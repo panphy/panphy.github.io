@@ -194,11 +194,13 @@
           <div class="graph-head">
             <strong class="graph-title">Graph</strong>
             <div id="graph-legend" class="graph-legend"></div>
-            <div id="graph-exports" class="graph-exports" hidden>
-              <button type="button" id="graph-export-csv" class="graph-export-pill">Export CSV</button>
-              <button type="button" id="graph-export-plot" class="graph-export-pill">Export to PanPhyPlot</button>
+            <div class="graph-actions">
+              <button type="button" id="graph-full" class="graph-view-button" data-icon="fit" title="Restore the full graph view" disabled>Full Graph</button>
+              <div id="graph-exports" class="graph-exports" hidden>
+                <button type="button" id="graph-export-csv" class="graph-export-pill">Export CSV</button>
+                <button type="button" id="graph-export-plot" class="graph-export-pill">Export to PanPhyPlot</button>
+              </div>
             </div>
-            <button type="button" id="graph-full" class="graph-export-pill" title="Show and export the full recording">Full Graph</button>
             <button type="button" id="graph-close" class="icon-btn" data-icon="close" aria-label="Close graph"></button>
           </div>
           <canvas id="graph-canvas" class="graph-canvas" tabindex="0" title="Drag to select a time range. Use +/− to zoom, arrow keys to pan, and Escape for Full Graph." aria-label="Graph of plotted meter and oscilloscope readings against time"></canvas>

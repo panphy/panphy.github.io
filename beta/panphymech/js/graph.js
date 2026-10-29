@@ -219,6 +219,7 @@
     const ctx = canvas.getContext('2d');
     const g = { hidden: new Set(), hoverX: null };
     const selection = R.mount(canvas, {
+      fullButton: document.getElementById('graph-full'),
       getTimes: () => app.recorder.t,
       getSource: () => app.recorder.cols,
       getRange: () => app.graphRange,
@@ -333,7 +334,7 @@
 
       // Hover readout
       g.hoverIndex = null;
-      if (g.hoverX !== null && i1 > i0) {
+      if (g.hoverX !== null && i1 > i0 && !selection.isSelecting()) {
         const t = tMin + ((g.hoverX - pad.l) / pw) * (tMax - tMin);
         if (t >= tMin && t <= Math.min(tMax, tEnd)) {
           let lo = i0; let hi = i1 - 1;
@@ -349,6 +350,11 @@
             if (!v) return;
             ctx.fillStyle = palette[s.q] || col('--ink');
             ctx.beginPath(); ctx.arc(px, Y(v[i]), 3.5, 0, Math.PI * 2); ctx.fill();
+          });
+          R.drawReadout(ctx, {
+            x: px, top: pad.t, width: W, height: H,
+            lines: [`t = ${formatCell(rec.t[i])} s`, ...data.map(({ s, v }) => `${s.label} = ${v && Number.isFinite(v[i]) ? formatCell(v[i]) : '—'} ${s.unit}`)],
+            background: col('--surface'), ink: col('--ink'), border: col('--line-strong')
           });
         }
       }

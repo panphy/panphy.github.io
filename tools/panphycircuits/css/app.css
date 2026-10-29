@@ -419,8 +419,21 @@ a.atool { text-decoration: none; }
 .legend-swatch { width: 18px; height: 0; border-top: 3px solid var(--c); }
 .legend-swatch.is-dashed { border-top-style: dashed; }
 .field select { min-height: 36px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 4px 8px; }
+.graph-actions { display: flex; align-items: center; gap: 6px; flex: none; }
 .graph-exports { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
 .graph-exports[hidden] { display: none !important; }
+
+/* View reset is separate from the export pills. */
+.graph-view-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none;
+  min-height: 32px; margin-right: 8px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: transparent; color: var(--ink); font: 600 0.74rem var(--font-body); cursor: pointer; white-space: nowrap;
+}
+.graph-view-button .icon { width: 16px; height: 16px; }
+.graph-view-button:hover:not(:disabled) { background: var(--surface-3); border-color: var(--accent); }
+.graph-view-button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.graph-view-button:disabled { opacity: 0.45; cursor: default; }
+
 .graph-export-pill {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 999px;
@@ -686,9 +699,9 @@ a.atool { text-decoration: none; }
 .graph-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 @media (max-width: 640px) {
-  .graph-head { flex-wrap: wrap; height: auto; gap: 6px; padding: 6px 8px; }
-  .graph-legend { flex: 1 1 calc(100% - 80px); }
-  .graph-exports { order: 1; }
-  #graph-full { order: 1; margin-left: auto; }
-  #graph-close { order: 1; width: 32px; min-width: 32px; height: 32px; }
+  .graph-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; height: auto; gap: 6px; padding: 6px 8px; }
+  .graph-title { grid-column: 1; grid-row: 1; }
+  .graph-legend { grid-column: 2; grid-row: 1; }
+  .graph-actions { grid-column: 1 / -1; grid-row: 2; flex-wrap: wrap; }
+  #graph-close { grid-column: 3; grid-row: 1; width: 32px; min-width: 32px; height: 32px; }
 }

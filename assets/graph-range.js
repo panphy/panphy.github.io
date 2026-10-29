@@ -17,6 +17,12 @@
     return out;
   }
 
+  function isFull(times, range) {
+    if (times.length < 2) return true;
+    const { t0, t1 } = bounds(times, range);
+    return t0 <= times[0] + 1e-12 && t1 >= times[times.length - 1] - 1e-12;
+  }
+
   function nearest(times, t) {
     let lo = 0, hi = times.length - 1;
     while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (times[mid] < t) lo = mid; else hi = mid; }
@@ -29,15 +35,42 @@
     return b > a ? { start: times[a], end: times[b] } : null;
   }
 
+  function nearestSample(times, range, time) {
+    const visible = indices(times, range);
+    if (!visible.length) return -1;
+    return Math.max(visible[0], Math.min(visible[visible.length - 1], nearest(times, time)));
+  }
+
+  // Solid readout beside the hovered sample; use columns when the graph is short.
+  function drawReadout(ctx, { x, top, width, height, lines, background, ink, border }) {
+    if (!lines.length) return;
+    ctx.save(); ctx.font = '500 11px "IBM Plex Mono", monospace';
+    const maxRows = Math.max(1, Math.floor((height - 28) / 16));
+    const columns = Math.ceil(lines.length / maxRows), rows = Math.ceil(lines.length / columns);
+    const textWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
+    const boxWidth = Math.min(width - 12, (textWidth + 20) * columns), boxHeight = rows * 16 + 16;
+    const left = Math.max(6, x + 12 + boxWidth > width - 6 ? x - boxWidth - 12 : x + 12);
+    const y = Math.max(6, Math.min(top + 8, height - boxHeight - 6));
+    ctx.fillStyle = background; ctx.fillRect(left, y, boxWidth, boxHeight);
+    ctx.strokeStyle = border; ctx.lineWidth = 1; ctx.strokeRect(left, y, boxWidth, boxHeight);
+    ctx.fillStyle = ink; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    lines.forEach((line, i) => ctx.fillText(line, left + 10 + Math.floor(i / rows) * boxWidth / columns, y + 16 + (i % rows) * 16, boxWidth / columns - 20));
+    ctx.restore();
+  }
+
   function mount(canvas, options) {
     let plot = null, drag = null, source = options.getSource();
     const clamp = (x, p) => Math.max(p.left, Math.min(p.left + p.width, x));
     const xOf = (e) => e.clientX - canvas.getBoundingClientRect().left;
     const timeAt = (x, p) => p.t0 + (clamp(x, p) - p.left) / p.width * (p.t1 - p.t0);
-    const reset = () => { drag = null; options.setRange(null); options.redraw(); };
+    const updateButton = () => { if (options.fullButton) options.fullButton.disabled = isFull(options.getTimes(), options.getRange()); };
+    const setRange = (range) => { options.setRange(range); updateButton(); };
+    const reset = () => { drag = null; setRange(null); options.redraw(); };
     function sync() {
-      if (source !== options.getSource()) { source = options.getSource(); drag = null; options.setRange(null); }
+      if (source !== options.getSource()) { source = options.getSource(); drag = null; setRange(null); }
+      updateButton();
     }
+    updateButton();
     canvas.addEventListener('pointerdown', (e) => {
       sync();
       if (drag) { drag = null; options.redraw(); return; } // A second finger cancels selection.
@@ -59,7 +92,7 @@
       const end = clamp(xOf(e), d.plot);
       if (d.source === options.getSource() && Math.abs(end - d.start) >= 6) {
         const range = select(options.getTimes(), timeAt(d.start, d.plot), timeAt(end, d.plot));
-        if (range) options.setRange(range);
+        if (range) setRange(range);
       }
       options.redraw();
     });
@@ -83,10 +116,11 @@
         start = Math.max(times[0], Math.min(times[times.length - 1] - span, times[next])); end = start + span;
       } else { const half = span * (e.key === '-' ? 1 : 0.25); start = mid - half; end = mid + half; }
       const range = select(options.getTimes(), start, end);
-      if (range) { options.setRange(range); options.redraw(); }
+      if (range) { setRange(range); options.redraw(); }
     });
     return {
       sync, reset,
+      isSelecting: () => !!drag,
       viewBounds(times, range) { return drag ? { t0: drag.plot.t0, t1: drag.plot.t1 } : bounds(times, range); },
       setPlot(value) { plot = value; },
       draw(ctx, color) {
@@ -99,7 +133,7 @@
       }
     };
   }
-  const api = { bounds, indices, select, mount };
+  const api = { bounds, indices, isFull, select, nearestSample, drawReadout, mount };
   root.PanPhyGraphRange = api;
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis === 'object' ? globalThis : this);

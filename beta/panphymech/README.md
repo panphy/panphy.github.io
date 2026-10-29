@@ -24,7 +24,7 @@ Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They
 
 Drag any library part directly into the scene. Connector drags show the snapped starting point on the canvas, without a floating connector icon. Springs, rods and ropes start their first endpoint at the drop position; click the second endpoint to finish, or press Esc to cancel. Hinges, motors and glue attach at the drop position. Right-click or hold an object, connector or selected connector endpoint for quick settings (500 ms for touch/pen); movement and a second finger cancel the hold.
 
-The graph uses `/assets/graph-range.js` for mouse, touch and pen time selection. Drag across the graph to zoom into a range; CSV and PanPhyPlot exports use only that range, retaining the original sample times. **Full Graph** restores the complete recording. Keyboard +/− zoom, arrows pan, and Escape restores the full graph. A reset or new scene clears the selection.
+The graph uses `/assets/graph-range.js` for mouse, touch and pen time selection. Drag across the graph to zoom into a range; CSV and PanPhyPlot exports use only that range, retaining the original sample times. **Full Graph** is a separate view-reset control before the export pills; it restores the complete recording and is disabled when the full recording is already visible. Hover over the graph to mark the nearest recorded sample and read its time and values. Keyboard +/− zoom, arrows pan, and Escape restores the full graph. A reset or new scene clears the selection.
 
 ## Physics model
 
