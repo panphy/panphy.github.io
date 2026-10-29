@@ -37,3 +37,18 @@ test('SVG full circles use two arcs; clipping and drawing state survive restore'
   assert.match(svg, /fill="red"/);
   assert.match(svg, /width="1" height="1" fill="#000"/);
 });
+
+
+test('override glow follows the drag setting and is omitted from clean exports', () => {
+  const scene = S.createScene(); scene.world.floor = false;
+  const b = S.makeBody(scene, 'box', 0, 0); b.dragModel = 'linear'; scene.bodies.push(b);
+  const app = { scene, sim: null, display: {}, poseOf: b => b, isSelected: () => false, selection: null, extra: [], editor: { deleteButton: () => null, preview: () => null } };
+  function draw(clean) {
+    const ctx = PPM.svg.createContext(800, 500), renderer = PPM.render.createRenderer(app, {}, ctx);
+    Object.assign(renderer, { w: 800, h: 500 }); renderer.colors = { bg: '#ffffff', floor: '#abcdef', floorLine: '#abcdef' };
+    renderer.draw(clean); return ctx.serialize();
+  }
+  assert.match(draw(false), /#F08C00/);
+  assert.doesNotMatch(draw(true), /#F08C00/);
+  b.dragModel = 'world'; assert.doesNotMatch(draw(false), /#F08C00/);
+});

@@ -235,6 +235,7 @@
       $('btn-graph').setAttribute('aria-pressed', String(app.graphOpen));
       $('btn-clear').disabled = !app.scene.bodies.length && !app.scene.links.length;
       $('speed').value = String(app.speed);
+      syncDragNotes();
       const play = $('btn-play');
       play.setAttribute('aria-pressed', String(app.running));
       play.querySelector('.run-icon').innerHTML = icon(app.running ? 'pause' : 'play');
@@ -260,13 +261,51 @@
       menu.addEventListener('click', (e) => e.stopPropagation());
     }
     function closeMenus() {
-      ['menu-file', 'display-menu'].forEach((id) => { $(id).hidden = true; });
+      ['menu-file', 'display-menu', 'drag-notes-pop'].forEach((id) => { $(id).hidden = true; });
       $('btn-file').setAttribute('aria-expanded', 'false');
       $('btn-display').setAttribute('aria-expanded', 'false');
+      $('btn-drag-notes').setAttribute('aria-expanded', 'false');
     }
     ui.closeMenus = closeMenus;
     setupMenu('btn-file', 'menu-file');
     setupMenu('btn-display', 'display-menu');
+    function dragNotes() {
+      return app.scene.bodies.map((b) => ({ body: b, message: S.dragOverrideNote(app.scene, b) })).filter((n) => n.message);
+    }
+    function renderDragNotes() {
+      $('drag-notes-pop').innerHTML = '<div class="drag-notes-head"><strong>Drag notes</strong><button type="button" data-close-notes aria-label="Close drag notes">Close</button></div><ul>'
+        + dragNotes().map((n) => `<li><button type="button" data-drag-body="${esc(n.body.id)}">${esc(n.message)}</button></li>`).join('') + '</ul>';
+    }
+    function syncDragNotes() {
+      const notes = dragNotes();
+      const button = $('btn-drag-notes');
+      button.hidden = !notes.length;
+      button.textContent = `${notes.length} note${notes.length === 1 ? '' : 's'}`;
+      button.setAttribute('aria-label', `${notes.length} drag override note${notes.length === 1 ? '' : 's'}`);
+      if (!notes.length) { $('drag-notes-pop').hidden = true; button.setAttribute('aria-expanded', 'false'); }
+      else if (!$('drag-notes-pop').hidden) renderDragNotes();
+    }
+    setupMenu('btn-drag-notes', 'drag-notes-pop');
+    $('btn-drag-notes').addEventListener('click', () => {
+      if ($('drag-notes-pop').hidden) return;
+      renderDragNotes();
+      $('drag-notes-pop').querySelector('button').focus();
+    });
+    $('drag-notes-pop').addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      event.stopPropagation(); closeMenus(); $('btn-drag-notes').focus();
+    });
+    $('drag-notes-pop').addEventListener('click', (event) => {
+      if (event.target.closest('[data-close-notes]')) { closeMenus(); $('btn-drag-notes').focus(); return; }
+      const button = event.target.closest('[data-drag-body]');
+      if (!button) return;
+      const b = S.bodyById(app.scene, button.dataset.dragBody);
+      if (!b) return;
+      closeMenus(); app.select({ type: 'body', id: b.id });
+      setPanel('inspector', true);
+      const select = $('inspector-body').querySelector('[data-drag-field="dragModel"]');
+      if (select) { select.closest('.icard').scrollIntoView({ block: 'start' }); select.focus({ preventScroll: true }); }
+    });
     document.addEventListener('click', closeMenus);
     $('menu-file').querySelectorAll('[data-file]').forEach((b) => b.addEventListener('click', () => {
       closeMenus();
@@ -387,6 +426,56 @@
       return wrap;
     }
 
+    function dragFields(get, isWorld = false) {
+      const el = document.createElement('div');
+      el.className = 'drag-fields';
+      const set = (key, rerender = false) => (value, coalesce) => app.editParam(() => { get()[key] = value; }, coalesce, false, rerender);
+      function dropdown(label, key, options, current) {
+        const wrap = document.createElement('label');
+        wrap.className = 'field drag-select';
+        wrap.innerHTML = `<span>${esc(label)}</span><select data-drag-field="${key}" aria-label="${esc(label)}">${options.map(([value, text]) => `<option value="${value}">${esc(text)}</option>`).join('')}</select>`;
+        const select = wrap.querySelector('select');
+        select.value = current;
+        select.disabled = !isWorld && get().fixed;
+        select.addEventListener('change', () => {
+          set(key, true)(select.value);
+          const replacement = $('inspector-body').querySelector(`[data-drag-field="${key}"]`);
+          if (replacement) replacement.focus();
+        });
+        el.appendChild(wrap);
+      }
+      const model = isWorld ? S.worldDragModel(app.scene) : S.objectDragModel(get());
+      dropdown(isWorld ? 'World drag model' : 'Object drag model', 'dragModel', [
+        ...(!isWorld ? [['world', 'Use World']] : []), ...Object.entries(S.DRAG_MODELS)
+      ], model);
+      if (!isWorld) {
+        const note = document.createElement('p');
+        const message = S.dragOverrideNote(app.scene, get());
+        note.className = message ? 'drag-override-note' : 'field-help';
+        note.setAttribute('role', 'status');
+        note.textContent = get().fixed ? 'Fixed objects do not experience drag.' : message || `Following World: ${S.DRAG_MODELS[S.worldDragModel(app.scene)]}. World changes apply to this object.`;
+        el.appendChild(note);
+      }
+      if (model === 'linear') {
+        const source = get().linearDragSource || 'coefficient';
+        dropdown('Linear drag calculation', 'linearDragSource', [['coefficient', 'Coefficient b'], ['stokes', 'Stokes viscosity η']], source);
+        const field = source === 'stokes'
+          ? { label: 'Fluid viscosity \\(\\eta\\)', plain: 'Fluid viscosity η', unit: 'Pa·s', get: () => get().viscosity || 0, set: set('viscosity'), min: L.viscosity[0], max: L.viscosity[1], slider: L.viscosity, step: 0.001, help: 'Stokes calculation for spheres. Other shapes use an equal-area radius as an approximation. No automatic streamlining or buoyancy.' }
+          : { label: 'Linear coefficient \\(b\\)', plain: 'Linear coefficient b', unit: 'kg/s', get: () => get().linearDrag, set: set('linearDrag'), min: L.linearDrag[0], max: L.linearDrag[1], slider: [0, 10], step: 0.01, help: 'Resistance proportional to speed. 0 turns this drag off.' };
+        field.disabled = () => !isWorld && get().fixed;
+        el.appendChild(numField(field));
+      } else if (model === 'quadratic') {
+        el.appendChild(numField({ label: 'Quadratic coefficient \\(k\\)', plain: 'Quadratic coefficient k', unit: 'kg/m', get: () => get().drag, set: set('drag'), min: L.drag[0], max: L.drag[1], slider: [0, 1], step: 0.001, disabled: () => !isWorld && get().fixed, help: 'Resistance proportional to speed squared. This coefficient includes the effects of the fluid and the object; 0 turns it off.' }));
+      }
+      if (model === 'linear' || model === 'quadratic') {
+        const law = document.createElement('p'); law.className = 'field-help';
+        const tex = model === 'quadratic' ? 'F = kv^2' : get().linearDragSource === 'stokes' ? 'F = 6\\pi r\\eta v' : 'F = bv';
+        law.innerHTML = mathText(`Drag force: \\(${tex}\\)`, 'Drag force: ' + (model === 'quadratic' ? 'F = kv²' : get().linearDragSource === 'stokes' ? 'F = 6πrηv' : 'F = bv'));
+        el.appendChild(law);
+      }
+      return el;
+    }
+
     function toggleField(label, get, set, help) {
       const el = document.createElement('label');
       el.className = 'toggle';
@@ -498,7 +587,6 @@
       main.appendChild(numField({ label: 'Mass \\(m\\)', plain: 'Mass m', unit: 'kg', get: () => b().mass, set: param((x, v) => { x.mass = v; }), min: L.mass[0], max: L.mass[1], slider: [0.01, 100], log: true, disabled: () => b().fixed }));
       main.appendChild(numField({ label: 'Friction \\(\\mu\\)', plain: 'Friction μ', unit: '', get: () => b().friction, set: param((x, v) => { x.friction = v; }), min: L.friction[0], max: L.friction[1], slider: [0, 1.5], step: 0.01 }));
       main.appendChild(numField({ label: 'Restitution \\(e\\)', plain: 'Restitution e', unit: '', get: () => b().restitution, set: param((x, v) => { x.restitution = v; }), min: 0, max: 1, slider: [0, 1], step: 0.01, help: '1 is perfectly bouncy, 0 does not bounce.' }));
-      main.appendChild(numField({ label: 'Air resistance \\(k\\)', plain: 'Air resistance k', unit: 'kg/m', get: () => b().drag, set: param((x, v) => { x.drag = v; }), min: L.drag[0], max: L.drag[1], slider: [0, 1], step: 0.001, help: 'Drag force F = kv², opposite to the velocity. 0 turns it off.', disabled: () => b().fixed }));
       main.appendChild(toggleField('Fixed in place', () => b().fixed, (v) => app.edit(() => { b().fixed = v; if (v && b().color !== 'slate') b().color = 'slate'; else if (!v && b().color === 'slate') b().color = S.COLOR_CYCLE[0]; })));
       if (!b().fixed) main.appendChild(toggleField('Lock rotation', () => b().lockRotation, (v) => app.edit(() => { b().lockRotation = v; }), 'The object slides without turning, like a cart.'));
       const sw = document.createElement('div');
@@ -526,6 +614,8 @@
         { icon: 'trash', label: 'Delete', run: () => app.deleteSelection(), danger: true }
       ]));
 
+      const drag = card('Drag');
+      drag.appendChild(dragFields(b));
       const geo = card('Size and position');
       const k = b().kind;
       if (k === 'ball' || k === 'polygon') geo.appendChild(numField({ label: 'Radius \\(r\\)', plain: 'Radius r', unit: 'm', get: () => b().r, set: setup((x, v) => { x.r = v; S.refitLengths(app.scene, new Set([x.id])); }), min: L.r[0], max: L.r[1], slider: [0.05, 2], step: 0.01 }));
@@ -558,7 +648,7 @@
       geo.appendChild(numField({ label: '\\(y\\)', plain: 'y', unit: 'm', get: () => b().y, set: setup((x, v) => moveBodyTo(x, x.x, v)), min: L.coord[0], max: L.coord[1] }));
       geo.appendChild(numField({ label: 'Angle \\(\\theta\\)', plain: 'Angle θ', unit: '°', get: () => b().angle * deg, set: setup((x, v) => rotateBodyTo(x, v / deg)), min: -3600, max: 3600, slider: [-180, 180], step: 1 }));
 
-      const cards = [main, geo];
+      const cards = [main, drag, geo];
       if (!b().fixed) {
         const vel = card('Velocity at the start');
         const speedOf = (x) => Math.hypot(x.vx, x.vy);
@@ -705,11 +795,7 @@
         presets.appendChild(b);
       });
       main.appendChild(presets);
-      main.appendChild(numField({ label: 'Fluid viscosity \\(\\eta\\)', plain: 'Fluid viscosity η', unit: 'Pa·s', get: () => w().viscosity || 0, set: (v, key) => app.editParam(() => { w().viscosity = v; }, key), min: L.viscosity[0], max: L.viscosity[1], slider: L.viscosity, step: 0.001, help: '0–1 Pa·s; default 0 turns world drag off. Other shapes use an equal-area radius. Adds to object-specific quadratic drag; does not add buoyancy.' }));
-      const dragLaw = document.createElement('p');
-      dragLaw.className = 'field-help';
-      dragLaw.innerHTML = mathText('Stokes drag: \\(F = 6\\pi r\\eta v\\)', 'Stokes drag: F = 6πrηv');
-      main.appendChild(dragLaw);
+      main.appendChild(dragFields(w, true));
       main.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
       main.appendChild(numField({ label: 'Floor friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
       main.appendChild(numField({ label: 'Zero of \\(E_\\mathrm{p}\\) at height', plain: 'Zero of gravitational energy at height', unit: 'm', get: () => w().gpeZero || 0, set: (v, key) => app.editParam(() => { w().gpeZero = v; }, key), min: L.coord[0], max: L.coord[1], help: 'Gravitational energy is measured from this height. The dashed line marks it when it is not 0.' }));

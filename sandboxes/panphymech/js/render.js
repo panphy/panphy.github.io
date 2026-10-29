@@ -642,6 +642,13 @@
       drawFloor();
       drawEnergyZero();
       if (app.display.trails) drawTrails();
+      if (!clean && !r.exporting) app.scene.bodies.forEach((b) => {
+        if (!S.dragOverrideNote(app.scene, b)) return;
+        ctx.save(); bodyPath(b, app.poseOf(b));
+        ctx.shadowColor = '#F08C00'; ctx.shadowBlur = 14;
+        ctx.strokeStyle = '#F08C00'; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.stroke();
+        ctx.restore();
+      });
       app.scene.bodies.forEach(drawBody);
       // Hover and selection outlines sit on top of every object.
       if (!clean) app.scene.bodies.forEach((b) => {

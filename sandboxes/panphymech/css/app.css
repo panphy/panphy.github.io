@@ -433,3 +433,14 @@ button, input, select { font: inherit; color: inherit; }
 /* Select a time range without scrolling the page on touch screens. */
 .graph-canvas { touch-action: none; cursor: crosshair; }
 .graph-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* Amber notes match PanPhyCircuits and identify deliberate World drag overrides. */
+.drag-select { display: grid; gap: 7px; }
+.drag-select select { width: 100%; min-height: 48px; padding: 8px 10px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+.drag-override-note { margin: 8px 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, var(--surface)); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }
+.drag-notes-button { flex: none; min-height: 28px; padding: 3px 10px; border: 1px solid #F08C00; border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.drag-notes-pop { position: fixed; z-index: 60; right: max(12px, env(safe-area-inset-right)); bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 12px); width: min(390px, calc(100vw - 24px)); max-height: min(60vh, 520px); overflow-y: auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-2); padding: 12px; }
+.drag-notes-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.drag-notes-pop ul { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; }
+.drag-notes-pop button { min-height: 48px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; color: var(--ink); background: var(--surface); cursor: pointer; }
+.drag-notes-pop li button { width: 100%; text-align: left; background: color-mix(in srgb, #F08C00 10%, var(--surface)); line-height: 1.45; }

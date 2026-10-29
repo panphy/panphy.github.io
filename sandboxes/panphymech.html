@@ -207,6 +207,7 @@
     <footer class="statusbar panphy-footer">
       <div class="statusbar-status">
         <span id="hint" class="hint"></span>
+        <button type="button" id="btn-drag-notes" class="drag-notes-button" aria-expanded="false" aria-controls="drag-notes-pop" aria-label="Drag override notes" hidden>0 notes</button>
         <span id="cursor-readout" class="cursor-readout ds-readout"></span>
         <span id="zoom-readout" class="zoom-readout ds-readout"></span>
       </div>
@@ -229,6 +230,7 @@
     </form>
   </dialog>
 
+  <section id="drag-notes-pop" class="drag-notes-pop" role="region" aria-label="Drag notes" hidden></section>
   <div id="toast" class="toast" role="status" hidden></div>
   <input type="file" id="file-input" accept=".ppmech,.json,application/json" hidden>
 
