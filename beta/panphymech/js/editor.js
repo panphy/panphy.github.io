@@ -25,6 +25,8 @@
     const pointers = new Map();
     let gesture = null;
     let pinch = null;
+    let connectorDropPreview = null;
+    let connectorDropActive = false;
 
     const rr = () => app.renderer;
     const snapOn = () => app.snap;
@@ -234,6 +236,7 @@
     };
 
     ed.preview = function preview() {
+      if (connectorDropActive) return connectorDropPreview;
       const w = ed.cursorWorld;
       if (!w) return null;
       if (gesture && gesture.kind === 'jointMove' && gesture.moved) {
@@ -340,7 +343,30 @@
       return true;
     };
 
+    // Preview the actual first endpoint, using the same snapping as placement.
+    ed.previewConnectorDrop = function previewConnectorDrop(type, clientX, clientY) {
+      connectorDropActive = true;
+      const rect = canvas.getBoundingClientRect();
+      connectorDropPreview = null;
+      if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+        const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
+        if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w).world, ok: true };
+        else {
+          const bs = bodiesAt(w);
+          connectorDropPreview = { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
+        }
+      }
+      app.requestDraw();
+    };
+
+    ed.clearConnectorDropPreview = function clearConnectorDropPreview() {
+      connectorDropActive = false;
+      connectorDropPreview = null;
+      app.requestDraw();
+    };
+
     ed.dropConnector = function dropConnector(type, clientX, clientY) {
+      ed.clearConnectorDropPreview();
       const rect = canvas.getBoundingClientRect();
       if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
       ed.setTool(type);

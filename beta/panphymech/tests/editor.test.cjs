@@ -57,6 +57,35 @@ test('dropping outside the canvas preserves the active tool and pending endpoint
   h.ed.cancel(); assert.equal(h.ed.pending, null);
 });
 
+test('library drag previews the exact snapped starting point without placing or selecting', () => {
+  for (const kind of ['spring', 'rod', 'rope', 'hinge', 'motor', 'weld']) {
+    const h = setup();
+    h.ed.previewConnectorDrop(kind, 305, 200);
+    const preview = h.ed.preview();
+    assert.equal(preview.point.x, 0, 'marker snaps to the body center');
+    assert.equal(preview.point.y, 0);
+    assert.equal(preview.link, undefined, 'only the starting point is shown');
+    assert.equal(h.app.selection, null);
+    assert.equal(h.app.scene.links.length, 0);
+    h.ed.dropConnector(kind, 305, 200);
+    const point = h.ed.pending ? h.ed.pending.world : S.endPoint(h.app.scene, h.app.scene.links[0].a, h.app.scene.links[0].la);
+    assert.equal(point.x, preview.point.x);
+    assert.equal(point.y, preview.point.y);
+  }
+});
+
+test('leaving the canvas hides the endpoint marker and cancellation restores the previous preview', () => {
+  const h = setup();
+  h.ed.arm('ball'); h.ed.cursorWorld = { x: 1, y: 1 };
+  h.ed.previewConnectorDrop('spring', 300, 200);
+  assert.ok(h.ed.preview().point);
+  h.ed.previewConnectorDrop('spring', -1, 200);
+  assert.equal(h.ed.preview(), null);
+  h.ed.clearConnectorDropPreview();
+  assert.ok(h.ed.preview().body);
+  assert.equal(h.app.scene.links.length, 0);
+});
+
 test('touch and pen holds open object, connector and selected endpoint settings', () => {
   for (const pointerType of ['touch', 'pen']) for (const target of ['body', 'link', 'endpoint']) {
     const h = setup(target !== 'body');
