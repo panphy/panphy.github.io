@@ -528,6 +528,7 @@
     lastFrame = performance.now();
     behindFrames = 0;
     app.editor.cancel();
+    if (app.running) app.select(null);
     app.ui.syncToolbar();
     app.ui.renderInspector();
     needsDraw = true;
