@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 function setup(type = 'resistor') {
-  const listeners = new Map(), timers = new Map(), calls = [];
+  const listeners = new Map(), timers = new Map(), calls = [], keys = new Map();
   let timerId = 0;
   const comp = { id: 'c1', type, label: 'R1', props: { closed: false } };
   const def = { props: [{ key: 'value' }], actuator: { kind: type === 'pushswitch' ? 'momentary' : 'toggle', prop: 'closed' } };
@@ -33,7 +33,7 @@ function setup(type = 'resistor') {
     setHint() {}, announce() {}
   };
   const context = { PPC: { registry: { get: () => def }, circuit: { getComp: (doc, id) => doc.components.find(c => c.id === id) }, layout },
-    document: { addEventListener() {} },
+    document: { addEventListener: (name, fn) => keys.set(name, fn) },
     setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout: id => timers.delete(id)
   };
   vm.runInNewContext(fs.readFileSync(require.resolve('../js/editor.js'), 'utf8'), context);
@@ -48,7 +48,7 @@ function setup(type = 'resistor') {
   }
   function hold() { for (const [id, fn] of [...timers]) { timers.delete(id); fn(); } }
   const menus = () => calls.filter(c => Array.isArray(c) && c[0] === 'menu');
-  return { app, comp, editor, calls, emit, hold, menus };
+  return { app, comp, editor, calls, emit, hold, menus, key: e => keys.get('keydown')(e) };
 }
 
 test('touch and pen holds open settings without moving or operating on release', () => {
@@ -139,4 +139,21 @@ test('a touch tap on empty canvas clears the selection; a touch drag pans withou
   d.app.renderer.applyCamera = () => {};
   d.emit('pointerdown', { hit: 'bg', isPrimary: true }); d.emit('pointermove', { hit: 'bg', clientX: 160 }); d.emit('pointerup', { hit: 'bg', clientX: 160 });
   assert.equal(d.app.selection.comps.size, 1);
+});
+
+
+test('Ctrl and Command copy/paste consume browser shortcuts but preserve native field editing', () => {
+  for (const modifier of ['ctrlKey', 'metaKey']) {
+    const h = setup(); let copies = 0, pastes = 0, prevented = 0;
+    h.app.modalOpen = () => false;
+    h.app.copy = () => copies++; h.app.paste = () => pastes++;
+    const event = { [modifier]: true, target: { tagName: 'DIV' }, preventDefault() { prevented++; } };
+    h.key({ ...event, key: 'c' }); h.key({ ...event, key: 'V' });
+    assert.equal(copies, 1); assert.equal(pastes, 1); assert.equal(prevented, 2);
+    for (const tagName of ['INPUT', 'TEXTAREA', 'SELECT']) {
+      h.key({ ...event, key: 'c', target: { tagName } });
+      h.key({ ...event, key: 'v', target: { tagName } });
+    }
+    assert.equal(copies, 1); assert.equal(pastes, 1); assert.equal(prevented, 2);
+  }
 });

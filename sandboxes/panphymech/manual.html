@@ -213,8 +213,8 @@
 <ul>
 <li>Click a part in Parts, then click the scene, or drag it straight in. Hold Shift to place several. The library includes balls, boxes, planks, polygons, ramps and walls.</li>
 <li>Drag an object to move it. The round handle rotates it; the square handle resizes it. Use the Inspector for precise size, position and starting velocity. Fixed objects are hatched and do not move.</li>
-<li>Shift-click or use Select several to select multiple objects. Duplicate copies the selection. Merge combines selected objects into one rigid shape; Subtract cuts the last selected object out of the others. These edits can be undone.</li>
-<li>Hinged and glued objects move together while editing. Drag empty space to pan; scroll, pinch or use the zoom buttons to zoom. Fit frames current positions, so leave room for motion. Snap aligns placement to the grid and rotation to 15° angles.</li>
+<li>Shift-click or use Select several to select multiple objects. Use Ctrl+C then Ctrl+V (Command on Mac) to copy and paste objects or a connector. Copied objects keep connectors between them; a connector copied alone keeps its attachments to the original objects. Duplicate also copies the selection. Merge combines selected objects into one rigid shape; Subtract cuts the last selected object out of the others. These edits can be undone.</li>
+<li>Hinged and glued objects move together while editing. Drag empty space to pan; scroll, pinch or use the zoom buttons to zoom. Fit frames current positions, so leave room for motion. With Snap on, moving or placing objects near another surface snaps them into contact, including rotated shapes and the floor. Connected and selected groups move together. Away from surfaces, placement aligns to the grid; rotation aligns to 15° angles. Turn Snap off with G for free placement.</li>
 </ul>
 </div>
 </details>
@@ -222,7 +222,7 @@
 <summary>Connect objects</summary>
 <div class="reference-body">
 <ul>
-<li><strong>Spring, rod, rope:</strong> click the first endpoint, then the second. When dragging from Parts, drop the first end and click the second. An endpoint on empty space is fixed to the background; endpoints snap to nearby object centers.</li>
+<li><strong>Spring, rod, rope:</strong> click the first endpoint, then the second. When dragging from Parts, drop the first end and click the second. An endpoint on empty space is fixed to the background; endpoints snap to nearby object centers and, with Snap on, nearby edges.</li>
 <li><strong>Hinge, motor, glue:</strong> place at the overlap between two objects. With one object, the joint attaches it to the background. A motor turns its first attached object relative to the second; set its speed, direction and maximum torque in the Inspector.</li>
 <li>A spring’s initial natural length matches its placement; change its natural length, stiffness or damping in the Inspector. A rod holds a fixed distance; a rope limits the maximum distance.</li>
 <li>Rods and ropes are ideal and massless until Solid is enabled. Solid rods are thin bars; solid ropes are chains that can drape around objects. Their mass contributes to system energy. Extreme mass ratios can make a solid rope unstable.</li>
@@ -297,7 +297,7 @@
 </tr>
 <tr><td><kbd>Del / Backspace</kbd></td><td>Delete selection</td>
 </tr>
-<tr><td><kbd>Ctrl+D</kbd></td><td>Duplicate selection</td>
+<tr><td><kbd>Ctrl+C / Ctrl+V</kbd></td><td>Copy / paste selection (Command also works on Mac)</td>
 </tr>
 <tr><td><kbd>Ctrl+Z / Ctrl+Shift+Z</kbd></td><td>Undo / redo (Command also works on Mac)</td>
 </tr>

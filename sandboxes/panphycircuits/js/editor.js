@@ -755,9 +755,8 @@
       if (ed.wiring && k === 'Backspace') { ed.wiring.pts.pop(); drawWirePreview(); e.preventDefault(); return; }
       if (mod && k.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) app.redo(); else app.undo(); return; }
       if (mod && k.toLowerCase() === 'y') { e.preventDefault(); app.redo(); return; }
-      if (mod && k.toLowerCase() === 'd') { e.preventDefault(); app.duplicate(); return; }
-      if (mod && k.toLowerCase() === 'c') { app.copy(); return; }
-      if (mod && k.toLowerCase() === 'v') { app.paste(); return; }
+      if (mod && k.toLowerCase() === 'c') { e.preventDefault(); app.copy(); return; }
+      if (mod && k.toLowerCase() === 'v') { e.preventDefault(); app.paste(); return; }
       if (mod && k.toLowerCase() === 'a') { e.preventDefault(); app.setSelection(app.doc.components.map((c) => c.id), app.doc.wires.map((w) => w.id)); return; }
       if (mod) return;
       if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); app.deleteSelection(); return; }

@@ -18,6 +18,8 @@ A circuit builder and simulator for GCSE and IB Physics. Entry point: `sandboxes
 
 Adding a component: define it in `registry.js` (terminals, props, `compile` into solver primitives, `readings`), then add an entry with `bounds`, `terms` and `draw` in both artwork files. Terminal ids must match in all three; `tests/model.test.cjs` checks this.
 
+Copy and paste selected components with Ctrl+C / Ctrl+V (Command on Mac); wires between them and placements in both views are retained. Each new copy resets the repeated-paste offset. Text fields retain native text shortcuts.
+
 ## Key design points
 
 - A selected component shows a small × button at its upper left, and a selected wire shows one beside the middle of the wire, clear of its bend handles; it deletes only that object (undoable). Right-click or touch and hold a component for compact property fields and numeric sliders with the same units, limits and settings as the inspector; Escape or a click outside closes them. Settings open outside the component and its delete button, choosing a nearby side with room on screen; tall menus scroll when needed. If zoom leaves no room, a message asks you to zoom out. Moving cancels the touch hold so dragging stays immediate; terminals and momentary push buttons keep their direct controls. Right-click still cancels wiring, and dragging empty space with the right button still pans.

@@ -365,7 +365,7 @@
   };
   app.copy = function () {
     const f = fragment();
-    if (f) { app.clipboard = f; ui.toast(`Copied ${f.comps.length} component${f.comps.length > 1 ? 's' : ''}`); }
+    if (f) { app.clipboard = f; app.pasteCount = 0; ui.toast(`Copied ${f.comps.length} component${f.comps.length > 1 ? 's' : ''}`); }
   };
   app.paste = function () {
     if (!app.clipboard) return;
