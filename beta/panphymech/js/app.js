@@ -338,8 +338,11 @@
       app.selection = null;
     }, { fresh: true });
     app.running = false;
+    // A blank canvas starts from the default view, as on a first visit.
+    const view = { ...app.scene.camera };
+    app.fit();
     app.ui.syncToolbar();
-    app.toast('Scene cleared.', { label: 'Undo', run: () => app.undo() });
+    app.toast('Scene cleared.', { label: 'Undo', run: () => { app.undo(); Object.assign(app.scene.camera, view); app.cameraChanged(); } });
   };
 
   function replaceScene(next, track, view) {
