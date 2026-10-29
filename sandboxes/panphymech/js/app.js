@@ -528,6 +528,8 @@
     if (body) track = { type: 'body', id: body.id };
     replaceScene(next, track, ex.view);
     if (ex.track && ex.track.group) app.setGraphGroup(ex.track.group);
+    // Choosing the group shows every series; an example may hide some to keep its graph clear.
+    ((ex.track && ex.track.hide) || []).forEach((q) => app.graph.hidden.add(q));
     ensureGroup();
     app.ui.renderGraphControls();
     app.setHint(`${ex.title}: press Play.`);

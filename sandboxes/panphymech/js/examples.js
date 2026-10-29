@@ -42,20 +42,20 @@
     {
       id: 'terminal-velocity',
       title: 'Terminal velocity',
-      text: 'Two identical 1 kg balls fall 10 m. Left: no drag. Right: World quadratic drag, reaching within 1% of its 4 m/s terminal speed after about one-third of the drop. The graph follows the right ball’s vertical velocity.',
-      track: { name: 'With drag (right)', group: 'velocity' },
-      view: { minX: -3, maxX: 3, minY: 0, maxY: 11.8 },
+      text: 'Two identical 0.5 kg balls fall 6 m. The coral ball has no drag; the blue ball follows World quadratic drag and levels off at a terminal velocity of 3 m/s within the first third of the drop. The graph shows the blue ball.',
+      track: { name: 'With drag', group: 'velocity', hide: ['vx'] },
+      view: { minX: -2, maxX: 2, minY: 0, maxY: 7.6 },
       build() {
         const s = S.createScene();
-        const mass = 1, radius = 0.6, dropHeight = 10, terminalSpeed = 4;
+        const mass = 0.5, radius = 0.4, dropHeight = 6, terminalVelocity = 3;
         s.world.dragModel = 'quadratic';
-        s.world.drag = mass * s.world.gravity / (terminalSpeed * terminalSpeed);
+        s.world.drag = mass * s.world.gravity / (terminalVelocity * terminalVelocity);
         const y = dropHeight + radius + S.REST_GAP.ball;
-        const props = { mass, r: radius, restitution: 0, color: 'blue' };
-        // For quadratic drag, 99% of terminal speed is reached after about 3.2 m.
-        // None replaces World drag for the left ball; the right ball inherits it.
-        add(s, 'ball', -1.5, y, { ...props, name: 'No drag (left)', dragModel: 'none' });
-        add(s, 'ball', 1.5, y, { ...props, name: 'With drag (right)' });
+        const props = { mass, r: radius, restitution: 0 };
+        // For quadratic drag, 99% of terminal velocity is reached after about 1.8 m.
+        // None replaces World drag for the coral ball; the blue ball inherits it.
+        add(s, 'ball', -0.9, y, { ...props, name: 'No drag', color: 'coral', dragModel: 'none' });
+        add(s, 'ball', 0.9, y, { ...props, name: 'With drag', color: 'blue' });
         return s;
       }
     },
