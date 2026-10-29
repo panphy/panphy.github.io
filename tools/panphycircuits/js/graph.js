@@ -129,13 +129,20 @@
 
   function createGraph(app, canvas, legendEl, exportsEl) {
     let lastDraw = 0;
+    let hoverX = null;
     const selection = R.mount(canvas, {
+      fullButton: document.getElementById('graph-full'),
       getTimes: () => app.sim.traces.t,
       getSource: () => app.sim.traces,
       getRange: () => app.graphRange,
       setRange: (range) => { app.graphRange = range; },
       redraw: () => draw(true)
     });
+    canvas.addEventListener('pointermove', (e) => {
+      hoverX = e.clientX - canvas.getBoundingClientRect().left;
+      draw(true);
+    });
+    canvas.addEventListener('pointerleave', () => { hoverX = null; draw(true); });
 
     function niceStep(range, target) {
       const raw = range / target;
@@ -256,10 +263,33 @@
       }
       g.restore();
       g.setLineDash([]);
+      let hoverIndex = -1;
+      if (hoverX !== null && hoverX >= left && hoverX <= left + pw && !selection.isSelecting()) {
+        const time = t0 + (hoverX - left) / pw * (t1 - t0);
+        if (time <= tr.t[tr.t.length - 1]) hoverIndex = R.nearestSample(tr.t, app.graphRange, time);
+      }
+      if (hoverIndex >= 0) {
+        const x = X(tr.t[hoverIndex]);
+        g.strokeStyle = ink3; g.lineWidth = 1; g.setLineDash([3, 3]);
+        g.beginPath(); g.moveTo(x, top); g.lineTo(x, top + ph); g.stroke(); g.setLineDash([]);
+        for (const s of list) {
+          const value = (tr.series[s.key] || [])[hoverIndex];
+          if (!Number.isFinite(value)) continue;
+          g.fillStyle = s.color; g.beginPath(); g.arc(x, axes[s.unit].Y(value), 3.5, 0, Math.PI * 2); g.fill();
+        }
+        R.drawReadout(g, {
+          x, top, width: W, height: H,
+          lines: [`t = ${units.fmtSI(tr.t[hoverIndex], 's', 4)}`, ...list.map((s) => {
+            const value = (tr.series[s.key] || [])[hoverIndex];
+            return `${s.label} = ${Number.isFinite(value) ? units.fmtSI(value, s.unit, 4) : value === Infinity ? 'OL' : '—'}`;
+          })],
+          background: cs.getPropertyValue('--surface').trim() || '#fff', ink, border: line
+        });
+      }
       selection.draw(g, cs.getPropertyValue('--accent').trim() || COLORS[0]);
-      // Legend with the last sample in the displayed range.
+      // Legend follows the hovered sample, or the last sample in the displayed range.
       const visibleIndices = R.indices(tr.t, app.graphRange);
-      const lastIndex = visibleIndices[visibleIndices.length - 1];
+      const lastIndex = hoverIndex >= 0 ? hoverIndex : visibleIndices[visibleIndices.length - 1];
       for (const s of list) {
         const arr = tr.series[s.key] || [];
         const last = lastIndex === undefined ? NaN : arr[lastIndex];

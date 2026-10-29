@@ -204,7 +204,19 @@ button, input, select { font: inherit; color: inherit; }
 .legend-swatch { width: 16px; height: 0; border-top: 3px solid var(--c); border-radius: 2px; }
 .legend-swatch.is-dashed { border-top-style: dashed; }
 .legend-time { color: var(--ink-3); min-width: 9ch; }
-.graph-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.graph-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: auto; }
+
+/* View reset is separate from the export pills. */
+.graph-view-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none;
+  min-height: 32px; margin-right: 8px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: transparent; color: var(--ink); font: 600 0.74rem var(--font-body); cursor: pointer; white-space: nowrap;
+}
+.graph-view-button .icon { width: 16px; height: 16px; }
+.graph-view-button:hover:not(:disabled) { background: var(--surface-3); border-color: var(--accent); }
+.graph-view-button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.graph-view-button:disabled { opacity: 0.45; cursor: default; }
+
 .graph-export-pill {
   display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 999px;
   background: var(--surface-2); color: var(--ink); font: 600 0.74rem var(--font-body); cursor: pointer; white-space: nowrap;
@@ -361,10 +373,13 @@ button, input, select { font: inherit; color: inherit; }
   .run-play { min-width: 0; padding: 6px 12px; }
   .run-label { display: none; }
   .time-readout { width: 9.5ch; font-size: 0.84rem; }
-  :root { --graph-h: 250px; }
+  :root { --graph-h: 300px; }
+  .graph-panel { min-height: 300px; }
+  .graph-actions { order: 1; width: 100%; margin-left: 0; }
+  #graph-close { margin-left: auto; width: 32px; min-width: 32px; height: 32px; }
   .graph-head { gap: 6px; padding: 6px 6px 0 8px; }
   .graph-track select { max-width: 132px; }
-  .graph-groups button { padding: 2px 9px; }
+  .graph-groups button { padding: 2px 7px; }
   .graph-legend { padding: 0 6px 0 8px; gap: 0 4px; }
   .legend-value { min-width: 0; }
 }

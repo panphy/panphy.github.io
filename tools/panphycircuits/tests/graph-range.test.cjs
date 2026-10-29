@@ -4,12 +4,13 @@ const R = require('../../../assets/graph-range.js');
 
 function setup() {
   const handlers = {};
+  const fullButton = { disabled: false };
   let times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], range = null, source = {}, redraws = 0;
   const canvas = { addEventListener: (key, fn) => { handlers[key] = fn; }, getBoundingClientRect: () => ({ left: 20, top: 30 }), focus() {}, setPointerCapture() {}, releasePointerCapture() {} };
-  const selection = R.mount(canvas, { getTimes: () => times, getSource: () => source, getRange: () => range, setRange: (r) => { range = r; }, redraw: () => redraws++ });
+  const selection = R.mount(canvas, { fullButton, getTimes: () => times, getSource: () => source, getRange: () => range, setRange: (r) => { range = r; }, redraw: () => redraws++ });
   selection.setPlot({ left: 50, top: 10, width: 500, height: 200, t0: 0, t1: 10 });
   const emit = (type, x = 170, extra = {}) => handlers[type]({ button: 0, pointerId: 1, isPrimary: true, clientX: x + 20, clientY: 80, preventDefault() {}, ...extra });
-  return { selection, emit, get range() { return range; }, times, get redraws() { return redraws; }, replaceSource() { source = {}; times = [0]; } };
+  return { selection, fullButton, emit, get range() { return range; }, times, get redraws() { return redraws; }, replaceSource() { source = {}; times = [0]; } };
 }
 
 test('time selection snaps to original irregular sample times in either direction', () => {
@@ -20,6 +21,14 @@ test('time selection snaps to original irregular sample times in either directio
   assert.equal(R.select(times, 0.2, 0.22), null);
   assert.deepEqual(R.bounds([], null), { t0: 0, t1: 1 });
   assert.deepEqual(R.indices(times, null), [0, 1, 2, 3, 4]);
+});
+
+test('hover picks the nearest recorded sample inside the displayed time range', () => {
+  const times = [0, 0.1, 0.4, 0.7, 1];
+  assert.equal(R.nearestSample(times, null, 0.6), 3);
+  assert.equal(R.nearestSample(times, { start: 0.1, end: 0.4 }, 0.6), 2);
+  assert.equal(R.nearestSample(times, { start: 0.4, end: 0.7 }, 0), 2);
+  assert.equal(R.nearestSample([], null, 0), -1);
 });
 
 test('mouse, touch and pen select and progressively zoom without deleting samples', () => {
@@ -66,4 +75,20 @@ test('keyboard zoom, pan, and Escape recover the full recording', () => {
   h.emit('keydown', 0, { key: 'ArrowRight' }); assert.deepEqual(h.range, { start: 3, end: 8 });
   h.emit('keydown', 0, { key: '-' }); assert.deepEqual(h.range, { start: 0, end: 10 });
   h.emit('keydown', 0, { key: 'Escape' }); assert.equal(h.range, null);
+});
+
+test('Full Graph is enabled only when some recorded data is outside the view', () => {
+  const h = setup();
+  assert.equal(h.fullButton.disabled, true);
+  h.emit('pointerdown', 150); h.emit('pointerup', 450);
+  assert.equal(h.fullButton.disabled, false);
+  h.selection.reset(); assert.equal(h.fullButton.disabled, true);
+  h.emit('keydown', 0, { key: '+' }); assert.equal(h.fullButton.disabled, false);
+  h.emit('keydown', 0, { key: '-' }); h.emit('keydown', 0, { key: '-' });
+  assert.equal(h.fullButton.disabled, true);
+  // A bounded range covering the old recording becomes cropped when new data arrives.
+  h.times.push(11); h.selection.sync(); assert.equal(h.fullButton.disabled, false);
+  h.replaceSource(); h.selection.sync(); assert.equal(h.fullButton.disabled, true);
+  assert.equal(R.isFull([], null), true);
+  assert.equal(R.isFull([0, 1], { start: 0, end: 1 }), true);
 });
