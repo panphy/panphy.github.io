@@ -4,6 +4,8 @@ A 2D mechanics sandbox in the style of Algodoo, in beta. Entry point: `beta/panp
 
 Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rope, hinge, motor, glue) go on a canvas in SI units. Play runs the physics; the graph shows position, velocity or energy of one object, a spring or the whole system, with CSV and PanPhyPlot export.
 
+The [user manual](manual.html) has a five-step pendulum walkthrough and a reference for building, connectors, graphs, files and shortcuts. The app’s Manual link opens it in a new tab.
+
 ## Structure
 
 | File | Role |
