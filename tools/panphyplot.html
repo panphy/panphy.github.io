@@ -95,6 +95,8 @@
 	<script src="/assets/fullscreen-button.js"></script>
 	<script src="/assets/sw-register.js" defer></script>
 	<link rel="stylesheet" href="/assets/footer.css">
+  <link rel="stylesheet" href="/assets/manual-overlay.css">
+  <script src="/assets/manual-overlay.js" defer></script>
 </head>
 
 <body>
@@ -119,7 +121,7 @@
 			<div class="dataset-tabs-bar neo-sheets" id="sheet-tabs" role="tablist" aria-label="Sheets"></div>
 			<div class="neo-appbar-actions">
 				<a href="/tools/panphyplot.html?tour=columns" class="neo-tool neo-tool-quiet tour-launch" title="Take a guided tour using practice data"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Tour</span></a>
-				<a href="/tools/panphyplot/manual.html" class="neo-tool neo-tool-quiet" title="Open the PanPhyPlot manual"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Manual</span></a>
+				<a href="/tools/panphyplot/manual.html" class="neo-tool neo-tool-quiet" title="Open the PanPhyPlot manual" data-manual-overlay="PanPhyPlot"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Manual</span></a>
 				<div class="theme-toggle">
 					<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme"
 						title="Toggle between light and dark themes">☀️</button>
