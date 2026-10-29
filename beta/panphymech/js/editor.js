@@ -340,6 +340,18 @@
       return true;
     };
 
+    ed.dropConnector = function dropConnector(type, clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
+      ed.setTool(type);
+      const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
+      ed.cursorWorld = w;
+      if (['spring', 'rod', 'rope'].includes(type)) placeLinkEnd(w, false);
+      else placeJoint(w, false);
+      app.requestDraw();
+      return true;
+    };
+
     // ---------- Gestures ----------
 
     function startGesture(kind, e, sp, extra = {}) {
@@ -502,6 +514,12 @@
 
     function onPointerDown(e) {
       if (e.button === 1 || e.button === 2) e.preventDefault();
+      // A new primary press means Safari lost the previous release/capture.
+      if (e.isPrimary && pointers.size) {
+        onPointerCancel({ pointerId: gesture ? gesture.id : e.pointerId });
+        pointers.clear();
+        pinch = null;
+      }
       canvas.focus({ preventScroll: true });
       const sp = localPoint(e);
       pointers.set(e.pointerId, sp);
@@ -542,7 +560,11 @@
       const hit = hitTest(sp);
       if (!hit) { startGesture('pan', e, sp, { deselect: true }); return; }
       if (hit.type === 'delete') { app.deleteSelection(); return; }
-      if (hit.type === 'linkEnd') { startGesture('linkEnd', e, sp, { linkId: hit.link.id, end: hit.end }); return; }
+      if (hit.type === 'linkEnd') {
+        startGesture('linkEnd', e, sp, { linkId: hit.link.id, end: hit.end });
+        armHold(e, { type: 'link', id: hit.link.id });
+        return;
+      }
       if (hit.type === 'rotate' || hit.type === 'resize') {
         startGesture(hit.type, e, sp, { bodyId: hit.body.id, corner: ed.handles(hit.body).corner });
         return;
@@ -577,17 +599,23 @@
     function clearHold() { clearTimeout(holdTimer); holdTimer = 0; }
     function armHold(e, sel) {
       clearHold();
-      if (e.pointerType === 'mouse') return;
+      if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
       const id = e.pointerId;
       const x = e.clientX;
       const y = e.clientY;
+      const scene = app.scene;
       holdTimer = setTimeout(() => {
         holdTimer = 0;
-        if (!gesture || gesture.id !== id || gesture.moved) return;
-        if (gesture.kind === 'grab') app.sim.release();
-        gesture = null;
-        app.ui.showQuick(sel, x, y);
+        if (!gesture || gesture.id !== id || gesture.moved || app.scene !== scene || pointers.size !== 1 || ed.tool !== 'select' || ed.armed) return;
+        openHeldSettings(sel, x, y);
       }, 500);
+    }
+
+    function openHeldSettings(sel, x, y) {
+      clearHold();
+      if (gesture && gesture.kind === 'grab') app.sim.release();
+      gesture = null;
+      app.ui.showQuick(sel, x, y);
     }
 
     let suppressMenu = false;
@@ -597,10 +625,11 @@
       if (suppressMenu) { suppressMenu = false; return; }
       if (ed.tool !== 'select' || ed.armed) return;
       const h = hitTest(localPoint(e));
-      if (!h || (h.type !== 'body' && h.type !== 'link')) return;
+      if (!h || !['body', 'link', 'linkEnd'].includes(h.type)) return;
       const sel = h.type === 'body' ? { type: 'body', id: h.body.id } : { type: 'link', id: h.link.id };
       app.select(sel);
-      app.ui.showQuick(sel, e.clientX, e.clientY);
+      // Native touch contextmenu can arrive before the hold timer on Safari.
+      openHeldSettings(sel, e.clientX, e.clientY);
     });
 
     function onPointerMove(e) {

@@ -23,6 +23,8 @@ Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rop
 
 Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They compare free fall, projectile range, spring and pendulum periods, an elastic collision, a block on a ramp and terminal velocity with textbook results, and run every example. Framing/export checks cover swept motion bounds, preview isolation and cancellation, vector output and escaped labels.
 
+Drag any library part directly into the scene. Springs, rods and ropes start their first endpoint at the drop position; click the second endpoint to finish, or press Esc to cancel. Hinges, motors and glue attach at the drop position. Right-click or hold an object, connector or selected connector endpoint for quick settings (500 ms for touch/pen); movement and a second finger cancel the hold.
+
 ## Physics model
 
 - The scene is the setup at t = 0. Play builds a world from it; Reset rebuilds it. Editing the setup after time has run (moving, resizing, adding or deleting anything) first makes the current state the new start, with one undo step back to the old one. Parameters (mass, friction, restitution, drag, spring and motor settings, gravity) apply immediately without restarting.
