@@ -169,3 +169,16 @@ test('placement preview and dropped bodies share precise contact and floor posit
   assert.ok(Math.abs(h.app.scene.bodies.at(-1).y - floorPreview.y) < 1e-8);
   assert.ok(Math.abs(floorPreview.y - floorPreview.h / 2 - S.restGap(floorPreview)) < 1e-8);
 });
+
+test('dropping an already-armed library body creates one object and clears the placement preview', () => {
+  const h = setup(); h.ed.arm('box'); h.ed.cursorWorld = { x: 1, y: 0 };
+  assert.equal(h.ed.dropBody('box', 400, 200), true);
+  assert.equal(h.app.scene.bodies.length, 2);
+  assert.equal(h.ed.armed, null); assert.equal(h.ed.preview(), null);
+  h.emit('pointerdown', { pointerType: 'mouse', clientX: 400 });
+  h.emit('pointerup', { pointerType: 'mouse', clientX: 400 });
+  assert.equal(h.app.scene.bodies.length, 2, 'the next press selects instead of placing another body');
+  h.ed.arm('ball');
+  assert.equal(h.ed.dropBody('ball', -1, 200), false);
+  assert.equal(h.ed.armed, 'ball'); assert.equal(h.app.scene.bodies.length, 2);
+});

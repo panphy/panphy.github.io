@@ -135,7 +135,7 @@
   app.canRedo = () => redoStack.length > 0;
 
   // Fields that can change while time runs, without starting again from t = 0.
-  const PARAM_KEYS = { body: ['mass', 'friction', 'restitution', 'drag', 'color', 'name'], link: ['k', 'rest', 'damping', 'speed', 'torque', 'motor', 'name', 'length'], world: ['gravity', 'floorFriction', 'gpeZero'] };
+  const PARAM_KEYS = { body: ['mass', 'friction', 'restitution', 'drag', 'color', 'name'], link: ['k', 'rest', 'damping', 'speed', 'torque', 'motor', 'name', 'length'], world: ['gravity', 'floorFriction', 'gpeZero', 'viscosity'] };
   function setupSignature(data) {
     const strip = (o, keys) => { const c = { ...o }; keys.forEach((k) => delete c[k]); return c; };
     // A solid rod or rope is rebuilt from bodies, so its length and mass belong to the setup.

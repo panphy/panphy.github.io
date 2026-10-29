@@ -152,6 +152,7 @@
           if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
             drag.moved = true;
             if (isBody) {
+              app.editor.arm(null);
               drag.ghost = document.createElement('div');
               drag.ghost.className = 'drag-ghost';
               drag.ghost.innerHTML = partSvg(kind);
@@ -704,6 +705,11 @@
         presets.appendChild(b);
       });
       main.appendChild(presets);
+      main.appendChild(numField({ label: 'Fluid viscosity \\(\\eta\\)', plain: 'Fluid viscosity η', unit: 'Pa·s', get: () => w().viscosity || 0, set: (v, key) => app.editParam(() => { w().viscosity = v; }, key), min: L.viscosity[0], max: L.viscosity[1], slider: L.viscosity, step: 0.001, help: '0–1 Pa·s; default 0 turns world drag off. Other shapes use an equal-area radius. Adds to object-specific quadratic drag; does not add buoyancy.' }));
+      const dragLaw = document.createElement('p');
+      dragLaw.className = 'field-help';
+      dragLaw.innerHTML = mathText('Stokes drag: \\(F = 6\\pi r\\eta v\\)', 'Stokes drag: F = 6πrηv');
+      main.appendChild(dragLaw);
       main.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
       main.appendChild(numField({ label: 'Floor friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
       main.appendChild(numField({ label: 'Zero of \\(E_\\mathrm{p}\\) at height', plain: 'Zero of gravitational energy at height', unit: 'm', get: () => w().gpeZero || 0, set: (v, key) => app.editParam(() => { w().gpeZero = v; }, key), min: L.coord[0], max: L.coord[1], help: 'Gravitational energy is measured from this height. The dashed line marks it when it is not 0.' }));
