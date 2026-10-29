@@ -112,15 +112,15 @@ button, input, select { font: inherit; color: inherit; }
 .part[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent-soft); }
 .part svg { width: 64px; height: 44px; overflow: visible; }
 .part-name { font-size: 0.78rem; font-weight: 650; text-align: center; line-height: 1.15; color: var(--ink); }
-.part .p-stroke { fill: none; stroke: var(--link); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.part .p-rope { fill: none; stroke: var(--rope); stroke-width: 2.2; stroke-linecap: round; }
-.part .p-pin { fill: var(--surface); stroke: var(--link); stroke-width: 1.8; }
-.part .p-dot { fill: var(--link); }
-.part .p-motor { fill: none; stroke: var(--good); stroke-width: 2; stroke-linecap: round; }
-.part .p-motor-head { fill: var(--good); }
-.part .p-glue { fill: var(--link); stroke: var(--surface-2); stroke-width: 1.4; stroke-linejoin: round; }
-.part .p-pin-dot { fill: var(--surface-2); }
-.part .p-mount { fill: var(--surface); stroke: var(--link); stroke-width: 1.5; }
+:is(.part, .insp-swatch) .p-stroke { fill: none; stroke: var(--link); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+:is(.part, .insp-swatch) .p-rope { fill: none; stroke: var(--rope); stroke-width: 2.2; stroke-linecap: round; }
+:is(.part, .insp-swatch) .p-pin { fill: var(--surface); stroke: var(--link); stroke-width: 1.8; }
+:is(.part, .insp-swatch) .p-dot { fill: var(--link); }
+:is(.part, .insp-swatch) .p-motor { fill: none; stroke: var(--good); stroke-width: 2; stroke-linecap: round; }
+:is(.part, .insp-swatch) .p-motor-head { fill: var(--good); }
+:is(.part, .insp-swatch) .p-glue { fill: var(--link); stroke: var(--surface-2); stroke-width: 1.4; stroke-linejoin: round; }
+:is(.part, .insp-swatch) .p-pin-dot { fill: var(--surface-2); }
+:is(.part, .insp-swatch) .p-mount { fill: var(--surface); stroke: var(--link); stroke-width: 1.5; }
 .lib-note { margin: 14px 2px 0; font-size: 0.78rem; line-height: 1.45; color: var(--ink-3); }
 .drag-ghost { position: fixed; left: 0; top: 0; width: 64px; height: 44px; pointer-events: none; z-index: 100; opacity: 0.85; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25)); }
 .drag-ghost svg { width: 100%; height: 100%; overflow: visible; }
@@ -400,3 +400,15 @@ button, input, select { font: inherit; color: inherit; }
 .quick-settings .toggle-track { width: 30px; height: 18px; }
 .quick-settings .toggle-track::after { top: 2px; left: 2px; width: 14px; height: 14px; }
 .quick-settings .toggle input:checked + .toggle-track::after { transform: translateX(12px); }
+
+/* Two-way choices such as a motor's direction. */
+.choice-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.choice-label { font-size: 0.86rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.seg { display: inline-flex; padding: 2px; gap: 2px; border-radius: 10px; background: var(--surface-3); border: 1px solid var(--line); }
+.seg button { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 2px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink-2); font-size: 0.74rem; font-weight: 650; cursor: pointer; white-space: nowrap; }
+.seg button .icon { width: 15px; height: 15px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button:hover:not([aria-pressed="true"]) { color: var(--ink); }
+.quick-settings .choice-label { font-size: .72rem; font-weight: 500; color: var(--ink-2); }
+.quick-settings .seg button { min-height: 26px; padding: 1px 6px; }
+.quick-settings .seg button span { display: none; }

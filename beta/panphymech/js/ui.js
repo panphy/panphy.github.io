@@ -365,6 +365,27 @@
       return el;
     }
 
+    // A small segmented control, such as a motor's direction.
+    function choiceField(label, options, get, set) {
+      const el = document.createElement('div');
+      el.className = 'field choice-row';
+      el.innerHTML = `<span class="choice-label">${esc(label)}</span><span class="seg" role="group" aria-label="${esc(label)}">${options.map((o) => `<button type="button" data-v="${o.v}" title="${esc(o.title || o.label)}">${o.icon ? icon(o.icon) : ''}<span>${esc(o.label)}</span></button>`).join('')}</span>`;
+      const sync = () => el.querySelectorAll('[data-v]').forEach((b) => b.setAttribute('aria-pressed', String(String(get()) === b.dataset.v)));
+      el.querySelectorAll('[data-v]').forEach((b) => b.addEventListener('click', () => { set(Number(b.dataset.v)); sync(); }));
+      sync();
+      ui.fields.push(sync);
+      return el;
+    }
+
+    // Motor direction and speed: speed is entered as a size, the direction chosen apart.
+    const motorDir = (x) => (x.dir === 1 || x.dir === -1 ? x.dir : x.speed > 0 ? 1 : -1);
+    function motorFields(l, param, help) {
+      return [
+        choiceField('Direction', [{ v: -1, label: 'Clockwise', icon: 'rotate' }, { v: 1, label: 'Counterclockwise', icon: 'rotateCcw' }], () => motorDir(l()), (d) => app.editParam(() => { const x = l(); x.dir = d; x.speed = d * Math.abs(x.speed); }, null)),
+        numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => Math.abs(l().speed), set: param((x, v) => { x.speed = motorDir(x) * v; }), min: 0, max: L.speed[1], slider: [0, 30], step: 0.1, help: help ? 'How fast the part turns relative to what it is hinged to. Clockwise drives a wheel to the right.' : '' })
+      ];
+    }
+
     function card(label, extraClass = '') {
       const el = document.createElement('section');
       el.className = 'icard ' + extraClass;
@@ -554,9 +575,9 @@
         main.appendChild(numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: param((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01, help: l().kind === 'rod' ? 'A rod is massless and rigid.' : 'A rope is massless; it pulls only when taut.' }));
         rows.push({ key: 'length', label: 'Distance between ends', plain: 'Distance' }, { key: 'force', label: 'Tension \\(T\\)', plain: 'Tension T' });
       } else if (l().kind === 'hinge') {
-        main.appendChild(toggleField('Motor', () => l().motor, (v) => app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = -3; }, null, false, true)));
+        main.appendChild(toggleField('Motor', () => l().motor, (v) => app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true)));
         if (l().motor) {
-          main.appendChild(numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => l().speed, set: param((x, v) => { x.speed = v; }), min: L.speed[0], max: L.speed[1], slider: [-30, 30], step: 0.1, help: 'Positive turns counterclockwise. Negative drives a wheel to the right.' }));
+          motorFields(l, param, true).forEach((el) => main.appendChild(el));
           main.appendChild(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
           rows.push({ key: 'rate', label: 'Relative angular velocity', plain: 'Angular velocity' }, { key: 'torque', label: 'Motor torque', plain: 'Motor torque' });
         }
@@ -673,11 +694,11 @@
         items.push(numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: param((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01 }));
       } else if (l().kind === 'hinge') {
         items.push(toggleField('Motor', () => l().motor, (v) => {
-          app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = -3; }, null, false, true);
+          app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true);
           if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y);
         }));
         if (l().motor) {
-          items.push(numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => l().speed, set: param((x, v) => { x.speed = v; }), min: L.speed[0], max: L.speed[1], slider: [-30, 30], step: 0.1 }));
+          motorFields(l, param, false).forEach((el) => items.push(el));
           items.push(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
         }
       }

@@ -352,7 +352,7 @@
       if (l.motor) {
         // An arrow around the axle shows which way the motor turns.
         // Positive speed is counterclockwise, which is a negative sweep on screen.
-        const dir = (l.speed || 0) >= 0 ? 1 : -1;
+        const dir = l.dir === 1 || l.dir === -1 ? l.dir : (l.speed || 0) >= 0 ? 1 : -1;
         const a = arcArrow(q.x, q.y, 11, dir > 0 ? Math.PI * 0.2 : Math.PI * 0.8, -dir * Math.PI * 1.4, 7);
         ctx.strokeStyle = r.colors.motor;
         ctx.lineWidth = 2;

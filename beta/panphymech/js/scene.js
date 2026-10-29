@@ -111,7 +111,8 @@
     const link = { id: newId(scene, 'l'), kind, name: nextName(scene, def.label), a, la, b, lb };
     if (kind === 'spring') Object.assign(link, { k: 50, rest: 1, damping: 0 });
     if (kind === 'rod' || kind === 'rope') link.length = 1;
-    if (kind === 'hinge') Object.assign(link, { motor: type === 'motor', speed: type === 'motor' ? -3 : 0, torque: type === 'motor' ? 50 : 0 });
+    // A motor turns clockwise (dir −1) or counterclockwise (dir +1); speed carries the same sign.
+    if (kind === 'hinge') Object.assign(link, { motor: type === 'motor', speed: type === 'motor' ? -3 : 0, dir: -1, torque: type === 'motor' ? 50 : 0 });
     return link;
   }
 
@@ -369,7 +370,11 @@
       const l = { id: src.id, kind: src.kind, name: String(src.name || 'Link').slice(0, 40), a, la: point(src.la), b, lb: point(src.lb) };
       if (l.kind === 'spring') { l.k = clamp(num(src.k, 50), ...LIMITS.k); l.rest = clamp(num(src.rest, 1), ...LIMITS.rest); l.damping = clamp(num(src.damping, 0), ...LIMITS.damping); }
       if (l.kind === 'rod' || l.kind === 'rope') l.length = clamp(num(src.length, 1), ...LIMITS.length);
-      if (l.kind === 'hinge') { l.motor = !!src.motor; l.speed = clamp(num(src.speed, 0), ...LIMITS.speed); l.torque = clamp(num(src.torque, 50), ...LIMITS.torque); }
+      if (l.kind === 'hinge') {
+        l.motor = !!src.motor; l.speed = clamp(num(src.speed, 0), ...LIMITS.speed); l.torque = clamp(num(src.torque, 50), ...LIMITS.torque);
+        l.dir = src.dir === 1 || src.dir === -1 ? src.dir : l.speed > 0 ? 1 : -1;
+        l.speed = l.dir * Math.abs(l.speed);
+      }
       linkIds.add(l.id); track(l.id);
       scene.links.push(l);
     });

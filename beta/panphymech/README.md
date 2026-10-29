@@ -25,7 +25,7 @@ Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They
 - Steps are 1/240 s, shortened so the stiffest spring has ω·h ≤ 0.05. Springs follow Hooke's law with optional linear damping; air resistance is F = kv². Both are applied as forces before each step, so their energy bookkeeping is exact up to the integrator.
 - Box2D keeps a 1 cm skin round polygons, so resting contacts settle about 15 mm apart (5 mm for a ball on a polygon). Objects placed on the floor and those in the examples sit at this gap (`S.REST_GAP`) so they do not pop up when time starts.
 - Planck mixes friction as √(μ₁μ₂) and restitution as the larger of the pair. Collisions slower than 0.25 m/s are inelastic so resting contacts stay quiet. Sleeping is off, so slow motion is never frozen.
-- Joints: rod = rigid distance joint, rope = rope joint (maximum length), hinge and motor = revolute joint (link end `a` turns relative to `b`; positive speed is counterclockwise), glue = weld joint. A connector end with no object is fixed to the background at a world point.
+- Joints: rod = rigid distance joint, rope = rope joint (maximum length), hinge and motor = revolute joint (link end `a` turns relative to `b`; positive speed is counterclockwise; the inspector sets a direction, stored in `dir`, and a speed size, and `speed` keeps the signed value), glue = weld joint. A connector end with no object is fixed to the background at a world point.
 - Gravitational energy is m g (y − y₀), with y₀ set in the World card (0 by default). Energies cover moving objects only.
 - The recorder samples every moving object and spring each 0.01 s of simulated time, halving its rate after 24 000 samples, so the graph can switch objects after a run.
 
