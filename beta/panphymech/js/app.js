@@ -137,7 +137,9 @@
   const PARAM_KEYS = { body: ['mass', 'friction', 'restitution', 'drag', 'color', 'name'], link: ['k', 'rest', 'damping', 'speed', 'torque', 'motor', 'name', 'length'], world: ['gravity', 'floorFriction', 'gpeZero'] };
   function setupSignature(data) {
     const strip = (o, keys) => { const c = { ...o }; keys.forEach((k) => delete c[k]); return c; };
-    return JSON.stringify({ w: strip(data.world, PARAM_KEYS.world), b: data.bodies.map((b) => strip(b, PARAM_KEYS.body)), l: data.links.map((l) => strip(l, PARAM_KEYS.link)) });
+    // A solid rod or rope is rebuilt from bodies, so its length and mass belong to the setup.
+    const linkKeys = (l) => (l.solid ? PARAM_KEYS.link.filter((k) => k !== 'length') : PARAM_KEYS.link);
+    return JSON.stringify({ w: strip(data.world, PARAM_KEYS.world), b: data.bodies.map((b) => strip(b, PARAM_KEYS.body)), l: data.links.map((l) => strip(l, linkKeys(l))) });
   }
 
   function restore(text) {

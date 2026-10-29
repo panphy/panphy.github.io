@@ -55,10 +55,76 @@
     const bodyFor = (id) => (id ? bodies.get(id) : ground);
     const isStatic = (pb) => !pb || pb === ground || pb.isStatic();
 
+    // Solid rods and ropes: real bodies with mass that other objects collide with.
+    const solids = new Map(); // link id → { segs, seg, endJoint }
+    let solidGroup = 0;
+    function pathPoints(pa, pb, L, n) {
+      // n + 1 points along the connector: straight when taut, else a sagging parabola.
+      const d = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+      const sag = d >= L * 0.999 ? 0 : Math.min(L / 2, Math.sqrt((3 * Math.max(d, 1e-6) * (L - d)) / 8) * (d < 0.2 * L ? 2 : 1));
+      const dir = d >= L * 0.999 && d > 1e-9 ? { x: (pb.x - pa.x) / d, y: (pb.y - pa.y) / d } : null;
+      if (dir) return Array.from({ length: n + 1 }, (_, i) => ({ x: pa.x + dir.x * (L * i) / n, y: pa.y + dir.y * (L * i) / n }));
+      const curve = (t) => ({ x: pa.x + (pb.x - pa.x) * t, y: pa.y + (pb.y - pa.y) * t - 4 * sag * t * (1 - t) });
+      const M = 400;
+      const pts = [curve(0)];
+      const acc = [0];
+      for (let i = 1; i <= M; i++) { const q = curve(i / M); acc.push(acc[i - 1] + Math.hypot(q.x - pts[i - 1].x, q.y - pts[i - 1].y)); pts.push(q); }
+      const total = acc[M];
+      return Array.from({ length: n + 1 }, (_, i) => {
+        const target = (total * i) / n;
+        let k = 1;
+        while (k < M && acc[k] < target) k++;
+        const f = (target - acc[k - 1]) / (acc[k] - acc[k - 1] || 1);
+        return { x: pts[k - 1].x + (pts[k].x - pts[k - 1].x) * f, y: pts[k - 1].y + (pts[k].y - pts[k - 1].y) * f };
+      });
+    }
+    function buildSolid(l, A, B) {
+      const pa = anchorWorld(l.a, l.la);
+      const pb = anchorWorld(l.b, l.lb);
+      const rope = l.kind === 'rope';
+      const n = rope ? Math.max(3, Math.min(80, Math.round(l.length / 0.12))) : 1;
+      const seg = l.length / n;
+      const th = rope ? 0.03 : 0.06;
+      const mass = l.mass > 0 ? l.mass : S.defaultSolidMass(l);
+      const pts = rope ? pathPoints(pa, pb, l.length, n) : (() => {
+        const d = Math.hypot(pb.x - pa.x, pb.y - pa.y) || 1;
+        return [pa, { x: pa.x + ((pb.x - pa.x) / d) * l.length, y: pa.y + ((pb.y - pa.y) / d) * l.length }];
+      })();
+      solidGroup -= 1;
+      const segs = [];
+      for (let i = 0; i < n; i++) {
+        const p = pts[i];
+        const q = pts[i + 1];
+        const body = world.createBody({ type: 'dynamic', position: pl.Vec2((p.x + q.x) / 2, (p.y + q.y) / 2), angle: Math.atan2(q.y - p.y, q.x - p.x) });
+        body.createFixture(new pl.Box(seg / 2, th / 2), { density: mass / n / (seg * th), friction: 0.4, restitution: 0.1, filterGroupIndex: solidGroup });
+        segs.push(body);
+      }
+      const hinge = (X, Y, local) => world.createJoint(new pl.RevoluteJoint({ localAnchorA: pl.Vec2(local.ax, local.ay), localAnchorB: pl.Vec2(local.bx, local.by) }, X, Y));
+      const endJoint = hinge(A, segs[0], { ax: l.la.x, ay: l.la.y, bx: -seg / 2, by: 0 });
+      const endJoints = [endJoint]; // every joint pulling on end a, to read the tension there
+      for (let i = 0; i < n - 1; i++) hinge(segs[i], segs[i + 1], { ax: seg / 2, ay: 0, bx: -seg / 2, by: 0 });
+      hinge(segs[n - 1], B, { ax: seg / 2, ay: 0, bx: l.lb.x, by: l.lb.y });
+      // A chain of light links stretches under a heavy load. Each joint is therefore also kept
+      // no farther from either end than the rope's length between them (and the ends within
+      // the whole length), which holds the rope to its length without making it stiff.
+      if (rope) {
+        const limit = (X, ax, ay, Y, bx, by, max) => world.createJoint(new pl.RopeJoint({ localAnchorA: pl.Vec2(ax, ay), localAnchorB: pl.Vec2(bx, by), maxLength: max }, X, Y));
+        endJoints.push(limit(A, l.la.x, l.la.y, B, l.lb.x, l.lb.y, l.length));
+        for (let i = 1; i < n; i++) {
+          endJoints.push(limit(A, l.la.x, l.la.y, segs[i], -seg / 2, 0, i * seg));
+          limit(B, l.lb.x, l.lb.y, segs[i - 1], seg / 2, 0, (n - i) * seg);
+        }
+      }
+      solids.set(l.id, { segs, seg, endJoint, endJoints });
+    }
+
     scene.links.forEach((l) => {
       const A = bodyFor(l.a);
       const B = bodyFor(l.b);
-      if (!A || !B || (isStatic(A) && isStatic(B))) return;
+      if (!A || !B) return;
+      // A solid rod or rope matters even between two fixed things: objects land on it.
+      if ((l.kind === 'rod' || l.kind === 'rope') && l.solid) { buildSolid(l, A, B); return; }
+      if (isStatic(A) && isStatic(B)) return;
       let joint = null;
       // A link end on the world stores a world point, which is also the ground's local point.
       if (l.kind === 'rod') {
@@ -90,7 +156,8 @@
 
     // The step is short enough to keep the stiffest spring accurate: ω·h ≤ 0.05.
     function chooseStep() {
-      let h = BASE_STEP;
+      // Solid connectors are chains of joints, which hold together better with finer steps.
+      let h = solids.size ? BASE_STEP / 2 : BASE_STEP;
       scene.links.forEach((l) => {
         if (l.kind !== 'spring') return;
         const inv = invMass(l.a) + invMass(l.b);
@@ -164,7 +231,8 @@
     sim.step = function step() {
       const h = sim.h;
       applyForces();
-      world.step(h, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+      // Chains of rope links need more solver passes to stay together under load.
+      world.step(h, solids.size ? 24 : VELOCITY_ITERATIONS, solids.size ? 8 : POSITION_ITERATIONS);
       sim.lastH = h;
       sim.t += h;
     };
@@ -222,15 +290,18 @@
         const s = springState(l);
         return { length: s.L, extension: s.ext, tension: s.tension, EPE: 0.5 * l.k * s.ext * s.ext, pa: s.pa, pb: s.pb };
       }
-      const j = joints.get(id);
+      const solid = solids.get(id);
+      const j = solid ? solid.endJoint : joints.get(id);
       const pa = anchorWorld(l.a, l.la);
       const pb = anchorWorld(l.b, l.lb);
       const out = { length: Math.hypot(pb.x - pa.x, pb.y - pa.y), pa, pb, force: 0 };
       // Joint forces exist only once the solver has run.
       if (j && sim.t > 0) {
         try {
-          const f = j.getReactionForce(1 / sim.lastH);
-          out.force = Math.hypot(f.x, f.y);
+          // A solid connector's tension is the pull of all its joints at end a.
+          let fx = 0; let fy = 0;
+          (solid ? solid.endJoints : [j]).forEach((jj) => { const f = jj.getReactionForce(1 / sim.lastH); fx += f.x; fy += f.y; });
+          out.force = Math.hypot(fx, fy);
           if (l.kind === 'hinge') {
             out.torque = l.motor ? j.getMotorTorque(1 / sim.lastH) : 0;
             out.rate = j.getJointSpeed();
@@ -246,8 +317,33 @@
     };
 
     // Energies of the moving parts. Fixed objects never move, so they add nothing that changes.
+    // Kinetic and gravitational energy of solid rods and ropes (their own bodies).
+    sim.connectorEnergy = function connectorEnergy() {
+      let KE = 0; let GPE = 0;
+      const g = scene.world.gravity;
+      solids.forEach(({ segs }) => segs.forEach((pb) => {
+        const v = pb.getLinearVelocity();
+        const w = pb.getAngularVelocity();
+        const m = pb.getMass();
+        const lc = pb.getLocalCenter();
+        KE += 0.5 * m * (v.x * v.x + v.y * v.y) + 0.5 * (pb.getInertia() - m * (lc.x * lc.x + lc.y * lc.y)) * w * w;
+        GPE += m * g * (pb.getWorldCenter().y - (scene.world.gpeZero || 0));
+      }));
+      return { KE, GPE };
+    };
+
+    // Points along a solid rod or rope as simulated: its joints, end to end.
+    sim.solidPoints = function solidPoints(id) {
+      const s = solids.get(id);
+      if (!s) return null;
+      const pts = s.segs.map((pb) => pb.getWorldPoint(pl.Vec2(-s.seg / 2, 0)));
+      pts.push(s.segs[s.segs.length - 1].getWorldPoint(pl.Vec2(s.seg / 2, 0)));
+      return pts.map((p) => ({ x: p.x, y: p.y }));
+    };
+
     sim.totals = function totals() {
-      let KE = 0; let GPE = 0; let EPE = 0;
+      const extra = sim.connectorEnergy();
+      let KE = extra.KE; let GPE = extra.GPE; let EPE = 0;
       scene.bodies.forEach((b) => {
         if (b.fixed) return;
         const r = sim.readBody(b.id);

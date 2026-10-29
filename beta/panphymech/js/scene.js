@@ -112,10 +112,15 @@
     const kind = def.kind || type;
     const link = { id: newId(scene, 'l'), kind, name: nextName(scene, def.label), a, la, b, lb };
     if (kind === 'spring') Object.assign(link, { k: 50, rest: 1, damping: 0 });
-    if (kind === 'rod' || kind === 'rope') link.length = 1;
+    if (kind === 'rod' || kind === 'rope') Object.assign(link, { length: 1, solid: false, mass: kind === 'rope' ? 0.1 : 0.5 });
     // A motor turns clockwise (dir −1) or counterclockwise (dir +1); speed carries the same sign.
     if (kind === 'hinge') Object.assign(link, { motor: type === 'motor', speed: type === 'motor' ? -3 : 0, dir: -1, torque: type === 'motor' ? 50 : 0 });
     return link;
+  }
+
+  // A solid rod weighs 0.5 kg; a solid rope 0.1 kg per meter.
+  function defaultSolidMass(l) {
+    return l.kind === 'rope' ? Math.max(0.01, Math.round(l.length * 10) / 100) : 0.5;
   }
 
   // ---------- Geometry (local coordinates about the centroid) ----------
@@ -402,7 +407,11 @@
       if ((src.a && !a) || (src.b && !b) || (!a && !b)) { skipped++; return; }
       const l = { id: src.id, kind: src.kind, name: String(src.name || 'Link').slice(0, 40), a, la: point(src.la), b, lb: point(src.lb) };
       if (l.kind === 'spring') { l.k = clamp(num(src.k, 50), ...LIMITS.k); l.rest = clamp(num(src.rest, 1), ...LIMITS.rest); l.damping = clamp(num(src.damping, 0), ...LIMITS.damping); }
-      if (l.kind === 'rod' || l.kind === 'rope') l.length = clamp(num(src.length, 1), ...LIMITS.length);
+      if (l.kind === 'rod' || l.kind === 'rope') {
+        l.length = clamp(num(src.length, 1), ...LIMITS.length);
+        l.solid = !!src.solid;
+        l.mass = clamp(num(src.mass, defaultSolidMass(l)), ...LIMITS.mass);
+      }
       if (l.kind === 'hinge') {
         l.motor = !!src.motor; l.speed = clamp(num(src.speed, 0), ...LIMITS.speed); l.torque = clamp(num(src.torque, 50), ...LIMITS.torque);
         l.dir = src.dir === 1 || src.dir === -1 ? src.dir : l.speed > 0 ? 1 : -1;
@@ -423,6 +432,6 @@
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint,
     bodyById, linkById, endPoint, rigidGroup, transformBodies, linkLength, refitLengths,
-    removeBody, removeLink, bounds, fitBox, serialize, parse, clamp, REST_GAP, restGap
+    removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp, REST_GAP, restGap
   };
 })(typeof window !== 'undefined' ? window : globalThis);

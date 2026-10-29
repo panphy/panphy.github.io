@@ -266,3 +266,82 @@ test('custom shapes survive saving and opening', () => {
   assert.ok(!S.containsPoint(r, { x: 0, y: 2 }), 'the hole is empty');
   assert.ok(S.containsPoint(r, { x: 0.85, y: 2 }), 'the ring is solid');
 });
+
+// ---------- Solid rods and ropes ----------
+
+function bridge(solid) {
+  const scene = emptyScene();
+  const left = S.makeBody(scene, 'wall', -1.5, 1); left.fixed = true;
+  const right = S.makeBody(scene, 'wall', 1.5, 1); right.fixed = true;
+  const pin = S.makeBody(scene, 'ball', -1.2, 2); pin.r = 0.05; pin.mass = 0.1;
+  scene.bodies.push(left, right, pin);
+  // A rod from the background at (-1.2, 2) to the background at (1.2, 2) needs one body end,
+  // so pin one end to a small ball hinged to the background.
+  const hinge = S.makeLink(scene, 'hinge', pin.id, { x: 0, y: 0 }, null, { x: -1.2, y: 2 });
+  const rod = S.makeLink(scene, 'rod', pin.id, { x: 0, y: 0 }, null, { x: 1.2, y: 2 });
+  rod.length = 2.4; rod.solid = solid; rod.mass = 1;
+  scene.links.push(hinge, rod);
+  const ball = S.makeBody(scene, 'ball', 0, 3); ball.r = 0.15;
+  scene.bodies.push(ball);
+  return { scene, ball };
+}
+
+test('a ball lands on a solid rod but falls through an ideal one', () => {
+  [true, false].forEach((solid) => {
+    const { scene, ball } = bridge(solid);
+    const sim = P.createSim(scene);
+    run(sim, 1.5);
+    const y = sim.readBody(ball.id).y;
+    if (solid) assert.ok(y > 2, `ball should rest on the rod, y = ${y}`);
+    else assert.ok(y < 1.5, `ball should fall through, y = ${y}`);
+  });
+});
+
+test('a solid rod pivoted at one end swings with period 2π√(2L/3g)', () => {
+  const scene = emptyScene();
+  const L = 1.5;
+  const theta = 4 * Math.PI / 180;
+  const tip = S.makeBody(scene, 'ball', L * Math.sin(theta), 5 - L * Math.cos(theta)); tip.r = 0.01; tip.mass = 0.0001;
+  scene.bodies.push(tip);
+  const rod = S.makeLink(scene, 'rod', null, { x: 0, y: 5 }, tip.id, { x: 0, y: 0 });
+  rod.length = L; rod.solid = true; rod.mass = 2;
+  scene.links.push(rod);
+  const sim = P.createSim(scene);
+  const samples = [];
+  run(sim, 10, () => samples.push([sim.t, sim.readBody(tip.id).x]));
+  const cross = upwardCrossings(samples, 0);
+  const period = (cross[cross.length - 1] - cross[0]) / (cross.length - 1);
+  const expected = 2 * Math.PI * Math.sqrt((2 * L) / (3 * 9.81));
+  assert.ok(Math.abs(period - expected) / expected < 0.01, `period ${period} vs ${expected}`);
+});
+
+test('a hanging solid rope keeps its length and counts its own energy', () => {
+  const scene = emptyScene();
+  const weight = S.makeBody(scene, 'box', 0.8, 3.5); weight.mass = 1;
+  scene.bodies.push(weight);
+  const rope = S.makeLink(scene, 'rope', null, { x: 0, y: 4 }, weight.id, { x: 0, y: 0 });
+  rope.length = 2; rope.solid = true; rope.mass = 0.5;
+  scene.links.push(rope);
+  const sim = P.createSim(scene);
+  run(sim, 4);
+  const r = sim.readBody(weight.id);
+  const d = Math.hypot(r.x, r.y - 4);
+  assert.ok(d <= 2 * 1.01, `rope stretched to ${d}`);
+  assert.ok(sim.solidPoints(rope.id).length > 10, 'made of many links');
+  const e = sim.connectorEnergy();
+  assert.ok(e.GPE !== 0, 'the rope has gravitational energy of its own');
+});
+
+test('a solid rope slung between two fixed pegs catches a falling ball', () => {
+  const scene = emptyScene(true);
+  const p1 = S.makeBody(scene, 'ball', -2, 3); p1.r = 0.1; p1.fixed = true;
+  const p2 = S.makeBody(scene, 'ball', 2, 3); p2.r = 0.1; p2.fixed = true;
+  const ball = S.makeBody(scene, 'ball', 0.3, 4.5); ball.r = 0.3; ball.mass = 1;
+  scene.bodies.push(p1, p2, ball);
+  const rope = S.makeLink(scene, 'rope', p1.id, { x: 0, y: 0 }, p2.id, { x: 0, y: 0 });
+  rope.length = 4.6; rope.solid = true; rope.mass = 0.3;
+  scene.links.push(rope);
+  const sim = P.createSim(scene);
+  run(sim, 4);
+  assert.ok(sim.readBody(ball.id).y > 1, `ball should hang in the rope, y = ${sim.readBody(ball.id).y}`);
+});

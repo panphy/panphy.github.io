@@ -410,6 +410,26 @@
       ];
     }
 
+    // Rods and ropes: their length, and whether they are solid (collide, have mass).
+    // A solid connector is rebuilt from bodies, so its changes go through setup edits.
+    function connectorFields(l, quickRefresh) {
+      const set = (fn) => (v, key) => {
+        if (l().solid) app.edit(() => fn(l(), v), { coalesce: key, fromInspector: true });
+        else app.editParam(() => fn(l(), v), key);
+      };
+      const rod = l().kind === 'rod';
+      const out = [
+        numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: set((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01,
+          help: quickRefresh ? '' : l().solid ? (rod ? 'A solid rod is a thin bar hinged at both ends: objects collide with it and its mass swings with it.' : 'A solid rope is a chain of short hinged segments: it drapes, wraps round objects and has weight.') : (rod ? 'A rod is massless and rigid; nothing collides with it.' : 'A rope is massless and pulls only when taut; nothing collides with it.') }),
+        toggleField('Solid: collides and has mass', () => l().solid, (v) => {
+          app.edit(() => { const x = l(); x.solid = v; if (v && !(x.mass > 0)) x.mass = S.defaultSolidMass(x); });
+          if (quickRefresh) quickRefresh();
+        }, 'Off: an ideal, massless connector, as in textbook problems.')
+      ];
+      if (l().solid) out.push(numField({ label: 'Mass \\(m\\)', plain: 'Mass m', unit: 'kg', get: () => l().mass, set: set((x, v) => { x.mass = v; }), min: 0.001, max: 1000, slider: [0.01, 20], log: true }));
+      return out;
+    }
+
     function card(label, extraClass = '') {
       const el = document.createElement('section');
       el.className = 'icard ' + extraClass;
@@ -607,7 +627,7 @@
         main.appendChild(btn);
         rows.push({ key: 'length', label: 'Length \\(L\\)', plain: 'Length L' }, { key: 'extension', label: 'Extension \\(\\Delta L\\)', plain: 'Extension' }, { key: 'tension', label: 'Tension \\(F\\)', plain: 'Tension F' }, { key: 'EPE', label: 'Elastic energy \\(E_\\mathrm{e}\\)', plain: 'Elastic energy' });
       } else if (l().kind === 'rod' || l().kind === 'rope') {
-        main.appendChild(numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: param((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01, help: l().kind === 'rod' ? 'A rod is massless and rigid.' : 'A rope is massless; it pulls only when taut.' }));
+        connectorFields(l, null).forEach((el) => main.appendChild(el));
         rows.push({ key: 'length', label: 'Distance between ends', plain: 'Distance' }, { key: 'force', label: 'Tension \\(T\\)', plain: 'Tension T' });
       } else if (l().kind === 'hinge') {
         main.appendChild(toggleField('Motor', () => l().motor, (v) => app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true)));
@@ -755,7 +775,7 @@
         items.push(numField({ label: 'Natural length \\(L_0\\)', plain: 'Natural length L0', unit: 'm', get: () => l().rest, set: param((x, v) => { x.rest = v; }), min: L.rest[0], max: L.rest[1], slider: [0, 5], step: 0.01 }));
         items.push(numField({ label: 'Damping \\(c\\)', plain: 'Damping c', unit: 'N s/m', get: () => l().damping, set: param((x, v) => { x.damping = v; }), min: L.damping[0], max: L.damping[1], slider: [0, 20], step: 0.05 }));
       } else if (l().kind === 'rod' || l().kind === 'rope') {
-        items.push(numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: param((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01 }));
+        connectorFields(l, () => { if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y); }).forEach((el) => items.push(el));
       } else if (l().kind === 'hinge') {
         items.push(toggleField('Motor', () => l().motor, (v) => {
           app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true);
