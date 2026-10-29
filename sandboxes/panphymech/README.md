@@ -4,7 +4,7 @@ A 2D mechanics sandbox in the style of Algodoo. Entry point: `sandboxes/panphyme
 
 Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rope, hinge, motor, glue) go on a canvas in SI units. Play runs the physics; the graph shows position, velocity or energy of one object, a spring or the whole system, with CSV and PanPhyPlot export.
 
-The [user manual](manual.html) has a five-step pendulum walkthrough and a reference for building, connectors, graphs, files and shortcuts. The app’s Manual link opens it in a new tab.
+The [user manual](manual.html) has a five-step pendulum walkthrough and a reference for building, connectors, graphs, files and shortcuts. The app’s Manual control opens it in a large overlay, full-screen on small screens, with an Open in new tab option.
 
 ## Structure
 
@@ -49,3 +49,5 @@ The scene autosaves to `panphy-mech-scene-v1` and display choices to `panphy-mec
 
 Fit frames the current object positions and connector anchors with the original margins and floor placement. Objects far from the rest are left out and named so a runaway object cannot shrink the scene to dots.
 
+
+The manual overlay uses `/assets/manual-overlay.js` and `/assets/manual-overlay.css`. It loads the standalone guide on first use and keeps it mounted so reading position and expanded topics survive closing and reopening. Escape closes the guide after any open Contents or screenshot dialog; closing restores focus to Manual. Same-tab links back to the app close the guide; explicit new-tab links and links to other pages open separately to preserve the workspace.
