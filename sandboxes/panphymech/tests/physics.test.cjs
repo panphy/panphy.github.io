@@ -149,7 +149,7 @@ test('block on a ramp accelerates at g(sin θ − μ cos θ)', () => {
 test('quadratic drag gives terminal velocity √(mg/k)', () => {
   const scene = emptyScene();
   const b = S.makeBody(scene, 'ball', 0, 500);
-  b.mass = 0.2; b.drag = 0.05;
+  b.mass = 0.2; b.drag = 0.05; b.dragModel = 'quadratic';
   scene.bodies.push(b);
   const sim = P.createSim(scene);
   run(sim, 8);
@@ -379,21 +379,21 @@ test('world viscosity defaults to zero and old files preserve drag-free motion',
 });
 
 test('Stokes drag gives terminal speed mg/(6πrη) and the expected velocity decay', () => {
-  const scene = emptyScene(); scene.world.viscosity = 0.2;
+  const scene = emptyScene(); scene.world.dragModel = 'linear'; scene.world.linearDragSource = 'stokes'; scene.world.viscosity = 0.2;
   const b = S.makeBody(scene, 'ball', 0, 500); b.r = 0.2; b.mass = 0.2; scene.bodies.push(b);
   const sim = P.createSim(scene); run(sim, 5);
   const vt = b.mass * scene.world.gravity / (6 * Math.PI * b.r * scene.world.viscosity);
   assert.ok(Math.abs(-sim.readBody(b.id).vy - vt) / vt < 0.001);
-  const free = emptyScene(); free.world.gravity = 0; free.world.viscosity = 0.05;
+  const free = emptyScene(); free.world.gravity = 0; free.world.dragModel = 'linear'; free.world.linearDragSource = 'stokes'; free.world.viscosity = 0.05;
   const ball = S.makeBody(free, 'ball', 0, 0); ball.r = 0.25; ball.mass = 1; ball.vx = 3; free.bodies.push(ball);
   const decay = P.createSim(free); run(decay, 1);
   const expected = 3 * Math.exp(-6 * Math.PI * ball.r * free.world.viscosity / ball.mass * decay.t);
   assert.ok(Math.abs(decay.readBody(ball.id).vx - expected) / expected < 0.001);
 });
 
-test('maximum viscosity is stable at minimum mass and maximum radius and works with quadratic drag', () => {
+test('maximum Stokes viscosity is stable and inactive quadratic settings do not interfere', () => {
   for (const drag of [0, S.LIMITS.drag[1]]) {
-    const scene = emptyScene(); scene.world.gravity = 0; scene.world.viscosity = S.LIMITS.viscosity[1];
+    const scene = emptyScene(); scene.world.gravity = 0; scene.world.dragModel = 'linear'; scene.world.linearDragSource = 'stokes'; scene.world.viscosity = S.LIMITS.viscosity[1];
     const b = S.makeBody(scene, 'ball', 0, 0); b.r = S.LIMITS.r[1]; b.mass = S.LIMITS.mass[0]; b.vx = 500; b.drag = drag;
     scene.bodies.push(b); const sim = P.createSim(scene); let previous = b.vx;
     for (let i = 0; i < 240; i++) {
@@ -408,7 +408,7 @@ test('viscosity updates live without resetting time and tracks mass changes', ()
   const scene = emptyScene(); scene.world.gravity = 0;
   const b = S.makeBody(scene, 'box', 0, 0); b.vx = 2; scene.bodies.push(b);
   const sim = P.createSim(scene); run(sim, 0.1); const time = sim.t;
-  scene.world.viscosity = 0.5; sim.syncParams(); assert.equal(sim.t, time);
+  scene.world.dragModel = 'linear'; scene.world.linearDragSource = 'stokes'; scene.world.viscosity = 0.5; sim.syncParams(); assert.equal(sim.t, time);
   const c = 6 * Math.PI * Math.sqrt(S.area(b) / Math.PI) * scene.world.viscosity;
   assert.ok(Math.abs(sim.bodies.get(b.id).getLinearDamping() - c / b.mass) < 1e-9);
   b.mass *= 2; sim.syncParams();
@@ -426,7 +426,7 @@ test('viscosity files round-trip and invalid or out-of-range values are normaliz
 });
 
 test('solid connectors receive world drag and update it live', () => {
-  const { scene } = bridge(true); scene.world.viscosity = 1;
+  const { scene } = bridge(true); scene.world.dragModel = 'linear'; scene.world.linearDragSource = 'stokes'; scene.world.viscosity = 1;
   const sim = P.createSim(scene);
   let coefficient = 0;
   for (let pb = sim.world.getBodyList(); pb; pb = pb.getNext()) {

@@ -1,5 +1,5 @@
 // PanPhyMech: the live simulation. Builds a Planck.js (Box2D) world from the scene,
-// adds Hooke's-law springs, quadratic air resistance and world Stokes drag, and
+// adds Hooke's-law springs and one effective drag model per object, and
 // reports positions, velocities, forces and energies in SI units.
 (function (root) {
   const PPM = root.PPM = root.PPM || {};
@@ -41,10 +41,10 @@
     }
 
     // Planck integrates linear damping implicitly: v /= 1 + h*c/m. This
-    // implements Stokes drag without reversing velocity at high viscosity/low mass.
-    function setViscousDamping(pb, radius) {
-      const eta = S.clamp(scene.world.viscosity || 0, ...S.LIMITS.viscosity);
-      pb.setLinearDamping(pb.isStatic() ? 0 : 6 * Math.PI * radius * eta / pb.getMass());
+    // implements linear drag without reversing velocity at high damping/low mass.
+    function setViscousDamping(pb, radius, b = null, share = 1) {
+      const c = S.dragCoefficients(scene, b, radius).linear / share;
+      pb.setLinearDamping(pb.isStatic() ? 0 : c / pb.getMass());
     }
     const dragRadius = (b) => b.kind === 'ball' ? b.r : Math.sqrt(S.area(b) / Math.PI);
 
@@ -59,7 +59,7 @@
         angularVelocity: b.fixed || b.lockRotation ? 0 : b.omega
       });
       fixtureFor(pb, b);
-      setViscousDamping(pb, dragRadius(b));
+      setViscousDamping(pb, dragRadius(b), b);
       pb.setUserData(b.id);
       bodies.set(b.id, pb);
     });
@@ -111,7 +111,7 @@
         body.createFixture(new pl.Box(seg / 2, th / 2), { density: mass / n / (seg * th), friction: 0.4, restitution: 0.1, filterGroupIndex: solidGroup });
         // Share one connector's total drag across its segments, so changing the
         // rope discretization does not change the total resistance.
-        setViscousDamping(body, Math.sqrt(l.length * th / Math.PI) / n);
+        setViscousDamping(body, Math.sqrt(l.length * th / Math.PI), null, n);
         segs.push(body);
       }
       const hinge = (X, Y, local) => world.createJoint(new pl.RevoluteJoint({ localAnchorA: pl.Vec2(local.ax, local.ay), localAnchorB: pl.Vec2(local.bx, local.by) }, X, Y));
@@ -229,18 +229,24 @@
         if (B && B !== ground && !B.isStatic()) B.applyForce(pl.Vec2(-fx, -fy), s.pb, true);
       });
       scene.bodies.forEach((b) => {
-        if (b.fixed || !(b.drag > 0)) return;
-        const pb = bodies.get(b.id);
-        if (!pb) return;
-        const v = pb.getLinearVelocity();
-        const speed = Math.hypot(v.x, v.y);
-        if (speed < 1e-9) return;
-        // F = k v², opposite to the velocity, limited so one step can never reverse the motion.
-        let f = b.drag * speed * speed;
-        const limit = (0.9 * pb.getMass() * speed) / sim.h;
-        if (f > limit) f = limit;
-        pb.applyForceToCenter(pl.Vec2((-f * v.x) / speed, (-f * v.y) / speed), true);
+        if (b.fixed) return;
+        applyQuadraticDrag(bodies.get(b.id), S.dragCoefficients(scene, b).quadratic);
       });
+      scene.links.forEach((l) => {
+        const solid = solids.get(l.id);
+        if (!solid) return;
+        const k = S.dragCoefficients(scene, null).quadratic / solid.segs.length;
+        solid.segs.forEach((pb) => applyQuadraticDrag(pb, k));
+      });
+    }
+
+    function applyQuadraticDrag(pb, k) {
+      if (!pb || !(k > 0)) return;
+      const v = pb.getLinearVelocity();
+      const speed = Math.hypot(v.x, v.y);
+      if (speed < 1e-9) return;
+      const f = Math.min(k * speed * speed, 0.9 * pb.getMass() * speed / sim.h);
+      pb.applyForceToCenter(pl.Vec2(-f * v.x / speed, -f * v.y / speed), true);
     }
 
     sim.step = function step() {
@@ -412,7 +418,7 @@
         if (!b.fixed) f.setDensity(b.mass / Math.max(S.area(b), 1e-9));
       }
       if (!b.fixed) pb.resetMassData();
-      setViscousDamping(pb, dragRadius(b));
+      setViscousDamping(pb, dragRadius(b), b);
       refreshContacts();
       chooseStep();
     };
@@ -431,8 +437,8 @@
       const solid = solids.get(l.id);
       if (solid) {
         const thickness = l.kind === 'rope' ? 0.03 : 0.06;
-        const radius = Math.sqrt(l.length * thickness / Math.PI) / solid.segs.length;
-        solid.segs.forEach((pb) => setViscousDamping(pb, radius));
+        const radius = Math.sqrt(l.length * thickness / Math.PI);
+        solid.segs.forEach((pb) => setViscousDamping(pb, radius, null, solid.segs.length));
       }
       chooseStep();
     };

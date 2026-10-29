@@ -43,7 +43,7 @@
   // Limits used by the inspector and by file import.
   const LIMITS = {
     r: [0.02, 5], w: [0.02, 20], h: [0.02, 20], sides: [3, 8],
-    mass: [0.001, 10000], friction: [0, 2], restitution: [0, 1], drag: [0, 50],
+    mass: [0.001, 10000], friction: [0, 2], restitution: [0, 1], drag: [0, 50], linearDrag: [0, 1000],
     k: [0.1, 100000], rest: [0, 50], damping: [0, 1000], length: [0.01, 50],
     speed: [-100, 100], torque: [0, 100000],
     gravity: [0, 100], viscosity: [0, 1], coord: [-1000, 1000], velocity: [-500, 500], omega: [-200, 200]
@@ -61,7 +61,7 @@
     return {
       format: FORMAT,
       version: VERSION,
-      world: { gravity: 9.81, viscosity: 0, floor: true, floorFriction: 0.5, gpeZero: 0 },
+      world: { gravity: 9.81, dragModel: 'none', linearDragSource: 'coefficient', linearDrag: 1, drag: 0.1, viscosity: 0, floor: true, floorFriction: 0.5, gpeZero: 0 },
       bodies: [],
       links: [],
       nextId: 1,
@@ -97,7 +97,7 @@
       mass: def.mass,
       friction: 0.4,
       restitution: kind === 'ball' ? 0.6 : 0.2,
-      drag: 0,
+      drag: 0.1, dragModel: 'world', linearDragSource: 'coefficient', linearDrag: 1, viscosity: 0,
       fixed,
       lockRotation: false,
       flip: false,
@@ -208,6 +208,36 @@
       if ((ex * (q.y - a.y) - ey * (q.x - a.x)) / len < -pad) return false;
     }
     return true;
+  }
+
+  const DRAG_MODELS = { none: 'None', linear: 'Linear', quadratic: 'Quadratic' };
+  function worldDragModel(scene) {
+    return Object.hasOwn(DRAG_MODELS, scene.world.dragModel) ? scene.world.dragModel : scene.world.viscosity > 0 ? 'linear' : 'none';
+  }
+  function objectDragModel(b) {
+    return b.dragModel === 'world' || Object.hasOwn(DRAG_MODELS, b.dragModel) ? b.dragModel : b.drag > 0 ? 'quadratic' : 'world';
+  }
+  function effectiveDragModel(scene, b) {
+    return b && objectDragModel(b) !== 'world' ? objectDragModel(b) : worldDragModel(scene);
+  }
+  function dragCoefficients(scene, b, radius) {
+    const model = effectiveDragModel(scene, b);
+    const params = b && objectDragModel(b) !== 'world' ? b : scene.world;
+    let linear = 0, quadratic = 0;
+    if (model === 'linear') {
+      const source = params.linearDragSource || (params.viscosity > 0 ? 'stokes' : 'coefficient');
+      if (source === 'stokes') {
+        if (radius === undefined) radius = b ? b.kind === 'ball' ? b.r : Math.sqrt(area(b) / Math.PI) : 0;
+        linear = 6 * Math.PI * radius * clamp(num(params.viscosity, 0), ...LIMITS.viscosity);
+      } else linear = clamp(num(params.linearDrag, 1), ...LIMITS.linearDrag);
+    } else if (model === 'quadratic') quadratic = clamp(num(params.drag, 0), ...LIMITS.drag);
+    return { model, linear, quadratic };
+  }
+  function dragOverrideNote(scene, b) {
+    if (b.fixed || objectDragModel(b) === 'world') return '';
+    const model = effectiveDragModel(scene, b);
+    const own = model === 'none' ? 'no drag' : `its own ${model} drag`;
+    return `${b.name} uses ${own} instead of World drag (${DRAG_MODELS[worldDragModel(scene)]}). Choose Use World to follow the shared settings.`;
   }
 
   function copyFragment(scene, selection, extra = [], poseOf = (b) => b) {
@@ -520,6 +550,10 @@
     scene.world.floor = w.floor !== false;
     scene.world.floorFriction = clamp(num(w.floorFriction, 0.5), ...LIMITS.friction);
     scene.world.viscosity = clamp(num(w.viscosity, 0), ...LIMITS.viscosity);
+    scene.world.dragModel = worldDragModel({ world: w });
+    scene.world.linearDragSource = w.linearDragSource === 'stokes' || (!w.linearDragSource && w.viscosity > 0) ? 'stokes' : 'coefficient';
+    scene.world.linearDrag = clamp(num(w.linearDrag, 1), ...LIMITS.linearDrag);
+    scene.world.drag = clamp(num(w.drag, 0.1), ...LIMITS.drag);
     scene.world.gpeZero = clamp(num(w.gpeZero, 0), ...LIMITS.coord);
     const ids = new Set();
     let skipped = 0;
@@ -534,6 +568,9 @@
         x: clamp(num(src.x, 0), ...LIMITS.coord), y: clamp(num(src.y, 0), ...LIMITS.coord), angle: num(src.angle, 0),
         mass: clamp(num(src.mass, 1), ...LIMITS.mass), friction: clamp(num(src.friction, 0.4), ...LIMITS.friction),
         restitution: clamp(num(src.restitution, 0.2), ...LIMITS.restitution), drag: clamp(num(src.drag, 0), ...LIMITS.drag),
+        dragModel: objectDragModel(src),
+        linearDragSource: src.linearDragSource === 'stokes' ? 'stokes' : 'coefficient',
+        linearDrag: clamp(num(src.linearDrag, 1), ...LIMITS.linearDrag), viscosity: clamp(num(src.viscosity, 0), ...LIMITS.viscosity),
         fixed: !!src.fixed, lockRotation: !!src.lockRotation, flip: !!src.flip,
         color: COLORS[src.color] ? src.color : 'blue',
         vx: clamp(num(src.vx, 0), ...LIMITS.velocity), vy: clamp(num(src.vy, 0), ...LIMITS.velocity), omega: clamp(num(src.omega, 0), ...LIMITS.omega)
@@ -575,6 +612,7 @@
   }
 
   PPM.scene = {
+    DRAG_MODELS, worldDragModel, objectDragModel, effectiveDragModel, dragCoefficients, dragOverrideNote,
     FORMAT, VERSION, COLORS, COLOR_CYCLE, BODY_KINDS, LINK_KINDS, LIMITS,
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, closestSurface, copyFragment, pasteFragment,
