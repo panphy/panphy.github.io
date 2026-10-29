@@ -5,6 +5,7 @@ require('../js/units.js');
 const registry = require('../js/registry.js');
 const circuit = require('../js/circuit.js');
 const solver = require('../js/solver.js');
+require('../../../assets/graph-range.js');
 const graph = require('../js/graph.js');
 
 function advance(sim, seconds) {
@@ -21,7 +22,7 @@ test('ohmmeter Plot on graph records resistance on the shared time graph', () =>
   sim.setDoc(doc);
   sim.setRunning(true);
   advance(sim, 0.05);
-  const app = { doc, sim, graphWindow: 'all' };
+  const app = { doc, sim, graphRange: null };
   const series = graph.plottedSeries(app);
   assert.equal(series.length, 1);
   assert.equal(series[0].unit, 'Ω');
@@ -45,7 +46,7 @@ test('oscilloscope Plot on graph adds CH1 and CH2 series', () => {
   sim.setDoc(doc);
   sim.setRunning(true);
   advance(sim, 0.2);
-  const app = { doc, sim, graphWindow: 'all' };
+  const app = { doc, sim, graphRange: null };
   const series = graph.plottedSeries(app);
   assert.equal(series.length, 2);
   assert.deepEqual(series.map((s) => s.channel), ['ch1', 'ch2']);
@@ -72,7 +73,7 @@ test('CSV and PanPhyPlot export include plotted meters and scope channels', () =
   sim.setDoc(doc);
   sim.setRunning(true);
   advance(sim, 0.05);
-  const app = { doc, sim, graphWindow: 'all' };
+  const app = { doc, sim, graphRange: null };
   assert.equal(graph.hasExportData(app), true);
   const csv = graph.toCSV(app);
   assert.match(csv, /^"t \(s\)"/);
@@ -95,4 +96,16 @@ test('scope defaults include Plot on graph as an operational property', () => {
   const def = registry.get('scope');
   assert.ok(def.props.some((p) => p.key === 'plot' && p.operational));
   assert.ok(def.props.some((p) => p.key === 'autoScale'));
+});
+
+test('selected circuit exports exclude earlier and later samples and restore with Full Graph', () => {
+  const doc = circuit.createDoc(), meter = circuit.addComponent(doc, 'voltmeter', { props: { plot: true } });
+  const key = meter.id + ':V';
+  const app = { doc, sim: { traces: { t: [0, 1, 2, 3, 4, 5], series: { [key]: [100, NaN, 2.25, 3.5, 400, 500] } } }, graphRange: { start: 2, end: 3 } };
+  assert.deepEqual(graph.sampleRows(app, graph.plottedSeries(app)).rows.map(r=>r.t), [2,3]);
+  const p = graph.panPhyPlotPayload(app);
+  assert.deepEqual(p.columns[0].cells, ['2','3']); assert.deepEqual(p.columns[1].cells, ['2.25','3.5']);
+  assert.equal(graph.toCSV(app).trim().split('\n').length, 3);
+  app.graphRange=null; assert.equal(graph.toCSV(app).trim().split('\n').length,7);
+  assert.equal(app.sim.traces.t.length,6);
 });

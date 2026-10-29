@@ -24,6 +24,8 @@ Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They
 
 Drag any library part directly into the scene. Connector drags show the snapped starting point on the canvas, without a floating connector icon. Springs, rods and ropes start their first endpoint at the drop position; click the second endpoint to finish, or press Esc to cancel. Hinges, motors and glue attach at the drop position. Right-click or hold an object, connector or selected connector endpoint for quick settings (500 ms for touch/pen); movement and a second finger cancel the hold.
 
+The graph uses `/assets/graph-range.js` for mouse, touch and pen time selection. Drag across the graph to zoom into a range; CSV and PanPhyPlot exports use only that range, retaining the original sample times. **Full Graph** restores the complete recording. Keyboard +/− zoom, arrows pan, and Escape restores the full graph. A reset or new scene clears the selection.
+
 ## Physics model
 
 - The scene is the setup at t = 0. Play builds a world from it; Reset rebuilds it. Editing the setup after time has run (moving, resizing, adding or deleting anything) first makes the current state the new start, with one undo step back to the old one. Parameters (mass, friction, restitution, drag, spring and motor settings, gravity) apply immediately without restarting.

@@ -142,7 +142,7 @@ button, input, select { font: inherit; color: inherit; }
 .run-icon .icon { width: 16px; height: 16px; stroke: none; fill: currentColor; }
 /* Fixed width so the running time never shifts the controls. */
 .time-readout { flex: none; width: 11ch; font-size: 0.92rem; font-weight: 500; color: var(--ink); text-align: left; white-space: nowrap; }
-.speed-select select, .graph-track select, .graph-window select { min-height: 36px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 4px 8px; font-size: 0.84rem; cursor: pointer; }
+.speed-select select, .graph-track select { min-height: 36px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 4px 8px; font-size: 0.84rem; cursor: pointer; }
 .speed-select select { font-family: var(--font-mono); }
 #btn-show-inspector { margin-left: auto; }
 
@@ -365,7 +365,6 @@ button, input, select { font: inherit; color: inherit; }
   .graph-head { gap: 6px; padding: 6px 6px 0 8px; }
   .graph-track select { max-width: 132px; }
   .graph-groups button { padding: 2px 9px; }
-  .graph-window { display: none; }
   .graph-legend { padding: 0 6px 0 8px; gap: 0 4px; }
   .legend-value { min-width: 0; }
 }
@@ -419,3 +418,7 @@ button, input, select { font: inherit; color: inherit; }
 .multi-list li::before { content: counter(pick); width: 1.4em; color: var(--ink-3); font: 600 0.74rem var(--font-mono); text-align: right; }
 .multi-art svg { display: block; width: 36px; height: 25px; }
 .multi-tag { margin-left: auto; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font: 600 0.66rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* Select a time range without scrolling the page on touch screens. */
+.graph-canvas { touch-action: none; cursor: crosshair; }
+.graph-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }

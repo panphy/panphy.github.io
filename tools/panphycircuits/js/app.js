@@ -30,7 +30,7 @@
     problemComps: new Set(),
     noteComps: new Set(),
     rev: 0,
-    graphWindow: 'all',
+    graphRange: null,
     clipboard: null,
     lastElecKey: '',
     pinned: new Set(),
@@ -816,7 +816,7 @@
     $('btn-snap').addEventListener('click', () => app.toggleSnap());
     $('btn-graph').addEventListener('click', () => app.showGraph($('graph-panel').hidden));
     $('graph-close').addEventListener('click', () => app.showGraph(false));
-    $('graph-window').addEventListener('change', (e) => { app.graphWindow = e.target.value; app.graph.draw(true); });
+    $('graph-full').addEventListener('click', () => app.graph.fullGraph());
     $('graph-export-csv').addEventListener('click', () => {
       if (app.graph.exportCSV()) ui.toast('Graph data downloaded as CSV.');
       else ui.toast('Pause with plotted readings on the graph to export.');
