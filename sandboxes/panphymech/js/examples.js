@@ -40,6 +40,26 @@
       }
     },
     {
+      id: 'terminal-velocity',
+      title: 'Terminal velocity',
+      text: 'Two identical 1 kg balls fall 10 m. Left: no drag. Right: World quadratic drag, reaching within 1% of its 4 m/s terminal speed after about one-third of the drop. The graph follows the right ball’s vertical velocity.',
+      track: { name: 'With drag (right)', group: 'velocity' },
+      view: { minX: -3, maxX: 3, minY: 0, maxY: 11.8 },
+      build() {
+        const s = S.createScene();
+        const mass = 1, radius = 0.6, dropHeight = 10, terminalSpeed = 4;
+        s.world.dragModel = 'quadratic';
+        s.world.drag = mass * s.world.gravity / (terminalSpeed * terminalSpeed);
+        const y = dropHeight + radius + S.REST_GAP.ball;
+        const props = { mass, r: radius, restitution: 0, color: 'blue' };
+        // For quadratic drag, 99% of terminal speed is reached after about 3.2 m.
+        // None replaces World drag for the left ball; the right ball inherits it.
+        add(s, 'ball', -1.5, y, { ...props, name: 'No drag (left)', dragModel: 'none' });
+        add(s, 'ball', 1.5, y, { ...props, name: 'With drag (right)' });
+        return s;
+      }
+    },
+    {
       id: 'pendulum',
       title: 'Simple pendulum',
       text: 'A 1 kg bob on a 2.5 m rod, released from 25°. Watch kinetic and gravitational energy swap. Gravitational energy is zero at the lowest point.',

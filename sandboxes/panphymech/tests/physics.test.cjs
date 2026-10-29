@@ -439,3 +439,40 @@ test('solid connectors receive world drag and update it live', () => {
   scene.world.viscosity = 0; sim.syncParams();
   for (let pb = sim.world.getBodyList(); pb; pb = pb.getNext()) assert.equal(pb.getLinearDamping(), 0);
 });
+
+test('terminal-velocity example reaches 99% speed after about one-third of the drop', () => {
+  const example = E.list.find(ex => ex.id === 'terminal-velocity');
+  const scene = example.build();
+  assert.equal(scene.bodies.length, 2); assert.equal(scene.links.length, 0);
+  const [free, drag] = scene.bodies;
+  const physicalProperties = b => Object.fromEntries(Object.entries(b).filter(([key]) => !['id', 'name', 'x', 'dragModel'].includes(key)));
+  assert.deepEqual(physicalProperties(free), physicalProperties(drag), 'only their positions, names, IDs and drag choices differ');
+  assert.equal(free.dragModel, 'none'); assert.equal(drag.dragModel, 'world');
+  assert.equal(scene.world.dragModel, 'quadratic');
+  assert.equal(example.track.name, drag.name); assert.equal(example.track.group, 'velocity');
+  const terminalSpeed = Math.sqrt(drag.mass * scene.world.gravity / scene.world.drag);
+  assert.equal(terminalSpeed, 4);
+  const height = drag.y - drag.r - S.REST_GAP.ball;
+  assert.equal(height, 10);
+  const sim = P.createSim(scene);
+  let thresholdFraction = null, atThird = null, checkedPlateau = false;
+  while (sim.t < 4) {
+    sim.step(); const d = sim.readBody(drag.id), f = sim.readBody(free.id);
+    const fraction = (drag.y - d.y) / height;
+    if (thresholdFraction === null && -d.vy >= 0.99 * terminalSpeed) thresholdFraction = fraction;
+    if (!atThird && fraction >= 1 / 3) atThird = { drag: d.vy, free: f.vy };
+    if (fraction > 0.5 && fraction < 0.9) {
+      assert.ok(Math.abs(-d.vy - terminalSpeed) / terminalSpeed < 0.002);
+      checkedPlateau = true;
+    }
+  }
+  assert.ok(thresholdFraction > 0.29 && thresholdFraction < 0.36, `99% reached at ${thresholdFraction} of the drop`);
+  assert.ok(Math.abs(-atThird.drag - terminalSpeed) / terminalSpeed < 0.01);
+  assert.ok(-atThird.free > 2 * terminalSpeed, 'the drag-free ball is still accelerating');
+  assert.equal(checkedPlateau, true);
+  for (const b of [free, drag]) {
+    const reading = sim.readBody(b.id);
+    assert.ok(Math.abs(reading.vy) < 0.01, `${b.name} should stop after landing`);
+    assert.ok(reading.y < b.r + 0.03);
+  }
+});
