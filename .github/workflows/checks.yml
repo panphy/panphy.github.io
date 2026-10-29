@@ -37,5 +37,6 @@ jobs:
             misc/panphyplotog/tests/regression.test.cjs \
             tools/motion_tracker/tests/regression.test.cjs \
             tools/panphycircuits/tests/*.test.cjs \
+            beta/panphymech/tests/*.test.cjs \
             fun/spellwave/tests/prompt-utils.test.mjs \
             fun/spellwave/tests/difficulty.test.mjs

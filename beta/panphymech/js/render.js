@@ -1,0 +1,578 @@
+// PanPhyMech: canvas rendering. Flat shapes with thin outlines on a metric grid,
+// connectors, trails, velocity arrows, selection handles and placement previews.
+(function (root) {
+  const PPM = root.PPM = root.PPM || {};
+  const S = PPM.scene;
+
+  const NICE = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500];
+  const niceStep = (scale, px) => NICE.find((s) => s * scale >= px) || NICE[NICE.length - 1];
+
+  function createRenderer(app, canvas) {
+    const ctx = canvas.getContext('2d');
+    const r = { canvas, ctx, w: 0, h: 0, dpr: 1, colors: {} };
+
+    r.readColors = function readColors() {
+      const cs = getComputedStyle(document.documentElement);
+      const v = (name) => cs.getPropertyValue(name).trim();
+      r.dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      r.colors = {
+        bg: v('--stage'), grid: v('--stage-grid'), gridMajor: v('--stage-grid-major'), axis: v('--stage-axis'),
+        floor: v('--floor'), floorLine: v('--floor-line'), ink: v('--ink'), ink2: v('--ink-2'), ink3: v('--ink-3'),
+        accent: v('--accent'), surface: v('--surface'), link: v('--link'), rope: v('--rope'), vector: v('--vector'),
+        motor: v('--good'), danger: v('--danger')
+      };
+    };
+
+    r.resize = function resize() {
+      const rect = canvas.getBoundingClientRect();
+      r.dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      r.w = Math.max(1, rect.width);
+      r.h = Math.max(1, rect.height);
+      canvas.width = Math.round(r.w * r.dpr);
+      canvas.height = Math.round(r.h * r.dpr);
+    };
+
+    const cam = () => app.scene.camera;
+    r.toScreen = (p) => ({ x: r.w / 2 + (p.x - cam().cx) * cam().scale, y: r.h / 2 - (p.y - cam().cy) * cam().scale });
+    r.toWorld = (x, y) => ({ x: cam().cx + (x - r.w / 2) / cam().scale, y: cam().cy - (y - r.h / 2) / cam().scale });
+
+    function bodyPath(b, pose) {
+      const s = cam().scale;
+      const c = r.toScreen(pose);
+      ctx.beginPath();
+      if (b.kind === 'ball') {
+        ctx.arc(c.x, c.y, b.r * s, 0, Math.PI * 2);
+        return;
+      }
+      S.vertices(b).forEach((p, i) => {
+        const q = r.toScreen(S.toWorld(pose, p));
+        if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+      });
+      ctx.closePath();
+    }
+
+    function drawGrid() {
+      const s = cam().scale;
+      const minor = niceStep(s, 22);
+      const major = niceStep(s, 110);
+      const tl = r.toWorld(0, 0);
+      const br = r.toWorld(r.w, r.h);
+      const lines = (step, color) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = Math.ceil(tl.x / step) * step; x <= br.x; x += step) {
+          const X = Math.round(r.toScreen({ x, y: 0 }).x) + 0.5;
+          ctx.moveTo(X, 0); ctx.lineTo(X, r.h);
+        }
+        for (let y = Math.ceil(br.y / step) * step; y <= tl.y; y += step) {
+          const Y = Math.round(r.toScreen({ x: 0, y }).y) + 0.5;
+          ctx.moveTo(0, Y); ctx.lineTo(r.w, Y);
+        }
+        ctx.stroke();
+      };
+      if (app.display.grid) {
+        lines(minor, r.colors.grid);
+        lines(major, r.colors.gridMajor);
+      }
+      // Axes through the origin, with meter labels on the major lines.
+      const o = r.toScreen({ x: 0, y: 0 });
+      ctx.strokeStyle = r.colors.axis;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(Math.round(o.x) + 0.5, 0); ctx.lineTo(Math.round(o.x) + 0.5, r.h);
+      if (!app.scene.world.floor) { ctx.moveTo(0, Math.round(o.y) + 0.5); ctx.lineTo(r.w, Math.round(o.y) + 0.5); }
+      ctx.stroke();
+      if (!app.display.grid) return;
+      ctx.fillStyle = r.colors.ink3;
+      ctx.font = '500 10.5px "IBM Plex Mono", ui-monospace, monospace';
+      const fmt = (v) => (Math.abs(v) < 1e-9 ? '0' : String(Number(v.toPrecision(6))));
+      const labelY = Math.min(Math.max(o.y + 14, 14), r.h - 6);
+      ctx.textAlign = 'center';
+      for (let x = Math.ceil(tl.x / major) * major; x <= br.x; x += major) {
+        if (Math.abs(x) < 1e-9) continue;
+        ctx.fillText(fmt(x), r.toScreen({ x, y: 0 }).x, labelY);
+      }
+      const labelX = Math.min(Math.max(o.x - 6, 30), r.w - 6);
+      ctx.textAlign = 'right';
+      for (let y = Math.ceil(br.y / major) * major; y <= tl.y; y += major) {
+        if (Math.abs(y) < 1e-9) continue;
+        ctx.fillText(fmt(y), labelX, r.toScreen({ x: 0, y }).y + 3.5);
+      }
+      ctx.textAlign = 'left';
+      ctx.fillText('m', Math.min(Math.max(o.x + 5, 4), r.w - 14), Math.max(12, Math.min(r.toScreen({ x: 0, y: tl.y }).y + 12, r.h - 4)));
+    }
+
+    function drawFloor() {
+      if (!app.scene.world.floor) return;
+      const y = r.toScreen({ x: 0, y: 0 }).y;
+      if (y > r.h) return;
+      ctx.fillStyle = r.colors.floor;
+      ctx.fillRect(0, y, r.w, r.h - y);
+      // Hatching under the surface line, like a textbook ground.
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, y, r.w, Math.min(14, r.h - y));
+      ctx.clip();
+      ctx.strokeStyle = r.colors.floorLine;
+      ctx.globalAlpha = 0.45;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = -20; x < r.w + 20; x += 10) { ctx.moveTo(x, y + 14); ctx.lineTo(x + 12, y); }
+      ctx.stroke();
+      ctx.restore();
+      ctx.strokeStyle = r.colors.floorLine;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(r.w, y);
+      ctx.stroke();
+    }
+
+    // The height where gravitational energy is zero, when it is not the floor.
+    function drawEnergyZero() {
+      const y0 = app.scene.world.gpeZero || 0;
+      if (Math.abs(y0) < 1e-9) return;
+      const y = Math.round(r.toScreen({ x: 0, y: y0 }).y) + 0.5;
+      if (y < 0 || y > r.h) return;
+      ctx.strokeStyle = r.colors.ink3;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(r.w, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = r.colors.ink3;
+      ctx.font = 'italic 600 11px Figtree, system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('Ep = 0', r.w - 8, y - 5);
+    }
+
+    function hatch(b, pose, color) {
+      ctx.save();
+      bodyPath(b, pose);
+      ctx.clip();
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = 1.2;
+      const c = r.toScreen(pose);
+      const e = S.extent(b);
+      const R = Math.hypot(e.x, e.y) * cam().scale + 4;
+      ctx.beginPath();
+      for (let d = -R * 2; d < R * 2; d += 7) { ctx.moveTo(c.x + d - R, c.y + R); ctx.lineTo(c.x + d + R, c.y - R); }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBody(b) {
+      const pose = app.poseOf(b);
+      const col = S.COLORS[b.color] || S.COLORS.blue;
+      const s = cam().scale;
+      bodyPath(b, pose);
+      ctx.fillStyle = col.fill;
+      ctx.fill();
+      if (b.fixed) hatch(b, pose, col.stroke);
+      bodyPath(b, pose);
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = col.stroke;
+      ctx.stroke();
+      const c = r.toScreen(pose);
+      if (b.kind === 'ball' || b.kind === 'polygon') {
+        // A spoke shows the rotation.
+        const R = b.r * s;
+        if (R > 5) {
+          ctx.strokeStyle = col.stroke;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(c.x, c.y);
+          ctx.lineTo(c.x + Math.cos(pose.angle) * R * 0.92, c.y - Math.sin(pose.angle) * R * 0.92);
+          ctx.stroke();
+        }
+      }
+      // Center of mass.
+      if (!b.fixed && Math.min(S.extent(b).x, S.extent(b).y) * s > 7) {
+        ctx.fillStyle = col.stroke;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function outline(b, color, width) {
+      const pose = app.poseOf(b);
+      bodyPath(b, pose);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+
+    function anchorMount(p, color) {
+      // A small hatched block: this end is fixed to the background.
+      const q = r.toScreen(p);
+      ctx.fillStyle = r.colors.surface;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.rect(q.x - 6, q.y - 6, 12, 12);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(q.x - 6, q.y + 2); ctx.lineTo(q.x + 2, q.y - 6);
+      ctx.moveTo(q.x - 2, q.y + 6); ctx.lineTo(q.x + 6, q.y - 2);
+      ctx.stroke();
+    }
+
+    function linkEnds(l) {
+      const pa = S.endPoint(app.scene, l.a, l.la, app.poseOf);
+      const pb = S.endPoint(app.scene, l.b, l.lb, app.poseOf);
+      return [pa, pb];
+    }
+
+    function drawSpring(pa, pb, color, width = 1.6, dashed = false) {
+      const A = r.toScreen(pa);
+      const B = r.toScreen(pb);
+      const dx = B.x - A.x;
+      const dy = B.y - A.y;
+      const L = Math.hypot(dx, dy);
+      if (L < 1) return;
+      const ux = dx / L; const uy = dy / L;
+      const nx = -uy; const ny = ux;
+      const amp = Math.max(5, Math.min(10, 0.09 * cam().scale));
+      const lead = Math.min(10, L * 0.12);
+      const coils = 9;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = 'round';
+      ctx.setLineDash(dashed ? [5, 4] : []);
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(A.x + ux * lead, A.y + uy * lead);
+      const body = L - 2 * lead;
+      for (let i = 0; i < coils * 2; i++) {
+        const t = (i + 0.5) / (coils * 2);
+        const side = i % 2 ? -1 : 1;
+        ctx.lineTo(A.x + ux * (lead + body * t) + nx * amp * side, A.y + uy * (lead + body * t) + ny * amp * side);
+      }
+      ctx.lineTo(B.x - ux * lead, B.y - uy * lead);
+      ctx.lineTo(B.x, B.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function drawRod(pa, pb, color, dashed = false) {
+      const A = r.toScreen(pa);
+      const B = r.toScreen(pb);
+      ctx.strokeStyle = color;
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 4.5;
+      ctx.setLineDash(dashed ? [6, 5] : []);
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.lineCap = 'butt';
+      [A, B].forEach((p) => { ctx.fillStyle = r.colors.surface; ctx.beginPath(); ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2); ctx.fill(); });
+    }
+
+    function drawRope(pa, pb, length, color, dashed = false) {
+      const A = r.toScreen(pa);
+      const B = r.toScreen(pb);
+      const d = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash(dashed ? [5, 4] : []);
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      if (length > d * 1.003 && d > 1e-6) {
+        // Slack: a parabola with the rope's length, sagging under gravity.
+        const sag = Math.sqrt((3 * d * (length - d)) / 8) * cam().scale;
+        ctx.quadraticCurveTo((A.x + B.x) / 2, (A.y + B.y) / 2 + 2 * sag, B.x, B.y);
+      } else {
+        ctx.lineTo(B.x, B.y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function drawHinge(l, p, selected) {
+      const q = r.toScreen(p);
+      const ink = selected ? r.colors.accent : r.colors.ink2;
+      if (l.kind === 'weld') {
+        ctx.fillStyle = r.colors.surface;
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.rect(q.x - 5, q.y - 5, 10, 10);
+        ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(q.x - 3, q.y - 3); ctx.lineTo(q.x + 3, q.y + 3);
+        ctx.moveTo(q.x + 3, q.y - 3); ctx.lineTo(q.x - 3, q.y + 3);
+        ctx.stroke();
+        return;
+      }
+      if (!l.b) {
+        // Pinned to the background: a small mount behind the pin.
+        ctx.fillStyle = r.colors.ink3;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(q.x, q.y); ctx.lineTo(q.x - 7, q.y + 11); ctx.lineTo(q.x + 7, q.y + 11); ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      if (l.motor) {
+        // An arrow around the axle shows which way the motor turns.
+        const dir = (l.speed || 0) >= 0 ? 1 : -1;
+        const R = 11;
+        const a0 = -Math.PI * 0.15;
+        const a1 = a0 - dir * Math.PI * 1.45;
+        ctx.strokeStyle = r.colors.motor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, R, a0, a1, dir > 0);
+        ctx.stroke();
+        const ex = q.x + R * Math.cos(a1);
+        const ey = q.y + R * Math.sin(a1);
+        const tx = -Math.sin(a1) * -dir;
+        const ty = Math.cos(a1) * -dir;
+        ctx.fillStyle = r.colors.motor;
+        ctx.beginPath();
+        ctx.moveTo(ex + tx * 5, ey + ty * 5);
+        ctx.lineTo(ex - tx * 1 + Math.cos(a1) * 4, ey - ty * 1 + Math.sin(a1) * 4);
+        ctx.lineTo(ex - tx * 1 - Math.cos(a1) * 4, ey - ty * 1 - Math.sin(a1) * 4);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = r.colors.surface;
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, 5.5, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = ink;
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawLink(l) {
+      const sel = app.isSelected('link', l.id);
+      const hov = app.hover && app.hover.type === 'link' && app.hover.id === l.id;
+      const [pa, pb] = linkEnds(l);
+      const color = sel ? r.colors.accent : hov ? r.colors.ink : r.colors.link;
+      if (l.kind === 'hinge' || l.kind === 'weld') { drawHinge(l, pa, sel || hov); return; }
+      if (l.kind === 'spring') drawSpring(pa, pb, color, sel ? 2.2 : 1.7);
+      else if (l.kind === 'rod') drawRod(pa, pb, color);
+      else if (l.kind === 'rope') drawRope(pa, pb, l.length, sel ? r.colors.accent : r.colors.rope);
+      if (!l.a) anchorMount(pa, color);
+      if (!l.b) anchorMount(pb, color);
+    }
+
+    function drawTrails() {
+      const rec = app.recorder;
+      if (!rec || rec.t.length < 2) return;
+      const n = rec.t.length;
+      const stride = Math.max(1, Math.ceil(n / 1500));
+      app.scene.bodies.forEach((b) => {
+        if (b.fixed) return;
+        const xs = rec.cols.get(b.id + ':x');
+        const ys = rec.cols.get(b.id + ':y');
+        if (!xs) return;
+        const col = S.COLORS[b.color] || S.COLORS.blue;
+        ctx.strokeStyle = col.stroke;
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < n; i += stride) {
+          const q = r.toScreen({ x: xs[i], y: ys[i] });
+          if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+        }
+        const last = r.toScreen({ x: xs[n - 1], y: ys[n - 1] });
+        ctx.lineTo(last.x, last.y);
+        ctx.stroke();
+        // Strobe dots every 0.1 s, like a multiflash photograph.
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = col.stroke;
+        const every = Math.max(1, Math.round(0.1 / rec.interval));
+        for (let i = 0; i < n; i += every) {
+          const q = r.toScreen({ x: xs[i], y: ys[i] });
+          ctx.beginPath();
+          ctx.arc(q.x, q.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    function arrow(from, to, color, label) {
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const L = Math.hypot(dx, dy);
+      if (L < 4) return;
+      const ux = dx / L; const uy = dy / L;
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x - ux * 7, to.y - uy * 7);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(to.x, to.y);
+      ctx.lineTo(to.x - ux * 10 - uy * 5, to.y - uy * 10 + ux * 5);
+      ctx.lineTo(to.x - ux * 10 + uy * 5, to.y - uy * 10 - ux * 5);
+      ctx.closePath();
+      ctx.fill();
+      if (label) {
+        ctx.font = 'italic 600 12px Figtree, system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(label, to.x + 5, to.y - 5);
+      }
+    }
+
+    function drawVectors() {
+      if (!app.sim) return;
+      app.scene.bodies.forEach((b) => {
+        if (b.fixed) return;
+        const v = app.velocityOf(b);
+        if (!v) return;
+        const speed = Math.hypot(v.vx, v.vy);
+        if (speed < 0.02) return;
+        const pose = app.poseOf(b);
+        // 0.25 s of motion, capped so fast objects keep their arrow on screen.
+        const len = Math.min(0.25 * speed * cam().scale, 160);
+        const from = r.toScreen(pose);
+        arrow(from, { x: from.x + (v.vx / speed) * len, y: from.y - (v.vy / speed) * len }, r.colors.vector, 'v');
+      });
+    }
+
+    function drawLabels() {
+      ctx.font = '600 11.5px Figtree, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      app.scene.bodies.forEach((b) => {
+        const pose = app.poseOf(b);
+        const e = S.extent(b);
+        const q = r.toScreen({ x: pose.x, y: pose.y + Math.hypot(e.x, e.y) });
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = r.colors.bg;
+        ctx.strokeText(b.name, q.x, q.y - 6);
+        ctx.fillStyle = r.colors.ink2;
+        ctx.fillText(b.name, q.x, q.y - 6);
+      });
+    }
+
+    function drawHandles(b) {
+      const hs = app.editor.handles(b);
+      if (!hs) return;
+      ctx.strokeStyle = r.colors.accent;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(hs.center.x, hs.center.y); ctx.lineTo(hs.rotate.x, hs.rotate.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = r.colors.surface;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(hs.rotate.x, hs.rotate.y, 7, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(hs.rotate.x, hs.rotate.y, 3.2, -Math.PI * 0.9, Math.PI * 0.4);
+      ctx.stroke();
+      ctx.fillStyle = r.colors.accent;
+      ctx.beginPath();
+      ctx.rect(hs.resize.x - 6, hs.resize.y - 6, 12, 12);
+      ctx.fill();
+      ctx.strokeStyle = r.colors.surface;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    function drawPreview() {
+      const ed = app.editor;
+      const pv = ed.preview();
+      if (!pv) return;
+      ctx.globalAlpha = 0.55;
+      if (pv.body) {
+        drawBody(pv.body);
+        ctx.globalAlpha = 1;
+        return;
+      }
+      if (pv.link) {
+        const { kind, from, to } = pv.link;
+        if (kind === 'spring') drawSpring(from, to, r.colors.accent, 1.8, true);
+        else if (kind === 'rod') drawRod(from, to, r.colors.accent, true);
+        else drawRope(from, to, 0, r.colors.accent, true);
+        ctx.globalAlpha = 1;
+        const q = r.toScreen(from);
+        ctx.fillStyle = r.colors.accent;
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (pv.point) {
+        ctx.globalAlpha = 1;
+        const q = r.toScreen(pv.point);
+        ctx.strokeStyle = pv.ok ? r.colors.accent : r.colors.ink3;
+        ctx.lineWidth = 1.6;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawGrab() {
+      const g = app.sim && app.sim.grabTarget();
+      if (!g) return;
+      const A = r.toScreen(g.anchor);
+      const B = r.toScreen(g.target);
+      ctx.strokeStyle = r.colors.accent;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = r.colors.accent;
+      ctx.beginPath();
+      ctx.arc(A.x, A.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    r.draw = function draw() {
+      if (!r.colors.bg) r.readColors();
+      ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
+      ctx.fillStyle = r.colors.bg;
+      ctx.fillRect(0, 0, r.w, r.h);
+      drawGrid();
+      drawFloor();
+      drawEnergyZero();
+      if (app.display.trails) drawTrails();
+      app.scene.bodies.forEach(drawBody);
+      // Hover and selection outlines sit on top of every object.
+      app.scene.bodies.forEach((b) => {
+        if (app.isSelected('body', b.id)) outline(b, r.colors.accent, 2.6);
+        else if (app.hover && app.hover.type === 'body' && app.hover.id === b.id) outline(b, r.colors.accent, 1.3);
+      });
+      app.scene.links.filter((l) => l.kind !== 'hinge' && l.kind !== 'weld').forEach(drawLink);
+      app.scene.links.filter((l) => l.kind === 'hinge' || l.kind === 'weld').forEach(drawLink);
+      if (app.display.vectors) drawVectors();
+      if (app.display.labels) drawLabels();
+      const sel = app.selection;
+      if (sel && sel.type === 'body' && app.canEditGeometry()) {
+        const b = S.bodyById(app.scene, sel.id);
+        if (b) drawHandles(b);
+      }
+      drawGrab();
+      drawPreview();
+    };
+
+    r.niceStep = niceStep;
+    return r;
+  }
+
+  PPM.render = { createRenderer };
+})(typeof window !== 'undefined' ? window : globalThis);
