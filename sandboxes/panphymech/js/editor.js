@@ -240,11 +240,13 @@
       const w = ed.cursorWorld;
       if (!w) return null;
       if (gesture && gesture.kind === 'jointMove' && gesture.moved) {
-        const bs = bodiesAt(w);
+        const bs = jointBodies(w);
         return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
       }
       if (ed.armed) {
-        const b = S.makeBody({ ...app.scene, bodies: app.scene.bodies.slice(), links: [], nextId: 0 }, ed.armed, snapV(w.x, SNAP_POS), snapV(w.y, SNAP_POS));
+        const b = S.makeBody({ ...app.scene, bodies: app.scene.bodies.slice(), links: [], nextId: 0 }, ed.armed, w.x, w.y);
+        const previewScene = { ...app.scene, bodies: [...app.scene.bodies, b], links: [] };
+        positionBody(b, previewScene);
         return { body: b };
       }
       if (['spring', 'rod', 'rope'].includes(ed.tool)) {
@@ -253,7 +255,7 @@
         return { point: target.world, ok: true };
       }
       if (['hinge', 'motor', 'weld'].includes(ed.tool)) {
-        const bs = bodiesAt(w);
+        const bs = jointBodies(w);
         return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
       }
       return null;
@@ -263,6 +265,15 @@
     // pointer on that object, else a point on the background.
     function endTarget(w) {
       const bs = bodiesAt(w);
+      if (snapOn() && !bs.length) {
+        let nearest = null, distance = 10 / app.scene.camera.scale;
+        for (const b of app.scene.bodies) {
+          const p = S.closestSurface({ ...b, ...app.poseOf(b) }, w);
+          const d = Math.hypot(p.x - w.x, p.y - w.y);
+          if (d < distance) { nearest = { body: b, world: p, local: S.toLocal(app.poseOf(b), p) }; distance = d; }
+        }
+        if (nearest) return nearest;
+      }
       if (bs.length) {
         const b = bs[0];
         const p = jointPoint(w, b);
@@ -272,11 +283,26 @@
       return { body: null, world: p, local: p };
     }
 
+    function jointBodies(w) {
+      const bs = bodiesAt(w);
+      if (!bs.length && snapOn()) {
+        const t = endTarget(w);
+        if (t.body) bs.push(t.body);
+      }
+      return bs;
+    }
+
     function jointPoint(w, b) {
       const pose = app.poseOf(b);
       const e = S.extent(b);
       const near = Math.max(Math.min(e.x, e.y) * 0.35, 10 / app.scene.camera.scale);
-      if (Math.hypot(w.x - pose.x, w.y - pose.y) <= near) return { x: pose.x, y: pose.y };
+      const distance = Math.hypot(w.x - pose.x, w.y - pose.y);
+      if (snapOn()) {
+        const p = S.closestSurface({ ...b, ...pose }, w);
+        const edgeDistance = Math.hypot(p.x - w.x, p.y - w.y);
+        if (edgeDistance < distance && edgeDistance <= 10 / app.scene.camera.scale) return p;
+      }
+      if (distance <= near) return { x: pose.x, y: pose.y };
       return w;
     }
 
@@ -305,7 +331,7 @@
     }
 
     function placeJoint(w, keep) {
-      const bs = bodiesAt(w);
+      const bs = jointBodies(w);
       if (!bs.length) { app.toast('Click on an object.'); return; }
       const top = bs[0];
       const base = bs[1] || null;
@@ -322,16 +348,30 @@
       if (!keep) ed.setTool('select');
     }
 
+    function snapBodies(ids, scene = app.scene) {
+      if (!snapOn()) return false;
+      const d = S.contactSnap(scene, ids, 10 / app.scene.camera.scale);
+      if (d) S.transformBodies(scene, ids, (p, angle) => ({ x: p.x + d.x, y: p.y + d.y, angle }));
+      return !!d;
+    }
+
+    function positionBody(b, scene) {
+      function liftFromFloor() {
+        if (!scene.world.floor) return;
+        const bottom = b.kind === 'ball' ? b.y - b.r : Math.min(...S.vertices(b).map((p) => S.toWorld(b, p).y));
+        b.y += Math.max(0, S.restGap(b) - bottom);
+      }
+      // Keep the preview and final placement at the same resting gap as the engine.
+      liftFromFloor();
+      if (!snapBodies(new Set([b.id]), scene)) { b.x = snapV(b.x, SNAP_POS); b.y = snapV(b.y, SNAP_POS); }
+      liftFromFloor();
+    }
+
     ed.placeBody = function placeBody(type, w) {
       app.edit(() => {
-        const b = S.makeBody(app.scene, type, snapV(w.x, SNAP_POS), snapV(w.y, SNAP_POS));
-        // Never place an object partly inside the floor: lift it to rest on top, at the
-        // engine's resting gap so it does not pop up when time starts.
-        if (app.scene.world.floor) {
-          const bottom = (b.kind === 'ball' ? b.r : Math.max(...S.vertices(b).map((p) => -p.y))) + S.restGap(b);
-          if (b.y < bottom) b.y = bottom;
-        }
+        const b = S.makeBody(app.scene, type, w.x, w.y);
         app.scene.bodies.push(b);
+        positionBody(b, app.scene);
         app.select({ type: 'body', id: b.id });
       });
     };
@@ -406,7 +446,7 @@
       const l = S.linkById(app.scene, gesture.linkId);
       if (!l) return;
       l[gesture.end] = null;
-      l['l' + gesture.end] = { x: snapV(w.x, SNAP_POS), y: snapV(w.y, SNAP_POS) };
+      l['l' + gesture.end] = endTarget(w).world;
       if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
     }
 
@@ -440,8 +480,8 @@
       restoreOrig();
       if (!S.linkById(app.scene, gesture.linkId)) return;
       const { l, a, b } = movedEnds(w);
-      l.a = null; l.la = a;
-      l.b = null; l.lb = b;
+      l.a = null; l.la = endTarget(a).world;
+      l.b = null; l.lb = endTarget(b).world;
     }
 
     function finishLinkMove(w) {
@@ -461,7 +501,7 @@
     function finishJointMove(w) {
       restoreOrig();
       const l = S.linkById(app.scene, gesture.linkId);
-      const bs = bodiesAt(w);
+      const bs = jointBodies(w);
       if (!bs.length) return 'Drop the joint on an object.';
       const top = bs[0];
       const base = bs[1] || null;
@@ -483,9 +523,14 @@
     function applyMove(w) {
       restoreOrig();
       const b0 = gesture.b0;
-      const dx = snapV(b0.x + (w.x - gesture.startWorld.x), SNAP_POS) - b0.x;
-      const dy = snapV(b0.y + (w.y - gesture.startWorld.y), SNAP_POS) - b0.y;
+      const dx = w.x - gesture.startWorld.x;
+      const dy = w.y - gesture.startWorld.y;
       S.transformBodies(app.scene, gesture.group, (p, angle) => ({ x: p.x + dx, y: p.y + dy, angle }));
+      if (!snapBodies(gesture.group)) {
+        const gx = snapV(b0.x + dx, SNAP_POS) - b0.x - dx;
+        const gy = snapV(b0.y + dy, SNAP_POS) - b0.y - dy;
+        S.transformBodies(app.scene, gesture.group, (p, angle) => ({ x: p.x + gx, y: p.y + gy, angle }));
+      }
     }
 
     function applyRotate(w) {

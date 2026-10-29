@@ -439,21 +439,34 @@
     app.toast(`Cut ${cutName} out${removed ? `; ${removed} object${removed === 1 ? ' was' : 's were'} cut away completely` : ''}${pieces > baseIds.length ? '; some objects split into separate pieces' : ''}.`);
   };
 
-  app.duplicateSelection = function duplicateSelection() {
-    const sel = app.selection;
-    if (!sel || sel.type !== 'body') return;
-    const src = S.bodyById(app.scene, sel.id);
-    if (!src) return;
+  let clipboard = null;
+  let pasteCount = 0;
+  function insertCopy(fragment, offset) {
     app.edit(() => {
-      const copy = JSON.parse(JSON.stringify(src));
-      copy.id = S.newId(app.scene, 'b');
-      const base = src.name.replace(/\s+\d+$/, '');
-      copy.name = S.nextName(app.scene, base);
-      const e = S.extent(src);
-      copy.x = src.x + Math.max(0.3, e.x * 2 + 0.1);
-      app.scene.bodies.push(copy);
-      app.selection = { type: 'body', id: copy.id };
+      const added = S.pasteFragment(app.scene, fragment, offset);
+      app.selection = added.bodies.length ? { type: 'body', id: added.bodies[0] }
+        : added.links.length ? { type: 'link', id: added.links[0] } : null;
+      app.extra = added.bodies.slice(1);
     });
+  }
+  function copyOffset(fragment) {
+    if (!fragment.bodies.length) return 0;
+    const box = S.bounds({ bodies: fragment.bodies, links: [] });
+    return Math.max(0.3, Math.min(box.maxX - box.minX, box.maxY - box.minY) + 0.1);
+  }
+  app.copySelection = function copySelection() {
+    const fragment = S.copyFragment(app.scene, app.selection, app.extra, app.poseOf);
+    if (!fragment) return;
+    clipboard = fragment;
+    pasteCount = 0;
+    app.toast('Selection copied. Press Ctrl+V or Command+V to paste.');
+  };
+  app.pasteSelection = function pasteSelection() {
+    if (clipboard) insertCopy(clipboard, copyOffset(clipboard) * ++pasteCount);
+  };
+  app.duplicateSelection = function duplicateSelection() {
+    const fragment = S.copyFragment(app.scene, app.selection, app.extra, app.poseOf);
+    if (fragment) insertCopy(fragment, copyOffset(fragment));
   };
 
   app.rotateSelection = function rotateSelection(dir) {
@@ -782,7 +795,8 @@
     const k = e.key;
     if (mod && (k === 'z' || k === 'Z')) { e.preventDefault(); if (e.shiftKey) app.redo(); else app.undo(); return; }
     if (mod && (k === 'y' || k === 'Y')) { e.preventDefault(); app.redo(); return; }
-    if (mod && (k === 'd' || k === 'D')) { e.preventDefault(); app.duplicateSelection(); return; }
+    if (mod && k.toLowerCase() === 'c') { e.preventDefault(); app.copySelection(); return; }
+    if (mod && k.toLowerCase() === 'v') { e.preventDefault(); app.pasteSelection(); return; }
     if (mod) return;
     if (k === ' ') {
       if (tag === 'BUTTON') return;

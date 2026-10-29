@@ -210,6 +210,152 @@
     return true;
   }
 
+  function copyFragment(scene, selection, extra = [], poseOf = (b) => b) {
+    if (!selection) return null;
+    const ids = new Set(selection.type === 'body' ? [selection.id, ...extra] : []);
+    const bodies = scene.bodies.filter((b) => ids.has(b.id)).map((b) => ({ ...b, ...poseOf(b) }));
+    const links = scene.links.filter((l) => selection.type === 'link' ? l.id === selection.id
+      : (l.a || l.b) && (!l.a || ids.has(l.a)) && (!l.b || ids.has(l.b)));
+    const anchors = {};
+    links.forEach((l) => { anchors[l.id] = { a: endPoint(scene, l.a, l.la, poseOf), b: endPoint(scene, l.b, l.lb, poseOf) }; });
+    return JSON.parse(JSON.stringify({ bodies, links, anchors }));
+  }
+
+  function pasteFragment(scene, fragment, offset = 0.3) {
+    const f = JSON.parse(JSON.stringify(fragment));
+    const ids = new Map();
+    const bodies = [], links = [];
+    for (const b of f.bodies) {
+      const id = newId(scene, 'b'); ids.set(b.id, id); b.id = id;
+      b.name = nextName(scene, b.name.replace(/\s+\d+$/, ''));
+      b.x += offset; b.y += offset;
+      scene.bodies.push(b); bodies.push(id);
+    }
+    for (const l of f.links) {
+      const anchors = f.anchors[l.id];
+      for (const end of ['a', 'b']) {
+        if (ids.has(l[end])) l[end] = ids.get(l[end]);
+        else if (l[end] && bodyById(scene, l[end])) continue; // Connector-only copy retains attachments.
+        else { l[end] = null; const shift = f.bodies.length ? offset : 0; l['l' + end] = { x: anchors[end].x + shift, y: anchors[end].y + shift }; }
+      }
+      if (!l.a && !l.b) continue;
+      l.id = newId(scene, 'l');
+      l.name = nextName(scene, l.name.replace(/\s+\d+$/, ''));
+      scene.links.push(l); links.push(l.id);
+    }
+    return { bodies, links };
+  }
+
+  // Convex pieces keep contact snapping accurate for rotated and cut shapes too.
+  function contactParts(b) {
+    if (b.kind === 'ball') return [{ center: { x: b.x, y: b.y }, radius: b.r }];
+    const pieces = b.kind === 'custom'
+      ? PPM.shapes.decompose(b.paths).pieces.map((ring) => ring.map(([x, y]) => ({ x, y })))
+      : [vertices(b)];
+    return pieces.map((ring) => ({ points: ring.map((p) => toWorld(b, p)) }));
+  }
+
+  // Largest signed separating distance and its direction, from b toward a.
+  function contactSeparation(a, b) {
+    const axes = [];
+    for (const part of [a, b]) if (part.points) part.points.forEach((p, i) => {
+      const q = part.points[(i + 1) % part.points.length];
+      axes.push({ x: p.y - q.y, y: q.x - p.x });
+    });
+    if (a.center && b.center) axes.push({ x: a.center.x - b.center.x, y: a.center.y - b.center.y });
+    for (const [circle, poly] of [[a, b], [b, a]]) if (circle.center && poly.points) {
+      poly.points.forEach((p) => axes.push({ x: circle.center.x - p.x, y: circle.center.y - p.y }));
+    }
+    function project(part, n) {
+      if (part.center) {
+        const c = part.center.x * n.x + part.center.y * n.y;
+        return [c - part.radius, c + part.radius];
+      }
+      const values = part.points.map((p) => p.x * n.x + p.y * n.y);
+      return [Math.min(...values), Math.max(...values)];
+    }
+    let best = { distance: -Infinity, x: 1, y: 0 };
+    if (!axes.some((n) => Math.hypot(n.x, n.y) > 1e-12)) axes.push({ x: 1, y: 0 });
+    for (const axis of axes) {
+      const len = Math.hypot(axis.x, axis.y);
+      if (len < 1e-12) continue;
+      const n = { x: axis.x / len, y: axis.y / len };
+      const pa = project(a, n), pb = project(b, n);
+      const forward = pa[0] - pb[1], backward = pb[0] - pa[1];
+      const distance = Math.max(forward, backward);
+      if (distance > best.distance) best = { distance, x: n.x * (forward >= backward ? 1 : -1), y: n.y * (forward >= backward ? 1 : -1) };
+    }
+    return best;
+  }
+
+  function bodyBottom(b) {
+    return b.kind === 'ball' ? b.y - b.r : Math.min(...vertices(b).map((p) => toWorld(b, p).y));
+  }
+
+  // Return a small rigid translation to the nearest contact. Never snap through
+  // another object, into a cut shape's solid material, or away from the pointer.
+  function contactSnap(scene, ids, tolerance) {
+    const moving = scene.bodies.filter((b) => ids.has(b.id));
+    const fixed = scene.bodies.filter((b) => !ids.has(b.id));
+    const candidates = [];
+    const parts = new Map([...moving, ...fixed].map((b) => [b.id, contactParts(b)]));
+    const add = (x, y, body, target = null) => {
+      if (Math.hypot(x, y) <= tolerance) candidates.push({ x, y, body, target });
+    };
+    for (const a of moving) {
+      if (scene.world.floor) add(0, restGap(a) - bodyBottom(a), a.id);
+      for (const b of fixed) for (const pa of parts.get(a.id)) for (const pb of parts.get(b.id)) {
+        const sep = contactSeparation(pa, pb);
+        if (sep.distance > tolerance) continue;
+        add(-sep.distance * sep.x, -sep.distance * sep.y, a.id, b.id);
+        // Vertex-to-edge vectors also close diagonal corner gaps exactly.
+        if (pa.points && pb.points) for (const [from, to, sign] of [[pa, pb, 1], [pb, pa, -1]]) {
+          for (const p of from.points) to.points.forEach((v, i) => {
+            const q = to.points[(i + 1) % to.points.length];
+            const dx = q.x - v.x, dy = q.y - v.y;
+            const t = clamp(((p.x - v.x) * dx + (p.y - v.y) * dy) / (dx * dx + dy * dy || 1), 0, 1);
+            add(sign * (v.x + t * dx - p.x), sign * (v.y + t * dy - p.y), a.id, b.id);
+          });
+        }
+      }
+    }
+    // An existing contact (e.g. the floor) must not mask a nearby side contact.
+    candidates.sort((a, b) => {
+      const da = Math.hypot(a.x, a.y), db = Math.hypot(b.x, b.y);
+      return (da < 1e-9 ? Infinity : da) - (db < 1e-9 ? Infinity : db);
+    });
+    for (const d of candidates) {
+      if (Math.hypot(d.x, d.y) > tolerance) continue;
+      const shifted = moving.map((b) => ({ ...b, x: b.x + d.x, y: b.y + d.y }));
+      const source = shifted.find((a) => a.id === d.body);
+      const touches = d.target ? parts.get(d.target).some((pb) => contactParts(source).some((pa) => Math.abs(contactSeparation(pa, pb).distance) < 1e-8))
+        : Math.abs(bodyBottom(source) - restGap(source)) < 1e-8;
+      if (!touches) continue;
+      const valid = shifted.every((a) => (!scene.world.floor || bodyBottom(a) >= restGap(a) - 1e-8)
+        && fixed.every((b) => contactParts(a).every((pa) => parts.get(b.id).every((pb) => contactSeparation(pa, pb).distance >= -1e-8))));
+      if (valid) return d;
+    }
+    return null;
+  }
+
+  function closestSurface(b, p) {
+    if (b.kind === 'ball') {
+      const dx = p.x - b.x, dy = p.y - b.y, len = Math.hypot(dx, dy) || 1;
+      return { x: b.x + b.r * dx / len, y: b.y + b.r * dy / len };
+    }
+    const rings = b.kind === 'custom' ? b.paths.flat().map((ring) => ring.map(([x, y]) => ({ x, y }))) : [vertices(b)];
+    let best = null, distance = Infinity;
+    for (const ring of rings) ring.forEach((v, i) => {
+      const a = toWorld(b, v), c = toWorld(b, ring[(i + 1) % ring.length]);
+      const dx = c.x - a.x, dy = c.y - a.y;
+      const t = clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1), 0, 1);
+      const q = { x: a.x + t * dx, y: a.y + t * dy };
+      const dist = Math.hypot(q.x - p.x, q.y - p.y);
+      if (dist < distance) { best = q; distance = dist; }
+    });
+    return best;
+  }
+
   function bodyById(scene, id) {
     return scene.bodies.find((b) => b.id === id) || null;
   }
@@ -430,7 +576,7 @@
   PPM.scene = {
     FORMAT, VERSION, COLORS, COLOR_CYCLE, BODY_KINDS, LINK_KINDS, LIMITS,
     createScene, makeBody, makeLink, newId, nextName,
-    vertices, area, extent, toWorld, toLocal, containsPoint,
+    vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, closestSurface, copyFragment, pasteFragment,
     bodyById, linkById, endPoint, rigidGroup, transformBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp, REST_GAP, restGap
   };

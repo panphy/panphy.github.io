@@ -129,3 +129,43 @@ test('a fresh primary press recovers after a lost release; stale scenes cannot o
   h.emit('pointerdown'); h.app.scene = S.createScene(); h.hold();
   assert.equal(h.menus.length, 1);
 });
+
+test('dragging snaps surfaces before the grid, and Snap off retains free placement', () => {
+  for (const snap of [true, false]) {
+    const h = setup(); h.app.snap = snap; h.body.w = 1; h.body.h = 1;
+    const target = S.makeBody(h.app.scene, 'box', 2, 0); target.w = target.h = 1;
+    h.app.scene.bodies.push(target);
+    h.emit('pointerdown', { pointerType: 'mouse', clientX: 300 });
+    h.emit('pointermove', { pointerType: 'mouse', clientX: 403 });
+    h.emit('pointerup', { pointerType: 'mouse', clientX: 403 });
+    assert.ok(Math.abs(h.app.scene.bodies[0].x - (snap ? 1 : 1.03)) < 1e-8);
+  }
+});
+
+test('connector previews and placement snap to edges from outside the hit-test padding', () => {
+  const h = setup(); h.app.snap = true; h.body.w = h.body.h = 1;
+  h.ed.setTool('spring'); h.ed.cursorWorld = { x: 0.57, y: 0.2 };
+  const p = h.ed.preview().point;
+  assert.ok(Math.abs(p.x - 0.5) < 1e-8); assert.ok(Math.abs(p.y - 0.2) < 1e-8);
+  h.emit('pointerdown', { clientX: 357, clientY: 180, pointerType: 'mouse' });
+  h.emit('pointerup', { clientX: 357, clientY: 180, pointerType: 'mouse' });
+  assert.equal(h.ed.pending.a, h.body.id);
+  assert.ok(Math.abs(h.ed.pending.la.x - 0.5) < 1e-8);
+});
+
+test('placement preview and dropped bodies share precise contact and floor positions', () => {
+  const h = setup(); h.app.snap = true; h.body.w = h.body.h = 1;
+  h.ed.arm('box'); h.ed.cursorWorld = { x: 0.02, y: 0.79 };
+  const preview = h.ed.preview().body;
+  h.ed.placeBody('box', h.ed.cursorWorld);
+  const placed = h.app.scene.bodies.at(-1);
+  assert.ok(Math.abs(placed.x - preview.x) < 1e-8);
+  assert.ok(Math.abs(placed.y - preview.y) < 1e-8);
+  assert.ok(Math.abs(placed.y - placed.h / 2 - 0.5) < 1e-8);
+  h.app.scene.world.floor = true;
+  h.ed.cursorWorld = { x: 4, y: -1 };
+  const floorPreview = h.ed.preview().body;
+  h.ed.placeBody('box', h.ed.cursorWorld);
+  assert.ok(Math.abs(h.app.scene.bodies.at(-1).y - floorPreview.y) < 1e-8);
+  assert.ok(Math.abs(floorPreview.y - floorPreview.h / 2 - S.restGap(floorPreview)) < 1e-8);
+});

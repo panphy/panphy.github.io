@@ -226,7 +226,7 @@
       $('btn-undo').disabled = !app.canUndo();
       $('btn-redo').disabled = !app.canRedo();
       $('btn-delete').disabled = !sel;
-      $('btn-duplicate').disabled = !sel || sel.type !== 'body' || app.extra.length > 0;
+      $('btn-duplicate').disabled = !sel;
       $('btn-multi').setAttribute('aria-pressed', String(app.multiMode));
       $('btn-merge').disabled = $('btn-subtract').disabled = !app.canCombine();
       $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = !sel || sel.type !== 'body' || app.running || app.extra.length > 0;
