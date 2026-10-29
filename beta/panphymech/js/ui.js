@@ -144,27 +144,31 @@
         btn.addEventListener('pointerdown', (e) => {
           if (e.button !== 0) return;
           delete btn.dataset.suppressClick;
-          drag = { x: e.clientX, y: e.clientY, ghost: null, id: e.pointerId };
+          drag = { x: e.clientX, y: e.clientY, moved: false, ghost: null, id: e.pointerId };
           btn.setPointerCapture(e.pointerId);
         });
         btn.addEventListener('pointermove', (e) => {
           if (!drag || drag.id !== e.pointerId) return;
-          if (!drag.ghost && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
-            drag.ghost = document.createElement('div');
-            drag.ghost.className = 'drag-ghost';
-            drag.ghost.innerHTML = partSvg(kind);
-            document.body.appendChild(drag.ghost);
+          if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
+            drag.moved = true;
+            if (isBody) {
+              drag.ghost = document.createElement('div');
+              drag.ghost.className = 'drag-ghost';
+              drag.ghost.innerHTML = partSvg(kind);
+              document.body.appendChild(drag.ghost);
+            }
             ui.closePanels();
           }
           if (drag.ghost) drag.ghost.style.transform = `translate(${e.clientX - 32}px, ${e.clientY - 22}px)`;
+          if (drag.moved && !isBody) app.editor.previewConnectorDrop(kind, e.clientX, e.clientY);
         });
         const end = (e) => {
           if (!drag || drag.id !== e.pointerId) return;
           const d = drag;
           drag = null;
-          if (d.ghost) {
-            d.ghost.remove();
-            d.dropped = true;
+          if (d.moved) {
+            if (d.ghost) d.ghost.remove();
+            if (!isBody) app.editor.clearConnectorDropPreview();
             if (e.type === 'pointerup') {
               if (isBody) app.editor.dropBody(kind, e.clientX, e.clientY);
               else app.editor.dropConnector(kind, e.clientX, e.clientY);
