@@ -558,9 +558,7 @@
 
   // ---------- View ----------
 
-  let fitRequest = 0;
   app.cameraChanged = function cameraChanged() {
-    fitRequest++;
     needsDraw = true;
     $('zoom-readout').textContent = `${Math.round(app.scene.camera.scale)} px/m`;
     scheduleSave();
@@ -570,30 +568,21 @@
     app.editor.zoomAt(app.renderer.w / 2, app.renderer.h / 2, f);
   };
 
-  // Center the swept motion bounds, with a small, constant screen margin.
-  app.fit = async function fit(view) {
-    const request = ++fitRequest;
-    const signature = S.serialize(app.scene);
-    const cancelled = () => request !== fitRequest || signature !== S.serialize(app.scene);
-    const capture = app.sim && !app.simStale ? app.sim.capture() : null;
-    let fitted;
-    try {
-      fitted = view ? { box: view, far: [] } : await PPM.framing.motionBox(app.scene, capture, cancelled);
-    } catch (e) {
-      if (cancelled()) return;
-      fitted = S.fitBox(app.scene, app.poseOf);
-      app.toast('Motion preview unavailable; fitted the current scene.');
-    }
-    if (!fitted || cancelled()) return;
+  // Frame the scene (or a given box), with the floor near the bottom of the view.
+  app.fit = function fit(view) {
     const r = app.renderer;
+    const fitted = view ? { box: view, far: [] } : S.fitBox(app.scene, app.poseOf);
     const bb = fitted.box || { minX: -4, maxX: 4, minY: 0, maxY: 4 };
-    const w = Math.max(bb.maxX - bb.minX, 0.5);
-    const h = Math.max(bb.maxY - bb.minY, 0.5);
+    const minSpan = 3;
+    const w = Math.max(bb.maxX - bb.minX, minSpan);
+    const h = Math.max(bb.maxY - bb.minY, minSpan * 0.6);
+    const margin = 1.25;
     const cam = app.scene.camera;
-    const padding = Math.min(32, r.w * 0.08, r.h * 0.08);
-    cam.scale = S.clamp(Math.min((r.w - 2 * padding) / w, (r.h - 2 * padding) / h), 0.01, 600);
+    cam.scale = S.clamp(Math.min(r.w / (w * margin), r.h / (h * margin)), 4, 600);
     cam.cx = (bb.minX + bb.maxX) / 2;
-    cam.cy = (bb.minY + bb.maxY) / 2;
+    const viewH = r.h / cam.scale;
+    // With the floor in view, keep it near the bottom edge rather than mid-screen.
+    cam.cy = app.scene.world.floor && bb.minY >= -1e-9 && bb.minY <= 1e-9 ? viewH * 0.4 : (bb.minY + bb.maxY) / 2;
     app.cameraChanged();
     if (fitted.far.length) {
       const f = fitted.far;
