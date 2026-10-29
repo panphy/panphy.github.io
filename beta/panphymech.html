@@ -38,8 +38,10 @@
             <button type="button" id="btn-file" class="atool" data-icon="folder" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-file" title="Open, save and export"><span>File</span><svg class="icon icon-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
             <div id="menu-file" class="menu" role="menu" hidden>
               <button type="button" role="menuitem" data-file="open">Open file…</button>
-              <button type="button" role="menuitem" data-file="save">Save as file (.ppmech)</button>
+              <button type="button" role="menuitem" data-file="save">Save as file (.ppmech)…</button>
               <hr>
+              <button type="button" role="menuitem" data-file="svg">Export as SVG</button>
+              <button type="button" role="menuitem" data-file="panphymd">Export to PanPhyMD</button>
               <button type="button" role="menuitem" data-file="png">Export the scene as PNG</button>
             </div>
           </div>
@@ -103,7 +105,7 @@
           <div class="tool-group">
             <button type="button" id="btn-zoom-out" class="tool" data-icon="zoomOut" aria-label="Zoom out (−)" title="Zoom out (−)"></button>
             <button type="button" id="btn-zoom-in" class="tool" data-icon="zoomIn" aria-label="Zoom in (+)" title="Zoom in (+)"></button>
-            <button type="button" id="btn-fit" class="tool" data-icon="fit" aria-label="Fit the scene (0)" title="Fit the scene (0)"></button>
+            <button type="button" id="btn-fit" class="tool" data-icon="fit" aria-label="Fit the scene (0)" title="Fit the scene and motion preview (0)"></button>
             <button type="button" id="btn-snap" class="tool" data-icon="snap" aria-label="Snap to grid (G)" title="Snap to grid and 15° angles (G)" aria-pressed="true"></button>
             <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph position, velocity and energy against time" aria-pressed="true"></button>
           </div>
@@ -211,6 +213,7 @@
         <ul>
           <li>Play (Space) runs time; Reset returns to the start. Editing after time has run makes the current state the new start.</li>
           <li>While it runs, drag an object to pull it.</li>
+          <li>Fit centers the system and its predicted motion: ten seconds, extended for slow oscillations or long flights up to 60 seconds. Continuous travel can leave the view later; fit again as needed.</li>
           <li>The graph shows position, velocity or energy of the chosen object, a spring, or the whole system. Hover to read values. Export as CSV or open in PanPhyPlot to fit curves.</li>
         </ul>
       </section>
@@ -244,6 +247,8 @@
   <script src="panphymech/js/shapes.js"></script>
   <script src="panphymech/js/physics.js"></script>
   <script src="panphymech/js/examples.js"></script>
+  <script src="panphymech/js/svg.js"></script>
+  <script src="panphymech/js/framing.js"></script>
   <script src="panphymech/js/render.js"></script>
   <script src="panphymech/js/editor.js"></script>
   <script src="panphymech/js/graph.js"></script>

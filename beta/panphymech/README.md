@@ -14,12 +14,14 @@ Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rop
 | `js/shapes.js` | Custom shapes: outlines, merge (union) and subtract (difference), convex decomposition |
 | `js/physics.js` | Builds a Planck world from the scene; springs and air resistance as explicit forces; readings and energies |
 | `js/examples.js` | Example experiments, each built in code |
+| `js/svg.js` | Vector drawing context for SVG and PanPhyMD scene exports |
+| `js/framing.js` | Isolated physics preview for motion-aware fitting |
 | `js/render.js` | Canvas drawing: grid, floor, objects, connectors, trails, vectors, handles |
 | `js/editor.js` | Pointer interaction: placing, connecting, moving, rotating, resizing, moving and re-attaching connectors, the delete cross, right-click and touch-and-hold settings, grabbing, panning, zooming |
 | `js/graph.js` | The sample recorder, the time graph, CSV and PanPhyPlot export |
 | `js/ui.js`, `js/app.js` | Panels, inspector and quick settings; state, run loop, undo, autosave, fitting the view, files and shortcuts |
 
-Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They compare free fall, projectile range, spring and pendulum periods, an elastic collision, a block on a ramp and terminal velocity with textbook results, and run every example.
+Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They compare free fall, projectile range, spring and pendulum periods, an elastic collision, a block on a ramp and terminal velocity with textbook results, and run every example. Framing/export checks cover swept motion bounds, preview isolation and cancellation, vector output and escaped labels.
 
 ## Physics model
 
@@ -38,7 +40,9 @@ Merge and Subtract turn selected objects into a `custom` object whose `paths` ho
 
 ## Storage
 
-The scene autosaves to `panphy-mech-scene-v1` and display choices to `panphy-mech-prefs-v1` in browser storage. Files are `.ppmech` JSON with `format: "panphy-mech"`.
+The scene autosaves to `panphy-mech-scene-v1` and display choices to `panphy-mech-prefs-v1` in browser storage. Files are `.ppmech` JSON with `format: "panphy-mech"`. Save opens the browser’s filename/location picker where available and asks for a filename before downloading elsewhere. The File menu exports the current view as PNG or vector SVG, or sends an embedded SVG image to PanPhyMD; SVG exports omit editing controls and keep visible trails, labels and vectors.
+
+Fit centers the motion bounds with a small screen margin. A separate physics world previews ten seconds from the current state, extended to a pendulum/spring period or ballistic flight where needed (up to 60 seconds and 60,000 physics steps). Continuous travel and driven or chaotic motion can continue beyond that preview; fit again later as needed. Previewing does not advance the live simulation or graph. Suspended systems do not include a distant floor.
 
 ## Promoting it
 

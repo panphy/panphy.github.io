@@ -25,8 +25,8 @@
   const NICE = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500];
   const niceStep = (scale, px) => NICE.find((s) => s * scale >= px) || NICE[NICE.length - 1];
 
-  function createRenderer(app, canvas) {
-    const ctx = canvas.getContext('2d');
+  function createRenderer(app, canvas, context) {
+    const ctx = context || canvas.getContext('2d');
     const r = { canvas, ctx, w: 0, h: 0, dpr: 1, colors: {} };
 
     r.readColors = function readColors() {
@@ -411,8 +411,8 @@
     }
 
     function drawLink(l) {
-      const sel = app.isSelected('link', l.id);
-      const hov = app.hover && app.hover.type === 'link' && app.hover.id === l.id;
+      const sel = !r.exporting && app.isSelected('link', l.id);
+      const hov = !r.exporting && app.hover && app.hover.type === 'link' && app.hover.id === l.id;
       const [pa, pb] = linkEnds(l);
       const color = sel ? r.colors.accent : hov ? r.colors.ink : r.colors.link;
       if (l.kind === 'hinge' || l.kind === 'weld') { drawHinge(l, pa, sel || hov); return; }
@@ -633,7 +633,7 @@
       ctx.fill();
     }
 
-    r.draw = function draw() {
+    r.draw = function draw(clean = false) {
       if (!r.colors.bg) r.readColors();
       ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
       ctx.fillStyle = r.colors.bg;
@@ -644,7 +644,7 @@
       if (app.display.trails) drawTrails();
       app.scene.bodies.forEach(drawBody);
       // Hover and selection outlines sit on top of every object.
-      app.scene.bodies.forEach((b) => {
+      if (!clean) app.scene.bodies.forEach((b) => {
         if (app.isSelected('body', b.id)) outline(b, r.colors.accent, 2.6);
         else if (app.hover && app.hover.type === 'body' && app.hover.id === b.id) outline(b, r.colors.accent, 1.3);
       });
@@ -652,7 +652,7 @@
       app.scene.links.filter((l) => l.kind === 'hinge' || l.kind === 'weld').forEach(drawLink);
       if (app.display.vectors) drawVectors();
       if (app.display.labels) drawLabels();
-      const sel = app.selection;
+      const sel = clean ? null : app.selection;
       if (sel && sel.type === 'body' && app.canEditGeometry() && !app.extra.length) {
         const b = S.bodyById(app.scene, sel.id);
         if (b) drawHandles(b);
@@ -661,9 +661,19 @@
         const l = S.linkById(app.scene, sel.id);
         if (l) drawLinkHandles(l);
       }
-      drawDeleteButton();
-      drawGrab();
-      drawPreview();
+      if (!clean) {
+        drawDeleteButton();
+        drawGrab();
+        drawPreview();
+      }
+    };
+
+    r.exportSvg = function exportSvg() {
+      const svg = PPM.svg.createContext(r.w, r.h);
+      const copy = createRenderer(app, canvas, svg);
+      Object.assign(copy, { w: r.w, h: r.h, dpr: 1, colors: r.colors, exporting: true });
+      copy.draw(true);
+      return svg.serialize();
     };
 
     r.niceStep = niceStep;

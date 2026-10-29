@@ -492,7 +492,7 @@
     function zoomAt(sx, sy, factor) {
       const camr = app.scene.camera;
       const before = rr().toWorld(sx, sy);
-      camr.scale = S.clamp(camr.scale * factor, 4, 1500);
+      camr.scale = S.clamp(camr.scale * factor, 0.01, 1500);
       const after = rr().toWorld(sx, sy);
       camr.cx += before.x - after.x;
       camr.cy += before.y - after.y;
