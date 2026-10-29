@@ -11,7 +11,7 @@
   const DRAG_START_PX = 4;
 
   const HINTS = {
-    select: 'Drag an object to move it. While the simulation runs, drag to pull it. Drag empty space to pan; scroll or pinch to zoom.',
+    select: 'Drag an object or a connector to move it; a selected connector has end handles. While the simulation runs, drag to pull. Drag empty space to pan.',
     spring: 'Spring: click the first end on an object or the background, then the second end.',
     rod: 'Rod: click the first end on an object or the background, then the second end. A rod keeps its length.',
     rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack.',
@@ -379,16 +379,36 @@
       return null;
     }
 
-    // Moving a spring, rod or rope by its middle moves the ends fixed to the background.
-    function applyLinkMove(w) {
-      restoreOrig();
+    // Dragging a spring, rod or rope by its line picks the whole connector up: both ends
+    // follow the pointer, and on release each attaches to whatever is under it.
+    function movedEnds(w) {
       const l = S.linkById(app.scene, gesture.linkId);
-      if (!l) return;
       const dx = snapV(w.x - gesture.startWorld.x, SNAP_POS);
       const dy = snapV(w.y - gesture.startWorld.y, SNAP_POS);
-      if (!l.a) l.la = { x: l.la.x + dx, y: l.la.y + dy };
-      if (!l.b) l.lb = { x: l.lb.x + dx, y: l.lb.y + dy };
+      const pa = S.endPoint(app.scene, l.a, l.la, app.poseOf);
+      const pb = S.endPoint(app.scene, l.b, l.lb, app.poseOf);
+      return { l, a: { x: pa.x + dx, y: pa.y + dy }, b: { x: pb.x + dx, y: pb.y + dy } };
+    }
+
+    function applyLinkMove(w) {
+      restoreOrig();
+      if (!S.linkById(app.scene, gesture.linkId)) return;
+      const { l, a, b } = movedEnds(w);
+      l.a = null; l.la = a;
+      l.b = null; l.lb = b;
+    }
+
+    function finishLinkMove(w) {
+      restoreOrig();
+      const { l, a, b } = movedEnds(w);
+      const ta = endTarget(a);
+      const tb = endTarget(b);
+      if (!ta.body && !tb.body) return 'Drop at least one end of the connector on an object.';
+      if (ta.body && tb.body && ta.body.id === tb.body.id) return 'The two ends would land on the same object.';
+      l.a = ta.body ? ta.body.id : null; l.la = ta.local;
+      l.b = tb.body ? tb.body.id : null; l.lb = tb.local;
       if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      return null;
     }
 
     // A hinge, motor or glue joint dropped somewhere joins whatever is under it there.
@@ -626,8 +646,8 @@
       clearHold();
       const g = gesture;
       const w = rr().toWorld(localPoint(e).x, localPoint(e).y);
-      if (g.moved && (g.kind === 'linkEnd' || g.kind === 'jointMove')) {
-        const problem = g.kind === 'linkEnd' ? finishLinkEnd(w) : finishJointMove(w);
+      if (g.moved && (g.kind === 'linkEnd' || g.kind === 'jointMove' || g.kind === 'linkMove')) {
+        const problem = g.kind === 'linkEnd' ? finishLinkEnd(w) : g.kind === 'linkMove' ? finishLinkMove(w) : finishJointMove(w);
         gesture = null;
         if (problem) { app.cancelGesture(); app.toast(problem); } else app.endGesture(true);
         app.requestDraw();
@@ -636,7 +656,7 @@
       gesture = null;
       if (g.kind === 'grab') app.sim.release();
       if (g.kind === 'pan' && !g.moved && g.deselect) app.select(null);
-      if (['move', 'rotate', 'resize', 'linkMove'].includes(g.kind) && g.moved) app.endGesture(true);
+      if (['move', 'rotate', 'resize'].includes(g.kind) && g.moved) app.endGesture(true);
       app.requestDraw();
     }
 
