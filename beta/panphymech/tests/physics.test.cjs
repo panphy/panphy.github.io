@@ -203,3 +203,66 @@ test('fitting the view leaves out an object far from the rest', () => {
   assert.deepEqual(far.map((f) => f.name), ['Runaway']);
   assert.ok(box.maxX < 10 && box.minY === 0, JSON.stringify(box));
 });
+
+// ---------- Merged and cut shapes ----------
+
+globalThis.earcut = require(path.join(__dirname, '../js/vendor/earcut.min.js'));
+globalThis.polygonClipping = require(path.join(__dirname, '../js/vendor/polygon-clipping.min.js'));
+require(path.join(__dirname, '../js/shapes.js'));
+const SH = globalThis.PPM.shapes;
+
+function customFrom(scene, multi, props = {}) {
+  const placed = SH.placeOutline(multi);
+  const b = S.makeBody(scene, 'box', 0, 0);
+  ['w', 'h'].forEach((k) => delete b[k]);
+  Object.assign(b, placed, props);
+  delete b.area;
+  scene.bodies.push(b);
+  return b;
+}
+
+test('merging two overlapping boxes gives the union area, total mass and the right centroid', () => {
+  const scene = emptyScene();
+  const a = S.makeBody(scene, 'box', 0, 0); a.w = 2; a.h = 1;
+  const b = S.makeBody(scene, 'box', 1, 0.5); b.w = 1; b.h = 2;
+  const multi = SH.union([a, b]);
+  const placed = SH.placeOutline(multi);
+  // The boxes overlap where x is 0.5 to 1 and y is −0.5 to 0.5, so the union is 2 + 2 − 0.5 m².
+  assert.ok(Math.abs(placed.area - 3.5) < 1e-9, `area ${placed.area}`);
+  const m = customFrom(scene, multi, { mass: 3 });
+  const sim = P.createSim(scene);
+  const pb = sim.bodies.get(m.id);
+  assert.ok(Math.abs(pb.getMass() - 3) < 1e-9, `mass ${pb.getMass()}`);
+  assert.ok(Math.hypot(pb.getLocalCenter().x, pb.getLocalCenter().y) < 1e-6, 'centroid at the body origin');
+});
+
+test('a hollow box cut with subtract holds a ball inside it', () => {
+  const scene = emptyScene(true);
+  const outer = S.makeBody(scene, 'box', 0, 1.015); outer.w = 2; outer.h = 2;
+  const inner = S.makeBody(scene, 'box', 0, 1.1); inner.w = 1.6; inner.h = 1.6;
+  const frame = SH.difference(outer, inner);
+  assert.equal(frame.length, 1);
+  assert.equal(frame[0].length, 2, 'outer ring and one hole');
+  const box = customFrom(scene, frame, { mass: 5 });
+  const ball = S.makeBody(scene, 'ball', 0, 1.5); ball.r = 0.2; ball.vx = 6; ball.restitution = 0.8;
+  scene.bodies.push(ball);
+  const sim = P.createSim(scene);
+  for (let i = 0; i < 240 * 3; i++) {
+    sim.step();
+    const r = sim.readBody(ball.id);
+    const bx = sim.readBody(box.id);
+    assert.ok(Math.abs(r.x - bx.x) < 0.8 && r.y - bx.y < 0.8 && r.y - bx.y > -0.8, `ball escaped at t = ${sim.t.toFixed(2)}`);
+  }
+});
+
+test('custom shapes survive saving and opening', () => {
+  const scene = emptyScene();
+  const ring = SH.difference(Object.assign(S.makeBody(scene, 'ball', 0, 2), { r: 1 }), Object.assign(S.makeBody(scene, 'ball', 0, 2), { r: 0.7 }));
+  customFrom(scene, ring, { name: 'Ring' });
+  const { scene: back, skipped } = S.parse(S.serialize(scene));
+  assert.equal(skipped, 0);
+  const r = back.bodies.find((b) => b.name === 'Ring');
+  assert.ok(r && r.kind === 'custom' && Math.abs(S.area(r) - Math.PI * (1 - 0.49)) < 0.02, 'ring area');
+  assert.ok(!S.containsPoint(r, { x: 0, y: 2 }), 'the hole is empty');
+  assert.ok(S.containsPoint(r, { x: 0.85, y: 2 }), 'the ring is solid');
+});

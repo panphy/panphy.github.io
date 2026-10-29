@@ -62,6 +62,17 @@
         ctx.arc(c.x, c.y, b.r * s, 0, Math.PI * 2);
         return;
       }
+      if (b.kind === 'custom') {
+        // Every ring of every polygon; filled with the even–odd rule, holes stay open.
+        b.paths.forEach((poly) => poly.forEach((ring) => {
+          ring.forEach(([x, y], i) => {
+            const q = r.toScreen(S.toWorld(pose, { x, y }));
+            if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+          });
+          ctx.closePath();
+        }));
+        return;
+      }
       S.vertices(b).forEach((p, i) => {
         const q = r.toScreen(S.toWorld(pose, p));
         if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
@@ -168,7 +179,7 @@
     function hatch(b, pose, color) {
       ctx.save();
       bodyPath(b, pose);
-      ctx.clip();
+      ctx.clip('evenodd');
       ctx.strokeStyle = color;
       ctx.globalAlpha = 0.35;
       ctx.lineWidth = 1.2;
@@ -187,7 +198,7 @@
       const s = cam().scale;
       bodyPath(b, pose);
       ctx.fillStyle = col.fill;
-      ctx.fill();
+      ctx.fill('evenodd');
       if (b.fixed) hatch(b, pose, col.stroke);
       bodyPath(b, pose);
       ctx.lineJoin = 'round';
@@ -620,7 +631,7 @@
       if (app.display.vectors) drawVectors();
       if (app.display.labels) drawLabels();
       const sel = app.selection;
-      if (sel && sel.type === 'body' && app.canEditGeometry()) {
+      if (sel && sel.type === 'body' && app.canEditGeometry() && !app.extra.length) {
         const b = S.bodyById(app.scene, sel.id);
         if (b) drawHandles(b);
       }

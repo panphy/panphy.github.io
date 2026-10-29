@@ -9,7 +9,9 @@ Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rop
 | File | Role |
 | --- | --- |
 | `js/vendor/planck.min.js` | [Planck.js](https://github.com/piqnt/planck.js) 1.5.0 (MIT, `planck-LICENSE.txt`), a JavaScript port of Box2D |
+| `js/vendor/polygon-clipping.min.js`, `js/vendor/earcut.min.js` | [polygon-clipping](https://github.com/mfogel/polygon-clipping) 0.15.7 (MIT) for outline union and difference; [earcut](https://github.com/mapbox/earcut) 3.2.4 (ISC) for triangulation |
 | `js/scene.js` | The document: objects and connectors, geometry, rigid groups for editing, file validation |
+| `js/shapes.js` | Custom shapes: outlines, merge (union) and subtract (difference), convex decomposition |
 | `js/physics.js` | Builds a Planck world from the scene; springs and air resistance as explicit forces; readings and energies |
 | `js/examples.js` | Example experiments, each built in code |
 | `js/render.js` | Canvas drawing: grid, floor, objects, connectors, trails, vectors, handles |
@@ -28,6 +30,10 @@ Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They
 - Joints: rod = rigid distance joint, rope = rope joint (maximum length), hinge and motor = revolute joint (link end `a` turns relative to `b`; positive speed is counterclockwise; the inspector sets a direction, stored in `dir`, and a speed size, and `speed` keeps the signed value), glue = weld joint. A connector end with no object is fixed to the background at a world point.
 - Gravitational energy is m g (y − y₀), with y₀ set in the World card (0 by default). Energies cover moving objects only.
 - The recorder samples every moving object and spring each 0.01 s of simulated time, halving its rate after 24 000 samples, so the graph can switch objects after a run.
+
+## Merged and cut shapes
+
+Merge and Subtract turn selected objects into a `custom` object whose `paths` hold its outline: polygons of `[x, y]` rings (outer ring first, then holes), in local coordinates about the centroid. Circles become 24–64-sided polygons. For the engine, each outline is triangulated with earcut and neighbouring triangles are merged back into convex pieces of at most 8 corners (Hertel–Mehlhorn); every piece is a fixture of one rigid body, with density = mass / area. A merged shape takes the total mass and the first object's settings, and is fixed if any part was. Subtract cuts the object picked last out of each of the others and removes it; a part that splits apart becomes several objects sharing its mass by area. Connector ends keep their world positions on the new shapes. Objects can catch slightly on the seams between pieces, and very thin walls can let fast objects through.
 
 ## Storage
 

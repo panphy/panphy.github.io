@@ -83,6 +83,7 @@
         <div class="pane-toolbar toolbar" role="toolbar" aria-label="Tools">
           <div class="tool-group">
             <button type="button" class="tool" data-tool="select" data-icon="select" aria-label="Select and move (V)" title="Select and move (V)"></button>
+            <button type="button" id="btn-multi" class="tool" data-icon="multi" aria-pressed="false" aria-label="Select several (or Shift-click)" title="Select several: click objects to add them (or Shift-click)"></button>
             <button type="button" class="tool" data-tool="pan" data-icon="pan" aria-label="Pan (H)" title="Pan (H)"></button>
           </div>
           <div class="tool-group">
@@ -94,6 +95,10 @@
             <button type="button" id="btn-rotate" class="tool" data-icon="rotate" aria-label="Rotate 15° clockwise (R)" title="Rotate 15° clockwise (R)"></button>
             <button type="button" id="btn-duplicate" class="tool" data-icon="duplicate" aria-label="Duplicate (Ctrl+D)" title="Duplicate (Ctrl+D)"></button>
             <button type="button" id="btn-delete" class="tool" data-icon="cross" aria-label="Delete (Del)" title="Delete (Del)"></button>
+          </div>
+          <div class="tool-group">
+            <button type="button" id="btn-merge" class="tool" data-icon="merge" aria-label="Merge the selected objects" title="Merge: join the selected objects into one shape"></button>
+            <button type="button" id="btn-subtract" class="tool" data-icon="subtract" aria-label="Subtract the last selected object" title="Subtract: cut the last selected object out of the others"></button>
           </div>
           <div class="tool-group">
             <button type="button" id="btn-zoom-out" class="tool" data-icon="zoomOut" aria-label="Zoom out (−)" title="Zoom out (−)"></button>
@@ -186,6 +191,7 @@
           <li>Click a part, then click the scene. Drag a part in to drop it where you want. Hold Shift to place several.</li>
           <li>Drag an object to move it. Use the round handle above it to rotate and the square handle to resize.</li>
           <li>Hinged and glued objects move together while you edit.</li>
+          <li>Shift-click (or use Select several) to pick several objects. <strong>Merge</strong> joins them into one rigid shape; <strong>Subtract</strong> cuts the last one you picked out of the others, so you can make cups, rings and hollow boxes.</li>
           <li>Right-click an object or connector, or touch and hold it, for its main settings. The small cross deletes the selection.</li>
           <li>Drag empty space to pan; scroll, pinch or use + and − to zoom.</li>
         </ul>
@@ -231,7 +237,10 @@
   <input type="file" id="file-input" accept=".ppmech,.json,application/json" hidden>
 
   <script src="panphymech/js/vendor/planck.min.js"></script>
+  <script src="panphymech/js/vendor/polygon-clipping.min.js"></script>
+  <script src="panphymech/js/vendor/earcut.min.js"></script>
   <script src="panphymech/js/scene.js"></script>
+  <script src="panphymech/js/shapes.js"></script>
   <script src="panphymech/js/physics.js"></script>
   <script src="panphymech/js/examples.js"></script>
   <script src="panphymech/js/render.js"></script>

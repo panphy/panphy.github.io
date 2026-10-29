@@ -29,6 +29,11 @@
       const density = b.mass / Math.max(S.area(b), 1e-9);
       const opts = { density, friction: b.friction, restitution: b.restitution };
       if (b.kind === 'ball') return pb.createFixture(new pl.Circle(b.r), opts);
+      // A custom shape is one rigid body made of its convex pieces.
+      if (b.kind === 'custom') {
+        PPM.shapes.decompose(b.paths).pieces.forEach((piece) => pb.createFixture(new pl.Polygon(piece.map(([x, y]) => pl.Vec2(x, y))), opts));
+        return pb.getFixtureList();
+      }
       return pb.createFixture(new pl.Polygon(S.vertices(b).map((p) => pl.Vec2(p.x, p.y))), opts);
     }
 
@@ -290,15 +295,12 @@
     sim.updateBody = function updateBody(b) {
       const pb = bodies.get(b.id);
       if (!pb) return;
-      const f = pb.getFixtureList();
-      if (f) {
+      for (let f = pb.getFixtureList(); f; f = f.getNext()) {
         f.setFriction(b.friction);
         f.setRestitution(b.restitution);
-        if (!b.fixed) {
-          f.setDensity(b.mass / Math.max(S.area(b), 1e-9));
-          pb.resetMassData();
-        }
+        if (!b.fixed) f.setDensity(b.mass / Math.max(S.area(b), 1e-9));
       }
+      if (!b.fixed) pb.resetMassData();
       refreshContacts();
       chooseStep();
     };

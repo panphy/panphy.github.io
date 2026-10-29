@@ -24,6 +24,8 @@
     simStale: false,
     recorder: G.createRecorder(),
     selection: null,
+    extra: [], // further selected objects, in the order they were picked
+    multiMode: false,
     hover: null,
     running: false,
     speed: 1,
@@ -67,7 +69,9 @@
     const r = app.sim.readBody(b.id);
     return r ? { vx: r.vx, vy: r.vy } : null;
   };
-  app.isSelected = (type, id) => !!(app.selection && app.selection.type === type && app.selection.id === id);
+  app.isSelected = (type, id) => !!(app.selection && app.selection.type === type && app.selection.id === id) || (type === 'body' && app.extra.includes(id));
+  // Selected objects in the order they were picked (the first is the primary selection).
+  app.selectedBodies = () => (app.selection && app.selection.type === 'body' ? [app.selection.id] : []).concat(app.extra);
   app.canEditGeometry = () => !app.running;
 
   let needsDraw = true;
@@ -94,6 +98,7 @@
     app.scene.links = app.scene.links.filter((l) => (!l.a || ids.has(l.a)) && (!l.b || ids.has(l.b)) && (l.a || l.b));
     const exists = (sel) => sel && (sel.type === 'body' ? !!S.bodyById(app.scene, sel.id) : sel.type === 'link' ? !!S.linkById(app.scene, sel.id) : true);
     if (app.selection && !exists(app.selection)) app.selection = null;
+    app.extra = app.extra.filter((id) => S.bodyById(app.scene, id) && app.selection && app.selection.type === 'body');
     if (app.track.type !== 'system') {
       const ok = app.track.type === 'body'
         ? (() => { const b = S.bodyById(app.scene, app.track.id); return b && !b.fixed; })()
@@ -256,6 +261,7 @@
     const prev = app.selection;
     if (!sel || !prev || sel.type !== prev.type || sel.id !== prev.id) app.ui.closeQuick();
     app.selection = sel;
+    app.extra = [];
     if (sel) {
       const b = sel.type === 'body' ? S.bodyById(app.scene, sel.id) : null;
       const l = sel.type === 'link' ? S.linkById(app.scene, sel.id) : null;
@@ -286,10 +292,148 @@
   app.deleteSelection = function deleteSelection() {
     const sel = app.selection;
     if (!sel) return;
+    const ids = app.selectedBodies();
     app.edit(() => {
-      if (sel.type === 'body') S.removeBody(app.scene, sel.id); else S.removeLink(app.scene, sel.id);
+      if (sel.type === 'body') ids.forEach((id) => S.removeBody(app.scene, id)); else S.removeLink(app.scene, sel.id);
       app.selection = null;
+      app.extra = [];
     });
+  };
+
+  // Add an object to the selection, or take it out again.
+  app.toggleInSelection = function toggleInSelection(id) {
+    const sel = app.selection;
+    if (!sel || sel.type !== 'body') { app.select({ type: 'body', id }); return; }
+    if (sel.id === id) {
+      if (app.extra.length) { app.selection = { type: 'body', id: app.extra.shift() }; } else { app.select(null); return; }
+    } else if (app.extra.includes(id)) {
+      app.extra = app.extra.filter((x) => x !== id);
+    } else {
+      app.extra.push(id);
+    }
+    app.ui.closeQuick();
+    app.ui.renderInspector();
+    app.ui.syncToolbar();
+    needsDraw = true;
+  };
+
+  app.setMultiMode = function setMultiMode(on) {
+    app.multiMode = on;
+    app.ui.syncToolbar();
+    app.setHint(on ? 'Select several: click objects to add or remove them. Then merge, subtract, move or delete them together.' : app.editor.HINTS.select);
+  };
+
+  // ---------- Merge and subtract ----------
+
+  // Move connector ends from old objects onto new ones, keeping their world positions.
+  // pick(worldPoint, oldId) gives the new object for that end, or null to drop the connector.
+  function remapLinks(oldBodies, pick) {
+    const old = new Map(oldBodies.map((b) => [b.id, b]));
+    const keep = [];
+    app.scene.links.forEach((l) => {
+      let ok = true;
+      ['a', 'b'].forEach((end) => {
+        const id = l[end];
+        if (!id || !old.has(id)) return;
+        const w = S.toWorld(old.get(id), l['l' + end]);
+        const nb = pick(w, id);
+        if (!nb) { ok = false; return; }
+        l[end] = nb.id;
+        l['l' + end] = S.toLocal(nb, w);
+      });
+      if (ok && l.a && l.a === l.b) ok = false; // both ends now on one object
+      if (ok) keep.push(l);
+    });
+    app.scene.links = keep;
+  }
+
+  const SHAPE_FIELDS = ['w', 'h', 'r', 'sides', 'flip', 'paths'];
+  function asCustom(b, placed) {
+    SHAPE_FIELDS.forEach((k) => delete b[k]);
+    return Object.assign(b, { kind: 'custom', x: placed.x, y: placed.y, angle: 0, paths: placed.paths });
+  }
+
+  app.canCombine = () => app.selectedBodies().length >= 2 && !app.running;
+
+  app.mergeSelection = function mergeSelection() {
+    if (!app.canCombine()) return;
+    const ids = app.selectedBodies();
+    const check = PPM.shapes.placeOutline(PPM.shapes.union(ids.map((id) => S.bodyById(app.scene, id)), app.poseOf));
+    if (!check) { app.toast('These objects could not be merged.'); return; }
+    let name = '';
+    let apart = false;
+    app.edit(() => {
+      const bodies = ids.map((id) => S.bodyById(app.scene, id));
+      const olds = bodies.map((b) => JSON.parse(JSON.stringify(b)));
+      const multi = PPM.shapes.union(bodies);
+      apart = multi.length > 1;
+      const placed = PPM.shapes.placeOutline(multi);
+      const primary = bodies[0];
+      const fixed = bodies.some((b) => b.fixed);
+      const mass = bodies.reduce((s, b) => s + b.mass, 0);
+      asCustom(primary, placed);
+      primary.mass = mass;
+      primary.fixed = fixed;
+      if (fixed) primary.color = 'slate';
+      primary.name = name = S.nextName({ bodies: app.scene.bodies.filter((b) => !ids.includes(b.id)), links: app.scene.links }, 'Shape');
+      app.scene.bodies = app.scene.bodies.filter((b) => b === primary || !ids.includes(b.id));
+      remapLinks(olds, () => primary);
+      app.selection = { type: 'body', id: primary.id };
+      app.extra = [];
+    });
+    app.toast(apart ? `Merged into ${name}. The parts do not touch, but they now move as one rigid object.` : `Merged ${ids.length} objects into ${name}.`);
+  };
+
+  app.subtractSelection = function subtractSelection() {
+    if (!app.canCombine()) return;
+    const ids = app.selectedBodies();
+    const cutterId = ids[ids.length - 1];
+    const baseIds = ids.slice(0, -1);
+    const cutterNow = S.bodyById(app.scene, cutterId);
+    const touches = baseIds.some((id) => {
+      const b = S.bodyById(app.scene, id);
+      return Math.abs(PPM.shapes.outlineArea(PPM.shapes.difference(b, cutterNow, app.poseOf)) - S.area(b)) > 1e-6 * Math.max(1, S.area(b));
+    });
+    if (!touches) { app.toast(`${cutterNow.name} (selected last) does not overlap the other objects, so there is nothing to cut.`); return; }
+    const cutName = cutterNow.name;
+    let removed = 0;
+    let pieces = 0;
+    app.edit(() => {
+      const cutter = S.bodyById(app.scene, cutterId);
+      baseIds.forEach((id) => {
+        const base = S.bodyById(app.scene, id);
+        const before = S.area(base);
+        const multi = PPM.shapes.difference(base, cutter);
+        const after = PPM.shapes.outlineArea(multi);
+        if (Math.abs(after - before) <= 1e-6 * Math.max(1, before)) return;
+        const old = JSON.parse(JSON.stringify(base));
+        const parts = multi.map((poly) => PPM.shapes.placeOutline([poly])).filter(Boolean);
+        if (!parts.length) { S.removeBody(app.scene, id); removed++; return; }
+        // The largest part keeps the object (its name, id and connectors); others become new objects.
+        parts.sort((p, q) => q.area - p.area);
+        const total = parts.reduce((s, p) => s + p.area, 0);
+        const made = [];
+        parts.forEach((p, i) => {
+          let b = base;
+          if (i > 0) {
+            b = JSON.parse(JSON.stringify(old));
+            b.id = S.newId(app.scene, 'b');
+            b.name = S.nextName(app.scene, old.name.replace(/\s+\d+$/, ''));
+            app.scene.bodies.splice(app.scene.bodies.indexOf(base) + i, 0, b);
+          }
+          asCustom(b, p);
+          b.mass = old.mass * (p.area / total);
+          made.push(b);
+        });
+        pieces += made.length;
+        // Each connector end goes to the part under it, or the nearest part.
+        remapLinks([old], (w) => made.find((b) => S.containsPoint(b, w, 0.02)) || made.reduce((best, b) => (Math.hypot(b.x - w.x, b.y - w.y) < Math.hypot(best.x - w.x, best.y - w.y) ? b : best), made[0]));
+      });
+      S.removeBody(app.scene, cutterId);
+      app.selection = null;
+      app.extra = [];
+    });
+    app.toast(`Cut ${cutName} out${removed ? `; ${removed} object${removed === 1 ? ' was' : 's were'} cut away completely` : ''}${pieces > baseIds.length ? '; some objects split into separate pieces' : ''}.`);
   };
 
   app.duplicateSelection = function duplicateSelection() {

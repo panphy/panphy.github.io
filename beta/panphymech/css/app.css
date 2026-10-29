@@ -246,7 +246,7 @@ button, input, select { font: inherit; color: inherit; }
 .field { padding: 8px 0; }
 .field + .field, .field + .toggle, .toggle + .field, .toggle + .toggle { border-top: 1px solid var(--line); }
 .field-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.field-row > label { font-size: 0.86rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.field-row > label { min-width: 0; font-size: 0.86rem; font-weight: 600; line-height: 1.25; color: var(--ink); }
 .num { flex: 0 0 132px; display: flex; align-items: center; position: relative; }
 .num input { width: 100%; min-height: 38px; padding: 6px 44px 6px 10px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); font-family: var(--font-mono); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
 .num input:focus { outline: 2px solid var(--focus); border-color: var(--accent); }
@@ -412,3 +412,10 @@ button, input, select { font: inherit; color: inherit; }
 .quick-settings .choice-label { font-size: .72rem; font-weight: 500; color: var(--ink-2); }
 .quick-settings .seg button { min-height: 26px; padding: 1px 6px; }
 .quick-settings .seg button span { display: none; }
+
+/* Several selected objects. */
+.multi-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; counter-reset: pick; }
+.multi-list li { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 0.86rem; font-weight: 600; counter-increment: pick; }
+.multi-list li::before { content: counter(pick); width: 1.4em; color: var(--ink-3); font: 600 0.74rem var(--font-mono); text-align: right; }
+.multi-art svg { display: block; width: 36px; height: 25px; }
+.multi-tag { margin-left: auto; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font: 600 0.66rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
