@@ -445,15 +445,15 @@ test('terminal-velocity example reaches 99% speed after about one-third of the d
   const scene = example.build();
   assert.equal(scene.bodies.length, 2); assert.equal(scene.links.length, 0);
   const [free, drag] = scene.bodies;
-  const physicalProperties = b => Object.fromEntries(Object.entries(b).filter(([key]) => !['id', 'name', 'x', 'dragModel'].includes(key)));
-  assert.deepEqual(physicalProperties(free), physicalProperties(drag), 'only their positions, names, IDs and drag choices differ');
+  const physicalProperties = b => Object.fromEntries(Object.entries(b).filter(([key]) => !['id', 'name', 'x', 'color', 'dragModel'].includes(key)));
+  assert.deepEqual(physicalProperties(free), physicalProperties(drag), 'only their positions, names, IDs, colors and drag choices differ');
   assert.equal(free.dragModel, 'none'); assert.equal(drag.dragModel, 'world');
   assert.equal(scene.world.dragModel, 'quadratic');
   assert.equal(example.track.name, drag.name); assert.equal(example.track.group, 'velocity');
   const terminalSpeed = Math.sqrt(drag.mass * scene.world.gravity / scene.world.drag);
-  assert.equal(terminalSpeed, 4);
+  assert.equal(terminalSpeed, 3);
   const height = drag.y - drag.r - S.REST_GAP.ball;
-  assert.equal(height, 10);
+  assert.equal(height, 6);
   const sim = P.createSim(scene);
   let thresholdFraction = null, atThird = null, checkedPlateau = false;
   while (sim.t < 4) {

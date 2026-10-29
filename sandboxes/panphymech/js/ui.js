@@ -303,7 +303,7 @@
       if (!b) return;
       closeMenus(); app.select({ type: 'body', id: b.id });
       setPanel('inspector', true);
-      const select = $('inspector-body').querySelector('[data-drag-field="dragModel"]');
+      const select = $('inspector-body').querySelector('[data-drag-field="dragModel"]:checked');
       if (select) { select.closest('.icard').scrollIntoView({ block: 'start' }); select.focus({ preventScroll: true }); }
     });
     document.addEventListener('click', closeMenus);
@@ -426,28 +426,40 @@
       return wrap;
     }
 
+    // Drag model and its coefficient. World and objects share this layout; objects add a World option.
     function dragFields(get, isWorld = false) {
       const el = document.createElement('div');
       el.className = 'drag-fields';
+      const off = () => !isWorld && get().fixed;
       const set = (key, rerender = false) => (value, coalesce) => app.editParam(() => { get()[key] = value; }, coalesce, false, rerender);
-      function dropdown(label, key, options, current) {
-        const wrap = document.createElement('label');
-        wrap.className = 'field drag-select';
-        wrap.innerHTML = `<span>${esc(label)}</span><select data-drag-field="${key}" aria-label="${esc(label)}">${options.map(([value, text]) => `<option value="${value}">${esc(text)}</option>`).join('')}</select>`;
-        const select = wrap.querySelector('select');
-        select.value = current;
-        select.disabled = !isWorld && get().fixed;
-        select.addEventListener('change', () => {
-          set(key, true)(select.value);
-          const replacement = $('inspector-body').querySelector(`[data-drag-field="${key}"]`);
+      // A full-width segmented choice built from radios, so arrow keys move between options.
+      function segment(label, key, options, current) {
+        const name = 'r' + Math.random().toString(36).slice(2, 9);
+        const group = document.createElement('div');
+        group.className = options.length > 3 ? 'drag-seg is-compact' : 'drag-seg';
+        group.setAttribute('role', 'radiogroup');
+        group.setAttribute('aria-label', label);
+        group.style.setProperty('--n', options.length);
+        group.innerHTML = options.map(([value, text]) => `<label><input type="radio" name="${name}" value="${value}" data-drag-field="${key}"${value === current ? ' checked' : ''}${off() ? ' disabled' : ''}><span>${esc(text)}</span></label>`).join('');
+        group.addEventListener('change', (e) => {
+          set(key, true)(e.target.value);
+          const replacement = $('inspector-body').querySelector(`[data-drag-field="${key}"]:checked`);
           if (replacement) replacement.focus();
         });
-        el.appendChild(wrap);
+        return group;
       }
       const model = isWorld ? S.worldDragModel(app.scene) : S.objectDragModel(get());
-      dropdown(isWorld ? 'World drag model' : 'Object drag model', 'dragModel', [
-        ...(!isWorld ? [['world', 'Use World']] : []), ...Object.entries(S.DRAG_MODELS)
-      ], model);
+      // Match the physics: an older scene with only a viscosity uses Stokes.
+      const source = get().linearDragSource || (get().viscosity > 0 ? 'stokes' : 'coefficient');
+      // The force law sits beside the heading; it is left out for None, World and fixed objects.
+      const law = off() ? null : model === 'quadratic' ? ['F = kv^2', 'F = kv²'] : model !== 'linear' ? null : source === 'stokes' ? ['F = 6\\pi r\\eta v', 'F = 6πrηv'] : ['F = bv', 'F = bv'];
+      const head = document.createElement('div');
+      head.className = 'drag-head';
+      head.innerHTML = `<span class="choice-label">${isWorld ? 'Drag model' : 'Model'}</span>` + (law ? `<span class="drag-law">${mathText(`\\(${law[0]}\\)`, law[1])}</span>` : '');
+      el.appendChild(head);
+      el.appendChild(segment(isWorld ? 'World drag model' : 'Object drag model', 'dragModel', [
+        ...(!isWorld ? [['world', 'World']] : []), ...Object.entries(S.DRAG_MODELS)
+      ], model));
       if (!isWorld) {
         const note = document.createElement('p');
         const message = S.dragOverrideNote(app.scene, get());
@@ -457,21 +469,18 @@
         el.appendChild(note);
       }
       if (model === 'linear') {
-        const source = get().linearDragSource || 'coefficient';
-        dropdown('Linear drag calculation', 'linearDragSource', [['coefficient', 'Coefficient b'], ['stokes', 'Stokes viscosity η']], source);
+        const row = document.createElement('div');
+        row.className = 'choice-row drag-source';
+        row.innerHTML = '<span class="choice-label">Set by</span>';
+        row.appendChild(segment('Linear drag calculation', 'linearDragSource', [['coefficient', 'Coefficient b'], ['stokes', 'Viscosity η']], source));
+        el.appendChild(row);
         const field = source === 'stokes'
-          ? { label: 'Fluid viscosity \\(\\eta\\)', plain: 'Fluid viscosity η', unit: 'Pa·s', get: () => get().viscosity || 0, set: set('viscosity'), min: L.viscosity[0], max: L.viscosity[1], slider: L.viscosity, step: 0.001, help: 'Stokes calculation for spheres. Other shapes use an equal-area radius as an approximation. No automatic streamlining or buoyancy.' }
-          : { label: 'Linear coefficient \\(b\\)', plain: 'Linear coefficient b', unit: 'kg/s', get: () => get().linearDrag, set: set('linearDrag'), min: L.linearDrag[0], max: L.linearDrag[1], slider: [0, 10], step: 0.01, help: 'Resistance proportional to speed. 0 turns this drag off.' };
-        field.disabled = () => !isWorld && get().fixed;
+          ? { label: 'Fluid viscosity \\(\\eta\\)', plain: 'Fluid viscosity η', unit: 'Pa·s', get: () => get().viscosity || 0, set: set('viscosity'), min: L.viscosity[0], max: L.viscosity[1], slider: L.viscosity, step: 0.001, help: 'Stokes’ law for a sphere; other shapes use a sphere of equal area. No buoyancy.' }
+          : { label: 'Coefficient \\(b\\)', plain: 'Linear coefficient b', unit: 'kg/s', get: () => get().linearDrag, set: set('linearDrag'), min: L.linearDrag[0], max: L.linearDrag[1], slider: [0, 10], step: 0.01, help: 'Drag grows in proportion to speed.' };
+        field.disabled = off;
         el.appendChild(numField(field));
       } else if (model === 'quadratic') {
-        el.appendChild(numField({ label: 'Quadratic coefficient \\(k\\)', plain: 'Quadratic coefficient k', unit: 'kg/m', get: () => get().drag, set: set('drag'), min: L.drag[0], max: L.drag[1], slider: [0, 1], step: 0.001, disabled: () => !isWorld && get().fixed, help: 'Resistance proportional to speed squared. This coefficient includes the effects of the fluid and the object; 0 turns it off.' }));
-      }
-      if (model === 'linear' || model === 'quadratic') {
-        const law = document.createElement('p'); law.className = 'field-help';
-        const tex = model === 'quadratic' ? 'F = kv^2' : get().linearDragSource === 'stokes' ? 'F = 6\\pi r\\eta v' : 'F = bv';
-        law.innerHTML = mathText(`Drag force: \\(${tex}\\)`, 'Drag force: ' + (model === 'quadratic' ? 'F = kv²' : get().linearDragSource === 'stokes' ? 'F = 6πrηv' : 'F = bv'));
-        el.appendChild(law);
+        el.appendChild(numField({ label: 'Coefficient \\(k\\)', plain: 'Quadratic coefficient k', unit: 'kg/m', get: () => get().drag, set: set('drag'), min: L.drag[0], max: L.drag[1], slider: [0, 1], step: 0.001, disabled: off, help: 'Drag grows with speed squared. k combines the fluid with the object’s size and shape.' }));
       }
       return el;
     }
@@ -798,7 +807,7 @@
       main.appendChild(dragFields(w, true));
       main.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
       main.appendChild(numField({ label: 'Floor friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
-      main.appendChild(numField({ label: 'Zero of \\(E_\\mathrm{p}\\) at height', plain: 'Zero of gravitational energy at height', unit: 'm', get: () => w().gpeZero || 0, set: (v, key) => app.editParam(() => { w().gpeZero = v; }, key), min: L.coord[0], max: L.coord[1], help: 'Gravitational energy is measured from this height. The dashed line marks it when it is not 0.' }));
+      main.appendChild(numField({ label: '\\(E_\\mathrm{p} = 0\\) at height', plain: 'Zero of gravitational energy at height', unit: 'm', get: () => w().gpeZero || 0, set: (v, key) => app.editParam(() => { w().gpeZero = v; }, key), min: L.coord[0], max: L.coord[1], help: 'Gravitational energy is measured from here; a dashed line marks it when it is not 0.' }));
       const sys = readingsCard('System energy now', [
         { key: 'KE', label: 'Kinetic \\(E_\\mathrm{k}\\)', plain: 'Kinetic' }, { key: 'GPE', label: 'Gravitational \\(E_\\mathrm{p}\\)', plain: 'Gravitational' },
         { key: 'EPE', label: 'Elastic \\(E_\\mathrm{e}\\)', plain: 'Elastic' }, '-', { key: 'E', label: 'Total \\(E\\)', plain: 'Total' }
@@ -818,7 +827,7 @@
     ui.renderInspector = function renderInspector() {
       const body = $('inspector-body');
       const active = document.activeElement;
-      if (active && body.contains(active) && active.matches('input')) {
+      if (active && body.contains(active) && active.matches('input:not([type="radio"])')) {
         // Keep a field the user is typing in; refresh the others.
         ui.refreshFields();
         return;

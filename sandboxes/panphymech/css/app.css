@@ -434,13 +434,33 @@ button, input, select { font: inherit; color: inherit; }
 .graph-canvas { touch-action: none; cursor: crosshair; }
 .graph-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
-/* Amber notes match PanPhyCircuits and identify deliberate World drag overrides. */
-.drag-select { display: grid; gap: 7px; }
-.drag-select select { width: 100%; min-height: 48px; padding: 8px 10px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font: inherit; }
-.drag-override-note { margin: 8px 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, var(--surface)); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }
-.drag-notes-button { flex: none; min-height: 28px; padding: 3px 10px; border: 1px solid #F08C00; border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.drag-notes-pop { position: fixed; z-index: 60; right: max(12px, env(safe-area-inset-right)); bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 12px); width: min(390px, calc(100vw - 24px)); max-height: min(60vh, 520px); overflow-y: auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-2); padding: 12px; }
+/* Amber notes match PanPhyCircuits and identify deliberate World drag overrides.
+   The notes pill floats in the scene's top-right corner, so it never covers the status text. */
+/* Drag model: a full-width segmented choice with the force law beside its heading. */
+.drag-fields { padding: 10px 0 4px; }
+.field + .drag-fields, .preset-row + .drag-fields, .drag-fields + .field, .drag-fields + .toggle { border-top: 1px solid var(--line); }
+.drag-fields > .field { padding-bottom: 0; }
+.drag-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.drag-law { color: var(--ink-2); font-size: 0.84rem; white-space: nowrap; }
+.drag-seg { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 2px; padding: 3px; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--line); }
+.drag-seg label { position: relative; display: grid; cursor: pointer; }
+.drag-seg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: inherit; }
+.drag-seg span { display: grid; place-items: center; min-height: 36px; padding: 2px 6px; border: 1.5px solid transparent; border-radius: 999px; color: var(--ink-2); font-size: 0.78rem; font-weight: 650; text-align: center; line-height: 1.15; transition: color 0.15s, background-color 0.15s; }
+.drag-seg label:hover span { color: var(--ink); }
+/* The chosen option matches the pressed gravity chips: a spectrum outline on a solid fill. */
+.drag-seg input:checked + span { color: var(--ink); background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--spectrum) border-box; box-shadow: var(--shadow-1); }
+.drag-seg input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 1px; }
+.drag-seg.is-compact span { padding: 2px 1px; font-size: 0.72rem; letter-spacing: -0.01em; }
+.drag-seg input:disabled + span { opacity: 0.45; cursor: not-allowed; }
+.drag-source { margin-top: 10px; }
+.drag-source .drag-seg { flex: 0 1 220px; }
+.drag-fields .field-help, .drag-override-note { margin-top: 8px; }
+.drag-override-note { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, var(--surface)); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }
+.drag-notes-button { position: absolute; top: 10px; right: 10px; z-index: 5; height: 28px; padding: 0 12px; border: 1px solid #F08C00; border-radius: 999px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow-1); font: inherit; font-size: 0.76rem; font-weight: 700; line-height: 1; cursor: pointer; white-space: nowrap; }
+.drag-notes-pop { position: absolute; z-index: 6; top: 46px; right: 10px; width: min(390px, calc(100% - 20px)); max-height: calc(100% - 56px); overflow-y: auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-2); padding: 12px; }
 .drag-notes-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .drag-notes-pop ul { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; }
 .drag-notes-pop button { min-height: 48px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; color: var(--ink); background: var(--surface); cursor: pointer; }
 .drag-notes-pop li button { width: 100%; text-align: left; background: color-mix(in srgb, #F08C00 10%, var(--surface)); line-height: 1.45; }
+.drag-notes-button::before { content: ''; position: absolute; inset: -10px -6px; }
+@media (prefers-reduced-motion: reduce) { .drag-seg span { transition: none; } }

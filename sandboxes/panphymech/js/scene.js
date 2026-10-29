@@ -237,7 +237,7 @@
     if (b.fixed || objectDragModel(b) === 'world') return '';
     const model = effectiveDragModel(scene, b);
     const own = model === 'none' ? 'no drag' : `its own ${model} drag`;
-    return `${b.name} uses ${own} instead of World drag (${DRAG_MODELS[worldDragModel(scene)]}). Choose Use World to follow the shared settings.`;
+    return `${b.name} uses ${own} instead of World drag (${DRAG_MODELS[worldDragModel(scene)]}). Choose World to follow the shared settings.`;
   }
 
   function copyFragment(scene, selection, extra = [], poseOf = (b) => b) {
