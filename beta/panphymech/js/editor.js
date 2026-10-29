@@ -109,14 +109,19 @@
     // Screen positions of the selected object's rotate and resize handles.
     ed.handles = function handles(b) {
       const pose = app.poseOf(b);
-      const e = S.extent(b);
       const center = rr().toScreen(pose);
-      const s = app.scene.camera.scale;
-      const R = Math.hypot(e.x, e.y) * s;
-      const corner = b.kind === 'ball' ? { x: b.r * Math.SQRT1_2, y: -b.r * Math.SQRT1_2 } : b.kind === 'polygon' ? { x: e.x, y: -e.y } : { x: e.x, y: -e.y };
+      const box = screenBox(b);
+      // Resize from the lower-right corner of the shape's own box (a ramp's real corner).
+      let corner;
+      if (b.kind === 'ball') corner = { x: b.r * Math.SQRT1_2, y: -b.r * Math.SQRT1_2 };
+      else {
+        const v = S.vertices(b);
+        corner = { x: Math.max(...v.map((p) => p.x)), y: Math.min(...v.map((p) => p.y)) };
+      }
       return {
         center,
-        rotate: { x: center.x, y: center.y - R - 24 },
+        // Just above the object as drawn, however long or rotated it is.
+        rotate: { x: center.x, y: box.minY - 24 },
         resize: rr().toScreen(S.toWorld(pose, corner)),
         corner
       };
@@ -157,13 +162,12 @@
       if (sel.type === 'body') {
         const b = S.bodyById(app.scene, sel.id);
         if (!b) return null;
-        // Up and left of the object, and never closer to its center than 28 px, so small
-        // objects keep their rotate and resize handles clear.
+        // Just outside the upper-left corner of the object as drawn; small objects push it
+        // at least 22 px from their center so it stays clear of the other handles.
         const box = screenBox(b);
         const cx = (box.minX + box.maxX) / 2;
         const cy = (box.minY + box.maxY) / 2;
-        const d = Math.max(Math.hypot(box.maxX - box.minX, box.maxY - box.minY) / 2 + 6, 28) * Math.SQRT1_2;
-        p = { x: Math.min(box.minX - 6, cx - d), y: Math.min(box.minY - 6, cy - d) };
+        p = { x: Math.min(box.minX - 8, cx - 22), y: Math.min(box.minY - 8, cy - 22) };
       } else {
         const l = S.linkById(app.scene, sel.id);
         if (!l) return null;
