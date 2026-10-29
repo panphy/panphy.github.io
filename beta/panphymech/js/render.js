@@ -389,6 +389,27 @@
       ctx.fill();
     }
 
+    // A solid rod or rope as simulated: a thick line through its segments' joints.
+    function drawSolid(l, color) {
+      const pts = app.sim && !app.simStale ? app.sim.solidPoints(l.id) : null;
+      if (!pts) return false;
+      const th = (l.kind === 'rope' ? 0.03 : 0.06) * cam().scale;
+      ctx.strokeStyle = color;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(l.kind === 'rope' ? 3 : 5, th);
+      ctx.beginPath();
+      pts.forEach((p, i) => { const q = r.toScreen(p); if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y); });
+      ctx.stroke();
+      // Dots at the joints show it is made of links.
+      if (l.kind === 'rope' && cam().scale * (l.length / (pts.length - 1)) > 8) {
+        ctx.fillStyle = r.colors.surface;
+        pts.forEach((p) => { const q = r.toScreen(p); ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1, ctx.lineWidth * 0.22), 0, Math.PI * 2); ctx.fill(); });
+      }
+      ctx.lineCap = 'butt';
+      return true;
+    }
+
     function drawLink(l) {
       const sel = app.isSelected('link', l.id);
       const hov = app.hover && app.hover.type === 'link' && app.hover.id === l.id;
@@ -396,6 +417,7 @@
       const color = sel ? r.colors.accent : hov ? r.colors.ink : r.colors.link;
       if (l.kind === 'hinge' || l.kind === 'weld') { drawHinge(l, pa, sel || hov); return; }
       if (l.kind === 'spring') drawSpring(pa, pb, color, sel ? 2.2 : 1.7);
+      else if (l.solid && drawSolid(l, sel ? r.colors.accent : l.kind === 'rope' ? r.colors.rope : color)) { /* drawn from its bodies */ }
       else if (l.kind === 'rod') drawRod(pa, pb, color);
       else if (l.kind === 'rope') drawRope(pa, pb, l.length, sel ? r.colors.accent : r.colors.rope);
       if (!l.a) anchorMount(pa, color);

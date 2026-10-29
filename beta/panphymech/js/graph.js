@@ -37,7 +37,9 @@
       const scene = sim.scene;
       const put = (k, v) => { const c = rec.cols.get(k); if (c) c.push(v); };
       rec.t.push(sim.t);
-      let KE = 0; let GPE = 0; let EPE = 0;
+      // Solid rods and ropes carry energy of their own.
+      const extra = sim.connectorEnergy ? sim.connectorEnergy() : { KE: 0, GPE: 0 };
+      let KE = extra.KE; let GPE = extra.GPE; let EPE = 0;
       const springEPE = new Map();
       scene.links.forEach((l) => {
         if (l.kind !== 'spring') return;
