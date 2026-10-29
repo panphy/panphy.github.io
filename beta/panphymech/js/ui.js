@@ -42,6 +42,12 @@
   // ---------- Part artwork (64 × 44) ----------
 
   const c = (name) => S.COLORS[name];
+  // The motor's arrow uses the same geometry as the scene drawing; new motors turn clockwise.
+  const motorArrow = (() => {
+    const a = PPM.render.arcArrow(32, 22, 17, -Math.PI * 0.8, Math.PI * 1.4, 8);
+    const f = (v) => v.toFixed(2);
+    return `<path class="p-motor" d="M${f(a.from.x)} ${f(a.from.y)}A17 17 0 1 1 ${f(a.to.x)} ${f(a.to.y)}"/><path class="p-motor-head" d="M${f(a.tip.x)} ${f(a.tip.y)}L${f(a.left.x)} ${f(a.left.y)}L${f(a.right.x)} ${f(a.right.y)}z"/>`;
+  })();
   const PART_ART = {
     ball: `<circle cx="32" cy="22" r="15" fill="${c('blue').fill}" stroke="${c('blue').stroke}" stroke-width="1.6"/><path d="M32 22h13" stroke="${c('blue').stroke}" stroke-width="1.6"/><circle cx="32" cy="22" r="2" fill="${c('blue').stroke}"/>`,
     box: `<rect x="17" y="7" width="30" height="30" rx="1" fill="${c('coral').fill}" stroke="${c('coral').stroke}" stroke-width="1.6"/>`,
@@ -53,8 +59,8 @@
     rod: '<path class="p-stroke" d="M8 30L56 14" stroke-width="5"/><circle class="p-pin" cx="8" cy="30" r="3"/><circle class="p-pin" cx="56" cy="14" r="3"/>',
     rope: '<path class="p-rope" d="M6 10Q32 50 58 10"/><circle class="p-dot" cx="6" cy="10" r="2.4"/><circle class="p-dot" cx="58" cy="10" r="2.4"/>',
     hinge: `<rect x="6" y="16" width="34" height="10" rx="1" fill="${c('amber').fill}" stroke="${c('amber').stroke}" stroke-width="1.4" transform="rotate(-18 32 22)"/><rect x="26" y="16" width="32" height="10" rx="1" fill="${c('teal').fill}" stroke="${c('teal').stroke}" stroke-width="1.4" transform="rotate(18 32 22)"/><circle class="p-pin" cx="32" cy="22" r="5.5"/><circle class="p-dot" cx="32" cy="22" r="1.8"/>`,
-    motor: `<circle cx="32" cy="22" r="13" fill="${c('slate').fill}" stroke="${c('slate').stroke}" stroke-width="1.4"/><path class="p-motor" d="M46 15A16 16 0 1 1 41 8"/><path class="p-motor-head" d="M38.5 4.5l6 4-6.5 3z"/><circle class="p-pin" cx="32" cy="22" r="5"/><circle class="p-dot" cx="32" cy="22" r="1.8"/>`,
-    weld: `<rect x="8" y="14" width="26" height="16" rx="1" fill="${c('violet').fill}" stroke="${c('violet').stroke}" stroke-width="1.4"/><rect x="28" y="10" width="26" height="16" rx="1" fill="${c('pink').fill}" stroke="${c('pink').stroke}" stroke-width="1.4"/><rect class="p-pin" x="26" y="15" width="10" height="10"/><path class="p-stroke" d="M28.5 17.5l5 5M33.5 17.5l-5 5" stroke-width="1.5"/>`
+    motor: `<circle cx="32" cy="22" r="13" fill="${c('slate').fill}" stroke="${c('slate').stroke}" stroke-width="1.4"/>${motorArrow}<circle class="p-pin" cx="32" cy="22" r="5"/><circle class="p-dot" cx="32" cy="22" r="1.8"/>`,
+    weld: `<rect x="8" y="14" width="26" height="16" rx="1" fill="${c('violet').fill}" stroke="${c('violet').stroke}" stroke-width="1.4"/><rect x="28" y="10" width="26" height="16" rx="1" fill="${c('pink').fill}" stroke="${c('pink').stroke}" stroke-width="1.4"/><path class="p-glue" d="M31 13.5l6.5 6.5-6.5 6.5-6.5-6.5z"/><circle class="p-pin-dot" cx="31" cy="20" r="1.7"/>`
   };
   const partSvg = (kind) => `<svg viewBox="0 0 64 44" aria-hidden="true">${PART_ART[kind] || ''}</svg>`;
 
@@ -619,10 +625,123 @@
       else cards = worldInspector();
       cards.forEach((c2) => body.appendChild(c2));
       ui.updateReadings();
+      quickFields.forEach((f) => f());
     };
+
+    // ---------- Quick settings (right-click, or touch and hold) ----------
+
+    const quick = document.createElement('section');
+    quick.className = 'quick-settings';
+    quick.hidden = true;
+    quick.setAttribute('role', 'dialog');
+    document.body.appendChild(quick);
+    let quickFields = [];
+    let quickAt = null;
+
+    ui.closeQuick = function closeQuick(returnFocus) {
+      if (quick.hidden) return;
+      quick.hidden = true;
+      quick.innerHTML = '';
+      quickFields = [];
+      quickAt = null;
+      if (returnFocus) app.canvas.focus({ preventScroll: true });
+    };
+
+    // The main settings of an object or connector, as compact fields.
+    function quickItems(sel) {
+      const items = [];
+      if (sel.type === 'body') {
+        const b = () => S.bodyById(app.scene, sel.id);
+        if (!b()) return items;
+        const param = (fn) => (v, key) => app.editParam(() => fn(b(), v), key);
+        items.push(numField({ label: 'Mass \\(m\\)', plain: 'Mass m', unit: 'kg', get: () => b().mass, set: param((x, v) => { x.mass = v; }), min: L.mass[0], max: L.mass[1], slider: [0.01, 100], log: true, disabled: () => b().fixed }));
+        items.push(numField({ label: 'Friction \\(\\mu\\)', plain: 'Friction μ', unit: '', get: () => b().friction, set: param((x, v) => { x.friction = v; }), min: L.friction[0], max: L.friction[1], slider: [0, 1.5], step: 0.01 }));
+        items.push(numField({ label: 'Restitution \\(e\\)', plain: 'Restitution e', unit: '', get: () => b().restitution, set: param((x, v) => { x.restitution = v; }), min: 0, max: 1, slider: [0, 1], step: 0.01 }));
+        items.push(toggleField('Fixed in place', () => b().fixed, (v) => app.edit(() => { b().fixed = v; if (v && b().color !== 'slate') b().color = 'slate'; else if (!v && b().color === 'slate') b().color = S.COLOR_CYCLE[0]; })));
+        return items;
+      }
+      const l = () => S.linkById(app.scene, sel.id);
+      if (!l()) return items;
+      const param = (fn) => (v, key) => app.editParam(() => fn(l(), v), key);
+      if (l().kind === 'spring') {
+        items.push(numField({ label: 'Spring constant \\(k\\)', plain: 'Spring constant k', unit: 'N/m', get: () => l().k, set: param((x, v) => { x.k = v; }), min: L.k[0], max: L.k[1], slider: [1, 5000], log: true }));
+        items.push(numField({ label: 'Natural length \\(L_0\\)', plain: 'Natural length L0', unit: 'm', get: () => l().rest, set: param((x, v) => { x.rest = v; }), min: L.rest[0], max: L.rest[1], slider: [0, 5], step: 0.01 }));
+        items.push(numField({ label: 'Damping \\(c\\)', plain: 'Damping c', unit: 'N s/m', get: () => l().damping, set: param((x, v) => { x.damping = v; }), min: L.damping[0], max: L.damping[1], slider: [0, 20], step: 0.05 }));
+      } else if (l().kind === 'rod' || l().kind === 'rope') {
+        items.push(numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: param((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01 }));
+      } else if (l().kind === 'hinge') {
+        items.push(toggleField('Motor', () => l().motor, (v) => {
+          app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = -3; }, null, false, true);
+          if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y);
+        }));
+        if (l().motor) {
+          items.push(numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => l().speed, set: param((x, v) => { x.speed = v; }), min: L.speed[0], max: L.speed[1], slider: [-30, 30], step: 0.1 }));
+          items.push(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
+        }
+      }
+      return items;
+    }
+
+    ui.showQuick = function showQuick(sel, x, y) {
+      const saved = ui.fields;
+      ui.fields = [];
+      const items = quickItems(sel);
+      quickFields = ui.fields;
+      ui.fields = saved;
+      if (!items.length) {
+        ui.closeQuick();
+        app.toast('Glue has no settings. Select it to see the force on the joint.');
+        return;
+      }
+      const obj = sel.type === 'body' ? S.bodyById(app.scene, sel.id) : S.linkById(app.scene, sel.id);
+      quick.innerHTML = `<p class="quick-title">${esc(obj.name)}</p>`;
+      quick.setAttribute('aria-label', `${obj.name} settings`);
+      items.forEach((el) => quick.appendChild(el));
+      quick.querySelectorAll('.field-help').forEach((el) => el.remove());
+      quick.style.maxHeight = '';
+      quick.hidden = false;
+      quickAt = { x, y };
+      // Beside the object, never over it: right, left, below or above, nearest first.
+      const rect = quick.getBoundingClientRect();
+      const c2 = app.canvas.getBoundingClientRect();
+      const box = app.editor.selectionBox(sel) || { minX: x - c2.left, maxX: x - c2.left, minY: y - c2.top, maxY: y - c2.top };
+      const gap = 10;
+      const m = 8;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const left = c2.left + box.minX - gap;
+      const right = c2.left + box.maxX + gap;
+      const top = c2.top + box.minY - gap;
+      const bottom = c2.top + box.maxY + gap;
+      const px = S.clamp(x, m, vw - m - rect.width);
+      const py = S.clamp(y - 20, m, vh - m - rect.height);
+      const spots = [
+        { x: right, y: py, w: vw - m - right, h: vh - m - py },
+        { x: left - rect.width, y: py, w: left - m, h: vh - m - py },
+        { x: px, y: bottom, w: vw - m - px, h: vh - m - bottom },
+        { x: px, y: top - rect.height, w: vw - m - px, h: top - m }
+      ];
+      const fits = spots.filter((p) => p.w >= rect.width && p.h >= rect.height);
+      const pick = (fits.length ? fits : spots.filter((p) => p.w >= rect.width && p.h > 60).sort((a, b) => b.h - a.h))[0];
+      if (!pick) { ui.closeQuick(); app.toast('Zoom out to make room for the settings.'); return; }
+      quick.style.left = Math.max(m, pick.x) + 'px';
+      quick.style.top = Math.max(m, pick.y) + 'px';
+      quick.style.maxHeight = Math.min(rect.height, Math.max(60, pick.h)) + 'px';
+      const first = quick.querySelector('input[type="text"]:not(:disabled)');
+      if (first) first.focus({ preventScroll: true });
+    };
+
+    quick.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Escape') { e.preventDefault(); ui.closeQuick(true); }
+    });
+    document.addEventListener('pointerdown', (e) => { if (!quick.contains(e.target)) ui.closeQuick(); }, true);
+    document.addEventListener('wheel', (e) => { if (!quick.contains(e.target)) ui.closeQuick(); }, { capture: true, passive: true });
+    window.addEventListener('resize', () => ui.closeQuick());
 
     ui.refreshFields = function refreshFields() {
       ui.fields.forEach((f) => f());
+      quickFields.forEach((f) => f());
     };
 
     ui.updateReadings = function updateReadings() {

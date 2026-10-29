@@ -118,6 +118,8 @@ button, input, select { font: inherit; color: inherit; }
 .part .p-dot { fill: var(--link); }
 .part .p-motor { fill: none; stroke: var(--good); stroke-width: 2; stroke-linecap: round; }
 .part .p-motor-head { fill: var(--good); }
+.part .p-glue { fill: var(--link); stroke: var(--surface-2); stroke-width: 1.4; stroke-linejoin: round; }
+.part .p-pin-dot { fill: var(--surface-2); }
 .part .p-mount { fill: var(--surface); stroke: var(--link); stroke-width: 1.5; }
 .lib-note { margin: 14px 2px 0; font-size: 0.78rem; line-height: 1.45; color: var(--ink-3); }
 .drag-ghost { position: fixed; left: 0; top: 0; width: 64px; height: 44px; pointer-events: none; z-index: 100; opacity: 0.85; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25)); }
@@ -383,3 +385,18 @@ button, input, select { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .library, .inspector, .toggle-track, .toggle-track::after { transition: none; }
 }
+
+/* Quick settings: compact rows beside the object, opened by right-click or touch and hold. */
+.quick-settings { position: fixed; z-index: 100; width: min(220px, calc(100vw - 16px)); overflow-y: auto; padding: 6px 8px 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-2); }
+.quick-title { margin: 0 0 2px; padding: 2px 0 4px; border-bottom: 1px solid var(--line); font-family: var(--font-display); font-size: .78rem; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.quick-settings .field { padding: 3px 0; }
+.quick-settings .field + .field, .quick-settings .field + .toggle, .quick-settings .toggle + .field { border-top: 0; }
+.quick-settings .field-row > label, .quick-settings .toggle { min-height: 24px; color: var(--ink-2); font-size: .72rem; font-weight: 500; }
+.quick-settings .num { flex: 0 0 86px; }
+.quick-settings .num input { min-height: 26px; height: 26px; padding: 2px 34px 2px 6px; border-radius: 6px; font-size: .74rem; }
+.quick-settings .num .unit { right: 6px; font-size: .66rem; }
+.quick-settings .slider { height: 16px; margin: 2px 0 0; }
+.quick-settings .toggle { gap: 8px; }
+.quick-settings .toggle-track { width: 30px; height: 18px; }
+.quick-settings .toggle-track::after { top: 2px; left: 2px; width: 14px; height: 14px; }
+.quick-settings .toggle input:checked + .toggle-track::after { transform: translateX(12px); }
