@@ -177,3 +177,29 @@ test('scene files round-trip and reject other files', () => {
   assert.equal(back.links.length, scene.links.length);
   assert.throws(() => S.parse('{"format":"other"}'));
 });
+
+test('objects resting in the examples do not pop up when time starts', () => {
+  ['ramp', 'collision', 'horizontal-spring', 'dominoes'].forEach((id) => {
+    const scene = E.list.find((e) => e.id === id).build();
+    const sim = P.createSim(scene);
+    const start = new Map(scene.bodies.map((b) => [b.id, sim.readBody(b.id)]));
+    run(sim, 0.05);
+    scene.bodies.forEach((b) => {
+      if (b.fixed || b.vx || b.vy) return;
+      const r = sim.readBody(b.id);
+      const s = start.get(b.id);
+      // Free fall over 0.05 s would be 12 mm; a pop out of a surface would be about 15 mm upward.
+      assert.ok(r.y - s.y < 0.001, `${id}: ${b.name} rose ${((r.y - s.y) * 1000).toFixed(1)} mm`);
+    });
+  });
+});
+
+test('fitting the view leaves out an object far from the rest', () => {
+  const scene = E.list.find((e) => e.id === 'pendulum').build();
+  const runaway = S.makeBody(scene, 'ball', 800, 40);
+  runaway.name = 'Runaway';
+  scene.bodies.push(runaway);
+  const { box, far } = S.fitBox(scene);
+  assert.deepEqual(far.map((f) => f.name), ['Runaway']);
+  assert.ok(box.maxX < 10 && box.minY === 0, JSON.stringify(box));
+});

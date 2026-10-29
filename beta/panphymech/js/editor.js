@@ -81,6 +81,15 @@
 
     function hitTest(sp) {
       const sel = app.selection;
+      const del = ed.deleteButton();
+      if (del && Math.hypot(sp.x - del.x, sp.y - del.y) <= 12) return { type: 'delete' };
+      if (sel && sel.type === 'link' && app.canEditGeometry()) {
+        const l = S.linkById(app.scene, sel.id);
+        const ends = l && ed.linkHandles(l);
+        if (ends) {
+          for (const end of ['a', 'b']) if (Math.hypot(sp.x - ends[end].x, sp.y - ends[end].y) <= 11) return { type: 'linkEnd', link: l, end };
+        }
+      }
       if (sel && sel.type === 'body' && app.canEditGeometry()) {
         const b = S.bodyById(app.scene, sel.id);
         const hs = b && ed.handles(b);
@@ -110,6 +119,75 @@
         rotate: { x: center.x, y: center.y - R - 24 },
         resize: rr().toScreen(S.toWorld(pose, corner)),
         corner
+      };
+    };
+
+    // Screen box of an object as drawn now.
+    function screenBox(b) {
+      const pose = app.poseOf(b);
+      if (b.kind === 'ball') {
+        const c = rr().toScreen(pose);
+        const R = b.r * app.scene.camera.scale;
+        return { minX: c.x - R, minY: c.y - R, maxX: c.x + R, maxY: c.y + R };
+      }
+      const pts = S.vertices(b).map((v) => rr().toScreen(S.toWorld(pose, v)));
+      return {
+        minX: Math.min(...pts.map((p) => p.x)), maxX: Math.max(...pts.map((p) => p.x)),
+        minY: Math.min(...pts.map((p) => p.y)), maxY: Math.max(...pts.map((p) => p.y))
+      };
+    }
+
+    // The selection's screen box (objects) or a small box round a connector, for menus.
+    ed.selectionBox = function selectionBox(sel) {
+      if (!sel) return null;
+      if (sel.type === 'body') { const b = S.bodyById(app.scene, sel.id); return b ? screenBox(b) : null; }
+      const l = S.linkById(app.scene, sel.id);
+      if (!l) return null;
+      const pa = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
+      const pb = l.kind === 'hinge' || l.kind === 'weld' ? pa : rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf));
+      return { minX: Math.min(pa.x, pb.x) - 12, maxX: Math.max(pa.x, pb.x) + 12, minY: Math.min(pa.y, pb.y) - 12, maxY: Math.max(pa.y, pb.y) + 12 };
+    };
+
+    // The small delete button: at the upper left of an object, beside the middle of a
+    // spring, rod or rope (on its upper side), or up and left of a hinge or glue joint.
+    ed.deleteButton = function deleteButton() {
+      const sel = app.selection;
+      if (!sel || (gesture && gesture.moved)) return null;
+      let p = null;
+      if (sel.type === 'body') {
+        const b = S.bodyById(app.scene, sel.id);
+        if (!b) return null;
+        // Up and left of the object, and never closer to its center than 28 px, so small
+        // objects keep their rotate and resize handles clear.
+        const box = screenBox(b);
+        const cx = (box.minX + box.maxX) / 2;
+        const cy = (box.minY + box.maxY) / 2;
+        const d = Math.max(Math.hypot(box.maxX - box.minX, box.maxY - box.minY) / 2 + 6, 28) * Math.SQRT1_2;
+        p = { x: Math.min(box.minX - 6, cx - d), y: Math.min(box.minY - 6, cy - d) };
+      } else {
+        const l = S.linkById(app.scene, sel.id);
+        if (!l) return null;
+        const pa = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
+        if (l.kind === 'hinge' || l.kind === 'weld') p = { x: pa.x - 17, y: pa.y - 17 };
+        else {
+          const pb = rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf));
+          const len = Math.hypot(pb.x - pa.x, pb.y - pa.y) || 1;
+          let nx = -(pb.y - pa.y) / len;
+          let ny = (pb.x - pa.x) / len;
+          if (ny > 0 || (ny === 0 && nx > 0)) { nx = -nx; ny = -ny; }
+          p = { x: (pa.x + pb.x) / 2 + nx * 22, y: (pa.y + pb.y) / 2 + ny * 22 };
+        }
+      }
+      const r = rr();
+      return { x: S.clamp(p.x, 14, r.w - 14), y: S.clamp(p.y, 14, r.h - 14) };
+    };
+
+    // End handles of a selected spring, rod or rope.
+    ed.linkHandles = function linkHandles(l) {
+      if (l.kind === 'hinge' || l.kind === 'weld') return null;
+      return {
+        a: rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf)),
+        b: rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf))
       };
     };
 
@@ -154,6 +232,10 @@
     ed.preview = function preview() {
       const w = ed.cursorWorld;
       if (!w) return null;
+      if (gesture && gesture.kind === 'jointMove' && gesture.moved) {
+        const bs = bodiesAt(w);
+        return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
+      }
       if (ed.armed) {
         const b = S.makeBody({ ...app.scene, bodies: app.scene.bodies.slice(), links: [], nextId: 0 }, ed.armed, snapV(w.x, SNAP_POS), snapV(w.y, SNAP_POS));
         return { body: b };
@@ -236,9 +318,10 @@
     ed.placeBody = function placeBody(type, w) {
       app.edit(() => {
         const b = S.makeBody(app.scene, type, snapV(w.x, SNAP_POS), snapV(w.y, SNAP_POS));
-        // Never place an object partly inside the floor: lift it to rest on top.
+        // Never place an object partly inside the floor: lift it to rest on top, at the
+        // engine's resting gap so it does not pop up when time starts.
         if (app.scene.world.floor) {
-          const bottom = b.kind === 'ball' ? b.r : Math.max(...S.vertices(b).map((p) => -p.y));
+          const bottom = (b.kind === 'ball' ? b.r : Math.max(...S.vertices(b).map((p) => -p.y))) + S.restGap(b);
           if (b.y < bottom) b.y = bottom;
         }
         app.scene.bodies.push(b);
@@ -263,9 +346,66 @@
       // Editing after time has run makes the current state the new start (t = 0).
       app.beginGesture();
       gesture.orig = JSON.parse(JSON.stringify({ bodies: app.scene.bodies, links: app.scene.links }));
+      if (!gesture.bodyId) return;
       const b = S.bodyById(app.scene, gesture.bodyId);
       gesture.b0 = b ? { x: b.x, y: b.y, angle: b.angle, w: b.w, h: b.h, r: b.r } : null;
       gesture.group = S.rigidGroup(app.scene, gesture.bodyId);
+    }
+
+    // ---------- Dragging connectors ----------
+
+    // While an end is dragged it follows the pointer; it attaches when released.
+    function applyLinkEnd(w) {
+      restoreOrig();
+      const l = S.linkById(app.scene, gesture.linkId);
+      if (!l) return;
+      l[gesture.end] = null;
+      l['l' + gesture.end] = { x: snapV(w.x, SNAP_POS), y: snapV(w.y, SNAP_POS) };
+      if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+    }
+
+    function finishLinkEnd(w) {
+      restoreOrig();
+      const l = S.linkById(app.scene, gesture.linkId);
+      const end = gesture.end;
+      const other = end === 'a' ? l.b : l.a;
+      const t = endTarget(w);
+      const id = t.body ? t.body.id : null;
+      if (!id && !other) return 'Attach at least one end to an object.';
+      if (id && id === other) return 'Connect two different objects, or an object and the background.';
+      l[end] = id;
+      l['l' + end] = t.local;
+      if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      return null;
+    }
+
+    // Moving a spring, rod or rope by its middle moves the ends fixed to the background.
+    function applyLinkMove(w) {
+      restoreOrig();
+      const l = S.linkById(app.scene, gesture.linkId);
+      if (!l) return;
+      const dx = snapV(w.x - gesture.startWorld.x, SNAP_POS);
+      const dy = snapV(w.y - gesture.startWorld.y, SNAP_POS);
+      if (!l.a) l.la = { x: l.la.x + dx, y: l.la.y + dy };
+      if (!l.b) l.lb = { x: l.lb.x + dx, y: l.lb.y + dy };
+      if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+    }
+
+    // A hinge, motor or glue joint dropped somewhere joins whatever is under it there.
+    function finishJointMove(w) {
+      restoreOrig();
+      const l = S.linkById(app.scene, gesture.linkId);
+      const bs = bodiesAt(w);
+      if (!bs.length) return 'Drop the joint on an object.';
+      const top = bs[0];
+      const base = bs[1] || null;
+      if (top.fixed && (!base || base.fixed)) return 'A joint needs at least one movable object.';
+      const p = jointPoint(w, top);
+      l.a = top.id;
+      l.la = S.toLocal(app.poseOf(top), p);
+      l.b = base ? base.id : null;
+      l.lb = base ? S.toLocal(app.poseOf(base), p) : { x: p.x, y: p.y };
+      return null;
     }
 
     function restoreOrig() {
@@ -336,7 +476,8 @@
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
       if (pointers.size === 2) {
         // Two fingers: pinch to zoom and pan. Undo any one-finger drag that had started.
-        if (gesture && gesture.moved && gesture.orig) { restoreOrig(); app.endGesture(false); }
+        clearHold();
+        if (gesture && gesture.moved && gesture.orig) { restoreOrig(); app.cancelGesture(); }
         if (gesture && gesture.kind === 'grab') app.sim.release();
         gesture = null;
         const [a, b] = [...pointers.values()];
@@ -346,6 +487,12 @@
       if (pointers.size > 2) return;
       const w = rr().toWorld(sp.x, sp.y);
       ed.cursorWorld = w;
+      app.ui.closeQuick();
+      if (e.button === 2 && ed.tool === 'select' && !ed.armed) {
+        // Right-clicking an object opens its settings (on contextmenu); elsewhere it pans.
+        const h = hitTest(sp);
+        if (h && (h.type === 'body' || h.type === 'link')) return;
+      }
       if (e.button === 1 || e.button === 2 || ed.tool === 'pan') { startGesture('pan', e, sp); return; }
       if (ed.armed) {
         ed.placeBody(ed.armed, w);
@@ -356,23 +503,57 @@
       if (['hinge', 'motor', 'weld'].includes(ed.tool)) { placeJoint(w, e.shiftKey); app.requestDraw(); return; }
       const hit = hitTest(sp);
       if (!hit) { startGesture('pan', e, sp, { deselect: true }); return; }
+      if (hit.type === 'delete') { app.deleteSelection(); return; }
+      if (hit.type === 'linkEnd') { startGesture('linkEnd', e, sp, { linkId: hit.link.id, end: hit.end }); return; }
       if (hit.type === 'rotate' || hit.type === 'resize') {
         startGesture(hit.type, e, sp, { bodyId: hit.body.id, corner: ed.handles(hit.body).corner });
         return;
       }
       if (hit.type === 'link') {
         app.select({ type: 'link', id: hit.link.id });
-        startGesture('none', e, sp);
+        const joint = hit.link.kind === 'hinge' || hit.link.kind === 'weld';
+        if (app.running) startGesture('none', e, sp);
+        else startGesture(joint ? 'jointMove' : 'linkMove', e, sp, { linkId: hit.link.id });
+        armHold(e, { type: 'link', id: hit.link.id });
         return;
       }
       app.select({ type: 'body', id: hit.body.id });
       if (app.running) {
         if (!hit.body.fixed && app.sim.grab(hit.body.id, w)) startGesture('grab', e, sp);
         else startGesture('none', e, sp);
-        return;
+      } else {
+        startGesture('move', e, sp, { bodyId: hit.body.id });
       }
-      startGesture('move', e, sp, { bodyId: hit.body.id });
+      armHold(e, { type: 'body', id: hit.body.id });
     }
+
+    // Touch and hold an object or connector for its quick settings, as right-click does.
+    let holdTimer = 0;
+    function clearHold() { clearTimeout(holdTimer); holdTimer = 0; }
+    function armHold(e, sel) {
+      clearHold();
+      if (e.pointerType === 'mouse') return;
+      const id = e.pointerId;
+      const x = e.clientX;
+      const y = e.clientY;
+      holdTimer = setTimeout(() => {
+        holdTimer = 0;
+        if (!gesture || gesture.id !== id || gesture.moved) return;
+        if (gesture.kind === 'grab') app.sim.release();
+        gesture = null;
+        app.ui.showQuick(sel, x, y);
+      }, 500);
+    }
+
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (ed.tool !== 'select' || ed.armed) return;
+      const h = hitTest(localPoint(e));
+      if (!h || (h.type !== 'body' && h.type !== 'link')) return;
+      const sel = h.type === 'body' ? { type: 'body', id: h.body.id } : { type: 'link', id: h.link.id };
+      app.select(sel);
+      app.ui.showQuick(sel, e.clientX, e.clientY);
+    });
 
     function onPointerMove(e) {
       const sp = localPoint(e);
@@ -400,6 +581,7 @@
       if (!gesture.moved && Math.hypot(sp.x - gesture.start.x, sp.y - gesture.start.y) < DRAG_START_PX) return;
       const firstMove = !gesture.moved;
       gesture.moved = true;
+      clearHold();
       switch (gesture.kind) {
         case 'pan': {
           const camr = app.scene.camera;
@@ -420,6 +602,16 @@
           else applyResize(w);
           app.gestureChanged();
           break;
+        case 'linkEnd':
+        case 'linkMove':
+          if (firstMove) beginSceneDrag();
+          if (gesture.kind === 'linkEnd') applyLinkEnd(w); else applyLinkMove(w);
+          app.gestureChanged();
+          break;
+        case 'jointMove':
+          if (firstMove) beginSceneDrag();
+          app.requestDraw();
+          break;
         default:
           break;
       }
@@ -431,20 +623,30 @@
       try { canvas.releasePointerCapture(e.pointerId); } catch (err) { /* already released */ }
       if (pinch) { if (pointers.size < 2) pinch = null; return; }
       if (!gesture || gesture.id !== e.pointerId) return;
+      clearHold();
       const g = gesture;
+      const w = rr().toWorld(localPoint(e).x, localPoint(e).y);
+      if (g.moved && (g.kind === 'linkEnd' || g.kind === 'jointMove')) {
+        const problem = g.kind === 'linkEnd' ? finishLinkEnd(w) : finishJointMove(w);
+        gesture = null;
+        if (problem) { app.cancelGesture(); app.toast(problem); } else app.endGesture(true);
+        app.requestDraw();
+        return;
+      }
       gesture = null;
       if (g.kind === 'grab') app.sim.release();
       if (g.kind === 'pan' && !g.moved && g.deselect) app.select(null);
-      if ((g.kind === 'move' || g.kind === 'rotate' || g.kind === 'resize') && g.moved) app.endGesture(true);
+      if (['move', 'rotate', 'resize', 'linkMove'].includes(g.kind) && g.moved) app.endGesture(true);
       app.requestDraw();
     }
 
     function onPointerCancel(e) {
       pointers.delete(e.pointerId);
       if (pinch && pointers.size < 2) pinch = null;
+      clearHold();
       if (gesture && gesture.id === e.pointerId) {
         if (gesture.kind === 'grab') app.sim.release();
-        if (gesture.moved && gesture.orig) app.endGesture(true);
+        if (gesture.moved && gesture.orig) { restoreOrig(); app.cancelGesture(); }
         gesture = null;
       }
     }
@@ -455,9 +657,11 @@
       let cursor = '';
       if (ed.armed || ed.tool !== 'select') cursor = 'crosshair';
       else if (hit) {
-        if (hit.type === 'rotate') cursor = 'grab';
+        if (hit.type === 'delete') cursor = 'pointer';
+        else if (hit.type === 'linkEnd') cursor = 'move';
+        else if (hit.type === 'rotate') cursor = 'grab';
         else if (hit.type === 'resize') cursor = 'nwse-resize';
-        else if (hit.type === 'link') { hover = { type: 'link', id: hit.link.id }; cursor = 'pointer'; }
+        else if (hit.type === 'link') { hover = { type: 'link', id: hit.link.id }; cursor = app.running ? 'pointer' : 'move'; }
         else { hover = { type: 'body', id: hit.body.id }; cursor = app.running ? (hit.body.fixed ? 'pointer' : 'grab') : 'move'; }
       }
       canvas.style.cursor = cursor;
@@ -471,7 +675,6 @@
     canvas.addEventListener('pointerup', onPointerUp);
     canvas.addEventListener('pointercancel', onPointerCancel);
     canvas.addEventListener('pointerleave', () => { if (!gesture) { app.hover = null; ed.cursorWorld = null; app.requestDraw(); } });
-    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       const sp = localPoint(e);

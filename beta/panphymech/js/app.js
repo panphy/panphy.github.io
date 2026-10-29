@@ -228,10 +228,18 @@
   };
 
   // Dragging on the canvas: one undo step and one rebuild per gesture.
+  let gestureCommitted = false;
   app.beginGesture = function beginGesture() {
     pushUndo(null);
-    commitLiveIfNeeded();
+    gestureCommitted = commitLiveIfNeeded();
     app.simStale = true;
+  };
+  // A drag that changed nothing (or was refused): drop its undo step and redraw.
+  app.cancelGesture = function cancelGesture() {
+    if (!gestureCommitted) undoStack.pop();
+    tidyReferences();
+    rebuild();
+    afterChange();
   };
   let fieldsTimer = 0;
   app.gestureChanged = function gestureChanged() {
@@ -245,6 +253,8 @@
   };
 
   app.select = function select(sel) {
+    const prev = app.selection;
+    if (!sel || !prev || sel.type !== prev.type || sel.id !== prev.id) app.ui.closeQuick();
     app.selection = sel;
     if (sel) {
       const b = sel.type === 'body' ? S.bodyById(app.scene, sel.id) : null;
@@ -412,10 +422,8 @@
   // Frame the scene (or a given box), with the floor near the bottom of the view.
   app.fit = function fit(view) {
     const r = app.renderer;
-    const live = { ...app.scene, bodies: app.scene.bodies.map((b) => ({ ...b, ...app.poseOf(b) })) };
-    let bb = view || S.bounds(live) || { minX: -4, maxX: 4, minY: 0, maxY: 4 };
-    // Nothing rests below the floor, so frame from the floor up.
-    if (app.scene.world.floor && !view) bb = { ...bb, minY: 0, maxY: Math.max(bb.maxY, 0.5) };
+    const fitted = view ? { box: view, far: [] } : S.fitBox(app.scene, app.poseOf);
+    const bb = fitted.box || { minX: -4, maxX: 4, minY: 0, maxY: 4 };
     const minSpan = 3;
     const w = Math.max(bb.maxX - bb.minX, minSpan);
     const h = Math.max(bb.maxY - bb.minY, minSpan * 0.6);
@@ -424,8 +432,15 @@
     cam.scale = S.clamp(Math.min(r.w / (w * margin), r.h / (h * margin)), 4, 600);
     cam.cx = (bb.minX + bb.maxX) / 2;
     const viewH = r.h / cam.scale;
-    cam.cy = app.scene.world.floor ? bb.minY + viewH * 0.4 : (bb.minY + bb.maxY) / 2;
+    // With the floor in view, keep it near the bottom edge rather than mid-screen.
+    cam.cy = app.scene.world.floor && bb.minY >= -1e-9 && bb.minY <= 1e-9 ? viewH * 0.4 : (bb.minY + bb.maxY) / 2;
     app.cameraChanged();
+    if (fitted.far.length) {
+      const f = fitted.far;
+      const where = (i) => (Number.isFinite(i.x) ? ` (x = ${app.ui.fmt(i.x, 1)} m, y = ${app.ui.fmt(i.y, 1)} m)` : '');
+      const names = f.slice(0, 2).map((i) => `${i.name}${where(i)}`).join(' and ');
+      app.toast(`${names}${f.length > 2 ? ` and ${f.length - 2} more` : ''} ${f.length === 1 ? 'is' : 'are'} far from the rest of the scene and left out of the view. Reset, undo or delete to bring ${f.length === 1 ? 'it' : 'them'} back.`);
+    }
   };
 
   app.setSnap = function setSnap(v) {

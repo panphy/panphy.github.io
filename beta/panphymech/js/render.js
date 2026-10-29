@@ -4,6 +4,24 @@
   const PPM = root.PPM = root.PPM || {};
   const S = PPM.scene;
 
+  // An arc with an arrowhead at its end, in screen coordinates (y down). sweep < 0 turns
+  // counterclockwise on screen. The arc stops at the arrowhead's base so the two meet.
+  function arcArrow(cx, cy, R, start, sweep, head = 6) {
+    const sgn = sweep < 0 ? -1 : 1;
+    const end = start + sweep;
+    const p = (a) => ({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) });
+    const e = p(end);
+    const d = { x: -Math.sin(end) * sgn, y: Math.cos(end) * sgn };
+    const n = { x: Math.cos(end), y: Math.sin(end) };
+    const base = { x: e.x - d.x * head * 0.45, y: e.y - d.y * head * 0.45 };
+    return {
+      start, end: end - sgn * ((head * 0.45) / R), anticlockwise: sgn < 0, from: p(start), to: p(end - sgn * ((head * 0.45) / R)),
+      tip: { x: e.x + d.x * head * 0.55, y: e.y + d.y * head * 0.55 },
+      left: { x: base.x + n.x * head * 0.5, y: base.y + n.y * head * 0.5 },
+      right: { x: base.x - n.x * head * 0.5, y: base.y - n.y * head * 0.5 }
+    };
+  }
+
   const NICE = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500];
   const niceStep = (scale, px) => NICE.find((s) => s * scale >= px) || NICE[NICE.length - 1];
 
@@ -299,16 +317,27 @@
       const q = r.toScreen(p);
       const ink = selected ? r.colors.accent : r.colors.ink2;
       if (l.kind === 'weld') {
-        ctx.fillStyle = r.colors.surface;
-        ctx.strokeStyle = ink;
-        ctx.lineWidth = 1.6;
+        // Glue: a solid diamond, so it never looks like a delete cross.
+        ctx.fillStyle = ink;
+        ctx.strokeStyle = r.colors.surface;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.rect(q.x - 5, q.y - 5, 10, 10);
+        ctx.moveTo(q.x, q.y - 7); ctx.lineTo(q.x + 7, q.y); ctx.lineTo(q.x, q.y + 7); ctx.lineTo(q.x - 7, q.y); ctx.closePath();
         ctx.fill(); ctx.stroke();
+        ctx.fillStyle = r.colors.surface;
         ctx.beginPath();
-        ctx.moveTo(q.x - 3, q.y - 3); ctx.lineTo(q.x + 3, q.y + 3);
-        ctx.moveTo(q.x + 3, q.y - 3); ctx.lineTo(q.x - 3, q.y + 3);
-        ctx.stroke();
+        ctx.arc(q.x, q.y, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+        if (!l.b) {
+          ctx.strokeStyle = ink;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(q.x - 8, q.y + 11); ctx.lineTo(q.x + 8, q.y + 11);
+          ctx.moveTo(q.x - 6, q.y + 11); ctx.lineTo(q.x - 9, q.y + 14);
+          ctx.moveTo(q.x, q.y + 11); ctx.lineTo(q.x - 3, q.y + 14);
+          ctx.moveTo(q.x + 6, q.y + 11); ctx.lineTo(q.x + 3, q.y + 14);
+          ctx.stroke();
+        }
         return;
       }
       if (!l.b) {
@@ -322,25 +351,19 @@
       }
       if (l.motor) {
         // An arrow around the axle shows which way the motor turns.
+        // Positive speed is counterclockwise, which is a negative sweep on screen.
         const dir = (l.speed || 0) >= 0 ? 1 : -1;
-        const R = 11;
-        const a0 = -Math.PI * 0.15;
-        const a1 = a0 - dir * Math.PI * 1.45;
+        const a = arcArrow(q.x, q.y, 11, dir > 0 ? Math.PI * 0.2 : Math.PI * 0.8, -dir * Math.PI * 1.4, 7);
         ctx.strokeStyle = r.colors.motor;
         ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.arc(q.x, q.y, R, a0, a1, dir > 0);
+        ctx.arc(q.x, q.y, 11, a.start, a.end, a.anticlockwise);
         ctx.stroke();
-        const ex = q.x + R * Math.cos(a1);
-        const ey = q.y + R * Math.sin(a1);
-        const tx = -Math.sin(a1) * -dir;
-        const ty = Math.cos(a1) * -dir;
+        ctx.lineCap = 'butt';
         ctx.fillStyle = r.colors.motor;
         ctx.beginPath();
-        ctx.moveTo(ex + tx * 5, ey + ty * 5);
-        ctx.lineTo(ex - tx * 1 + Math.cos(a1) * 4, ey - ty * 1 + Math.sin(a1) * 4);
-        ctx.lineTo(ex - tx * 1 - Math.cos(a1) * 4, ey - ty * 1 - Math.sin(a1) * 4);
-        ctx.closePath();
+        ctx.moveTo(a.tip.x, a.tip.y); ctx.lineTo(a.left.x, a.left.y); ctx.lineTo(a.right.x, a.right.y); ctx.closePath();
         ctx.fill();
       }
       ctx.fillStyle = r.colors.surface;
@@ -524,6 +547,41 @@
       ctx.globalAlpha = 1;
     }
 
+    // End handles of a selected spring, rod or rope: drag one onto another object.
+    function drawLinkHandles(l) {
+      const ends = app.editor.linkHandles(l);
+      if (!ends) return;
+      ['a', 'b'].forEach((k) => {
+        const p = ends[k];
+        ctx.fillStyle = r.colors.accent;
+        ctx.strokeStyle = r.colors.surface;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6.5, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+      });
+    }
+
+    // The selection's delete button: a small circle with a cross.
+    function drawDeleteButton() {
+      const p = app.editor.deleteButton();
+      if (!p) return;
+      ctx.fillStyle = r.colors.surface;
+      ctx.strokeStyle = r.colors.accent;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = r.colors.ink;
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(p.x - 3.5, p.y - 3.5); ctx.lineTo(p.x + 3.5, p.y + 3.5);
+      ctx.moveTo(p.x + 3.5, p.y - 3.5); ctx.lineTo(p.x - 3.5, p.y + 3.5);
+      ctx.stroke();
+      ctx.lineCap = 'butt';
+    }
+
     function drawGrab() {
       const g = app.sim && app.sim.grabTarget();
       if (!g) return;
@@ -566,6 +624,11 @@
         const b = S.bodyById(app.scene, sel.id);
         if (b) drawHandles(b);
       }
+      if (sel && sel.type === 'link' && app.canEditGeometry()) {
+        const l = S.linkById(app.scene, sel.id);
+        if (l) drawLinkHandles(l);
+      }
+      drawDeleteButton();
       drawGrab();
       drawPreview();
     };
@@ -574,5 +637,5 @@
     return r;
   }
 
-  PPM.render = { createRenderer };
+  PPM.render = { createRenderer, arcArrow };
 })(typeof window !== 'undefined' ? window : globalThis);

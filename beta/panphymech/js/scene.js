@@ -47,6 +47,11 @@
     gravity: [0, 100], coord: [-1000, 1000], velocity: [-500, 500], omega: [-200, 200]
   };
 
+  // Box2D keeps a thin skin round polygons, so resting contacts settle this far apart.
+  // Placing objects at this gap stops them popping out of a surface on the first step.
+  const REST_GAP = { polygon: 0.015, ball: 0.005 };
+  const restGap = (b) => (b.kind === 'ball' ? REST_GAP.ball : REST_GAP.polygon);
+
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const num = (v, fallback) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
 
@@ -281,6 +286,42 @@
     return { minX, minY, maxX, maxY };
   }
 
+  // The box to frame when fitting the view. Objects far from the rest (thrown away by a
+  // strong spring, say) are left out and named, so one runaway object cannot shrink the
+  // whole scene to dots. poseOf gives an object's current pose.
+  function fitBox(scene, poseOf = (b) => b) {
+    const items = [];
+    scene.bodies.forEach((b) => {
+      const p = poseOf(b);
+      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) { items.push({ name: b.name, bad: true }); return; }
+      const live = { ...b, x: p.x, y: p.y, angle: p.angle };
+      const pts = b.kind === 'ball'
+        ? [{ x: p.x - b.r, y: p.y - b.r }, { x: p.x + b.r, y: p.y + b.r }]
+        : vertices(b).map((v) => toWorld(live, v));
+      items.push({ name: b.name, x: p.x, y: p.y, pts });
+    });
+    scene.links.forEach((l) => {
+      if (!l.a) items.push({ name: l.name, x: l.la.x, y: l.la.y, pts: [l.la] });
+      if (!l.b) items.push({ name: l.name, x: l.lb.x, y: l.lb.y, pts: [l.lb] });
+    });
+    const good = items.filter((i) => !i.bad);
+    const far = items.filter((i) => i.bad);
+    if (!good.length) return { box: null, far: far.map((i) => ({ name: i.name })) };
+    const median = (arr) => { const s = arr.slice().sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
+    const mx = median(good.map((i) => i.x));
+    const my = median(good.map((i) => i.y));
+    const dist = good.map((i) => Math.hypot(i.x - mx, i.y - my));
+    const limit = Math.max(25, 4 * median(dist));
+    let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
+    good.forEach((i, k) => {
+      if (dist[k] > limit) { far.push({ name: i.name, x: i.x, y: i.y }); return; }
+      i.pts.forEach((q) => { minX = Math.min(minX, q.x); maxX = Math.max(maxX, q.x); minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y); });
+    });
+    // Show the floor when the scene sits on it or close above it.
+    if (scene.world.floor && minY < Math.max(3, 0.6 * (maxY - minY))) minY = Math.min(minY, 0);
+    return { box: { minX, minY, maxX, maxY }, far };
+  }
+
   // ---------- Files ----------
 
   function serialize(scene) {
@@ -344,6 +385,6 @@
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint,
     bodyById, linkById, endPoint, rigidGroup, transformBodies, linkLength, refitLengths,
-    removeBody, removeLink, bounds, serialize, parse, clamp
+    removeBody, removeLink, bounds, fitBox, serialize, parse, clamp, REST_GAP, restGap
   };
 })(typeof window !== 'undefined' ? window : globalThis);
