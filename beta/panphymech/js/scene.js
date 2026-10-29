@@ -26,7 +26,9 @@
     plank: { label: 'Plank', size: { w: 2, h: 0.12 }, mass: 2 },
     wedge: { label: 'Ramp', size: { w: 3, h: 1.5 }, mass: 10, fixed: true },
     polygon: { label: 'Polygon', size: { r: 0.3, sides: 6 }, mass: 1.5 },
-    wall: { label: 'Wall', kind: 'box', size: { w: 0.3, h: 2 }, mass: 10, fixed: true }
+    wall: { label: 'Wall', kind: 'box', size: { w: 0.3, h: 2 }, mass: 10, fixed: true },
+    // Made by merging or cutting objects; never placed from the parts list.
+    custom: { label: 'Shape', size: {}, mass: 1 }
   };
 
   const LINK_KINDS = {
@@ -119,6 +121,8 @@
   // ---------- Geometry (local coordinates about the centroid) ----------
 
   function vertices(b) {
+    // A custom shape's outer outlines (holes aside), for boxes, fitting and placing.
+    if (b.kind === 'custom') return b.paths.flatMap((poly) => poly[0].map(([x, y]) => ({ x, y })));
     if (b.kind === 'box' || b.kind === 'plank') {
       const w = b.w / 2;
       const h = b.h / 2;
@@ -149,6 +153,7 @@
 
   function area(b) {
     if (b.kind === 'ball') return Math.PI * b.r * b.r;
+    if (b.kind === 'custom') return PPM.shapes.decompose(b.paths).area;
     const v = vertices(b);
     let s = 0;
     for (let i = 0; i < v.length; i++) {
@@ -186,6 +191,7 @@
   function containsPoint(b, p, pad = 0) {
     const q = toLocal(b, p);
     if (b.kind === 'ball') return Math.hypot(q.x, q.y) <= b.r + pad;
+    if (b.kind === 'custom') return PPM.shapes.inside(b.paths, q.x, q.y) || (pad > 0 && PPM.shapes.distanceToEdges(b.paths, q.x, q.y) <= pad);
     const v = vertices(b);
     // Convex polygon, counterclockwise: inside every edge (with a little padding).
     for (let i = 0; i < v.length; i++) {
@@ -329,6 +335,30 @@
     return JSON.stringify(scene);
   }
 
+  // A custom outline from a file: polygons of rings of [x, y], with a sane number of points.
+  function parsePaths(src) {
+    if (!Array.isArray(src) || !src.length || src.length > 50) return null;
+    let count = 0;
+    const out = [];
+    for (const poly of src) {
+      if (!Array.isArray(poly) || !poly.length) return null;
+      const rings = [];
+      for (const ring of poly) {
+        if (!Array.isArray(ring) || ring.length < 3) return null;
+        const pts = [];
+        for (const p of ring) {
+          if (!Array.isArray(p) || !Number.isFinite(p[0]) || !Number.isFinite(p[1]) || Math.abs(p[0]) > 100 || Math.abs(p[1]) > 100) return null;
+          pts.push([p[0], p[1]]);
+        }
+        count += pts.length;
+        rings.push(pts);
+      }
+      out.push(rings);
+    }
+    if (count > 5000) return null;
+    return PPM.shapes && PPM.shapes.decompose(out).pieces.length ? out : null;
+  }
+
   // Reads a saved scene. Unknown objects are skipped; every number is checked and clamped.
   function parse(text) {
     const data = typeof text === 'string' ? JSON.parse(text) : text;
@@ -344,7 +374,9 @@
     let maxNum = 0;
     const track = (id) => { const n = parseInt(String(id).slice(1), 10); if (n > maxNum) maxNum = n; };
     data.bodies.forEach((src) => {
-      if (!src || typeof src.id !== 'string' || ids.has(src.id) || !['ball', 'box', 'plank', 'wedge', 'polygon'].includes(src.kind)) { skipped++; return; }
+      if (!src || typeof src.id !== 'string' || ids.has(src.id) || !['ball', 'box', 'plank', 'wedge', 'polygon', 'custom'].includes(src.kind)) { skipped++; return; }
+      const paths = src.kind === 'custom' ? parsePaths(src.paths) : null;
+      if (src.kind === 'custom' && !paths) { skipped++; return; }
       const b = {
         id: src.id, kind: src.kind, name: String(src.name || 'Object').slice(0, 40),
         x: clamp(num(src.x, 0), ...LIMITS.coord), y: clamp(num(src.y, 0), ...LIMITS.coord), angle: num(src.angle, 0),
@@ -356,6 +388,7 @@
       };
       if (b.kind === 'ball') b.r = clamp(num(src.r, 0.25), ...LIMITS.r);
       else if (b.kind === 'polygon') { b.r = clamp(num(src.r, 0.3), ...LIMITS.r); b.sides = Math.round(clamp(num(src.sides, 6), ...LIMITS.sides)); }
+      else if (b.kind === 'custom') b.paths = paths;
       else { b.w = clamp(num(src.w, 0.5), ...LIMITS.w); b.h = clamp(num(src.h, 0.5), ...LIMITS.h); }
       ids.add(b.id); track(b.id);
       scene.bodies.push(b);

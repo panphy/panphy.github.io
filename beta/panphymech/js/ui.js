@@ -9,6 +9,9 @@
     pan: '<path d="M12 3v18M3 12h18"/><path d="M9.5 5.5L12 3l2.5 2.5M9.5 18.5L12 21l2.5-2.5M5.5 9.5L3 12l2.5 2.5M18.5 9.5L21 12l-2.5 2.5"/>',
     rotate: '<path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/>',
     rotateCcw: '<path d="M4 11a8 8 0 112.3 5.7"/><path d="M4 4v7h7"/>',
+    multi: '<path d="M3 3l8 4-3.5 1L6 11.5z"/><rect x="11" y="11" width="10" height="10" rx="2"/><path d="M16 13.5v5M13.5 16h5"/>',
+    merge: '<path d="M3.5 3.5h10v6h7v11h-11v-6h-6z"/>',
+    subtract: '<path d="M3.5 3.5h13v6h-7v7h-6z"/><rect x="10" y="10" width="10.5" height="10.5" rx="1" stroke-dasharray="2.2 2.2"/>',
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
     cross: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
@@ -64,6 +67,22 @@
     weld: `<rect x="8" y="14" width="26" height="16" rx="1" fill="${c('violet').fill}" stroke="${c('violet').stroke}" stroke-width="1.4"/><rect x="28" y="10" width="26" height="16" rx="1" fill="${c('pink').fill}" stroke="${c('pink').stroke}" stroke-width="1.4"/><path class="p-glue" d="M31 13.5l6.5 6.5-6.5 6.5-6.5-6.5z"/><circle class="p-pin-dot" cx="31" cy="20" r="1.7"/>`
   };
   const partSvg = (kind) => `<svg viewBox="0 0 64 44" aria-hidden="true">${PART_ART[kind] || ''}</svg>`;
+
+  // A custom shape's own outline, fitted into the 64 × 44 icon box.
+  function customSvg(b) {
+    const pts = b.paths.flat(2);
+    const xs = pts.map((p) => p[0]);
+    const ys = pts.map((p) => p[1]);
+    const minX = Math.min(...xs); const maxX = Math.max(...xs);
+    const minY = Math.min(...ys); const maxY = Math.max(...ys);
+    const k = Math.min(56 / (maxX - minX || 1), 36 / (maxY - minY || 1));
+    const ox = 32 - ((minX + maxX) / 2) * k;
+    const oy = 22 + ((minY + maxY) / 2) * k;
+    const d = b.paths.map((poly) => poly.map((ring) => 'M' + ring.map(([x, y]) => `${(ox + x * k).toFixed(1)} ${(oy - y * k).toFixed(1)}`).join('L') + 'z').join('')).join('');
+    const col = S.COLORS[b.color] || S.COLORS.blue;
+    return `<svg viewBox="0 0 64 44" aria-hidden="true"><path d="${d}" fill="${col.fill}" stroke="${col.stroke}" stroke-width="1.4" fill-rule="evenodd" stroke-linejoin="round"/></svg>`;
+  }
+  const bodyArt = (b) => (b.kind === 'custom' ? customSvg(b) : partSvg(b.kind === 'box' && b.fixed ? 'wall' : b.kind));
 
   const PART_GROUPS = [
     { title: 'Objects', items: ['ball', 'box', 'plank', 'polygon', 'wedge', 'wall'] },
@@ -178,6 +197,9 @@
     $('btn-rotate-ccw').addEventListener('click', () => app.rotateSelection(1));
     $('btn-rotate').addEventListener('click', () => app.rotateSelection(-1));
     $('btn-duplicate').addEventListener('click', () => app.duplicateSelection());
+    $('btn-multi').addEventListener('click', () => app.setMultiMode(!app.multiMode));
+    $('btn-merge').addEventListener('click', () => app.mergeSelection());
+    $('btn-subtract').addEventListener('click', () => app.subtractSelection());
     $('btn-delete').addEventListener('click', () => app.deleteSelection());
     $('btn-zoom-in').addEventListener('click', () => app.zoomBy(1.25));
     $('btn-zoom-out').addEventListener('click', () => app.zoomBy(0.8));
@@ -196,8 +218,10 @@
       $('btn-undo').disabled = !app.canUndo();
       $('btn-redo').disabled = !app.canRedo();
       $('btn-delete').disabled = !sel;
-      $('btn-duplicate').disabled = !sel || sel.type !== 'body';
-      $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = !sel || sel.type !== 'body' || app.running;
+      $('btn-duplicate').disabled = !sel || sel.type !== 'body' || app.extra.length > 0;
+      $('btn-multi').setAttribute('aria-pressed', String(app.multiMode));
+      $('btn-merge').disabled = $('btn-subtract').disabled = !app.canCombine();
+      $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = !sel || sel.type !== 'body' || app.running || app.extra.length > 0;
       $('btn-snap').setAttribute('aria-pressed', String(app.snap));
       $('btn-graph').setAttribute('aria-pressed', String(app.graphOpen));
       $('btn-clear').disabled = !app.scene.bodies.length && !app.scene.links.length;
@@ -440,7 +464,7 @@
       const kindLabel = (b().kind === 'wedge' ? 'Ramp' : S.BODY_KINDS[b().kind].label) + (b().fixed ? ' · fixed' : ' · movable');
 
       const main = card('');
-      main.appendChild(head(kindLabel, b().name, partSvg(b().kind === 'box' && b().fixed ? 'wall' : b().kind), (v) => app.editParam(() => { b().name = v; }, null, true)));
+      main.appendChild(head(kindLabel, b().name, bodyArt(b()), (v) => app.editParam(() => { b().name = v; }, null, true)));
       main.appendChild(numField({ label: 'Mass \\(m\\)', plain: 'Mass m', unit: 'kg', get: () => b().mass, set: param((x, v) => { x.mass = v; }), min: L.mass[0], max: L.mass[1], slider: [0.01, 100], log: true, disabled: () => b().fixed }));
       main.appendChild(numField({ label: 'Friction \\(\\mu\\)', plain: 'Friction μ', unit: '', get: () => b().friction, set: param((x, v) => { x.friction = v; }), min: L.friction[0], max: L.friction[1], slider: [0, 1.5], step: 0.01 }));
       main.appendChild(numField({ label: 'Restitution \\(e\\)', plain: 'Restitution e', unit: '', get: () => b().restitution, set: param((x, v) => { x.restitution = v; }), min: 0, max: 1, slider: [0, 1], step: 0.01, help: '1 is perfectly bouncy, 0 does not bounce.' }));
@@ -475,6 +499,17 @@
       const geo = card('Size and position');
       const k = b().kind;
       if (k === 'ball' || k === 'polygon') geo.appendChild(numField({ label: 'Radius \\(r\\)', plain: 'Radius r', unit: 'm', get: () => b().r, set: setup((x, v) => { x.r = v; S.refitLengths(app.scene, new Set([x.id])); }), min: L.r[0], max: L.r[1], slider: [0.05, 2], step: 0.01 }));
+      if (k === 'custom') {
+        // A merged or cut shape keeps its outline; width scales it evenly.
+        const widthOf = (x) => { const v = S.vertices(x); return Math.max(...v.map((p) => p.x)) - Math.min(...v.map((p) => p.x)); };
+        geo.appendChild(numField({ label: 'Width', unit: 'm', get: () => widthOf(b()), set: setup((x, v) => { x.paths = PPM.shapes.scalePaths(x.paths, v / widthOf(x)); }), min: 0.02, max: 40, slider: [0.05, 10], step: 0.01, help: 'Scales the whole shape evenly.' }));
+        const info = document.createElement('p');
+        info.className = 'field-help';
+        const showInfo = () => { const d = PPM.shapes.decompose(b().paths); info.textContent = `Area ${fmt(d.area)} m², made of ${d.pieces.length} convex piece${d.pieces.length === 1 ? '' : 's'}.`; };
+        showInfo();
+        ui.fields.push(showInfo);
+        geo.appendChild(info);
+      }
       if (k === 'polygon') geo.appendChild(numField({ label: 'Sides', unit: '', get: () => b().sides, set: setup((x, v) => { x.sides = v; }), min: 3, max: 8, slider: [3, 8], step: 1, integer: true }));
       if (k === 'box' || k === 'plank' || k === 'wedge') {
         geo.appendChild(numField({ label: 'Width \\(w\\)', plain: 'Width w', unit: 'm', get: () => b().w, set: setup((x, v) => { x.w = v; }), min: L.w[0], max: L.w[1], slider: [0.05, 10], step: 0.01 }));
@@ -594,6 +629,34 @@
       return cards;
     }
 
+    function multiInspector() {
+      const ids = app.selectedBodies();
+      const bodies = ids.map((id) => S.bodyById(app.scene, id)).filter(Boolean);
+      const c2 = card(`${bodies.length} objects selected`);
+      const list = document.createElement('ol');
+      list.className = 'multi-list';
+      list.innerHTML = bodies.map((b, i) => `<li><span class="multi-art">${bodyArt(b)}</span><span>${esc(b.name)}</span>${i === bodies.length - 1 ? '<span class="multi-tag">cutter</span>' : ''}</li>`).join('');
+      c2.appendChild(list);
+      const note = document.createElement('p');
+      note.className = 'icard-note';
+      const last = bodies[bodies.length - 1];
+      note.textContent = `Merge joins them into one rigid shape with their total mass. Subtract cuts ${last ? last.name : 'the last one'} (picked last) out of the others and removes it. Shift-click an object to add or remove it.`;
+      c2.appendChild(note);
+      c2.appendChild(actions([
+        { icon: 'merge', label: 'Merge', run: () => app.mergeSelection() },
+        { icon: 'subtract', label: 'Subtract', run: () => app.subtractSelection() },
+        { icon: 'trash', label: 'Delete all', run: () => app.deleteSelection(), danger: true }
+      ]));
+      if (app.running) {
+        const r = document.createElement('p');
+        r.className = 'icard-note';
+        r.textContent = 'Pause the simulation to merge or subtract.';
+        c2.appendChild(r);
+      }
+      ui.readings = null;
+      return [c2];
+    }
+
     function worldInspector() {
       const w = () => app.scene.world;
       const main = card('World');
@@ -643,7 +706,8 @@
       body.innerHTML = '';
       const sel = app.selection;
       let cards;
-      if (sel && sel.type === 'body' && S.bodyById(app.scene, sel.id)) cards = bodyInspector(S.bodyById(app.scene, sel.id));
+      if (sel && sel.type === 'body' && app.extra.length) cards = multiInspector();
+      else if (sel && sel.type === 'body' && S.bodyById(app.scene, sel.id)) cards = bodyInspector(S.bodyById(app.scene, sel.id));
       else if (sel && sel.type === 'link' && S.linkById(app.scene, sel.id)) cards = linkInspector(S.linkById(app.scene, sel.id));
       else cards = worldInspector();
       cards.forEach((c2) => body.appendChild(c2));

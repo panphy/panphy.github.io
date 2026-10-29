@@ -90,7 +90,7 @@
           for (const end of ['a', 'b']) if (Math.hypot(sp.x - ends[end].x, sp.y - ends[end].y) <= 11) return { type: 'linkEnd', link: l, end };
         }
       }
-      if (sel && sel.type === 'body' && app.canEditGeometry()) {
+      if (sel && sel.type === 'body' && app.canEditGeometry() && !app.extra.length) {
         const b = S.bodyById(app.scene, sel.id);
         const hs = b && ed.handles(b);
         if (hs) {
@@ -350,6 +350,10 @@
       const b = S.bodyById(app.scene, gesture.bodyId);
       gesture.b0 = b ? { x: b.x, y: b.y, angle: b.angle, w: b.w, h: b.h, r: b.r } : null;
       gesture.group = S.rigidGroup(app.scene, gesture.bodyId);
+      // Several objects selected: they all move together.
+      if (app.extra.length && app.isSelected('body', gesture.bodyId)) {
+        app.selectedBodies().forEach((id) => S.rigidGroup(app.scene, id).forEach((g) => gesture.group.add(g)));
+      }
     }
 
     // ---------- Dragging connectors ----------
@@ -465,7 +469,11 @@
       const q = S.toLocal(b0, w);
       const corner = gesture.corner;
       const L = S.LIMITS;
-      if (b.kind === 'ball' || b.kind === 'polygon') {
+      if (b.kind === 'custom') {
+        // A custom shape scales evenly about its centroid.
+        const k = S.clamp(Math.hypot(q.x, q.y) / Math.hypot(corner.x, corner.y), 0.05, 20);
+        b.paths = PPM.shapes.scalePaths(b.paths, k);
+      } else if (b.kind === 'ball' || b.kind === 'polygon') {
         const k = Math.hypot(q.x, q.y) / Math.hypot(corner.x, corner.y);
         b.r = S.clamp(snapV(b0.r * k, SNAP_SIZE), L.r[0], L.r[1]);
       } else {
@@ -543,7 +551,14 @@
         armHold(e, { type: 'link', id: hit.link.id });
         return;
       }
-      app.select({ type: 'body', id: hit.body.id });
+      // Shift-click (or the Select several tool) adds or removes objects from the selection.
+      if (e.shiftKey || app.multiMode) {
+        app.toggleInSelection(hit.body.id);
+        startGesture('none', e, sp);
+        return;
+      }
+      // Pressing one of several selected objects keeps them all selected, to drag together.
+      if (!(app.extra.length && app.isSelected('body', hit.body.id))) app.select({ type: 'body', id: hit.body.id });
       if (app.running) {
         if (!hit.body.fixed && app.sim.grab(hit.body.id, w)) startGesture('grab', e, sp);
         else startGesture('none', e, sp);
