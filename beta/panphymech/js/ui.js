@@ -693,7 +693,7 @@
       main.appendChild(numField({ label: 'Gravity \\(g\\)', plain: 'Gravity g', unit: 'N/kg', get: () => w().gravity, set: (v, key) => app.editParam(() => { w().gravity = v; }, key), min: L.gravity[0], max: L.gravity[1], slider: [0, 25], step: 0.01 }));
       const presets = document.createElement('div');
       presets.className = 'preset-row';
-      [['Earth', 9.81], ['Moon', 1.62], ['Mars', 3.71], ['Jupiter', 24.79], ['None', 0]].forEach(([name, g]) => {
+      [['Earth', 9.81], ['Moon', 1.62], ['Mars', 3.71], ['Jupiter', 24.79]].forEach(([name, g]) => {
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'ds-chip';
