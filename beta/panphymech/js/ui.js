@@ -8,6 +8,7 @@
     select: '<path d="M5 3l14 7-6 1.6L10.5 18z"/>',
     pan: '<path d="M12 3v18M3 12h18"/><path d="M9.5 5.5L12 3l2.5 2.5M9.5 18.5L12 21l2.5-2.5M5.5 9.5L3 12l2.5 2.5M18.5 9.5L21 12l-2.5 2.5"/>',
     rotate: '<path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/>',
+    rotateCcw: '<path d="M4 11a8 8 0 112.3 5.7"/><path d="M4 4v7h7"/>',
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
     cross: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
@@ -174,7 +175,8 @@
     document.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => { app.editor.arm(null); app.editor.setTool(b.dataset.tool); }));
     $('btn-undo').addEventListener('click', () => app.undo());
     $('btn-redo').addEventListener('click', () => app.redo());
-    $('btn-rotate').addEventListener('click', (e) => app.rotateSelection(e.shiftKey ? 1 : -1));
+    $('btn-rotate-ccw').addEventListener('click', () => app.rotateSelection(1));
+    $('btn-rotate').addEventListener('click', () => app.rotateSelection(-1));
     $('btn-duplicate').addEventListener('click', () => app.duplicateSelection());
     $('btn-delete').addEventListener('click', () => app.deleteSelection());
     $('btn-zoom-in').addEventListener('click', () => app.zoomBy(1.25));
@@ -195,7 +197,7 @@
       $('btn-redo').disabled = !app.canRedo();
       $('btn-delete').disabled = !sel;
       $('btn-duplicate').disabled = !sel || sel.type !== 'body';
-      $('btn-rotate').disabled = !sel || sel.type !== 'body' || app.running;
+      $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = !sel || sel.type !== 'body' || app.running;
       $('btn-snap').setAttribute('aria-pressed', String(app.snap));
       $('btn-graph').setAttribute('aria-pressed', String(app.graphOpen));
       $('btn-clear').disabled = !app.scene.bodies.length && !app.scene.links.length;
