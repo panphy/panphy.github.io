@@ -1,4 +1,4 @@
-// Run with: node --test tools/panphycircuits/tests/*.test.cjs
+// Run with: node --test sandboxes/panphycircuits/tests/*.test.cjs
 // Document, layout and view-synchronization checks (no browser needed).
 const test = require('node:test');
 const assert = require('node:assert/strict');

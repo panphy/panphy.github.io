@@ -1,6 +1,6 @@
 # PanPhyMech
 
-A 2D mechanics sandbox in the style of Algodoo, in beta. Entry point: `beta/panphymech.html`, listed in `beta/index.html`. Plain HTML, CSS and classic scripts on the global `PPM` namespace; no build step. It loads no service worker and is network-only while in `beta/`.
+A 2D mechanics sandbox in the style of Algodoo. Entry point: `sandboxes/panphymech.html`, listed under Sandboxes on the homepage. Plain HTML, CSS and classic scripts on the global `PPM` namespace; no build step. It works offline: runtime files and the manual are listed in `ASSETS_TO_CACHE` in `sw.js` and `OFFLINE_CARD_REQUIREMENTS` in `index.html`. Add new runtime files to both and bump `BUILD_ID`.
 
 Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rope, hinge, motor, glue) go on a canvas in SI units. Play runs the physics; the graph shows position, velocity or energy of one object, a spring or the whole system, with CSV and PanPhyPlot export.
 
@@ -22,7 +22,7 @@ The [user manual](manual.html) has a five-step pendulum walkthrough and a refere
 | `js/graph.js` | The sample recorder, the time graph, CSV and PanPhyPlot export |
 | `js/ui.js`, `js/app.js` | Panels, inspector and quick settings; state, run loop, undo, autosave, fitting the view, files and shortcuts |
 
-Run the physics checks with `node --test beta/panphymech/tests/*.test.cjs`. They compare free fall, projectile range, spring and pendulum periods, an elastic collision, a block on a ramp and terminal velocity with textbook results, and run every example. Export checks cover vector output and escaped labels.
+Run the physics checks with `node --test sandboxes/panphymech/tests/*.test.cjs`. They compare free fall, projectile range, spring and pendulum periods, an elastic collision, a block on a ramp and terminal velocity with textbook results, and run every example. Export checks cover vector output and escaped labels.
 
 Drag any library part directly into the scene. Connector drags show the snapped starting point on the canvas, without a floating connector icon. Springs, rods and ropes start their first endpoint at the drop position; click the second endpoint to finish, or press Esc to cancel. Hinges, motors and glue attach at the drop position. Right-click or hold an object, connector or selected connector endpoint for quick settings (500 ms for touch/pen); movement and a second finger cancel the hold.
 
@@ -49,10 +49,3 @@ The scene autosaves to `panphy-mech-scene-v1` and display choices to `panphy-mec
 
 Fit frames the current object positions and connector anchors with the original margins and floor placement. Objects far from the rest are left out and named so a runaway object cannot shrink the scene to dots.
 
-## Promoting it
-
-The page already follows the published-app conventions (shared theme, Spectrum design, fonts, math labels, copyright), so promotion is mostly moving files:
-
-1. Move `beta/panphymech.html` to `simulations/panphymech.html` and this folder to `simulations/panphymech/`; relative paths stay valid. Remove the entry from `beta/index.html` and update the test path in `.github/workflows/checks.yml`.
-2. Remove `<meta name="robots" content="noindex">`; add the canonical link and the discovery metadata used by other apps; add the page to `index.html` and `sitemap.xml`.
-3. Add `<script src="/assets/sw-register.js" defer></script>`, add the page, its CSS and JS files (including the vendored Planck) to `ASSETS_TO_CACHE` in `sw.js`, add its offline requirements (with `/assets/math.js` and the pinned MathJax URL) to `OFFLINE_CARD_REQUIREMENTS` in `index.html`, and bump `BUILD_ID`.

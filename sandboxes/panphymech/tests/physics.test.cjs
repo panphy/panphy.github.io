@@ -1,4 +1,4 @@
-// PanPhyMech physics checks against textbook results: node --test beta/panphymech/tests/*.test.cjs
+// PanPhyMech physics checks against textbook results: node --test sandboxes/panphymech/tests/*.test.cjs
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');

@@ -1,6 +1,6 @@
 # PanPhyCircuits
 
-A circuit builder and simulator for GCSE and IB Physics. Entry point: `tools/panphycircuits.html`, listed under Tools on the homepage. Plain HTML, CSS and classic scripts; no build step. It works offline: every file here is in `ASSETS_TO_CACHE` in `sw.js` and in the page's offline requirements in `index.html`, so add new files to both and bump `BUILD_ID`.
+A circuit builder and simulator for GCSE and IB Physics. Entry point: `sandboxes/panphycircuits.html`, listed under Sandboxes on the homepage. Plain HTML, CSS and classic scripts; no build step. It works offline: every file here is in `ASSETS_TO_CACHE` in `sw.js` and in the page's offline requirements in `index.html`, so add new files to both and bump `BUILD_ID`.
 
 ## Structure
 
@@ -54,7 +54,7 @@ Adding a component: define it in `registry.js` (terminals, props, `compile` into
 ## Tests
 
 ```sh
-node --test tools/panphycircuits/tests/*.test.cjs
+node --test sandboxes/panphycircuits/tests/*.test.cjs
 ```
 
 `solver.test.cjs` compares the solver with hand calculations (series/parallel, bridge, switches, polarity, shorts, conflicting sources, RC/RL against the exponential, LC energy exchange, AC inductor phase lag, transformer turns ratios/loading/isolation/DC decay, diode, LED, lamp, transistors, every gate truth table, latch, AC r.m.s., ohmmeter readings). `model.test.cjs` covers terminal mapping, rotation (including 45° steps), mirroring, clear placement of new parts, junction splitting, view sync, diagram rerouting after component moves, terminal and corner clearance, self-crossing rejection, a sweep of 1,569 valid lamp positions including narrow lead gaps, genuine junction dots, full oscilloscope frame clearance, single-channel scope fast layouts, symbol collision checks, examples and import safety. It also checks repeated Tidy on the clean AND diagram, rendered-route quality, straight leads/positive readings in the parallel-resistor example, textbook Tidy of branches wired straight onto terminals (shared trunks and their dots), separate junction points, and Tidy's time limit and second-click stability. `scope-scale.test.cjs` covers automatic voltage/time scaling, manual restoration, saved settings, 44 Hz sine acquisition, peak-preserving reduction, bounded long acquisitions, three-scope tiny-step RLC acquisition past the first AC cycle, separate meter averaging, and clearing traces after source edits. `audio.test.cjs` checks supply-matched frequency, current-controlled volume, network isolation, sub-audible/DC silence, saved mute compatibility and audio lifecycle with the real solver. `flow.test.cjs` checks slow AC replay against actual solver currents, rectification, DC isolation, pause, source edits and live fallbacks. `editor.test.cjs` checks touch/pen holds, short taps, drag cancellation, switch controls, momentary buttons, terminal wiring, pinch and pointer cancellation, native context menus, mouse input and stale documents. All run on every pull request (`.github/workflows/checks.yml`).

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#F5F6FA">
+  <script src="/assets/theme.js"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>PanPhyCircuits: Circuit Builder and Simulator — PanPhy Labs</title>
+  <meta name="description" content="Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.">
+  <link rel="canonical" href="https://panphy.app/sandboxes/panphycircuits.html">
+<!-- panphy-discovery -->
+  <meta property="og:title" content="PanPhyCircuits: Circuit Builder and Simulator — PanPhy Labs">
+  <meta property="og:description" content="Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://panphy.app/sandboxes/panphycircuits.html">
+  <meta property="og:image" content="https://panphy.app/assets/og-default.png">
+  <meta property="og:site_name" content="PanPhy Labs">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PanPhyCircuits: Circuit Builder and Simulator — PanPhy Labs">
+  <meta name="twitter:description" content="Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.">
+  <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PanPhyCircuits",
+  "description": "Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.",
+  "url": "https://panphy.app/sandboxes/panphycircuits.html",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires HTML5 and JavaScript",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "image": "https://panphy.app/assets/og-default.png"
+}
+  </script>
+<!-- /panphy-discovery -->
+
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <script src="/assets/sw-register.js" defer></script>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/design.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <link rel="stylesheet" href="panphycircuits/css/app.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/assets/fullscreen-button.js"></script>
+  <link rel="stylesheet" href="/assets/footer.css">
+</head>
+
+<body>
+  <div id="app" class="app">
+    <header class="appbar">
+      <div class="brand">
+        <a href="/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo" width="30" height="30"></a>
+        <h1 class="wordmark">PanPhyCircuits</h1>
+      </div>
+      <div class="appbar-actions">
+        <div class="appbar-group" role="group" aria-label="Circuits">
+          <button type="button" id="btn-examples" class="atool" data-icon="examples" title="Open an example circuit"><span>Examples</span></button>
+          <div class="menu-wrap">
+            <button type="button" id="btn-file" class="atool" data-icon="folder" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-file" title="Open, save and export"><span>File</span><svg class="icon icon-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+            <div id="menu-file" class="menu" role="menu" hidden>
+              <button type="button" role="menuitem" data-file="open">Open file…</button>
+              <button type="button" role="menuitem" data-file="save">Save as file (.ppcir)</button>
+              <hr>
+              <button type="button" role="menuitem" data-file="svg">Export this view as SVG</button>
+              <button type="button" role="menuitem" data-file="png">Export this view as PNG</button>
+              <button type="button" role="menuitem" data-file="panphymd">Export to PanPhyMD</button>
+            </div>
+          </div>
+        </div>
+        <a href="/sandboxes/panphycircuits/manual.html" class="atool atool-quiet" data-icon="guide" title="Open the PanPhyCircuits manual"><span>Manual</span></a>
+        <button id="theme-button" type="button" data-panphy-theme-toggle="auto" aria-label="Toggle light/dark theme" title="Toggle light/dark theme"></button>
+        <button type="button" data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
+      </div>
+    </header>
+
+    <main class="main">
+      <aside id="library" class="pane library" aria-labelledby="library-title">
+        <div class="pane-head">
+          <div class="pane-title"><h2 class="pane-heading" id="library-title">Components</h2><p class="pane-hint">Drag to add</p></div>
+          <button type="button" class="icon-btn panel-close" data-close-panel data-icon="close" aria-label="Close components"></button>
+        </div>
+        <div class="lib-head">
+          <label class="search">
+            <span class="sr-only">Search components</span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            <input id="lib-search" type="search" placeholder="Search components" autocomplete="off">
+          </label>
+          <div class="lib-filters" role="group" aria-label="Filter components">
+            <button type="button" class="ds-chip" data-filter="all" aria-pressed="false">All</button>
+            <button type="button" class="ds-chip" data-filter="core" aria-pressed="true">Core</button>
+            <button type="button" class="ds-chip" data-filter="logic" aria-pressed="false">Logic</button>
+          </div>
+        </div>
+        <div id="lib-list" class="lib-list"></div>
+      </aside>
+
+      <section class="pane stage" aria-labelledby="circuit-title">
+        <div class="pane-head stage-head">
+          <h2 class="pane-heading" id="circuit-title">Circuit</h2>
+          <button type="button" id="btn-show-library" class="tool tool-panel" data-icon="panelLeft" aria-label="Show components" title="Show components" aria-controls="library" aria-expanded="false"></button>
+          <div id="view-switch" class="view-switch" role="group" aria-label="View" data-view="realistic">
+            <button type="button" id="view-realistic" data-icon="realistic" aria-pressed="true" title="Realistic view: components as physical objects (1)"><span>Realistic</span></button>
+            <button type="button" id="view-schematic" data-icon="schematic" aria-pressed="false" title="Circuit diagram view: standard symbols (2)"><span>Circuit diagram</span></button>
+          </div>
+          <button type="button" id="btn-show-inspector" class="tool tool-panel" data-icon="panelRight" aria-label="Show inspector" title="Show inspector" aria-controls="inspector" aria-expanded="false"></button>
+        </div>
+        <div class="pane-toolbar toolbar" role="toolbar" aria-label="Tools">
+          <div class="tool-group">
+            <button type="button" class="tool" data-tool="select" data-icon="select" aria-label="Select and move (V)" title="Select and move (V)"></button>
+            <button type="button" class="tool" data-tool="wire" data-icon="wire" aria-label="Wire tool (W): click terminals, or click a wire to branch" title="Wire (W): click terminals, or click a wire to branch"></button>
+            <button type="button" class="tool" data-tool="pan" data-icon="pan" aria-label="Pan (H)" title="Pan (H)"></button>
+          </div>
+          <div class="tool-group">
+            <button type="button" id="btn-rotate-ccw" class="tool" data-icon="rotateCcw" aria-label="Rotate 45° counterclockwise (Shift+R)" title="Rotate 45° counterclockwise (Shift+R)"></button>
+            <button type="button" id="btn-rotate" class="tool" data-icon="rotate" aria-label="Rotate 45° clockwise (R)" title="Rotate 45° clockwise (R)"></button>
+            <button type="button" id="btn-mirror" class="tool" data-icon="mirror" aria-label="Mirror (M)" title="Mirror (M)"></button>
+            <button type="button" id="btn-duplicate" class="tool" data-icon="duplicate" aria-label="Duplicate (Ctrl+D)" title="Duplicate (Ctrl+D)"></button>
+            <button type="button" id="btn-delete" class="tool" data-icon="cross" aria-label="Delete (Del)" title="Delete (Del)"></button>
+          </div>
+          <div class="tool-group">
+            <button type="button" id="btn-tidy" class="tool" data-icon="tidy" aria-label="Tidy up this view" title="Tidy up: line up parts and reroute wires in this view"></button>
+          </div>
+          <div class="tool-group">
+            <button type="button" id="btn-undo" class="tool" data-icon="undo" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)"></button>
+            <button type="button" id="btn-redo" class="tool" data-icon="redo" aria-label="Redo (Ctrl+Shift+Z)" title="Redo (Ctrl+Shift+Z)"></button>
+          </div>
+          <div class="tool-group">
+            <button type="button" id="btn-zoom-out" class="tool" data-icon="zoomOut" aria-label="Zoom out (−)" title="Zoom out (−)"></button>
+            <button type="button" id="btn-zoom-in" class="tool" data-icon="zoomIn" aria-label="Zoom in (+)" title="Zoom in (+)"></button>
+            <button type="button" id="btn-fit" class="tool" data-icon="fit" aria-label="Fit to circuit (0)" title="Fit to circuit (0)"></button>
+            <button type="button" id="btn-snap" class="tool" data-icon="snap" aria-label="Snap to grid (G)" title="Snap to grid (G)" aria-pressed="true"></button>
+            <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph of meter and oscilloscope readings" aria-pressed="false"></button>
+          </div>
+          <div class="toolbar-end">
+            <div class="menu-wrap display-wrap">
+              <button type="button" id="btn-display" class="tool tool-display" data-icon="sliders" aria-haspopup="true" aria-expanded="false" aria-controls="display-menu" aria-label="Display settings" title="Display settings: labels, values, current animation, symbols"></button>
+              <div id="display-menu" class="menu display-menu" role="group" aria-label="Display settings" hidden></div>
+            </div>
+            <button type="button" id="btn-clear" class="tool-clear" data-icon="trash" title="Clear circuit: remove every part and wire from both views (you can undo it)"><span>Clear</span></button>
+          </div>
+        </div>
+        <div id="workspace" class="workspace view-realistic" tabindex="0" role="application" aria-label="Circuit workspace. Tab cycles through components; arrow keys move the selection." data-active-tool="select">
+          <svg id="ws-svg" class="ws-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+          <div id="flow-note" class="flow-note" title="Current animation only. Meters, scope traces and sound use the actual frequency." hidden>AC animation slowed for visibility</div>
+
+          <!-- Live circuit controls, also available in the Simulation inspector. -->
+          <div id="sim-status" class="sim-status" data-state="live" role="group" aria-label="Simulation controls">
+            <button type="button" id="btn-run" class="chip-btn chip-pause" aria-pressed="false"></button>
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="sim-state" class="sim-state">Live</span>
+          </div>
+
+          <button type="button" id="error-banner" class="error-banner" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg><span></span></button>
+
+          <div id="empty-state" class="empty-state">
+            <h2 class="ds-title">Start building</h2>
+            <ol>
+              <li><strong>Add components.</strong> Drag one from the library, or click it and then click here.</li>
+              <li><strong>Connect them.</strong> Click a terminal, then another. Click a wire to branch from it.</li>
+              <li><strong>Measure.</strong> Readings update live. When a circuit changes over time (capacitors, AC, the oscilloscope), a Pause button appears at the bottom right so you can freeze it.</li>
+            </ol>
+            <p>Switch between <strong>Realistic</strong> and <strong>Circuit diagram</strong> at any time: both show the same circuit.</p>
+            <div class="empty-actions">
+              <button type="button" id="empty-clean" class="ds-button ds-button-primary">Start with a clean canvas</button>
+              <button type="button" id="empty-start" class="ds-button">Open a starter circuit</button>
+            </div>
+          </div>
+
+          <div id="problems-pop" class="problems-pop" hidden></div>
+        </div>
+        <div id="graph-panel" class="graph-panel" hidden>
+          <div class="graph-head">
+            <strong class="graph-title">Graph</strong>
+            <div id="graph-legend" class="graph-legend"></div>
+            <div class="graph-actions">
+              <button type="button" id="graph-full" class="graph-view-button" data-icon="fit" title="Restore the full graph view" disabled>Full Graph</button>
+              <div id="graph-exports" class="graph-exports" hidden>
+                <button type="button" id="graph-export-csv" class="graph-export-pill">Export CSV</button>
+                <button type="button" id="graph-export-plot" class="graph-export-pill">Export to PanPhyPlot</button>
+              </div>
+            </div>
+            <button type="button" id="graph-close" class="icon-btn" data-icon="close" aria-label="Close graph"></button>
+          </div>
+          <canvas id="graph-canvas" class="graph-canvas" tabindex="0" title="Drag to select a time range. Use +/− to zoom, arrow keys to pan, and Escape for Full Graph." aria-label="Graph of plotted meter and oscilloscope readings against time"></canvas>
+        </div>
+      </section>
+
+      <aside id="inspector" class="inspector" aria-label="Inspector">
+        <div class="panel-top">
+          <h2 class="pane-heading">Inspector</h2>
+          <button type="button" class="icon-btn panel-close" data-close-panel data-icon="close" aria-label="Close inspector"></button>
+        </div>
+        <div id="pinned-displays" class="pinned-displays" role="region" aria-label="Pinned displays" tabindex="0" hidden></div>
+        <div id="pinned-resize" class="pinned-resize" role="separator" aria-orientation="horizontal" aria-controls="pinned-displays" aria-label="Resize pinned displays" title="Drag to resize the pinned displays. Double-click to reset." tabindex="0" hidden></div>
+        <div id="inspector-body" class="inspector-body"></div>
+      </aside>
+    </main>
+
+    <footer class="statusbar panphy-footer">
+    <div class="statusbar-status">
+        <span id="hint" class="hint"></span>
+        <button type="button" id="btn-problems" class="problems-btn" hidden></button>
+        <span id="zoom-readout" class="zoom-readout ds-readout"></span>
+      </div>
+      <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
+    </footer>
+  </div>
+
+  <dialog id="dlg-examples" class="dialog dialog-wide" aria-labelledby="examples-title">
+    <form method="dialog" class="dialog-head"><h2 id="examples-title" class="ds-title">Example circuits</h2><button class="icon-btn" value="cancel" aria-label="Close">✕</button></form>
+    <p class="dialog-sub">Each example has a realistic layout and a circuit diagram. Opening one replaces the current circuit (you can undo).</p>
+    <ol id="examples-list" class="examples-list"></ol>
+  </dialog>
+
+  <dialog id="dlg-confirm" class="dialog" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title" class="ds-title"></h2>
+      <p></p>
+      <div class="dialog-actions"><button class="ds-button" value="cancel">Cancel</button><button class="ds-button ds-button-primary danger-fill" value="ok" data-ok>OK</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-message" class="dialog" aria-labelledby="message-title">
+    <form method="dialog">
+      <h2 id="message-title" class="ds-title"></h2>
+      <div class="msg-body"></div>
+      <div class="dialog-actions"><button class="ds-button ds-button-primary" value="ok">OK</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="live" class="sr-only" aria-live="polite"></div>
+  <svg class="defs-host" aria-hidden="true" focusable="false" width="0" height="0"><defs id="shared-defs"></defs></svg>
+  <input type="file" id="file-input" accept=".ppcir,.json,application/json" hidden>
+
+  <script src="panphycircuits/js/units.js"></script>
+  <script src="panphycircuits/js/registry.js"></script>
+  <script src="panphycircuits/js/circuit.js"></script>
+  <script src="panphycircuits/js/solver.js"></script>
+  <script src="panphycircuits/js/art-common.js"></script>
+  <script src="panphycircuits/js/art-realistic.js"></script>
+  <script src="panphycircuits/js/art-schematic.js"></script>
+  <script src="panphycircuits/js/layout.js"></script>
+  <script src="panphycircuits/js/render.js"></script>
+  <script src="panphycircuits/js/editor.js"></script>
+  <script src="/assets/graph-range.js"></script>
+  <script src="panphycircuits/js/graph.js"></script>
+  <script src="panphycircuits/js/ui.js"></script>
+  <script src="panphycircuits/js/examples.js"></script>
+  <script src="panphycircuits/js/audio.js"></script>
+  <script src="panphycircuits/js/app.js"></script>
+</body>
+
+</html>
