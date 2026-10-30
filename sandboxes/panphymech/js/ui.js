@@ -455,19 +455,22 @@
       const law = off() ? null : model === 'quadratic' ? ['F = kv^2', 'F = kv²'] : model !== 'linear' ? null : source === 'stokes' ? ['F = 6\\pi r\\eta v', 'F = 6πrηv'] : ['F = bv', 'F = bv'];
       const head = document.createElement('div');
       head.className = 'drag-head';
-      head.innerHTML = `<span class="choice-label">${isWorld ? 'Drag model' : 'Model'}</span>` + (law ? `<span class="drag-law">${mathText(`\\(${law[0]}\\)`, law[1])}</span>` : '');
+      head.innerHTML = `<span class="choice-label">Model</span>` + (law ? `<span class="drag-law">${mathText(`\\(${law[0]}\\)`, law[1])}</span>` : '');
       el.appendChild(head);
       el.appendChild(segment(isWorld ? 'World drag model' : 'Object drag model', 'dragModel', [
         ...(!isWorld ? [['world', 'World']] : []), ...Object.entries(S.DRAG_MODELS)
       ], model));
-      if (!isWorld) {
-        const note = document.createElement('p');
+      const note = document.createElement('p');
+      if (isWorld) {
+        note.className = 'field-help';
+        note.textContent = 'Objects follow these settings unless they choose their own drag.';
+      } else {
         const message = S.dragOverrideNote(app.scene, get());
         note.className = message ? 'drag-override-note' : 'field-help';
         note.setAttribute('role', 'status');
         note.textContent = get().fixed ? 'Fixed objects do not experience drag.' : message || `Following World: ${S.DRAG_MODELS[S.worldDragModel(app.scene)]}. World changes apply to this object.`;
-        el.appendChild(note);
       }
+      el.appendChild(note);
       if (model === 'linear') {
         const row = document.createElement('div');
         row.className = 'choice-row drag-source';
@@ -788,10 +791,13 @@
 
     function worldInspector() {
       const w = () => app.scene.world;
-      const main = card('World');
-      main.appendChild(numField({ label: 'Gravity \\(g\\)', plain: 'Gravity g', unit: 'N/kg', get: () => w().gravity, set: (v, key) => app.editParam(() => { w().gravity = v; }, key), min: L.gravity[0], max: L.gravity[1], slider: [0, 25], step: 0.01 }));
+      // Gravity, drag and floor each get their own card.
+      const gravity = card('Gravity');
+      gravity.appendChild(numField({ label: 'Gravity \\(g\\)', plain: 'Gravity g', unit: 'N/kg', get: () => w().gravity, set: (v, key) => app.editParam(() => { w().gravity = v; }, key), min: L.gravity[0], max: L.gravity[1], slider: [0, 25], step: 0.01 }));
       const presets = document.createElement('div');
       presets.className = 'preset-row';
+      presets.setAttribute('role', 'group');
+      presets.setAttribute('aria-label', 'Gravity presets');
       [['Earth', 9.81], ['Moon', 1.62], ['Mars', 3.71], ['Jupiter', 24.79]].forEach(([name, g]) => {
         const b = document.createElement('button');
         b.type = 'button';
@@ -803,11 +809,13 @@
         b.addEventListener('click', () => app.editParam(() => { w().gravity = g; }, null));
         presets.appendChild(b);
       });
-      main.appendChild(presets);
-      main.appendChild(dragFields(w, true));
-      main.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
-      main.appendChild(numField({ label: 'Floor friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
-      main.appendChild(numField({ label: '\\(E_\\mathrm{p} = 0\\) at height', plain: 'Zero of gravitational energy at height', unit: 'm', get: () => w().gpeZero || 0, set: (v, key) => app.editParam(() => { w().gpeZero = v; }, key), min: L.coord[0], max: L.coord[1], help: 'Gravitational energy is measured from here; a dashed line marks it when it is not 0.' }));
+      gravity.appendChild(presets);
+      gravity.appendChild(numField({ label: '\\(E_\\mathrm{p} = 0\\) at height', plain: 'Zero of gravitational energy at height', unit: 'm', get: () => w().gpeZero || 0, set: (v, key) => app.editParam(() => { w().gpeZero = v; }, key), min: L.coord[0], max: L.coord[1], help: 'The reference for gravitational energy. A dashed line marks it when it is not 0.' }));
+      const drag = card('Drag');
+      drag.appendChild(dragFields(w, true));
+      const floor = card('Floor');
+      floor.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
+      floor.appendChild(numField({ label: 'Friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
       const sys = readingsCard('System energy now', [
         { key: 'KE', label: 'Kinetic \\(E_\\mathrm{k}\\)', plain: 'Kinetic' }, { key: 'GPE', label: 'Gravitational \\(E_\\mathrm{p}\\)', plain: 'Gravitational' },
         { key: 'EPE', label: 'Elastic \\(E_\\mathrm{e}\\)', plain: 'Elastic' }, '-', { key: 'E', label: 'Total \\(E\\)', plain: 'Total' }
@@ -820,8 +828,8 @@
       ui.readings = { type: 'system' };
       const hint = document.createElement('p');
       hint.className = 'insp-hint';
-      hint.textContent = app.scene.bodies.length ? 'Select an object or a connector to edit it.' : 'Add parts from the left, or open an example.';
-      return [hint, main, sys];
+      hint.textContent = 'World settings apply to the whole scene. ' + (app.scene.bodies.length ? 'Select an object or a connector to edit it.' : 'Add parts from the left, or open an example.');
+      return [hint, gravity, drag, floor, sys];
     }
 
     ui.renderInspector = function renderInspector() {
