@@ -167,7 +167,7 @@ test('placement preview and dropped bodies share precise contact and floor posit
   const floorPreview = h.ed.preview().body;
   h.ed.placeBody('box', h.ed.cursorWorld);
   assert.ok(Math.abs(h.app.scene.bodies.at(-1).y - floorPreview.y) < 1e-8);
-  assert.ok(Math.abs(floorPreview.y - floorPreview.h / 2 - S.restGap(floorPreview)) < 1e-8);
+  assert.ok(Math.abs(floorPreview.y - floorPreview.h / 2) < 1e-8);
 });
 
 test('dropping an already-armed library body creates one object and clears the placement preview', () => {

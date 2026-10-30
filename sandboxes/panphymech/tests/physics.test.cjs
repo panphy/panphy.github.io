@@ -452,7 +452,7 @@ test('terminal-velocity example reaches 99% speed after about one-third of the d
   assert.equal(example.track.name, drag.name); assert.equal(example.track.group, 'velocity');
   const terminalSpeed = Math.sqrt(drag.mass * scene.world.gravity / scene.world.drag);
   assert.equal(terminalSpeed, 3);
-  const height = drag.y - drag.r - S.REST_GAP.ball;
+  const height = drag.y - drag.r;
   assert.equal(height, 6);
   const sim = P.createSim(scene);
   let thresholdFraction = null, atThird = null, checkedPlateau = false;
@@ -474,5 +474,97 @@ test('terminal-velocity example reaches 99% speed after about one-third of the d
     const reading = sim.readBody(b.id);
     assert.ok(Math.abs(reading.vy) < 0.01, `${b.name} should stop after landing`);
     assert.ok(reading.y < b.r + 0.03);
+  }
+});
+
+function addBody(scene, type, x, y, props) {
+  const b = Object.assign(S.makeBody(scene, type, x, y), props);
+  scene.bodies.push(b);
+  return b;
+}
+
+// Box2D collides polygons with a thin skin, so physics.js insets their pieces. Objects must
+// still have their exact mass and inertia, rest on their drawn outlines, and not jump.
+test('inset collision pieces keep exact mass, center and rotational inertia', () => {
+  const scene = emptyScene(false); scene.world.gravity = 0;
+  const box = addBody(scene, 'box', 0, 0, { w: 0.4, h: 0.4, mass: 2, vx: 1, omega: 3 });
+  const wedge = addBody(scene, 'wedge', 3, 0, { w: 1, h: 0.6, mass: 1, omega: 2, fixed: false });
+  const locked = addBody(scene, 'box', 6, 0, { w: 0.3, h: 0.3, mass: 0.5, vx: 2, lockRotation: true });
+  const sim = P.createSim(scene);
+  const rb = sim.readBody(box.id);
+  assert.ok(Math.abs(rb.px - 2) < 1e-9);
+  assert.ok(Math.abs(rb.KEr - 0.5 * (2 * (0.16 + 0.16) / 12) * 9) < 1e-9);
+  const rw = sim.readBody(wedge.id);
+  assert.ok(Math.abs(rw.x - 3) < 1e-9 && Math.abs(rw.y) < 1e-9, 'center of mass stays at the centroid');
+  assert.ok(Math.abs(rw.KEr - 0.5 * (1 * (1 + 0.36) / 18) * 4) < 1e-9);
+  assert.ok(Math.abs(sim.readBody(locked.id).px - 1) < 1e-9);
+  box.mass = 4; sim.updateBody(box);
+  assert.ok(Math.abs(sim.readBody(box.id).px - 4) < 1e-9, 'editing a property keeps the exact mass');
+});
+
+test('a block snapped onto a ramp or the floor rests there without jumping', () => {
+  const scene = emptyScene(true);
+  const theta = Math.PI / 6;
+  addBody(scene, 'wedge', -2.5 + 5 / 3, 5 * Math.tan(theta) / 3, { w: 5, h: 5 * Math.tan(theta), fixed: true, friction: 1 });
+  const onRamp = addBody(scene, 'box', -1.2, 2.2, { w: 0.4, h: 0.4, angle: -theta, friction: 1, restitution: 0 });
+  const onFloor = addBody(scene, 'box', 4, 0.21, { w: 0.4, h: 0.4, friction: 1, restitution: 0 });
+  for (const b of [onRamp, onFloor]) {
+    const d = S.contactSnap(scene, new Set([b.id]), 0.5);
+    assert.ok(d, 'snaps into contact');
+    b.x += d.x; b.y += d.y;
+  }
+  const sim = P.createSim(scene);
+  const n = { x: Math.sin(theta), y: Math.cos(theta) }; // the ramp's outward normal
+  const start = { x: onRamp.x, y: onRamp.y };
+  // A contact may settle a little within Box2D's slop, but nothing may push the block out.
+  for (let i = 0; i < 30; i++) {
+    sim.step();
+    const p = sim.readBody(onRamp.id);
+    const off = (p.x - start.x) * n.x + (p.y - start.y) * n.y;
+    assert.ok(off < 1e-5 && off > -3e-3, `no jump off the slope (${off})`);
+    const dy = sim.readBody(onFloor.id).y - onFloor.y;
+    assert.ok(dy < 1e-5 && dy > -3e-3, `no jump off the floor (${dy})`);
+    assert.ok(Math.hypot(p.vx, p.vy) < 0.02, 'the block stays at rest on the slope');
+  }
+});
+
+test('objects settle exactly on their drawn outlines, and thin planks keep their shape', () => {
+  const scene = emptyScene(true);
+  const box = addBody(scene, 'box', 0, 0.3, { w: 0.4, h: 0.4, restitution: 0 });
+  const plank = addBody(scene, 'plank', 2, 0.1, { w: 1, h: 0.02, restitution: 0 });
+  const top = addBody(scene, 'box', 0, 0.75, { w: 0.3, h: 0.3, restitution: 0 });
+  const sim = P.createSim(scene);
+  run(sim, 2);
+  const yb = sim.readBody(box.id).y, yp = sim.readBody(plank.id).y, yt = sim.readBody(top.id).y;
+  // Within Box2D's resting band, so the outlines look flush.
+  assert.ok(Math.abs(yb - 0.2) < 2e-3, `box rests on the floor (${yb})`);
+  assert.ok(Math.abs(yp - 0.01) < 2e-3, `thin plank rests on the floor (${yp})`);
+  assert.ok(Math.abs(yt - (yb + 0.35)) < 2e-3, `box rests on the box below (${yt - yb})`);
+});
+
+test('a merged shape keeps its exact mass and inertia and stays smooth across its seams', () => {
+  globalThis.earcut = globalThis.earcut || require(path.join(__dirname, '../js/vendor/earcut.min.js'));
+  globalThis.polygonClipping = globalThis.polygonClipping || require(path.join(__dirname, '../js/vendor/polygon-clipping.min.js'));
+  require(path.join(__dirname, '../js/shapes.js'));
+  // An L made of two rectangles: mass and inertia from their parts and the parallel-axis theorem.
+  const scene = emptyScene(false); scene.world.gravity = 0;
+  const L = addBody(scene, 'custom', 0, 0, { paths: [[[[0.5, -0.5], [0.5, -0.3], [-0.3, -0.3], [-0.3, 0.5], [-0.5, 0.5], [-0.5, -0.5]]]], mass: 3, omega: 2, vx: 1 });
+  const parts = [{ a: 0.2, c: [0, -0.4], I: 0.2 * (1 + 0.04) / 12 }, { a: 0.16, c: [-0.4, 0.1], I: 0.16 * (0.04 + 0.64) / 12 }];
+  const area = 0.36, cx = (0.2 * 0 + 0.16 * -0.4) / area, cy = (0.2 * -0.4 + 0.16 * 0.1) / area;
+  const I = (3 / area) * parts.reduce((sum, p) => sum + p.I + p.a * ((p.c[0] - cx) ** 2 + (p.c[1] - cy) ** 2), 0);
+  const sim = P.createSim(scene); const r = sim.readBody(L.id);
+  assert.ok(Math.abs(r.px / r.vx - 3) < 1e-9, 'mass');
+  assert.ok(Math.abs(r.x - cx) < 1e-9 && Math.abs(r.y - cy) < 1e-9);
+  assert.ok(Math.abs(r.KEr - 0.5 * I * 4) < 1e-9);
+  // A box sliding over a platform whose cut-outs put seams under its top stays flush.
+  const s2 = emptyScene(false);
+  addBody(s2, 'custom', 0, 1, { fixed: true, friction: 0, paths: [[[[-2, -0.2], [-0.8, -0.2], [-0.8, 0.05], [-0.6, 0.05], [-0.6, -0.2], [0.5, -0.2], [0.5, 0.1], [0.7, 0.1], [0.7, -0.2], [2, -0.2], [2, 0.2], [-2, 0.2]]]] });
+  const box = addBody(s2, 'box', -1.8, 1.3, { w: 0.2, h: 0.2, friction: 0, restitution: 0, vx: 2 });
+  const sim2 = P.createSim(s2);
+  while (sim2.readBody(box.id).x < 1.8) {
+    sim2.step();
+    const q = sim2.readBody(box.id);
+    assert.ok(Math.abs(q.y - 1.3) < 2e-3, `rides flush on the platform (${q.y - 1.3})`);
+    assert.ok(q.vx > 1.99, 'keeps its speed across the seams');
   }
 });
