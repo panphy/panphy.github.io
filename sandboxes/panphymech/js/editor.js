@@ -29,7 +29,10 @@
     let connectorDropActive = false;
 
     const rr = () => app.renderer;
-    const snapOn = () => app.snap;
+    // Holding Ctrl or Command turns Snap off until it is released.
+    let snapKeyHeld = false;
+    const snapOn = () => app.snap && !snapKeyHeld;
+    ed.snapSuspended = () => app.snap && snapKeyHeld;
     const snapV = (v, step) => (snapOn() ? Math.round(v / step) * step : v);
 
     function localPoint(e) {
@@ -864,6 +867,28 @@
       const changed = JSON.stringify(hover) !== JSON.stringify(app.hover);
       app.hover = hover;
       if (changed) app.requestDraw();
+    }
+
+    // Pressing or releasing Ctrl or Command mid-drag updates the drag at once, without
+    // waiting for the pointer to move.
+    const SNAP_KEYS = ['Control', 'Meta'];
+    function setSnapKeyHeld(on) {
+      if (on === snapKeyHeld) return;
+      snapKeyHeld = on;
+      if (gesture && gesture.moved) {
+        const w = rr().toWorld(gesture.last.x, gesture.last.y);
+        const apply = { move: applyMove, rotate: applyRotate, resize: applyResize, linkEnd: applyLinkEnd, linkMove: applyLinkMove }[gesture.kind];
+        if (apply) { apply(w); app.gestureChanged(); }
+      }
+      app.ui.syncToolbar();
+      app.requestDraw();
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', (e) => { if (SNAP_KEYS.includes(e.key)) setSnapKeyHeld(true); });
+      window.addEventListener('keyup', (e) => { if (SNAP_KEYS.includes(e.key)) setSnapKeyHeld(e.ctrlKey || e.metaKey); });
+      window.addEventListener('blur', () => setSnapKeyHeld(false));
+      // Pointer events carry the keys too, which covers a press made while another window had focus.
+      ['pointerdown', 'pointermove', 'pointerup'].forEach((type) => window.addEventListener(type, (e) => setSnapKeyHeld(e.ctrlKey || e.metaKey), true));
     }
 
     canvas.addEventListener('pointerdown', onPointerDown);
