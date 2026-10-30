@@ -460,6 +460,22 @@
 		};
 	}
 
+	// Smaller dots for denser data, so many points read as a trace rather than a blob;
+	// dense data also drops the dot edge, which would darken its color.
+	function markerSize(count) {
+		if (count > 400) return 4;
+		if (count > 150) return 5;
+		return 7;
+	}
+
+	function mixHex(hex, other, amount) {
+		const parse = value => [1, 3, 5].map(i => parseInt(value.slice(i, i + 2), 16));
+		const a = parse(hex);
+		const b = parse(other);
+		if (a.some(Number.isNaN) || b.some(Number.isNaN)) return hex;
+		return `#${a.map((v, i) => Math.round(v + (b[i] - v) * amount).toString(16).padStart(2, '0')).join('')}`;
+	}
+
 	function seriesTraces(sheet, series, colorIndex, themeSettings, options = {}) {
 		const color = themeSettings.datasetColors[colorIndex % themeSettings.datasetColors.length];
 		const fitColor = themeSettings.fitColors[colorIndex % themeSettings.fitColors.length];
@@ -478,28 +494,36 @@
 			legendgroup: key,
 			hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
 			visible: hidden ? 'legendonly' : true,
-			marker: { color, symbol: 'circle', size: 7, line: { color: readToken('--surface', '#ffffff'), width: 1.5 } },
+			marker: { color, symbol: 'circle', size: markerSize(points.length), opacity: 0.9, line: { color: mixHex(color, '#000000', 0.35), width: points.length > 150 ? 0 : 0.75 } },
 			error_x: { type: 'data', array: points.map(point => point.xError), visible: !!series.xErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 },
 			error_y: { type: 'data', array: points.map(point => point.yError), visible: !!series.yErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 }
 		}];
 		const curve = fittedCurves[key];
 		if (curve && Array.isArray(curve.x)) {
 			const stale = !!datasetFitResults[key]?.stale;
-			// Draw the fit first so points and their outlines stay visible at intersections.
-			traces.unshift({
-				x: curve.x,
-				y: curve.y,
-				mode: 'lines',
+			const dash = stale ? 'dash' : 'solid';
+			const common = { x: curve.x, y: curve.y, mode: 'lines', meta: key, legendgroup: key, showlegend: false, visible: hidden ? 'legendonly' : true };
+			// A background-colored halo under the fit keeps it readable over dense points,
+			// without outlining each point (rings hide the dots when points are close together).
+			traces.push({
+				...common,
+				name: 'Fit halo',
+				hoverinfo: 'skip',
+				line: { color: readToken('--surface', '#ffffff'), width: 5, dash },
+				opacity: 0.7
+			}, {
+				...common,
 				name: stale ? `Outdated fit: ${prefix}${yLabel}` : `Fit: ${prefix}${yLabel}`,
-				meta: key,
-				legendgroup: key,
-				showlegend: false,
 				hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
-				visible: hidden ? 'legendonly' : true,
-				line: { color: fitColor, width: 2, dash: stale ? 'dash' : 'solid' }
+				line: { color: fitColor, width: 2, dash }
 			});
 		}
 		return traces;
+	}
+
+	// Points first, then every fit, so no series' points cover another series' fit.
+	function pointsBeforeFits(traces) {
+		return traces.filter(trace => trace.mode === 'markers').concat(traces.filter(trace => trace.mode !== 'markers'));
 	}
 
 	const lastPlotKeys = {};
@@ -566,7 +590,7 @@
 		const sheet = getActiveSheet();
 		const themeSettings = getPlotThemeSettings();
 		const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
-		const data = series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings));
+		const data = pointsBeforeFits(series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings)));
 		const titles = getAxisTitles(sheet);
 		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 1 }), themeSettings);
 		const element = document.getElementById('plot');
@@ -649,7 +673,7 @@
 		if (inputs.x.dataset.edited !== 'true') inputs.x.value = describe(xColumns);
 		if (inputs.y.dataset.edited !== 'true') inputs.y.value = describe(yColumns);
 		const layout = applyThemeLayout(buildLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim(), { showTitle: true }), themeSettings);
-		reactIfChanged('popup-plot', data, layout, createDownloadImageConfig('combined_plot'));
+		reactIfChanged('popup-plot', pointsBeforeFits(data), layout, createDownloadImageConfig('combined_plot'));
 		bindLegendToggle('popup-plot');
 	}
 
