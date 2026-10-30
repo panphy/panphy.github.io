@@ -206,8 +206,9 @@
       // no farther from either end than the rope's length between them (and the ends within
       // the whole length), which holds the rope to its length without making it stiff.
       if (rope) {
-        const limit = (X, ax, ay, Y, bx, by, max) => world.createJoint(new pl.RopeJoint({ localAnchorA: pl.Vec2(ax, ay), localAnchorB: pl.Vec2(bx, by), maxLength: max }, X, Y));
-        endJoints.push(limit(A, l.la.x, l.la.y, B, l.lb.x, l.lb.y, l.length));
+        const limit = (X, ax, ay, Y, bx, by, max, collide = false) => world.createJoint(new pl.RopeJoint({ localAnchorA: pl.Vec2(ax, ay), localAnchorB: pl.Vec2(bx, by), maxLength: max, collideConnected: collide }, X, Y));
+        // The end objects still collide with each other, as they would on a real rope.
+        endJoints.push(limit(A, l.la.x, l.la.y, B, l.lb.x, l.lb.y, l.length, true));
         for (let i = 1; i < n; i++) {
           endJoints.push(limit(A, l.la.x, l.la.y, segs[i], -seg / 2, 0, i * seg));
           limit(B, l.lb.x, l.lb.y, segs[i - 1], seg / 2, 0, (n - i) * seg);
@@ -225,10 +226,11 @@
       if (isStatic(A) && isStatic(B)) return;
       let joint = null;
       // A link end on the world stores a world point, which is also the ground's local point.
+      // Objects joined by a rod or rope still collide; only hinges and glue let parts overlap.
       if (l.kind === 'rod') {
-        joint = new pl.DistanceJoint({ localAnchorA: pl.Vec2(l.la.x, l.la.y), localAnchorB: pl.Vec2(l.lb.x, l.lb.y), length: l.length, frequencyHz: 0, dampingRatio: 0 }, A, B);
+        joint = new pl.DistanceJoint({ localAnchorA: pl.Vec2(l.la.x, l.la.y), localAnchorB: pl.Vec2(l.lb.x, l.lb.y), length: l.length, frequencyHz: 0, dampingRatio: 0, collideConnected: true }, A, B);
       } else if (l.kind === 'rope') {
-        joint = new pl.RopeJoint({ localAnchorA: pl.Vec2(l.la.x, l.la.y), localAnchorB: pl.Vec2(l.lb.x, l.lb.y), maxLength: l.length }, A, B);
+        joint = new pl.RopeJoint({ localAnchorA: pl.Vec2(l.la.x, l.la.y), localAnchorB: pl.Vec2(l.lb.x, l.lb.y), maxLength: l.length, collideConnected: true }, A, B);
       } else if (l.kind === 'hinge' || l.kind === 'weld') {
         // The joint point is where link end a sits; bodyA is the base (b), bodyB the part on top (a),
         // so a positive motor speed turns part a counterclockwise relative to its base.
