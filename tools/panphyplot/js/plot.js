@@ -460,6 +460,22 @@
 		};
 	}
 
+	// Smaller dots for denser data, so many points read as a trace rather than a blob;
+	// dense data also drops the dot edge, which would darken its color.
+	function markerSize(count) {
+		if (count > 400) return 4;
+		if (count > 150) return 5;
+		return 7;
+	}
+
+	function mixHex(hex, other, amount) {
+		const parse = value => [1, 3, 5].map(i => parseInt(value.slice(i, i + 2), 16));
+		const a = parse(hex);
+		const b = parse(other);
+		if (a.some(Number.isNaN) || b.some(Number.isNaN)) return hex;
+		return `#${a.map((v, i) => Math.round(v + (b[i] - v) * amount).toString(16).padStart(2, '0')).join('')}`;
+	}
+
 	function seriesTraces(sheet, series, colorIndex, themeSettings, options = {}) {
 		const color = themeSettings.datasetColors[colorIndex % themeSettings.datasetColors.length];
 		const fitColor = themeSettings.fitColors[colorIndex % themeSettings.fitColors.length];
@@ -478,7 +494,7 @@
 			legendgroup: key,
 			hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
 			visible: hidden ? 'legendonly' : true,
-			marker: { color, symbol: 'circle', size: 7, line: { width: 0 } },
+			marker: { color, symbol: 'circle', size: markerSize(points.length), opacity: 0.9, line: { color: mixHex(color, '#000000', 0.35), width: points.length > 150 ? 0 : 0.75 } },
 			error_x: { type: 'data', array: points.map(point => point.xError), visible: !!series.xErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 },
 			error_y: { type: 'data', array: points.map(point => point.yError), visible: !!series.yErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 }
 		}];
@@ -493,7 +509,8 @@
 				...common,
 				name: 'Fit halo',
 				hoverinfo: 'skip',
-				line: { color: readToken('--surface', '#ffffff'), width: 6, dash }
+				line: { color: readToken('--surface', '#ffffff'), width: 5, dash },
+				opacity: 0.7
 			}, {
 				...common,
 				name: stale ? `Outdated fit: ${prefix}${yLabel}` : `Fit: ${prefix}${yLabel}`,
