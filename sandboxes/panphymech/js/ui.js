@@ -234,7 +234,8 @@
       $('btn-multi').setAttribute('aria-pressed', String(app.multiMode));
       $('btn-merge').disabled = $('btn-subtract').disabled = !app.canCombine();
       $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = $('btn-mirror').disabled = !sel || sel.type !== 'body' || app.running || app.extra.length > 0;
-      $('btn-snap').setAttribute('aria-pressed', String(app.snap));
+      // Shows off while Ctrl or Command pauses it.
+      $('btn-snap').setAttribute('aria-pressed', String(app.snap && !(app.editor && app.editor.snapSuspended())));
       $('btn-graph').setAttribute('aria-pressed', String(app.graphOpen));
       $('btn-clear').disabled = !app.scene.bodies.length && !app.scene.links.length;
       $('speed').value = String(app.speed);
