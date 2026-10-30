@@ -463,8 +463,8 @@
 	// Smaller dots for denser data, so many points read as a trace rather than a blob;
 	// dense data also drops the dot edge, which would darken its color.
 	function markerSize(count) {
-		if (count > 400) return 4;
-		if (count > 150) return 5;
+		if (count > 400) return 5.5;
+		if (count > 150) return 6;
 		return 7;
 	}
 
@@ -501,21 +501,19 @@
 		const curve = fittedCurves[key];
 		if (curve && Array.isArray(curve.x)) {
 			const stale = !!datasetFitResults[key]?.stale;
-			const dash = stale ? 'dash' : 'solid';
-			const common = { x: curve.x, y: curve.y, mode: 'lines', meta: key, legendgroup: key, showlegend: false, visible: hidden ? 'legendonly' : true };
-			// A background-colored halo under the fit keeps it readable over dense points,
-			// without outlining each point (rings hide the dots when points are close together).
+			// The fit sits above the points but is narrower than them, so points that lie
+			// exactly on it still show on both sides.
 			traces.push({
-				...common,
-				name: 'Fit halo',
-				hoverinfo: 'skip',
-				line: { color: readToken('--surface', '#ffffff'), width: 5, dash },
-				opacity: 0.7
-			}, {
-				...common,
+				x: curve.x,
+				y: curve.y,
+				mode: 'lines',
 				name: stale ? `Outdated fit: ${prefix}${yLabel}` : `Fit: ${prefix}${yLabel}`,
+				meta: key,
+				legendgroup: key,
+				showlegend: false,
 				hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
-				line: { color: fitColor, width: 2, dash }
+				visible: hidden ? 'legendonly' : true,
+				line: { color: fitColor, width: 1.75, dash: stale ? 'dash' : 'solid' }
 			});
 		}
 		return traces;
