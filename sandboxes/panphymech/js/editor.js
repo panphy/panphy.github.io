@@ -407,9 +407,9 @@
       function liftFromFloor() {
         if (!scene.world.floor) return;
         const bottom = b.kind === 'ball' ? b.y - b.r : Math.min(...S.vertices(b).map((p) => S.toWorld(b, p).y));
-        b.y += Math.max(0, S.restGap(b) - bottom);
+        b.y += Math.max(0, -bottom);
       }
-      // Keep the preview and final placement at the same resting gap as the engine.
+      // Objects rest exactly on the floor as drawn (physics.js insets their collision shapes).
       liftFromFloor();
       if (!snapBodies(new Set([b.id]), scene)) { b.x = snapV(b.x, SNAP_POS); b.y = snapV(b.y, SNAP_POS); }
       liftFromFloor();

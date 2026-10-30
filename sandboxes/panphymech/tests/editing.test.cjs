@@ -30,9 +30,9 @@ test('ball snaps accurately to a sloped plank and another ball', () => {
 });
 test('floor contact does not hide side contact and groups retain their spacing', () => {
   const h = setup(); h.scene.world.floor = true;
-  h.body('box', 0, 0.515, { w: 1, h: 1 });
-  const b = h.body('box', 1.04, 0.515, { w: 1, h: 1 });
-  const c = h.body('box', 2.04, 0.515, { w: 1, h: 1 });
+  h.body('box', 0, 0.5, { w: 1, h: 1 });
+  const b = h.body('box', 1.04, 0.5, { w: 1, h: 1 });
+  const c = h.body('box', 2.04, 0.5, { w: 1, h: 1 });
   const ids = new Set([b.id, c.id]); const d = S.contactSnap(h.scene, ids, 0.1);
   near(d.x, -0.04); near(d.y, 0);
   S.transformBodies(h.scene, ids, (p, angle) => ({ x: p.x + d.x, y: p.y + d.y, angle })); near(c.x - b.x, 1);

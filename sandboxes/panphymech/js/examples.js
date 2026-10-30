@@ -35,7 +35,7 @@
       view: { minX: -1, maxX: 16, minY: 0, maxY: 7 },
       build() {
         const s = S.createScene();
-        add(s, 'ball', 0, 0.15 + S.REST_GAP.ball, { name: 'Ball', r: 0.15, mass: 0.5, restitution: 0.3, vx: 12 * Math.cos(50 * Math.PI / 180), vy: 12 * Math.sin(50 * Math.PI / 180) });
+        add(s, 'ball', 0, 0.15, { name: 'Ball', r: 0.15, mass: 0.5, restitution: 0.3, vx: 12 * Math.cos(50 * Math.PI / 180), vy: 12 * Math.sin(50 * Math.PI / 180) });
         return s;
       }
     },
@@ -50,7 +50,7 @@
         const mass = 0.5, radius = 0.4, dropHeight = 6, terminalVelocity = 3;
         s.world.dragModel = 'quadratic';
         s.world.drag = mass * s.world.gravity / (terminalVelocity * terminalVelocity);
-        const y = dropHeight + radius + S.REST_GAP.ball;
+        const y = dropHeight + radius;
         const props = { mass, r: radius, restitution: 0 };
         // For quadratic drag, 99% of terminal velocity is reached after about 1.8 m.
         // None replaces World drag for the coral ball; the blue ball inherits it.
@@ -96,7 +96,7 @@
         const s = S.createScene();
         s.world.floorFriction = 0;
         const wall = add(s, 'wall', -3, 1, { name: 'Wall', w: 0.3, h: 2, friction: 0 });
-        const block = add(s, 'box', -0.6, 0.25 + S.REST_GAP.polygon, { name: 'Block', mass: 1, friction: 0, lockRotation: true });
+        const block = add(s, 'box', -0.6, 0.25, { name: 'Block', mass: 1, friction: 0, lockRotation: true });
         link(s, 'spring', wall, { x: 0.15, y: -0.75 }, block, { x: -0.25, y: 0 }, { name: 'Spring', k: 30, rest: 1.5 });
         return s;
       }
@@ -109,8 +109,8 @@
       build() {
         const s = S.createScene();
         s.world.floorFriction = 0;
-        add(s, 'box', -3, 0.25 + S.REST_GAP.polygon, { name: 'Cart A', w: 0.6, h: 0.5, mass: 1, vx: 3, friction: 0, restitution: 1, lockRotation: true, color: 'blue' });
-        add(s, 'box', 2, 0.3 + S.REST_GAP.polygon, { name: 'Cart B', w: 0.7, h: 0.6, mass: 2, vx: -1, friction: 0, restitution: 1, lockRotation: true, color: 'coral' });
+        add(s, 'box', -3, 0.25, { name: 'Cart A', w: 0.6, h: 0.5, mass: 1, vx: 3, friction: 0, restitution: 1, lockRotation: true, color: 'blue' });
+        add(s, 'box', 2, 0.3, { name: 'Cart B', w: 0.7, h: 0.6, mass: 2, vx: -1, friction: 0, restitution: 1, lockRotation: true, color: 'coral' });
         return s;
       }
     },
@@ -129,7 +129,7 @@
         const d = 0.7; // distance down the slope from its top
         const px = -2.5 + d * Math.cos(theta);
         const py = h - d * Math.sin(theta);
-        const off = 0.2 + S.REST_GAP.polygon; // half the block, plus the resting gap
+        const off = 0.2; // half the block
         add(s, 'box', px + off * Math.sin(theta), py + off * Math.cos(theta), { name: 'Block', w: 0.4, h: 0.4, angle: -theta, friction: 0.25, restitution: 0 });
         return s;
       }
@@ -156,10 +156,10 @@
       build() {
         const s = S.createScene();
         const chassis = add(s, 'box', -4, 0.75, { name: 'Chassis', w: 1.6, h: 0.3, mass: 4, color: 'violet' });
-        const back = add(s, 'ball', -4.55, 0.3 + S.REST_GAP.ball, { name: 'Back wheel', r: 0.3, mass: 0.5, friction: 1, restitution: 0.1, color: 'slate' });
-        const front = add(s, 'ball', -3.45, 0.3 + S.REST_GAP.ball, { name: 'Front wheel', r: 0.3, mass: 0.5, friction: 1, restitution: 0.1, color: 'slate' });
-        link(s, 'motor', back, { x: 0, y: 0 }, chassis, { x: -0.55, y: -0.45 + S.REST_GAP.ball }, { name: 'Back motor', speed: -8, torque: 20 });
-        link(s, 'motor', front, { x: 0, y: 0 }, chassis, { x: 0.55, y: -0.45 + S.REST_GAP.ball }, { name: 'Front motor', speed: -8, torque: 20 });
+        const back = add(s, 'ball', -4.55, 0.3, { name: 'Back wheel', r: 0.3, mass: 0.5, friction: 1, restitution: 0.1, color: 'slate' });
+        const front = add(s, 'ball', -3.45, 0.3, { name: 'Front wheel', r: 0.3, mass: 0.5, friction: 1, restitution: 0.1, color: 'slate' });
+        link(s, 'motor', back, { x: 0, y: 0 }, chassis, { x: -0.55, y: -0.45 }, { name: 'Back motor', speed: -8, torque: 20 });
+        link(s, 'motor', front, { x: 0, y: 0 }, chassis, { x: 0.55, y: -0.45 }, { name: 'Front motor', speed: -8, torque: 20 });
         ramp(s, 0, 6, 1.2, { name: 'Slope', friction: 0.9 }, true);
         return s;
       }
@@ -171,9 +171,9 @@
       track: { name: '', group: 'energy' },
       build() {
         const s = S.createScene();
-        add(s, 'ball', -4, 0.2 + S.REST_GAP.ball, { name: 'Ball', r: 0.2, mass: 1, vx: 3, color: 'coral' });
+        add(s, 'ball', -4, 0.2, { name: 'Ball', r: 0.2, mass: 1, vx: 3, color: 'coral' });
         for (let i = 0; i < 10; i++) {
-          add(s, 'box', -2 + i * 0.55, 0.45 + S.REST_GAP.polygon, { name: `Domino ${i + 1}`, w: 0.1, h: 0.9, mass: 0.3, friction: 0.5, restitution: 0.05, color: i % 2 ? 'teal' : 'blue' });
+          add(s, 'box', -2 + i * 0.55, 0.45, { name: `Domino ${i + 1}`, w: 0.1, h: 0.9, mass: 0.3, friction: 0.5, restitution: 0.05, color: i % 2 ? 'teal' : 'blue' });
         }
         return s;
       }
@@ -188,7 +188,7 @@
         add(s, 'wedge', 0, 0.175, { name: 'Pivot', kind: 'polygon', r: 0.35, sides: 3 });
         const plank = add(s, 'plank', 0, 0.62, { name: 'Plank', w: 4, h: 0.12, mass: 3, color: 'amber' });
         link(s, 'hinge', plank, { x: 0, y: 0 }, null, { x: 0, y: 0.62 }, { name: 'Pivot hinge' });
-        add(s, 'box', -1.8, 0.88 + S.REST_GAP.polygon, { name: 'Small box', w: 0.4, h: 0.4, mass: 0.5, color: 'green' });
+        add(s, 'box', -1.8, 0.88, { name: 'Small box', w: 0.4, h: 0.4, mass: 0.5, color: 'green' });
         add(s, 'box', 1.7, 4, { name: 'Heavy box', w: 0.5, h: 0.5, mass: 10, color: 'coral' });
         return s;
       }

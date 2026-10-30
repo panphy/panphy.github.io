@@ -49,11 +49,6 @@
     gravity: [0, 100], viscosity: [0, 1], coord: [-1000, 1000], velocity: [-500, 500], omega: [-200, 200]
   };
 
-  // Box2D keeps a thin skin round polygons, so resting contacts settle this far apart.
-  // Placing objects at this gap stops them popping out of a surface on the first step.
-  const REST_GAP = { polygon: 0.015, ball: 0.005 };
-  const restGap = (b) => (b.kind === 'ball' ? REST_GAP.ball : REST_GAP.polygon);
-
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const num = (v, fallback) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
 
@@ -331,7 +326,7 @@
       if (Math.hypot(x, y) <= tolerance) candidates.push({ x, y, body, target });
     };
     for (const a of moving) {
-      if (scene.world.floor) add(0, restGap(a) - bodyBottom(a), a.id);
+      if (scene.world.floor) add(0, -bodyBottom(a), a.id);
       for (const b of fixed) for (const pa of parts.get(a.id)) for (const pb of parts.get(b.id)) {
         const sep = contactSeparation(pa, pb);
         if (sep.distance > tolerance) continue;
@@ -357,9 +352,9 @@
       const shifted = moving.map((b) => ({ ...b, x: b.x + d.x, y: b.y + d.y }));
       const source = shifted.find((a) => a.id === d.body);
       const touches = d.target ? parts.get(d.target).some((pb) => contactParts(source).some((pa) => Math.abs(contactSeparation(pa, pb).distance) < 1e-8))
-        : Math.abs(bodyBottom(source) - restGap(source)) < 1e-8;
+        : Math.abs(bodyBottom(source)) < 1e-8;
       if (!touches) continue;
-      const valid = shifted.every((a) => (!scene.world.floor || bodyBottom(a) >= restGap(a) - 1e-8)
+      const valid = shifted.every((a) => (!scene.world.floor || bodyBottom(a) >= -1e-8)
         && fixed.every((b) => contactParts(a).every((pa) => parts.get(b.id).every((pb) => contactSeparation(pa, pb).distance >= -1e-8))));
       if (valid) return d;
     }
@@ -644,6 +639,6 @@
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, closestSurface, copyFragment, pasteFragment,
     bodyById, linkById, endPoint, rigidGroup, transformBodies, mirrorBodies, linkLength, refitLengths,
-    removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp, REST_GAP, restGap
+    removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp
   };
 })(typeof window !== 'undefined' ? window : globalThis);

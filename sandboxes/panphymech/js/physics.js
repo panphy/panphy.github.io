@@ -14,6 +14,48 @@
     const pl = root.planck;
     // Collisions slower than this are treated as perfectly inelastic, so resting contacts stay quiet.
     pl.Settings.velocityThreshold = 0.25;
+    // Box2D collides polygons with a skin of polygonRadius round them. Contacts rest
+    // anywhere from where the skins meet to linearSlop into each other, and are only pushed
+    // apart beyond that. Insetting each side by the skin less a quarter of the slop centers
+    // that band on the drawn outlines: objects rest flush as drawn, and an object placed
+    // touching another stays put instead of jumping.
+    const INSET = pl.Settings.polygonRadius - pl.Settings.linearSlop / 4;
+    // Move every side of a ring of points by d into the material: into the ring for an
+    // outline, out of it for a hole. Null if that would fold or collapse any side.
+    function insetRing(pts, d, materialInside = true) {
+      const n = pts.length;
+      if (n < 3) return null;
+      let area2 = 0;
+      for (let i = 0; i < n; i++) { const a = pts[i], c = pts[(i + 1) % n]; area2 += a.x * c.y - c.x * a.y; }
+      if (Math.abs(area2) < 1e-12) return null;
+      // Counterclockwise rings have their inside to the left of each side.
+      const sign = (area2 > 0 ? 1 : -1) * (materialInside ? 1 : -1);
+      const lines = pts.map((a, i) => {
+        const c = pts[(i + 1) % n];
+        const len = Math.hypot(c.x - a.x, c.y - a.y);
+        if (len < 1e-12) return null;
+        const nx = (-(c.y - a.y) / len) * sign, ny = ((c.x - a.x) / len) * sign;
+        return { p: { x: a.x + nx * d, y: a.y + ny * d }, dx: c.x - a.x, dy: c.y - a.y };
+      });
+      if (lines.some((l) => !l)) return null;
+      const out = [];
+      for (let i = 0; i < n; i++) {
+        const L1 = lines[(i + n - 1) % n], L2 = lines[i];
+        const den = L1.dx * L2.dy - L1.dy * L2.dx;
+        // A straight run through a vertex: the vertex just moves with both sides.
+        if (Math.abs(den) < 1e-12 * Math.hypot(L1.dx, L1.dy) * Math.hypot(L2.dx, L2.dy)) { out.push({ ...L2.p }); continue; }
+        const t = ((L2.p.x - L1.p.x) * L2.dy - (L2.p.y - L1.p.y) * L2.dx) / den;
+        out.push({ x: L1.p.x + L1.dx * t, y: L1.p.y + L1.dy * t });
+      }
+      // Each side must keep its direction and a length Box2D can tell apart.
+      for (let i = 0; i < n; i++) {
+        const a = out[i], c = out[(i + 1) % n];
+        const ex = c.x - a.x, ey = c.y - a.y;
+        if (ex * lines[i].dx + ey * lines[i].dy <= 0 || Math.hypot(ex, ey) < pl.Settings.linearSlop) return null;
+      }
+      return out;
+    }
+
     const world = new pl.World({ gravity: pl.Vec2(0, -scene.world.gravity), allowSleep: false });
     const ground = world.createBody();
     let floorFixture = null;
@@ -22,22 +64,63 @@
       // The floor has a body of its own. Connectors fixed to the background join objects to
       // the ground body, and Box2D stops joined bodies colliding, so a floor on the ground
       // body would let anything hung from the background (or grabbed) fall through it.
-      floorFixture = world.createBody().createFixture(new pl.Box(2000, 10, pl.Vec2(0, -10), 0), { friction: scene.world.floorFriction, restitution: 0 });
+      // Its top sits inset below y = 0 like every object, so objects rest on the drawn floor.
+      floorFixture = world.createBody().createFixture(new pl.Box(2000, 10, pl.Vec2(0, -10 - INSET), 0), { friction: scene.world.floorFriction, restitution: 0 });
     }
 
     const bodies = new Map(); // scene id → planck body
     const joints = new Map(); // link id → planck joint
 
+    // An object's convex pieces as drawn, in body coordinates.
+    function polygonPieces(b) {
+      if (b.kind === 'custom') return PPM.shapes.decompose(b.paths).pieces.map((piece) => piece.map(([x, y]) => ({ x, y })));
+      return [S.vertices(b)];
+    }
+
+    // The convex pieces it collides with: its outline inset by INSET (less for very thin
+    // shapes), then split. Insetting the whole outline before splitting a merged or cut
+    // shape keeps its surface smooth across the seams between pieces.
+    function collisionPieces(b) {
+      for (const d of [INSET, INSET * 0.75, INSET / 2, INSET / 4]) {
+        if (b.kind !== 'custom') {
+          const ring = insetRing(S.vertices(b), d);
+          if (ring) return [ring];
+          continue;
+        }
+        const rings = b.paths.map((poly) => poly.map((ring, k) => insetRing(ring.map(([x, y]) => ({ x, y })), d, k === 0)));
+        if (rings.some((poly) => poly.some((ring) => !ring))) continue;
+        try {
+          const pieces = PPM.shapes.decompose(rings.map((poly) => poly.map((ring) => ring.map((p) => [p.x, p.y])))).pieces;
+          if (pieces.length && pieces.every((piece) => piece.length >= 3)) return pieces.map((piece) => piece.map(([x, y]) => ({ x, y })));
+        } catch (err) { /* try a smaller inset */ }
+      }
+      return polygonPieces(b);
+    }
+
     function fixtureFor(pb, b) {
       const density = b.mass / Math.max(S.area(b), 1e-9);
       const opts = { density, friction: b.friction, restitution: b.restitution };
       if (b.kind === 'ball') return pb.createFixture(new pl.Circle(b.r), opts);
-      // A custom shape is one rigid body made of its convex pieces.
-      if (b.kind === 'custom') {
-        PPM.shapes.decompose(b.paths).pieces.forEach((piece) => pb.createFixture(new pl.Polygon(piece.map(([x, y]) => pl.Vec2(x, y))), opts));
-        return pb.getFixtureList();
-      }
-      return pb.createFixture(new pl.Polygon(S.vertices(b).map((p) => pl.Vec2(p.x, p.y))), opts);
+      // A custom shape is one rigid body made of its convex pieces. They collide slightly
+      // inset, so that with Box2D's skin the object rests exactly on its drawn outline.
+      collisionPieces(b).forEach((piece) => pb.createFixture(new pl.Polygon(piece.map((p) => pl.Vec2(p.x, p.y))), opts));
+      setTrueMass(pb, b);
+      return pb.getFixtureList();
+    }
+
+    // Mass, center and rotational inertia of the shape as drawn, not of the inset pieces.
+    function setTrueMass(pb, b) {
+      if (b.fixed || b.kind === 'ball') return;
+      const pieces = polygonPieces(b).map((piece) => new pl.Polygon(piece.map((p) => pl.Vec2(p.x, p.y))));
+      const density = b.mass / Math.max(S.area(b), 1e-9);
+      let mass = 0, cx = 0, cy = 0, I = 0;
+      pieces.forEach((shape) => {
+        const md = { mass: 0, center: pl.Vec2(0, 0), I: 0 };
+        shape.computeMass(md, density);
+        mass += md.mass; cx += md.mass * md.center.x; cy += md.mass * md.center.y; I += md.I;
+      });
+      if (!(mass > 0)) return;
+      pb.setMassData({ mass, center: pl.Vec2(cx / mass, cy / mass), I });
     }
 
     // Planck integrates linear damping implicitly: v /= 1 + h*c/m. This
@@ -417,7 +500,7 @@
         f.setRestitution(b.restitution);
         if (!b.fixed) f.setDensity(b.mass / Math.max(S.area(b), 1e-9));
       }
-      if (!b.fixed) pb.resetMassData();
+      if (!b.fixed) { pb.resetMassData(); setTrueMass(pb, b); }
       setViscousDamping(pb, dragRadius(b), b);
       refreshContacts();
       chooseStep();
