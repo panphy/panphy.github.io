@@ -42,7 +42,7 @@
     {
       id: 'terminal-velocity',
       title: 'Terminal velocity',
-      text: 'Two identical 0.5 kg balls fall 6 m. The coral ball has no drag; the blue ball follows World quadratic drag and levels off at a terminal velocity of 3 m/s within the first third of the drop. The graph shows the blue ball.',
+      text: 'Two identical balls fall 6 m. The blue ball has drag and soon levels off at its terminal velocity of 3 m/s; the coral ball has none. The graph shows the blue ball.',
       track: { name: 'With drag', group: 'velocity', hide: ['vx'] },
       view: { minX: -2, maxX: 2, minY: 0, maxY: 7.6 },
       build() {
