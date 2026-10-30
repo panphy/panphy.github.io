@@ -151,7 +151,7 @@
             <button type="button" id="btn-zoom-in" class="tool" data-icon="zoomIn" aria-label="Zoom in (+)" title="Zoom in (+)"></button>
             <button type="button" id="btn-fit" class="tool" data-icon="fit" aria-label="Fit the scene (0)" title="Fit the scene (0)"></button>
             <button type="button" id="btn-snap" class="tool" data-icon="snap" aria-label="Snap to grid and surfaces (G)" title="Snap to grid, nearby surfaces and 15° angles (G)" aria-pressed="true"></button>
-            <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph position, velocity and energy against time" aria-pressed="true"></button>
+            <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph position, velocity and energy against time" aria-pressed="false"></button>
           </div>
           <div class="toolbar-end">
             <div class="menu-wrap display-wrap">
@@ -180,7 +180,7 @@
             </div>
           </div>
         </div>
-        <div id="graph-panel" class="graph-panel">
+        <div id="graph-panel" class="graph-panel" hidden>
           <div id="graph-resize" class="graph-resize" role="separator" aria-orientation="horizontal" aria-label="Resize the graph" title="Drag to resize the graph" tabindex="0"></div>
           <div class="graph-head">
             <label class="graph-track"><span class="sr-only">Graph of</span><select id="graph-track"></select></label>

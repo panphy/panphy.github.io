@@ -31,7 +31,8 @@
     speed: 1,
     snap: true,
     display: { vectors: false, trails: true, labels: false, grid: true },
-    graphOpen: true,
+    // The graph starts closed on every visit; Graph opens it.
+    graphOpen: false,
     graphHeight: null,
     graphGroup: 'energy',
     graphRange: null,
@@ -47,12 +48,11 @@
     if (!p) return;
     if (p.display) Object.keys(app.display).forEach((k) => { if (typeof p.display[k] === 'boolean') app.display[k] = p.display[k]; });
     if (typeof p.snap === 'boolean') app.snap = p.snap;
-    if (typeof p.graphOpen === 'boolean') app.graphOpen = p.graphOpen;
     if (Number.isFinite(p.graphHeight)) app.graphHeight = p.graphHeight;
     if ([0.1, 0.25, 0.5, 1, 2].includes(p.speed)) app.speed = p.speed;
   })();
   function savePrefs() {
-    store.set(PREFS_KEY, JSON.stringify({ display: app.display, snap: app.snap, graphOpen: app.graphOpen, graphHeight: app.graphHeight, speed: app.speed }));
+    store.set(PREFS_KEY, JSON.stringify({ display: app.display, snap: app.snap, graphHeight: app.graphHeight, speed: app.speed }));
   }
 
   // ---------- Helpers used by the renderer and editor ----------
