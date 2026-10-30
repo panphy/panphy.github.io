@@ -164,12 +164,7 @@
       if (sel.type === 'body') {
         const b = S.bodyById(app.scene, sel.id);
         if (!b) return null;
-        // Just outside the upper-left corner of the object as drawn; small objects push it
-        // at least 22 px from their center so it stays clear of the other handles.
-        const box = screenBox(b);
-        const cx = (box.minX + box.maxX) / 2;
-        const cy = (box.minY + box.maxY) / 2;
-        p = { x: Math.min(box.minX - 8, cx - 22), y: Math.min(box.minY - 8, cy - 22) };
+        p = bodyDeleteSpot(b);
       } else {
         const l = S.linkById(app.scene, sel.id);
         if (!l) return null;
@@ -187,6 +182,56 @@
       const r = rr();
       return { x: S.clamp(p.x, 14, r.w - 14), y: S.clamp(p.y, 14, r.h - 14) };
     };
+
+    // Directions to try for an object's delete button, upper left first.
+    const DELETE_DIRS = [[-1, -1], [-1, 0], [0, -1], [1, -1], [-1, 1], [1, 0], [0, 1], [1, 1]]
+      .map(([x, y]) => { const n = Math.hypot(x, y); return { x: x / n, y: y / n }; });
+
+    // Beside the outline point that reaches furthest up and left, so a long or rotated
+    // object keeps its cross next to it rather than at an empty corner of its box. If that
+    // spot crowds the rotate or resize handle or a joint on the object, try other sides.
+    function bodyDeleteSpot(b) {
+      const pose = app.poseOf(b);
+      const scale = app.scene.camera.scale;
+      const center = rr().toScreen(pose);
+      // Outline corners and the middles of its sides, on screen.
+      let pts = null;
+      if (b.kind !== 'ball') {
+        const rings = b.kind === 'custom' ? b.paths.map((poly) => poly[0].map(([x, y]) => ({ x, y }))) : [S.vertices(b)];
+        pts = rings.flatMap((ring) => ring.flatMap((v, i) => {
+          const n = ring[(i + 1) % ring.length];
+          return [v, { x: (v.x + n.x) / 2, y: (v.y + n.y) / 2 }];
+        })).map((v) => rr().toScreen(S.toWorld(pose, v)));
+      }
+      const avoid = [];
+      if (app.canEditGeometry() && !app.extra.length) {
+        const hs = ed.handles(b);
+        avoid.push({ p: hs.rotate, d: 28 }, { p: hs.resize, d: 26 });
+      }
+      app.scene.links.forEach((l) => {
+        if (l.a === b.id) avoid.push({ p: rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf)), d: 24 });
+        if (l.b === b.id) avoid.push({ p: rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf)), d: 24 });
+      });
+      let first = null;
+      for (const dir of DELETE_DIRS) {
+        // The outline's furthest point in this direction, then 18 px further out: the
+        // whole object lies behind that point, so the button never covers it. A side
+        // square to the direction offers each of its points, upper left first.
+        let edges;
+        if (!pts) edges = [{ x: center.x + dir.x * b.r * scale, y: center.y + dir.y * b.r * scale }];
+        else {
+          const reach = (q) => q.x * dir.x + q.y * dir.y;
+          const most = Math.max(...pts.map(reach));
+          edges = pts.filter((q) => reach(q) >= most - 1).sort((p, q) => p.x + p.y - (q.x + q.y));
+        }
+        for (const edge of edges) {
+          const spot = { x: edge.x + dir.x * 18, y: edge.y + dir.y * 18 };
+          if (!first) first = spot;
+          if (avoid.every((a) => Math.hypot(spot.x - a.p.x, spot.y - a.p.y) >= a.d)) return spot;
+        }
+      }
+      return first;
+    }
 
     // End handles of a selected spring, rod or rope.
     ed.linkHandles = function linkHandles(l) {
