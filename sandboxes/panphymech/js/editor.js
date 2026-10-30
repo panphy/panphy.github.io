@@ -379,8 +379,8 @@
     ed.dropBody = function dropBody(type, clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
-      ed.placeBody(type, rr().toWorld(clientX - rect.left, clientY - rect.top));
       ed.arm(null);
+      ed.placeBody(type, rr().toWorld(clientX - rect.left, clientY - rect.top));
       return true;
     };
 
@@ -623,8 +623,10 @@
       }
       if (e.button === 1 || e.button === 2 || ed.tool === 'pan') { startGesture('pan', e, sp); return; }
       if (ed.armed) {
-        ed.placeBody(ed.armed, w);
+        // Disarm first, so one click places one object even if placing fails.
+        const type = ed.armed;
         if (!e.shiftKey) ed.arm(null);
+        ed.placeBody(type, w);
         return;
       }
       if (['spring', 'rod', 'rope'].includes(ed.tool)) { placeLinkEnd(w, e.shiftKey); app.requestDraw(); return; }
