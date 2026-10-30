@@ -170,11 +170,12 @@
           if (d.moved) {
             if (d.ghost) d.ghost.remove();
             if (!isBody) app.editor.clearConnectorDropPreview();
+            // Set before dropping, so the click that follows never arms the part.
+            btn.dataset.suppressClick = '1';
             if (e.type === 'pointerup') {
               if (isBody) app.editor.dropBody(kind, e.clientX, e.clientY);
               else app.editor.dropConnector(kind, e.clientX, e.clientY);
             }
-            btn.dataset.suppressClick = '1';
           }
         };
         btn.addEventListener('pointerup', end);
@@ -626,7 +627,7 @@
         { icon: 'trash', label: 'Delete', run: () => app.deleteSelection(), danger: true }
       ]));
 
-      const drag = section('Drag');
+      const drag = card('Drag');
       drag.appendChild(dragFields(b));
       const geo = card('Size and position');
       const k = b().kind;
