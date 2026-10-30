@@ -47,8 +47,8 @@ test('quadratic override suppresses World Stokes drag, including after a live sw
 test('only deliberate movable-object overrides produce notes, even if the model matches World', () => {
   const { scene, b } = setup(); scene.world.dragModel = 'linear';
   assert.equal(S.dragOverrideNote(scene, b), '');
-  b.dragModel = 'linear'; assert.match(S.dragOverrideNote(scene, b), /own linear.*World drag \(Linear\)/);
-  b.dragModel = 'none'; assert.match(S.dragOverrideNote(scene, b), /no drag/);
+  b.dragModel = 'linear'; assert.match(S.dragOverrideNote(scene, b), /doesn’t follow the World drag settings/);
+  b.dragModel = 'none'; assert.match(S.dragOverrideNote(scene, b), /World drag/);
   b.fixed = true; assert.equal(S.dragOverrideNote(scene, b), '');
   b.fixed = false; b.dragModel = 'world'; assert.equal(S.dragOverrideNote(scene, b), '');
 });
@@ -67,7 +67,7 @@ test('drag models and independent parameters round-trip, clamp safely, and migra
   const migrated = S.parse(legacy).scene;
   assert.equal(migrated.world.dragModel, 'linear'); assert.equal(migrated.world.linearDragSource, 'stokes');
   assert.equal(migrated.bodies[0].dragModel, 'quadratic');
-  assert.match(S.dragOverrideNote(migrated, migrated.bodies[0]), /own quadratic/);
+  assert.match(S.dragOverrideNote(migrated, migrated.bodies[0]), /World drag/);
   legacy.bodies[0].drag = 0; assert.equal(S.parse(legacy).scene.bodies[0].dragModel, 'world');
 });
 
