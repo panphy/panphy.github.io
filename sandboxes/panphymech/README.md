@@ -44,7 +44,7 @@ The Terminal velocity example drops two identical 0.5 kg balls through 6 m: the 
 - Linear drag uses `linearDrag` (b, 0–1000 kg/s) or `linearDragSource: "stokes"` with `viscosity` (η, 0–1 Pa·s). Stokes calculates b = 6πrη using the ball radius or an equal-area radius for other shapes. Planck integrates linear damping implicitly as b/m. Quadratic drag uses `drag` (k, 0–50 kg/m), with its existing step limit. None of these models infer streamlining or add buoyancy or rotational drag. Model and coefficient edits apply live and undo without resetting time.
 - Movable objects with explicit drag overrides have a steady amber halo, an Inspector note and an entry in the notes pill at the top right of the scene. Clicking a note selects the object and focuses its drag control; choosing World removes the override cues. Fixed objects have no active drag or halo. PNG/SVG/PanPhyMD exports omit the halo as an editing cue.
 - Old files with viscosity migrate to World Linear/Stokes; old per-object quadratic coefficients migrate to explicit Quadratic overrides. If both were active, the object override now replaces World drag, matching the new model, and is identified by a note. Other old objects inherit World. New files retain each model and its inactive parameter values.
-- Gravitational energy is m g (y − y₀), with y₀ set in the World Gravity card (0 by default). Energies cover moving objects only.
+- Gravitational energy is m g (y − y₀), with y₀ set in the Gravity section of the World card (0 by default). Energies cover moving objects only.
 - The recorder samples every moving object and spring each 0.01 s of simulated time, halving its rate after 24 000 samples, so the graph can switch objects after a run.
 
 ## Merged and cut shapes

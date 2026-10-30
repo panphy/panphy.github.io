@@ -278,6 +278,12 @@ button, input, select { font: inherit; color: inherit; }
 .select-row select { min-height: 36px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 4px 8px; font-size: 0.84rem; max-width: 60%; }
 .preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .preset-row + .field { margin-top: 10px; border-top: 1px solid var(--line); }
+.world-icon { color: var(--accent); }
+.world-icon svg { width: 24px; height: 24px; }
+.world-title { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 1rem; letter-spacing: -0.02em; color: var(--ink); }
+.world-sub { margin: 2px 0 0; font-size: 0.78rem; color: var(--ink-3); }
+.world-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-strong); }
+.world-section > .icard-label { margin-bottom: 4px; }
 .preset-row .ds-chip { cursor: pointer; min-height: 32px; padding: 0.3rem 0.7rem; font-size: 0.64rem; }
 
 .readings { margin: 0; display: grid; }
