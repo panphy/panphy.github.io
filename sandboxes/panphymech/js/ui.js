@@ -626,7 +626,7 @@
         { icon: 'trash', label: 'Delete', run: () => app.deleteSelection(), danger: true }
       ]));
 
-      const drag = card('Drag');
+      const drag = section('Drag');
       drag.appendChild(dragFields(b));
       const geo = card('Size and position');
       const k = b().kind;
@@ -791,8 +791,21 @@
 
     function worldInspector() {
       const w = () => app.scene.world;
-      // Gravity, drag and floor each get their own card.
-      const gravity = card('Gravity');
+      // One World card holds the scene-wide settings, in Gravity, Drag and Floor sections.
+      const world = card('', 'world-card');
+      const top = document.createElement('div');
+      top.className = 'insp-head';
+      top.innerHTML = '<div class="insp-swatch world-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 7.5h14M5 16.5h14"/></svg></div>'
+        + '<div class="insp-head-text"><h3 class="world-title">World</h3><p class="world-sub">Applies to the whole scene</p></div>';
+      world.appendChild(top);
+      const section = (label) => {
+        const el = document.createElement('section');
+        el.className = 'world-section';
+        el.innerHTML = `<h4 class="icard-label">${esc(label)}</h4>`;
+        world.appendChild(el);
+        return el;
+      };
+      const gravity = section('Gravity');
       gravity.appendChild(numField({ label: 'Gravity \\(g\\)', plain: 'Gravity g', unit: 'N/kg', get: () => w().gravity, set: (v, key) => app.editParam(() => { w().gravity = v; }, key), min: L.gravity[0], max: L.gravity[1], slider: [0, 25], step: 0.01 }));
       const presets = document.createElement('div');
       presets.className = 'preset-row';
@@ -811,9 +824,9 @@
       });
       gravity.appendChild(presets);
       gravity.appendChild(numField({ label: '\\(E_\\mathrm{p} = 0\\) at height', plain: 'Zero of gravitational energy at height', unit: 'm', get: () => w().gpeZero || 0, set: (v, key) => app.editParam(() => { w().gpeZero = v; }, key), min: L.coord[0], max: L.coord[1], help: 'The reference for gravitational energy. A dashed line marks it when it is not 0.' }));
-      const drag = card('Drag');
+      const drag = section('Drag');
       drag.appendChild(dragFields(w, true));
-      const floor = card('Floor');
+      const floor = section('Floor');
       floor.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
       floor.appendChild(numField({ label: 'Friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
       const sys = readingsCard('System energy now', [
@@ -828,8 +841,8 @@
       ui.readings = { type: 'system' };
       const hint = document.createElement('p');
       hint.className = 'insp-hint';
-      hint.textContent = 'World settings apply to the whole scene. ' + (app.scene.bodies.length ? 'Select an object or a connector to edit it.' : 'Add parts from the left, or open an example.');
-      return [hint, gravity, drag, floor, sys];
+      hint.textContent = app.scene.bodies.length ? 'Select an object or a connector to edit it.' : 'Add parts from the left, or open an example.';
+      return [hint, world, sys];
     }
 
     ui.renderInspector = function renderInspector() {
