@@ -568,3 +568,23 @@ test('a merged shape keeps its exact mass and inertia and stays smooth across it
     assert.ok(q.vx > 1.99, 'keeps its speed across the seams');
   }
 });
+
+test('objects joined by a rope or rod still collide with each other', () => {
+  for (const [kind, solid] of [['rope', false], ['rope', true], ['rod', false]]) {
+    const scene = emptyScene(false); scene.world.gravity = 0;
+    const a = addBody(scene, 'box', 0, 0, { w: 0.4, h: 0.4, restitution: 0 });
+    // The rod is attached to the far sides, so it lets the boxes meet; the rope is slack.
+    const b = addBody(scene, 'box', 1, 0, { w: 0.4, h: 0.4, restitution: 0, vx: kind === 'rod' ? 0 : -2 });
+    const la = kind === 'rod' ? { x: -0.2, y: 0 } : { x: 0, y: 0.1 };
+    const lb = kind === 'rod' ? { x: 0.2, y: 0 } : { x: 0, y: 0.1 };
+    const l = S.makeLink(scene, kind, a.id, la, b.id, lb);
+    if (kind === 'rod') l.length = 0.9; else l.length = 2;
+    l.solid = solid;
+    scene.links.push(l);
+    if (kind === 'rod') { b.x = 1.4; } // anchors 1.4 − 0.2 − 0.2 = 1.0 apart; the rod pulls them to 0.9
+    const sim = P.createSim(scene);
+    run(sim, 1);
+    const gap = sim.readBody(b.id).x - sim.readBody(a.id).x;
+    assert.ok(gap > 0.4 - 3e-3, `${solid ? 'solid ' : ''}${kind}: the boxes do not pass through each other (${gap})`);
+  }
+});
