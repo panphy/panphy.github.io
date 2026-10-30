@@ -434,6 +434,35 @@
     refitLengths(scene, ids);
   }
 
+  // Mirror a set of bodies left to right about the vertical line x = cx: positions,
+  // angles, shapes, attachment points, starting velocities and motor directions.
+  // Connectors to bodies outside the set keep their outside end.
+  function mirrorBodies(scene, ids, cx) {
+    scene.bodies.forEach((b) => {
+      if (!ids.has(b.id)) return;
+      b.x = 2 * cx - b.x;
+      b.angle = -b.angle;
+      b.vx = -b.vx;
+      b.omega = -b.omega;
+      if (b.kind === 'wedge') b.flip = !b.flip;
+      // Reversing each ring keeps its winding after the x flip.
+      if (b.kind === 'custom') b.paths = b.paths.map((poly) => poly.map((ring) => ring.map(([x, y]) => [-x, y]).reverse()));
+    });
+    scene.links.forEach((l) => {
+      const inA = ids.has(l.a);
+      const inB = ids.has(l.b);
+      if (!inA && !inB) return;
+      if (inA) l.la = { x: -l.la.x, y: l.la.y };
+      if (inB) l.lb = { x: -l.lb.x, y: l.lb.y };
+      if (l.kind === 'hinge' || l.kind === 'weld') {
+        // A joint pinned to the background moves with the body it pins.
+        if (!l.b) l.lb = { x: 2 * cx - l.lb.x, y: l.lb.y };
+        if (l.kind === 'hinge') { l.dir = -l.dir; l.speed = -l.speed || 0; }
+      }
+    });
+    refitLengths(scene, ids);
+  }
+
   function linkLength(scene, l) {
     const p = endPoint(scene, l.a, l.la);
     const q = endPoint(scene, l.b, l.lb);
@@ -614,7 +643,7 @@
     FORMAT, VERSION, COLORS, COLOR_CYCLE, BODY_KINDS, LINK_KINDS, LIMITS,
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, closestSurface, copyFragment, pasteFragment,
-    bodyById, linkById, endPoint, rigidGroup, transformBodies, linkLength, refitLengths,
+    bodyById, linkById, endPoint, rigidGroup, transformBodies, mirrorBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp, REST_GAP, restGap
   };
 })(typeof window !== 'undefined' ? window : globalThis);

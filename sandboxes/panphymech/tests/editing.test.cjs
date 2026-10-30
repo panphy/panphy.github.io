@@ -98,3 +98,36 @@ test('mechanics Ctrl/Command C and V route to scene copy/paste and leave text fi
     assert.equal(copies, 1); assert.equal(pastes, 1); assert.equal(prevented, 2);
   }
 });
+test('mirroring reflects shapes, joints, velocities and motors about the object center', () => {
+  const h = setup();
+  const ramp = h.body('wedge', 1, 1, { angle: 0.3, vx: 2, vy: 1, omega: 0.5 });
+  const before = S.vertices(ramp).map((p) => S.toWorld(ramp, p));
+  const arm = h.body('box', 3, 1);
+  const motor = S.makeLink(h.scene, 'motor', arm.id, { x: 0.1, y: 0.2 }, null, { x: 3.1, y: 1.2 }); h.scene.links.push(motor);
+  const glue = S.makeLink(h.scene, 'weld', ramp.id, { x: 0.5, y: 0 }, arm.id, { x: -1.5, y: 0 }); h.scene.links.push(glue);
+  const anchor = h.body('ball', -4, 1, { fixed: true });
+  const rod = S.makeLink(h.scene, 'rod', ramp.id, { x: 0.4, y: 0.1 }, anchor.id, { x: 0, y: 0 }); h.scene.links.push(rod);
+  const ids = S.rigidGroup(h.scene, ramp.id);
+  assert.deepEqual([...ids].sort(), [arm.id, ramp.id].sort());
+  S.mirrorBodies(h.scene, ids, ramp.x);
+  // Every corner lands at its mirror image across x = 1.
+  const after = S.vertices(ramp).map((p) => S.toWorld(ramp, p));
+  before.forEach((p) => assert.ok(after.some((q) => Math.abs(q.x - (2 - p.x)) < 1e-9 && Math.abs(q.y - p.y) < 1e-9), JSON.stringify(p)));
+  near(ramp.x, 1); near(ramp.angle, -0.3); assert.equal(ramp.flip, true);
+  near(ramp.vx, -2); near(ramp.vy, 1); near(ramp.omega, -0.5);
+  near(arm.x, -1); near(motor.la.x, -0.1); near(motor.lb.x, -1.1); near(motor.lb.y, 1.2);
+  assert.equal(motor.dir, 1); near(motor.speed, 3);
+  near(glue.la.x, -0.5); near(glue.lb.x, 1.5);
+  // The rod keeps its outside end and refits to the new distance.
+  near(rod.lb.x, 0); near(rod.la.x, -0.4); near(rod.length, S.linkLength(h.scene, rod));
+  assert.equal(anchor.x, -4);
+});
+test('mirroring a cut shape reflects its outline and keeps ring winding', () => {
+  const h = setup();
+  const ring = [[0, 0], [2, 0], [0, 1]];
+  const b = h.body('custom', 0, 0, { paths: [[ring]] });
+  const area = (r) => r.reduce((s, [x, y], i) => { const [u, v] = r[(i + 1) % r.length]; return s + x * v - u * y; }, 0) / 2;
+  S.mirrorBodies(h.scene, new Set([b.id]), 0);
+  assert.deepEqual(b.paths[0][0].map(([x, y]) => [x + 0, y]).sort(), [[-2, 0], [0, 0], [0, 1]].sort());
+  assert.equal(Math.sign(area(b.paths[0][0])), Math.sign(area(ring)));
+});

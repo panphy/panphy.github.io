@@ -9,6 +9,7 @@
     pan: '<path d="M12 3v18M3 12h18"/><path d="M9.5 5.5L12 3l2.5 2.5M9.5 18.5L12 21l2.5-2.5M5.5 9.5L3 12l2.5 2.5M18.5 9.5L21 12l-2.5 2.5"/>',
     rotate: '<path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/>',
     rotateCcw: '<path d="M4 11a8 8 0 112.3 5.7"/><path d="M4 4v7h7"/>',
+    mirror: '<path d="M12 2.5v19"/><path d="M9 6.5L3 17.5h6zM15 6.5l6 11h-6z"/>',
     multi: '<path d="M3 3l8 4-3.5 1L6 11.5z"/><rect x="11" y="11" width="10" height="10" rx="2"/><path d="M16 13.5v5M13.5 16h5"/>',
     merge: '<path d="M3.5 3.5h10v6h7v11h-11v-6h-6z"/>',
     subtract: '<path d="M3.5 3.5h13v6h-7v7h-6z"/><rect x="10" y="10" width="10.5" height="10.5" rx="1" stroke-dasharray="2.2 2.2"/>',
@@ -206,6 +207,7 @@
     $('btn-redo').addEventListener('click', () => app.redo());
     $('btn-rotate-ccw').addEventListener('click', () => app.rotateSelection(1));
     $('btn-rotate').addEventListener('click', () => app.rotateSelection(-1));
+    $('btn-mirror').addEventListener('click', () => app.mirrorSelection());
     $('btn-duplicate').addEventListener('click', () => app.duplicateSelection());
     $('btn-multi').addEventListener('click', () => app.setMultiMode(!app.multiMode));
     $('btn-merge').addEventListener('click', () => app.mergeSelection());
@@ -231,7 +233,7 @@
       $('btn-duplicate').disabled = !sel;
       $('btn-multi').setAttribute('aria-pressed', String(app.multiMode));
       $('btn-merge').disabled = $('btn-subtract').disabled = !app.canCombine();
-      $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = !sel || sel.type !== 'body' || app.running || app.extra.length > 0;
+      $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = $('btn-mirror').disabled = !sel || sel.type !== 'body' || app.running || app.extra.length > 0;
       $('btn-snap').setAttribute('aria-pressed', String(app.snap));
       $('btn-graph').setAttribute('aria-pressed', String(app.graphOpen));
       $('btn-clear').disabled = !app.scene.bodies.length && !app.scene.links.length;

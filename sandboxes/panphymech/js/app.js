@@ -481,6 +481,16 @@
     }, { coalesce: 'rotate' });
   };
 
+  // Mirror the selected object left to right about its own center, with anything
+  // hinged or glued to it, as rotation carries the same group.
+  app.mirrorSelection = function mirrorSelection() {
+    const sel = app.selection;
+    if (!sel || sel.type !== 'body' || app.running || app.extra.length) return;
+    const b = S.bodyById(app.scene, sel.id);
+    if (!b) return;
+    app.edit(() => S.mirrorBodies(app.scene, S.rigidGroup(app.scene, b.id), b.x));
+  };
+
   app.nudge = function nudge(dx, dy) {
     const sel = app.selection;
     if (!sel || sel.type !== 'body' || app.running) return;
@@ -813,6 +823,7 @@
     if (k === 'h' || k === 'H') { app.editor.setTool('pan'); return; }
     if (k === 'g' || k === 'G') { app.setSnap(!app.snap); return; }
     if (k === 'r' || k === 'R') { app.rotateSelection(e.shiftKey ? 1 : -1); return; }
+    if (k === 'm' || k === 'M') { app.mirrorSelection(); return; }
     if (k === '0') { app.fit(); return; }
     if (k === '+' || k === '=') { app.zoomBy(1.25); return; }
     if (k === '-' || k === '_') { app.zoomBy(0.8); return; }
