@@ -498,12 +498,17 @@
     sim.forcesOn = function forcesOn(id) {
       const pb = bodies.get(id);
       if (!pb || pb.isStatic()) return [];
+      // Before time starts no contact or joint has been solved yet, so read the forces from a
+      // copy of the world advanced by one step: the forces acting at the start.
+      if (!(sim.t > 0)) {
+        if (!sim.probe) { sim.probe = createSim(scene); sim.probe.step(); }
+        return sim.probe.forcesOn(id);
+      }
       const out = [];
       const add = (label, p, fx, fy) => out.push({ label, x: p.x, y: p.y, fx, fy });
       const c = pb.getWorldCenter();
       const g = world.getGravity();
       add('W', c, pb.getMass() * g.x, pb.getMass() * g.y);
-      if (!(sim.t > 0)) return out;
       contactForces.forEach((f) => {
         const sign = f.B === pb ? 1 : f.A === pb ? -1 : 0;
         if (!sign) return;
@@ -671,15 +676,18 @@
     // ---------- Live edits that keep the run going ----------
 
     sim.setGravity = function setGravity(g) {
+      sim.probe = null; // the starting forces change too
       world.setGravity(pl.Vec2(0, -g));
     };
 
     sim.setFloorFriction = function setFloorFriction(mu) {
+      sim.probe = null; // the starting forces change too
       if (floorFixture) floorFixture.setFriction(mu);
       refreshContacts();
     };
 
     sim.updateBody = function updateBody(b) {
+      sim.probe = null; // the starting forces change too
       const pb = bodies.get(b.id);
       if (!pb) return;
       for (let f = pb.getFixtureList(); f; f = f.getNext()) {
@@ -694,6 +702,7 @@
     };
 
     sim.updateLink = function updateLink(l) {
+      sim.probe = null; // the starting forces change too
       const j = joints.get(l.id);
       if (j && l.kind === 'hinge') {
         j.enableMotor(!!l.motor);

@@ -715,9 +715,12 @@ test('force arrows: a block on a ramp feels W, N = mg cos θ and friction μN, e
   const scene = E.list.find((e) => /ramp/i.test(e.title)).build();
   const block = scene.bodies.find((b) => b.name === 'Block');
   const sim = P.createSim(scene);
-  assert.deepEqual(sim.forcesOn(block.id).map((f) => f.label), ['W'], 'only weight before time starts');
+  const atStart = Object.fromEntries(sim.forcesOn(block.id).map((f) => [f.label, f]));
+  assert.deepEqual(Object.keys(atStart).sort(), ['F_f', 'N', 'W'], 'every force shows before time starts');
+  assert.equal(sim.t, 0, 'reading the starting forces does not advance the simulation');
   run(sim, 0.5);
   const forces = Object.fromEntries(sim.forcesOn(block.id).map((f) => [f.label, f]));
+  assert.ok(Math.abs(Math.hypot(atStart.N.fx, atStart.N.fy) - Math.hypot(forces.N.fx, forces.N.fy)) < 0.02 * block.mass * 9.81, 'the starting normal reaction matches the running one');
   const mag = (f) => Math.hypot(f.fx, f.fy);
   const theta = Math.PI / 6;
   const W = block.mass * 9.81;
@@ -756,4 +759,15 @@ test('force arrows: a rod or rope tied to a ball center pulls at the ball surfac
     assert.ok(Math.abs(d - ball.r) < 1e-3, `${id}: tension acts ${d} m from the center, radius ${ball.r}`);
     assert.ok((t.x - c.x) * t.fx + (t.y - c.y) * t.fy > 0, `${id}: on the side the string pulls toward`);
   }
+});
+
+test('motor car: the driven back wheel pushes the car along and the free front wheel takes no drive', () => {
+  const scene = E.list.find((e) => e.id === 'car').build();
+  const [chassis, back, front] = scene.bodies;
+  const sim = P.createSim(scene);
+  const fx = (id, label) => sim.forcesOn(id).filter((f) => f.label === label).reduce((sum, f) => sum + f.fx, 0);
+  assert.ok(fx(back.id, 'F_f') > 5, 'speeding up: friction drives the back wheel forward');
+  run(sim, 1);
+  assert.ok(Math.abs(fx(back.id, 'F_f')) < 0.5 && Math.abs(fx(front.id, 'F_f')) < 0.5, 'steady on the flat: almost no friction');
+  sim.forcesOn(chassis.id).filter((f) => f.label === 'R').forEach((f) => assert.ok(Math.abs(f.fx) < 0.5, `axle force ${f.fx}`));
 });

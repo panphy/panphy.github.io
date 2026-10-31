@@ -599,13 +599,26 @@
   app.fit = function fit(view) {
     const r = app.renderer;
     const fitted = view ? { box: view, far: [] } : S.fitBox(app.scene, app.poseOf);
-    const bb = fitted.box || { minX: -4, maxX: 4, minY: 0, maxY: 4 };
+    let bb = fitted.box || { minX: -4, maxX: 4, minY: 0, maxY: 4 };
     const minSpan = 3;
-    const w = Math.max(bb.maxX - bb.minX, minSpan);
-    const h = Math.max(bb.maxY - bb.minY, minSpan * 0.6);
     const margin = 1.25;
+    const scaleFor = (box) => S.clamp(Math.min(r.w / (Math.max(box.maxX - box.minX, minSpan) * margin), r.h / (Math.max(box.maxY - box.minY, minSpan * 0.6) * margin)), 4, 600);
     const cam = app.scene.camera;
-    cam.scale = S.clamp(Math.min(r.w / (w * margin), r.h / (h * margin)), 4, 600);
+    // Force arrows are drawn at a length in pixels, so their size in meters depends on the
+    // scale being chosen: widen the box to hold them and their labels, and settle in a few passes.
+    if (!view && app.display.forces) {
+      const objects = bb;
+      for (let pass = 0; pass < 3; pass++) {
+        const scale = scaleFor(bb);
+        const pad = 22 / scale;
+        bb = { ...objects };
+        r.forceArrows(scale).forEach((a) => {
+          bb.minX = Math.min(bb.minX, a.to.x - pad); bb.maxX = Math.max(bb.maxX, a.to.x + pad);
+          bb.minY = Math.min(bb.minY, a.to.y - pad); bb.maxY = Math.max(bb.maxY, a.to.y + pad);
+        });
+      }
+    }
+    cam.scale = scaleFor(bb);
     cam.cx = (bb.minX + bb.maxX) / 2;
     const viewH = r.h / cam.scale;
     // With the floor in view, keep it near the bottom edge rather than mid-screen.

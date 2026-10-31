@@ -11,7 +11,14 @@
   --link: #4A5466;
   --rope: #9A6B2F;
   --vector: #D6336C;
-  --force: #6741D9;
+  /* Force arrows, one color per kind of force. */
+  --force-w: #E8590C;
+  --force-n: #1971C2;
+  --force-f: #2B8A3E;
+  --force-t: #7048E8;
+  --force-s: #0C8599;
+  --force-r: #5C636E;
+  --force-d: #A87700;
   --appbar-h: 56px;
   --panel-w: 236px;
   --insp-w: 304px;
@@ -31,7 +38,13 @@
   --link: #B5BDCC;
   --rope: #D6A15E;
   --vector: #FF6B9D;
-  --force: #B197FC;
+  --force-w: #FF922B;
+  --force-n: #4DABF7;
+  --force-f: #69DB7C;
+  --force-t: #B197FC;
+  --force-s: #3BC9DB;
+  --force-r: #ADB5BD;
+  --force-d: #FFD43B;
   --paper-minor: rgba(150, 175, 255, 0.03);
   --paper-major: rgba(150, 175, 255, 0.065);
 }
