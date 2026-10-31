@@ -194,19 +194,27 @@ test('objects resting in the examples do not pop up when time starts', () => {
   });
 });
 
-test("Newton's cradle passes the momentum along the row to the last ball", () => {
+test("Newton's cradle passes the momentum along the row, then the balls swing together", () => {
   const scene = E.list.find((e) => e.id === 'newtons-cradle').build();
   const balls = scene.bodies.filter((b) => b.kind === 'ball');
   const sim = P.createSim(scene);
   const startX = balls.map((b) => b.x);
   startX[0] = balls[1].x - (balls[2].x - balls[1].x); // ball 1's hanging position
-  const reach = balls.map(() => 0);
-  run(sim, 1.4, () => balls.forEach((b, i) => {
-    reach[i] = Math.max(reach[i], Math.abs(sim.readBody(b.id).x - startX[i]));
-  }));
-  // Ball 1 starts 1 m out; ball 5 should swing out about as far while the middle three stay put.
-  assert.ok(reach[4] > 0.95, `ball 5 reached ${reach[4].toFixed(3)} m`);
-  [1, 2, 3].forEach((i) => assert.ok(reach[i] < 0.03, `ball ${i + 1} moved ${reach[i].toFixed(3)} m`));
+  const reachOver = (seconds) => {
+    const reach = balls.map(() => 0);
+    run(sim, sim.t + seconds, () => balls.forEach((b, i) => {
+      reach[i] = Math.max(reach[i], Math.abs(sim.readBody(b.id).x - startX[i]));
+    }));
+    return reach;
+  };
+  // Ball 1 starts 1 m out. With e = 0.95, ball 5 swings out most of the way while the middle three barely move.
+  const first = reachOver(1.4);
+  assert.ok(first[4] > 0.8, `ball 5 reached ${first[4].toFixed(3)} m`);
+  [1, 2, 3].forEach((i) => assert.ok(first[i] < 0.05, `ball ${i + 1} moved ${first[i].toFixed(3)} m`));
+  // The energy lost in each collision leaves all five swinging together, as in a real cradle.
+  run(sim, 30);
+  const late = reachOver(3);
+  assert.ok(Math.max(...late) - Math.min(...late) < 0.02, `late swings ${late.map((r) => r.toFixed(3)).join(', ')}`);
 });
 
 test('fitting the view leaves out an object far from the rest', () => {
