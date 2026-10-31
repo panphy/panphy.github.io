@@ -148,16 +148,36 @@ const sky = new THREE.Mesh(
         tint = max(mix(vec3(dot(tint, vec3(.3, .59, .11))), tint, 1.35), 0.);
         return tint*heat*g*g*g*g*(.35 + 1.4*n*n)*3.;
       }
+      // Outside a sphere around the disk the bending is weak, so the deflection there comes from a formula for
+      // a ray passing at distance b: 2/b + 2.95/b² in all, shared along the path by s/√(b² + s²). Only rays
+      // inside the sphere are traced step by step.
+      const float TRACE_R = 13.;
+      vec3 bend(vec3 p, vec3 v, float s1, bool toInfinity){
+        float s0 = dot(p, v);
+        vec3 c = p - s0*v; float b = max(length(c), 1e-3);
+        float f1 = toInfinity ? 1. : s1/sqrt(b*b + s1*s1);
+        float alpha = (1./b + 1.473/(b*b))*(f1 - s0/sqrt(b*b + s0*s0));
+        return normalize(v*cos(alpha) - (c/b)*sin(alpha));
+      }
       vec3 tracedView(vec3 dir){
         vec3 p = cameraPosition/uRs; vec3 v = dir;
+        float s0 = dot(p, v);
+        vec3 closest = p - s0*v; float b = length(closest);
+        // Rays that never come near the disk only need the formula.
+        if (b > TRACE_R - .5) return background(bend(p, v, 0., true));
+        if (dot(p, p) > TRACE_R*TRACE_R) {
+          float entry = -sqrt(TRACE_R*TRACE_R - b*b);
+          if (s0 > entry) return background(bend(p, v, 0., true));
+          vec3 bent = bend(p, v, entry, false);
+          p = closest + entry*v; v = bent;
+        }
         vec3 hv = cross(p, v); float h2 = dot(hv, hv);
-        float escape = max(length(p)*1.02, 30.);
         vec3 col = vec3(0.); float through = 1.; float open = 0.;
-        for (int i = 0; i < 360; i++) {
+        for (int i = 0; i < 160; i++) {
           float r = length(p);
           if (r < 1.) break;
-          if (r > escape && dot(p, v) > 0.) { open = 1.; break; }
-          float dt = clamp(.07*r, .015, 2.5);
+          if (r > TRACE_R + .01 && dot(p, v) > 0.) { open = 1.; break; }
+          float dt = clamp(.08*r, .015, 1.5);
           vec3 vh = v - 1.5*h2*p/pow(r, 5.)*(.5*dt);
           vec3 pn = p + vh*dt;
           v = vh - 1.5*h2*pn/pow(length(pn), 5.)*(.5*dt);
@@ -172,10 +192,14 @@ const sky = new THREE.Mesh(
           }
           p = pn;
         }
-        return (1. - exp(-col*2.6)) + background(normalize(v))*through*open;
+        vec3 glow = 1. - exp(-col*2.6);
+        if (open < .5 || through < .02) return glow;
+        return glow + background(bend(p, normalize(v), 0., true))*through;
       }
       void main(){
         vec3 d = normalize(vDir);
+        // With the disk fully in, the traced view replaces the simple lens, so skip the lens altogether.
+        if (uDisk > .999) { gl_FragColor = vec4(tracedView(d), 1.); return; }
         float shade = 1.; float ring = 0.;
         vec3 lensed = d;
         if (uHole > 0.001) {
