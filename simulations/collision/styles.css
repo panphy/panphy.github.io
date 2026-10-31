@@ -298,7 +298,8 @@ select {
     display: flex;
 }
 
-/* The view keeps the 16:10 play area the presets are designed for, as large as fits. */
+/* The view keeps a fixed 16:9 play area (the shape of most webcam pictures), as large as fits.
+   A fixed shape keeps the walls where they are when the settings drawer opens or closes. */
 .cl-viewport {
     position: relative;
     flex: 1 1 auto;
@@ -310,8 +311,8 @@ select {
 
 .cl-view {
     position: relative;
-    width: min(100cqw, 160cqh);
-    aspect-ratio: 16 / 10;
+    width: min(100cqw, calc(100cqh * 16 / 9));
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     isolation: isolate;
     background-color: var(--view-bg);
@@ -424,6 +425,7 @@ body.ball-fullscreen-lock {
 }
 
 /* ---------- Start card ---------- */
+/* Sized from the view (container units), so it reads well on a laptop and on a phone. */
 .cl-start {
     position: absolute;
     inset: 0;
@@ -436,28 +438,30 @@ body.ball-fullscreen-lock {
 }
 
 .cl-start-card {
-    width: min(500px, 100%);
+    width: clamp(300px, 62cqw, 760px);
+    max-width: 100%;
     margin: auto;
-    padding: 22px 22px 18px;
+    padding: clamp(20px, 3.2cqw, 36px) clamp(18px, 3.2cqw, 36px) clamp(18px, 2.6cqw, 30px);
     text-align: center;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: calc(var(--radius) + 4px);
     box-shadow: var(--shadow-2);
 }
 
 .cl-start h2 {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: clamp(1.2rem, 2.3cqw, 1.85rem);
     font-weight: 500;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     line-height: 1.15;
 }
 
 #startText {
-    margin: 0 auto 16px;
-    max-width: 40ch;
+    margin: 0 auto clamp(16px, 2.2cqw, 24px);
+    max-width: 46ch;
+    font-size: clamp(0.92rem, 1.25cqw, 1.05rem);
     color: var(--ink-2);
 }
 
@@ -471,33 +475,94 @@ body.ball-fullscreen-lock {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .cl-start-actions button {
-    min-height: 48px;
-    min-width: 160px;
+    min-height: 52px;
+    min-width: 180px;
+    padding: 0 20px;
+    font-size: 0.95rem;
+    border-radius: 999px;
 }
 
 .cl-start-presets {
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: clamp(18px, 2.6cqw, 28px);
+    padding-top: clamp(14px, 2cqw, 22px);
     border-top: 1px solid var(--line);
 }
 
-.cl-chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
+.cl-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 10px;
 }
 
-.cl-chip {
-    min-height: var(--hit);
-    padding: 0 12px;
-    font-size: 0.82rem;
-    border-radius: 999px;
+button.cl-preset {
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: 3px;
+    min-height: 0;
+    padding: 10px 12px 12px;
+    text-align: left;
     background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+button.cl-preset:hover:not(:disabled) {
+    background: var(--surface);
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    transform: translateY(-1px);
+}
+
+.cl-preset-art {
+    width: 100%;
+    height: auto;
+    margin-bottom: 6px;
+    aspect-ratio: 3 / 1;
+}
+
+.cl-art-line {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+}
+
+.cl-art-arrow {
+    fill: none;
+    stroke: var(--ink-2);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.cl-art-text {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    text-anchor: middle;
+    fill: var(--ink-2);
+}
+
+/* The same colors as the balls in the view. */
+.cl-art-a { fill: #F97316; }
+.cl-art-b { fill: #38BDF8; }
+.cl-art-c { fill: #E879F9; }
+
+.cl-preset-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.cl-preset-note {
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--ink-2);
 }
 
 .cl-spinner {
@@ -747,7 +812,7 @@ body.ball-fullscreen-lock {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 6px 6px 6px 16px;
+    padding: 6px 6px 6px 18px;
     border-bottom: 1px solid var(--line);
 }
 
@@ -764,20 +829,13 @@ body.ball-fullscreen-lock {
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 10px;
+    padding: 0 0 12px;
 }
 
-/* Block flow, not grid: grid rows would squash the sections to fit the drawer. */
-.cl-drawer-body > * + * {
-    margin-top: 10px;
-}
-
+/* Flat sections divided by rules, rather than boxes inside a box. */
 .physics-controls,
 .ball-controls {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--surface-2);
-    overflow: hidden;
+    border-bottom: 1px solid var(--line);
 }
 
 .physics-controls > summary,
@@ -787,7 +845,7 @@ body.ball-fullscreen-lock {
     justify-content: space-between;
     gap: 12px;
     min-height: var(--hit);
-    padding: 4px 12px;
+    padding: 6px 12px 6px 18px;
     cursor: pointer;
     list-style: none;
 }
@@ -796,6 +854,7 @@ body.ball-fullscreen-lock {
 .ball-controls-summary .cp-label {
     margin: 0;
     font-size: 0.72rem;
+    font-weight: 600;
     color: var(--ink-2);
 }
 
@@ -806,7 +865,7 @@ body.ball-fullscreen-lock {
 
 .physics-controls > summary:hover,
 .ball-controls-summary:hover {
-    background: var(--surface-3);
+    background: var(--surface-2);
 }
 
 .summary-caret {
@@ -828,8 +887,7 @@ details[open] > summary .summary-caret {
 .ball-controls-body {
     display: grid;
     gap: 12px;
-    padding: 12px;
-    border-top: 1px solid var(--line);
+    padding: 2px 18px 18px;
 }
 
 .ball-controls-head {
@@ -838,71 +896,95 @@ details[open] > summary .summary-caret {
     gap: 8px;
 }
 
+.ball-controls-head .value-badge {
+    padding: 1px 8px;
+    font-size: 0.72rem;
+    background: var(--accent-soft);
+    border-radius: 999px;
+}
+
 .ball-controls-list {
     display: grid;
     gap: 10px;
 }
 
+.ball-controls-list:empty {
+    display: none;
+}
+
+/* Each ball's card carries its color as a stripe down the left edge. */
 .ball-control-card {
     display: grid;
-    gap: 10px;
-    padding: 10px;
+    gap: 4px;
+    padding: 6px 10px 10px 14px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--line);
-    background: var(--surface);
+    background: var(--surface-2);
+    box-shadow: inset 4px 0 0 var(--ball-color, var(--accent));
 }
 
 .ball-control-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
 }
 
-/* One stepper per row: the drawer is too narrow for two side by side
-   without clipping the values. */
 .ball-control-grid {
     display: grid;
-    gap: 10px;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: end;
+    gap: 6px;
 }
 
 .ball-color-dot {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
+    flex: none;
     border-radius: 999px;
-    box-shadow: 0 0 0 1px var(--line-strong);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ball-color, var(--accent)) 25%, transparent);
 }
 
 .ball-control-title {
-    font-size: 0.86rem;
+    font-size: 0.92rem;
     font-weight: 700;
 }
 
-.ball-launch-btn {
-    grid-column: 1 / -1;
-    width: 100%;
-    background: var(--accent);
-    color: var(--accent-ink);
+button.ball-launch-btn {
+    margin-left: auto;
+    gap: 6px;
+    padding: 0 16px 0 12px;
+    font-size: 0.84rem;
+    color: var(--accent);
+    background: var(--accent-soft);
     border-color: transparent;
+    border-radius: 999px;
 }
 
-.ball-launch-btn:hover:not(:disabled) {
-    background: var(--accent-hover);
+button.ball-launch-btn:hover:not(:disabled) {
+    color: var(--accent-ink);
+    background: var(--accent);
+}
+
+.ball-launch-btn .cl-icon {
+    width: 16px;
+    height: 16px;
 }
 
 .physics-toggle-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 18px;
+    display: grid;
 }
 
+.physics-toggle-row .toggle-block + .toggle-block {
+    border-top: 1px solid var(--line);
+}
+
+/* Label on the left, switch on the right. */
 .toggle-block {
     display: flex;
+    flex-direction: row-reverse;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 12px;
     min-height: var(--hit);
-    font-size: 0.84rem;
+    font-size: 0.88rem;
     font-weight: 600;
     color: var(--ink);
     cursor: pointer;
@@ -963,15 +1045,13 @@ details[open] > summary .summary-caret {
 
 .physics-slider-grid {
     display: grid;
-    gap: 10px;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: end;
+    gap: 6px;
 }
 
 .control-block {
     display: grid;
     gap: 6px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--ink-2);
     align-content: start;
@@ -1009,13 +1089,29 @@ details[open] > summary .summary-caret {
 .control-help {
     margin: 0;
     font-size: 0.78rem;
-    line-height: 1.35;
+    line-height: 1.4;
     color: var(--ink-3);
 }
 
-/* Stepper: tap for an exact step, hold to ramp, or type a value. */
+/* Stepper: tap for an exact step, hold to ramp, or type a value.
+   One row each: the quantity and its unit on the left, a joined [- value +] control on the right. */
 .stepper-block {
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+}
+
+.stepper-block .control-label-row {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1px;
+}
+
+.stepper-block .control-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
 }
 
 .stepper-block.is-disabled {
@@ -1023,33 +1119,51 @@ details[open] > summary .summary-caret {
 }
 
 .stepper-unit {
-    color: var(--ink-3);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
     font-weight: 500;
+    color: var(--ink-3);
 }
 
 .stepper {
     display: grid;
-    grid-template-columns: var(--hit) minmax(0, 1fr) var(--hit);
-    gap: 4px;
+    grid-template-columns: var(--hit) 5em var(--hit);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
 }
 
-.stepper-btn {
+.stepper:focus-within {
+    border-color: var(--accent);
+}
+
+button.stepper-btn {
     width: var(--hit);
+    min-height: calc(var(--hit) - 2px);
     padding: 0;
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--ink-2);
+    background: none;
+    border: 0;
+    border-radius: 999px;
+}
+
+button.stepper-btn:hover:not(:disabled) {
+    color: var(--accent);
+    background: var(--accent-soft);
 }
 
 .stepper-input {
     min-width: 0;
-    min-height: var(--hit);
-    padding: 0 4px;
+    min-height: calc(var(--hit) - 2px);
+    padding: 0 2px;
     font-size: 0.95rem;
     text-align: center;
     color: var(--ink);
-    background: var(--surface);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-sm);
+    background: none;
+    border: 0;
+    border-radius: 0;
     -webkit-user-select: text;
     user-select: text;
     -moz-appearance: textfield;
@@ -1063,6 +1177,10 @@ details[open] > summary .summary-caret {
 }
 
 .stepper-input:focus {
+    outline: none;
+}
+
+.stepper:has(.stepper-input:focus-visible) {
     outline: 2px solid var(--accent);
     outline-offset: 1px;
 }
@@ -1342,6 +1460,11 @@ details[open] > summary .summary-caret {
     .stage.drawer-open .cl-viewport {
         margin-right: 0;
     }
+
+    /* On a wide sheet, keep each label near its control. */
+    .cl-drawer-body {
+        padding-inline: max(0px, calc((100% - 640px) / 2));
+    }
 }
 
 /* Phones: the page scrolls and the view takes the full width. */
@@ -1367,15 +1490,27 @@ details[open] > summary .summary-caret {
     /* While the start card shows there are no balls, so the view can grow to fit it. */
     .cl-view:has(> .cl-start:not([hidden])) {
         aspect-ratio: auto;
-        min-height: 440px;
+        min-height: 640px;
+    }
+
+    .cl-start {
+        padding: 10px;
     }
 
     .cl-start-card {
-        padding: 18px 16px 14px;
+        padding: 18px 14px 14px;
+    }
+
+    .cl-preset-grid {
+        gap: 8px;
+    }
+
+    button.cl-preset {
+        padding: 8px 10px 10px;
     }
 
     .cl-start h2 {
-        font-size: 1rem;
+        font-size: 1.15rem;
     }
 
     .stage.is-fullscreen .cl-main {
