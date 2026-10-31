@@ -117,7 +117,7 @@
     {
       id: 'newtons-cradle',
       title: "Newton's cradle",
-      text: 'Five 1 kg balls hang on 2 m strings. Ball 1 is pulled out to 30° and released: its momentum passes along the row and Ball 5 swings out alone.',
+      text: 'Five 1 kg balls hang on 2 m strings. Ball 1 is pulled out to 30° and released: its momentum passes along the row and Ball 5 swings out. Like a real cradle, each collision loses a little energy (e = 0.95) and air resistance acts, so the balls end up swinging together.',
       track: { name: 'Ball 5', group: 'velocity', hide: ['vy'] },
       build() {
         const s = S.createScene();
@@ -128,12 +128,14 @@
         // A 1 mm gap keeps the collisions one pair at a time, so the momentum is passed on whole.
         const pitch = 2 * r + 0.001;
         s.world.gpeZero = top - len; // the lowest point of the swing
+        s.world.dragModel = 'quadratic';
+        s.world.drag = 0.03; // kg/m, about right for a 0.4 m ball in air
         const bar = add(s, 'plank', 0, top + 0.06, { name: 'Frame', w: 3, h: 0.12, fixed: true });
         for (let i = 0; i < 5; i++) {
           const px = (i - 2) * pitch;
           const a = i === 0 ? -lift : 0;
           const color = i === 0 ? 'coral' : i === 4 ? 'amber' : 'blue';
-          const ball = add(s, 'ball', px + len * Math.sin(a), top - len * Math.cos(a), { name: `Ball ${i + 1}`, r, mass: 1, restitution: 1, friction: 0, color });
+          const ball = add(s, 'ball', px + len * Math.sin(a), top - len * Math.cos(a), { name: `Ball ${i + 1}`, r, mass: 1, restitution: 0.95, friction: 0, color });
           link(s, 'rope', bar, { x: px, y: -0.06 }, ball, { x: 0, y: 0 }, { name: `String ${i + 1}` });
         }
         return s;
