@@ -36,7 +36,8 @@
       r.colors = {
         bg: v('--stage'), grid: v('--stage-grid'), gridMajor: v('--stage-grid-major'), axis: v('--stage-axis'),
         floor: v('--floor'), floorLine: v('--floor-line'), ink: v('--ink'), ink2: v('--ink-2'), ink3: v('--ink-3'),
-        accent: v('--accent'), surface: v('--surface'), link: v('--link'), rope: v('--rope'), vector: v('--vector'), force: v('--force'),
+        accent: v('--accent'), surface: v('--surface'), link: v('--link'), rope: v('--rope'), vector: v('--vector'),
+        forceW: v('--force-w'), forceN: v('--force-n'), forceF: v('--force-f'), forceT: v('--force-t'), forceS: v('--force-s'), forceR: v('--force-r'), forceD: v('--force-d'),
         motor: v('--good'), danger: v('--danger')
       };
     };
@@ -521,30 +522,36 @@
       });
     }
 
-    // Force arrows on the selected objects, or on every moving object when none is selected,
-    // each drawn from where the force acts. One scale serves the scene: the heaviest moving
-    // object's weight is drawn a little longer than that object looks (60–160 px).
-    function drawForces() {
-      if (!app.sim || app.simStale || !app.sim.forcesOn) return;
+    // A free-body diagram: the forces on the selected objects or, with none selected, on the
+    // object the graph tracks (every moving object when it tracks the whole system or a
+    // spring), each drawn from where it acts. The heaviest object shown has its weight drawn
+    // a little longer than it looks (60–160 px). Returns arrows in world coordinates at a
+    // given camera scale, so Fit can make room for them too.
+    r.forceArrows = function forceArrows(scale) {
+      if (!app.sim || app.simStale || !app.sim.forcesOn) return [];
       const moving = app.scene.bodies.filter((b) => !b.fixed);
-      const picked = app.selectedBodies().map((id) => S.bodyById(app.scene, id)).filter((b) => b && !b.fixed);
-      const g = Math.abs(app.scene.world.gravity);
-      const list = (picked.length ? picked : moving).flatMap((b) => app.sim.forcesOn(b.id));
-      const heaviest = moving.reduce((m, b) => (!m || b.mass > m.mass ? b : m), null);
-      let ref = heaviest ? g * heaviest.mass : 0;
+      let shown = app.selectedBodies().map((id) => S.bodyById(app.scene, id)).filter((b) => b && !b.fixed);
+      if (!shown.length && app.track && app.track.type === 'body') shown = moving.filter((b) => b.id === app.track.id);
+      if (!shown.length) shown = moving;
+      const list = shown.flatMap((b) => app.sim.forcesOn(b.id));
+      const heaviest = shown.reduce((m, b) => (!m || b.mass > m.mass ? b : m), null);
+      let ref = heaviest ? Math.abs(app.scene.world.gravity) * heaviest.mass : 0;
       if (!(ref > 0)) ref = Math.max(0, ...list.map((f) => Math.hypot(f.fx, f.fy)));
-      if (!(ref > 0)) return;
+      if (!(ref > 0)) return [];
       const e = heaviest ? S.extent(heaviest) : { x: 0.25, y: 0.25 };
-      const unit = Math.min(160, Math.max(60, 2.4 * Math.max(e.x, e.y) * cam().scale));
-      const arrows = list.map((f) => {
+      const unit = Math.min(160, Math.max(60, 2.4 * Math.max(e.x, e.y) * scale)) / scale;
+      return list.map((f) => {
         const F = Math.hypot(f.fx, f.fy);
         if (F < 0.01 * ref) return null;
         const len = Math.min((unit * F) / ref, 3 * unit);
-        const from = r.toScreen(f);
-        const ux = f.fx / F; const uy = -f.fy / F;
-        return { from, to: { x: from.x + ux * len, y: from.y + uy * len }, ux, uy, label: f.label };
+        return { from: { x: f.x, y: f.y }, to: { x: f.x + (f.fx / F) * len, y: f.y + (f.fy / F) * len }, label: f.label };
       }).filter(Boolean);
-      arrows.forEach((a) => arrow(a.from, a.to, r.colors.force, a.label, true));
+    };
+
+    // Each kind of force has its own color, so the forces on one object are easy to tell apart.
+    const FORCE_COLORS = { W: 'forceW', N: 'forceN', F_f: 'forceF', T: 'forceT', F_s: 'forceS', R: 'forceR', D: 'forceD' };
+    function drawForces() {
+      r.forceArrows(cam().scale).forEach((a) => arrow(r.toScreen(a.from), r.toScreen(a.to), r.colors[FORCE_COLORS[a.label]] || r.colors.ink, a.label, true));
     }
 
     function drawLabels() {

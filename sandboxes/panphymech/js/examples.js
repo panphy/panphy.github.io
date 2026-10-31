@@ -178,7 +178,7 @@
     {
       id: 'car',
       title: 'Motor car',
-      text: 'Two motorized wheels hinged to a chassis drive the car up a slope. Try changing the motor speed and torque.',
+      text: 'A motor turns the back wheel, which drives the car up a slope; the front wheel turns freely on a hinge. Try changing the motor speed and torque.',
       track: { name: 'Chassis', group: 'velocity' },
       build() {
         const s = S.createScene();
@@ -186,7 +186,9 @@
         const back = add(s, 'ball', -4.55, 0.3, { name: 'Back wheel', r: 0.3, mass: 0.5, friction: 1, restitution: 0.1, color: 'slate' });
         const front = add(s, 'ball', -3.45, 0.3, { name: 'Front wheel', r: 0.3, mass: 0.5, friction: 1, restitution: 0.1, color: 'slate' });
         link(s, 'motor', back, { x: 0, y: 0 }, chassis, { x: -0.55, y: -0.45 }, { name: 'Back motor', speed: -8, torque: 20 });
-        link(s, 'motor', front, { x: 0, y: 0 }, chassis, { x: 0.55, y: -0.45 }, { name: 'Front motor', speed: -8, torque: 20 });
+        // Only one driven wheel: two wheels driven at one speed and joined rigidly through the chassis
+        // could push against each other with any force, which would make their friction meaningless.
+        link(s, 'hinge', front, { x: 0, y: 0 }, chassis, { x: 0.55, y: -0.45 }, { name: 'Front axle' });
         ramp(s, 0, 6, 1.2, { name: 'Slope', friction: 0.9 }, true);
         return s;
       }
