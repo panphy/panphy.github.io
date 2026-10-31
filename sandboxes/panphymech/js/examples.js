@@ -117,7 +117,7 @@
     {
       id: 'newtons-cradle',
       title: "Newton's cradle",
-      text: 'Five 1 kg balls hang on 2 m strings. Ball 1 is pulled out to 30° and released: its momentum passes along the row and Ball 5 swings out. Like a real cradle, each collision loses a little energy (e = 0.95) and air resistance acts, so the balls end up swinging together.',
+      text: 'Ball 1 swings in and Ball 5 swings out. Small energy losses leave the balls swinging together.',
       track: { name: 'Ball 5', group: 'velocity', hide: ['vy'] },
       build() {
         const s = S.createScene();
