@@ -16,6 +16,7 @@ const STAGE_SECONDS = 14;
 const MASS_STEPS = [0.1, 0.12, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80, 100];
 const NEUTRON_STAR_VISUAL = 0.24;
 const BLACK_HOLE_VISUAL = 0.35;
+const STAR_SKY_FACE = 1536;
 const CAMERA_HOME = new THREE.Vector3(5.6, 4.7, 7.9);
 const BASE_FOV = 40;
 const KIND_CODE = { inert: 0, fusion: 1, radiative: 2, convective: 3, degenerate: 4, shell: 5 };
@@ -73,7 +74,55 @@ float noise(vec3 x){ vec3 i=floor(x), f=fract(x); f=f*f*(3.-2.*f);
 float fbm(vec3 p){ float a=.5, s=0.; for(int i=0;i<4;i++){ s+=a*noise(p); p=p*2.03+7.1; a*=.5; } return s/0.9375; }
 `;
 
-// Background stars. The same shader bends their light around a black hole with the lens equation
+// Background stars, drawn once into a cube texture. Each texel averages four directions, so that
+// the stars stay smooth when the texture is magnified.
+const STAR_GLSL = `
+vec3 hash33(vec3 p){ p = fract(p*vec3(.1031,.1030,.0973)); p += dot(p,p.yxz+33.33); return fract((p.xxy+p.yxx)*p.zyx); }
+vec3 starLayer(vec3 d, float scale, float sharp, float gain, float density){
+  vec3 p = d*scale; vec3 cell = floor(p); vec3 col = vec3(0.);
+  for(int i=-1;i<=1;i++) for(int j=-1;j<=1;j++) for(int k=-1;k<=1;k++){
+    vec3 c = cell + vec3(float(i),float(j),float(k));
+    vec3 h = hash33(c);
+    if (h.x > density) continue;
+    vec3 sd = normalize(c + 0.15 + 0.7*hash33(c+7.3));
+    float dist = length(sd - d)*scale;
+    float b = h.y*h.y;
+    col += exp(-dist*dist*sharp)*(0.25 + 1.5*b)*gain*mix(vec3(1.,.82,.62), vec3(.72,.86,1.), h.z);
+  }
+  return col;
+}
+`;
+const STAR_SKY_SIZE = Math.min(STAR_SKY_FACE, renderer.capabilities.maxCubemapSize);
+const starTarget = new THREE.WebGLCubeRenderTarget(STAR_SKY_SIZE, { generateMipmaps: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+const starBakeScene = new THREE.Scene();
+starBakeScene.add(new THREE.Mesh(
+  new THREE.BoxGeometry(2, 2, 2),
+  new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, depthTest: false,
+    uniforms: { uTexel: { value: 2 / STAR_SKY_SIZE } },
+    vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
+    fragmentShader: `
+      varying vec3 vDir; uniform float uTexel;
+      ${STAR_GLSL}
+      vec3 stars(vec3 d){ return starLayer(d, 26., 420., 1.1, .16) + starLayer(d, 61., 170., .5, .22); }
+      void main(){
+        vec3 d = normalize(vDir);
+        vec3 t = normalize(cross(d, abs(d.y) < .9 ? vec3(0., 1., 0.) : vec3(1., 0., 0.)));
+        vec3 b = cross(d, t);
+        float o = .25*uTexel;
+        vec3 col = stars(normalize(d + o*(t + b))) + stars(normalize(d + o*(t - b)))
+                 + stars(normalize(d - o*(t + b))) + stars(normalize(d - o*(t - b)));
+        gl_FragColor = vec4(col*.25, 1.);
+      }`
+  })
+));
+const starCamera = new THREE.CubeCamera(0.1, 10, starTarget);
+const bakeStars = () => starCamera.update(renderer, starBakeScene);
+bakeStars();
+// A lost graphics context (common on iOS) empties the texture, so draw it again.
+renderer.domElement.addEventListener('webglcontextrestored', bakeStars);
+
+// The sky. Its shader bends their light around a black hole with the lens equation
 // β = θ − θE²/θ, where θE² = 2 r_s / D for sources far behind a hole at distance D.
 // With infalling gas switched on, each pixel's ray is traced back past the hole instead, along a
 // Schwarzschild light path (units of r_s, a = −1.5 h² r/r⁵), and picks up light where it crosses the
@@ -84,28 +133,17 @@ const sky = new THREE.Mesh(
     side: THREE.BackSide, depthWrite: false, depthTest: false,
     uniforms: {
       uHole: { value: 0 }, uHoleDir: { value: new THREE.Vector3(0, 0, -1) }, uEinstein2: { value: 0.05 }, uShadow: { value: 0.06 },
-      uDisk: { value: 0 }, uRs: { value: BLACK_HOLE_VISUAL }, uTime: { value: 0 }
+      uDisk: { value: 0 }, uRs: { value: BLACK_HOLE_VISUAL }, uTime: { value: 0 }, uStars: { value: null }
     },
     vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
     fragmentShader: `
       varying vec3 vDir; uniform float uHole, uEinstein2, uShadow, uDisk, uRs, uTime; uniform vec3 uHoleDir;
       ${NOISE_GLSL}
-      vec3 hash33(vec3 p){ p = fract(p*vec3(.1031,.1030,.0973)); p += dot(p,p.yxz+33.33); return fract((p.xxy+p.yxx)*p.zyx); }
-      vec3 starLayer(vec3 d, float scale, float sharp, float gain, float density){
-        vec3 p = d*scale; vec3 cell = floor(p); vec3 col = vec3(0.);
-        for(int i=-1;i<=1;i++) for(int j=-1;j<=1;j++) for(int k=-1;k<=1;k++){
-          vec3 c = cell + vec3(float(i),float(j),float(k));
-          vec3 h = hash33(c);
-          if (h.x > density) continue;
-          vec3 sd = normalize(c + 0.15 + 0.7*hash33(c+7.3));
-          float dist = length(sd - d)*scale;
-          float b = h.y*h.y;
-          col += exp(-dist*dist*sharp)*(0.25 + 1.5*b)*gain*mix(vec3(1.,.82,.62), vec3(.72,.86,1.), h.z);
-        }
-        return col;
-      }
+      uniform samplerCube uStars;
+      // The stars never change, so they are drawn once into a cube texture and only looked up here.
+      // The faint haze stays procedural, because an 8-bit texture would band it.
       vec3 background(vec3 d){
-        vec3 col = starLayer(d, 26., 420., 1.1, .16) + starLayer(d, 61., 170., .5, .22);
+        vec3 col = textureLod(uStars, d, 0.).rgb;
         float band = exp(-pow(d.y*2.6 + 0.3*d.x, 2.));
         col += vec3(.060,.046,.050)*band*(0.35 + fbm(d*5.));
         col += vec3(.012,.020,.024)*fbm(d*2.3 + 4.);
@@ -220,6 +258,7 @@ const sky = new THREE.Mesh(
 );
 sky.frustumCulled = false;
 sky.renderOrder = -10;
+sky.material.uniforms.uStars.value = starTarget.texture;
 scene.add(sky);
 
 function additivePoints(count, fill, vertexShader, uniforms) {
@@ -1396,6 +1435,12 @@ new ResizeObserver(resize).observe(viewer);
 new ResizeObserver(() => { hrDirty = true; }).observe($('hr-canvas').parentElement);
 new MutationObserver(() => { hrDirty = true; }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
+// Drawing the 3D view is most of the work, so skip it while the view is scrolled out of sight.
+// Playback, the notes and the HR diagram keep going.
+let viewerOnScreen = true;
+let miniDirty = false;
+new IntersectionObserver(([entry]) => { viewerOnScreen = entry.isIntersecting; }).observe(viewer);
+
 const clock = new THREE.Clock();
 function frame() {
   const dt = Math.min(clock.getDelta(), 0.1);
@@ -1410,17 +1455,23 @@ function frame() {
     refresh();
   }
   const st = lifeState(state.life, state.position);
-  controls.update();
-  sky.position.copy(camera.position);
-  applyVisuals(st, dt, time);
+  if (viewerOnScreen) {
+    controls.update();
+    sky.position.copy(camera.position);
+    applyVisuals(st, dt, time);
+  }
   if (time - lastReadout > 0.12 || lastReadout === 0) {
     lastReadout = time || 0.001;
     renderReadout(st);
   }
   // While playing, the diagram only needs to keep up roughly ten times a second.
-  if (hrDirty && time - lastHR > (state.playing ? 0.1 : 0)) { hrDirty = false; lastHR = time; drawHR(st); drawMiniHR(st); }
+  if (hrDirty && time - lastHR > (state.playing ? 0.1 : 0)) {
+    hrDirty = false; lastHR = time; drawHR(st);
+    if (viewerOnScreen) drawMiniHR(st); else miniDirty = true;
+  }
+  if (viewerOnScreen && miniDirty) { miniDirty = false; drawMiniHR(st); }
   if (liveDirty) { liveDirty = false; reserveLive(); }
-  renderer.render(scene, camera);
+  if (viewerOnScreen) renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
 
