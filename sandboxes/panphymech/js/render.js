@@ -544,21 +544,6 @@
         const ux = f.fx / F; const uy = -f.fy / F;
         return { from, to: { x: from.x + ux * len, y: from.y + uy * len }, ux, uy, label: f.label };
       }).filter(Boolean);
-      // Opposite forces along one line (weight and normal reaction under a ball) would hide
-      // each other, so move such pairs a little apart sideways.
-      for (let i = 0; i < arrows.length; i++) {
-        for (let j = i + 1; j < arrows.length; j++) {
-          const a = arrows[i]; const b = arrows[j];
-          if (a.ux * b.ux + a.uy * b.uy > -0.95) continue;
-          const side = (b.from.x - a.from.x) * -a.uy + (b.from.y - a.from.y) * a.ux;
-          if (Math.abs(side) > 6) continue;
-          [[a, 4], [b, -4]].forEach(([q, d]) => {
-            const ox = -a.uy * d; const oy = a.ux * d;
-            q.from = { x: q.from.x + ox, y: q.from.y + oy };
-            q.to = { x: q.to.x + ox, y: q.to.y + oy };
-          });
-        }
-      }
       arrows.forEach((a) => arrow(a.from, a.to, r.colors.force, a.label, true));
     }
 

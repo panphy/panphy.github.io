@@ -55,10 +55,26 @@
   // A reading's name on an axis: "V1 p.d.", or "S1 CH1" for a scope channel.
   function seriesName(s) { return s.channel ? s.label : `${s.label} ${quantityLabel(s.unit, s.channel)}`; }
 
-  // The plotted reading chosen for the x-axis, or null for time.
+  // The plotted reading chosen for the x-axis, or null for a graph against time.
   function xSeries(app, list = plottedSeries(app)) {
     const key = app.doc.settings.graphX;
     return key && key !== 't' ? list.find((s) => s.key === key) || null : null;
+  }
+
+  // The reading plotted against it: the chosen one, or the first other plotted reading.
+  function ySeries(app, list = plottedSeries(app), xs = xSeries(app, list)) {
+    if (!xs) return null;
+    const others = list.filter((s) => s !== xs);
+    return others.find((s) => s.key === app.doc.settings.graphY) || others[0] || null;
+  }
+
+  // Every graph the plotted readings allow: all of them against time, then each reading
+  // against each other one ("A1 current against V1 p.d."), as [value, text] menu entries.
+  function graphChoices(list) {
+    const time = [['t', list.length === 1 ? `${seriesName(list[0])} against time` : 'Readings against time']];
+    const pairs = [];
+    for (const ys of list) for (const xs of list) if (ys !== xs) pairs.push([`${ys.key}|${xs.key}`, `${seriesName(ys)} against ${seriesName(xs)}`]);
+    return time.concat(pairs);
   }
 
   function timeBounds(app, tr) {
@@ -110,16 +126,18 @@
   function panPhyPlotPayload(app) {
     const list = plottedSeries(app);
     const xs = xSeries(app, list);
+    const ys = ySeries(app, list, xs);
     const { rows } = sampleRows(app, list);
     const columns = [
       { name: 't', unit: 's', role: xs ? 'none' : 'X', cells: rows.map((row) => formatCell(row.t)) }
     ];
-    // On an X–Y graph the chosen reading is the X column, so PanPhyPlot opens the same graph.
-    for (const s of xs ? [xs, ...list.filter((x) => x !== xs)] : list) {
+    // On an X–Y graph the two chosen readings are the X and Y columns, so PanPhyPlot opens the
+    // same graph; other readings come along unplotted.
+    for (const s of xs ? [xs, ys, ...list.filter((x) => x !== xs && x !== ys)].filter(Boolean) : list) {
       columns.push({
         name: s.label,
         unit: s.unit,
-        role: s === xs ? 'X' : 'Y',
+        role: !xs ? 'Y' : s === xs ? 'X' : s === ys ? 'Y' : 'none',
         cells: rows.map((row) => formatCell(row.values[s.key]))
       });
     }
@@ -144,21 +162,26 @@
     let hoverX = null;
     let hoverY = null;
     let axisOptions = '';
-    if (axisSelect) axisSelect.addEventListener('change', () => { app.setSetting('graphX', axisSelect.value); draw(true); });
+    if (axisSelect) axisSelect.addEventListener('change', () => {
+      const [y, x] = axisSelect.value.split('|');
+      if (x) app.doc.settings.graphY = y;
+      app.setSetting('graphX', x || 't');
+      draw(true);
+    });
 
-    // Time, then each plotted reading, as choices for the x-axis.
     function syncAxisSelect(list, xs) {
       if (!axisSelect) return;
-      const options = [['t', 'Time'], ...list.map((s) => [s.key, seriesName(s)])];
+      const options = graphChoices(list);
       const sig = JSON.stringify(options);
       if (sig !== axisOptions) {
         axisOptions = sig;
         axisSelect.replaceChildren(...options.map(([value, text]) => new Option(text, value)));
       }
-      axisSelect.value = xs ? xs.key : 't';
+      const ys = ySeries(app, list, xs);
+      axisSelect.value = xs && ys ? `${ys.key}|${xs.key}` : 't';
       axisSelect.disabled = list.length < 2;
       canvas.title = xs ? 'Hover to read the nearest sample.' : 'Drag to select a time range. Use +/− to zoom, arrow keys to pan, and Escape for Full Graph.';
-      canvas.setAttribute('aria-label', xs ? `Graph of plotted readings against ${seriesName(xs)}` : 'Graph of plotted meter and oscilloscope readings against time');
+      canvas.setAttribute('aria-label', xs && ys ? `Graph of ${seriesName(ys)} against ${seriesName(xs)}` : 'Graph of plotted meter and oscilloscope readings against time');
     }
     const selection = R.mount(canvas, {
       fullButton: document.getElementById('graph-full'),
@@ -361,11 +384,11 @@
       return { lo: lo - (lo < 0 ? pad : 0), hi: hi + pad };
     }
 
-    // An X–Y graph: every other plotted reading against the chosen one, sample by sample in
-    // time order, over the displayed time range.
+    // An X–Y graph: the chosen reading against another, sample by sample in time order, over
+    // the displayed time range.
     function drawXY(g, W, H, list, xs, { ink, ink3, line, cs }) {
       const tr = app.sim.traces;
-      const ys = list.filter((s) => s !== xs);
+      const ys = [ySeries(app, list, xs)].filter(Boolean);
       const { t0, t1 } = R.bounds(tr.t, app.graphRange);
       const xa = extent([xs], tr, t0, t1);
       const yUnits = [...new Set(ys.map((s) => s.unit))];
@@ -478,7 +501,7 @@
     return { draw, syncExports, fullGraph: selection.reset, exportCSV, exportPanPhyPlot, plottedSeries: () => plottedSeries(app), hasExportData: () => hasExportData(app) };
   }
 
-  const api = { createGraph, plottedSeries, xSeries, sampleRows, toCSV, panPhyPlotPayload, panPhyPlotUrl, hasExportData, quantityLabel };
+  const api = { createGraph, plottedSeries, xSeries, ySeries, graphChoices, sampleRows, toCSV, panPhyPlotPayload, panPhyPlotUrl, hasExportData, quantityLabel };
   PPC.graph = api;
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis === 'object' ? globalThis : this);

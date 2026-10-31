@@ -743,3 +743,17 @@ test('force arrows: tension and spring force balance a hanging mass at its attac
     assert.ok(f && Math.abs(f.fy - 9.81) < 0.01 && Math.abs(f.fx) < 1e-6, `${kind}: ${f && f.fy}`);
   }
 });
+
+test('force arrows: a rod or rope tied to a ball center pulls at the ball surface', () => {
+  for (const id of ['pendulum', 'newtons-cradle']) {
+    const scene = E.list.find((e) => e.id === id).build();
+    const ball = scene.bodies.find((b) => b.kind === 'ball' && !b.fixed);
+    const sim = P.createSim(scene);
+    run(sim, 0.5);
+    const c = sim.readBody(ball.id);
+    const t = sim.forcesOn(ball.id).find((f) => f.label === 'T');
+    const d = Math.hypot(t.x - c.x, t.y - c.y);
+    assert.ok(Math.abs(d - ball.r) < 1e-3, `${id}: tension acts ${d} m from the center, radius ${ball.r}`);
+    assert.ok((t.x - c.x) * t.fx + (t.y - c.y) * t.fy > 0, `${id}: on the side the string pulls toward`);
+  }
+});

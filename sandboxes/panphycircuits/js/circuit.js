@@ -22,8 +22,10 @@
       currentFlow: true,
       speed: 1,
       dt: 'auto',
-      // The graph's x-axis: 't' for time, or the key of a plotted reading for an X–Y graph.
-      graphX: 't'
+      // The graph: 't' for readings against time, or the keys of the plotted readings on the
+      // x- and y-axes of an X–Y graph.
+      graphX: 't',
+      graphY: 't'
     };
   }
 
@@ -326,12 +328,15 @@
       currentFlow: flag(s.currentFlow, def.currentFlow),
       speed: [0.01, 0.1, 0.25, 1, 4, 10].includes(s.speed) ? s.speed : def.speed,
       dt: s.dt === 'auto' || (finite(s.dt) && s.dt >= 1e-6 && s.dt <= 0.1) ? s.dt : 'auto',
-      graphX: typeof s.graphX === 'string' && /^[a-z][a-z0-9_-]{0,31}:[a-z0-9]{1,12}$/i.test(s.graphX) ? s.graphX : 't'
+      graphX: seriesKey(s.graphX),
+      graphY: seriesKey(s.graphY)
     };
     cleanupJunctions(doc);
     return { doc, warnings };
   }
 
+  // A plotted reading's key, such as c3:V, or 't' for none.
+  function seriesKey(v) { return typeof v === 'string' && /^[a-z][a-z0-9_-]{0,31}:[a-z0-9]{1,12}$/i.test(v) ? v : 't'; }
   function flag(v, fallback) { return typeof v === 'boolean' ? v : fallback; }
 
   function exportDoc(doc) {

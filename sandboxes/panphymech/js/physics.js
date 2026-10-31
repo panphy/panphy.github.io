@@ -511,14 +511,34 @@
         add('F_f', f, sign * f.tx, sign * f.ty);
       });
       const inv = 1 / sim.lastH;
+      // A rod, rope or spring often joins an object at its center, but its pull acts where it
+      // meets the object's surface: the first point of the object on the way in from the
+      // connector's other end (or, for a solid one, its next joint).
+      const surfacePoint = (anchor, from) => {
+        const input = { p1: pl.Vec2(from.x, from.y), p2: pl.Vec2(anchor.x, anchor.y), maxFraction: 1 };
+        let best = 1;
+        for (let f = pb.getFixtureList(); f; f = f.getNext()) {
+          const output = {};
+          for (let i = 0; i < f.getShape().getChildCount(); i++) {
+            if (f.rayCast(output, input, i) && output.fraction < best) best = output.fraction;
+          }
+        }
+        return { x: from.x + (anchor.x - from.x) * best, y: from.y + (anchor.y - from.y) * best };
+      };
       scene.links.forEach((l) => {
         const atA = bodyFor(l.a) === pb; const atB = bodyFor(l.b) === pb;
         if (!atA && !atB) return;
         const pa = anchorWorld(l.a, l.la); const pbw = anchorWorld(l.b, l.lb);
+        // Along a solid rod or rope, aim from its first joint outside this object.
+        const solidPts = solids.has(l.id) ? sim.solidPoints(l.id) : null;
+        const reach = (() => { const e = S.extent(S.bodyById(scene, id)); return Math.hypot(e.x, e.y); })();
+        const firstOutside = (pts, from) => pts.find((q) => Math.hypot(q.x - from.x, q.y - from.y) > reach) || pts[pts.length - 1];
+        const towardA = solidPts ? firstOutside([...solidPts].reverse(), pbw) : pa;
+        const towardB = solidPts ? firstOutside(solidPts, pa) : pbw;
         if (l.kind === 'spring') {
           const st = springState(l);
-          if (atA) add('F_s', pa, st.tension * st.ux, st.tension * st.uy);
-          if (atB) add('F_s', pbw, -st.tension * st.ux, -st.tension * st.uy);
+          if (atA) add('F_s', surfacePoint(pa, towardB), st.tension * st.ux, st.tension * st.uy);
+          if (atB) add('F_s', surfacePoint(pbw, towardA), -st.tension * st.ux, -st.tension * st.uy);
           return;
         }
         const label = l.kind === 'rod' || l.kind === 'rope' ? 'T' : 'R';
@@ -538,8 +558,13 @@
           fa = { x: -fb.x, y: -fb.y };
         }
         // A hinge or glue joint acts at one point, where end a sits.
-        if (atA) add(label, pa, fa.x, fa.y);
-        if (atB) add(label, label === 'R' ? pa : pbw, fb.x, fb.y);
+        if (label === 'R') {
+          if (atA) add(label, pa, fa.x, fa.y);
+          if (atB) add(label, pa, fb.x, fb.y);
+          return;
+        }
+        if (atA) add(label, surfacePoint(pa, towardB), fa.x, fa.y);
+        if (atB) add(label, surfacePoint(pbw, towardA), fb.x, fb.y);
       });
       const v = pb.getLinearVelocity();
       const dq = quadDrag.get(pb);
