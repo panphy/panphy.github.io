@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 globalThis.planck = require('../js/vendor/planck.min.js');
 require('../js/scene.js');
 require('../js/physics.js');
-require('../js/examples.js');
+require('./examples.cjs');
 require('../js/svg.js');
 require('../js/render.js');
 const { scene: S, physics: P, examples: E } = globalThis.PPM;

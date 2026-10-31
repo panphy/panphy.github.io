@@ -1,0 +1,314 @@
+{
+ "format": "panphy-circuits",
+ "version": 1,
+ "components": [
+  {
+   "id": "c1",
+   "type": "logic_in",
+   "label": "INA",
+   "props": {
+    "high": false
+   }
+  },
+  {
+   "id": "c2",
+   "type": "logic_in",
+   "label": "INB",
+   "props": {
+    "high": false
+   }
+  },
+  {
+   "id": "c3",
+   "type": "gate_and",
+   "label": "G1",
+   "props": {}
+  },
+  {
+   "id": "c4",
+   "type": "junction",
+   "label": "J1",
+   "props": {}
+  },
+  {
+   "id": "c5",
+   "type": "logic_out",
+   "label": "OUT1",
+   "props": {}
+  },
+  {
+   "id": "c6",
+   "type": "resistor",
+   "label": "R1",
+   "props": {
+    "R": 330
+   }
+  },
+  {
+   "id": "c7",
+   "type": "led",
+   "label": "D1",
+   "props": {
+    "color": "green"
+   }
+  },
+  {
+   "id": "c8",
+   "type": "rail_0v",
+   "label": "GND",
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "a": {
+    "c": "c1",
+    "t": "q"
+   },
+   "b": {
+    "c": "c3",
+    "t": "a"
+   },
+   "color": "purple"
+  },
+  {
+   "id": "w2",
+   "a": {
+    "c": "c2",
+    "t": "q"
+   },
+   "b": {
+    "c": "c3",
+    "t": "b"
+   },
+   "color": "purple"
+  },
+  {
+   "id": "w3",
+   "a": {
+    "c": "c3",
+    "t": "q"
+   },
+   "b": {
+    "c": "c4",
+    "t": "j"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w4",
+   "a": {
+    "c": "c4",
+    "t": "j"
+   },
+   "b": {
+    "c": "c5",
+    "t": "a"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w5",
+   "a": {
+    "c": "c4",
+    "t": "j"
+   },
+   "b": {
+    "c": "c6",
+    "t": "a"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w6",
+   "a": {
+    "c": "c6",
+    "t": "b"
+   },
+   "b": {
+    "c": "c7",
+    "t": "a"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w7",
+   "a": {
+    "c": "c7",
+    "t": "k"
+   },
+   "b": {
+    "c": "c8",
+    "t": "t"
+   },
+   "color": "black"
+  }
+ ],
+ "layouts": {
+  "realistic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -260,
+     "y": -80,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": -260,
+     "y": 80,
+     "r": 0,
+     "f": false
+    },
+    "c3": {
+     "x": 0,
+     "y": 0,
+     "r": 0,
+     "f": false
+    },
+    "c4": {
+     "x": 110,
+     "y": 0,
+     "r": 0,
+     "f": false
+    },
+    "c5": {
+     "x": 250,
+     "y": -10,
+     "r": 0,
+     "f": false
+    },
+    "c6": {
+     "x": 110,
+     "y": 120,
+     "r": 1,
+     "f": false
+    },
+    "c7": {
+     "x": 110,
+     "y": 250,
+     "r": 1,
+     "f": false
+    },
+    "c8": {
+     "x": 110,
+     "y": 360,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": []
+    },
+    "w5": {
+     "pts": []
+    },
+    "w6": {
+     "pts": []
+    },
+    "w7": {
+     "pts": []
+    }
+   }
+  },
+  "schematic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -160,
+     "y": -40,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": -160,
+     "y": 40,
+     "r": 0,
+     "f": false
+    },
+    "c3": {
+     "x": 0,
+     "y": 0,
+     "r": 0,
+     "f": false
+    },
+    "c4": {
+     "x": 80,
+     "y": 0,
+     "r": 0,
+     "f": false
+    },
+    "c5": {
+     "x": 160,
+     "y": 0,
+     "r": 0,
+     "f": false
+    },
+    "c6": {
+     "x": 80,
+     "y": 70,
+     "r": 1,
+     "f": false
+    },
+    "c7": {
+     "x": 80,
+     "y": 170,
+     "r": 1,
+     "f": false
+    },
+    "c8": {
+     "x": 80,
+     "y": 250,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": []
+    },
+    "w5": {
+     "pts": []
+    },
+    "w6": {
+     "pts": []
+    },
+    "w7": {
+     "pts": []
+    }
+   }
+  }
+ },
+ "view": "realistic",
+ "settings": {
+  "logicStyle": "distinctive",
+  "showLabels": false,
+  "showValues": true,
+  "wireColorsInDiagram": false,
+  "currentFlow": true,
+  "speed": 1,
+  "dt": "auto",
+  "graphX": "t",
+  "graphY": "t"
+ }
+}

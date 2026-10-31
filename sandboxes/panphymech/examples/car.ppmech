@@ -1,0 +1,162 @@
+{
+ "format": "panphy-mech",
+ "version": 1,
+ "world": {
+  "gravity": 9.81,
+  "dragModel": "none",
+  "linearDragSource": "coefficient",
+  "linearDrag": 1,
+  "drag": 0.1,
+  "viscosity": 0,
+  "floor": true,
+  "floorFriction": 0.5,
+  "gpeZero": 0,
+  "accuracy": "standard"
+ },
+ "bodies": [
+  {
+   "id": "b1",
+   "kind": "box",
+   "name": "Chassis",
+   "x": -4,
+   "y": 0.75,
+   "angle": 0,
+   "mass": 4,
+   "friction": 0.4,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "violet",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "w": 1.6,
+   "h": 0.3
+  },
+  {
+   "id": "b2",
+   "kind": "ball",
+   "name": "Back wheel",
+   "x": -4.55,
+   "y": 0.3,
+   "angle": 0,
+   "mass": 0.5,
+   "friction": 1,
+   "restitution": 0.1,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "slate",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "r": 0.3
+  },
+  {
+   "id": "b3",
+   "kind": "ball",
+   "name": "Front wheel",
+   "x": -3.45,
+   "y": 0.3,
+   "angle": 0,
+   "mass": 0.5,
+   "friction": 1,
+   "restitution": 0.1,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "slate",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "r": 0.3
+  },
+  {
+   "id": "b6",
+   "kind": "wedge",
+   "name": "Slope",
+   "x": 4,
+   "y": 0.39999999999999997,
+   "angle": 0,
+   "mass": 10,
+   "friction": 0.9,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": true,
+   "lockRotation": false,
+   "flip": true,
+   "color": "slate",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "w": 6,
+   "h": 1.2
+  }
+ ],
+ "links": [
+  {
+   "id": "l4",
+   "kind": "hinge",
+   "name": "Back motor",
+   "a": "b2",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": "b1",
+   "lb": {
+    "x": -0.55,
+    "y": -0.45
+   },
+   "motor": true,
+   "speed": -8,
+   "torque": 20,
+   "dir": -1
+  },
+  {
+   "id": "l5",
+   "kind": "hinge",
+   "name": "Front axle",
+   "a": "b3",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": "b1",
+   "lb": {
+    "x": 0.55,
+    "y": -0.45
+   },
+   "motor": false,
+   "speed": 0,
+   "torque": 0,
+   "dir": -1
+  }
+ ],
+ "nextId": 7,
+ "camera": {
+  "cx": 0,
+  "cy": 2,
+  "scale": 80
+ }
+}

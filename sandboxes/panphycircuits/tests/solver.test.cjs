@@ -392,7 +392,7 @@ test('pause preserves the exact transient result and history; resume continues f
 });
 
 test('full-wave bridge example rectifies both half-cycles and measures only across the load', () => {
-  const examples = require('../js/examples.js');
+  const examples = require('./examples.cjs');
   const example = examples.list.find(ex => ex.title === 'Full-wave bridge rectifier and oscilloscope');
   assert.ok(example);
   for (const view of ['realistic', 'schematic']) {

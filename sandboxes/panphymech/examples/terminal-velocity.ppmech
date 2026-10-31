@@ -1,0 +1,73 @@
+{
+ "format": "panphy-mech",
+ "version": 1,
+ "world": {
+  "gravity": 9.81,
+  "dragModel": "quadratic",
+  "linearDragSource": "coefficient",
+  "linearDrag": 1,
+  "drag": 0.545,
+  "viscosity": 0,
+  "floor": true,
+  "floorFriction": 0.5,
+  "gpeZero": 0,
+  "accuracy": "standard"
+ },
+ "bodies": [
+  {
+   "id": "b1",
+   "kind": "ball",
+   "name": "No drag",
+   "x": -0.9,
+   "y": 6.4,
+   "angle": 0,
+   "mass": 0.5,
+   "friction": 0.4,
+   "restitution": 0,
+   "drag": 0.1,
+   "dragModel": "none",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "coral",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "r": 0.4
+  },
+  {
+   "id": "b2",
+   "kind": "ball",
+   "name": "With drag",
+   "x": 0.9,
+   "y": 6.4,
+   "angle": 0,
+   "mass": 0.5,
+   "friction": 0.4,
+   "restitution": 0,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "blue",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "r": 0.4
+  }
+ ],
+ "links": [],
+ "nextId": 3,
+ "camera": {
+  "cx": 0,
+  "cy": 2,
+  "scale": 80
+ }
+}

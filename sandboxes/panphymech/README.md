@@ -15,12 +15,14 @@ The [user manual](manual.html) has a five-step pendulum walkthrough and a refere
 | `js/scene.js` | The document: objects and connectors, geometry, rigid groups for editing, file validation |
 | `js/shapes.js` | Custom shapes: outlines, merge (union) and subtract (difference), convex decomposition |
 | `js/physics.js` | Builds a Planck world from the scene; springs, explicit quadratic drag and implicit linear drag; readings and energies |
-| `js/examples.js` | Example experiments, each built in code |
+| `examples/` | Example experiments as ordinary `.ppmech` files; `index.json` lists them in menu order with their text (`plain` is the version without math), the object and graph group to show (`track`), and an optional view box |
 | `js/svg.js` | Vector drawing context for SVG and PanPhyMD scene exports |
 | `js/render.js` | Canvas drawing: grid, floor, objects, connectors, trails, vectors, handles |
 | `js/editor.js` | Pointer interaction: placing, connecting, moving, rotating, resizing, moving and re-attaching connectors, the delete cross, right-click and touch-and-hold settings, grabbing, panning, zooming |
 | `js/graph.js` | The sample recorder, the time graph, CSV and PanPhyPlot export |
 | `js/ui.js`, `js/app.js` | Panels, inspector and quick settings; state, run loop, undo, autosave, fitting the view, files and shortcuts |
+
+Adding an example: build it in the app, save it as a `.ppmech` file into `examples/`, add an entry to `examples/index.json`, and add the file to `ASSETS_TO_CACHE` in `/sw.js` and to this app's offline requirements in `/index.html`. `tests/examples.cjs` loads the files for the tests, so every example is also run by them.
 
 Run the physics checks with `node --test sandboxes/panphymech/tests/*.test.cjs`. They compare free fall, projectile range, spring and pendulum periods, an elastic collision, a Newton's cradle, a block on a ramp and terminal velocity with textbook results, and run every example. Export checks cover vector output and escaped labels.
 

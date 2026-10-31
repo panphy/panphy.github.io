@@ -899,6 +899,7 @@
     });
 
     ui.renderExamples = function (list) {
+      if (!list.length) { $('examples-list').innerHTML = '<li class="examples-note">The examples could not be loaded. Check your connection and try again.</li>'; return; }
       $('examples-list').innerHTML = list.map((ex, i) => `<li><button type="button" class="example" data-example="${i}"><span class="ex-num">${i + 1}</span><span><strong>${esc(ex.title)}</strong><span>${esc(ex.summary)}</span></span></button></li>`).join('');
     };
 

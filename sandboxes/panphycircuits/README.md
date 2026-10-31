@@ -14,7 +14,9 @@ A circuit builder and simulator for GCSE and IB Physics. Entry point: `sandboxes
 | `js/layout.js` | Per-view geometry: transforms, wire routing, junction splitting, layout generation and syncing, Tidy up |
 | `js/render.js`, `editor.js`, `ui.js`, `graph.js`, `app.js` | Workspace rendering, interaction, panels, graph, state/history/autosave |
 | `js/audio.js` | AC-frequency sine tones, with volume from smoothed AC current |
-| `js/examples.js` | Example circuits, each with a realistic layout and a circuit diagram |
+| `examples/` | Example circuits as ordinary `.ppcir` files, each with a realistic layout and a circuit diagram; `index.json` lists them in menu order with their summary, tip and whether to open the graph |
+
+Adding an example: build it in the app, save it as a `.ppcir` file into `examples/`, add an entry to `examples/index.json`, and add the file to `ASSETS_TO_CACHE` in `/sw.js` and to this app's offline requirements in `/index.html`. The example opens in the user's current view and logic symbol style. `tests/examples.cjs` loads the files for the tests.
 
 Adding a component: define it in `registry.js` (terminals, props, `compile` into solver primitives, `readings`), then add an entry with `bounds`, `terms` and `draw` in both artwork files. Terminal ids must match in all three; `tests/model.test.cjs` checks this.
 

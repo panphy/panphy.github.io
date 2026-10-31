@@ -10,7 +10,7 @@ require('../js/art-common.js');
 require('../js/art-realistic.js');
 require('../js/art-schematic.js');
 const layout = require('../js/layout.js');
-const examples = require('../js/examples.js');
+const examples = require('./examples.cjs');
 
 function place(doc, comp, view, x, y, r = 0, f = false) { doc.layouts[view].comps[comp.id] = { x, y, r, f }; }
 

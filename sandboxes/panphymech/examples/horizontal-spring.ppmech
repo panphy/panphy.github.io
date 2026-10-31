@@ -1,0 +1,94 @@
+{
+ "format": "panphy-mech",
+ "version": 1,
+ "world": {
+  "gravity": 9.81,
+  "dragModel": "none",
+  "linearDragSource": "coefficient",
+  "linearDrag": 1,
+  "drag": 0.1,
+  "viscosity": 0,
+  "floor": true,
+  "floorFriction": 0,
+  "gpeZero": 0,
+  "accuracy": "standard"
+ },
+ "bodies": [
+  {
+   "id": "b1",
+   "kind": "box",
+   "name": "Wall",
+   "x": -3,
+   "y": 1,
+   "angle": 0,
+   "mass": 10,
+   "friction": 0,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": true,
+   "lockRotation": false,
+   "flip": false,
+   "color": "slate",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "w": 0.3,
+   "h": 2
+  },
+  {
+   "id": "b2",
+   "kind": "box",
+   "name": "Block",
+   "x": -0.6,
+   "y": 0.25,
+   "angle": 0,
+   "mass": 1,
+   "friction": 0,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": true,
+   "flip": false,
+   "color": "blue",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "w": 0.5,
+   "h": 0.5
+  }
+ ],
+ "links": [
+  {
+   "id": "l3",
+   "kind": "spring",
+   "name": "Spring",
+   "a": "b1",
+   "la": {
+    "x": 0.15,
+    "y": -0.75
+   },
+   "b": "b2",
+   "lb": {
+    "x": -0.25,
+    "y": 0
+   },
+   "k": 30,
+   "rest": 1.5,
+   "damping": 0
+  }
+ ],
+ "nextId": 4,
+ "camera": {
+  "cx": 0,
+  "cy": 2,
+  "scale": 80
+ }
+}

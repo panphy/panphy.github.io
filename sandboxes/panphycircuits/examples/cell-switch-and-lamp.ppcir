@@ -1,0 +1,161 @@
+{
+ "format": "panphy-circuits",
+ "version": 1,
+ "components": [
+  {
+   "id": "c1",
+   "type": "cell",
+   "label": "B1",
+   "props": {
+    "emf": 1.5,
+    "r": 0
+   }
+  },
+  {
+   "id": "c2",
+   "type": "switch",
+   "label": "S1",
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "c3",
+   "type": "lamp",
+   "label": "L1",
+   "props": {
+    "ratedV": 1.5,
+    "ratedI": 0.3
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "a": {
+    "c": "c1",
+    "t": "p"
+   },
+   "b": {
+    "c": "c2",
+    "t": "a"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w2",
+   "a": {
+    "c": "c2",
+    "t": "b"
+   },
+   "b": {
+    "c": "c3",
+    "t": "b"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w3",
+   "a": {
+    "c": "c3",
+    "t": "a"
+   },
+   "b": {
+    "c": "c1",
+    "t": "n"
+   },
+   "color": "black"
+  }
+ ],
+ "layouts": {
+  "realistic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": 0,
+     "y": -130,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": 220,
+     "y": 0,
+     "r": 1,
+     "f": false
+    },
+    "c3": {
+     "x": 0,
+     "y": 130,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    }
+   }
+  },
+  "schematic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": 0,
+     "y": -100,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": 140,
+     "y": 0,
+     "r": 1,
+     "f": false
+    },
+    "c3": {
+     "x": 0,
+     "y": 100,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": [
+      [
+       -140,
+       100
+      ],
+      [
+       -140,
+       -100
+      ]
+     ]
+    }
+   }
+  }
+ },
+ "view": "realistic",
+ "settings": {
+  "logicStyle": "distinctive",
+  "showLabels": false,
+  "showValues": true,
+  "wireColorsInDiagram": false,
+  "currentFlow": true,
+  "speed": 1,
+  "dt": "auto",
+  "graphX": "t",
+  "graphY": "t"
+ }
+}

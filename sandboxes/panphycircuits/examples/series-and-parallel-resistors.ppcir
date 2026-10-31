@@ -1,0 +1,500 @@
+{
+ "format": "panphy-circuits",
+ "version": 1,
+ "components": [
+  {
+   "id": "c1",
+   "type": "battery",
+   "label": "B1",
+   "props": {
+    "emf": 6,
+    "r": 0
+   }
+  },
+  {
+   "id": "c2",
+   "type": "ammeter",
+   "label": "A1",
+   "props": {
+    "rin": "ideal",
+    "mode": "dc",
+    "plot": false
+   }
+  },
+  {
+   "id": "c3",
+   "type": "resistor",
+   "label": "R1",
+   "props": {
+    "R": 100
+   }
+  },
+  {
+   "id": "c4",
+   "type": "resistor",
+   "label": "R2",
+   "props": {
+    "R": 200
+   }
+  },
+  {
+   "id": "c5",
+   "type": "battery",
+   "label": "B2",
+   "props": {
+    "emf": 6,
+    "r": 0
+   }
+  },
+  {
+   "id": "c6",
+   "type": "ammeter",
+   "label": "A2",
+   "props": {
+    "rin": "ideal",
+    "mode": "dc",
+    "plot": false
+   }
+  },
+  {
+   "id": "c7",
+   "type": "junction",
+   "label": "J1",
+   "props": {}
+  },
+  {
+   "id": "c8",
+   "type": "ammeter",
+   "label": "A3",
+   "props": {
+    "rin": "ideal",
+    "mode": "dc",
+    "plot": false
+   }
+  },
+  {
+   "id": "c9",
+   "type": "resistor",
+   "label": "R3",
+   "props": {
+    "R": 100
+   }
+  },
+  {
+   "id": "c10",
+   "type": "resistor",
+   "label": "R4",
+   "props": {
+    "R": 200
+   }
+  },
+  {
+   "id": "c11",
+   "type": "junction",
+   "label": "J2",
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "a": {
+    "c": "c1",
+    "t": "p"
+   },
+   "b": {
+    "c": "c2",
+    "t": "p"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w2",
+   "a": {
+    "c": "c2",
+    "t": "n"
+   },
+   "b": {
+    "c": "c4",
+    "t": "b"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w3",
+   "a": {
+    "c": "c4",
+    "t": "a"
+   },
+   "b": {
+    "c": "c3",
+    "t": "b"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w4",
+   "a": {
+    "c": "c3",
+    "t": "a"
+   },
+   "b": {
+    "c": "c1",
+    "t": "n"
+   },
+   "color": "black"
+  },
+  {
+   "id": "w5",
+   "a": {
+    "c": "c5",
+    "t": "p"
+   },
+   "b": {
+    "c": "c6",
+    "t": "p"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w6",
+   "a": {
+    "c": "c6",
+    "t": "n"
+   },
+   "b": {
+    "c": "c7",
+    "t": "j"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w7",
+   "a": {
+    "c": "c7",
+    "t": "j"
+   },
+   "b": {
+    "c": "c8",
+    "t": "p"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w8",
+   "a": {
+    "c": "c8",
+    "t": "n"
+   },
+   "b": {
+    "c": "c9",
+    "t": "b"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w9",
+   "a": {
+    "c": "c7",
+    "t": "j"
+   },
+   "b": {
+    "c": "c10",
+    "t": "b"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w10",
+   "a": {
+    "c": "c9",
+    "t": "a"
+   },
+   "b": {
+    "c": "c11",
+    "t": "j"
+   },
+   "color": "black"
+  },
+  {
+   "id": "w11",
+   "a": {
+    "c": "c10",
+    "t": "a"
+   },
+   "b": {
+    "c": "c11",
+    "t": "j"
+   },
+   "color": "black"
+  },
+  {
+   "id": "w12",
+   "a": {
+    "c": "c11",
+    "t": "j"
+   },
+   "b": {
+    "c": "c5",
+    "t": "n"
+   },
+   "color": "black"
+  }
+ ],
+ "layouts": {
+  "realistic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -380,
+     "y": -150,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": -200,
+     "y": -20,
+     "r": 0,
+     "f": false
+    },
+    "c3": {
+     "x": -440,
+     "y": 140,
+     "r": 0,
+     "f": false
+    },
+    "c4": {
+     "x": -250,
+     "y": 140,
+     "r": 0,
+     "f": false
+    },
+    "c5": {
+     "x": 180,
+     "y": -150,
+     "r": 0,
+     "f": false
+    },
+    "c6": {
+     "x": 380,
+     "y": -40,
+     "r": 0,
+     "f": false
+    },
+    "c7": {
+     "x": 470,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c8": {
+     "x": 330,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c9": {
+     "x": 170,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c10": {
+     "x": 230,
+     "y": 230,
+     "r": 0,
+     "f": false
+    },
+    "c11": {
+     "x": 40,
+     "y": 170,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": []
+    },
+    "w5": {
+     "pts": []
+    },
+    "w6": {
+     "pts": []
+    },
+    "w7": {
+     "pts": []
+    },
+    "w8": {
+     "pts": []
+    },
+    "w9": {
+     "pts": []
+    },
+    "w10": {
+     "pts": []
+    },
+    "w11": {
+     "pts": []
+    },
+    "w12": {
+     "pts": []
+    }
+   }
+  },
+  "schematic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -220,
+     "y": -100,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": -60,
+     "y": -20,
+     "r": 3,
+     "f": false
+    },
+    "c3": {
+     "x": -300,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c4": {
+     "x": -160,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c5": {
+     "x": 260,
+     "y": -100,
+     "r": 0,
+     "f": false
+    },
+    "c6": {
+     "x": 480,
+     "y": 0,
+     "r": 3,
+     "f": false
+    },
+    "c7": {
+     "x": 480,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c8": {
+     "x": 370,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c9": {
+     "x": 230,
+     "y": 100,
+     "r": 0,
+     "f": false
+    },
+    "c10": {
+     "x": 280,
+     "y": 240,
+     "r": 0,
+     "f": false
+    },
+    "c11": {
+     "x": 80,
+     "y": 100,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": [
+      [
+       -380,
+       100
+      ],
+      [
+       -380,
+       -100
+      ]
+     ]
+    },
+    "w5": {
+     "pts": []
+    },
+    "w6": {
+     "pts": []
+    },
+    "w7": {
+     "pts": []
+    },
+    "w8": {
+     "pts": []
+    },
+    "w9": {
+     "pts": [
+      [
+       480,
+       240
+      ]
+     ]
+    },
+    "w10": {
+     "pts": []
+    },
+    "w11": {
+     "pts": [
+      [
+       80,
+       240
+      ]
+     ]
+    },
+    "w12": {
+     "pts": [
+      [
+       80,
+       -100
+      ]
+     ]
+    }
+   }
+  }
+ },
+ "view": "realistic",
+ "settings": {
+  "logicStyle": "distinctive",
+  "showLabels": false,
+  "showValues": true,
+  "wireColorsInDiagram": false,
+  "currentFlow": true,
+  "speed": 1,
+  "dt": "auto",
+  "graphX": "t",
+  "graphY": "t"
+ }
+}

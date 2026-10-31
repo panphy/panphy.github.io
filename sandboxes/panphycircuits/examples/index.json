@@ -1,0 +1,57 @@
+[
+  {
+    "file": "cell-switch-and-lamp.ppcir",
+    "title": "Cell, switch and lamp",
+    "summary": "The simplest complete circuit. Close the switch to light the lamp.",
+    "tip": "Click the switch lever to close it and light the lamp."
+  },
+  {
+    "file": "series-and-parallel-resistors.ppcir",
+    "title": "Series and parallel resistors",
+    "summary": "Two separate circuits on one bench: 100 Ω + 200 Ω in series, and 100 Ω ∥ 200 Ω in parallel.",
+    "tip": "Compare the ammeter readings: one current in series, shared current in parallel."
+  },
+  {
+    "file": "ammeter-and-voltmeter-connections.ppcir",
+    "title": "Ammeter and voltmeter connections",
+    "summary": "An ammeter in series with a resistor and a voltmeter in parallel across it.",
+    "tip": "Close the switch. Check that V ÷ I equals the resistance."
+  },
+  {
+    "file": "potentiometer-potential-divider.ppcir",
+    "title": "Potentiometer potential divider",
+    "summary": "A potentiometer across a 6 V battery; the voltmeter reads the p.d. between the wiper and end B.",
+    "tip": "Drag the potentiometer knob (or use the inspector slider) and watch the output p.d."
+  },
+  {
+    "file": "led-with-a-current-limiting-resistor.ppcir",
+    "title": "LED with a current-limiting resistor",
+    "summary": "A red LED and a 330 Ω resistor in series. Reverse the LED to see that it only conducts one way.",
+    "tip": "Select the LED and rotate it 180° (press R four times) to reverse it, or change the resistor to see the current change."
+  },
+  {
+    "file": "capacitor-charging-and-discharging.ppcir",
+    "title": "Capacitor charging and discharging",
+    "summary": "A 1000 µF capacitor charges through 4.7 kΩ (RC = 4.7 s). Flip the two-way switch to discharge it.",
+    "tip": "The circuit is live. Flip the two-way switch to B to discharge. The graph shows the solver’s p.d. and current.",
+    "graph": true
+  },
+  {
+    "file": "npn-transistor-switch.ppcir",
+    "title": "NPN transistor switch",
+    "summary": "Pressing the push switch drives a small base current, which switches on a much larger lamp current.",
+    "tip": "Press and hold the push switch. Select the transistor to compare base and collector currents."
+  },
+  {
+    "file": "logic-gate-and.ppcir",
+    "title": "Logic gate: AND",
+    "summary": "Two logic inputs feed an AND gate. Its output lights an indicator and drives an LED through 330 Ω to the 0 V rail.",
+    "tip": "Click the input switches to step through the truth table (shown in the gate’s inspector)."
+  },
+  {
+    "file": "full-wave-bridge-rectifier-and-oscilloscope.ppcir",
+    "title": "Full-wave bridge rectifier and oscilloscope",
+    "summary": "A four-diode bridge turns both half-cycles of a 2 Hz AC supply into one-way current through a 1 kΩ load. CH1 measures the load voltage.",
+    "tip": "Watch CH1: both half-cycles produce a positive pulse across the load, with two diode drops. D1/D2 conduct on one half-cycle; D3/D4 conduct on the other."
+  }
+]

@@ -1,0 +1,213 @@
+{
+ "format": "panphy-circuits",
+ "version": 1,
+ "components": [
+  {
+   "id": "c1",
+   "type": "battery",
+   "label": "B1",
+   "props": {
+    "emf": 6,
+    "r": 0
+   }
+  },
+  {
+   "id": "c2",
+   "type": "potentiometer",
+   "label": "VR1",
+   "props": {
+    "R": 10000,
+    "pos": 50
+   }
+  },
+  {
+   "id": "c3",
+   "type": "voltmeter",
+   "label": "V1",
+   "props": {
+    "rin": "ideal",
+    "mode": "dc",
+    "plot": false
+   }
+  },
+  {
+   "id": "c4",
+   "type": "junction",
+   "label": "J1",
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "a": {
+    "c": "c1",
+    "t": "p"
+   },
+   "b": {
+    "c": "c2",
+    "t": "a"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w2",
+   "a": {
+    "c": "c2",
+    "t": "w"
+   },
+   "b": {
+    "c": "c3",
+    "t": "p"
+   },
+   "color": "purple"
+  },
+  {
+   "id": "w3",
+   "a": {
+    "c": "c2",
+    "t": "b"
+   },
+   "b": {
+    "c": "c4",
+    "t": "j"
+   },
+   "color": "black"
+  },
+  {
+   "id": "w4",
+   "a": {
+    "c": "c3",
+    "t": "n"
+   },
+   "b": {
+    "c": "c4",
+    "t": "j"
+   },
+   "color": "black"
+  },
+  {
+   "id": "w5",
+   "a": {
+    "c": "c1",
+    "t": "n"
+   },
+   "b": {
+    "c": "c4",
+    "t": "j"
+   },
+   "color": "black"
+  }
+ ],
+ "layouts": {
+  "realistic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -260,
+     "y": -110,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": 0,
+     "y": 0,
+     "r": 0,
+     "f": false
+    },
+    "c3": {
+     "x": 220,
+     "y": 30,
+     "r": 0,
+     "f": false
+    },
+    "c4": {
+     "x": 20,
+     "y": 140,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": []
+    },
+    "w5": {
+     "pts": []
+    }
+   }
+  },
+  "schematic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -240,
+     "y": 40,
+     "r": 3,
+     "f": false
+    },
+    "c2": {
+     "x": 0,
+     "y": 40,
+     "r": 1,
+     "f": false
+    },
+    "c3": {
+     "x": 120,
+     "y": 80,
+     "r": 3,
+     "f": false
+    },
+    "c4": {
+     "x": 0,
+     "y": 140,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": []
+    },
+    "w5": {
+     "pts": [
+      [
+       -240,
+       140
+      ]
+     ]
+    }
+   }
+  }
+ },
+ "view": "realistic",
+ "settings": {
+  "logicStyle": "distinctive",
+  "showLabels": false,
+  "showValues": true,
+  "wireColorsInDiagram": false,
+  "currentFlow": true,
+  "speed": 1,
+  "dt": "auto",
+  "graphX": "t",
+  "graphY": "t"
+ }
+}
