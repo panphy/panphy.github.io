@@ -230,25 +230,13 @@
         .card-offline-pill {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
+            color: var(--status-check);
         }
 
-        .card-offline-pill::before {
-            content: '';
-            width: 0.4rem;
-            height: 0.4rem;
-            border-radius: 50%;
-            background: var(--status-check);
-        }
-
+        .card-offline-pill svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .card-offline-pill[data-state="ready"] { color: var(--status-ready); }
-        .card-offline-pill[data-state="ready"]::before { background: var(--status-ready); }
         .card-offline-pill[data-state="warning"] { color: var(--status-warning); }
-        .card-offline-pill[data-state="warning"]::before { background: var(--status-warning); }
 
-        /* Cards fade in as they scroll into view */
         .card {
             position: relative;
             display: flex;
@@ -258,15 +246,6 @@
             transition: opacity 0.45s ease-out, transform 0.45s ease-out,
                         border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.4s ease;
         }
-
-        .js .card { opacity: 0; transform: translateY(16px); }
-        .js .card.revealed { opacity: 1; transform: none; }
-
-        .card:nth-child(2) { transition-delay: 0.04s, 0.04s, 0s, 0s, 0s; }
-        .card:nth-child(3) { transition-delay: 0.08s, 0.08s, 0s, 0s, 0s; }
-        .card:nth-child(4) { transition-delay: 0.12s, 0.12s, 0s, 0s, 0s; }
-        .card:nth-child(5) { transition-delay: 0.16s, 0.16s, 0s, 0s, 0s; }
-        .card:nth-child(6) { transition-delay: 0.2s, 0.2s, 0s, 0s, 0s; }
 
         /* Sideways scroller for sections with more than two rows of cards */
         .grid-wrap { position: relative; }
@@ -496,7 +475,7 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
-            .js .card, .card:hover, .js .card.revealed:hover { opacity: 1; transform: none; }
+            .card:hover { transform: none; }
         }
 
         /* ========================================
@@ -560,7 +539,6 @@
             backdrop-filter: blur(18px) saturate(1.4);
             -webkit-backdrop-filter: blur(18px) saturate(1.4);
             transform: translateX(-50%);
-            animation: specDrop 0.7s ease-out 0.2s both;
         }
 
         nav::after {
@@ -580,12 +558,9 @@
             padding: 0.55rem 0.9rem;
             color: var(--text-secondary);
             border-radius: 10px;
-            font-family: var(--font-mono);
-            font-size: 0.74rem;
+            font-size: 0.92rem;
             font-weight: 600;
-            letter-spacing: 0.08em;
             text-decoration: none;
-            text-transform: uppercase;
             transition: color 0.2s ease, background-color 0.2s ease;
         }
 
@@ -603,21 +578,13 @@
             padding: 8.5rem 1.5rem 4.5rem;
         }
 
-        .hero-copy > * { animation: specRise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-        .hero-copy > :nth-child(2) { animation-delay: 0.08s; }
-        .hero-copy > :nth-child(3) { animation-delay: 0.16s; }
-        .hero-copy > :nth-child(4) { animation-delay: 0.24s; }
-
         .hero-brand { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.6rem; }
         .logo { height: 48px; width: auto; }
 
         .hero-eyebrow {
             color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.74rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
         }
 
         .hero h1 {
@@ -678,21 +645,9 @@
         }
 
         .hero-facts {
-            display: flex;
-            gap: 2.4rem;
-            margin: 2.2rem 0 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .hero-facts strong { display: block; font-family: var(--font-display); font-size: 2.2rem; font-weight: 600; line-height: 1.1; }
-
-        .hero-facts span {
+            margin: 0.9rem 0 0;
             color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            font-size: 1rem;
         }
 
         /* Showcase: a glass instrument panel with a spectral rim */
@@ -702,7 +657,6 @@
             background: var(--spectrum);
             border-radius: 22px;
             box-shadow: var(--glow);
-            animation: specRise 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
             transition: transform 0.3s ease;
         }
 
@@ -756,18 +710,7 @@
             -webkit-backdrop-filter: blur(16px);
         }
 
-        .catalog-kicker,
-        .section-eyebrow {
-            display: block;
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-        }
-
-        .catalog-copy h2 { margin: 0.35rem 0 0.2rem; font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
+        .catalog-copy h2 { margin: 0 0 0.2rem; font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
         .catalog-copy p { margin: 0; color: var(--text-secondary); }
 
         .filter-button {
@@ -776,9 +719,7 @@
             background: transparent;
             border: 1px solid var(--card-border);
             border-radius: 999px;
-            font: 600 0.7rem var(--font-mono);
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
+            font: 600 0.85rem var(--font-body);
             transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
         }
 
@@ -806,16 +747,6 @@
             position: relative;
         }
 
-        .section-heading::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -1px;
-            width: 120px;
-            height: 2px;
-            background: var(--spectrum);
-        }
-
         .section-title-block { display: grid; grid-template-columns: 1fr; align-items: end; }
 
         .section h2 {
@@ -829,15 +760,6 @@
             font-weight: 600;
             line-height: 1;
             letter-spacing: -0.03em;
-        }
-
-        .section h2 .section-label {
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.68rem;
-            font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
         }
 
         .section-summary { display: flex; align-items: flex-end; justify-content: flex-end; gap: 1rem; }
@@ -887,22 +809,12 @@
             transform: translateY(-4px);
         }
 
-        .js .card.revealed:hover { transform: translateY(-4px); }
 
         .card-art { margin: 8px 8px 0; overflow: hidden; background: var(--art-bg); border-radius: 14px; }
 
         .card-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.7rem; margin: 1rem 1.2rem 0; }
 
-        .card-type,
-        .card-offline-pill {
-            font-family: var(--font-mono);
-            font-size: 0.66rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-
-        .card-type { color: var(--text-secondary); }
+        .card-type { color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; }
         .card-body { margin: 0.45rem 1.2rem 1.3rem; }
         .card h3 { margin: 0 0 0.4rem; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
         .card p { margin: 0; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.55; }
@@ -937,7 +849,7 @@
         }
 
         .about-panel > * { position: relative; }
-        .about-panel h2 { display: block; margin: 0.4rem 0 1rem; }
+        .about-panel h2 { display: block; margin: 0 0 1rem; }
         .about-lead { margin: 0; font-size: 1.3rem; font-weight: 500; line-height: 1.45; }
         .about-copy p { margin: 0 0 1.1rem; color: var(--text-secondary); line-height: 1.75; }
         .about-copy p:last-child { margin-bottom: 0; }
@@ -987,9 +899,6 @@
         footer a:hover { color: var(--brand-accent); }
         .footer-sep { margin: 0 0.45rem; opacity: 0.5; }
 
-        @keyframes specRise { from { opacity: 0; transform: translateY(16px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
-        @keyframes specDrop { from { opacity: 0; transform: translateX(-50%) translateY(-12px); } to { opacity: 1; transform: translateX(-50%); } }
-
         @media (max-width: 1000px) {
             .grid, .grid.is-scroller { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .section-heading { grid-template-columns: 1fr; }
@@ -1017,9 +926,8 @@
                 max-width: none;
                 padding: 0.25rem;
             }
-            nav a { justify-content: center; padding: 0.4rem 0.2rem; font-size: 0.62rem; letter-spacing: 0.02em; }
+            nav a { justify-content: center; padding: 0.4rem 0.2rem; font-size: 0.74rem; }
             .grid, .grid.is-scroller { grid-template-columns: 1fr; }
-            .hero-facts { gap: 1.6rem; }
         }
 
         @media (max-width: 480px) {
@@ -1077,11 +985,7 @@
             </div>
             <h1>PanPhy <em>Labs</em></h1>
             <p class="hero-tagline">Physics apps, tools, sims, and some random stuff.</p>
-            <ul class="hero-facts">
-                <li><strong id="fact-apps">21</strong><span>apps</span></li>
-                <li><strong id="fact-offline">19</strong><span>work offline</span></li>
-                <li><strong>0</strong><span>installs</span></li>
-            </ul>
+            <p class="hero-facts"><span id="fact-apps">21</span> apps, <span id="fact-offline">19</span> of them work offline, nothing to install.</p>
         </div>
         <a class="scope" id="scope" href="/simulations/superposition.html" aria-label="Open the Wave Superposition simulation">
             <span class="scope-note scope-swap" id="scope-note" aria-hidden="true">y = y₁ + y₂</span>
@@ -1107,7 +1011,6 @@
     <section class="catalog-intro" aria-labelledby="catalog-title">
         <div class="catalog-bar">
             <div class="catalog-copy">
-                <span class="catalog-kicker">Explore the collection</span>
                 <h2 id="catalog-title">Find the right physics app.</h2>
                 <p>Browse the collection by topic.</p>
             </div>
@@ -1135,8 +1038,7 @@
     <section class="section app-section" id="tools" data-section="01" data-category="tools">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Build &amp; analyze</span>
-                <h2>Tools <span class="section-label">Explore</span></h2>
+                <h2>Tools</h2>
             </div>
             <div class="section-summary">
                 <p>Practical browser-based tools for writing, measuring, plotting, and investigating.</p>
@@ -1252,8 +1154,7 @@
     <section class="section app-section" id="sandboxes" data-section="02" data-category="sandboxes">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Build &amp; experiment</span>
-                <h2>Sandboxes <span class="section-label">Create</span></h2>
+                <h2>Sandboxes</h2>
             </div>
             <div class="section-summary">
                 <p>Build your own physics experiments, from circuits to mechanical systems.</p>
@@ -1327,8 +1228,7 @@
     <section class="section app-section" id="simulations" data-section="03" data-category="simulations">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">See physics move</span>
-                <h2>Simulations <span class="section-label">Interact</span></h2>
+                <h2>Simulations</h2>
             </div>
             <div class="section-summary">
                 <p>Interactive models for exploring waves, mechanics, matter, electromagnetism, nuclear physics, space, and relativity.</p>
@@ -1595,8 +1495,7 @@
     <section class="section app-section" id="for_teachers" data-section="04" data-category="for_teachers">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Made for the classroom</span>
-                <h2>For Teachers <span class="section-label">Utility</span></h2>
+                <h2>For Teachers</h2>
             </div>
             <div class="section-summary">
                 <p>Simple utilities designed for lessons, demonstrations, and assessments.</p>
@@ -1652,8 +1551,7 @@
     <section class="section app-section" id="fun" data-section="05" data-category="fun">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Experiments &amp; play</span>
-                <h2>For Fun <span class="section-label">Play</span></h2>
+                <h2>For Fun</h2>
             </div>
             <div class="section-summary">
                 <p>Playful side projects where physics, cameras, and code get a little strange.</p>
@@ -1711,7 +1609,6 @@
     <section class="section" id="about" data-section="06">
         <div class="about-panel">
             <div>
-                <span class="section-eyebrow">Why PanPhy</span>
                 <h2>About</h2>
                 <p class="about-lead">Small, useful physics apps that run wherever a browser does.</p>
                 <div class="about-points" aria-label="PanPhy principles">
@@ -1723,7 +1620,7 @@
             <div class="about-copy">
                 <p>Welcome to <strong>PanPhy Labs</strong>. These tools, simulations, and games are built with AI and designed to be interactive and educational. There are many great physics tools online, but not all of them fit my lessons. On school-managed devices, students and teachers often don't have the admin rights to install software, so I build my own web apps that are simple, run in any browser, and need no installation.</p>
                 <p>The aim is simple: build tools I’m proud to use in my own classroom and happy to recommend to others.</p>
-                <p>Most apps are offline-friendly after the first visit. Look for the <strong>Offline ready</strong> badge on each card. Games and features that rely on external services still require an internet connection.</p>
+                <p>Most apps are offline-friendly after the first visit. Cards with the green download icon are ready to use offline on this device. Games and features that rely on external services still require an internet connection.</p>
             </div>
         </div>
     </section>
@@ -1804,9 +1701,6 @@
                         if (matches) {
                             visibleInSection += 1;
                             visibleTotal += 1;
-                            if (activeTopic !== 'all') {
-                                card.classList.add('revealed');
-                            }
                         }
                     });
 
@@ -1977,7 +1871,8 @@
             var massRadius = 180;
             var hasPointerInteraction = false;
 
-            var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            // Drawn once as a still grid; it does not follow the pointer.
+            var reducedMotion = true;
 
             var running = false;
             var lastFrameTime = 0;
@@ -2545,7 +2440,8 @@
         function setCardOfflineState(pill, state, label) {
             if (!pill) return;
             pill.dataset.state = state;
-            pill.textContent = label;
+            pill.title = label;
+            pill.querySelector('.sr-only').textContent = label;
             pill.hidden = state === 'checking';
         }
 
@@ -2570,6 +2466,8 @@
 
                 const pill = document.createElement('span');
                 pill.className = 'card-offline-pill';
+                // A download icon; the label is its tooltip and screen-reader text.
+                pill.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v10m-4-4 4 4 4-4M5 19h14"/></svg><span class="sr-only"></span>';
                 setCardOfflineState(pill, 'checking', '');
                 const meta = card.querySelector('.card-meta');
                 if (meta) {
@@ -3034,30 +2932,6 @@
         window.addEventListener('online', updateOfflineFontState);
         window.addEventListener('offline', updateOfflineFontState);
         updateOfflineFontState();
-    </script>
-    <script>
-        // Card scroll reveal with IntersectionObserver
-        (function () {
-            var cards = document.querySelectorAll('.card');
-            if (!cards.length) return;
-
-            var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (prefersReduced || !('IntersectionObserver' in window)) {
-                cards.forEach(function (c) { c.classList.add('revealed'); });
-                return;
-            }
-
-            var observer = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('revealed');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.01, rootMargin: '0px 0px -30px 0px' });
-
-            cards.forEach(function (c) { observer.observe(c); });
-        })();
     </script>
 </body>
 
