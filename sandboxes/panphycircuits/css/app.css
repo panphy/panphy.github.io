@@ -420,10 +420,9 @@ a.atool { text-decoration: none; }
 .legend-swatch.is-dashed { border-top-style: dashed; }
 .field select { min-height: 36px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 4px 8px; }
 .graph-actions { display: flex; align-items: center; gap: 6px; flex: none; }
-.graph-axis { display: inline-flex; align-items: center; gap: 6px; flex: none; font-size: 0.78rem; color: var(--ink-2); }
-.graph-axis select { min-height: 32px; max-width: 11rem; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 0 6px; font: 600 0.74rem var(--font-body); }
-.graph-axis select:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.graph-axis select:disabled { opacity: 0.55; }
+.graph-axis { flex: none; min-height: 32px; max-width: 17rem; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 0 6px; font: 600 0.74rem var(--font-body); }
+.graph-axis:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.graph-axis:disabled { opacity: 0.55; }
 .graph-exports { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
 .graph-exports[hidden] { display: none !important; }
 
@@ -706,7 +705,7 @@ a.atool { text-decoration: none; }
   .graph-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; height: auto; gap: 6px; padding: 6px 8px; }
   .graph-title { grid-column: 1; grid-row: 1; }
   .graph-legend { grid-column: 2; grid-row: 1; }
-  .graph-axis { grid-column: 1; grid-row: 2; }
+  .graph-axis { grid-column: 1; grid-row: 2; max-width: 12rem; }
   .graph-actions { grid-column: 2 / -1; grid-row: 2; flex-wrap: wrap; justify-content: flex-end; }
   #graph-close { grid-column: 3; grid-row: 1; width: 32px; min-width: 32px; height: 32px; }
 }

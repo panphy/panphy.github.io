@@ -133,6 +133,12 @@ test('an X–Y graph plots current against p.d. and exports the chosen reading a
   assert.ok(Math.abs(Number(cols[2].cells[last]) - Number(cols[1].cells[last]) / 100) < 1e-4, 'I = V/R');
   const saved = circuit.importDoc(circuit.exportDoc(doc)).doc;
   assert.equal(saved.settings.graphX, vm.id + ':V', 'the x-axis is saved with the circuit');
+  const names = graph.graphChoices(graph.plottedSeries(app)).map(([, text]) => text);
+  assert.deepEqual(names, ['Readings against time', `${am.label} current against ${vm.label} p.d.`, `${vm.label} p.d. against ${am.label} current`]);
+  doc.settings.graphX = am.id + ':I'; doc.settings.graphY = vm.id + ':V';
+  assert.equal(graph.ySeries(app).comp, vm, 'p.d. against current');
+  assert.deepEqual(graph.panPhyPlotPayload(app).columns.map((c) => [c.name, c.role]), [['t', 'none'], [am.label, 'X'], [vm.label, 'Y']]);
+  assert.equal(circuit.importDoc(circuit.exportDoc(doc)).doc.settings.graphY, vm.id + ':V', 'the y-axis is saved too');
   doc.settings.graphX = 'nope:<b>';
   assert.equal(circuit.importDoc(circuit.exportDoc(doc)).doc.settings.graphX, 't', 'invalid choices fall back to time');
   doc.settings.graphX = 'zz9:V';
