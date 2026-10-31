@@ -56,7 +56,7 @@
     return {
       format: FORMAT,
       version: VERSION,
-      world: { gravity: 9.81, dragModel: 'none', linearDragSource: 'coefficient', linearDrag: 1, drag: 0.1, viscosity: 0, floor: true, floorFriction: 0.5, gpeZero: 0 },
+      world: { gravity: 9.81, dragModel: 'none', linearDragSource: 'coefficient', linearDrag: 1, drag: 0.1, viscosity: 0, floor: true, floorFriction: 0.5, gpeZero: 0, accuracy: 'standard' },
       bodies: [],
       links: [],
       nextId: 1,
@@ -206,6 +206,22 @@
   }
 
   const DRAG_MODELS = { none: 'None', linear: 'Linear', quadratic: 'Quadratic' };
+
+  // The longest time step the simulation may take. Stiff springs and solid rods and ropes
+  // shorten it further; finer steps are more accurate but cost more computing time.
+  const ACCURACY = {
+    standard: { label: 'Standard', step: 1 / 240, text: '1/240 s' },
+    fine: { label: 'Fine', step: 1 / 480, text: '1/480 s' },
+    veryFine: { label: 'Very fine', step: 1 / 1000, text: '1/1000 s' }
+  };
+  function worldAccuracy(scene) {
+    return Object.hasOwn(ACCURACY, scene.world.accuracy) ? scene.world.accuracy : 'standard';
+  }
+  function accuracyNote(scene) {
+    const a = worldAccuracy(scene);
+    if (a === 'standard') return '';
+    return `World accuracy is ${ACCURACY[a].label} (steps of ${ACCURACY[a].text} or less), so large scenes may run slower than real time.`;
+  }
   function worldDragModel(scene) {
     return Object.hasOwn(DRAG_MODELS, scene.world.dragModel) ? scene.world.dragModel : scene.world.viscosity > 0 ? 'linear' : 'none';
   }
@@ -577,6 +593,7 @@
     scene.world.linearDrag = clamp(num(w.linearDrag, 1), ...LIMITS.linearDrag);
     scene.world.drag = clamp(num(w.drag, 0.1), ...LIMITS.drag);
     scene.world.gpeZero = clamp(num(w.gpeZero, 0), ...LIMITS.coord);
+    scene.world.accuracy = worldAccuracy({ world: w });
     const ids = new Set();
     let skipped = 0;
     let maxNum = 0;
@@ -635,6 +652,7 @@
 
   PPM.scene = {
     DRAG_MODELS, worldDragModel, objectDragModel, effectiveDragModel, dragCoefficients, dragOverrideNote,
+    ACCURACY, worldAccuracy, accuracyNote,
     FORMAT, VERSION, COLORS, COLOR_CYCLE, BODY_KINDS, LINK_KINDS, LIMITS,
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, closestSurface, copyFragment, pasteFragment,

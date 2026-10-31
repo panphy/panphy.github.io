@@ -143,7 +143,7 @@
 <ol class="actions">
 <li>With the scene paused, click the bob. The Inspector shows its properties and current readings. Right-click it, or touch and hold, for quick settings.</li>
 <li>Use the numeric fields for precise mass, friction, bounciness and air resistance. Reset before testing a different starting position or velocity.</li>
-<li>Click empty space to show the <strong>World</strong> card, whose settings apply to the whole scene. It has three sections: <strong>Gravity</strong> (strength, planet presets and the reference height for gravitational energy), <strong>Drag</strong> (the default drag for every object) and <strong>Floor</strong> (on or off, and its friction).</li>
+<li>Click empty space to show the <strong>World</strong> card, whose settings apply to the whole scene. It has four sections: <strong>Gravity</strong> (strength, planet presets and the reference height for gravitational energy), <strong>Drag</strong> (the default drag for every object), <strong>Floor</strong> (on or off, and its friction) and <strong>Accuracy</strong> (how finely time is stepped).</li>
 </ol>
 <div class="checkpoint"><strong>What you should see</strong>
 <p>The bob is highlighted and its settings appear in the Inspector. The example’s gravitational-energy reference is 2 m, the height of the bob at its lowest point.</p>
@@ -237,7 +237,7 @@
 <ul>
 <li>Pause keeps the current motion and recording. Play resumes. While running, drag an object to pull it with a force.</li>
 <li>Moving, resizing, adding or deleting after time has run makes the current state the new starting setup and starts a fresh recording. Undo can return to the previous setup.</li>
-<li>Parameter changes such as mass, friction, restitution, drag, gravity and spring or motor settings apply immediately. Reset first when you want to compare runs from the same initial conditions.</li>
+<li>Parameter changes such as mass, friction, restitution, drag, gravity, World accuracy and spring or motor settings apply immediately. Reset first when you want to compare runs from the same initial conditions.</li>
 <li>Reset rebuilds the starting setup at time zero and clears the graph. A saved scene is an editable setup, not a replay or a graph recording.</li>
 </ul>
 </div>
@@ -258,7 +258,7 @@
 <summary>Physics model and limits</summary>
 <div class="reference-body">
 <ul>
-<li>All quantities use SI units. The simulation uses Planck.js (Box2D) rigid-body mechanics, with steps of 1/240 s or smaller for stiff springs; solid connectors use smaller steps too.</li>
+<li>All quantities use SI units. The simulation uses Planck.js (Box2D) rigid-body mechanics and advances time in steps. <strong>Accuracy</strong> in World sets the longest step: <strong>Standard</strong> (1/240 s, the default), <strong>Fine</strong> (1/480 s) or <strong>Very fine</strong> (1/1000 s). The same rules then shorten it for any scene that needs it: solid rods and ropes halve it, and stiff springs shorten it further, down to 1/5000 s, so they stay stable. One step applies to the whole scene. It is worked out again when time starts and whenever a mass, connector or World setting changes, and it is saved with the scene.</li>
 <li>Try <strong>Examples → Terminal velocity</strong> to compare two identical balls dropped from the same height. The coral ball has no drag; the blue ball follows World quadratic drag and reaches within 1% of its 3 m/s terminal velocity after about one-third of the 6 m drop. Its vertical-velocity graph levels near −3 m/s before landing. Use <strong>Graph of</strong> to compare the coral ball, and try 0.25× speed to watch the fall more slowly.</li>
 <li data-math-static>Springs follow Hooke’s law with optional linear damping. Quadratic drag follows \(F = kv^2\). </li>
 <li data-math-static>The <strong>Drag</strong> section of World has a row of buttons: None, Linear or Quadratic; Linear also chooses whether it is set by a coefficient \(b\) or by fluid viscosity \(\eta\). Each object defaults to <strong>World</strong>. Choosing None, Linear or Quadratic in the object’s Drag card replaces World drag for that object only; it does not change World or add the two forces together. None disables drag.</li>
@@ -267,7 +267,7 @@
 <li>Friction combines the two surface coefficients using their geometric mean; if either is zero, the contact is frictionless.</li>
 <li>Bounciness uses the larger restitution of the two surfaces. Very slow collisions are inelastic to keep resting contacts quiet. Tiny contact overlaps (about 1 mm) and small energy changes at impacts are normal numerical effects.</li>
 <li>Gravitational energy is measured from the height set in World, which defaults to the floor at 0 m. Some examples choose another reference; negative gravitational energy below that height is valid.</li>
-<li>The 1/240 s step keeps large scenes running in real time on classroom tablets, but it limits how precisely nearly simultaneous collisions are resolved. A ball moving at 2.3 m/s travels about 1 cm per step, so when several collisions fall inside one step, such as along a row of touching balls, they are solved together instead of one after another. Each time, a little momentum goes to the wrong ball, and the error grows. To see it, open <strong>Examples → Newton’s cradle</strong> and set every ball’s restitution to 1, so that no energy is lost: after about eight clean swings, the middle balls still start to move. Slower speeds and collisions spread out in time reduce the effect.</li>
+<li>Finer steps are more accurate but need more computing time, so a large scene may run slower than real time; the scene shows a note when it does. Standard keeps large scenes real-time on classroom tablets, but it limits how precisely nearly simultaneous collisions are resolved. A ball moving at 2.3 m/s travels about 1 cm per 1/240 s step, so collisions that fall inside one step, such as along a row of touching balls, are solved together instead of one after another, and each time a little momentum goes to the wrong ball. To see it, open <strong>Examples → Newton’s cradle</strong>, set every ball’s restitution to 1 and World drag to None: after about eight clean swings, the middle balls start to move. With Very fine they stay still for longer. Any accuracy other than Standard appears in the <strong>notes</strong> pill at the top right of the scene.</li>
 <li>Merged or cut shapes can catch at seams, and very thin walls can miss fast objects. This is an educational model; reduce extreme speeds, stiffnesses or mass ratios if a setup becomes unstable.</li>
 </ul>
 </div>
@@ -310,7 +310,7 @@
 </tr>
 <tr><td><kbd>Ctrl+C / Ctrl+V</kbd></td><td>Copy / paste selection (Command also works on Mac)</td>
 </tr>
-<tr><td><kbd>Ctrl+Z / Ctrl+Shift+Z</kbd></td><td>Undo / redo (Command also works on Mac)</td>
+<tr><td><kbd>Ctrl+Z / Ctrl+Shift+Z</kbd></td><td>Undo / redo; Ctrl+Y also redoes (Command also works on Mac)</td>
 </tr>
 <tr><td><kbd>Arrow keys / Shift+arrows</kbd></td><td>Nudge selected object 0.01 m / 0.1 m with scene focused</td>
 </tr>

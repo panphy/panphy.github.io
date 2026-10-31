@@ -5,7 +5,7 @@
   const PPM = root.PPM = root.PPM || {};
   const S = PPM.scene;
 
-  const BASE_STEP = 1 / 240; // seconds of simulated time per step, before stiff springs shorten it
+  const BASE_STEP = 1 / 240; // the Standard accuracy step, before stiff springs shorten it
   const MIN_STEP = 1 / 5000;
   const VELOCITY_ITERATIONS = 12;
   const POSITION_ITERATIONS = 5;
@@ -254,10 +254,12 @@
       floorFixture
     };
 
-    // The step is short enough to keep the stiffest spring accurate: ω·h ≤ 0.05.
+    // The World accuracy sets the longest step; it is then short enough to keep the stiffest
+    // spring accurate: ω·h ≤ 0.05.
     function chooseStep() {
+      const base = S.ACCURACY[S.worldAccuracy(scene)].step;
       // Solid connectors are chains of joints, which hold together better with finer steps.
-      let h = solids.size ? BASE_STEP / 2 : BASE_STEP;
+      let h = solids.size ? base / 2 : base;
       scene.links.forEach((l) => {
         if (l.kind !== 'spring') return;
         const inv = invMass(l.a) + invMass(l.b);
@@ -534,6 +536,7 @@
       sim.setFloorFriction(scene.world.floorFriction);
       scene.bodies.forEach((b) => sim.updateBody(b));
       scene.links.forEach((l) => sim.updateLink(l));
+      chooseStep();
     };
 
     // Contacts keep the friction and restitution they started with; reset them after an edit.

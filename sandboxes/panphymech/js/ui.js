@@ -273,19 +273,22 @@
     ui.closeMenus = closeMenus;
     setupMenu('btn-file', 'menu-file');
     setupMenu('btn-display', 'display-menu');
+    // Settings that differ from the usual: objects with their own drag, and a finer World accuracy.
     function dragNotes() {
-      return app.scene.bodies.map((b) => ({ body: b, message: S.dragOverrideNote(app.scene, b) })).filter((n) => n.message);
+      const notes = app.scene.bodies.map((b) => ({ body: b, message: S.dragOverrideNote(app.scene, b) })).filter((n) => n.message);
+      const accuracy = S.accuracyNote(app.scene);
+      return accuracy ? [{ world: true, message: accuracy }, ...notes] : notes;
     }
     function renderDragNotes() {
-      $('drag-notes-pop').innerHTML = '<div class="drag-notes-head"><strong>Drag notes</strong><button type="button" data-close-notes aria-label="Close drag notes">Close</button></div><ul>'
-        + dragNotes().map((n) => `<li><button type="button" data-drag-body="${esc(n.body.id)}">${esc(n.message)}</button></li>`).join('') + '</ul>';
+      $('drag-notes-pop').innerHTML = '<div class="drag-notes-head"><strong>Notes</strong><button type="button" data-close-notes aria-label="Close notes">Close</button></div><ul>'
+        + dragNotes().map((n) => `<li><button type="button" ${n.world ? 'data-world-note' : `data-drag-body="${esc(n.body.id)}"`}>${esc(n.message)}</button></li>`).join('') + '</ul>';
     }
     function syncDragNotes() {
       const notes = dragNotes();
       const button = $('btn-drag-notes');
       button.hidden = !notes.length;
       button.textContent = `${notes.length} note${notes.length === 1 ? '' : 's'}`;
-      button.setAttribute('aria-label', `${notes.length} drag override note${notes.length === 1 ? '' : 's'}`);
+      button.setAttribute('aria-label', `${notes.length} settings note${notes.length === 1 ? '' : 's'}`);
       if (!notes.length) { $('drag-notes-pop').hidden = true; button.setAttribute('aria-expanded', 'false'); }
       else if (!$('drag-notes-pop').hidden) renderDragNotes();
     }
@@ -301,6 +304,13 @@
     });
     $('drag-notes-pop').addEventListener('click', (event) => {
       if (event.target.closest('[data-close-notes]')) { closeMenus(); $('btn-drag-notes').focus(); return; }
+      if (event.target.closest('[data-world-note]')) {
+        closeMenus(); app.select(null);
+        setPanel('inspector', true);
+        const choice = $('inspector-body').querySelector('[data-accuracy]:checked');
+        if (choice) { choice.closest('.world-section').scrollIntoView({ block: 'start' }); choice.focus({ preventScroll: true }); }
+        return;
+      }
       const button = event.target.closest('[data-drag-body]');
       if (!button) return;
       const b = S.bodyById(app.scene, button.dataset.dragBody);
@@ -795,7 +805,7 @@
 
     function worldInspector() {
       const w = () => app.scene.world;
-      // One World card holds the scene-wide settings, in Gravity, Drag and Floor sections.
+      // One World card holds the scene-wide settings, in Gravity, Drag, Floor and Accuracy sections.
       const world = card('', 'world-card');
       const top = document.createElement('div');
       top.className = 'insp-head';
@@ -833,6 +843,25 @@
       const floor = section('Floor');
       floor.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
       floor.appendChild(numField({ label: 'Friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
+      const accuracy = section('Accuracy');
+      const current = S.worldAccuracy(app.scene);
+      const name = 'r' + Math.random().toString(36).slice(2, 9);
+      const group = document.createElement('div');
+      group.className = 'drag-seg';
+      group.setAttribute('role', 'radiogroup');
+      group.setAttribute('aria-label', 'Simulation accuracy');
+      group.style.setProperty('--n', 3);
+      group.innerHTML = Object.entries(S.ACCURACY).map(([value, a]) => `<label><input type="radio" name="${name}" value="${value}" data-accuracy${value === current ? ' checked' : ''}><span>${esc(a.label)}</span></label>`).join('');
+      group.addEventListener('change', (e) => {
+        app.editParam(() => { w().accuracy = e.target.value; }, null, false, true);
+        const replacement = $('inspector-body').querySelector('[data-accuracy]:checked');
+        if (replacement) replacement.focus();
+      });
+      accuracy.appendChild(group);
+      const accuracyHelp = document.createElement('p');
+      accuracyHelp.className = 'field-help';
+      accuracyHelp.textContent = `Time advances in steps of ${S.ACCURACY[current].text} or less. Finer steps resolve fast collisions better but need more computing time, so large scenes may run slower than real time.`;
+      accuracy.appendChild(accuracyHelp);
       const sys = readingsCard('System energy now', [
         { key: 'KE', label: 'Kinetic \\(E_\\mathrm{k}\\)', plain: 'Kinetic' }, { key: 'GPE', label: 'Gravitational \\(E_\\mathrm{p}\\)', plain: 'Gravitational' },
         { key: 'EPE', label: 'Elastic \\(E_\\mathrm{e}\\)', plain: 'Elastic' }, '-', { key: 'E', label: 'Total \\(E\\)', plain: 'Total' }
