@@ -522,17 +522,15 @@
       });
     }
 
-    // A free-body diagram: the forces on the selected objects or, with none selected, on the
-    // object the graph tracks (every moving object when it tracks the whole system or a
-    // spring), each drawn from where it acts. The heaviest object shown has its weight drawn
+    // Force arrows on every moving object or, when objects are selected, a free-body diagram of
+    // just those, each force drawn from where it acts. The heaviest object shown has its weight drawn
     // a little longer than it looks (60–160 px). Returns arrows in world coordinates at a
     // given camera scale, so Fit can make room for them too.
     r.forceArrows = function forceArrows(scale) {
       if (!app.sim || app.simStale || !app.sim.forcesOn) return [];
       const moving = app.scene.bodies.filter((b) => !b.fixed);
-      let shown = app.selectedBodies().map((id) => S.bodyById(app.scene, id)).filter((b) => b && !b.fixed);
-      if (!shown.length && app.track && app.track.type === 'body') shown = moving.filter((b) => b.id === app.track.id);
-      if (!shown.length) shown = moving;
+      const picked = app.selectedBodies().map((id) => S.bodyById(app.scene, id)).filter((b) => b && !b.fixed);
+      const shown = picked.length ? picked : moving;
       const list = shown.flatMap((b) => app.sim.forcesOn(b.id));
       const heaviest = shown.reduce((m, b) => (!m || b.mass > m.mass ? b : m), null);
       let ref = heaviest ? Math.abs(app.scene.world.gravity) * heaviest.mass : 0;
