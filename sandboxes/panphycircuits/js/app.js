@@ -504,6 +504,8 @@
         for (const msg of def.warnings(c, solver.reader(res, c))) out.push({ level: 'warn', msg, comps: [c.id] });
       }
     }
+    const step = solver.stepNote(app.sim);
+    if (step) out.push({ level: 'warn', msg: step.msg, comps: step.comps });
     for (const m of app.meterNotes()) out.push({ level: 'warn', msg: m.msg, comps: [m.id] });
     const dangling = circuit.danglingJunctions(app.doc);
     if (dangling.length) out.push({ level: 'warn', msg: `${dangling.length} wire end${dangling.length > 1 ? 's are' : ' is'} not connected to anything (marked with an orange ring). Drag the end onto a terminal, or delete the wire.`, comps: dangling });
@@ -774,7 +776,8 @@
       app,
       document.getElementById('graph-canvas'),
       document.getElementById('graph-legend'),
-      document.getElementById('graph-exports')
+      document.getElementById('graph-exports'),
+      document.getElementById('graph-x')
     );
     wireControls();
     ui.renderExamples(PPC.examples.list);

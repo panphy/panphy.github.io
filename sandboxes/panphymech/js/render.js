@@ -36,7 +36,7 @@
       r.colors = {
         bg: v('--stage'), grid: v('--stage-grid'), gridMajor: v('--stage-grid-major'), axis: v('--stage-axis'),
         floor: v('--floor'), floorLine: v('--floor-line'), ink: v('--ink'), ink2: v('--ink-2'), ink3: v('--ink-3'),
-        accent: v('--accent'), surface: v('--surface'), link: v('--link'), rope: v('--rope'), vector: v('--vector'),
+        accent: v('--accent'), surface: v('--surface'), link: v('--link'), rope: v('--rope'), vector: v('--vector'), force: v('--force'),
         motor: v('--good'), danger: v('--danger')
       };
     };
@@ -460,29 +460,48 @@
       });
     }
 
-    function arrow(from, to, color, label) {
+    // An outline in the stage color keeps an arrow readable where it crosses an object.
+    function arrow(from, to, color, label, outline) {
       const dx = to.x - from.x;
       const dy = to.y - from.y;
       const L = Math.hypot(dx, dy);
       if (L < 4) return;
       const ux = dx / L; const uy = dy / L;
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color;
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.moveTo(from.x, from.y);
-      ctx.lineTo(to.x - ux * 7, to.y - uy * 7);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(to.x, to.y);
-      ctx.lineTo(to.x - ux * 10 - uy * 5, to.y - uy * 10 + ux * 5);
-      ctx.lineTo(to.x - ux * 10 + uy * 5, to.y - uy * 10 - ux * 5);
-      ctx.closePath();
-      ctx.fill();
+      const shape = (width, ink) => {
+        ctx.strokeStyle = ink;
+        ctx.fillStyle = ink;
+        ctx.lineWidth = width;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x - ux * 7, to.y - uy * 7);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(to.x, to.y);
+        ctx.lineTo(to.x - ux * 10 - uy * 5, to.y - uy * 10 + ux * 5);
+        ctx.lineTo(to.x - ux * 10 + uy * 5, to.y - uy * 10 - ux * 5);
+        ctx.closePath();
+        ctx.fill();
+        if (width > 3) ctx.stroke();
+      };
+      if (outline) shape(5.5, r.colors.bg);
+      shape(2.2, color);
+      ctx.lineJoin = 'miter';
       if (label) {
+        // "F_f" draws F with a small upright f below it.
+        const [main, sub] = label.split('_');
         ctx.font = 'italic 600 12px Figtree, system-ui, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(label, to.x + 5, to.y - 5);
+        const text = (t, x, y) => {
+          if (outline) { ctx.lineWidth = 3; ctx.strokeStyle = r.colors.bg; ctx.strokeText(t, x, y); }
+          ctx.fillText(t, x, y);
+        };
+        text(main, to.x + 5, to.y - 5);
+        if (sub) {
+          const w = ctx.measureText ? ctx.measureText(main).width : main.length * 7.5;
+          ctx.font = '600 9px Figtree, system-ui, sans-serif';
+          text(sub, to.x + 6 + w, to.y - 2);
+        }
       }
     }
 
@@ -500,6 +519,47 @@
         const from = r.toScreen(pose);
         arrow(from, { x: from.x + (v.vx / speed) * len, y: from.y - (v.vy / speed) * len }, r.colors.vector, 'v');
       });
+    }
+
+    // Force arrows on the selected objects, or on every moving object when none is selected,
+    // each drawn from where the force acts. One scale serves the scene: the heaviest moving
+    // object's weight is drawn a little longer than that object looks (60–160 px).
+    function drawForces() {
+      if (!app.sim || app.simStale || !app.sim.forcesOn) return;
+      const moving = app.scene.bodies.filter((b) => !b.fixed);
+      const picked = app.selectedBodies().map((id) => S.bodyById(app.scene, id)).filter((b) => b && !b.fixed);
+      const g = Math.abs(app.scene.world.gravity);
+      const list = (picked.length ? picked : moving).flatMap((b) => app.sim.forcesOn(b.id));
+      const heaviest = moving.reduce((m, b) => (!m || b.mass > m.mass ? b : m), null);
+      let ref = heaviest ? g * heaviest.mass : 0;
+      if (!(ref > 0)) ref = Math.max(0, ...list.map((f) => Math.hypot(f.fx, f.fy)));
+      if (!(ref > 0)) return;
+      const e = heaviest ? S.extent(heaviest) : { x: 0.25, y: 0.25 };
+      const unit = Math.min(160, Math.max(60, 2.4 * Math.max(e.x, e.y) * cam().scale));
+      const arrows = list.map((f) => {
+        const F = Math.hypot(f.fx, f.fy);
+        if (F < 0.01 * ref) return null;
+        const len = Math.min((unit * F) / ref, 3 * unit);
+        const from = r.toScreen(f);
+        const ux = f.fx / F; const uy = -f.fy / F;
+        return { from, to: { x: from.x + ux * len, y: from.y + uy * len }, ux, uy, label: f.label };
+      }).filter(Boolean);
+      // Opposite forces along one line (weight and normal reaction under a ball) would hide
+      // each other, so move such pairs a little apart sideways.
+      for (let i = 0; i < arrows.length; i++) {
+        for (let j = i + 1; j < arrows.length; j++) {
+          const a = arrows[i]; const b = arrows[j];
+          if (a.ux * b.ux + a.uy * b.uy > -0.95) continue;
+          const side = (b.from.x - a.from.x) * -a.uy + (b.from.y - a.from.y) * a.ux;
+          if (Math.abs(side) > 6) continue;
+          [[a, 4], [b, -4]].forEach(([q, d]) => {
+            const ox = -a.uy * d; const oy = a.ux * d;
+            q.from = { x: q.from.x + ox, y: q.from.y + oy };
+            q.to = { x: q.to.x + ox, y: q.to.y + oy };
+          });
+        }
+      }
+      arrows.forEach((a) => arrow(a.from, a.to, r.colors.force, a.label, true));
     }
 
     function drawLabels() {
@@ -657,6 +717,7 @@
       });
       app.scene.links.filter((l) => l.kind !== 'hinge' && l.kind !== 'weld').forEach(drawLink);
       app.scene.links.filter((l) => l.kind === 'hinge' || l.kind === 'weld').forEach(drawLink);
+      if (app.display.forces) drawForces();
       if (app.display.vectors) drawVectors();
       if (app.display.labels) drawLabels();
       const sel = clean ? null : app.selection;

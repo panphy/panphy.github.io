@@ -30,7 +30,7 @@
     running: false,
     speed: 1,
     snap: true,
-    display: { vectors: false, trails: true, labels: false, grid: true },
+    display: { vectors: false, forces: false, trails: true, labels: false, grid: true },
     // The graph starts closed on every visit; Graph opens it.
     graphOpen: false,
     graphHeight: null,

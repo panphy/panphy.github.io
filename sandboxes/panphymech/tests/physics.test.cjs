@@ -668,3 +668,78 @@ test('objects joined by a rope or rod still collide with each other', () => {
     assert.ok(gap > 0.4 - 3e-3, `${solid ? 'solid ' : ''}${kind}: the boxes do not pass through each other (${gap})`);
   }
 });
+
+test('slow restitution-1 collisions still bounce', () => {
+  const scene = emptyScene();
+  scene.world.gravity = 0;
+  const a = S.makeBody(scene, 'ball', -1, 0); a.r = 0.1; a.restitution = 1; a.vx = 0.05;
+  const b = S.makeBody(scene, 'ball', 1, 0); b.r = 0.1; b.restitution = 1; b.vx = -0.05;
+  scene.bodies.push(a, b);
+  const sim = P.createSim(scene);
+  run(sim, 25);
+  assert.ok(Math.abs(sim.readBody(a.id).vx + 0.05) < 1e-3, `a vx ${sim.readBody(a.id).vx}`);
+  assert.ok(Math.abs(sim.readBody(b.id).vx - 0.05) < 1e-3, `b vx ${sim.readBody(b.id).vx}`);
+});
+
+test('a restitution-1 ball bounces back to its drop height every time', () => {
+  for (const accuracy of ['standard', 'fine']) {
+    const scene = S.createScene();
+    scene.world.accuracy = accuracy;
+    const ball = S.makeBody(scene, 'ball', 0, 2); ball.r = 0.2; ball.restitution = 1;
+    scene.bodies.push(ball);
+    const sim = P.createSim(scene);
+    const peaks = [];
+    let last = sim.readBody(ball.id);
+    run(sim, 10, () => { const r = sim.readBody(ball.id); if (last.vy > 0 && r.vy <= 0) peaks.push(r.y); last = r; });
+    assert.ok(peaks.length >= 4, `${accuracy}: ${peaks.length} bounces`);
+    peaks.forEach((y) => assert.ok(Math.abs(y - 2) < 0.005, `${accuracy}: peak ${y}`));
+  }
+});
+
+test('a pendulum on an ideal rod or rope keeps its energy', () => {
+  for (const kind of ['rod', 'rope']) {
+    const scene = emptyScene();
+    const a = Math.PI / 3;
+    const ball = S.makeBody(scene, 'ball', Math.sin(a), -Math.cos(a)); ball.r = 0.05;
+    scene.bodies.push(ball);
+    scene.links.push(S.makeLink(scene, kind, ball.id, { x: 0, y: 0 }, null, { x: 0, y: 0 }));
+    const sim = P.createSim(scene);
+    const E0 = sim.totals().E;
+    const swing = ball.mass * 9.81 * (1 - Math.cos(a));
+    run(sim, 20);
+    assert.ok(Math.abs(sim.totals().E - E0) < 0.02 * swing, `${kind}: ${E0} → ${sim.totals().E}`);
+  }
+});
+
+test('force arrows: a block on a ramp feels W, N = mg cos θ and friction μN, each where it acts', () => {
+  const scene = E.list.find((e) => /ramp/i.test(e.title)).build();
+  const block = scene.bodies.find((b) => b.name === 'Block');
+  const sim = P.createSim(scene);
+  assert.deepEqual(sim.forcesOn(block.id).map((f) => f.label), ['W'], 'only weight before time starts');
+  run(sim, 0.5);
+  const forces = Object.fromEntries(sim.forcesOn(block.id).map((f) => [f.label, f]));
+  const mag = (f) => Math.hypot(f.fx, f.fy);
+  const theta = Math.PI / 6;
+  const W = block.mass * 9.81;
+  assert.ok(Math.abs(mag(forces.W) - W) < 1e-9);
+  assert.ok(Math.abs(mag(forces.N) - W * Math.cos(theta)) < 0.01 * W, `N ${mag(forces.N)}`);
+  assert.ok(Math.abs(mag(forces.F_f) - 0.25 * W * Math.cos(theta)) < 0.01 * W, `friction ${mag(forces.F_f)}`);
+  const c = sim.readBody(block.id);
+  assert.ok(Math.hypot(forces.W.x - c.x, forces.W.y - c.y) < 1e-9, 'weight at the center of mass');
+  assert.ok(Math.hypot(forces.N.x - c.x, forces.N.y - c.y) > 0.15, 'normal reaction at the contact');
+});
+
+test('force arrows: tension and spring force balance a hanging mass at its attachment', () => {
+  for (const kind of ['rope', 'rod', 'spring']) {
+    const scene = emptyScene();
+    const ball = S.makeBody(scene, 'ball', 0, -1); ball.mass = 1;
+    scene.bodies.push(ball);
+    const l = S.makeLink(scene, kind, ball.id, { x: 0, y: 0 }, null, { x: 0, y: 0 });
+    if (kind === 'spring') Object.assign(l, { k: 50, rest: 1 - 9.81 / 50, damping: 2 });
+    scene.links.push(l);
+    const sim = P.createSim(scene);
+    run(sim, 1);
+    const f = sim.forcesOn(ball.id).find((x) => x.label === (kind === 'spring' ? 'F_s' : 'T'));
+    assert.ok(f && Math.abs(f.fy - 9.81) < 0.01 && Math.abs(f.fx) < 1e-6, `${kind}: ${f && f.fy}`);
+  }
+});

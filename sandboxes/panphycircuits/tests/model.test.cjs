@@ -929,3 +929,18 @@ test('Tidy finishes promptly and a second click leaves a tidied diagram alone', 
     assert.equal(JSON.stringify(doc.layouts.schematic), once, ex.title);
   }
 });
+
+test('display settings missing from a file match a new circuit; saved ones are kept', () => {
+  const def = circuit.createDoc().settings;
+  const bare = circuit.exportDoc(circuit.createDoc());
+  delete bare.settings;
+  const s = circuit.importDoc(bare).doc.settings;
+  for (const key of ['showLabels', 'showValues', 'wireColorsInDiagram', 'currentFlow']) assert.equal(s[key], def[key], key);
+  const saved = circuit.exportDoc(circuit.createDoc());
+  saved.settings = { showLabels: true, showValues: false, currentFlow: false, wireColorsInDiagram: true };
+  const t = circuit.importDoc(saved).doc.settings;
+  assert.deepEqual([t.showLabels, t.showValues, t.currentFlow, t.wireColorsInDiagram], [true, false, false, true]);
+  const old = circuit.exportDoc(circuit.createDoc());
+  old.settings = { showLabels: false };
+  assert.equal(circuit.importDoc(old).doc.settings.showValues, false, 'older files used one switch for labels and values');
+});

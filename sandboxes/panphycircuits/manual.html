@@ -256,7 +256,9 @@
 <div class="reference-body">
 <ul>
 	<li>Opening Graph enables “Plot on graph” for selected meters or scopes, or for all of them if none is selected and none is plotted yet.</li>
+	<li>The graph plots readings against time. To plot them against another reading, choose it in <strong>against</strong> beside the Graph title. For an I–V characteristic, plot an ammeter and a voltmeter, choose the voltmeter, then change the supply or a variable resistor while the simulation runs: each recorded sample adds a point. Use a DC supply: on AC, meters show averages over each cycle, not instantaneous values. Choose <strong>Time</strong> to return to the time graph. The choice is saved with the circuit, and Export to PanPhyPlot uses it as the X column.</li>
 	<li>Hover over the graph to mark the nearest sample and read its time and values. Drag across the graph to select a time range for viewing and export. Full Graph restores the entire recording. Pause while the graph is open to show Export CSV and Export to PanPhyPlot for the displayed range.</li>
+	<li>Very small capacitances and inductances can make an LC circuit oscillate faster than the shortest automatic time step (1 µs) can follow; a long manual time step can do the same. The oscillations then die away too quickly, and <strong>Problems and notes</strong> names the parts responsible. Use larger values or a lower frequency.</li>
 	<li>New oscilloscopes start with Auto scale and Auto time base on. Turn either off for manual volts/div or time/div.</li>
 	<li>The ohmmeter (outside Core) drives at most 1 mA. Use it with no live supply between its leads; OL means open circuit.</li>
 </ul>
@@ -287,6 +289,10 @@
 		<tr><td><kbd>Space</kbd></td><td>Pause / resume simulation</td></tr>
 		<tr><td><kbd>1</kbd> / <kbd>2</kbd></td><td>Realistic / circuit diagram</td></tr>
 		<tr><td><kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Zoom in / out / fit</td></tr>
+		<tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Select the next / previous component; past the last or first, move on to the rest of the page</td></tr>
+		<tr><td>Arrow keys</td><td>Move the selection (with <kbd>Shift</kbd>, five grid squares)</td></tr>
+		<tr><td><kbd>Enter</kbd></td><td>Operate the selected switch or push switch</td></tr>
+		<tr><td><kbd>Esc</kbd></td><td>Cancel a wire or placement, or clear the selection; <kbd>Tab</kbd> straight after leaves the workspace</td></tr>
 	</tbody>
 </table></div>
 </div>

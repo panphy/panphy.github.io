@@ -21,7 +21,9 @@
       wireColorsInDiagram: false,
       currentFlow: true,
       speed: 1,
-      dt: 'auto'
+      dt: 'auto',
+      // The graph's x-axis: 't' for time, or the key of a plotted reading for an X–Y graph.
+      graphX: 't'
     };
   }
 
@@ -316,17 +318,21 @@
     const def = defaultSettings();
     doc.settings = {
       logicStyle: s.logicStyle === 'iec' ? 'iec' : 'distinctive',
-      showLabels: s.showLabels !== false,
+      // A setting missing from the file takes the same value as in a new circuit.
+      showLabels: flag(s.showLabels, def.showLabels),
       // Older files had one switch for both labels and values.
-      showValues: s.showValues !== undefined ? s.showValues !== false : s.showLabels !== false,
-      wireColorsInDiagram: s.wireColorsInDiagram === true,
-      currentFlow: s.currentFlow === true,
+      showValues: flag(s.showValues, flag(s.showLabels, def.showValues)),
+      wireColorsInDiagram: flag(s.wireColorsInDiagram, def.wireColorsInDiagram),
+      currentFlow: flag(s.currentFlow, def.currentFlow),
       speed: [0.01, 0.1, 0.25, 1, 4, 10].includes(s.speed) ? s.speed : def.speed,
-      dt: s.dt === 'auto' || (finite(s.dt) && s.dt >= 1e-6 && s.dt <= 0.1) ? s.dt : 'auto'
+      dt: s.dt === 'auto' || (finite(s.dt) && s.dt >= 1e-6 && s.dt <= 0.1) ? s.dt : 'auto',
+      graphX: typeof s.graphX === 'string' && /^[a-z][a-z0-9_-]{0,31}:[a-z0-9]{1,12}$/i.test(s.graphX) ? s.graphX : 't'
     };
     cleanupJunctions(doc);
     return { doc, warnings };
   }
+
+  function flag(v, fallback) { return typeof v === 'boolean' ? v : fallback; }
 
   function exportDoc(doc) {
     const out = clone(doc);

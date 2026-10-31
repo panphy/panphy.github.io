@@ -339,6 +339,7 @@
     function buildDisplayMenu() {
       const opts = [
         ['vectors', 'Velocity arrows'],
+        ['forces', 'Force arrows'],
         ['trails', 'Trails and strobe dots'],
         ['labels', 'Object names'],
         ['grid', 'Grid and scale']

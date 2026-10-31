@@ -19,6 +19,10 @@
 // - Logic modules settle one gate at a time (zero propagation delay).
 (function (root) {
   const PPC = root.PPC = root.PPC || {};
+  // The shortest automatic time step, which keeps the simulation near real time.
+  const MIN_DT = 1e-6;
+  // A step this many times longer than a part needs visibly damps oscillations.
+  const COARSE_STEP = 10;
   const registry = PPC.registry || (typeof require === 'function' ? require('./registry.js') : null);
   const circuit = PPC.circuit || (typeof require === 'function' ? require('./circuit.js') : null);
   const units = PPC.units || (typeof require === 'function' ? require('./units.js') : null);
@@ -138,12 +142,21 @@
 
     // Time step suggestion and AC frequencies (per electrical network).
     let dtSuggest = 0.005;
+    // The shortest step any oscillation needs (LC circuits and AC supplies), before the 1 µs
+    // floor, and the parts that need it. A too-coarse step damps an oscillation, but only
+    // speeds up an RC or RL decay that is over within a microsecond anyway.
+    let dtNeed = Infinity;
+    let dtNeedComps = [];
+    const need = (dt, owners, oscillation) => {
+      dtSuggest = Math.min(dtSuggest, dt);
+      if (oscillation && dt < dtNeed) { dtNeed = dt; dtNeedComps = [...new Set(owners.filter(Boolean))]; }
+    };
     let acMin = Infinity;
     for (const net of networks) net.acMin = Infinity;
     for (const c of doc.components) {
       const def = registry.get(c.type);
       const step = def.timeStep && def.timeStep(c);
-      if (step > 0) dtSuggest = Math.min(dtSuggest, step);
+      if (step > 0) need(step, [c.id], true);
       const freq = def.acFrequency && def.acFrequency(c);
       if (!(freq > 0)) continue;
       acMin = Math.min(acMin, freq);
@@ -159,7 +172,7 @@
         if (q.k !== 'G' || typeof q.g !== 'number' || q.owner === p.owner) continue;
         if ([q.a.n, q.b.n].some((n) => n === p.a.n || n === p.b.n)) rMin = Math.min(rMin, 1 / q.g);
       }
-      if (Number.isFinite(rMin)) dtSuggest = Math.min(dtSuggest, (p.c * rMin) / 100);
+      if (Number.isFinite(rMin)) need((p.c * rMin) / 100, [p.owner]);
     }
     for (const p of prims) {
       if (p.k !== 'L') continue;
@@ -174,12 +187,12 @@
           .reduce((sum, q) => sum + q.g, 0);
         if (gTouch > 0) resistance = 1 / gTouch;
       }
-      if (resistance > 0) dtSuggest = Math.min(dtSuggest, p.l / resistance / 100);
-      for (const q of net.prims) if (q.k === 'C') dtSuggest = Math.min(dtSuggest, Math.sqrt(p.l * q.c) / 100);
+      if (resistance > 0) need(p.l / resistance / 100, [p.owner]);
+      for (const q of net.prims) if (q.k === 'C') need(Math.sqrt(p.l * q.c) / 100, [p.owner, q.owner], true);
     }
-    dtSuggest = Math.min(0.01, Math.max(1e-6, dtSuggest));
+    dtSuggest = Math.min(0.01, Math.max(MIN_DT, dtSuggest));
 
-    return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T') };
+    return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, dtNeed, dtNeedComps, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T') };
   }
 
   // ---------- Linear algebra ----------
@@ -981,7 +994,25 @@
     return sim;
   }
 
-  const api = { compile, solveAll, buildResult, reader, createSim, solveLinear, analyseVoltageLoops };
+  // A warning when the step in use is much longer than an oscillation needs, which happens at the
+  // automatic floor (very small L and C) or with a long manual step. Null when the step is fine.
+  function stepNote(sim) {
+    const c = sim && sim.compiled;
+    if (!c || !(c.dtNeed * COARSE_STEP < sim.dt)) return null;
+    const names = c.dtNeedComps.map((id) => circuit.getComp(sim.doc, id)?.label).filter(Boolean);
+    const who = names.length ? names.join(' and ') : 'Part of the circuit';
+    const auto = sim.doc.settings.dt === 'auto';
+    // Auto helps unless the circuit needs less than the automatic floor.
+    const autoHelps = c.dtNeed * COARSE_STEP >= c.dtSuggest;
+    const fix = auto ? 'Use larger values or a lower frequency.'
+      : autoHelps ? 'Choose the Auto time step.' : 'Use larger values, a lower frequency or the Auto time step.';
+    return {
+      msg: `${who} change${names.length === 1 ? 's' : ''} faster than the ${units.fmtSI(sim.dt, 's', 2)} time step can follow, so their oscillations die away too quickly. ${fix}`,
+      comps: c.dtNeedComps
+    };
+  }
+
+  const api = { compile, solveAll, buildResult, reader, createSim, solveLinear, analyseVoltageLoops, stepNote, MIN_DT };
   PPC.solver = api;
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis === 'object' ? globalThis : this);

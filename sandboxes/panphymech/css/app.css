@@ -11,6 +11,7 @@
   --link: #4A5466;
   --rope: #9A6B2F;
   --vector: #D6336C;
+  --force: #6741D9;
   --appbar-h: 56px;
   --panel-w: 236px;
   --insp-w: 304px;
@@ -30,6 +31,7 @@
   --link: #B5BDCC;
   --rope: #D6A15E;
   --vector: #FF6B9D;
+  --force: #B197FC;
   --paper-minor: rgba(150, 175, 255, 0.03);
   --paper-major: rgba(150, 175, 255, 0.065);
 }

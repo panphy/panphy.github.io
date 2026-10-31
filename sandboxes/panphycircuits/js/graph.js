@@ -1,4 +1,5 @@
-// PanPhyCircuits: time graph of meter and oscilloscope readings.
+// PanPhyCircuits: graph of meter and oscilloscope readings against time, or against one of
+// the plotted readings (an X–Y graph, such as current against p.d. for an I–V curve).
 // Every value plotted here is a sample recorded by the solver at a committed
 // time step; nothing is interpolated or smoothed.
 (function (root) {
@@ -51,6 +52,15 @@
     return out;
   }
 
+  // A reading's name on an axis: "V1 p.d.", or "S1 CH1" for a scope channel.
+  function seriesName(s) { return s.channel ? s.label : `${s.label} ${quantityLabel(s.unit, s.channel)}`; }
+
+  // The plotted reading chosen for the x-axis, or null for time.
+  function xSeries(app, list = plottedSeries(app)) {
+    const key = app.doc.settings.graphX;
+    return key && key !== 't' ? list.find((s) => s.key === key) || null : null;
+  }
+
   function timeBounds(app, tr) {
     return R.bounds(tr.t, app.graphRange);
   }
@@ -99,15 +109,17 @@
 
   function panPhyPlotPayload(app) {
     const list = plottedSeries(app);
+    const xs = xSeries(app, list);
     const { rows } = sampleRows(app, list);
     const columns = [
-      { name: 't', unit: 's', role: 'X', cells: rows.map((row) => formatCell(row.t)) }
+      { name: 't', unit: 's', role: xs ? 'none' : 'X', cells: rows.map((row) => formatCell(row.t)) }
     ];
-    for (const s of list) {
+    // On an X–Y graph the chosen reading is the X column, so PanPhyPlot opens the same graph.
+    for (const s of xs ? [xs, ...list.filter((x) => x !== xs)] : list) {
       columns.push({
         name: s.label,
         unit: s.unit,
-        role: 'Y',
+        role: s === xs ? 'X' : 'Y',
         cells: rows.map((row) => formatCell(row.values[s.key]))
       });
     }
@@ -127,9 +139,27 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  function createGraph(app, canvas, legendEl, exportsEl) {
+  function createGraph(app, canvas, legendEl, exportsEl, axisSelect) {
     let lastDraw = 0;
     let hoverX = null;
+    let hoverY = null;
+    let axisOptions = '';
+    if (axisSelect) axisSelect.addEventListener('change', () => { app.setSetting('graphX', axisSelect.value); draw(true); });
+
+    // Time, then each plotted reading, as choices for the x-axis.
+    function syncAxisSelect(list, xs) {
+      if (!axisSelect) return;
+      const options = [['t', 'Time'], ...list.map((s) => [s.key, seriesName(s)])];
+      const sig = JSON.stringify(options);
+      if (sig !== axisOptions) {
+        axisOptions = sig;
+        axisSelect.replaceChildren(...options.map(([value, text]) => new Option(text, value)));
+      }
+      axisSelect.value = xs ? xs.key : 't';
+      axisSelect.disabled = list.length < 2;
+      canvas.title = xs ? 'Hover to read the nearest sample.' : 'Drag to select a time range. Use +/− to zoom, arrow keys to pan, and Escape for Full Graph.';
+      canvas.setAttribute('aria-label', xs ? `Graph of plotted readings against ${seriesName(xs)}` : 'Graph of plotted meter and oscilloscope readings against time');
+    }
     const selection = R.mount(canvas, {
       fullButton: document.getElementById('graph-full'),
       getTimes: () => app.sim.traces.t,
@@ -139,10 +169,12 @@
       redraw: () => draw(true)
     });
     canvas.addEventListener('pointermove', (e) => {
-      hoverX = e.clientX - canvas.getBoundingClientRect().left;
+      const box = canvas.getBoundingClientRect();
+      hoverX = e.clientX - box.left;
+      hoverY = e.clientY - box.top;
       draw(true);
     });
-    canvas.addEventListener('pointerleave', () => { hoverX = null; draw(true); });
+    canvas.addEventListener('pointerleave', () => { hoverX = null; hoverY = null; draw(true); });
 
     function niceStep(range, target) {
       const raw = range / target;
@@ -178,9 +210,11 @@
       const line = cs.getPropertyValue('--line').trim() || '#ddd';
       g.clearRect(0, 0, W, H);
       const list = plottedSeries(app);
+      const xs = xSeries(app, list);
       const tr = app.sim.traces;
       legendEl.innerHTML = '';
       syncExports();
+      syncAxisSelect(list, xs);
       if (!list.length) {
         g.fillStyle = ink3; g.font = '13px Figtree, sans-serif'; g.textAlign = 'center';
         const hasPlottable = app.doc.components.some((c) => {
@@ -193,6 +227,7 @@
         W / 2, H / 2);
         return;
       }
+      if (xs) { drawXY(g, W, H, list, xs, { ink, ink3, line, cs }); return; }
       const { t0, t1 } = selection.viewBounds(tr.t, app.graphRange);
       const unitsUsed = [...new Set(list.map((s) => s.unit))];
       const axes = {};
@@ -308,6 +343,126 @@
       }
     }
 
+    // Value range of some series over the samples in the displayed time range.
+    function extent(list, tr, t0, t1) {
+      let lo = Infinity, hi = -Infinity;
+      for (const s of list) {
+        const arr = tr.series[s.key] || [];
+        for (let i = 0; i < arr.length; i++) {
+          if (tr.t[i] < t0 || tr.t[i] > t1) continue;
+          const v = arr[i];
+          if (Number.isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+        }
+      }
+      if (!Number.isFinite(lo)) { lo = 0; hi = 1; }
+      lo = Math.min(lo, 0); hi = Math.max(hi, 0);
+      if (hi - lo < 1e-12) hi = lo + (list[0] && list[0].unit === 'A' ? 1e-3 : 1);
+      const pad = (hi - lo) * 0.08;
+      return { lo: lo - (lo < 0 ? pad : 0), hi: hi + pad };
+    }
+
+    // An X–Y graph: every other plotted reading against the chosen one, sample by sample in
+    // time order, over the displayed time range.
+    function drawXY(g, W, H, list, xs, { ink, ink3, line, cs }) {
+      const tr = app.sim.traces;
+      const ys = list.filter((s) => s !== xs);
+      const { t0, t1 } = R.bounds(tr.t, app.graphRange);
+      const xa = extent([xs], tr, t0, t1);
+      const yUnits = [...new Set(ys.map((s) => s.unit))];
+      const ya = {};
+      for (const u of yUnits) ya[u] = extent(ys.filter((s) => s.unit === u), tr, t0, t1);
+      const left = 56, right = yUnits.length > 1 ? 56 : 14, top = 10, bottom = 42;
+      const pw = W - left - right, ph = H - top - bottom;
+      if (pw <= 0 || ph <= 0) return;
+      const X = (v) => left + ((v - xa.lo) / (xa.hi - xa.lo)) * pw;
+      g.strokeStyle = line; g.lineWidth = 1; g.fillStyle = ink3; g.font = '11px "IBM Plex Mono", monospace';
+      // About one tick per 80 px, so the unit labels never run together on a phone.
+      const xsStep = niceStep(xa.hi - xa.lo, Math.max(2, Math.min(6, Math.floor(pw / 80))));
+      g.textAlign = 'center'; g.textBaseline = 'top';
+      for (let v = Math.ceil(xa.lo / xsStep) * xsStep; v <= xa.hi + 1e-15; v += xsStep) {
+        const x = X(v);
+        g.strokeStyle = Math.abs(v) < xsStep * 1e-6 ? ink3 : line;
+        g.beginPath(); g.moveTo(x, top); g.lineTo(x, top + ph); g.stroke();
+        g.fillText(units.fmtSI(Math.abs(v) < xsStep * 1e-6 ? 0 : v, xs.unit, 3, { trim: true }), x, top + ph + 6);
+      }
+      g.font = '600 11px Figtree, sans-serif';
+      g.fillText(seriesName(xs), left + pw / 2, top + ph + 22);
+      g.font = '11px "IBM Plex Mono", monospace';
+      yUnits.forEach((u, idx) => {
+        const ax = ya[u];
+        ax.Y = (v) => top + ph - ((v - ax.lo) / (ax.hi - ax.lo)) * ph;
+        const vs = niceStep(ax.hi - ax.lo, 4);
+        g.textAlign = idx === 0 ? 'right' : 'left'; g.textBaseline = 'middle';
+        for (let v = Math.ceil(ax.lo / vs) * vs; v <= ax.hi + 1e-15; v += vs) {
+          const y = ax.Y(v);
+          if (idx === 0) { g.strokeStyle = Math.abs(v) < vs * 1e-6 ? ink3 : line; g.beginPath(); g.moveTo(left, y); g.lineTo(left + pw, y); g.stroke(); }
+          g.fillStyle = ink3;
+          g.fillText(units.fmtSI(Math.abs(v) < vs * 1e-6 ? 0 : v, u, 3, { trim: true }), idx === 0 ? left - 6 : left + pw + 6, y);
+        }
+      });
+      g.strokeStyle = ink3; g.strokeRect(left, top, pw, ph);
+      if (!ys.length) {
+        g.fillStyle = ink3; g.font = '13px Figtree, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(`Plot another meter to draw its readings against ${xs.label}.`, left + pw / 2, top + ph / 2);
+        return;
+      }
+      const xArr = tr.series[xs.key] || [];
+      g.save();
+      g.beginPath(); g.rect(left, top, pw, ph); g.clip();
+      let hover = null;
+      for (const s of ys) {
+        const arr = tr.series[s.key] || [];
+        const Y = ya[s.unit].Y;
+        g.strokeStyle = s.color; g.fillStyle = s.color; g.lineWidth = 2;
+        g.setLineDash(s.unit === 'A' && yUnits.length > 1 ? [6, 3] : []);
+        g.beginPath();
+        let pen = false, count = 0, lx = 0, ly = 0;
+        for (let i = 0; i < arr.length; i++) {
+          if (tr.t[i] < t0 || tr.t[i] > t1) continue;
+          const xv = xArr[i], v = arr[i];
+          if (!Number.isFinite(xv) || !Number.isFinite(v)) { pen = false; continue; }
+          const x = X(xv), y = Y(v);
+          if (pen) g.lineTo(x, y); else g.moveTo(x, y);
+          pen = true; count++; lx = x; ly = y;
+          if (hoverX !== null) {
+            const d = Math.hypot(x - hoverX, y - hoverY);
+            if (d < 24 && (!hover || d < hover.d)) hover = { d, i, x, y, s };
+          }
+        }
+        g.stroke();
+        // A steady reading is a single point, so mark the latest one.
+        if (count) { g.setLineDash([]); g.beginPath(); g.arc(lx, ly, 3.5, 0, Math.PI * 2); g.fill(); }
+      }
+      g.restore();
+      g.setLineDash([]);
+      if (hover) {
+        g.fillStyle = hover.s.color; g.strokeStyle = cs.getPropertyValue('--surface').trim() || '#fff'; g.lineWidth = 2;
+        g.beginPath(); g.arc(hover.x, hover.y, 5, 0, Math.PI * 2); g.fill(); g.stroke();
+        R.drawReadout(g, {
+          x: hover.x, top, width: W, height: H,
+          lines: [`${xs.label} = ${units.fmtSI(xArr[hover.i], xs.unit, 4)}`, `${hover.s.label} = ${units.fmtSI((tr.series[hover.s.key] || [])[hover.i], hover.s.unit, 4)}`, `t = ${units.fmtSI(tr.t[hover.i], 's', 4)}`],
+          background: cs.getPropertyValue('--surface').trim() || '#fff', ink, border: line
+        });
+      }
+      const indices = R.indices(tr.t, app.graphRange);
+      const at = hover ? hover.i : indices[indices.length - 1];
+      for (const s of ys) {
+        const v = at === undefined ? NaN : (tr.series[s.key] || [])[at];
+        const item = document.createElement('span');
+        item.className = 'legend-item';
+        const sw = document.createElement('span');
+        sw.className = 'legend-swatch' + (s.unit === 'A' && yUnits.length > 1 ? ' is-dashed' : '');
+        sw.style.setProperty('--c', s.color);
+        const tx = document.createElement('span');
+        tx.textContent = `${s.label} (${quantityLabel(s.unit, s.channel)})`;
+        const val = document.createElement('span');
+        val.className = 'legend-value';
+        val.textContent = Number.isFinite(v) ? units.fmtSI(v, s.unit, 3) : (v === Infinity ? 'OL' : '—');
+        item.append(sw, tx, val);
+        legendEl.append(item);
+      }
+    }
+
     function exportCSV() {
       if (!hasExportData(app)) return false;
       downloadText('panphycircuits_graph.csv', toCSV(app), 'text/csv;charset=utf-8;');
@@ -323,7 +478,7 @@
     return { draw, syncExports, fullGraph: selection.reset, exportCSV, exportPanPhyPlot, plottedSeries: () => plottedSeries(app), hasExportData: () => hasExportData(app) };
   }
 
-  const api = { createGraph, plottedSeries, sampleRows, toCSV, panPhyPlotPayload, panPhyPlotUrl, hasExportData, quantityLabel };
+  const api = { createGraph, plottedSeries, xSeries, sampleRows, toCSV, panPhyPlotPayload, panPhyPlotUrl, hasExportData, quantityLabel };
   PPC.graph = api;
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis === 'object' ? globalThis : this);

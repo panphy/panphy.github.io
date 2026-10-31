@@ -109,3 +109,32 @@ test('selected circuit exports exclude earlier and later samples and restore wit
   app.graphRange=null; assert.equal(graph.toCSV(app).trim().split('\n').length,7);
   assert.equal(app.sim.traces.t.length,6);
 });
+
+test('an X–Y graph plots current against p.d. and exports the chosen reading as X', () => {
+  const doc = circuit.createDoc();
+  const bat = circuit.addComponent(doc, 'battery', { props: { emf: 6 } });
+  const r = circuit.addComponent(doc, 'resistor', { props: { R: 100 } });
+  const am = circuit.addComponent(doc, 'ammeter', { props: { plot: true } });
+  const vm = circuit.addComponent(doc, 'voltmeter', { props: { plot: true } });
+  for (const [a, b] of [[[bat, 'p'], [am, 'p']], [[am, 'n'], [r, 'a']], [[r, 'b'], [bat, 'n']], [[vm, 'p'], [r, 'a']], [[vm, 'n'], [r, 'b']]]) {
+    assert.ok(circuit.addWire(doc, { c: a[0].id, t: a[1] }, { c: b[0].id, t: b[1] }).wire);
+  }
+  const sim = solver.createSim();
+  sim.setDoc(doc);
+  sim.setRunning(true);
+  advance(sim, 0.05);
+  const app = { doc, sim, graphRange: null };
+  assert.equal(graph.xSeries(app), null, 'time by default');
+  doc.settings.graphX = vm.id + ':V';
+  assert.equal(graph.xSeries(app).comp, vm);
+  const cols = graph.panPhyPlotPayload(app).columns;
+  assert.deepEqual(cols.map((c) => [c.name, c.role]), [['t', 'none'], [vm.label, 'X'], [am.label, 'Y']]);
+  const last = cols[1].cells.length - 1;
+  assert.ok(Math.abs(Number(cols[2].cells[last]) - Number(cols[1].cells[last]) / 100) < 1e-4, 'I = V/R');
+  const saved = circuit.importDoc(circuit.exportDoc(doc)).doc;
+  assert.equal(saved.settings.graphX, vm.id + ':V', 'the x-axis is saved with the circuit');
+  doc.settings.graphX = 'nope:<b>';
+  assert.equal(circuit.importDoc(circuit.exportDoc(doc)).doc.settings.graphX, 't', 'invalid choices fall back to time');
+  doc.settings.graphX = 'zz9:V';
+  assert.equal(graph.xSeries(app), null, 'a reading that is not plotted falls back to time');
+});
