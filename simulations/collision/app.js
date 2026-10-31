@@ -1583,8 +1583,8 @@ function cssRgba(color, alpha) {
     return `rgba(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)}, ${alpha})`;
 }
 
-// A tapered arrow in the ball's color from a small white-ringed dot at the ball's center. It
-// strengthens from the tail to the head, casts a soft shadow and has a thin light edge.
+// A slim arrow in the ball's color from the ball's center, styled like PanPhyMech's velocity
+// arrows: a thin line and a small solid head. A faint light edge keeps it visible over its ball.
 function drawVelocityArrow(ctx, sphere, ballRadiusPx, easeAlpha, onCamera) {
     const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
     if (speed < ARROW_MIN_SPEED) {
@@ -1607,60 +1607,55 @@ function drawVelocityArrow(ctx, sphere, ballRadiusPx, easeAlpha, onCamera) {
     if (lengthPx < 2) {
         return;
     }
-    const shaft = Math.max(3.5, Math.min(9, ballRadiusPx * 0.15));
-    const headLength = Math.min(lengthPx * 0.5, Math.max(13, ballRadiusPx * 0.55));
-    const headHalf = Math.max(shaft * 1.7, headLength * 0.48);
-    const neck = lengthPx - (headLength * 0.78); // the head's back edges sweep forward to here
-    const dotRadius = Math.max(3.5, shaft * 0.95);
+    const shaft = Math.max(2, Math.min(3.2, ballRadiusPx * 0.06));
+    const headLength = Math.min(lengthPx * 0.45, Math.max(9, Math.min(14, ballRadiusPx * 0.3)));
+    const headHalf = headLength * 0.5;
 
     // Plain sRGB channels for the 2D canvas, without three.js's conversion to linear color.
     arrowColor.setHex(sphere.colorHex, THREE.LinearSRGBColorSpace);
     if (!onCamera && document.documentElement.getAttribute('data-theme') !== 'dark') {
         arrowColor.multiplyScalar(0.88);
     }
+    const color = cssRgba(arrowColor, 1);
+    const edge = onCamera ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.5)';
 
     ctx.save();
     ctx.translate(overlayPointA.x, overlayPointA.y);
     ctx.rotate(Math.atan2(dy, dx));
-    ctx.beginPath();
-    ctx.moveTo(0, -shaft / 2);
-    ctx.lineTo(neck, -shaft / 2);
-    ctx.lineTo(lengthPx - headLength, -headHalf);
-    ctx.lineTo(lengthPx, 0);
-    ctx.lineTo(lengthPx - headLength, headHalf);
-    ctx.lineTo(neck, shaft / 2);
-    ctx.lineTo(0, shaft / 2);
-    ctx.closePath();
-
-    const gradient = ctx.createLinearGradient(0, 0, lengthPx, 0);
-    gradient.addColorStop(0, cssRgba(arrowColor, 0.55));
-    gradient.addColorStop(Math.min(0.95, neck / lengthPx), cssRgba(arrowColor, 1));
-    gradient.addColorStop(1, cssRgba(arrowColor, 1));
+    ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.shadowColor = 'rgba(8, 12, 30, 0.32)';
-    ctx.shadowBlur = shaft * 1.4;
-    ctx.shadowOffsetY = shaft * 0.35;
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    ctx.shadowColor = 'transparent';
-    // A stroke in the same color rounds the arrow's corners and tip.
-    ctx.strokeStyle = gradient;
-    ctx.lineWidth = Math.max(1.5, shaft * 0.35);
+    const shaftEnd = lengthPx - (headLength * 0.7);
+
+    // Light edge first, then the colored arrow on top.
+    ctx.strokeStyle = edge;
+    ctx.fillStyle = edge;
+    ctx.lineWidth = shaft + 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(shaftEnd, 0);
     ctx.stroke();
-    // A thin light edge keeps the arrow apart from its own trail and from the camera picture.
-    ctx.strokeStyle = onCamera ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.9)';
-    ctx.lineWidth = 1.4;
+    traceArrowHead(ctx, lengthPx, headLength, headHalf);
+    ctx.lineWidth = 2;
     ctx.stroke();
 
-    // The arrow starts from a small dot at the ball's center.
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = shaft;
     ctx.beginPath();
-    ctx.arc(0, 0, dotRadius, 0, Math.PI * 2);
-    ctx.fillStyle = cssRgba(arrowColor.multiplyScalar(0.55), 1);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.lineWidth = Math.max(1.5, dotRadius * 0.5);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(shaftEnd, 0);
     ctx.stroke();
+    traceArrowHead(ctx, lengthPx, headLength, headHalf);
+    ctx.fill();
     ctx.restore();
+}
+
+function traceArrowHead(ctx, tip, headLength, headHalf) {
+    ctx.beginPath();
+    ctx.moveTo(tip, 0);
+    ctx.lineTo(tip - headLength, -headHalf);
+    ctx.lineTo(tip - headLength, headHalf);
+    ctx.closePath();
 }
 
 function drawMotionOverlays() {
