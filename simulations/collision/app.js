@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import { radialTexture } from '/assets/three-textures.js';
 
 const ui = {
     startBtn: document.getElementById('startBtn'),
@@ -482,8 +483,18 @@ const sharedWireMaterial = new THREE.MeshBasicMaterial({
     color: 0x00131c,
     wireframe: true,
     transparent: true,
-    opacity: 0.25
+    opacity: 0.07,
+    depthWrite: false
 });
+
+// A soft shadow under each ball while the camera is off, so the balls sit on the table.
+const sharedShadowGeometry = new THREE.PlaneGeometry(SPHERE_RADIUS * 2.9, SPHERE_RADIUS * 2.9);
+const sharedShadowMaterial = new THREE.MeshBasicMaterial({
+    map: radialTexture(THREE, 64, [[0, 0.26], [0.4, 0.17], [0.75, 0.04], [1, 0]], [12, 18, 40]),
+    transparent: true,
+    depthWrite: false
+});
+const SHADOW_OFFSET_Y = -SPHERE_RADIUS * 0.28;
 
 const FINGERTIP_POINTS = [4, 8, 12, 16, 20];
 const PALM_LANDMARKS = [0, 5, 9, 13, 17]; // wrist + MCP joints
@@ -528,8 +539,13 @@ const REAL_INTERACTION_PROFILE = {
 };
 
 const scene = new THREE.Scene();
-const camera3d = new THREE.PerspectiveCamera(52, 1, 0.01, 20);
-camera3d.position.set(0, 0, 2.2);
+// A narrow field of view keeps balls near the edges round. The camera stands back far enough
+// that the play area keeps the size it had with the original 52° lens at 2.2 units, because the
+// presets, spawn ranges and wall limits are all measured from it.
+const VIEW_HALF_HEIGHT = 2.2 * Math.tan(THREE.MathUtils.degToRad(26));
+const CAMERA_FOV = 22;
+const camera3d = new THREE.PerspectiveCamera(CAMERA_FOV, 1, 0.5, 20);
+camera3d.position.set(0, 0, VIEW_HALF_HEIGHT / Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV * 0.5)));
 scene.add(camera3d);
 
 const renderer = new THREE.WebGLRenderer({
@@ -851,6 +867,7 @@ function renderBallControls() {
         const ballName = `Ball ${index + 1}`;
         const card = document.createElement('article');
         card.className = 'ball-control-card';
+        card.style.setProperty('--ball-color', toCssHexColor(sphere.colorHex));
 
         const header = document.createElement('div');
         header.className = 'ball-control-header';
@@ -863,7 +880,14 @@ function renderBallControls() {
         title.className = 'ball-control-title';
         title.textContent = ballName;
 
-        header.append(colorDot, title);
+        const launchBtn = document.createElement('button');
+        launchBtn.type = 'button';
+        launchBtn.className = 'ball-launch-btn';
+        launchBtn.setAttribute('aria-label', `Launch ${ballName} from its start position`);
+        launchBtn.innerHTML = '<svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/></svg><span>Launch</span>';
+        launchBtn.addEventListener('click', () => launchSphere(sphere));
+
+        header.append(colorDot, title, launchBtn);
         card.appendChild(header);
 
         const grid = document.createElement('div');
@@ -917,13 +941,6 @@ function renderBallControls() {
             });
             grid.appendChild(vyStepper.element);
         }
-
-        const launchBtn = document.createElement('button');
-        launchBtn.type = 'button';
-        launchBtn.className = 'ball-launch-btn';
-        launchBtn.textContent = `Launch ${ballName}`;
-        launchBtn.addEventListener('click', () => launchSphere(sphere));
-        grid.appendChild(launchBtn);
 
         card.appendChild(grid);
         ui.ballControlsList.appendChild(card);
@@ -1052,31 +1069,41 @@ function getViewBounds() {
 }
 
 function createSphere(colorHex) {
-    const material = new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshPhysicalMaterial({
         color: colorHex,
         emissive: darkenHexColor(colorHex),
         emissiveIntensity: 1.0,
-        metalness: 0.22,
-        roughness: 0.22,
+        metalness: 0.08,
+        roughness: 0.32,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.08,
+        sheen: 0.4,
+        sheenColor: 0xffffff,
         transparent: true,
-        opacity: 0.9
+        opacity: 0.95
     });
     const mesh = new THREE.Mesh(sharedSphereGeometry, material);
     const wire = new THREE.Mesh(sharedSphereGeometry, sharedWireMaterial);
+    const shadow = new THREE.Mesh(sharedShadowGeometry, sharedShadowMaterial);
+    // Just behind the trails, so they are drawn over it.
+    shadow.position.set(0, SHADOW_OFFSET_Y, TRAIL_PLANE_Z - 0.02);
+    shadow.renderOrder = -2;
     const group = new THREE.Group();
-    group.add(mesh, wire);
+    group.add(mesh, wire, shadow);
 
     const trailPositions = new Float32Array(TRAIL_LENGTH * 3);
-    const trailMesh = createTrailRibbon();
+    const trailMesh = createTrailRibbon(Math.max(0, SPHERE_PALETTE.indexOf(colorHex)));
 
     return {
         id: nextSphereId++,
         colorHex,
         group,
         material,
+        shadow,
         trailPositions,
         trailMesh,
         trailCount: 0,
+        arrowLength: 0,
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
         // Launch velocity in screen convention: +x is right, +y is up.
@@ -1363,52 +1390,73 @@ function updateOverlays(advanced) {
     drawMotionOverlays();
 }
 
-// --- Trails: a three.js ribbon under each ball ---
-// A triangle mesh blends color and transparency smoothly from vertex to vertex, so the trail
-// can taper, shift color and fade without the seams that short 2D strokes leave. Each trail
-// point gets four vertices across the ribbon: transparent outer edges and an opaque core, which
-// gives the ribbon soft, feathered edges.
+// --- Trails: a three.js stroke under each ball ---
+// Each trail is drawn as a stroke with round joins: a disc at every trail point and a quad
+// along every segment, so a bounce leaves a clean rounded corner instead of a pinched one.
+// The stroke writes depth and later fragments at the same depth fail the test, so where the
+// stroke overlaps itself (joints, 1D reversals) each pixel is colored once and never doubles
+// up. The newest part of the trail is drawn first, so it lies on top where the path crosses.
+// Edges are smoothed by the renderer's multisampling, so there is no feathered fringe to
+// write depth and notch the stroke underneath.
 
-const RIBBON_ACROSS = [-1, -0.55, 0.55, 1];
-const RIBBON_EDGE_ALPHA = [0, 1, 1, 0];
-const RIBBON_MAX_HALF_WIDTH = SPHERE_RADIUS * 0.32;
-const RIBBON_HEAD_ALPHA = 0.85;
+const TRAIL_JOIN_SEGMENTS = 16;
+const TRAIL_DISC_VERTICES = TRAIL_JOIN_SEGMENTS + 1;
+const TRAIL_VERTICES_PER_POINT = TRAIL_DISC_VERTICES + 4;
+const TRAIL_INDICES_PER_POINT = (TRAIL_JOIN_SEGMENTS * 3) + 6;
+const TRAIL_MAX_HALF_WIDTH = SPHERE_RADIUS * 0.17;
+const TRAIL_MIN_HALF_WIDTH_SCALE = 0.25;
+const TRAIL_HEAD_ALPHA = 0.9;
+const TRAIL_PLANE_Z = -0.03;
 
-const ribbonIndex = (() => {
-    const quadsAcross = RIBBON_ACROSS.length - 1;
-    const indices = new Uint16Array((TRAIL_LENGTH - 1) * quadsAcross * 6);
+const trailJoinCos = new Float32Array(TRAIL_JOIN_SEGMENTS);
+const trailJoinSin = new Float32Array(TRAIL_JOIN_SEGMENTS);
+for (let k = 0; k < TRAIL_JOIN_SEGMENTS; k++) {
+    const angle = (k / TRAIL_JOIN_SEGMENTS) * Math.PI * 2;
+    trailJoinCos[k] = Math.cos(angle);
+    trailJoinSin[k] = Math.sin(angle);
+}
+
+// Slots are ordered by age, newest first: slot r holds the disc for the r-th newest point and
+// the quad joining it to the next older point. The index buffer is fixed; the draw range
+// stops before the last slot's quad.
+const trailIndex = (() => {
+    const indices = new Uint16Array(TRAIL_LENGTH * TRAIL_INDICES_PER_POINT);
     let n = 0;
-    for (let i = 0; i < TRAIL_LENGTH - 1; i++) {
-        for (let k = 0; k < quadsAcross; k++) {
-            const a = (i * RIBBON_ACROSS.length) + k;
-            const b = a + 1;
-            const c = a + RIBBON_ACROSS.length;
-            const d = c + 1;
-            indices.set([a, c, b, b, c, d], n);
-            n += 6;
+    for (let r = 0; r < TRAIL_LENGTH; r++) {
+        const base = r * TRAIL_VERTICES_PER_POINT;
+        for (let k = 0; k < TRAIL_JOIN_SEGMENTS; k++) {
+            indices[n++] = base;
+            indices[n++] = base + 1 + k;
+            indices[n++] = base + 1 + ((k + 1) % TRAIL_JOIN_SEGMENTS);
         }
+        const q = base + TRAIL_DISC_VERTICES;
+        indices.set([q, q + 1, q + 2, q + 2, q + 1, q + 3], n);
+        n += 6;
     }
     return new THREE.BufferAttribute(indices, 1);
 })();
 
-function createTrailRibbon() {
-    const vertexCount = TRAIL_LENGTH * RIBBON_ACROSS.length;
+function createTrailRibbon(layer = 0) {
+    const vertexCount = TRAIL_LENGTH * TRAIL_VERTICES_PER_POINT;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertexCount * 3), 3));
     // Four components per color, so each vertex carries its own transparency.
     geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vertexCount * 4), 4));
-    geometry.setIndex(ribbonIndex);
+    geometry.setIndex(trailIndex);
     geometry.setDrawRange(0, 0);
     const material = new THREE.MeshBasicMaterial({
         vertexColors: true,
         transparent: true,
-        depthWrite: false,
+        depthWrite: true,
+        depthTest: true,
+        depthFunc: THREE.LessDepth,
         side: THREE.DoubleSide
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.frustumCulled = false;
-    // Just behind the balls, and drawn before them.
-    mesh.position.z = -0.02;
+    // Just behind the balls, and drawn before them. Each ball's trail sits on its own layer,
+    // so where two trails cross they overlap the same way every frame.
+    mesh.position.z = TRAIL_PLANE_Z + (layer * 0.004);
     mesh.renderOrder = -1;
     mesh.visible = false;
     return mesh;
@@ -1420,6 +1468,16 @@ const ribbonWhite = new THREE.Color(0xffffff);
 
 function isOnLightBackground() {
     return document.documentElement.getAttribute('data-theme') !== 'dark' && !state.running;
+}
+
+function writeTrailVertex(positions, colors, v, x, y, r, g, b, a) {
+    positions[v * 3] = x;
+    positions[(v * 3) + 1] = y;
+    positions[(v * 3) + 2] = 0;
+    colors[v * 4] = r;
+    colors[(v * 4) + 1] = g;
+    colors[(v * 4) + 2] = b;
+    colors[(v * 4) + 3] = a;
 }
 
 function updateTrailRibbon(sphere, onLight) {
@@ -1434,46 +1492,63 @@ function updateTrailRibbon(sphere, onLight) {
     // light background the color is deepened a little so the trail keeps its contrast.
     ribbonHead.setHex(sphere.colorHex);
     if (onLight) {
-        ribbonHead.multiplyScalar(0.72);
+        ribbonHead.multiplyScalar(0.78);
     }
-    ribbonTail.copy(ribbonHead).lerp(ribbonWhite, onLight ? 0.35 : 0.6);
+    // On dark backgrounds the tail keeps the ball's hue; fading it towards white turns it grey.
+    ribbonTail.copy(ribbonHead).lerp(ribbonWhite, onLight ? 0.3 : 0.12);
 
     const points = sphere.trailPositions;
     const positions = mesh.geometry.attributes.position.array;
     const colors = mesh.geometry.attributes.color.array;
-    const across = RIBBON_ACROSS.length;
-    for (let i = 0; i < count; i++) {
-        // Direction of travel from the neighboring points, and the sideways normal to it.
-        const prev = Math.max(0, i - 1) * 3;
-        const next = Math.min(count - 1, i + 1) * 3;
-        let tx = points[next] - points[prev];
-        let ty = points[next + 1] - points[prev + 1];
-        const len = Math.hypot(tx, ty) || 1;
-        tx /= len;
-        ty /= len;
-        const t = i / (count - 1); // 0 at the oldest point, 1 at the ball
-        const halfWidth = RIBBON_MAX_HALF_WIDTH * (0.15 + (0.85 * Math.pow(t, 0.7)));
-        const alpha = RIBBON_HEAD_ALPHA * t * t * (3 - (2 * t)); // smoothstep fade
-        const r = ribbonTail.r + ((ribbonHead.r - ribbonTail.r) * t);
-        const g = ribbonTail.g + ((ribbonHead.g - ribbonTail.g) * t);
-        const b = ribbonTail.b + ((ribbonHead.b - ribbonTail.b) * t);
+    let prevHalfWidth = 0;
+    let prevR = 0;
+    let prevG = 0;
+    let prevB = 0;
+    let prevA = 0;
+    for (let r = 0; r < count; r++) {
+        const i = count - 1 - r; // trail point: 0 is the oldest, count - 1 is at the ball
+        const t = i / (count - 1); // 0 at the tail, 1 at the ball
+        const halfWidth = TRAIL_MAX_HALF_WIDTH * (TRAIL_MIN_HALF_WIDTH_SCALE + ((1 - TRAIL_MIN_HALF_WIDTH_SCALE) * Math.pow(t, 0.6)));
+        const alpha = TRAIL_HEAD_ALPHA * t * t * (3 - (2 * t)); // smoothstep fade
+        const cr = ribbonTail.r + ((ribbonHead.r - ribbonTail.r) * t);
+        const cg = ribbonTail.g + ((ribbonHead.g - ribbonTail.g) * t);
+        const cb = ribbonTail.b + ((ribbonHead.b - ribbonTail.b) * t);
         const x = points[i * 3];
         const y = points[(i * 3) + 1];
-        for (let k = 0; k < across; k++) {
-            const v = (i * across) + k;
-            const offset = RIBBON_ACROSS[k] * halfWidth;
-            positions[v * 3] = x - (ty * offset);
-            positions[(v * 3) + 1] = y + (tx * offset);
-            positions[(v * 3) + 2] = PLANE_Z;
-            colors[v * 4] = r;
-            colors[(v * 4) + 1] = g;
-            colors[(v * 4) + 2] = b;
-            colors[(v * 4) + 3] = alpha * RIBBON_EDGE_ALPHA[k];
+        const base = r * TRAIL_VERTICES_PER_POINT;
+
+        // Round join: a disc centered on the point.
+        writeTrailVertex(positions, colors, base, x, y, cr, cg, cb, alpha);
+        for (let k = 0; k < TRAIL_JOIN_SEGMENTS; k++) {
+            writeTrailVertex(positions, colors, base + 1 + k,
+                x + (trailJoinCos[k] * halfWidth), y + (trailJoinSin[k] * halfWidth), cr, cg, cb, alpha);
         }
+
+        // The quad from the previous (newer) point back to this one lives in the previous slot.
+        if (r > 0) {
+            const nx = points[(i + 1) * 3];
+            const ny = points[((i + 1) * 3) + 1];
+            let dx = nx - x;
+            let dy = ny - y;
+            const len = Math.hypot(dx, dy) || 1;
+            dx /= len;
+            dy /= len;
+            const q = ((r - 1) * TRAIL_VERTICES_PER_POINT) + TRAIL_DISC_VERTICES;
+            writeTrailVertex(positions, colors, q, nx - (dy * prevHalfWidth), ny + (dx * prevHalfWidth), prevR, prevG, prevB, prevA);
+            writeTrailVertex(positions, colors, q + 1, nx + (dy * prevHalfWidth), ny - (dx * prevHalfWidth), prevR, prevG, prevB, prevA);
+            writeTrailVertex(positions, colors, q + 2, x - (dy * halfWidth), y + (dx * halfWidth), cr, cg, cb, alpha);
+            writeTrailVertex(positions, colors, q + 3, x + (dy * halfWidth), y - (dx * halfWidth), cr, cg, cb, alpha);
+        }
+        prevHalfWidth = halfWidth;
+        prevR = cr;
+        prevG = cg;
+        prevB = cb;
+        prevA = alpha;
     }
     mesh.geometry.attributes.position.needsUpdate = true;
     mesh.geometry.attributes.color.needsUpdate = true;
-    mesh.geometry.setDrawRange(0, (count - 1) * (across - 1) * 6);
+    // Every slot's disc and quad, except the oldest slot's quad, which has no older point.
+    mesh.geometry.setDrawRange(0, (count * TRAIL_INDICES_PER_POINT) - 6);
 }
 
 // --- Velocity arrows: drawn on a 2D canvas over the balls ---
@@ -1498,17 +1573,29 @@ function projectToOverlay(x, y, out) {
 
 const overlayPointA = { x: 0, y: 0 };
 const overlayPointB = { x: 0, y: 0 };
-const ARROW_FILL = '#111214';
-const ARROW_EDGE = 'rgba(255, 255, 255, 0.92)';
+// The arrow eases to a new length over a few hundredths of a second, so it does not jump
+// when a collision changes the speed suddenly. While paused it always shows the exact speed.
+const ARROW_EASE_SECONDS = 0.05;
+const arrowColor = new THREE.Color();
+let lastArrowDrawAt = 0;
 
-// An arrow in the ball's color from a solid black dot at the ball's center. The thin white
-// edge keeps it visible on dark backgrounds and over the camera picture.
-function drawVelocityArrow(ctx, sphere, ballRadiusPx) {
+function cssRgba(color, alpha) {
+    return `rgba(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)}, ${alpha})`;
+}
+
+// A tapered arrow in the ball's color from a small white-ringed dot at the ball's center. It
+// strengthens from the tail to the head, casts a soft shadow and has a thin light edge.
+function drawVelocityArrow(ctx, sphere, ballRadiusPx, easeAlpha, onCamera) {
     const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
     if (speed < ARROW_MIN_SPEED) {
+        sphere.arrowLength = 0;
         return;
     }
-    const length = Math.min(ARROW_MAX_LENGTH, SPHERE_RADIUS + (speed * ARROW_SECONDS));
+    const target = Math.min(ARROW_MAX_LENGTH, SPHERE_RADIUS + (speed * ARROW_SECONDS));
+    sphere.arrowLength = sphere.arrowLength > 0
+        ? sphere.arrowLength + ((target - sphere.arrowLength) * easeAlpha)
+        : target;
+    const length = sphere.arrowLength;
     const ux = sphere.velocity.x / speed;
     const uy = sphere.velocity.y / speed;
     projectToOverlay(sphere.position.x, sphere.position.y, overlayPointA);
@@ -1520,39 +1607,58 @@ function drawVelocityArrow(ctx, sphere, ballRadiusPx) {
     if (lengthPx < 2) {
         return;
     }
-    const shaft = Math.max(3.5, Math.min(10, ballRadiusPx * 0.16));
-    const headLength = Math.min(lengthPx * 0.55, Math.max(14, ballRadiusPx * 0.62));
-    const headHalf = Math.max(shaft * 1.6, headLength * 0.5);
-    const dotRadius = shaft * 1.05;
+    const shaft = Math.max(3.5, Math.min(9, ballRadiusPx * 0.15));
+    const headLength = Math.min(lengthPx * 0.5, Math.max(13, ballRadiusPx * 0.55));
+    const headHalf = Math.max(shaft * 1.7, headLength * 0.48);
+    const neck = lengthPx - (headLength * 0.78); // the head's back edges sweep forward to here
+    const dotRadius = Math.max(3.5, shaft * 0.95);
+
+    // Plain sRGB channels for the 2D canvas, without three.js's conversion to linear color.
+    arrowColor.setHex(sphere.colorHex, THREE.LinearSRGBColorSpace);
+    if (!onCamera && document.documentElement.getAttribute('data-theme') !== 'dark') {
+        arrowColor.multiplyScalar(0.88);
+    }
 
     ctx.save();
     ctx.translate(overlayPointA.x, overlayPointA.y);
     ctx.rotate(Math.atan2(dy, dx));
     ctx.beginPath();
     ctx.moveTo(0, -shaft / 2);
-    ctx.lineTo(lengthPx - headLength, -shaft / 2);
+    ctx.lineTo(neck, -shaft / 2);
     ctx.lineTo(lengthPx - headLength, -headHalf);
     ctx.lineTo(lengthPx, 0);
     ctx.lineTo(lengthPx - headLength, headHalf);
-    ctx.lineTo(lengthPx - headLength, shaft / 2);
+    ctx.lineTo(neck, shaft / 2);
     ctx.lineTo(0, shaft / 2);
     ctx.closePath();
+
+    const gradient = ctx.createLinearGradient(0, 0, lengthPx, 0);
+    gradient.addColorStop(0, cssRgba(arrowColor, 0.55));
+    gradient.addColorStop(Math.min(0.95, neck / lengthPx), cssRgba(arrowColor, 1));
+    gradient.addColorStop(1, cssRgba(arrowColor, 1));
     ctx.lineJoin = 'round';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    ctx.shadowBlur = shaft;
-    ctx.shadowOffsetY = 1;
-    ctx.strokeStyle = ARROW_EDGE;
-    ctx.lineWidth = Math.max(2, shaft * 0.45);
-    ctx.stroke();
-    ctx.shadowColor = 'transparent';
-    ctx.fillStyle = toCssHexColor(sphere.colorHex);
+    ctx.shadowColor = 'rgba(8, 12, 30, 0.32)';
+    ctx.shadowBlur = shaft * 1.4;
+    ctx.shadowOffsetY = shaft * 0.35;
+    ctx.fillStyle = gradient;
     ctx.fill();
-    // Solid black dot at the ball's center, where the arrow starts.
+    ctx.shadowColor = 'transparent';
+    // A stroke in the same color rounds the arrow's corners and tip.
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = Math.max(1.5, shaft * 0.35);
+    ctx.stroke();
+    // A thin light edge keeps the arrow apart from its own trail and from the camera picture.
+    ctx.strokeStyle = onCamera ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    // The arrow starts from a small dot at the ball's center.
     ctx.beginPath();
     ctx.arc(0, 0, dotRadius, 0, Math.PI * 2);
-    ctx.fillStyle = ARROW_FILL;
+    ctx.fillStyle = cssRgba(arrowColor.multiplyScalar(0.55), 1);
     ctx.fill();
-    ctx.lineWidth = Math.max(1.5, shaft * 0.3);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.lineWidth = Math.max(1.5, dotRadius * 0.5);
     ctx.stroke();
     ctx.restore();
 }
@@ -1567,16 +1673,20 @@ function drawMotionOverlays() {
     }
     arrowCtx.setTransform(1, 0, 0, 1, 0, 0);
     arrowCtx.clearRect(0, 0, ui.arrowCanvas.width, ui.arrowCanvas.height);
+    const now = performance.now();
+    const dt = lastArrowDrawAt ? (now - lastArrowDrawAt) / 1000 : 0;
+    lastArrowDrawAt = now;
     if (!state.showArrows || spheres.length === 0 || !state.stageWidth) {
         return;
     }
+    const easeAlpha = (state.paused || dt <= 0) ? 1 : 1 - Math.exp(-Math.min(dt, 0.1) / ARROW_EASE_SECONDS);
     arrowCtx.setTransform(overlayPixelRatio, 0, 0, overlayPixelRatio, 0, 0);
     // Ball radius on screen, so the arrow scales with the view.
     projectToOverlay(0, 0, overlayPointA);
     projectToOverlay(SPHERE_RADIUS, 0, overlayPointB);
     const ballRadiusPx = Math.abs(overlayPointB.x - overlayPointA.x);
     for (const sphere of spheres) {
-        drawVelocityArrow(arrowCtx, sphere, ballRadiusPx);
+        drawVelocityArrow(arrowCtx, sphere, ballRadiusPx, easeAlpha, state.running);
     }
 }
 
@@ -3090,6 +3200,8 @@ function updatePhysics(dt, profile) {
 
 function updateGlow(dt) {
     for (const sphere of spheres) {
+        // Shadows only make sense on the plain table; over live video they look wrong.
+        sphere.shadow.visible = !state.running;
         const target = sphere.contactCount > 0 ? 3.0 : 1.0;
         const rate = sphere.contactCount > 0 ? 12.0 : 4.0;
         const alpha = 1 - Math.exp(-rate * dt);
@@ -4150,6 +4262,8 @@ window.addEventListener('beforeunload', () => {
         state.stream.getTracks().forEach((track) => track.stop());
     }
     sharedSphereGeometry.dispose();
+    sharedShadowGeometry.dispose();
+    sharedShadowMaterial.dispose();
     sharedWireMaterial.dispose();
     renderer.dispose();
 });

@@ -122,11 +122,27 @@
                                 </div>
                                 <div class="cl-start-presets">
                                     <span class="cl-field-label">Or try a preset</span>
-                                    <div class="cl-chip-row">
-                                        <button type="button" class="cl-chip" data-preset="elasticEqual">Elastic, equal masses</button>
-                                        <button type="button" class="cl-chip" data-preset="heavyLight">Heavy hits light</button>
-                                        <button type="button" class="cl-chip" data-preset="perfectlyInelastic">Perfectly inelastic</button>
-                                        <button type="button" class="cl-chip" data-preset="cradle">Newton's cradle</button>
+                                    <div class="cl-preset-grid">
+                                        <button type="button" class="cl-preset" data-preset="elasticEqual">
+                                            <svg class="cl-preset-art" viewBox="0 0 120 40" aria-hidden="true"><path class="cl-art-line" d="M4 34h112"/><circle class="cl-art-a" cx="30" cy="22" r="10"/><path class="cl-art-arrow" d="M44 22h18m-5-5 5 5-5 5"/><circle class="cl-art-b" cx="86" cy="22" r="10"/></svg>
+                                            <span class="cl-preset-name">Elastic, equal masses</span>
+                                            <span class="cl-preset-note">The balls swap velocities</span>
+                                        </button>
+                                        <button type="button" class="cl-preset" data-preset="heavyLight">
+                                            <svg class="cl-preset-art" viewBox="0 0 120 40" aria-hidden="true"><path class="cl-art-line" d="M4 34h112"/><circle class="cl-art-a" cx="30" cy="22" r="10"/><text class="cl-art-text" x="30" y="9">4 kg</text><path class="cl-art-arrow" d="M44 22h18m-5-5 5 5-5 5"/><circle class="cl-art-b" cx="86" cy="22" r="10"/><text class="cl-art-text" x="86" y="9">1 kg</text></svg>
+                                            <span class="cl-preset-name">Heavy hits light</span>
+                                            <span class="cl-preset-note">The light ball shoots away</span>
+                                        </button>
+                                        <button type="button" class="cl-preset" data-preset="perfectlyInelastic">
+                                            <svg class="cl-preset-art" viewBox="0 0 120 40" aria-hidden="true"><path class="cl-art-line" d="M4 34h112"/><circle class="cl-art-a" cx="40" cy="22" r="10"/><circle class="cl-art-b" cx="60" cy="22" r="10"/><path class="cl-art-arrow" d="M76 22h18m-5-5 5 5-5 5"/></svg>
+                                            <span class="cl-preset-name">Perfectly inelastic</span>
+                                            <span class="cl-preset-note">The balls stick together</span>
+                                        </button>
+                                        <button type="button" class="cl-preset" data-preset="cradle">
+                                            <svg class="cl-preset-art" viewBox="0 0 120 40" aria-hidden="true"><path class="cl-art-line" d="M4 34h112"/><circle class="cl-art-a" cx="20" cy="24" r="9"/><path class="cl-art-arrow" d="M33 24h14m-5-5 5 5-5 5"/><circle class="cl-art-b" cx="63" cy="24" r="9"/><circle class="cl-art-c" cx="81" cy="24" r="9"/></svg>
+                                            <span class="cl-preset-name">Newton&rsquo;s cradle</span>
+                                            <span class="cl-preset-note">Momentum passes along the row</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
