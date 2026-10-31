@@ -1220,6 +1220,33 @@
       }
       if (curJson !== start) offer(curJson, cur, false);
     }
+    if (schematic && !best) {
+      // Keep useful turns independently of the position search. That search
+      // estimates wires separately and can bundle a good turn with moves that
+      // create conflicts in the complete drawing, losing both on rejection.
+      load(fallback);
+      let current = judge();
+      for (const c of doc.components) {
+        if (Date.now() >= deadline) break;
+        const pl = doc.layouts[view].comps[c.id];
+        if (!pl || c.type === 'junction') continue;
+        const original = { r: pl.r, f: pl.f };
+        let chosen = original;
+        for (const r of keepsUpright(doc, view, c.id) ? [0] : [0, 1, 2, 3]) {
+          for (const f of [false, true]) {
+            if (Date.now() >= deadline) break;
+            Object.assign(pl, { r, f });
+            const candidate = judge();
+            if (acceptable(candidate, false) && better(candidate, current)) {
+              chosen = { r, f };
+              current = candidate;
+            }
+          }
+        }
+        Object.assign(pl, chosen);
+      }
+      if (save() !== fallback) offer(save(), current, false);
+    }
     if (best) { load(best.json); return best.json !== before; }
     load(fallback);
     return fallback !== before;
