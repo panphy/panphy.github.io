@@ -115,6 +115,31 @@
       }
     },
     {
+      id: 'newtons-cradle',
+      title: "Newton's cradle",
+      text: 'Five 1 kg balls hang on 2 m strings. Ball 1 is pulled out to 30° and released: its momentum passes along the row and Ball 5 swings out alone.',
+      track: { name: 'Ball 5', group: 'velocity', hide: ['vy'] },
+      build() {
+        const s = S.createScene();
+        const r = 0.2;
+        const len = 2;
+        const top = 3.2;
+        const lift = (30 * Math.PI) / 180;
+        // A 1 mm gap keeps the collisions one pair at a time, so the momentum is passed on whole.
+        const pitch = 2 * r + 0.001;
+        s.world.gpeZero = top - len; // the lowest point of the swing
+        const bar = add(s, 'plank', 0, top + 0.06, { name: 'Frame', w: 3, h: 0.12, fixed: true });
+        for (let i = 0; i < 5; i++) {
+          const px = (i - 2) * pitch;
+          const a = i === 0 ? -lift : 0;
+          const color = i === 0 ? 'coral' : i === 4 ? 'amber' : 'blue';
+          const ball = add(s, 'ball', px + len * Math.sin(a), top - len * Math.cos(a), { name: `Ball ${i + 1}`, r, mass: 1, restitution: 1, friction: 0, color });
+          link(s, 'rope', bar, { x: px, y: -0.06 }, ball, { x: 0, y: 0 }, { name: `String ${i + 1}` });
+        }
+        return s;
+      }
+    },
+    {
       id: 'ramp',
       title: 'Block on a ramp',
       text: 'A block slides down a 30° slope with \\(\\mu = 0.25\\). Its acceleration should be \\(g(\\sin\\theta - \\mu\\cos\\theta)\\).',

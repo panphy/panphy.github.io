@@ -10,25 +10,25 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
     <title>Collision Lab: Momentum and Collisions Simulation — PanPhy Labs</title>
-    <meta name="description" content="A free collisions simulation: set masses and velocities, try elastic and inelastic collisions and Newton&#x27;s cradle, or push the balls with your hand on camera.">
+    <meta name="description" content="A free collisions simulation: set masses and velocities, try elastic and inelastic collisions with up to five balls, or push the balls with your hand on camera.">
     <link rel="canonical" href="https://panphy.app/simulations/collision.html">
 <!-- panphy-discovery -->
   <meta property="og:title" content="Collision Lab: Momentum and Collisions Simulation — PanPhy Labs">
-  <meta property="og:description" content="A free collisions simulation: set masses and velocities, try elastic and inelastic collisions and Newton&#x27;s cradle, or push the balls with your hand on camera.">
+  <meta property="og:description" content="A free collisions simulation: set masses and velocities, try elastic and inelastic collisions with up to five balls, or push the balls with your hand on camera.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://panphy.app/simulations/collision.html">
   <meta property="og:image" content="https://panphy.app/assets/og-default.png">
   <meta property="og:site_name" content="PanPhy Labs">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Collision Lab: Momentum and Collisions Simulation — PanPhy Labs">
-  <meta name="twitter:description" content="A free collisions simulation: set masses and velocities, try elastic and inelastic collisions and Newton&#x27;s cradle, or push the balls with your hand on camera.">
+  <meta name="twitter:description" content="A free collisions simulation: set masses and velocities, try elastic and inelastic collisions with up to five balls, or push the balls with your hand on camera.">
   <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Collision Lab",
-  "description": "A free collisions simulation: set masses and velocities, try elastic and inelastic collisions and Newton's cradle, or push the balls with your hand on camera.",
+  "description": "A free collisions simulation: set masses and velocities, try elastic and inelastic collisions with up to five balls, or push the balls with your hand on camera.",
   "url": "https://panphy.app/simulations/collision.html",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Any",
@@ -138,11 +138,6 @@
                                             <span class="cl-preset-name">Perfectly inelastic</span>
                                             <span class="cl-preset-note">The balls stick together</span>
                                         </button>
-                                        <button type="button" class="cl-preset" data-preset="cradle">
-                                            <svg class="cl-preset-art" viewBox="0 0 120 40" aria-hidden="true"><path class="cl-art-line" d="M4 34h112"/><circle class="cl-art-a" cx="20" cy="24" r="9"/><path class="cl-art-arrow" d="M33 24h14m-5-5 5 5-5 5"/><circle class="cl-art-b" cx="63" cy="24" r="9"/><circle class="cl-art-c" cx="81" cy="24" r="9"/></svg>
-                                            <span class="cl-preset-name">Newton&rsquo;s cradle</span>
-                                            <span class="cl-preset-note">Momentum passes along the row</span>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -168,19 +163,19 @@
                         </button>
                     </div>
                     <div class="cl-drawer-body">
-                        <details id="ballControlsSection" class="ball-controls" aria-live="polite" open>
+                        <details id="ballControlsSection" class="ball-controls" open>
                             <summary class="ball-controls-summary">
                                 <span class="ball-controls-head">
                                     <span class="cp-label">Ball settings</span>
-                                    <span id="ballControlsCount" class="value-badge">0 / 3</span>
+                                    <span id="ballControlsCount" class="value-badge" aria-live="polite">0 / 5</span>
                                 </span>
                                 <span class="summary-caret" aria-hidden="true">
                                     <svg class="cl-icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
                                 </span>
                             </summary>
                             <div class="ball-controls-body">
-                                <p class="control-help">Set each ball's mass and launch velocity, then launch it from its
-                                    start position. Positive velocity points right (or up).</p>
+                                <p class="control-help">Pick a ball, or tap it in the view, to set its mass and launch
+                                    velocity. Positive velocity points right (or up).</p>
                                 <div id="ballControlsList" class="ball-controls-list"></div>
                             </div>
                         </details>
@@ -282,7 +277,6 @@
                                 <button type="button" role="menuitem" data-preset="elasticEqual">Elastic, equal masses</button>
                                 <button type="button" role="menuitem" data-preset="heavyLight">Heavy hits light</button>
                                 <button type="button" role="menuitem" data-preset="perfectlyInelastic">Perfectly inelastic</button>
-                                <button type="button" role="menuitem" data-preset="cradle">Newton's cradle</button>
                             </div>
                         </div>
                     </div>

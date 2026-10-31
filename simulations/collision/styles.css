@@ -550,7 +550,6 @@ button.cl-preset:hover:not(:disabled) {
 /* The same colors as the balls in the view. */
 .cl-art-a { fill: #F97316; }
 .cl-art-b { fill: #38BDF8; }
-.cl-art-c { fill: #E879F9; }
 
 .cl-preset-name {
     font-size: 0.88rem;
@@ -966,6 +965,130 @@ button.ball-launch-btn:hover:not(:disabled) {
 .ball-launch-btn .cl-icon {
     width: 16px;
     height: 16px;
+}
+
+/* One tab per ball, in the ball's color, then an add tab. */
+.ball-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+button.ball-tab {
+    min-width: var(--hit);
+    gap: 6px;
+    padding: 0 10px;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    color: var(--ink-2);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+}
+
+button.ball-tab .ball-color-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--ball-color);
+    box-shadow: none;
+}
+
+button.ball-tab[aria-selected="true"] {
+    color: var(--ink);
+    font-weight: 700;
+    background: var(--surface-2);
+    border-color: var(--ball-color);
+    box-shadow: inset 0 -3px 0 var(--ball-color);
+}
+
+button.ball-tab-add {
+    color: var(--ink-3);
+    border-style: dashed;
+    border-color: var(--line-strong);
+}
+
+button.ball-tab-add .cl-icon {
+    width: 18px;
+    height: 18px;
+}
+
+button.ball-tab-add:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.ball-control-card .ball-color-dot {
+    background: var(--ball-color);
+}
+
+/* Every ball's settings at a glance; a row opens that ball in the editor. */
+.ball-summary {
+    display: grid;
+    gap: 8px;
+}
+
+.ball-summary-list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+}
+
+.ball-summary-list li + li {
+    border-top: 1px solid var(--line);
+}
+
+button.ball-summary-row {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: var(--hit);
+    gap: 9px;
+    padding: 0 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+.ball-summary-list li:first-child button.ball-summary-row {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.ball-summary-list li:last-child button.ball-summary-row {
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+button.ball-summary-row[aria-current="true"] {
+    color: var(--ink);
+    background: var(--surface-2);
+    box-shadow: inset 3px 0 0 var(--ball-color);
+}
+
+button.ball-summary-row .ball-color-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--ball-color);
+    box-shadow: none;
+}
+
+.ball-summary-num {
+    min-width: 1ch;
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.ball-summary-value {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+button.ball-launch-all {
+    justify-self: end;
+    margin-left: 0;
 }
 
 .physics-toggle-row {
