@@ -746,10 +746,14 @@
       if (inField(e) || app.modalOpen()) return;
       const mod = e.ctrlKey || e.metaKey;
       const k = e.key;
+      // Escape with nothing left to cancel lets the next Tab leave the workspace at once.
+      const tabOut = ed.tabOut;
+      // Modifier keys (Shift before Shift+Tab) keep the Escape-then-Tab exit open.
+      if (!['Shift', 'Control', 'Alt', 'Meta'].includes(k)) ed.tabOut = false;
       if (k === 'Escape') {
         if (ed.wiring) cancelWiring();
         else if (app.placing) app.setPlacing(null);
-        else app.setSelection([], []);
+        else { app.setSelection([], []); ed.tabOut = true; }
         return;
       }
       if (ed.wiring && k === 'Backspace') { ed.wiring.pts.pop(); drawWirePreview(); e.preventDefault(); return; }
@@ -795,13 +799,16 @@
         app.commit('Move component', { merge: 'arrow' });
         return;
       }
+      // Tab steps through the components, then on past the last (or, with Shift, the first)
+      // to the rest of the page, so keyboard users are never trapped in the workspace.
       if (k === 'Tab' && host.contains(document.activeElement)) {
         const comps = app.doc.components.filter((c) => c.type !== 'junction');
-        if (!comps.length) return;
-        e.preventDefault();
+        if (!comps.length || tabOut) return;
         const cur = singleComp();
-        let i = cur ? comps.findIndex((c) => c.id === cur.id) : -1;
-        i = (i + (e.shiftKey ? -1 : 1) + comps.length) % comps.length;
+        const at = cur ? comps.findIndex((c) => c.id === cur.id) : -1;
+        const i = at < 0 ? (e.shiftKey ? comps.length - 1 : 0) : at + (e.shiftKey ? -1 : 1);
+        if (i < 0 || i >= comps.length) return;
+        e.preventDefault();
         app.setSelection([comps[i].id], []);
         app.announce(`${comps[i].label}, ${registry.get(comps[i].type).name} selected`);
       }

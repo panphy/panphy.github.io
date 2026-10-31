@@ -739,3 +739,20 @@ test('open inductor with stored current reports that current at zero p.d.', () =
   close(c.read('L1').i('a'), 0.5);
   close(c.read('L1').v('a', 'b'), 0);
 });
+
+test('a circuit faster than the time step can follow is flagged, and an ordinary one is not', () => {
+  const lc = (L, C) => build({
+    comps: { C1: ['capacitor', { C, v0: 3 }], L1: ['inductor', { L }] },
+    wires: [['C1.p', 'L1.a'], ['C1.n', 'L1.b']]
+  });
+  assert.equal(solver.stepNote(lc(1, 0.01).sim), null, '1.6 Hz LC circuit');
+  const fast = lc(1e-5, 1e-6); // about 50 kHz: the step needs 32 ns but stops at 1 µs
+  assert.equal(fast.sim.dt, solver.MIN_DT);
+  const note = solver.stepNote(fast.sim);
+  assert.ok(note && /L1 and C1 change faster/.test(note.msg), note && note.msg);
+  assert.deepEqual(note.comps.sort(), [fast.ids.C1, fast.ids.L1].sort());
+  const slow = lc(0.1, 0.001); // 16 Hz: needs 0.1 ms steps
+  slow.doc.settings.dt = 0.01;
+  slow.sim.setDoc(slow.doc);
+  assert.ok(/Choose the Auto time step/.test(solver.stepNote(slow.sim).msg), 'a manual step that is too long');
+});

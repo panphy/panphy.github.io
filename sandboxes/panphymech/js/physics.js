@@ -12,8 +12,9 @@
 
   function createSim(scene) {
     const pl = root.planck;
-    // Collisions slower than this are treated as perfectly inelastic, so resting contacts stay quiet.
-    pl.Settings.velocityThreshold = 0.25;
+    // Collisions slower than this are treated as perfectly inelastic. The restitution
+    // correction below keeps resting contacts quiet, so this only stops creeping contacts chattering.
+    pl.Settings.velocityThreshold = 0.01;
     // Box2D collides polygons with a skin of polygonRadius round them. Contacts rest
     // anywhere from where the skins meet to linearSlop into each other, and are only pushed
     // apart beyond that. Insetting each side by the skin less a quarter of the slop centers
@@ -57,6 +58,35 @@
     }
 
     const world = new pl.World({ gravity: pl.Vec2(0, -scene.world.gravity), allowSleep: false });
+    // Box2D adds this step's gravity to the velocities before it applies restitution, so a
+    // bounce reflects an approach speed that is too large by g·h and every bounce gains height.
+    // Scale each contact's restitution so it reflects the approach speed before that gravity.
+    // Resting contacts, which approach only through gravity, then get no bounce at all.
+    world.on('pre-solve', (contact) => {
+      contact.resetRestitution();
+      const e = contact.getRestitution();
+      if (!(e > 0)) return;
+      const A = contact.getFixtureA().getBody();
+      const B = contact.getFixtureB().getBody();
+      const wm = contact.getWorldManifold(null);
+      const count = contact.getManifold().pointCount;
+      if (!wm || !count) return;
+      const n = wm.normal;
+      let vn = 0;
+      for (let i = 0; i < count; i++) {
+        const p = wm.points[i];
+        const va = A.getLinearVelocityFromWorldPoint(p);
+        const vb = B.getLinearVelocityFromWorldPoint(p);
+        vn += ((vb.x - va.x) * n.x + (vb.y - va.y) * n.y) / count;
+      }
+      if (vn >= 0) { contact.setRestitution(0); return; }
+      const g = world.getGravity();
+      const ga = A.isDynamic() ? A.getGravityScale() : 0;
+      const gb = B.isDynamic() ? B.getGravityScale() : 0;
+      const vnAfter = vn + sim.h * ((gb - ga) * (g.x * n.x + g.y * n.y));
+      if (vnAfter >= 0) return;
+      contact.setRestitution(Math.min(1, e * vn / vnAfter));
+    });
     const ground = world.createBody();
     let floorFixture = null;
     if (scene.world.floor) {
@@ -201,20 +231,23 @@
       const endJoint = hinge(A, segs[0], { ax: l.la.x, ay: l.la.y, bx: -seg / 2, by: 0 });
       const endJoints = [endJoint]; // every joint pulling on end a, to read the tension there
       for (let i = 0; i < n - 1; i++) hinge(segs[i], segs[i + 1], { ax: seg / 2, ay: 0, bx: -seg / 2, by: 0 });
-      hinge(segs[n - 1], B, { ax: seg / 2, ay: 0, bx: l.lb.x, by: l.lb.y });
+      // Every joint pulling on end b, with the sign that gives the force on b.
+      const endJointsB = [{ j: hinge(segs[n - 1], B, { ax: seg / 2, ay: 0, bx: l.lb.x, by: l.lb.y }), sign: 1 }];
       // A chain of light links stretches under a heavy load. Each joint is therefore also kept
       // no farther from either end than the rope's length between them (and the ends within
       // the whole length), which holds the rope to its length without making it stiff.
       if (rope) {
         const limit = (X, ax, ay, Y, bx, by, max, collide = false) => world.createJoint(new pl.RopeJoint({ localAnchorA: pl.Vec2(ax, ay), localAnchorB: pl.Vec2(bx, by), maxLength: max, collideConnected: collide }, X, Y));
         // The end objects still collide with each other, as they would on a real rope.
-        endJoints.push(limit(A, l.la.x, l.la.y, B, l.lb.x, l.lb.y, l.length, true));
+        const ends = limit(A, l.la.x, l.la.y, B, l.lb.x, l.lb.y, l.length, true);
+        endJoints.push(ends);
+        endJointsB.push({ j: ends, sign: 1 });
         for (let i = 1; i < n; i++) {
           endJoints.push(limit(A, l.la.x, l.la.y, segs[i], -seg / 2, 0, i * seg));
-          limit(B, l.lb.x, l.lb.y, segs[i - 1], seg / 2, 0, (n - i) * seg);
+          endJointsB.push({ j: limit(B, l.lb.x, l.lb.y, segs[i - 1], seg / 2, 0, (n - i) * seg), sign: -1 });
         }
       }
-      solids.set(l.id, { segs, seg, endJoint, endJoints });
+      solids.set(l.id, { segs, seg, endJoint, endJoints, endJointsB });
     }
 
     scene.links.forEach((l) => {
@@ -334,13 +367,81 @@
       if (speed < 1e-9) return;
       const f = Math.min(k * speed * speed, 0.9 * pb.getMass() * speed / sim.h);
       pb.applyForceToCenter(pl.Vec2(-f * v.x / speed, -f * v.y / speed), true);
+      quadDrag.set(pb, { x: -f * v.x / speed, y: -f * v.y / speed });
+    }
+
+    // ---------- Forces on each object, for force arrows ----------
+
+    // Contact forces of the latest step: normal reaction and friction on body B of each contact
+    // (body A feels the opposite), at the middle of its contact points.
+    const contactForces = new Map();
+    const quadDrag = new Map(); // planck body → quadratic drag force of the latest step
+    world.on('post-solve', (contact, impulse) => {
+      const count = contact.getManifold().pointCount;
+      const wm = contact.getWorldManifold(null);
+      if (!count || !wm || !(sim.lastStep > 0)) return;
+      let px = 0, py = 0, jn = 0, jt = 0;
+      for (let i = 0; i < count; i++) {
+        px += wm.points[i].x / count; py += wm.points[i].y / count;
+        jn += impulse.normalImpulses[i]; jt += impulse.tangentImpulses[i];
+      }
+      const n = wm.normal; const inv = 1 / sim.lastStep;
+      contactForces.set(contact, {
+        A: contact.getFixtureA().getBody(), B: contact.getFixtureB().getBody(), x: px, y: py,
+        nx: n.x * jn * inv, ny: n.y * jn * inv, tx: n.y * jt * inv, ty: -n.x * jt * inv
+      });
+    });
+
+    // Ideal rods and ropes. Each step moves their ends along straight lines, so a swinging end
+    // drifts outward and the joint pulls it back. Its velocity, still square to the old rod,
+    // then points slightly outward from the new one, and the next step would delete that part:
+    // a pendulum would lose about a fifth of its energy in 20 s at Standard accuracy. Turning
+    // that outward part back into speed along the swing removes this numerical loss.
+    const lineJoints = [];
+    scene.links.forEach((l) => {
+      const j = joints.get(l.id);
+      if (j && (l.kind === 'rod' || l.kind === 'rope')) lineJoints.push({ j, rope: l.kind === 'rope' });
+    });
+    function invMassOf(pb) { return pb.isDynamic() && pb.getMass() > 0 ? 1 / pb.getMass() : 0; }
+    function invInertiaOf(pb) {
+      if (!pb.isDynamic() || pb.isFixedRotation()) return 0;
+      const m = pb.getMass(); const lc = pb.getLocalCenter();
+      const I = pb.getInertia() - m * (lc.x * lc.x + lc.y * lc.y);
+      return I > 0 ? 1 / I : 0;
+    }
+    function keepLineSpeeds() {
+      lineJoints.forEach(({ j, rope }) => {
+        const A = j.getBodyA(); const B = j.getBodyB();
+        const pa = j.getAnchorA(); const pb = j.getAnchorB();
+        const dx = pb.x - pa.x; const dy = pb.y - pa.y;
+        const L = Math.hypot(dx, dy);
+        if (L < 1e-6) return;
+        if (rope && L < j.getMaxLength() - 2 * pl.Settings.linearSlop) return; // slack
+        const ux = dx / L; const uy = dy / L; const tx = -uy; const ty = ux;
+        const va = A.getLinearVelocityFromWorldPoint(pa); const vb = B.getLinearVelocityFromWorldPoint(pb);
+        const rvx = vb.x - va.x; const rvy = vb.y - va.y;
+        const vr = rvx * ux + rvy * uy; const vt = rvx * tx + rvy * ty;
+        if (rope && vr <= 0) return; // moving inward, so the rope goes slack and takes nothing
+        if (Math.abs(vt) < 1e-9 || Math.abs(vr) > 0.5 * Math.abs(vt)) return; // not a swing
+        const ca = A.getWorldCenter(); const cb = B.getWorldCenter();
+        const ra = (pa.x - ca.x) * ty - (pa.y - ca.y) * tx; const rb = (pb.x - cb.x) * ty - (pb.y - cb.y) * tx;
+        const k = invMassOf(A) + invMassOf(B) + invInertiaOf(A) * ra * ra + invInertiaOf(B) * rb * rb;
+        if (!(k > 0)) return;
+        const P = (Math.sign(vt) * Math.hypot(vt, vr) - vt) / k;
+        if (B.isDynamic()) B.applyLinearImpulse(pl.Vec2(P * tx, P * ty), pb, true);
+        if (A.isDynamic()) A.applyLinearImpulse(pl.Vec2(-P * tx, -P * ty), pa, true);
+      });
     }
 
     sim.step = function step() {
       const h = sim.h;
+      quadDrag.clear();
+      contactForces.clear();
+      sim.lastStep = h;
       applyForces();
       // Chains of rope links need more solver passes to stay together under load.
       world.step(h, solids.size ? 24 : VELOCITY_ITERATIONS, solids.size ? 8 : POSITION_ITERATIONS);
+      keepLineSpeeds();
       sim.lastH = h;
       sim.t += h;
     };
@@ -389,6 +490,63 @@
         x: c.x, y: c.y, angle: pb.getAngle(), vx: v.x, vy: v.y, speed: Math.hypot(v.x, v.y), omega: w,
         KE: KEt + KEr, KEt, KEr, GPE: m * g * h, px: m * v.x, py: m * v.y, fixed: false
       };
+    };
+
+    // The forces on one moving object in the latest step, each where it acts (world point, N):
+    // weight W at the center of mass, normal reaction N and friction F_f at each contact,
+    // spring force F_s, tension T and joint reaction R at attachments, and drag D.
+    sim.forcesOn = function forcesOn(id) {
+      const pb = bodies.get(id);
+      if (!pb || pb.isStatic()) return [];
+      const out = [];
+      const add = (label, p, fx, fy) => out.push({ label, x: p.x, y: p.y, fx, fy });
+      const c = pb.getWorldCenter();
+      const g = world.getGravity();
+      add('W', c, pb.getMass() * g.x, pb.getMass() * g.y);
+      if (!(sim.t > 0)) return out;
+      contactForces.forEach((f) => {
+        const sign = f.B === pb ? 1 : f.A === pb ? -1 : 0;
+        if (!sign) return;
+        add('N', f, sign * f.nx, sign * f.ny);
+        add('F_f', f, sign * f.tx, sign * f.ty);
+      });
+      const inv = 1 / sim.lastH;
+      scene.links.forEach((l) => {
+        const atA = bodyFor(l.a) === pb; const atB = bodyFor(l.b) === pb;
+        if (!atA && !atB) return;
+        const pa = anchorWorld(l.a, l.la); const pbw = anchorWorld(l.b, l.lb);
+        if (l.kind === 'spring') {
+          const st = springState(l);
+          if (atA) add('F_s', pa, st.tension * st.ux, st.tension * st.uy);
+          if (atB) add('F_s', pbw, -st.tension * st.ux, -st.tension * st.uy);
+          return;
+        }
+        const label = l.kind === 'rod' || l.kind === 'rope' ? 'T' : 'R';
+        const solid = solids.get(l.id);
+        const sum = (list) => list.reduce((acc, { j, sign }) => { const f = j.getReactionForce(inv); acc.x += sign * f.x; acc.y += sign * f.y; return acc; }, { x: 0, y: 0 });
+        let fa, fb;
+        if (solid) {
+          fa = sum(solid.endJoints.map((j) => ({ j, sign: -1 })));
+          fb = sum(solid.endJointsB);
+        } else {
+          const j = joints.get(l.id);
+          if (!j) return;
+          // Planck reports the force on the joint's body B. Hinges and glue join b (body A) to a (body B).
+          const f = j.getReactionForce(inv);
+          const onLinkB = l.kind === 'rod' || l.kind === 'rope';
+          fb = onLinkB ? { x: f.x, y: f.y } : { x: -f.x, y: -f.y };
+          fa = { x: -fb.x, y: -fb.y };
+        }
+        // A hinge or glue joint acts at one point, where end a sits.
+        if (atA) add(label, pa, fa.x, fa.y);
+        if (atB) add(label, label === 'R' ? pa : pbw, fb.x, fb.y);
+      });
+      const v = pb.getLinearVelocity();
+      const dq = quadDrag.get(pb);
+      const lin = pb.getLinearDamping() * pb.getMass();
+      const dx = (dq ? dq.x : 0) - lin * v.x; const dy = (dq ? dq.y : 0) - lin * v.y;
+      if (dx || dy) add('D', c, dx, dy);
+      return out;
     };
 
     sim.readLink = function readLink(id) {

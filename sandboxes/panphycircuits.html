@@ -162,7 +162,7 @@
             <button type="button" id="btn-clear" class="tool-clear" data-icon="trash" title="Clear circuit: remove every part and wire from both views (you can undo it)"><span>Clear</span></button>
           </div>
         </div>
-        <div id="workspace" class="workspace view-realistic" tabindex="0" role="application" aria-label="Circuit workspace. Tab cycles through components; arrow keys move the selection." data-active-tool="select">
+        <div id="workspace" class="workspace view-realistic" tabindex="0" role="application" aria-label="Circuit workspace. Tab steps through the components and then leaves; Escape then Tab leaves at once. Arrow keys move the selection." data-active-tool="select">
           <svg id="ws-svg" class="ws-svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
           <div id="flow-note" class="flow-note" title="Current animation only. Meters, scope traces and sound use the actual frequency." hidden>AC animation slowed for visibility</div>
@@ -195,6 +195,7 @@
         <div id="graph-panel" class="graph-panel" hidden>
           <div class="graph-head">
             <strong class="graph-title">Graph</strong>
+            <label class="graph-axis"><span>against</span><select id="graph-x" aria-label="Plot the readings against"></select></label>
             <div id="graph-legend" class="graph-legend"></div>
             <div class="graph-actions">
               <button type="button" id="graph-full" class="graph-view-button" data-icon="fit" title="Restore the full graph view" disabled>Full Graph</button>
