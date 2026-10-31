@@ -217,6 +217,63 @@ test("Newton's cradle passes the momentum along the row, then the balls swing to
   assert.ok(Math.max(...late) - Math.min(...late) < 0.02, `late swings ${late.map((r) => r.toFixed(3)).join(', ')}`);
 });
 
+test('World accuracy sets the longest step; springs and solid connectors still shorten it', () => {
+  const stepFor = (accuracy, extra) => {
+    const scene = emptyScene();
+    scene.world.accuracy = accuracy;
+    const ball = S.makeBody(scene, 'ball', 0, 2);
+    scene.bodies.push(ball);
+    if (extra) extra(scene, ball);
+    return P.createSim(scene).h;
+  };
+  assert.equal(stepFor('standard'), 1 / 240);
+  assert.equal(stepFor('fine'), 1 / 480);
+  assert.equal(stepFor('veryFine'), 1 / 1000);
+  assert.equal(stepFor('unknown'), 1 / 240);
+  const solidRope = (scene, ball) => {
+    const l = S.makeLink(scene, 'rope', null, { x: 0, y: 3 }, ball.id, { x: 0, y: 0 });
+    l.length = S.linkLength(scene, l); l.solid = true; scene.links.push(l);
+  };
+  assert.equal(stepFor('fine', solidRope), 1 / 960);
+  const stiffSpring = (scene, ball) => {
+    const l = S.makeLink(scene, 'spring', null, { x: 0, y: 3 }, ball.id, { x: 0, y: 0 });
+    l.k = 100000; scene.links.push(l);
+  };
+  assert.ok(stepFor('veryFine', stiffSpring) < 1 / 1000);
+});
+
+test('World accuracy is saved with the scene and can change mid-run', () => {
+  const scene = emptyScene();
+  scene.world.accuracy = 'fine';
+  assert.equal(S.parse(S.serialize(scene)).scene.world.accuracy, 'fine');
+  const old = JSON.parse(S.serialize(scene));
+  delete old.world.accuracy;
+  assert.equal(S.parse(JSON.stringify(old)).scene.world.accuracy, 'standard');
+  scene.bodies.push(S.makeBody(scene, 'ball', 0, 2));
+  const sim = P.createSim(scene);
+  run(sim, 0.1);
+  scene.world.accuracy = 'veryFine';
+  sim.syncParams();
+  assert.equal(sim.h, 1 / 1000);
+});
+
+test("finer accuracy keeps an elastic Newton's cradle clean for longer", () => {
+  const drift = (accuracy) => {
+    const scene = E.list.find((e) => e.id === 'newtons-cradle').build();
+    scene.world.accuracy = accuracy;
+    const balls = scene.bodies.filter((b) => b.kind === 'ball');
+    balls.forEach((b) => { b.restitution = 1; });
+    scene.world.dragModel = 'none';
+    const sim = P.createSim(scene);
+    let most = 0;
+    run(sim, 8, () => [1, 2, 3].forEach((i) => { most = Math.max(most, Math.abs(sim.readBody(balls[i].id).x - balls[i].x)); }));
+    return most;
+  };
+  const standard = drift('standard');
+  const veryFine = drift('veryFine');
+  assert.ok(veryFine < standard / 2, `middle-ball drift ${veryFine.toFixed(3)} m vs ${standard.toFixed(3)} m`);
+});
+
 test('fitting the view leaves out an object far from the rest', () => {
   const scene = E.list.find((e) => e.id === 'pendulum').build();
   const runaway = S.makeBody(scene, 'ball', 800, 40);
