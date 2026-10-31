@@ -1,0 +1,299 @@
+{
+ "format": "panphy-circuits",
+ "version": 1,
+ "components": [
+  {
+   "id": "c1",
+   "type": "battery",
+   "label": "B1",
+   "props": {
+    "emf": 6,
+    "r": 0
+   }
+  },
+  {
+   "id": "c2",
+   "type": "pushswitch",
+   "label": "S1",
+   "props": {}
+  },
+  {
+   "id": "c3",
+   "type": "resistor",
+   "label": "RB",
+   "props": {
+    "R": 4700
+   }
+  },
+  {
+   "id": "c4",
+   "type": "npn",
+   "label": "Q1",
+   "props": {
+    "beta": 100,
+    "pinout": "ebc"
+   }
+  },
+  {
+   "id": "c5",
+   "type": "lamp",
+   "label": "L1",
+   "props": {
+    "ratedV": 6,
+    "ratedI": 0.06
+   }
+  },
+  {
+   "id": "c6",
+   "type": "junction",
+   "label": "J1",
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "a": {
+    "c": "c1",
+    "t": "p"
+   },
+   "b": {
+    "c": "c6",
+    "t": "j"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w2",
+   "a": {
+    "c": "c6",
+    "t": "j"
+   },
+   "b": {
+    "c": "c5",
+    "t": "a"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w3",
+   "a": {
+    "c": "c6",
+    "t": "j"
+   },
+   "b": {
+    "c": "c2",
+    "t": "a"
+   },
+   "color": "red"
+  },
+  {
+   "id": "w4",
+   "a": {
+    "c": "c2",
+    "t": "b"
+   },
+   "b": {
+    "c": "c3",
+    "t": "a"
+   },
+   "color": "purple"
+  },
+  {
+   "id": "w5",
+   "a": {
+    "c": "c3",
+    "t": "b"
+   },
+   "b": {
+    "c": "c4",
+    "t": "b"
+   },
+   "color": "purple"
+  },
+  {
+   "id": "w6",
+   "a": {
+    "c": "c5",
+    "t": "b"
+   },
+   "b": {
+    "c": "c4",
+    "t": "c"
+   },
+   "color": "blue"
+  },
+  {
+   "id": "w7",
+   "a": {
+    "c": "c4",
+    "t": "e"
+   },
+   "b": {
+    "c": "c1",
+    "t": "n"
+   },
+   "color": "black"
+  }
+ ],
+ "layouts": {
+  "realistic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -330,
+     "y": 40,
+     "r": 0,
+     "f": false
+    },
+    "c2": {
+     "x": -120,
+     "y": 60,
+     "r": 0,
+     "f": false
+    },
+    "c3": {
+     "x": 20,
+     "y": 60,
+     "r": 0,
+     "f": false
+    },
+    "c4": {
+     "x": 180,
+     "y": 110,
+     "r": 2,
+     "f": false
+    },
+    "c5": {
+     "x": 160,
+     "y": -60,
+     "r": 1,
+     "f": false
+    },
+    "c6": {
+     "x": -200,
+     "y": -120,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": []
+    },
+    "w5": {
+     "pts": []
+    },
+    "w6": {
+     "pts": []
+    },
+    "w7": {
+     "pts": [
+      [
+       240,
+       230
+      ],
+      [
+       -400,
+       230
+      ]
+     ]
+    }
+   }
+  },
+  "schematic": {
+   "ready": true,
+   "comps": {
+    "c1": {
+     "x": -200,
+     "y": 40,
+     "r": 3,
+     "f": false
+    },
+    "c2": {
+     "x": -60,
+     "y": 80,
+     "r": 0,
+     "f": false
+    },
+    "c3": {
+     "x": 40,
+     "y": 80,
+     "r": 0,
+     "f": false
+    },
+    "c4": {
+     "x": 140,
+     "y": 80,
+     "r": 0,
+     "f": false
+    },
+    "c5": {
+     "x": 160,
+     "y": -40,
+     "r": 1,
+     "f": false
+    },
+    "c6": {
+     "x": -100,
+     "y": -80,
+     "r": 0,
+     "f": false
+    }
+   },
+   "wires": {
+    "w1": {
+     "pts": []
+    },
+    "w2": {
+     "pts": []
+    },
+    "w3": {
+     "pts": []
+    },
+    "w4": {
+     "pts": []
+    },
+    "w5": {
+     "pts": []
+    },
+    "w6": {
+     "pts": []
+    },
+    "w7": {
+     "pts": [
+      [
+       160,
+       140
+      ],
+      [
+       -200,
+       140
+      ]
+     ]
+    }
+   }
+  }
+ },
+ "view": "realistic",
+ "settings": {
+  "logicStyle": "distinctive",
+  "showLabels": false,
+  "showValues": true,
+  "wireColorsInDiagram": false,
+  "currentFlow": true,
+  "speed": 1,
+  "dt": "auto",
+  "graphX": "t",
+  "graphY": "t"
+ }
+}

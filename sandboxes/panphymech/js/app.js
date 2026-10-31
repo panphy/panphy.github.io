@@ -529,10 +529,33 @@
     app.ui.syncToolbar();
   }
 
-  app.openExample = function openExample(id) {
-    const ex = PPM.examples.list.find((e) => e.id === id);
+  // Example scenes are ordinary .ppmech files in panphymech/examples/; index.json lists
+  // them in menu order with their text, the object to graph and the view to frame.
+  const EXAMPLES_DIR = 'panphymech/examples/';
+  app.examples = null;
+  app.loadExamples = async function loadExamples() {
+    try {
+      const res = await fetch(EXAMPLES_DIR + 'index.json');
+      if (!res.ok) throw new Error(res.status);
+      app.examples = await res.json();
+    } catch (e) {
+      app.examples = [];
+    }
+    app.ui.buildExamples();
+  };
+
+  app.openExample = async function openExample(i) {
+    const ex = app.examples && app.examples[i];
     if (!ex) return;
-    const next = ex.build();
+    let next;
+    try {
+      const res = await fetch(EXAMPLES_DIR + ex.file);
+      if (!res.ok) throw new Error(res.status);
+      next = S.parse(await res.text()).scene;
+    } catch (e) {
+      app.toast('That example could not be loaded. Check your connection and try again.');
+      return;
+    }
     let track = { type: 'system' };
     const body = ex.track && ex.track.name ? next.bodies.find((b) => b.name === ex.track.name) : null;
     if (body) track = { type: 'body', id: body.id };
@@ -854,6 +877,7 @@
   app.editor = PPM.editor.createEditor(app, canvas);
   app.graph = G.createGraph(app, $('graph-canvas'));
   app.ui = PPM.ui.createUI(app);
+  app.loadExamples();
 
   canvas.addEventListener('pointermove', (e) => {
     const rect = canvas.getBoundingClientRect();

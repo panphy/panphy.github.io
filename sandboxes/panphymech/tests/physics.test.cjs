@@ -6,7 +6,7 @@ const path = require('node:path');
 globalThis.planck = require(path.join(__dirname, '../js/vendor/planck.min.js'));
 require(path.join(__dirname, '../js/scene.js'));
 require(path.join(__dirname, '../js/physics.js'));
-require(path.join(__dirname, '../js/examples.js'));
+require(path.join(__dirname, 'examples.cjs'));
 const { scene: S, physics: P, examples: E } = globalThis.PPM;
 
 function emptyScene(floor = false) {

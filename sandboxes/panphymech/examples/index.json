@@ -1,0 +1,132 @@
+[
+  {
+    "file": "projectile.ppmech",
+    "title": "Projectile",
+    "text": "A ball launched at 12 m/s, 50° above the horizontal. Compare the range with \\(\\dfrac{v^2 \\sin 2\\theta}{g}\\).",
+    "plain": "A ball launched at 12 m/s, 50° above the horizontal. Compare the range with v² sin 2θ / g.",
+    "track": {
+      "name": "Ball",
+      "group": "position"
+    },
+    "view": {
+      "minX": -1,
+      "maxX": 16,
+      "minY": 0,
+      "maxY": 7
+    }
+  },
+  {
+    "file": "terminal-velocity.ppmech",
+    "title": "Terminal velocity",
+    "text": "Two identical balls fall 6 m. The blue ball has drag and soon levels off at its terminal velocity of 3 m/s; the coral ball has none. The graph shows the blue ball.",
+    "track": {
+      "name": "With drag",
+      "group": "velocity",
+      "hide": [
+        "vx"
+      ]
+    },
+    "view": {
+      "minX": -2,
+      "maxX": 2,
+      "minY": 0,
+      "maxY": 7.6
+    }
+  },
+  {
+    "file": "pendulum.ppmech",
+    "title": "Simple pendulum",
+    "text": "A 1 kg bob on a 2.5 m rod, released from 25°. Watch kinetic and gravitational energy swap. Gravitational energy is zero at the lowest point.",
+    "track": {
+      "name": "Bob",
+      "group": "energy"
+    }
+  },
+  {
+    "file": "spring.ppmech",
+    "title": "Mass on a spring",
+    "text": "A 1 kg mass released from the spring’s natural length. The period is \\(2\\pi\\sqrt{\\dfrac{m}{k}}\\) and the total energy stays constant. Gravitational energy is zero at the lowest point.",
+    "plain": "A 1 kg mass released from the spring’s natural length. The period is 2π√(m/k) and the total energy stays constant. Gravitational energy is zero at the lowest point.",
+    "track": {
+      "name": "Mass",
+      "group": "energy"
+    }
+  },
+  {
+    "file": "horizontal-spring.ppmech",
+    "title": "Oscillator on a frictionless floor",
+    "text": "A block stretched 0.5 m from a wall and let go. Displacement and velocity are a quarter cycle apart.",
+    "track": {
+      "name": "Block",
+      "group": "position"
+    }
+  },
+  {
+    "file": "collision.ppmech",
+    "title": "Elastic collision",
+    "text": "Carts of 1 kg and 2 kg on a frictionless track, restitution 1. Total momentum and kinetic energy are conserved.",
+    "track": {
+      "name": "Cart A",
+      "group": "velocity"
+    }
+  },
+  {
+    "file": "newtons-cradle.ppmech",
+    "title": "Newton's cradle",
+    "text": "Ball 1 swings in and Ball 5 swings out. Small energy losses leave the balls swinging together.",
+    "track": {
+      "name": "Ball 5",
+      "group": "velocity",
+      "hide": [
+        "vy"
+      ]
+    }
+  },
+  {
+    "file": "ramp.ppmech",
+    "title": "Block on a ramp",
+    "text": "A block slides down a 30° slope with \\(\\mu = 0.25\\). Its acceleration should be \\(g(\\sin\\theta - \\mu\\cos\\theta)\\).",
+    "plain": "A block slides down a 30° slope with μ = 0.25. Its acceleration should be g(sin θ − μ cos θ).",
+    "track": {
+      "name": "Block",
+      "group": "velocity"
+    }
+  },
+  {
+    "file": "bounce.ppmech",
+    "title": "Bouncing balls",
+    "text": "Three balls dropped from 3 m with restitution 0.9, 0.7 and 0.4. Each bounce reaches \\(e^2\\) times the last height.",
+    "plain": "Three balls dropped from 3 m with restitution 0.9, 0.7 and 0.4. Each bounce reaches e² times the last height.",
+    "track": {
+      "name": "e = 0.9",
+      "group": "position"
+    }
+  },
+  {
+    "file": "car.ppmech",
+    "title": "Motor car",
+    "text": "A motor turns the back wheel, which drives the car up a slope; the front wheel turns freely on a hinge. Try changing the motor speed and torque.",
+    "track": {
+      "name": "Chassis",
+      "group": "velocity"
+    }
+  },
+  {
+    "file": "dominoes.ppmech",
+    "title": "Dominoes",
+    "text": "A rolling ball knocks over a row of dominoes. Follow the total energy of the system as it falls.",
+    "track": {
+      "name": "",
+      "group": "energy"
+    }
+  },
+  {
+    "file": "seesaw.ppmech",
+    "title": "See-saw launcher",
+    "text": "A 10 kg box lands on one end of a hinged plank and throws a 0.5 kg box into the air.",
+    "track": {
+      "name": "Small box",
+      "group": "position"
+    }
+  }
+]

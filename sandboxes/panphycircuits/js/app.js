@@ -745,12 +745,36 @@
     app.fit();
     ui.toast('Tidied', { label: 'Undo', run: () => app.undo() });
   };
+  // Example circuits are ordinary .ppcir files in panphycircuits/examples/;
+  // index.json lists them in menu order with their titles and tips.
+  const EXAMPLES_DIR = 'panphycircuits/examples/';
+  app.examples = [];
+  app.loadExamples = async function () {
+    try {
+      const res = await fetch(EXAMPLES_DIR + 'index.json');
+      if (!res.ok) throw new Error(res.status);
+      app.examples = await res.json();
+    } catch (e) { app.examples = []; }
+    ui.renderExamples(app.examples);
+  };
   app.loadExample = async function (i) {
-    const ex = PPC.examples.list[i];
+    const ex = app.examples[i];
     document.getElementById('dlg-examples').close();
+    if (!ex) { ui.message('Could not open the example', ['The example list could not be loaded. Check your connection and try again.']); return; }
+    let result;
+    try {
+      const res = await fetch(EXAMPLES_DIR + ex.file);
+      if (!res.ok) throw new Error(`The example file could not be loaded (${res.status}).`);
+      result = circuit.importDoc(await res.text());
+    } catch (e) {
+      ui.message('Could not open the example', [e instanceof TypeError ? 'The example file could not be loaded. Check your connection and try again.' : e.message]);
+      return;
+    }
     const before = app.doc.components.length ? snapshot() : null;
-    const doc = PPC.examples.build(ex, app.doc.view);
-    doc.settings = Object.assign(circuit.defaultSettings(), { logicStyle: app.doc.settings.logicStyle }, ex.settings || {});
+    const doc = result.doc;
+    // Open in the current view and keep the user's logic symbol style.
+    doc.view = app.doc.view;
+    doc.settings.logicStyle = app.doc.settings.logicStyle;
     loadDoc(doc, { label: `Open example: ${ex.title}` });
     if (before) {
       app.history.stack.unshift({ snap: before, label: 'Before example', view: app.doc.view, time: Date.now() });
@@ -780,7 +804,7 @@
       document.getElementById('graph-x')
     );
     wireControls();
-    ui.renderExamples(PPC.examples.list);
+    app.loadExamples();
 
     let restored = false;
     try {

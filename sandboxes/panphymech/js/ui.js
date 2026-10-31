@@ -354,12 +354,18 @@
 
     function openDialog(d) { if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', ''); }
     function buildExamples() {
-      $('examples-list').innerHTML = PPM.examples.list.map((ex, i) => `<li><button type="button" class="example" data-example="${ex.id}"><span class="ex-num">${i + 1}</span><span><strong>${esc(ex.title)}</strong><span class="ex-text">${mathText(ex.text, ex.plain || ex.text)}</span></span></button></li>`).join('');
+      const list = app.examples;
+      if (!list || !list.length) {
+        $('examples-list').innerHTML = `<li class="examples-note">${list ? 'The examples could not be loaded. Check your connection and try again.' : 'Loading examples…'}</li>`;
+        return;
+      }
+      $('examples-list').innerHTML = list.map((ex, i) => `<li><button type="button" class="example" data-example="${i}"><span class="ex-num">${i + 1}</span><span><strong>${esc(ex.title)}</strong><span class="ex-text">${mathText(ex.text, ex.plain || ex.text)}</span></span></button></li>`).join('');
       $('examples-list').querySelectorAll('[data-example]').forEach((b) => b.addEventListener('click', () => {
         $('dlg-examples').close();
-        app.openExample(b.dataset.example);
+        app.openExample(Number(b.dataset.example));
       }));
     }
+    ui.buildExamples = buildExamples;
     buildExamples();
     $('btn-examples').addEventListener('click', () => openDialog($('dlg-examples')));
     $('empty-examples').addEventListener('click', () => openDialog($('dlg-examples')));

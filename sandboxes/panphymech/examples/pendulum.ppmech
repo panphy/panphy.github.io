@@ -1,0 +1,68 @@
+{
+ "format": "panphy-mech",
+ "version": 1,
+ "world": {
+  "gravity": 9.81,
+  "dragModel": "none",
+  "linearDragSource": "coefficient",
+  "linearDrag": 1,
+  "drag": 0.1,
+  "viscosity": 0,
+  "floor": true,
+  "floorFriction": 0.5,
+  "gpeZero": 2,
+  "accuracy": "standard"
+ },
+ "bodies": [
+  {
+   "id": "b1",
+   "kind": "ball",
+   "name": "Bob",
+   "x": 1.0565456543517486,
+   "y": 2.2342305324083753,
+   "angle": 0,
+   "mass": 1,
+   "friction": 0.4,
+   "restitution": 0.6,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "blue",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "r": 0.15
+  }
+ ],
+ "links": [
+  {
+   "id": "l2",
+   "kind": "rod",
+   "name": "Rod",
+   "a": null,
+   "la": {
+    "x": 0,
+    "y": 4.5
+   },
+   "b": "b1",
+   "lb": {
+    "x": 0,
+    "y": 0
+   },
+   "length": 2.4999999999999996,
+   "solid": false,
+   "mass": 0.5
+  }
+ ],
+ "nextId": 3,
+ "camera": {
+  "cx": 0,
+  "cy": 2,
+  "scale": 80
+ }
+}

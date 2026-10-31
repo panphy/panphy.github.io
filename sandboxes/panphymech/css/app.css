@@ -335,6 +335,7 @@ button, input, select { font: inherit; color: inherit; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .danger-fill { background: var(--danger); }
 .examples-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.examples-note { grid-column: 1 / -1; padding: 12px 4px; }
 .example { position: relative; width: 100%; height: 100%; display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; }
 .example:hover { border-color: var(--accent); }
 .example strong { display: block; font-size: 0.92rem; margin-bottom: 3px; }
