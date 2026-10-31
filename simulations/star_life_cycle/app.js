@@ -30,7 +30,7 @@ const FATE = {
   blackHole: { name: 'black hole', color: 'var(--fate-bh)' }
 };
 
-const state = { mass: 1, life: null, position: 0, playing: false, speed: 1, cutaway: false, layer: -1 };
+const state = { mass: 1, life: null, position: 0, playing: false, speed: 1, cutaway: false, layer: -1, gas: false };
 
 const viewer = $('viewer');
 const stageName = stage => (stage.id === 'sg' ? (stage.staysBlue ? 'Blue supergiant' : 'Red supergiant') : STAGES[stage.id].name);
@@ -75,14 +75,20 @@ float fbm(vec3 p){ float a=.5, s=0.; for(int i=0;i<4;i++){ s+=a*noise(p); p=p*2.
 
 // Background stars. The same shader bends their light around a black hole with the lens equation
 // β = θ − θE²/θ, where θE² = 2 r_s / D for sources far behind a hole at distance D.
+// With infalling gas switched on, each pixel's ray is traced back past the hole instead, along a
+// Schwarzschild light path (units of r_s, a = −1.5 h² r/r⁵), and picks up light where it crosses the
+// accretion disk. The disk glow includes the Doppler shift of the orbiting gas and gravitational redshift.
 const sky = new THREE.Mesh(
   new THREE.SphereGeometry(1500, 48, 24),
   new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, depthTest: false,
-    uniforms: { uHole: { value: 0 }, uHoleDir: { value: new THREE.Vector3(0, 0, -1) }, uEinstein2: { value: 0.05 }, uShadow: { value: 0.06 } },
+    uniforms: {
+      uHole: { value: 0 }, uHoleDir: { value: new THREE.Vector3(0, 0, -1) }, uEinstein2: { value: 0.05 }, uShadow: { value: 0.06 },
+      uDisk: { value: 0 }, uRs: { value: BLACK_HOLE_VISUAL }, uTime: { value: 0 }
+    },
     vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
     fragmentShader: `
-      varying vec3 vDir; uniform float uHole, uEinstein2, uShadow; uniform vec3 uHoleDir;
+      varying vec3 vDir; uniform float uHole, uEinstein2, uShadow, uDisk, uRs, uTime; uniform vec3 uHoleDir;
       ${NOISE_GLSL}
       vec3 hash33(vec3 p){ p = fract(p*vec3(.1031,.1030,.0973)); p += dot(p,p.yxz+33.33); return fract((p.xxy+p.yxx)*p.zyx); }
       vec3 starLayer(vec3 d, float scale, float sharp, float gain, float density){
@@ -98,24 +104,93 @@ const sky = new THREE.Mesh(
         }
         return col;
       }
+      vec3 background(vec3 d){
+        vec3 col = starLayer(d, 26., 420., 1.1, .16) + starLayer(d, 61., 170., .5, .22);
+        float band = exp(-pow(d.y*2.6 + 0.3*d.x, 2.));
+        col += vec3(.060,.046,.050)*band*(0.35 + fbm(d*5.));
+        col += vec3(.012,.020,.024)*fbm(d*2.3 + 4.);
+        return col;
+      }
+      // Blackbody color from the Planck curve at red, green and blue wavelengths (in micrometers).
+      vec3 planck(float T){
+        vec3 l = vec3(.61, .55, .465);
+        vec3 b = 1./(l*l*l*l*l*(exp(min(14388./(l*T), 60.)) - 1.));
+        return b/max(b.r, max(b.g, b.b));
+      }
+      // Gas clumps carried round at the orbital speed, which is faster nearer the hole. Two copies of the
+      // pattern restart in turn, so the shearing never winds the streaks too tight.
+      float clumps(float r, float phi){
+        float period = 60.;
+        float t1 = mod(uTime, period), t2 = mod(uTime + .5*period, period);
+        float w = 1. - abs(2.*t1/period - 1.);
+        float omega = 3.3*pow(r, -1.5);
+        float a1 = phi - omega*t1, a2 = phi - omega*t2;
+        float n1 = fbm(vec3(r*2.4, 1.7*cos(a1), 1.7*sin(a1)));
+        float n2 = fbm(vec3(r*2.4 + 9.1, 1.7*cos(a2), 1.7*sin(a2)));
+        return mix(n2, n1, w);
+      }
+      // Light from the disk where the ray crosses it at p, traveling (backward) along v.
+      vec3 diskLight(vec3 p, vec3 v, out float alpha){
+        float r = length(p.xz);
+        float n = clumps(r, atan(p.z, p.x));
+        float beta = sqrt(.5/(r - 1.));
+        float gamma = 1./sqrt(1. - beta*beta);
+        vec3 orbit = normalize(vec3(-p.z, 0., p.x));
+        // g = observed / emitted frequency: gravitational redshift and the Doppler shift of the moving gas.
+        float g = sqrt(1. - 1./r)/(gamma*(1. - beta*dot(orbit, -normalize(v))));
+        // Thin-disk heating, zero at the inner edge (3 r_s) and peaking just outside it. Scaled to 1 at the peak.
+        float heat = max((1. - sqrt(3./r))/(r*r*r), 0.)/0.00211;
+        float edge = smoothstep(3., 3.3, r)*(1. - smoothstep(8.5, 12., r));
+        alpha = edge*clamp(.75 + .8*n, 0., 1.);
+        float T = 4300.*pow(heat, .25)*g;
+        // The color is strengthened a little, as for the stars, so that the shift is easy to see.
+        vec3 tint = planck(max(T, 900.));
+        tint = max(mix(vec3(dot(tint, vec3(.3, .59, .11))), tint, 1.35), 0.);
+        return tint*heat*g*g*g*g*(.35 + 1.4*n*n)*3.;
+      }
+      vec3 tracedView(vec3 dir){
+        vec3 p = cameraPosition/uRs; vec3 v = dir;
+        vec3 hv = cross(p, v); float h2 = dot(hv, hv);
+        float escape = max(length(p)*1.02, 30.);
+        vec3 col = vec3(0.); float through = 1.; float open = 0.;
+        for (int i = 0; i < 360; i++) {
+          float r = length(p);
+          if (r < 1.) break;
+          if (r > escape && dot(p, v) > 0.) { open = 1.; break; }
+          float dt = clamp(.07*r, .015, 2.5);
+          vec3 vh = v - 1.5*h2*p/pow(r, 5.)*(.5*dt);
+          vec3 pn = p + vh*dt;
+          v = vh - 1.5*h2*pn/pow(length(pn), 5.)*(.5*dt);
+          if (p.y*pn.y < 0.) {
+            vec3 hit = mix(p, pn, p.y/(p.y - pn.y));
+            float rr = length(hit.xz);
+            if (rr > 3. && rr < 12.) {
+              float a; vec3 light = diskLight(hit, v, a);
+              col += through*a*light; through *= 1. - a;
+              if (through < .02) break;
+            }
+          }
+          p = pn;
+        }
+        return (1. - exp(-col*2.6)) + background(normalize(v))*through*open;
+      }
       void main(){
         vec3 d = normalize(vDir);
         float shade = 1.; float ring = 0.;
+        vec3 lensed = d;
         if (uHole > 0.001) {
           float c = dot(d, uHoleDir);
           float theta = acos(clamp(c, -1., 1.));
           vec3 n = normalize(d - uHoleDir*c);
           float beta = theta - uHole*uEinstein2/max(theta, 1e-4);
-          d = normalize(uHoleDir*cos(beta) + n*sin(beta));
+          lensed = normalize(uHoleDir*cos(beta) + n*sin(beta));
           float edge = uShadow*uHole;
           shade = smoothstep(edge*0.97, edge*1.03, theta);
           ring = exp(-pow((theta - edge*1.05)/(edge*0.035), 2.))*0.22*uHole;
         }
-        vec3 col = starLayer(d, 26., 420., 1.1, .16) + starLayer(d, 61., 170., .5, .22);
-        float band = exp(-pow(d.y*2.6 + 0.3*d.x, 2.));
-        col += vec3(.060,.046,.050)*band*(0.35 + fbm(d*5.));
-        col += vec3(.012,.020,.024)*fbm(d*2.3 + 4.);
-        gl_FragColor = vec4(col*shade + vec3(1.,.93,.82)*ring, 1.);
+        vec3 col = background(lensed)*shade + vec3(1.,.93,.82)*ring;
+        if (uDisk > 0.001) col = mix(col, tracedView(d), uDisk);
+        gl_FragColor = vec4(col, 1.);
       }`
   })
 );
@@ -379,7 +454,7 @@ const fieldMaterial = new THREE.LineBasicMaterial({ color: 0x5eead4, transparent
 /* ───────────────────────── Per-frame visuals ───────────────────────── */
 
 const view = {
-  radius: 1, hole: 0, spin: 0, cloudSpin: 0, windPhase: 0, jetPhase: 0, surfaceTime: 0, color: new THREE.Color(1, 0.9, 0.7),
+  radius: 1, hole: 0, disk: 0, spin: 0, cloudSpin: 0, windPhase: 0, jetPhase: 0, surfaceTime: 0, color: new THREE.Color(1, 0.9, 0.7),
   // Eased copies of the stage targets, so that nothing snaps when a stage changes.
   star: 0, cells: 9, contrast: 0.2, spots: 0, flow: 1, spinRate: 0.15, pulse: 0, gain: 1, halo: 0,
   cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, pulsar: 0,
@@ -426,7 +501,7 @@ function stageTargets(st) {
   const mainWind = M > 15 ? 0.3 : 0;
   const v = {
     star: 0, radius: st.R ? visualRadius(st.R) : 1, surface: main, spinRate: 0.15, pulse: 0,
-    cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, shell: null, flash: null, pulsar: 0, hole: 0, halo: 0.7
+    cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, shell: null, flash: null, pulsar: 0, hole: 0, disk: 0, halo: 0.7
   };
   const debris = { radius: 10 + 40 * p, opacity: 0.55 * (1 - smoothstep(0, 0.5, p)), kind: 'sn' };
   const afterglow = { scale: 22, opacity: 0.19 * (1 - smoothstep(0, 0.15, p)), color: [1, 0.66, 0.4] };
@@ -503,7 +578,7 @@ function stageTargets(st) {
     v.star = 1; v.radius = NEUTRON_STAR_VISUAL; v.surface = SMOOTH_SURFACE; v.spinRate = 7; v.pulsar = 1;
     v.shell = debris; v.flash = afterglow;
   } else if (id === 'bh') {
-    v.hole = 1; v.halo = 0;
+    v.hole = 1; v.halo = 0; v.disk = state.gas ? 1 : 0;
     v.shell = debris; v.flash = afterglow;
   }
   return v;
@@ -676,11 +751,14 @@ function applyVisuals(st, dt, time) {
   ku.uHoleDir.value.copy(camera.position).multiplyScalar(-1 / distance);
   ku.uEinstein2.value = 2 * BLACK_HOLE_VISUAL / distance;
   ku.uShadow.value = 2.6 * BLACK_HOLE_VISUAL / distance;
+  ease('disk', v.disk, rate(2));
+  ku.uDisk.value = view.disk * view.hole;
+  ku.uTime.value = time;
 }
 
 /* ───────────────────────── Interface ───────────────────────── */
 
-const context = st => ({ M: state.mass, life: state.life, ms: state.life.ms, stage: st.stage, st });
+const context = st => ({ M: state.mass, life: state.life, ms: state.life.ms, stage: st.stage, st, gas: state.gas });
 const compactYears = y => fmt.years(y).replace(' years', ' yr');
 const chipDuration = stage => {
   if (stage.id === 'sn') return 'seconds + months';
@@ -825,8 +903,13 @@ function renderLayers(st) {
   lastLayers = layers;
   const cutaway = $('cutaway');
   cutaway.disabled = !layers;
+  // A black hole has nothing to cut away; its switch adds infalling gas instead.
+  const hole = st.stage.id === 'bh';
+  cutaway.hidden = hole;
+  $('gas').hidden = !hole;
+  $('gas').setAttribute('aria-pressed', String(state.gas));
   // Say why the switch is unavailable rather than leaving it grayed out without a reason.
-  $('cutaway-note').hidden = Boolean(layers);
+  $('cutaway-note').hidden = Boolean(layers) || hole;
   cutaway.setAttribute('aria-pressed', String(state.cutaway && !!layers));
   cutaway.classList.toggle('nudge', st.stage.id === 'late' || (st.stage.id === 'sn' && st.p < SN_BREAKOUT));
   const names = layers ? layers.map(l => l.name).join('|') : 'none';
@@ -854,7 +937,7 @@ function renderReadout(st) {
   $('r-mass').textContent = fmt.mass(st.mass);
   $('r-radius').textContent = id === 'bh' ? `${fmt.radius(st.R)} horizon` : fmt.radius(st.R);
   $('r-temp').textContent = id === 'bh' ? 'no surface' : fmt.temp(st.T);
-  $('r-lum').textContent = id === 'cloud' ? 'infrared only' : id === 'bh' ? 'none' : fmt.lum(st.L);
+  $('r-lum').textContent = id === 'cloud' ? 'infrared only' : id === 'bh' ? (state.gas ? 'gas: X-rays' : 'none') : fmt.lum(st.L);
   $('r-core').textContent = fmt.temp(st.coreT);
 
   const c = context(st);
@@ -1080,6 +1163,10 @@ document.querySelectorAll('.speed button').forEach(button => button.addEventList
   document.querySelectorAll('.speed button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
 }));
 $('cutaway').addEventListener('click', () => setCutaway(!state.cutaway));
+$('gas').addEventListener('click', () => {
+  state.gas = !state.gas;
+  refresh(true);
+});
 $('layers').addEventListener('click', event => {
   const button = event.target.closest('button');
   if (button) selectLayer(Number(button.dataset.layer));
@@ -1097,6 +1184,7 @@ $('reset').addEventListener('click', () => {
   document.querySelectorAll('.speed button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.speed === '1')));
   state.cutaway = false;
   state.layer = -1;
+  state.gas = false;
   layerSignature = '';
   resetCamera();
   state.position = 0;
