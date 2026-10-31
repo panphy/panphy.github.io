@@ -130,6 +130,7 @@
         s.world.gpeZero = top - len; // the lowest point of the swing
         s.world.dragModel = 'quadratic';
         s.world.drag = 0.03; // kg/m, about right for a 0.4 m ball in air
+        s.world.accuracy = 'veryFine'; // finer steps keep the five-ball collisions clean
         const bar = add(s, 'plank', 0, top + 0.06, { name: 'Frame', w: 3, h: 0.12, fixed: true });
         for (let i = 0; i < 5; i++) {
           const px = (i - 2) * pitch;
