@@ -1629,13 +1629,13 @@ function drawVelocityArrow(ctx, sphere, ballRadiusPx, easeAlpha, onCamera) {
     // Light edge first, then the colored arrow on top.
     ctx.strokeStyle = edge;
     ctx.fillStyle = edge;
-    ctx.lineWidth = shaft + 2;
+    ctx.lineWidth = shaft + 1;
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(shaftEnd, 0);
     ctx.stroke();
     traceArrowHead(ctx, lengthPx, headLength, headHalf);
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1;
     ctx.stroke();
 
     ctx.strokeStyle = color;
