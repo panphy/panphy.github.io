@@ -212,7 +212,7 @@ test("Newton's cradle passes the momentum along the row, then the balls swing to
   assert.ok(first[4] > 0.8, `ball 5 reached ${first[4].toFixed(3)} m`);
   [1, 2, 3].forEach((i) => assert.ok(first[i] < 0.05, `ball ${i + 1} moved ${first[i].toFixed(3)} m`));
   // The energy lost in each collision leaves all five swinging together, as in a real cradle.
-  run(sim, 30);
+  run(sim, 40); // Very fine accuracy keeps the collisions clean, so this takes about 40 s
   const late = reachOver(3);
   assert.ok(Math.max(...late) - Math.min(...late) < 0.02, `late swings ${late.map((r) => r.toFixed(3)).join(', ')}`);
 });
