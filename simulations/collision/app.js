@@ -263,6 +263,8 @@ const state = {
     statusBeforePause: null,
     nextTrackingErrorReportAt: 0,
     selectedSphere: null,
+    // The ball shown in the ball settings editor.
+    editedSphere: null,
     lastDrawVideoTime: -1,
     nextHandDetectAt: 0,
     lastHudUpdateAt: 0,
@@ -422,7 +424,7 @@ async function ensureHandTrackingDeps() {
 
 const SPHERE_RADIUS = 0.18;
 const PLANE_Z = 0;
-const MAX_SPHERES = 3;
+const MAX_SPHERES = 5;
 const PHYSICS_SUBSTEPS = 3;
 const PHYSICS_SUBSTEPS_1D = 6;
 const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
@@ -445,7 +447,7 @@ const MAX_HAND_SPEED = 6.0;
 const MAX_SPHERE_SPEED = 15.0;
 // Ball-ball approach speed needed before a collision is logged in the data panel.
 const COLLISION_LOG_MIN_SPEED = 0.15;
-const SPHERE_PALETTE = [0xF97316, 0x38BDF8, 0xE879F9];
+const SPHERE_PALETTE = [0xF97316, 0x38BDF8, 0xE879F9, 0x22C55E, 0xFACC15];
 const TRAIL_LENGTH = 120;
 const TRAIL_MIN_STEP = 0.004;
 const ARROW_SECONDS = 0.35;
@@ -854,97 +856,260 @@ function createStepper({
     };
 }
 
-function renderBallControls() {
+// The ball settings show one ball at a time: a row of colored tabs picks the ball, one card
+// edits it, and a line per ball below keeps every ball's settings in view.
+function formatBallSummary(sphere) {
+    const vx = sphere.launchVelocity.x.toFixed(2);
+    const velocity = state.oneD ? vx : `${vx}, ${sphere.launchVelocity.y.toFixed(2)}`;
+    return `${sphere.mass.toFixed(1)} kg · ${velocity} m/s`;
+}
+
+function getEditedSphere() {
+    if (!spheres.includes(state.editedSphere)) {
+        state.editedSphere = spheres[0] || null;
+    }
+    return state.editedSphere;
+}
+
+function setEditedSphere(sphere, focusTab = false) {
+    if (!spheres.includes(sphere)) {
+        return;
+    }
+    state.editedSphere = sphere;
+    renderBallControls(focusTab);
+}
+
+function launchAllSpheres() {
+    if (spheres.length === 0) {
+        return;
+    }
+    restoreStartPositions(true);
+    setStatus(`All balls launched.${state.paused ? ' Press play to run them.' : ''}`);
+}
+
+function buildBallTabs(edited, focusTab) {
+    const tabs = document.createElement('div');
+    tabs.className = 'ball-tabs';
+    tabs.setAttribute('role', 'tablist');
+    tabs.setAttribute('aria-label', 'Balls');
+
+    const tabButtons = [];
+    for (let index = 0; index < spheres.length; index++) {
+        const sphere = spheres[index];
+        const selected = sphere === edited;
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'ball-tab';
+        tab.id = `ballTab${index + 1}`;
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-selected', String(selected));
+        tab.setAttribute('aria-controls', 'ballEditor');
+        tab.setAttribute('aria-label', `Ball ${index + 1}`);
+        tab.tabIndex = selected ? 0 : -1;
+        tab.style.setProperty('--ball-color', toCssHexColor(sphere.colorHex));
+        tab.innerHTML = `<span class="ball-color-dot" aria-hidden="true"></span><span class="ball-tab-num">${index + 1}</span>`;
+        tab.addEventListener('click', () => setEditedSphere(sphere, true));
+        tabButtons.push(tab);
+        tabs.appendChild(tab);
+    }
+    tabs.addEventListener('keydown', (event) => {
+        const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+        let next = -1;
+        const current = spheres.indexOf(edited);
+        if (event.key in keys) {
+            next = (current + keys[event.key] + spheres.length) % spheres.length;
+        } else if (event.key === 'Home') {
+            next = 0;
+        } else if (event.key === 'End') {
+            next = spheres.length - 1;
+        }
+        if (next >= 0 && event.target.getAttribute('role') === 'tab') {
+            event.preventDefault();
+            setEditedSphere(spheres[next], true);
+        }
+    });
+
+    const addTab = document.createElement('button');
+    addTab.type = 'button';
+    addTab.className = 'ball-tab ball-tab-add';
+    addTab.setAttribute('aria-label', 'Add a ball');
+    addTab.title = 'Add a ball';
+    addTab.disabled = spheres.length >= getMaxAllowedSpheres();
+    addTab.innerHTML = '<svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+    addTab.addEventListener('click', () => {
+        addSphere();
+        const tab = ui.ballControlsList.querySelector('.ball-tab[aria-selected="true"]');
+        if (tab) {
+            tab.focus({ preventScroll: true });
+        }
+    });
+    tabs.appendChild(addTab);
+
+    if (focusTab) {
+        requestAnimationFrame(() => {
+            const tab = tabButtons[spheres.indexOf(edited)];
+            if (tab) {
+                tab.focus({ preventScroll: true });
+            }
+        });
+    }
+    return tabs;
+}
+
+function renderBallControls(focusTab = false) {
     if (!ui.ballControlsList || !ui.ballControlsSection || !ui.ballControlsCount) {
         return;
     }
 
     ui.ballControlsCount.textContent = `${spheres.length} / ${MAX_SPHERES}`;
     ui.ballControlsList.innerHTML = '';
+    const sphere = getEditedSphere();
+    if (!sphere) {
+        return;
+    }
 
-    for (let index = 0; index < spheres.length; index++) {
-        const sphere = spheres[index];
-        const ballName = `Ball ${index + 1}`;
-        const card = document.createElement('article');
-        card.className = 'ball-control-card';
-        card.style.setProperty('--ball-color', toCssHexColor(sphere.colorHex));
+    ui.ballControlsList.appendChild(buildBallTabs(sphere, focusTab));
 
-        const header = document.createElement('div');
-        header.className = 'ball-control-header';
+    const index = spheres.indexOf(sphere);
+    const ballName = `Ball ${index + 1}`;
+    const summaryValues = new Map();
+    const refreshSummary = () => {
+        const value = summaryValues.get(sphere);
+        if (value) {
+            value.textContent = formatBallSummary(sphere);
+        }
+    };
 
-        const colorDot = document.createElement('span');
-        colorDot.className = 'ball-color-dot';
-        colorDot.style.backgroundColor = toCssHexColor(sphere.colorHex);
+    const card = document.createElement('article');
+    card.className = 'ball-control-card';
+    card.id = 'ballEditor';
+    card.setAttribute('role', 'tabpanel');
+    card.setAttribute('aria-labelledby', `ballTab${index + 1}`);
+    card.style.setProperty('--ball-color', toCssHexColor(sphere.colorHex));
 
-        const title = document.createElement('span');
-        title.className = 'ball-control-title';
-        title.textContent = ballName;
+    const header = document.createElement('div');
+    header.className = 'ball-control-header';
 
-        const launchBtn = document.createElement('button');
-        launchBtn.type = 'button';
-        launchBtn.className = 'ball-launch-btn';
-        launchBtn.setAttribute('aria-label', `Launch ${ballName} from its start position`);
-        launchBtn.innerHTML = '<svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/></svg><span>Launch</span>';
-        launchBtn.addEventListener('click', () => launchSphere(sphere));
+    const colorDot = document.createElement('span');
+    colorDot.className = 'ball-color-dot';
 
-        header.append(colorDot, title, launchBtn);
-        card.appendChild(header);
+    const title = document.createElement('span');
+    title.className = 'ball-control-title';
+    title.textContent = ballName;
 
-        const grid = document.createElement('div');
-        grid.className = 'ball-control-grid';
+    const launchBtn = document.createElement('button');
+    launchBtn.type = 'button';
+    launchBtn.className = 'ball-launch-btn';
+    launchBtn.setAttribute('aria-label', `Launch ${ballName} from its start position`);
+    launchBtn.innerHTML = '<svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/></svg><span>Launch</span>';
+    launchBtn.addEventListener('click', () => launchSphere(sphere));
 
-        const massStepper = createStepper({
-            labelText: 'Mass',
-            unitText: 'kg',
-            min: MIN_SPHERE_MASS,
-            max: MAX_SPHERE_MASS,
-            step: 0.1,
-            decimals: 1,
-            value: sphere.mass,
-            ariaLabel: `mass of ${ballName}`,
-            onChange: (next) => {
-                sphere.mass = clampSphereMass(next);
-            }
-        });
-        grid.appendChild(massStepper.element);
+    header.append(colorDot, title, launchBtn);
+    card.appendChild(header);
 
-        const vxStepper = createStepper({
+    const grid = document.createElement('div');
+    grid.className = 'ball-control-grid';
+
+    const massStepper = createStepper({
+        labelText: 'Mass',
+        unitText: 'kg',
+        min: MIN_SPHERE_MASS,
+        max: MAX_SPHERE_MASS,
+        step: 0.1,
+        decimals: 1,
+        value: sphere.mass,
+        ariaLabel: `mass of ${ballName}`,
+        onChange: (next) => {
+            sphere.mass = clampSphereMass(next);
+            refreshSummary();
+        }
+    });
+    grid.appendChild(massStepper.element);
+
+    const vxStepper = createStepper({
+        labelText: 'Launch v',
+        labelSub: state.oneD ? '' : 'x',
+        unitText: 'm/s',
+        min: -MAX_LAUNCH_SPEED,
+        max: MAX_LAUNCH_SPEED,
+        step: 0.1,
+        decimals: 2,
+        value: sphere.launchVelocity.x,
+        ariaLabel: `launch velocity${state.oneD ? '' : ' x'} of ${ballName}`,
+        onChange: (next) => {
+            sphere.launchVelocity.x = next;
+            refreshSummary();
+        }
+    });
+    grid.appendChild(vxStepper.element);
+
+    if (!state.oneD) {
+        const vyStepper = createStepper({
             labelText: 'Launch v',
-            labelSub: state.oneD ? '' : 'x',
+            labelSub: 'y',
             unitText: 'm/s',
             min: -MAX_LAUNCH_SPEED,
             max: MAX_LAUNCH_SPEED,
             step: 0.1,
             decimals: 2,
-            value: sphere.launchVelocity.x,
-            ariaLabel: `launch velocity${state.oneD ? '' : ' x'} of ${ballName}`,
+            value: sphere.launchVelocity.y,
+            ariaLabel: `launch velocity y of ${ballName}`,
             onChange: (next) => {
-                sphere.launchVelocity.x = next;
+                sphere.launchVelocity.y = next;
+                refreshSummary();
             }
         });
-        grid.appendChild(vxStepper.element);
-
-        if (!state.oneD) {
-            const vyStepper = createStepper({
-                labelText: 'Launch v',
-                labelSub: 'y',
-                unitText: 'm/s',
-                min: -MAX_LAUNCH_SPEED,
-                max: MAX_LAUNCH_SPEED,
-                step: 0.1,
-                decimals: 2,
-                value: sphere.launchVelocity.y,
-                ariaLabel: `launch velocity y of ${ballName}`,
-                onChange: (next) => {
-                    sphere.launchVelocity.y = next;
-                }
-            });
-            grid.appendChild(vyStepper.element);
-        }
-
-        card.appendChild(grid);
-        ui.ballControlsList.appendChild(card);
+        grid.appendChild(vyStepper.element);
     }
+
+    card.appendChild(grid);
+    ui.ballControlsList.appendChild(card);
+
+    if (spheres.length < 2) {
+        return;
+    }
+
+    // One line per ball; picking a line edits that ball.
+    const summary = document.createElement('div');
+    summary.className = 'ball-summary';
+    const list = document.createElement('ul');
+    list.className = 'ball-summary-list';
+    list.setAttribute('aria-label', 'All balls');
+    spheres.forEach((other, otherIndex) => {
+        const item = document.createElement('li');
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'ball-summary-row';
+        row.style.setProperty('--ball-color', toCssHexColor(other.colorHex));
+        if (other === sphere) {
+            row.setAttribute('aria-current', 'true');
+        }
+        row.setAttribute('aria-label', `Edit Ball ${otherIndex + 1}: ${formatBallSummary(other)}`);
+        const dot = document.createElement('span');
+        dot.className = 'ball-color-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        const num = document.createElement('span');
+        num.className = 'ball-summary-num';
+        num.textContent = String(otherIndex + 1);
+        const value = document.createElement('span');
+        value.className = 'ball-summary-value mono';
+        value.textContent = formatBallSummary(other);
+        summaryValues.set(other, value);
+        row.append(dot, num, value);
+        row.addEventListener('click', () => setEditedSphere(other, true));
+        item.appendChild(row);
+        list.appendChild(item);
+    });
+    summary.appendChild(list);
+
+    const launchAllBtn = document.createElement('button');
+    launchAllBtn.type = 'button';
+    launchAllBtn.className = 'ball-launch-btn ball-launch-all';
+    launchAllBtn.setAttribute('aria-label', 'Launch all balls from their start positions');
+    launchAllBtn.innerHTML = '<svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/></svg><span>Launch all</span>';
+    launchAllBtn.addEventListener('click', launchAllSpheres);
+    summary.appendChild(launchAllBtn);
+    ui.ballControlsList.appendChild(summary);
 }
 
 function updateMetrics(now) {
@@ -968,6 +1133,10 @@ function updateAddBtnState() {
     const oneDCapacity = Math.min(MAX_SPHERES, getOneDWallsSphereCapacity());
     const maxAllowedSpheres = (state.oneD && state.boundaryMode === 'walls') ? oneDCapacity : MAX_SPHERES;
     ui.addBtn.disabled = spheres.length >= maxAllowedSpheres;
+    const addTab = ui.ballControlsList && ui.ballControlsList.querySelector('.ball-tab-add');
+    if (addTab) {
+        addTab.disabled = ui.addBtn.disabled;
+    }
     ui.resetBtn.disabled = spheres.length === 0;
 }
 
@@ -1185,6 +1354,7 @@ function addSphere() {
         syncSphereMeshes();
     }
     clearTrail(sphere);
+    state.editedSphere = sphere;
     renderBallControls();
     updateAddBtnState();
 
@@ -1286,15 +1456,6 @@ const PRESETS = {
             { x: -0.6, mass: 1.0, v: 1.0 },
             { x: 0.15, mass: 1.0, v: 0 }
         ]
-    },
-    cradle: {
-        label: "Newton's cradle",
-        ballRestitution: 1,
-        balls: [
-            { x: -0.7, mass: 1.0, v: 1.0 },
-            { x: 0.05, mass: 1.0, v: 0, touchPrevious: false },
-            { x: null, mass: 1.0, v: 0, touchPrevious: true }
-        ]
     }
 };
 
@@ -1319,15 +1480,10 @@ function applyPreset(name) {
 
     const bounds = getViewBounds();
     const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
-    const touchGap = (SPHERE_RADIUS * 2) + (COLLISION_SEPARATION_EPSILON * 2);
     const xSign = screenXSign();
-    let previousScreenX = 0;
     for (const spec of preset.balls) {
         const sphere = createAndAddSphere();
-        const screenX = spec.touchPrevious
-            ? previousScreenX + touchGap
-            : Math.max(-xLimit, Math.min(xLimit, spec.x * bounds.halfWidth));
-        previousScreenX = screenX;
+        const screenX = Math.max(-xLimit, Math.min(xLimit, spec.x * bounds.halfWidth));
         sphere.mass = spec.mass;
         sphere.launchVelocity.set(spec.v, 0);
         placeSphere(sphere, screenX * xSign, 0);
@@ -2907,7 +3063,7 @@ function getSweptCollisionNormal2D(a, b, diameter) {
 }
 
 // Collisions found during the current substep, for the data panel. Balls joined by impulses in
-// the same substep (such as a Newton's cradle chain) form one event, so the event's momentum
+// the same substep (such as a row of touching balls) form one event, so the event's momentum
 // before and after balances even when three balls take part.
 const substepCollision = {
     before: new Map(),
@@ -3635,6 +3791,11 @@ function selectSphere(sphere) {
     focusBeforeSelection = document.activeElement;
     state.selectedSphere = sphere;
     sphere.velocity.set(0, 0, 0);
+    // A ball picked in the view also opens in the ball settings.
+    if (state.editedSphere !== sphere) {
+        state.editedSphere = sphere;
+        renderBallControls();
+    }
     ui.selectionOverlay.style.display = 'flex';
     ui.cancelTargetBtn.focus();
 }
@@ -3690,6 +3851,9 @@ function removeSelectedSphere() {
     if (idx > -1) {
         spheres.splice(idx, 1);
     }
+    if (state.editedSphere === target) {
+        state.editedSphere = spheres[Math.min(Math.max(idx, 0), spheres.length - 1)] || null;
+    }
     deselectSphere();
     renderBallControls();
     updateAddBtnState();
@@ -3703,6 +3867,7 @@ function removeAllSpheres() {
         disposeSphere(sphere);
     }
     spheres.length = 0;
+    state.editedSphere = null;
     state.lastCollision = null;
     renderBallControls();
     clearHandInteractionState();
