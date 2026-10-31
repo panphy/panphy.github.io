@@ -686,6 +686,37 @@ test('Tidy preserves clean AND and bridge diagrams, including symmetry and diago
   }
 });
 
+test('Tidy fixes bridge meter leads without bundling in conflicting component moves', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const saved = fs.readFileSync(path.join(__dirname, 'fixtures/wheatstone-bridge.ppcir'), 'utf8');
+  const { doc } = circuit.importDoc(saved);
+  doc.view = 'schematic';
+  const before = JSON.parse(JSON.stringify(doc));
+  assert.equal(layout.schematicQuality(doc).crossings, 1, 'reproduce the crossed meter leads');
+  assert.equal(layout.tidy(doc, 'schematic'), true);
+  const q = layout.schematicQuality(doc);
+  assert.equal(q.defects, 0, 'no crossings, overlaps or wire conflicts');
+  assert.equal(q.backwards, 0);
+  assert.equal(q.detour, 0);
+  const routes = layout.routeAll(doc, 'schematic');
+  for (const wire of doc.wires.filter(w => w.a.c === 'c6' || w.b.c === 'c6')) {
+    assert.equal(routes.get(wire.id).poly.length, 2, 'both ammeter leads are straight');
+  }
+  for (const c of doc.components) {
+    const old = before.layouts.schematic.comps[c.id];
+    const now = doc.layouts.schematic.comps[c.id];
+    assert.deepEqual([now.x, now.y], [old.x, old.y], 'keep the authored bridge positions');
+    if (c.id !== 'c6') assert.deepEqual(now, old, 'other components keep their orientation');
+  }
+  assert.deepEqual(doc.components, before.components);
+  assert.deepEqual(doc.wires, before.wires, 'terminal polarity and connections are unchanged');
+  assert.deepEqual(doc.layouts.realistic, before.layouts.realistic);
+  const once = JSON.stringify(doc);
+  assert.equal(layout.tidy(doc, 'schematic'), false);
+  assert.equal(JSON.stringify(doc), once, 'a second click is stable');
+});
+
 test('parallel-resistor example has straight meter leads and positive branch readings', () => {
   const doc = examples.build(examples.list.find(ex => ex.title === 'Series and parallel resistors'), 'schematic');
   const byLabel = Object.fromEntries(doc.components.map(c => [c.label, c]));
