@@ -52,3 +52,28 @@ test('override glow follows the drag setting and is omitted from clean exports',
   assert.doesNotMatch(draw(true), /#F08C00/);
   b.dragModel = 'world'; assert.doesNotMatch(draw(false), /#F08C00/);
 });
+
+test('raster exports use a separate canvas and omit body and connector editing cues', () => {
+  const scene = S.createScene(); scene.world.floor = false;
+  const b = S.makeBody(scene, 'box', 0, 0); b.dragModel = 'linear'; scene.bodies.push(b);
+  scene.links.push(S.makeLink(scene, 'spring', b.id, { x: 0, y: 0 }, null, { x: 1, y: 0 }));
+  const app = { scene, sim: null, display: {}, poseOf: b => b, isSelected: () => true, hover: { type: 'link', id: scene.links[0].id }, selection: { type: 'body', id: b.id }, extra: [], editor: {} };
+  const live = { width: 1600, height: 1000 };
+  const ctx = PPM.svg.createContext(800, 500);
+  const output = { getContext: () => ctx };
+  const previousDocument = globalThis.document;
+  globalThis.document = { createElement: tag => { assert.equal(tag, 'canvas'); return output; } };
+  try {
+    const renderer = PPM.render.createRenderer(app, live, PPM.svg.createContext(800, 500));
+    Object.assign(renderer, { w: 800, h: 500, dpr: 2, colors: { bg: '#ffffff', surface: '#ffffff', axis: '#cccccc', link: '#123456', accent: '#ff00ff' } });
+    assert.equal(renderer.exportCanvas(), output);
+    assert.notEqual(output, live);
+    assert.equal(output.width, 1600); assert.equal(output.height, 1000);
+    const rendered = ctx.serialize();
+    assert.match(rendered, /#123456/);
+    assert.doesNotMatch(rendered, /#F08C00|#ff00ff|NaN|undefined/);
+    assert.equal(renderer.dpr, 2);
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
+  }
+});

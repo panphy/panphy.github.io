@@ -519,26 +519,51 @@
       return { pa, pb, L, ux, uy, rate, ext, tension: l.k * ext + l.damping * rate };
     }
 
+    // If the minimum step cannot resolve a spring, solve its spring and damping
+    // together as a backward-Euler impulse. Sequential impulses also keep multiple
+    // heavily damped springs on one object from adding an unstable velocity kick.
+    function applySpring(ends, k, ext, damping, tension, pullOnly = false) {
+      let inv = 0, rate = 0;
+      ends.forEach(([id, p, u]) => {
+        const pb = bodyFor(id);
+        if (isStatic(pb)) return;
+        const c = pb.getWorldCenter();
+        const arm = (p.x - c.x) * u.y - (p.y - c.y) * u.x;
+        inv += invMassOf(pb) + arm * arm * invInertiaOf(pb);
+        const v = pb.getLinearVelocityFromWorldPoint(p);
+        rate -= u.x * v.x + u.y * v.y;
+      });
+      const h = sim.h;
+      const implicit = h * damping * inv > 0.5 || h * Math.sqrt(k * inv) > 0.050001;
+      if (implicit) {
+        tension = (k * ext + (damping + h * k) * rate) / (1 + h * (damping + h * k) * inv);
+        if (pullOnly) tension = Math.max(0, tension);
+      }
+      ends.forEach(([id, p, u]) => {
+        const pb = bodyFor(id);
+        if (isStatic(pb)) return;
+        const force = pl.Vec2(tension * u.x, tension * u.y);
+        if (implicit) pb.applyLinearImpulse(pl.Vec2(h * force.x, h * force.y), pl.Vec2(p.x, p.y), true);
+        else pb.applyForce(force, pl.Vec2(p.x, p.y), true);
+      });
+    }
+
     function applyForces() {
       new Set(pairs.values()).forEach((st) => {
         const g = pairNow(st);
         if (st.pair.other.kind === 'pulley') { st.wind = g.wind; st.turn = g.turn; }
         const T = pairTension(st, g);
         st.tension = T;
-        [[st.sEnd.id, g.ps, g.pullS], [st.oEnd.id, g.po, g.pullO]].forEach(([id, p, u]) => {
-          const pb = bodyFor(id);
-          if (pb && pb !== ground && !pb.isStatic()) pb.applyForce(pl.Vec2(T * u.x, T * u.y), pl.Vec2(p.x, p.y), true);
-        });
+        const kind = st.pair.other.kind;
+        const damping = kind === 'spring' ? 0 : st.pair.spring.damping;
+        if (kind === 'rod' || kind === 'spring' || g.taut) {
+          applySpring([[st.sEnd.id, g.ps, g.pullS], [st.oEnd.id, g.po, g.pullO]], g.k, g.X, damping, T, kind === 'rope' || kind === 'pulley');
+        }
       });
       scene.links.forEach((l) => {
         if (l.kind !== 'spring' || pairs.has(l.id)) return;
         const s = springState(l);
-        const fx = s.tension * s.ux;
-        const fy = s.tension * s.uy;
-        const A = bodyFor(l.a);
-        const B = bodyFor(l.b);
-        if (A && A !== ground && !A.isStatic()) A.applyForce(pl.Vec2(fx, fy), s.pa, true);
-        if (B && B !== ground && !B.isStatic()) B.applyForce(pl.Vec2(-fx, -fy), s.pb, true);
+        applySpring([[l.a, s.pa, { x: s.ux, y: s.uy }], [l.b, s.pb, { x: -s.ux, y: -s.uy }]], l.k, s.ext, l.damping, s.tension);
       });
       scene.bodies.forEach((b) => {
         if (b.fixed) return;
