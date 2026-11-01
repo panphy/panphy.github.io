@@ -19,6 +19,7 @@
     ctx.closePath = () => { path += 'Z '; };
     ctx.rect = (x, y, w, h) => { path += `M${x} ${y}h${w}v${h}h${-w}Z `; hasPoint = true; };
     ctx.quadraticCurveTo = (cx, cy, x, y) => { path += `Q${cx} ${cy} ${x} ${y} `; };
+    ctx.bezierCurveTo = (ax, ay, bx, by, x, y) => { path += `C${ax} ${ay} ${bx} ${by} ${x} ${y} `; };
     ctx.arc = (x, y, r, start, end, anticlockwise = false) => {
       const tau = 2 * Math.PI;
       const raw = end - start;
