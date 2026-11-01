@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-01T00:10:43Z';
+const BUILD_ID = '2026-11-01T00:31:11Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -179,6 +179,16 @@ const ASSETS_TO_CACHE = [
   '/sandboxes/panphymech/js/vendor/earcut.min.js',
   '/sandboxes/panphymech/js/vendor/planck.min.js',
   '/sandboxes/panphymech/js/vendor/polygon-clipping.min.js',
+  '/sandboxes/panphymech/manual/build-1-dark.png',
+  '/sandboxes/panphymech/manual/build-1-light.png',
+  '/sandboxes/panphymech/manual/build-2-dark.png',
+  '/sandboxes/panphymech/manual/build-2-light.png',
+  '/sandboxes/panphymech/manual/build-3-dark.png',
+  '/sandboxes/panphymech/manual/build-3-light.png',
+  '/sandboxes/panphymech/manual/build-4-dark.png',
+  '/sandboxes/panphymech/manual/build-4-light.png',
+  '/sandboxes/panphymech/manual/build-5-dark.png',
+  '/sandboxes/panphymech/manual/build-5-light.png',
   '/sandboxes/panphymech/manual/file-dark.png',
   '/sandboxes/panphymech/manual/file-light.png',
   '/sandboxes/panphymech/manual/graph-dark.png',

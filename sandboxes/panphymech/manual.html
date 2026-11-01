@@ -76,7 +76,7 @@
 <p class="eyebrow">PanPhyMech · User guide</p>
 <h1>Build an experiment, then measure its motion</h1>
 <p class="lead">Start with a pendulum, watch its energy change, then explore your own objects, connectors and graphs.</p>
-<div class="intro-actions"><a class="primary-link" href="#step-example">Start the walkthrough</a><a href="#reference">Browse the reference</a>
+<div class="intro-actions"><a class="primary-link" href="#step-example">Start the walkthrough</a><a href="#tip">Build a complex object</a><a href="#reference">Browse the reference</a>
 </div>
 </header>
 <section aria-labelledby="walkthrough">
@@ -201,7 +201,135 @@
 <figcaption><strong>File menu.</strong> Scene files and image exports are separate from graph data.</figcaption>
 </figure>
 </div>
-<nav class="step-nav" aria-label="Step 5 navigation"><a href="#step-graph">← Previous</a><a href="#reference">Browse the reference →</a>
+<nav class="step-nav" aria-label="Step 5 navigation"><a href="#step-graph">← Previous</a><a href="#tip">Next: Tip: build complex objects →</a>
+</nav>
+</section>
+</section>
+<section aria-labelledby="tip">
+<h2 id="tip" tabindex="-1">Tip: build complex objects</h2>
+<p class="section-intro">Merge and Subtract turn simple parts into one custom shape. These five steps build the car from <strong>Examples → Motor car</strong>.</p>
+<nav class="step-index" aria-label="Tip steps">
+<a href="#tip-parts"><span>1</span>Rough out the shape</a>
+<a href="#tip-merge"><span>2</span>Merge the parts</a>
+<a href="#tip-wheels"><span>3</span>Attach the wheels first</a>
+<a href="#tip-cut"><span>4</span>Cut the arches and windows</a>
+<a href="#tip-drive"><span>5</span>Drive it</a>
+</nav>
+<section class="walkthrough-step" aria-labelledby="tip-parts">
+<p class="eyebrow">Step 1 of 5</p>
+<h3 id="tip-parts" tabindex="-1">Rough out the shape</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Open <strong>Examples → Motor car</strong> and delete the car’s body and wheels, keeping the slope. Or start an empty scene.</li>
+<li>Add a <strong>Box</strong> 2.1 × 0.38 m at (−4, 0.56) for the lower body and a <strong>Box</strong> 0.9 × 0.4 m at (−4.15, 0.95) for the cabin. Positions are centers in meters; set them in the Inspector’s Size and position card.</li>
+<li>Add two <strong>Balls</strong> of radius 0.19 m at (−5.05, 0.56) and (−2.95, 0.56) for rounded bumpers.</li>
+<li>Add two <strong>Ramps</strong> 0.4 m tall against the cabin: 0.5 m long at the front and 0.35 m at the back, mirrored with <kbd>M</kbd>. Ramps start fixed, so turn off <strong>Fixed in place</strong> for both. Parts may overlap.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>Six separate parts form the outline of a car. Each still moves on its own.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/build-1-light.png" target="_blank" rel="noopener" aria-label="Enlarge rough out the shape screenshot"><img src="manual/build-1-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Boxes, balls and ramps placed side by side, with the cabin selected."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/build-1-dark.png" target="_blank" rel="noopener" aria-label="Enlarge rough out the shape screenshot"><img src="manual/build-1-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Boxes, balls and ramps placed side by side, with the cabin selected."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Six parts.</strong> Boxes, balls and ramps placed side by side, with the cabin selected.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Tip step 1 navigation"><a href="#tip">← All steps</a><a href="#tip-merge">Next: Merge the parts →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="tip-merge">
+<p class="eyebrow">Step 2 of 5</p>
+<h3 id="tip-merge" tabindex="-1">Merge the parts</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Press <strong>Select several</strong> in the Scene toolbar and click all six parts. The Inspector lists them.</li>
+<li>Press <strong>Merge</strong>. They become one rigid shape with their total mass and the first part’s settings.</li>
+<li>Name the shape and set its mass to 4 kg.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>One car body. Undo splits it back into its parts.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/build-2-light.png" target="_blank" rel="noopener" aria-label="Enlarge merge the parts screenshot"><img src="manual/build-2-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: All six parts selected, with Merge and Subtract in the Inspector."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/build-2-dark.png" target="_blank" rel="noopener" aria-label="Enlarge merge the parts screenshot"><img src="manual/build-2-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: All six parts selected, with Merge and Subtract in the Inspector."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Ready to merge.</strong> All six parts selected, with Merge and Subtract in the Inspector.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Tip step 2 navigation"><a href="#tip-parts">← Previous</a><a href="#tip-wheels">Next: Attach the wheels first →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="tip-wheels">
+<p class="eyebrow">Step 3 of 5</p>
+<h3 id="tip-wheels" tabindex="-1">Attach the wheels first</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Add two <strong>Balls</strong> of radius 0.3 m at (−4.7, 0.3) and (−3.3, 0.3), with friction 1.</li>
+<li>Choose <strong>Motor</strong> and click the center of the back wheel, where it overlaps the body. Choose <strong>Hinge</strong> and click the center of the front wheel.</li>
+<li>Set the motor to Clockwise, 8 rad/s and 20 N m.</li>
+<li>Connect the wheels before cutting the arches: a motor or hinge needs two overlapping objects when you place it, and it keeps its axle when the body is cut.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>Both wheels are pinned at their centers. Hinged objects may overlap without colliding.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/build-3-light.png" target="_blank" rel="noopener" aria-label="Enlarge attach the wheels first screenshot"><img src="manual/build-3-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: A motor joins the back wheel to the body; a hinge joins the front wheel."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/build-3-dark.png" target="_blank" rel="noopener" aria-label="Enlarge attach the wheels first screenshot"><img src="manual/build-3-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: A motor joins the back wheel to the body; a hinge joins the front wheel."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Wheels attached.</strong> A motor joins the back wheel to the body; a hinge joins the front wheel.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Tip step 3 navigation"><a href="#tip-merge">← Previous</a><a href="#tip-cut">Next: Cut the arches and windows →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="tip-cut">
+<p class="eyebrow">Step 4 of 5</p>
+<h3 id="tip-cut" tabindex="-1">Cut the arches and windows</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Add a <strong>Ball</strong> of radius 0.36 m at (−4.7, 0.3), over the back wheel.</li>
+<li>With Select several, click the body, then the ball. The object picked last is the cutter. Press <strong>Subtract</strong>. Leave the wheel unselected, or it is cut too.</li>
+<li>Repeat at (−3.3, 0.3) for the front arch.</li>
+<li>For each window, merge a small box and ramp 0.28 m tall into one cutter inside the cabin, then subtract it. A cutter wholly inside the body leaves a hole.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The arches clear the wheels by 6 cm, and the motor and hinge still join them to the body.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/build-4-light.png" target="_blank" rel="noopener" aria-label="Enlarge cut the arches and windows screenshot"><img src="manual/build-4-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The body and an arch cutter selected, with the cutter picked last."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/build-4-dark.png" target="_blank" rel="noopener" aria-label="Enlarge cut the arches and windows screenshot"><img src="manual/build-4-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The body and an arch cutter selected, with the cutter picked last."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Ready to cut.</strong> The body and an arch cutter selected, with the cutter picked last.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Tip step 4 navigation"><a href="#tip-wheels">← Previous</a><a href="#tip-drive">Next: Drive it →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="tip-drive">
+<p class="eyebrow">Step 5 of 5</p>
+<h3 id="tip-drive" tabindex="-1">Drive it</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Press <strong>Play</strong>. The motor turns the back wheel and the car drives up the slope.</li>
+<li>Compare with <strong>Examples → Motor car</strong>, which was built this way. Save your car as a .ppmech file to reuse it.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The car climbs the slope, and its trail shows the path.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/build-5-light.png" target="_blank" rel="noopener" aria-label="Enlarge drive it screenshot"><img src="manual/build-5-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The car drives up the slope with its trail showing."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/build-5-dark.png" target="_blank" rel="noopener" aria-label="Enlarge drive it screenshot"><img src="manual/build-5-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The car drives up the slope with its trail showing."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Finished car.</strong> The car drives up the slope with its trail showing.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Tip step 5 navigation"><a href="#tip-cut">← Previous</a><a href="#reference">Browse the reference →</a>
 </nav>
 </section>
 </section>
@@ -349,6 +477,19 @@
 <li><a href="#step-graph">Read and export a graph</a>
 </li>
 <li><a href="#step-save">Save or export the scene</a>
+</li>
+</ol>
+<h3>Tip: build complex objects</h3>
+<ol>
+<li><a href="#tip-parts">Rough out the shape</a>
+</li>
+<li><a href="#tip-merge">Merge the parts</a>
+</li>
+<li><a href="#tip-wheels">Attach the wheels first</a>
+</li>
+<li><a href="#tip-cut">Cut the arches and windows</a>
+</li>
+<li><a href="#tip-drive">Drive it</a>
 </li>
 </ol>
 <h3>Reference</h3>
