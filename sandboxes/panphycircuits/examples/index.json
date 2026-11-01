@@ -33,8 +33,7 @@
     "file": "capacitor-charging-and-discharging.ppcir",
     "title": "Capacitor charging and discharging",
     "summary": "A 1000 µF capacitor charges through 4.7 kΩ (RC = 4.7 s). Flip the two-way switch to discharge it.",
-    "tip": "The circuit is live. Flip the two-way switch to B to discharge. The graph shows the solver’s p.d. and current.",
-    "graph": true
+    "tip": "The circuit is live. Flip the two-way switch to B to discharge. Open Graph to see the solver’s p.d. and current."
   },
   {
     "file": "npn-transistor-switch.ppcir",
