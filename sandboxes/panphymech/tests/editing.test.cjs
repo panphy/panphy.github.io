@@ -131,3 +131,15 @@ test('mirroring a cut shape reflects its outline and keeps ring winding', () => 
   assert.deepEqual(b.paths[0][0].map(([x, y]) => [x + 0, y]).sort(), [[-2, 0], [0, 0], [0, 1]].sort());
   assert.equal(Math.sign(area(b.paths[0][0])), Math.sign(area(ring)));
 });
+test('an object center near another object edge snaps onto that edge, including hole edges', () => {
+  const h = setup();
+  h.body('box', 0, 0, { w: 2, h: 1 });
+  const ball = h.body('ball', 0.6, 0.47, { r: 0.3 });
+  assert.equal(S.contactSnap(h.scene, new Set([ball.id]), 0.1), null, 'deep overlap: no surface contact');
+  const d = S.centerSnap(h.scene, new Set([ball.id]), 0.1); near(d.x, 0); near(d.y, 0.03);
+  ball.y = 0.2; assert.equal(S.centerSnap(h.scene, new Set([ball.id]), 0.1), null, 'far from every edge');
+  const k = setup();
+  k.body('custom', 0, 0, { paths: [[[[-2,-2],[2,-2],[2,2],[-2,2]], [[-1,-1],[-1,1],[1,1],[1,-1]]]] });
+  const c = k.body('ball', 0.95, 0.3, { r: 0.2 });
+  const e = S.centerSnap(k.scene, new Set([c.id]), 0.1); near(e.x, 0.05); near(e.y, 0);
+});
