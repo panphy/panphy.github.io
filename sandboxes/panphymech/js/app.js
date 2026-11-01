@@ -145,7 +145,7 @@
   app.canRedo = () => redoStack.length > 0;
 
   // Fields that can change while time runs, without starting again from t = 0.
-  const PARAM_KEYS = { body: ['mass', 'friction', 'restitution', 'drag', 'dragModel', 'linearDragSource', 'linearDrag', 'viscosity', 'color', 'name'], link: ['k', 'rest', 'damping', 'speed', 'torque', 'motor', 'name', 'length'], world: ['gravity', 'floorFriction', 'gpeZero', 'viscosity', 'dragModel', 'linearDragSource', 'linearDrag', 'drag', 'accuracy'] };
+  const PARAM_KEYS = { body: ['mass', 'friction', 'restitution', 'drag', 'dragModel', 'linearDragSource', 'linearDrag', 'viscosity', 'color', 'name'], link: ['k', 'rest', 'damping', 'speed', 'dir', 'torque', 'motor', 'name', 'length'], world: ['gravity', 'floorFriction', 'gpeZero', 'viscosity', 'dragModel', 'linearDragSource', 'linearDrag', 'drag', 'accuracy'] };
   function setupSignature(data) {
     const strip = (o, keys) => { const c = { ...o }; keys.forEach((k) => delete c[k]); return c; };
     // A solid rod or rope is rebuilt from bodies, so its length and mass belong to the setup.
@@ -159,9 +159,20 @@
   function restore(text) {
     const data = JSON.parse(text);
     const live = app.sim && app.sim.t > 0 && setupSignature(data) === setupSignature(app.scene);
-    app.scene.world = data.world;
-    app.scene.bodies = data.bodies;
-    app.scene.links = data.links;
+    if (live) {
+      // Joined-pair solvers retain these objects and their attachment points.
+      // Only parameters differ, so preserve those references during live undo/redo.
+      Object.assign(app.scene.world, data.world);
+      const restoreParams = (items, saved, keys) => items.forEach((item, i) => keys.forEach((key) => {
+        if (Object.hasOwn(saved[i], key)) item[key] = saved[i][key]; else delete item[key];
+      }));
+      restoreParams(app.scene.bodies, data.bodies, PARAM_KEYS.body);
+      restoreParams(app.scene.links, data.links, PARAM_KEYS.link);
+    } else {
+      app.scene.world = data.world;
+      app.scene.bodies = data.bodies;
+      app.scene.links = data.links;
+    }
     app.scene.nextId = data.nextId;
     tidyReferences();
     if (live) {
@@ -789,7 +800,7 @@
   };
 
   app.exportPng = function exportPng() {
-    canvas.toBlob((blob) => { if (blob) download('panphymech-scene.png', blob); }, 'image/png');
+    app.renderer.exportCanvas().toBlob((blob) => { if (blob) download('panphymech-scene.png', blob); }, 'image/png');
   };
 
   app.exportCsv = function exportCsv() {

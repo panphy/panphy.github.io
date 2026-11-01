@@ -920,6 +920,16 @@
       }
     };
 
+    r.exportCanvas = function exportCanvas() {
+      const output = document.createElement('canvas');
+      output.width = canvas.width;
+      output.height = canvas.height;
+      const copy = createRenderer(app, output);
+      Object.assign(copy, { w: r.w, h: r.h, dpr: r.dpr, colors: r.colors, exporting: true });
+      copy.draw(true);
+      return output;
+    };
+
     r.exportSvg = function exportSvg() {
       const svg = PPM.svg.createContext(r.w, r.h);
       const copy = createRenderer(app, canvas, svg);
