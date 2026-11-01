@@ -172,20 +172,24 @@
   // ---------- Helpers for readings ----------
 
   // Readings for a two-terminal part. Polarized parts give signed values with a
-  // stated reference direction; others give sizes plus the direction of current.
+  // stated reference direction; others give magnitudes, with direction only when
+  // reversing current changes the device’s motion.
   function twoTerminalReadings(c, r, pos = 'a', neg = 'b', labels = {}) {
     const v = r.v(pos, neg);
     const i = r.i(pos);
     if (!labels.signed) {
-      const def = types[c.type];
-      const name = (id) => def.terminals.find((t) => t.id === id).name;
-      const tiny = !(Math.abs(i) >= 1e-9);
-      return [
+      const out = [
         { key: 'v', label: labels.v || 'Potential difference', value: Math.abs(v), unit: 'V' },
         { key: 'i', label: labels.i || 'Current', value: Math.abs(i), unit: 'A' },
-        { key: 'dir', label: 'Current direction', text: Number.isNaN(i) ? '—' : tiny ? 'no current' : (i > 0 ? `${name(pos)} → ${name(neg)}` : `${name(neg)} → ${name(pos)}`) },
         { key: 'p', label: 'Power', value: (Number.isFinite(v) && Number.isFinite(i)) ? Math.abs(v * i) : NaN, unit: 'W' }
       ];
+      if (labels.direction) {
+        const def = types[c.type];
+        const name = (id) => def.terminals.find((t) => t.id === id).name;
+        const tiny = !(Math.abs(i) >= 1e-9);
+        out.splice(2, 0, { key: 'dir', label: 'Current direction', text: Number.isNaN(i) ? '—' : tiny ? 'no current' : (i > 0 ? `${name(pos)} → ${name(neg)}` : `${name(neg)} → ${name(pos)}`) });
+      }
+      return out;
     }
     return [
       { key: 'v', label: labels.v || 'Potential difference', value: v, unit: 'V' },
@@ -398,7 +402,7 @@
       { key: 'closed', label: 'Closed', kind: 'bool', default: false, operational: true }
     ],
     compile(c, T, b) { if (c.props.closed) b.V(T.a, T.b, 0, { short: true }); },
-    readings: (c, r) => twoTerminalReadings(c, r).filter((reading) => reading.key !== 'dir'),
+    readings: (c, r) => twoTerminalReadings(c, r),
     valueText: (c) => (c.props.closed ? 'closed' : 'open'),
     actuator: { kind: 'toggle', prop: 'closed' },
     help: 'An on/off switch. Closed, it is a perfect conductor (0 Ω); open, no current can flow. Click or tap the lever to operate it.'
@@ -424,7 +428,7 @@
     compile(c, T, b) { b.V(T.c, c.props.toB ? T.b : T.a, 0, { short: true }); },
     readings(c, r) {
       const t = c.props.toB ? 'b' : 'a';
-      return [{ key: 'i', label: `Current, common to ${t.toUpperCase()}`, value: r.i('c'), unit: 'A' }];
+      return [{ key: 'i', label: `Current through contact ${t.toUpperCase()}`, value: Math.abs(r.i('c')), unit: 'A' }];
     },
     valueText: (c) => (c.props.toB ? 'to B' : 'to A'),
     actuator: { kind: 'toggle', prop: 'toB' },
@@ -462,7 +466,7 @@
     ],
     compile(c, T, b) { b.R(T.a, T.b, c.props.R); },
     readings(c, r) {
-      const out = twoTerminalReadings(c, r);
+      const out = twoTerminalReadings(c, r, 'a', 'b', { direction: true });
       const s = this.state(c, r);
       out.push({ key: 'turn', label: 'Rotor', text: s.speed < 0.02 ? 'not turning' : `turning ${s.dir > 0 ? 'clockwise' : 'counterclockwise'}` });
       return out;
@@ -485,7 +489,7 @@
         help: 'Plays a sine tone at the connected AC supply’s frequency while time runs. Volume follows the changing current. Frequencies below 20 Hz stay silent.' }
     ],
     compile(c, T, b) { b.R(T.a, T.b, c.props.R); },
-    readings: (c, r) => twoTerminalReadings(c, r),
+    readings: (c, r) => twoTerminalReadings(c, r, 'a', 'b', { direction: true }),
     state(c, r) {
       const i = r.i('a');
       return { i: Number.isFinite(i) ? i : 0 };

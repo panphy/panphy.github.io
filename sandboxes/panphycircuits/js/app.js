@@ -775,12 +775,12 @@
     // Open in the current view and keep the user's logic symbol style.
     doc.view = app.doc.view;
     doc.settings.logicStyle = app.doc.settings.logicStyle;
+    app.showGraph(false);
     loadDoc(doc, { label: `Open example: ${ex.title}` });
     if (before) {
       app.history.stack.unshift({ snap: before, label: 'Before example', view: app.doc.view, time: Date.now() });
       app.history.index = 1;
     }
-    if (ex.graph) app.showGraph(true);
     ui.toast(ex.tip || ex.summary);
   };
 
