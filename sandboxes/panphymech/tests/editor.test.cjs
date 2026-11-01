@@ -276,3 +276,53 @@ test('two springs join in series with no damping; joins need a spring and an obj
   assert.equal(pulley.a, h2.app.scene.links[0].id);
   assert.equal(S.pulleyProblem(h2.app.scene, pulley), '');
 });
+
+test('Shift-drag or Select several draws a selection box from empty space or a connector line', () => {
+  const h = setup(true);
+  const found = [];
+  h.app.addBoxToSelection = (f) => found.push(f);
+  const drag = (from, to, opts = {}) => {
+    h.emit('pointerdown', { clientX: from[0], clientY: from[1], pointerType: 'mouse', ...opts });
+    h.emit('pointermove', { clientX: to[0], clientY: to[1], pointerType: 'mouse', ...opts });
+    const box = h.ed.selectionDrag();
+    h.emit('pointerup', { clientX: to[0], clientY: to[1], pointerType: 'mouse', ...opts });
+    return box;
+  };
+  // Shift-drag from empty space: the box covers the box object and the spring's fixed end.
+  const box = drag([100, 100], [400, 300], { shiftKey: true });
+  assert.equal(JSON.stringify(box), JSON.stringify({ minX: 100, maxX: 400, minY: 100, maxY: 300 }));
+  assert.equal(found.length, 1);
+  assert.equal(JSON.stringify(found[0].bodies), JSON.stringify([h.body.id]));
+  assert.equal(JSON.stringify(found[0].ends), JSON.stringify([{ id: h.app.scene.links[0].id, end: 'a' }]));
+  assert.equal(h.ed.selectionDrag(), null, 'the box goes when released');
+  // Shift-drag starting on the spring's line still draws a box rather than moving the spring.
+  drag([240, 200], [100, 100], { shiftKey: true });
+  assert.equal(found.length, 2);
+  assert.equal(h.app.selection, null);
+  // Without Shift, a drag from empty space pans as before.
+  const cam = { ...h.app.scene.camera };
+  drag([100, 100], [150, 120]);
+  assert.equal(found.length, 2);
+  assert.notDeepEqual(h.app.scene.camera, cam);
+  // In Select several mode a plain drag draws the box.
+  h.app.multiMode = true;
+  drag([100, 100], [400, 300]);
+  assert.equal(found.length, 3);
+});
+
+test('dragging a selected object carries the connector ends a selection box caught', () => {
+  const h = setup(true);
+  const spring = h.app.scene.links[0];
+  h.app.selection = { type: 'body', id: h.body.id };
+  h.app.isSelected = (type, id) => type === 'body' && id === h.body.id;
+  h.app.anchors = { ends: [{ id: spring.id, end: 'a' }], wheels: [] };
+  // As in the app, selecting afresh drops what a selection box caught.
+  h.app.select = function select(sel) { this.selection = sel; this.anchors = { ends: [], wheels: [] }; };
+  h.emit('pointerdown', { clientX: 300, clientY: 200, pointerType: 'mouse' });
+  h.emit('pointermove', { clientX: 350, clientY: 150, pointerType: 'mouse' });
+  h.emit('pointerup', { clientX: 350, clientY: 150, pointerType: 'mouse' });
+  const moved = S.linkById(h.app.scene, spring.id);
+  const body = S.bodyById(h.app.scene, h.body.id);
+  assert.ok(Math.abs(body.x - 0.5) < 1e-9 && Math.abs(body.y - 0.5) < 1e-9);
+  assert.ok(Math.abs(moved.la.x - -0.5) < 1e-9 && Math.abs(moved.la.y - 0.5) < 1e-9, 'the fixed end moved with the object');
+});

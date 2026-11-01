@@ -342,7 +342,7 @@
 <ul>
 <li>Click a part in Parts, then click the scene, or drag it straight in. Hold Shift to place several. The library includes balls, boxes, planks, polygons, ramps and walls.</li>
 <li>Drag an object to move it. The round handle rotates it; the square handle resizes it. <strong>Mirror</strong> (M) flips it left to right, with anything hinged or glued to it. Use the Inspector for precise size, position and starting velocity. Fixed objects are hatched and do not move.</li>
-<li>Shift-click or use Select several to select multiple objects. Use Ctrl+C then Ctrl+V (Command on Mac) to copy and paste objects or a connector. Copied objects keep connectors between them; a connector copied alone keeps its attachments to the original objects. Duplicate also copies the selection. Merge combines selected objects into one rigid shape; Subtract cuts the last selected object out of the others. These edits can be undone.</li>
+<li>Shift-click or use Select several to select multiple objects. To select a whole build, Shift-drag a box round it from empty space (or drag with Select several on, which suits touch screens); the box adds every object wholly inside it, and Ctrl+A (Command on Mac) selects everything. Drag any selected object to move them all. Connector ends fixed to the background and pulley wheels inside the box are ringed and move with the group, so a pendulum’s pivot or a pulley comes along; ends outside it stay put and ropes refit. Drag empty space without Shift to pan, or use two fingers. Use Ctrl+C then Ctrl+V (Command on Mac) to copy and paste objects or a connector. Copied objects keep connectors between them; a connector copied alone keeps its attachments to the original objects. Duplicate also copies the selection. Merge combines selected objects into one rigid shape; Subtract cuts the last selected object out of the others. These edits can be undone.</li>
 <li>Hinged and glued objects move together while editing. Drag empty space to pan; scroll, pinch or use the zoom buttons to zoom. Fit frames current positions, so leave room for motion. With Snap on, moving or placing objects near another surface snaps them into contact, including rotated shapes and the floor. Bring an object’s center near another object’s edge and the center snaps onto that edge. Connected and selected groups move together. Away from surfaces, placement aligns to the grid; rotation aligns to 15° angles. Turn Snap off with G for free placement, or hold Ctrl (Command on Mac) to turn it off only while the key is down.</li>
 </ul>
 </div>
@@ -446,9 +446,13 @@
 </tr>
 <tr><td><kbd>Ctrl+C / Ctrl+V</kbd></td><td>Copy / paste selection (Command also works on Mac)</td>
 </tr>
+<tr><td><kbd>Ctrl+A</kbd></td><td>Select everything in the scene, with scene focused (Command also works on Mac)</td>
+</tr>
+<tr><td><kbd>Shift+drag</kbd></td><td>Select a group with a box from empty space</td>
+</tr>
 <tr><td><kbd>Ctrl+Z / Ctrl+Shift+Z</kbd></td><td>Undo / redo; Ctrl+Y also redoes (Command also works on Mac)</td>
 </tr>
-<tr><td><kbd>Arrow keys / Shift+arrows</kbd></td><td>Nudge selected object 0.01 m / 0.1 m with scene focused</td>
+<tr><td><kbd>Arrow keys / Shift+arrows</kbd></td><td>Nudge the selection 0.01 m / 0.1 m with scene focused</td>
 </tr>
 <tr><td><kbd>+ / − / 0</kbd></td><td>Zoom in / out / fit scene</td>
 </tr>

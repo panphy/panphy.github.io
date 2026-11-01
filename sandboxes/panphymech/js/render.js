@@ -799,6 +799,44 @@
       });
     }
 
+    // Connector ends and pulley wheels a selection box caught: a ring round each, as they
+    // move with the selected objects.
+    function drawBoxedAnchors() {
+      const a = app.anchors;
+      if (!a || (!a.ends.length && !a.wheels.length)) return;
+      ctx.strokeStyle = r.colors.accent;
+      ctx.lineWidth = 2;
+      a.ends.forEach(({ id, end }) => {
+        const l = S.linkById(app.scene, id);
+        if (!l || l[end]) return;
+        const q = r.toScreen(l['l' + end]);
+        ctx.beginPath(); ctx.arc(q.x, q.y, 10, 0, Math.PI * 2); ctx.stroke();
+      });
+      a.wheels.forEach((id) => {
+        const l = S.linkById(app.scene, id);
+        if (!l) return;
+        const q = r.toScreen({ x: l.px, y: l.py });
+        ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(4, l.r * cam().scale) + 5, 0, Math.PI * 2); ctx.stroke();
+      });
+    }
+    // The selection box being dragged.
+    function drawSelectionDrag() {
+      const box = app.editor.selectionDrag && app.editor.selectionDrag();
+      if (!box) return;
+      ctx.save();
+      ctx.fillStyle = r.colors.accent;
+      ctx.globalAlpha = 0.08;
+      ctx.fillRect(box.minX, box.minY, box.maxX - box.minX, box.maxY - box.minY);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = r.colors.accent;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.rect(box.minX + 0.5, box.minY + 0.5, box.maxX - box.minX, box.maxY - box.minY);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // The selection's delete button: a small circle with a cross.
     function drawDeleteButton() {
       const p = app.editor.deleteButton();
@@ -874,9 +912,11 @@
         if (l) drawLinkHandles(l);
       }
       if (!clean) {
+        drawBoxedAnchors();
         drawDeleteButton();
         drawGrab();
         drawPreview();
+        drawSelectionDrag();
       }
     };
 

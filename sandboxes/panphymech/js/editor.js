@@ -11,7 +11,7 @@
   const DRAG_START_PX = 4;
 
   const HINTS = {
-    select: 'Drag an object or a connector to move it; a selected connector has end handles. While the simulation runs, drag to pull. Drag empty space to pan.',
+    select: 'Drag an object or a connector to move it; a selected connector has end handles. While the simulation runs, drag to pull. Drag empty space to pan; Shift-drag to select a group.',
     spring: 'Spring: click the first end on an object or the background, then the second end. Right-click or Esc cancels.',
     rod: 'Rod: click the first end on an object or the background, then the second end. A rod keeps its length. Right-click or Esc cancels.',
     rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack. Right-click or Esc cancels.',
@@ -185,6 +185,13 @@
         return { minX: Math.min(pa.x - 12, pb.x - 12, c.x - R), maxX: Math.max(pa.x + 12, pb.x + 12, c.x + R), minY: Math.min(pa.y - 12, pb.y - 12, c.y - R), maxY: Math.max(pa.y + 12, pb.y + 12, c.y + R) };
       }
       return { minX: Math.min(pa.x, pb.x) - 12, maxX: Math.max(pa.x, pb.x) + 12, minY: Math.min(pa.y, pb.y) - 12, maxY: Math.max(pa.y, pb.y) + 12 };
+    };
+
+    // The selection box being dragged, on screen, or null.
+    const boxRect = (a, b) => ({ minX: Math.min(a.x, b.x), maxX: Math.max(a.x, b.x), minY: Math.min(a.y, b.y), maxY: Math.max(a.y, b.y) });
+    ed.selectionDrag = function selectionDrag() {
+      if (!gesture || gesture.kind !== 'box' || !gesture.moved) return null;
+      return boxRect(gesture.start, gesture.last);
     };
 
     // The small delete button: at the upper left of an object, beside the middle of a
@@ -543,12 +550,12 @@
       if (!keep) ed.setTool('select');
     }
 
-    function snapBodies(ids, scene = app.scene) {
+    function snapBodies(ids, scene = app.scene, anchors) {
       if (!snapOn()) return false;
       // Surface contact first, then an object's center onto another object's edge.
       const tolerance = 10 / app.scene.camera.scale;
       const d = S.contactSnap(scene, ids, tolerance) || S.centerSnap(scene, ids, tolerance);
-      if (d) S.transformBodies(scene, ids, (p, angle) => ({ x: p.x + d.x, y: p.y + d.y, angle }));
+      if (d) S.transformBodies(scene, ids, (p, angle) => ({ x: p.x + d.x, y: p.y + d.y, angle }), anchors);
       return !!d;
     }
 
@@ -632,9 +639,11 @@
       const b = S.bodyById(app.scene, gesture.bodyId);
       gesture.b0 = b ? { x: b.x, y: b.y, angle: b.angle, w: b.w, h: b.h, r: b.r } : null;
       gesture.group = S.rigidGroup(app.scene, gesture.bodyId);
-      // Several objects selected: they all move together.
-      if (app.extra.length && app.isSelected('body', gesture.bodyId)) {
+      // Several objects selected: they all move together, with any connector ends and pulley
+      // wheels a selection box caught.
+      if (app.isSelected('body', gesture.bodyId)) {
         app.selectedBodies().forEach((id) => S.rigidGroup(app.scene, id).forEach((g) => gesture.group.add(g)));
+        gesture.anchors = app.anchors;
       }
     }
 
@@ -760,11 +769,11 @@
       const b0 = gesture.b0;
       const dx = w.x - gesture.startWorld.x;
       const dy = w.y - gesture.startWorld.y;
-      S.transformBodies(app.scene, gesture.group, (p, angle) => ({ x: p.x + dx, y: p.y + dy, angle }));
-      if (!snapBodies(gesture.group)) {
+      S.transformBodies(app.scene, gesture.group, (p, angle) => ({ x: p.x + dx, y: p.y + dy, angle }), gesture.anchors);
+      if (!snapBodies(gesture.group, app.scene, gesture.anchors)) {
         const gx = snapV(b0.x + dx, SNAP_POS) - b0.x - dx;
         const gy = snapV(b0.y + dy, SNAP_POS) - b0.y - dy;
-        S.transformBodies(app.scene, gesture.group, (p, angle) => ({ x: p.x + gx, y: p.y + gy, angle }));
+        S.transformBodies(app.scene, gesture.group, (p, angle) => ({ x: p.x + gx, y: p.y + gy, angle }), gesture.anchors);
       }
     }
 
@@ -867,6 +876,12 @@
       if (['hinge', 'motor', 'weld'].includes(ed.tool)) { placeJoint(w, e.shiftKey); app.requestDraw(); return; }
       if (ed.tool === 'pulley') { placePulleyPoint(w, e.shiftKey); app.requestDraw(); return; }
       const hit = hitTest(sp);
+      // Shift, or Select several, turns a drag from empty space (or a connector's line) into
+      // a selection box. A press on an object still adds or removes that object.
+      if ((e.shiftKey || app.multiMode) && (!hit || hit.type === 'link')) {
+        startGesture('box', e, sp, { keep: e.shiftKey });
+        return;
+      }
       if (!hit) { startGesture('pan', e, sp, { deselect: true }); return; }
       if (hit.type === 'delete') { app.deleteSelection(); return; }
       if (hit.type === 'linkEnd') {
@@ -894,8 +909,9 @@
         startGesture('none', e, sp);
         return;
       }
-      // Pressing one of several selected objects keeps them all selected, to drag together.
-      if (!(app.extra.length && app.isSelected('body', hit.body.id))) app.select({ type: 'body', id: hit.body.id });
+      // Pressing a selected object keeps the whole selection (and whatever a selection box
+      // caught with it), to drag together.
+      if (!app.isSelected('body', hit.body.id)) app.select({ type: 'body', id: hit.body.id });
       if (app.running) {
         if (!hit.body.fixed && app.sim.grab(hit.body.id, w)) startGesture('grab', e, sp);
         else startGesture('none', e, sp);
@@ -981,6 +997,9 @@
         case 'grab':
           app.sim.moveGrab(w);
           break;
+        case 'box':
+          app.requestDraw();
+          break;
         case 'move':
         case 'rotate':
         case 'resize':
@@ -1025,6 +1044,12 @@
         return;
       }
       gesture = null;
+      if (g.kind === 'box') {
+        if (g.moved) app.addBoxToSelection(S.boxContents(app.scene, boxRect(g.startWorld, w), app.poseOf));
+        else if (!g.keep) app.select(null); // a plain click on empty space clears, as before
+        app.requestDraw();
+        return;
+      }
       if (g.kind === 'grab') app.sim.release();
       if (g.kind === 'pan' && !g.moved && g.deselect) app.select(null);
       if (['move', 'rotate', 'resize'].includes(g.kind) && g.moved) app.endGesture(true);

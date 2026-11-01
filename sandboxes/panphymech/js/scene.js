@@ -655,7 +655,9 @@
 
   // Move or rotate a set of bodies rigidly, carrying the world anchors of their joints
   // and refitting rods and ropes to the new distance.
-  function transformBodies(scene, ids, fn) {
+  // anchors (from a box selection) adds connector ends fixed to the background ({ id, end })
+  // and pulley wheels (link ids), which move with the bodies.
+  function transformBodies(scene, ids, fn, anchors) {
     scene.bodies.forEach((b) => {
       if (!ids.has(b.id)) return;
       const p = fn({ x: b.x, y: b.y }, b.angle);
@@ -668,7 +670,44 @@
         l.lb = { x: p.x, y: p.y };
       }
     });
-    refitLengths(scene, ids);
+    const moved = new Set();
+    if (anchors) {
+      (anchors.ends || []).forEach(({ id, end }) => {
+        const l = linkById(scene, id);
+        if (!l || l[end]) return;
+        const p = fn({ x: l['l' + end].x, y: l['l' + end].y }, 0);
+        l['l' + end] = { x: p.x, y: p.y };
+        moved.add(l.id);
+      });
+      (anchors.wheels || []).forEach((id) => {
+        const l = linkById(scene, id);
+        if (!l || l.kind !== 'pulley') return;
+        const p = fn({ x: l.px, y: l.py }, 0);
+        l.px = p.x; l.py = p.y;
+        moved.add(l.id);
+      });
+    }
+    refitLengths(scene, ids, moved);
+  }
+
+  // What a selection box (world rectangle) holds: objects wholly inside it, connector ends
+  // fixed to the background inside it, and pulley wheels wholly inside it.
+  function boxContents(scene, rect, poseOf) {
+    const inside = (p) => p.x >= rect.minX && p.x <= rect.maxX && p.y >= rect.minY && p.y <= rect.maxY;
+    const bodies = scene.bodies.filter((b) => {
+      const pose = poseOf ? poseOf(b) : b;
+      const live = { ...b, x: pose.x, y: pose.y, angle: pose.angle };
+      if (b.kind === 'ball') return inside({ x: live.x - b.r, y: live.y - b.r }) && inside({ x: live.x + b.r, y: live.y + b.r });
+      return vertices(b).every((v) => inside(toWorld(live, v)));
+    }).map((b) => b.id);
+    const ends = [];
+    const wheels = [];
+    scene.links.forEach((l) => {
+      if (l.kind === 'hinge' || l.kind === 'weld') return; // their anchors follow their objects
+      ['a', 'b'].forEach((end) => { if (!l[end] && inside(l['l' + end])) ends.push({ id: l.id, end }); });
+      if (l.kind === 'pulley' && inside({ x: l.px - l.r, y: l.py - l.r }) && inside({ x: l.px + l.r, y: l.py + l.r })) wheels.push(l.id);
+    });
+    return { bodies, ends, wheels };
   }
 
   // Mirror a set of bodies left to right about the vertical line x = cx: positions,
@@ -716,13 +755,15 @@
     else if (!pair) l.length = Math.max(LIMITS.length[0], linkLength(scene, l));
   }
 
-  function refitLengths(scene, ids) {
+  // linkIds: connectors whose background ends or wheel moved too.
+  function refitLengths(scene, ids, linkIds) {
     scene.links.forEach((l) => {
       if (l.kind !== 'rod' && l.kind !== 'rope' && l.kind !== 'pulley') return;
       const pair = joinPair(scene, l);
       // A joined connector refits when either outer end of its pair moves.
       const ends = pair ? [pair.spring[farEnd(pair.se)], pair.other[farEnd(pair.oe)]] : [l.a, l.b];
-      if (ids && !ends.some((id) => ids.has(id))) return;
+      const touched = linkIds && (linkIds.has(l.id) || (pair && (linkIds.has(pair.spring.id) || linkIds.has(pair.other.id))));
+      if (ids && !touched && !ends.some((id) => ids.has(id))) return;
       refitLink(scene, l);
     });
   }
@@ -1015,7 +1056,7 @@
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, centerSnap, closestSurface, copyFragment, pasteFragment,
     pulleyWinding, pulleyGeometry, pulleyPath, pulleyProblem, PULLEY_CLEARANCE, PULLEY_RADIUS,
     bodyById, linkById, endPoint, rigidGroup,
-    JOIN_KINDS, joinedEnd, joinPair, pairGeometry, joinProblem, joinLinks, fitJoin, unjoin, minPulleyLength, tidyLinks, refitLink, transformBodies, mirrorBodies, linkLength, refitLengths,
+    JOIN_KINDS, joinedEnd, joinPair, pairGeometry, joinProblem, joinLinks, fitJoin, unjoin, minPulleyLength, tidyLinks, refitLink, transformBodies, boxContents, mirrorBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp
   };
 })(typeof window !== 'undefined' ? window : globalThis);
