@@ -357,7 +357,29 @@
       pulleys.set(l.id, st);
     }
 
+    // ---------- Joined pairs ----------
+    // A spring joined to another connector at a massless point acts with it as one connector
+    // between the two outer ends (S.pairGeometry). Both parts carry one pull, applied as a
+    // force before each step like a spring's, read from the scene each step so live changes
+    // apply. A pulley pair keeps its winding and follows its wrap angle from step to step.
+    const pairs = new Map(); // link id of either part → pair state
     scene.links.forEach((l) => {
+      if (pairs.has(l.id)) return;
+      const pair = S.joinPair(scene, l);
+      if (!pair) return;
+      const sf = pair.se === 'a' ? 'b' : 'a', of = pair.oe === 'a' ? 'b' : 'a';
+      const st = { pair, sEnd: { id: pair.spring[sf], local: pair.spring['l' + sf] }, oEnd: { id: pair.other[of], local: pair.other['l' + of] }, tension: 0, wind: undefined, turn: undefined };
+      if (pair.other.kind === 'pulley') {
+        const g = S.pairGeometry(scene, pair, null);
+        st.wind = g.wind; st.turn = g.turn;
+        world.createBody({ position: pl.Vec2(pair.other.px, pair.other.py) }).createFixture(new pl.Circle(pair.other.r), { friction: 0.4, restitution: 0 });
+      }
+      pairs.set(pair.spring.id, st);
+      pairs.set(pair.other.id, st);
+    });
+
+    scene.links.forEach((l) => {
+      if (pairs.has(l.id)) return;
       const A = bodyFor(l.a);
       const B = bodyFor(l.b);
       if (!A || !B) return;
@@ -401,8 +423,16 @@
       const base = S.ACCURACY[S.worldAccuracy(scene)].step;
       // Solid connectors are chains of joints, which hold together better with finer steps.
       let h = solids.size ? base / 2 : base;
+      new Set(pairs.values()).forEach((st) => {
+        const g = pairNow(st);
+        const inv = invMass(st.sEnd.id) + invMass(st.oEnd.id);
+        if (inv <= 0) return;
+        h = Math.min(h, 0.05 / Math.sqrt(g.k * inv));
+        const c = st.pair.other.kind === 'spring' ? 0 : st.pair.spring.damping;
+        if (c > 0) h = Math.min(h, 0.5 / (c * inv));
+      });
       scene.links.forEach((l) => {
-        if (l.kind !== 'spring') return;
+        if (l.kind !== 'spring' || pairs.has(l.id)) return;
         const inv = invMass(l.a) + invMass(l.b);
         if (inv <= 0) return;
         const omega = Math.sqrt(l.k * inv);
@@ -421,6 +451,7 @@
 
     function anchorWorld(id, local) {
       const pb = bodyFor(id);
+      if (!pb && id && pairs.has(id)) { const n = pairNow(pairs.get(id)).node; return pl.Vec2(n.x, n.y); }
       if (!pb || pb === ground) return pl.Vec2(local.x, local.y);
       return pb.getWorldPoint(pl.Vec2(local.x, local.y));
     }
@@ -428,6 +459,49 @@
       const pb = bodyFor(id);
       if (!pb || pb === ground) return pl.Vec2(0, 0);
       return pb.getLinearVelocityFromWorldPoint(p);
+    }
+    // Current object poses, with each pulley pair's winding and turn, for S.pairGeometry.
+    function livePose(b) {
+      const pb = bodies.get(b.id);
+      if (!pb) return b;
+      const p = pb.getPosition();
+      return { x: p.x, y: p.y, angle: pb.getAngle() };
+    }
+    livePose.pulley = (id) => { const st = pairs.get(id); return st && st.pair.other.id === id ? { wind: st.wind, turn: st.turn } : null; };
+    function pairNow(st) {
+      return S.pairGeometry(scene, st.pair, livePose, st.wind, st.turn);
+    }
+    // The pair's pull now, with damping: c × (rate of stretch) while taut. A rope or pulley
+    // pair only pulls; two springs have no damping (a massless join cannot share it exactly).
+    function pairTension(st, g) {
+      const s = st.pair.spring, kind = st.pair.other.kind;
+      if (kind === 'spring') return g.tension;
+      if (!g.taut) return 0;
+      const vs = pointVelocity(st.sEnd.id, g.ps), vo = pointVelocity(st.oEnd.id, g.po);
+      const rate = -(g.pullS.x * vs.x + g.pullS.y * vs.y + g.pullO.x * vo.x + g.pullO.y * vo.y);
+      const T = s.k * g.X + s.damping * rate;
+      return kind === 'rod' ? T : Math.max(0, T);
+    }
+    // One member's reading: its own length, stretch and share of the energy.
+    function pairReading(id) {
+      const st = pairs.get(id);
+      const g = pairNow(st);
+      const l = S.linkById(scene, id);
+      const T = pairTension(st, g);
+      const isSpring = l === st.pair.spring;
+      const node = g.node;
+      const outer = isSpring ? g.ps : g.po;
+      const length = Math.hypot(node.x - outer.x, node.y - outer.y);
+      const ends = (isSpring ? st.pair.se : st.pair.oe) === 'a' ? { pa: node, pb: outer } : { pa: outer, pb: node };
+      if (l.kind === 'spring') {
+        const ext = isSpring ? g.extS : g.extO;
+        return { length, extension: ext, tension: T, EPE: 0.5 * l.k * ext * ext, ...ends };
+      }
+      if (l.kind === 'pulley') {
+        const path = sim.pulleyPath(id);
+        return { length: path.total, slack: Math.max(0, -g.X), sideA: path.segA, sideB: path.segB, force: T, pa: path.pa, pb: path.pb };
+      }
+      return { length, force: T, ...ends };
     }
 
     function springState(l) {
@@ -446,8 +520,18 @@
     }
 
     function applyForces() {
+      new Set(pairs.values()).forEach((st) => {
+        const g = pairNow(st);
+        if (st.pair.other.kind === 'pulley') { st.wind = g.wind; st.turn = g.turn; }
+        const T = pairTension(st, g);
+        st.tension = T;
+        [[st.sEnd.id, g.ps, g.pullS], [st.oEnd.id, g.po, g.pullO]].forEach(([id, p, u]) => {
+          const pb = bodyFor(id);
+          if (pb && pb !== ground && !pb.isStatic()) pb.applyForce(pl.Vec2(T * u.x, T * u.y), pl.Vec2(p.x, p.y), true);
+        });
+      });
       scene.links.forEach((l) => {
-        if (l.kind !== 'spring') return;
+        if (l.kind !== 'spring' || pairs.has(l.id)) return;
         const s = springState(l);
         const fx = s.tension * s.ux;
         const fy = s.tension * s.uy;
@@ -648,6 +732,17 @@
         const firstOutside = (pts, from) => pts.find((q) => Math.hypot(q.x - from.x, q.y - from.y) > reach) || pts[pts.length - 1];
         const towardA = solidPts ? firstOutside([...solidPts].reverse(), pbw) : pa;
         const towardB = solidPts ? firstOutside(solidPts, pa) : pbw;
+        if (pairs.has(l.id)) {
+          // A joined pair pulls its outer end toward the join (or, for a pulley, the wheel).
+          const st = pairs.get(l.id);
+          const g = pairNow(st);
+          const isSpring = l === st.pair.spring;
+          const p = isSpring ? g.ps : g.po, u = isSpring ? g.pullS : g.pullO;
+          const reachLen = Math.max(1, Math.hypot(g.node.x - p.x, g.node.y - p.y));
+          const T = pairTension(st, g);
+          add(l.kind === 'spring' ? 'F_s' : 'T', surfacePoint(p, { x: p.x + u.x * reachLen, y: p.y + u.y * reachLen }), T * u.x, T * u.y);
+          return;
+        }
         if (l.kind === 'pulley') {
           // Tension along each straight part, toward its tangent point on the wheel.
           const ps = pulleys.get(l.id);
@@ -700,6 +795,7 @@
     sim.readLink = function readLink(id) {
       const l = S.linkById(scene, id);
       if (!l) return null;
+      if (pairs.has(id)) return pairReading(id);
       if (l.kind === 'spring') {
         const s = springState(l);
         return { length: s.L, extension: s.ext, tension: s.tension, EPE: 0.5 * l.k * s.ext * s.ext, pa: s.pa, pb: s.pb };
@@ -766,8 +862,8 @@
     sim.pulleyPath = function pulleyPath(id) {
       const l = S.linkById(scene, id);
       if (!l) return null;
-      const ps = pulleys.get(id);
-      return S.pulleyPath(scene, l, (b) => sim.pose(b.id) || b, ps ? ps.wind : undefined, ps ? ps.turn : undefined);
+      const ps = pulleys.get(id) || pairs.get(id);
+      return S.pulleyPath(scene, l, livePose, ps ? ps.wind : undefined, ps ? ps.turn : undefined);
     };
 
     sim.totals = function totals() {
@@ -834,6 +930,8 @@
       chooseStep();
     };
 
+    // A pulley pair's winding and turn, so drawings follow the rope the simulation holds.
+    sim.pulleyState = (id) => livePose.pulley(id);
     sim.updateLink = function updateLink(l) {
       sim.probe = null; // the starting forces change too
       const j = joints.get(l.id);

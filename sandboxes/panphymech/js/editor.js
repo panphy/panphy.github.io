@@ -23,6 +23,7 @@
 
   // Connectors whose length follows their ends when the setup changes.
   const refits = (l) => l.kind === 'rod' || l.kind === 'rope' || l.kind === 'pulley';
+  const JOIN_PX = 12; // a connector end this close to a free connector end joins it
 
   function createEditor(app, canvas) {
     const ed = { tool: 'select', armed: null, pending: null, cursorWorld: null };
@@ -331,7 +332,7 @@
         return { body: b };
       }
       if (['spring', 'rod', 'rope'].includes(ed.tool)) {
-        const target = endTarget(w);
+        const target = endTarget(w, ed.tool);
         if (ed.pending) return { link: { kind: ed.tool, from: ed.pending.world, to: target.world }, point: target.world, ok: true };
         return { point: target.world, ok: true };
       }
@@ -342,15 +343,59 @@
       if (ed.tool === 'pulley') {
         const p = ed.pending;
         if (!p) { const c = wheelPoint(w); return { pulley: { c, radius: PULLEY_R } }; }
-        const target = endTarget(w);
+        const target = endTarget(w, 'pulley');
         return { pulley: { c: p.c, radius: PULLEY_R, from: p.world || null, to: target.world }, point: target.world, ok: true };
       }
       return null;
     };
 
-    // Where a connector end lands: an object's center when the pointer is near it, else the
-    // pointer on that object, else a point on the background.
-    function endTarget(w) {
+    // A free background end of another connector that a connector of this kind could join
+    // (a spring with a spring, an ideal rope or rod, or a pulley's rope), near the pointer.
+    // rejoinId: the partner a dragged joined end came from, which it may drop back onto.
+    function joinTarget(w, kind, selfId, rejoinId) {
+      if (!S.JOIN_KINDS.includes(kind)) return null;
+      const sp = rr().toScreen(w);
+      let best = null, bestD = JOIN_PX;
+      app.scene.links.forEach((t) => {
+        if (t.id === selfId || t.solid || !S.JOIN_KINDS.includes(t.kind) || (kind !== 'spring' && t.kind !== 'spring')) return;
+        const back = !!rejoinId && t.id === rejoinId;
+        if (!back && S.joinedEnd(app.scene, t)) return;
+        ['a', 'b'].forEach((end) => {
+          if (back ? t[end] !== selfId : t[end]) return;
+          const p = t['l' + end];
+          const q = rr().toScreen(p);
+          const d = Math.hypot(q.x - sp.x, q.y - sp.y);
+          if (d < bestD) { bestD = d; best = { link: t, end, world: { x: p.x, y: p.y }, back }; }
+        });
+      });
+      return best;
+    }
+
+    // The connector an end is joined to, or null.
+    const joinedId = (l, end) => (l[end] && !S.bodyById(app.scene, l[end]) && S.linkById(app.scene, l[end]) ? l[end] : null);
+
+    // A rod, rope or pulley refits to its ends; one joined to a spring refits with its pair.
+    function refitAll(l) {
+      S.refitLink(app.scene, l);
+      const pair = S.joinPair(app.scene, l);
+      if (pair && pair.other !== l) S.refitLink(app.scene, pair.other);
+    }
+    // Why a connector's pair would not work after an end moved, or ''.
+    function pairProblem(l) {
+      const pair = S.joinPair(app.scene, l);
+      if (!pair) return '';
+      const so = pair.spring[pair.se === 'a' ? 'b' : 'a'], oo = pair.other[pair.oe === 'a' ? 'b' : 'a'];
+      if (!so && !oo) return 'Attach at least one end of the pair to an object.';
+      if (so && so === oo) return 'The pair would join an object to itself.';
+      return '';
+    }
+
+    // Where a connector end lands: a free end of another connector it can join (when kind
+    // is given), an object's center when the pointer is near it, else the pointer on that
+    // object, else a point on the background.
+    function endTarget(w, kind, selfId, rejoinId) {
+      const join = kind ? joinTarget(w, kind, selfId, rejoinId) : null;
+      if (join) return { body: null, join, world: join.world, local: join.world };
       const bs = bodiesAt(w);
       if (snapOn() && !bs.length) {
         let nearest = null, distance = 10 / app.scene.camera.scale;
@@ -393,23 +438,44 @@
       return w;
     }
 
+    // A new connector with one end on another connector's free end: which of its ends joins
+    // what, and why it cannot (or '').
+    function newJoin(kind, p, t, b) {
+      if (p.join && t.join) return { problem: 'Join only one end of a connector to another connector.' };
+      const tj = p.join || t.join;
+      if (!tj) return null;
+      const end = p.join ? 'a' : 'b';
+      const probe = { id: '', kind, solid: false, a: null, b: null };
+      return { tj, end, problem: S.joinProblem(app.scene, probe, end, tj.link, tj.end, p.join ? b : p.a) };
+    }
+    function attachJoin(l, j) {
+      if (!j) return false;
+      S.joinLinks(app.scene, l, j.end, S.linkById(app.scene, j.tj.link.id), j.tj.end);
+      S.fitJoin(app.scene, l);
+      return true;
+    }
+
     function placeLinkEnd(w, keep) {
-      const t = endTarget(w);
+      const kind = ed.tool;
+      const t = endTarget(w, kind);
       if (!ed.pending) {
-        ed.pending = { a: t.body ? t.body.id : null, la: t.local, world: t.world };
-        app.setHint('Now click the second end. Right-click or Esc cancels.');
+        ed.pending = { a: t.body ? t.body.id : null, la: t.local, world: t.world, join: t.join || null };
+        app.setHint(t.join ? `Joined to ${t.join.link.name}. Now click the second end. Right-click or Esc cancels.` : 'Now click the second end. Right-click or Esc cancels.');
         return;
       }
       const p = ed.pending;
       const b = t.body ? t.body.id : null;
-      if (!p.a && !b) { app.toast('Attach at least one end to an object.'); return; }
+      const j = newJoin(kind, p, t, b);
+      if (j && j.problem) { app.toast(j.problem); return; }
+      if (!j && !p.a && !b) { app.toast('Attach at least one end to an object.'); return; }
       if (p.a && p.a === b) { app.toast('Connect two different objects, or an object and the background.'); return; }
-      const kind = ed.tool;
       app.edit(() => {
         const l = S.makeLink(app.scene, kind, p.a, p.la, b, t.local);
-        if (kind === 'spring') l.rest = Math.max(0.05, Math.round(S.linkLength(app.scene, l) * 100) / 100);
-        else l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
         app.scene.links.push(l);
+        if (!attachJoin(l, j)) {
+          if (kind === 'spring') l.rest = Math.max(0.05, Math.round(S.linkLength(app.scene, l) * 100) / 100);
+          else l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+        }
         app.select({ type: 'link', id: l.id });
       });
       ed.pending = null;
@@ -435,21 +501,23 @@
         app.setHint('Now click the first end of the rope, on an object or the background. Right-click or Esc cancels.');
         return;
       }
-      const t = endTarget(w);
+      const t = endTarget(w, 'pulley');
       if (!outsideWheel(t.world, p.c, PULLEY_R)) { app.toast('Put the end of the rope outside the wheel.'); return; }
       if (!p.world) {
-        Object.assign(p, { a: t.body ? t.body.id : null, la: t.local, world: t.world });
-        app.setHint('Now click the second end of the rope. Right-click or Esc cancels.');
+        Object.assign(p, { a: t.body ? t.body.id : null, la: t.local, world: t.world, join: t.join || null });
+        app.setHint(t.join ? `Joined to ${t.join.link.name}. Now click the second end of the rope. Right-click or Esc cancels.` : 'Now click the second end of the rope. Right-click or Esc cancels.');
         return;
       }
       const b = t.body ? t.body.id : null;
-      if (!p.a && !b) { app.toast('Attach at least one end to an object.'); return; }
+      const j = newJoin('pulley', p, t, b);
+      if (j && j.problem) { app.toast(j.problem); return; }
+      if (!j && !p.a && !b) { app.toast('Attach at least one end to an object.'); return; }
       if (p.a && p.a === b) { app.toast('Connect two different objects, or an object and the background.'); return; }
       app.edit(() => {
         const l = S.makeLink(app.scene, 'pulley', p.a, p.la, b, t.local);
         Object.assign(l, { px: p.c.x, py: p.c.y, r: PULLEY_R });
-        l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
         app.scene.links.push(l);
+        if (!attachJoin(l, j)) l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
         app.select({ type: 'link', id: l.id });
       });
       ed.pending = null;
@@ -520,7 +588,7 @@
       connectorDropPreview = null;
       if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
         const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
-        if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w).world, ok: true };
+        if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w, type).world, ok: true };
         else if (type === 'pulley') connectorDropPreview = { pulley: { c: wheelPoint(w), radius: PULLEY_R } };
         else {
           const bs = bodiesAt(w);
@@ -577,23 +645,43 @@
       restoreOrig();
       const l = S.linkById(app.scene, gesture.linkId);
       if (!l) return;
+      const was = joinedId(l, gesture.end);
       l[gesture.end] = null;
-      l['l' + gesture.end] = endTarget(w).world;
-      if (refits(l)) l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      l['l' + gesture.end] = endTarget(w, l.kind, l.id, was).world;
+      refitAll(l);
     }
 
     function finishLinkEnd(w) {
       restoreOrig();
       const l = S.linkById(app.scene, gesture.linkId);
       const end = gesture.end;
+      const was = joinedId(l, end);
+      const t = endTarget(w, l.kind, l.id, was);
+      // Dragging a joined end away separates the pair; its partner keeps a background end there.
+      if (was) {
+        const partner = S.linkById(app.scene, was);
+        if (t.join && t.join.back) return null; // dropped back where it was
+        S.unjoin(app.scene, l, end, app.poseOf);
+        if (partner && !partner.a && !partner.b) return `${partner.name} would have no end on an object.`;
+      }
+      if (t.join) {
+        const target = S.linkById(app.scene, t.join.link.id);
+        const problem = S.joinProblem(app.scene, l, end, target, t.join.end);
+        if (problem) return problem;
+        S.joinLinks(app.scene, l, end, target, t.join.end);
+        S.fitJoin(app.scene, l);
+        refitAll(l);
+        return l.kind === 'pulley' ? S.pulleyProblem(app.scene, l, app.poseOf) || null : null;
+      }
       const other = end === 'a' ? l.b : l.a;
-      const t = endTarget(w);
       const id = t.body ? t.body.id : null;
       if (!id && !other) return 'Attach at least one end to an object.';
       if (id && id === other) return 'Connect two different objects, or an object and the background.';
       l[end] = id;
       l['l' + end] = t.local;
-      if (refits(l)) l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      const problem = pairProblem(l);
+      if (problem) return problem;
+      refitAll(l);
       return l.kind === 'pulley' ? S.pulleyProblem(app.scene, l, app.poseOf) || null : null;
     }
 
@@ -605,7 +693,7 @@
       if (!l) return;
       l.px = snapV(l.px + w.x - gesture.startWorld.x, SNAP_POS);
       l.py = snapV(l.py + w.y - gesture.startWorld.y, SNAP_POS);
-      l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      refitAll(l);
     }
     function finishPulleyMove(w) {
       applyPulleyMove(w);
@@ -794,6 +882,8 @@
         app.select({ type: 'link', id: hit.link.id });
         const joint = hit.link.kind === 'hinge' || hit.link.kind === 'weld';
         if (app.running) startGesture('none', e, sp);
+        // A joined connector moves by its end handles; dragging its line would pull it apart.
+        else if (hit.link.kind !== 'pulley' && !joint && S.joinPair(app.scene, hit.link)) startGesture('none', e, sp);
         else startGesture(joint ? 'jointMove' : hit.link.kind === 'pulley' ? 'pulleyMove' : 'linkMove', e, sp, { linkId: hit.link.id });
         armHold(e, { type: 'link', id: hit.link.id });
         return;
@@ -927,6 +1017,8 @@
       const w = rr().toWorld(localPoint(e).x, localPoint(e).y);
       if (g.moved && (g.kind === 'linkEnd' || g.kind === 'jointMove' || g.kind === 'linkMove' || g.kind === 'pulleyMove')) {
         const problem = g.kind === 'linkEnd' ? finishLinkEnd(w) : g.kind === 'linkMove' ? finishLinkMove(w) : g.kind === 'pulleyMove' ? finishPulleyMove(w) : finishJointMove(w);
+        // A refused drop leaves everything as it was before the drag.
+        if (problem) restoreOrig();
         gesture = null;
         if (problem) { app.cancelGesture(); app.toast(problem); } else app.endGesture(true);
         app.requestDraw();

@@ -253,6 +253,22 @@
       ctx.stroke();
     }
 
+    // The massless knot where two joined connectors meet.
+    function drawKnot(p, color) {
+      const q = r.toScreen(p);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = r.colors.surface;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, 3.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+    function knotOf(l) {
+      const end = S.joinedEnd(app.scene, l);
+      return end ? S.endPoint(app.scene, l[end], l['l' + end], app.poseOf) : null;
+    }
+
     function linkEnds(l) {
       const pa = S.endPoint(app.scene, l.a, l.la, app.poseOf);
       const pb = S.endPoint(app.scene, l.b, l.lb, app.poseOf);
@@ -429,6 +445,8 @@
       drawPulleyRope(path, l.length, sel ? r.colors.accent : r.colors.rope);
       if (!l.a) anchorMount(path.pa, color);
       if (!l.b) anchorMount(path.pb, color);
+      const knot = knotOf(l);
+      if (knot) drawKnot(knot, color);
     }
 
     function drawHinge(l, p, selected) {
@@ -530,6 +548,8 @@
       else if (l.kind === 'rope') drawRope(pa, pb, l.length, sel ? r.colors.accent : r.colors.rope);
       if (!l.a) anchorMount(pa, color);
       if (!l.b) anchorMount(pb, color);
+      const knot = knotOf(l);
+      if (knot) drawKnot(knot, color);
     }
 
     function drawTrails() {

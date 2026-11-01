@@ -5,7 +5,8 @@
   const PPM = root.PPM = root.PPM || {};
 
   const FORMAT = 'panphy-mech';
-  const VERSION = 1;
+  // 2: connector ends may name another connector they are joined to.
+  const VERSION = 2;
 
   // Flat fills with a darker outline. Colors only tell objects apart; they never encode data.
   const COLORS = {
@@ -259,8 +260,23 @@
     if (!selection) return null;
     const ids = new Set(selection.type === 'body' ? [selection.id, ...extra] : []);
     const bodies = scene.bodies.filter((b) => ids.has(b.id)).map((b) => ({ ...b, ...poseOf(b) }));
-    const links = scene.links.filter((l) => selection.type === 'link' ? l.id === selection.id
-      : (l.a || l.b) && (!l.a || ids.has(l.a)) && (!l.b || ids.has(l.b)));
+    // Objects copy the connectors among them, and a joined pair when both parts qualify.
+    const endOk = (l, end) => !l[end] || ids.has(l[end]) || (!bodyById(scene, l[end]) && !!linkById(scene, l[end]));
+    let links = scene.links.filter((l) => selection.type === 'link' ? l.id === selection.id
+      : (l.a || l.b) && endOk(l, 'a') && endOk(l, 'b'));
+    if (selection.type !== 'link') {
+      for (;;) {
+        const kept = new Set(links.map((l) => l.id));
+        const next = links.filter((l) => ['a', 'b'].every((end) => !l[end] || ids.has(l[end]) || kept.has(l[end])));
+        // A pair copies only if at least one outer end is on a copied object.
+        const real = next.filter((l) => l.a && ids.has(l.a) || l.b && ids.has(l.b) || ['a', 'b'].some((end) => {
+          const t = kept.has(l[end]) && linkById(scene, l[end]);
+          return t && (ids.has(t.a) || ids.has(t.b));
+        }));
+        if (real.length === links.length) break;
+        links = real;
+      }
+    }
     const anchors = {};
     links.forEach((l) => { anchors[l.id] = { a: endPoint(scene, l.a, l.la, poseOf), b: endPoint(scene, l.b, l.lb, poseOf) }; });
     return JSON.parse(JSON.stringify({ bodies, links, anchors }));
@@ -276,17 +292,20 @@
       b.x += offset; b.y += offset;
       scene.bodies.push(b); bodies.push(id);
     }
+    // Pasted pairs stay joined to each other; a join to anything else becomes a background end.
+    const linkIds = new Map(f.links.map((l) => [l.id, newId(scene, 'l')]));
     for (const l of f.links) {
       const anchors = f.anchors[l.id];
       for (const end of ['a', 'b']) {
         if (ids.has(l[end])) l[end] = ids.get(l[end]);
+        else if (linkIds.has(l[end])) { l[end] = linkIds.get(l[end]); if (f.bodies.length) l['l' + end] = { x: anchors[end].x + offset, y: anchors[end].y + offset }; }
         else if (l[end] && bodyById(scene, l[end])) continue; // Connector-only copy retains attachments.
         else { l[end] = null; const shift = f.bodies.length ? offset : 0; l['l' + end] = { x: anchors[end].x + shift, y: anchors[end].y + shift }; }
       }
       if (!l.a && !l.b) continue;
       // A pulley's wheel moves with the pasted objects.
       if (l.kind === 'pulley' && f.bodies.length) { l.px += offset; l.py += offset; }
-      l.id = newId(scene, 'l');
+      l.id = linkIds.get(l.id);
       l.name = nextName(scene, l.name.replace(/\s+\d+$/, ''));
       scene.links.push(l); links.push(l.id);
     }
@@ -428,12 +447,194 @@
     return scene.links.find((l) => l.id === id) || null;
   }
 
-  // A link end in world coordinates (a body's local anchor, or a fixed world point).
+  // A link end in world coordinates: a body's local anchor, a fixed world point, or the join
+  // with another connector (the end then holds that connector's id).
   function endPoint(scene, bodyId, local, poseOf) {
     if (!bodyId) return { x: local.x, y: local.y };
     const b = bodyById(scene, bodyId);
-    if (!b) return { x: local.x, y: local.y };
-    return toWorld(poseOf ? poseOf(b) : b, local);
+    if (b) return toWorld(poseOf ? poseOf(b) : b, local);
+    const partner = linkById(scene, bodyId);
+    const pair = partner && joinPair(scene, partner);
+    if (pair) return pairGeometry(scene, pair, poseOf).node;
+    return { x: local.x, y: local.y };
+  }
+  // An outer end of a joined pair: never itself a join.
+  function plainEnd(scene, bodyId, local, poseOf) {
+    const b = bodyId && bodyById(scene, bodyId);
+    return b ? toWorld(poseOf ? poseOf(b) : b, local) : { x: local.x, y: local.y };
+  }
+
+  // ---------- Joined connectors ----------
+  //
+  // A spring end may join one end of another connector (a spring, an ideal rope or rod, or a
+  // pulley's rope) that is fixed to the background. The two joined ends hold each other's id
+  // (spring.b = rope id, rope.a = spring id). The join is a massless point, so both parts carry
+  // one pull along one line and the pair acts as one connector; where the join sits follows
+  // from the two outer ends. A joined end's la or lb keeps the join's last setup position.
+  const JOIN_KINDS = ['spring', 'rope', 'rod', 'pulley'];
+  const farEnd = (end) => (end === 'a' ? 'b' : 'a');
+
+  // The end of l that is joined to another connector, or null.
+  function joinedEnd(scene, l) {
+    for (const end of ['a', 'b']) if (l[end] && !bodyById(scene, l[end]) && linkById(scene, l[end])) return end;
+    return null;
+  }
+
+  // The pair l belongs to, spring first: { spring, se, other, oe } (se and oe are the joined
+  // ends). Two springs keep scene order, so the pair reads the same from either one.
+  function joinPair(scene, l) {
+    const end = joinedEnd(scene, l);
+    if (!end) return null;
+    const p = linkById(scene, l[end]);
+    const pend = p.a === l.id ? 'a' : p.b === l.id ? 'b' : null;
+    if (!pend) return null;
+    const lFirst = l.kind === 'spring' && (p.kind !== 'spring' || scene.links.indexOf(l) <= scene.links.indexOf(p));
+    return lFirst ? { spring: l, se: end, other: p, oe: pend } : { spring: p, se: pend, other: l, oe: end };
+  }
+
+  // A pair's shape now. X is the whole pair's stretch beyond its natural length (rest lengths
+  // plus rope, rod or pulley rope length); a rope or pulley pair is slack while X ≤ 0 and its
+  // spring then rests at its natural length. pullS and pullO are unit directions of the pull on
+  // the spring's outer end ps and the other's outer end po, and the pair lengthens at the rate
+  // −(pullS·vs + pullO·vo). tension is the static pull (no damping). For a pulley the rope path
+  // runs from po over the wheel straight on to ps, with the join on that last straight part;
+  // the join stops at the wheel if the rope is too short to keep it off. A running simulation
+  // passes its pulley's winding and turn.
+  function pairGeometry(scene, pair, poseOf, wind, prevTurn) {
+    const { spring: s, se, other: o, oe } = pair;
+    const sf = farEnd(se), of = farEnd(oe);
+    const ps = plainEnd(scene, s[sf], s['l' + sf], poseOf);
+    const po = plainEnd(scene, o[of], o['l' + of], poseOf);
+    if (o.kind === 'pulley') {
+      if (!Number.isFinite(wind) && poseOf && poseOf.pulley) {
+        const st = poseOf.pulley(o.id);
+        if (st) { wind = st.wind; prevTurn = st.turn; }
+      }
+      const pa = oe === 'a' ? ps : po, pb = oe === 'a' ? po : ps;
+      const c = { x: o.px, y: o.py };
+      const g = pulleyGeometry(c, o.r, pa, pb, Number.isFinite(wind) ? wind : pulleyWinding(c, pa, pb), prevTurn);
+      const X = g.total - o.length - s.rest;
+      const seg = oe === 'a' ? g.segA : g.segB;
+      const uN = oe === 'a' ? g.ua : g.ub; // from the wheel out to the spring's end
+      const uO = oe === 'a' ? g.ub : g.ua;
+      const springLen = Math.min(X > 0 ? s.rest + X : s.rest, seg);
+      return {
+        ps, po, X, taut: X > 0, springLen, node: { x: ps.x - uN.x * springLen, y: ps.y - uN.y * springLen },
+        pullS: { x: -uN.x, y: -uN.y }, pullO: { x: -uO.x, y: -uO.y }, k: s.k, tension: X > 0 ? s.k * X : 0,
+        extS: Math.max(0, X), g, wind: g.wind, turn: g.turn, onWheel: X > 0 && s.rest + X > seg
+      };
+    }
+    const dx = po.x - ps.x, dy = po.y - ps.y;
+    const d = Math.hypot(dx, dy);
+    const u = d > 1e-9 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 };
+    const at = (len) => ({ x: ps.x + u.x * len, y: ps.y + u.y * len });
+    const base = { ps, po, d, pullS: u, pullO: { x: -u.x, y: -u.y } };
+    if (o.kind === 'spring') {
+      // Springs in series: k = k₁k₂/(k₁ + k₂); each stretches in inverse proportion to its k.
+      const X = d - s.rest - o.rest;
+      const K = s.k + o.k;
+      const extS = (X * o.k) / K;
+      const k = (s.k * o.k) / K;
+      return { ...base, X, taut: true, springLen: s.rest + extS, node: at(s.rest + extS), k, tension: k * X, extS, extO: X - extS };
+    }
+    const X = d - s.rest - o.length;
+    if (o.kind === 'rod') return { ...base, X, taut: true, springLen: d - o.length, node: at(d - o.length), k: s.k, tension: s.k * X, extS: X };
+    const springLen = X > 0 ? d - o.length : s.rest;
+    return { ...base, X, taut: X > 0, springLen, node: at(springLen), k: s.k, tension: X > 0 ? s.k * X : 0, extS: Math.max(0, X) };
+  }
+
+  // Why end `end` of l cannot join end `tend` of connector t, or '' when it can. farValue is
+  // what l's other end will hold (a body id or null; it defaults to l's current one).
+  function joinProblem(scene, l, end, t, tend, farValue = l[farEnd(end)]) {
+    if (!t || t.id === l.id) return 'Join two different connectors.';
+    if (!JOIN_KINDS.includes(l.kind) || !JOIN_KINDS.includes(t.kind) || (l.kind !== 'spring' && t.kind !== 'spring')) {
+      return 'Only a spring can join another connector: a spring, an ideal rope or rod, or a pulley’s rope.';
+    }
+    if (l.solid || t.solid) return 'Solid rods and ropes can’t be joined; switch Solid off first.';
+    if (t[tend]) return 'Join to a connector end that is fixed to the background.';
+    if (joinedEnd(scene, t)) return `${t.name} is already joined to another connector.`;
+    if (farValue && !bodyById(scene, farValue)) return 'A connector can be joined at one end only.';
+    if (!farValue && !t[farEnd(tend)]) return 'Attach at least one end of the pair to an object.';
+    if (farValue && farValue === t[farEnd(tend)]) return 'The pair would join an object to itself.';
+    return '';
+  }
+
+  // Join end `end` of l to end `tend` of t (checked with joinProblem first).
+  function joinLinks(scene, l, end, t, tend) {
+    const node = endPoint(scene, t[tend], t['l' + tend]);
+    l[end] = t.id; l['l' + end] = { ...node };
+    t[tend] = l.id; t['l' + tend] = { ...node };
+    const pair = joinPair(scene, l);
+    // Two springs cannot share damping exactly through a massless join, so they have none.
+    if (pair && pair.other.kind === 'spring') { pair.spring.damping = 0; pair.other.damping = 0; }
+  }
+
+  // Make a pair rest as drawn: the connector just placed or attached (l) takes up the slack,
+  // a spring through its natural length, anything else through its length.
+  function fitJoin(scene, l) {
+    const pair = joinPair(scene, l);
+    if (!pair) return;
+    const g = pairGeometry(scene, pair, null);
+    if (l.kind === 'spring') {
+      // X already counts this spring's natural length; for two springs only l takes it up.
+      l.rest = clamp(Math.round((l.rest + g.X) * 100) / 100, Math.max(0.05, LIMITS.rest[0]), LIMITS.rest[1]);
+    } else {
+      l.length = clamp(l.length + g.X, ...LIMITS.length);
+    }
+  }
+
+  // A joined end's partner end is set to the background where the join is now.
+  function unjoin(scene, l, end, poseOf) {
+    const t = linkById(scene, l[end]);
+    const node = endPoint(scene, l[end], l['l' + end], poseOf);
+    l[end] = null; l['l' + end] = { ...node };
+    if (t) ['a', 'b'].forEach((e) => { if (t[e] === l.id) { t[e] = null; t['l' + e] = { ...node }; } });
+  }
+
+  // The shortest pulley rope that still reaches the wheel from both sides (with a joined
+  // spring: that keeps the join off the wheel).
+  function minPulleyLength(scene, l, poseOf) {
+    const pair = joinPair(scene, l);
+    if (!pair) return linkLength(scene, l);
+    const g = pairGeometry(scene, pair, poseOf);
+    return g.g.total - (pair.oe === 'a' ? g.g.segA : g.g.segB);
+  }
+
+  // Connectors left consistent after any edit: a join whose partner is gone or no longer
+  // points back becomes a background end where the join was; connectors whose objects are
+  // gone, or with no end on an object, are removed (bodyIds: the objects that remain).
+  // Joined ends then store the join's position.
+  function tidyLinks(scene) {
+    const bodyIds = new Set(scene.bodies.map((b) => b.id));
+    for (let pass = 0; pass < 4; pass++) {
+      const before = scene.links.length;
+      scene.links.forEach((l) => ['a', 'b'].forEach((end) => {
+        const id = l[end];
+        if (!id || bodyIds.has(id)) return;
+        const t = linkById(scene, id);
+        const back = t && (t.a === l.id || t.b === l.id);
+        if (!back || joinProblemAfter(scene, l, end, t)) { l[end] = null; }
+      }));
+      scene.links = scene.links.filter((l) => ['a', 'b'].every((end) => !l[end] || bodyIds.has(l[end]) || linkById(scene, l[end]))
+        && (l.a || l.b));
+      if (scene.links.length === before) break;
+    }
+    syncJoinPoints(scene);
+  }
+  // A join that already exists stays valid while its kinds, solidity and outer ends allow it.
+  function joinProblemAfter(scene, l, end, t) {
+    const tend = t.a === l.id ? 'a' : 'b';
+    if (!JOIN_KINDS.includes(l.kind) || !JOIN_KINDS.includes(t.kind) || (l.kind !== 'spring' && t.kind !== 'spring')) return true;
+    if (l.solid || t.solid) return true;
+    const lf = l[farEnd(end)], tf = t[farEnd(tend)];
+    if ((lf && !bodyById(scene, lf)) || (tf && !bodyById(scene, tf))) return true; // chains
+    if (!lf && !tf) return true;
+    return false;
+  }
+  function syncJoinPoints(scene) {
+    scene.links.forEach((l) => ['a', 'b'].forEach((end) => {
+      if (l[end] && !bodyById(scene, l[end]) && linkById(scene, l[end])) l['l' + end] = endPoint(scene, l[end], l['l' + end]);
+    }));
   }
 
   // Bodies joined by hinges or glue move together while editing, so joints stay put.
@@ -506,21 +707,49 @@
     return Math.hypot(q.x - p.x, q.y - p.y);
   }
 
+  // A rod, rope or pulley refits to stay taut. Joined to a spring, it takes up the slack with
+  // the spring at its natural length.
+  function refitLink(scene, l) {
+    if (l.kind !== 'rod' && l.kind !== 'rope' && l.kind !== 'pulley') return;
+    const pair = joinPair(scene, l);
+    if (pair && pair.other === l) l.length = clamp(l.length + pairGeometry(scene, pair, null).X, ...LIMITS.length);
+    else if (!pair) l.length = Math.max(LIMITS.length[0], linkLength(scene, l));
+  }
+
   function refitLengths(scene, ids) {
     scene.links.forEach((l) => {
       if (l.kind !== 'rod' && l.kind !== 'rope' && l.kind !== 'pulley') return;
-      if (ids && !ids.has(l.a) && !ids.has(l.b)) return;
-      l.length = Math.max(LIMITS.length[0], linkLength(scene, l));
+      const pair = joinPair(scene, l);
+      // A joined connector refits when either outer end of its pair moves.
+      const ends = pair ? [pair.spring[farEnd(pair.se)], pair.other[farEnd(pair.oe)]] : [l.a, l.b];
+      if (ids && !ends.some((id) => ids.has(id))) return;
+      refitLink(scene, l);
     });
   }
 
-  function removeBody(scene, id) {
-    scene.bodies = scene.bodies.filter((b) => b.id !== id);
-    scene.links = scene.links.filter((l) => l.a !== id && l.b !== id);
+  // Removing connectors leaves each joined partner a background end where the join was; a
+  // partner left with no end on an object goes too.
+  function dropLinks(scene, gone, poseOf) {
+    const points = new Map();
+    scene.links.forEach((l) => ['a', 'b'].forEach((end) => {
+      if (!gone.has(l.id) && gone.has(l[end])) points.set(l.id + end, endPoint(scene, l[end], l['l' + end], poseOf));
+    }));
+    scene.links = scene.links.filter((l) => !gone.has(l.id));
+    scene.links.forEach((l) => ['a', 'b'].forEach((end) => {
+      const p = points.get(l.id + end);
+      if (p) { l[end] = null; l['l' + end] = { x: p.x, y: p.y }; }
+    }));
+    scene.links = scene.links.filter((l) => l.a || l.b);
   }
 
-  function removeLink(scene, id) {
-    scene.links = scene.links.filter((l) => l.id !== id);
+  function removeBody(scene, id, poseOf) {
+    const gone = new Set(scene.links.filter((l) => l.a === id || l.b === id).map((l) => l.id));
+    dropLinks(scene, gone, poseOf);
+    scene.bodies = scene.bodies.filter((b) => b.id !== id);
+  }
+
+  function removeLink(scene, id, poseOf) {
+    dropLinks(scene, new Set([id]), poseOf);
   }
 
   function bounds(scene) {
@@ -646,8 +875,11 @@
 
   // Why a pulley's geometry cannot work, or '' when it can.
   function pulleyProblem(scene, l, poseOf) {
-    const pa = endPoint(scene, l.a, l.la, poseOf);
-    const pb = endPoint(scene, l.b, l.lb, poseOf);
+    // A joined end is checked where its spring's far end is: the rope runs straight on to it.
+    const pair = joinPair(scene, l);
+    const ps = pair && pairGeometry(scene, pair, poseOf).ps;
+    const pa = pair && pair.oe === 'a' ? ps : endPoint(scene, l.a, l.la, poseOf);
+    const pb = pair && pair.oe === 'b' ? ps : endPoint(scene, l.b, l.lb, poseOf);
     const near = (p) => Math.hypot(p.x - l.px, p.y - l.py) < l.r + PULLEY_CLEARANCE;
     if (near(pa) || near(pb)) return 'Each end of the rope must be outside the pulley wheel.';
     const overlaps = scene.bodies.some((b) => !b.fixed && overlapsCircle(b, poseOf, { x: l.px, y: l.py }, l.r));
@@ -737,10 +969,13 @@
     });
     const point = (p) => ({ x: clamp(num(p && p.x, 0), ...LIMITS.coord), y: clamp(num(p && p.y, 0), ...LIMITS.coord) });
     const linkIds = new Set();
+    // An end may also name another connector it is joined to; tidyLinks checks those below.
+    const fileLinkIds = new Set((Array.isArray(data.links) ? data.links : []).map((src) => src && typeof src.id === 'string' && !ids.has(src.id) ? src.id : null).filter(Boolean));
     (Array.isArray(data.links) ? data.links : []).forEach((src) => {
       if (!src || typeof src.id !== 'string' || linkIds.has(src.id) || ids.has(src.id) || !['spring', 'rod', 'rope', 'hinge', 'weld', 'pulley'].includes(src.kind)) { skipped++; return; }
-      const a = src.a && ids.has(src.a) ? src.a : null;
-      const b = src.b && ids.has(src.b) ? src.b : null;
+      const endRef = (v) => (typeof v === 'string' && (ids.has(v) || (fileLinkIds.has(v) && v !== src.id)) ? v : null);
+      const a = endRef(src.a);
+      const b = endRef(src.b);
       if ((src.a && !a) || (src.b && !b) || (!a && !b)) { skipped++; return; }
       const l = { id: src.id, kind: src.kind, name: String(src.name || 'Link').slice(0, 40), a, la: point(src.la), b, lb: point(src.lb) };
       if (l.kind === 'spring') { l.k = clamp(num(src.k, 50), ...LIMITS.k); l.rest = clamp(num(src.rest, 1), ...LIMITS.rest); l.damping = clamp(num(src.damping, 0), ...LIMITS.damping); }
@@ -762,6 +997,9 @@
       linkIds.add(l.id); track(l.id);
       scene.links.push(l);
     });
+    const count = scene.links.length;
+    tidyLinks(scene);
+    skipped += count - scene.links.length;
     if (data.camera && Number.isFinite(data.camera.scale)) {
       scene.camera = { cx: num(data.camera.cx, 0), cy: num(data.camera.cy, 2), scale: clamp(data.camera.scale, 0.01, 2000) };
     }
@@ -776,7 +1014,8 @@
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, centerSnap, closestSurface, copyFragment, pasteFragment,
     pulleyWinding, pulleyGeometry, pulleyPath, pulleyProblem, PULLEY_CLEARANCE, PULLEY_RADIUS,
-    bodyById, linkById, endPoint, rigidGroup, transformBodies, mirrorBodies, linkLength, refitLengths,
+    bodyById, linkById, endPoint, rigidGroup,
+    JOIN_KINDS, joinedEnd, joinPair, pairGeometry, joinProblem, joinLinks, fitJoin, unjoin, minPulleyLength, tidyLinks, refitLink, transformBodies, mirrorBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp
   };
 })(typeof window !== 'undefined' ? window : globalThis);

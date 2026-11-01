@@ -64,6 +64,8 @@
     }
     return b;
   };
+  // A joined pulley's winding while time runs, so drawings follow the simulated rope.
+  app.poseOf.pulley = (id) => (app.sim && !app.simStale && app.sim.pulleyState ? app.sim.pulleyState(id) : null);
   app.velocityOf = (b) => {
     if (!app.sim || app.simStale) return { vx: b.vx, vy: b.vy };
     const r = app.sim.readBody(b.id);
@@ -93,10 +95,10 @@
     needsGraph = true;
   }
 
-  // Remove connectors whose objects are gone, and selection or tracking of missing things.
+  // Remove connectors whose objects are gone (a joined partner keeps a background end), and
+  // selection or tracking of missing things.
   function tidyReferences() {
-    const ids = new Set(app.scene.bodies.map((b) => b.id));
-    app.scene.links = app.scene.links.filter((l) => (!l.a || ids.has(l.a)) && (!l.b || ids.has(l.b)) && (l.a || l.b));
+    S.tidyLinks(app.scene);
     const exists = (sel) => sel && (sel.type === 'body' ? !!S.bodyById(app.scene, sel.id) : sel.type === 'link' ? !!S.linkById(app.scene, sel.id) : true);
     if (app.selection && !exists(app.selection)) app.selection = null;
     app.extra = app.extra.filter((id) => S.bodyById(app.scene, id) && app.selection && app.selection.type === 'body');
@@ -140,7 +142,10 @@
     const strip = (o, keys) => { const c = { ...o }; keys.forEach((k) => delete c[k]); return c; };
     // A solid rod or rope is rebuilt from bodies, so its length and mass belong to the setup.
     const linkKeys = (l) => (l.solid ? PARAM_KEYS.link.filter((k) => k !== 'length') : PARAM_KEYS.link);
-    return JSON.stringify({ w: strip(data.world, PARAM_KEYS.world), b: data.bodies.map((b) => strip(b, PARAM_KEYS.body)), l: data.links.map((l) => strip(l, linkKeys(l))) });
+    // A joined end's stored point only records where the join was; it is not part of the setup.
+    const bodyIds = new Set(data.bodies.map((b) => b.id));
+    const link = (l) => { const c = strip(l, linkKeys(l)); ['a', 'b'].forEach((e) => { if (l[e] && !bodyIds.has(l[e])) delete c['l' + e]; }); return c; };
+    return JSON.stringify({ w: strip(data.world, PARAM_KEYS.world), b: data.bodies.map((b) => strip(b, PARAM_KEYS.body)), l: data.links.map(link) });
   }
 
   function restore(text) {
