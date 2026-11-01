@@ -593,7 +593,11 @@
   // Tangent points, straight parts, the wrap and the total length. ua and ub are unit vectors
   // from each tangent point out to its end: the rope pulls each end along −u, and the total
   // length changes at the rate ua·va + ub·vb (the arc's change cancels the tangent points' slide).
-  function pulleyGeometry(c, r, pa, pb, wind) {
+  // A running simulation passes the previous step's turn (the wrap angle, followed continuously
+  // through whole turns), so an end swung over the top of the wheel never makes the wrap jump by
+  // a full turn. When the turn falls to zero or below, the rope has come off the wheel: it runs
+  // straight from end to end, which matches the wrapped rope exactly at the moment it leaves.
+  function pulleyGeometry(c, r, pa, pb, wind, prevTurn) {
     const side = (p, sign) => {
       const dx = p.x - c.x, dy = p.y - c.y;
       const d = Math.hypot(dx, dy);
@@ -611,19 +615,33 @@
     const A = side(pa, wind);
     const B = side(pb, -wind);
     const TAU = 2 * Math.PI;
-    const wrap = (((wind * (A.angle - B.angle)) % TAU) + TAU) % TAU;
+    let turn = (((wind * (A.angle - B.angle)) % TAU) + TAU) % TAU;
+    if (Number.isFinite(prevTurn)) turn += TAU * Math.round((prevTurn - turn) / TAU);
+    if (turn <= 0 && !A.inside && !B.inside) {
+      const dx = pb.x - pa.x, dy = pb.y - pa.y;
+      const L = Math.hypot(dx, dy) || 1e-12;
+      const k = clamp(((c.x - pa.x) * dx + (c.y - pa.y) * dy) / (L * L), 0, 1);
+      const t = { x: pa.x + k * dx, y: pa.y + k * dy };
+      return {
+        ta: t, tb: t, angleA: A.angle, angleB: A.angle, segA: k * L, segB: (1 - k) * L,
+        ua: { x: -dx / L, y: -dy / L }, ub: { x: dx / L, y: dy / L },
+        wrap: 0, turn, arc: 0, total: L, wind, inside: false, offWheel: true
+      };
+    }
+    const wrap = Math.max(0, turn);
     return {
       ta: A.t, tb: B.t, angleA: A.angle, angleB: B.angle, segA: A.len, segB: B.len, ua: A.u, ub: B.u,
-      wrap, arc: r * wrap, total: A.len + B.len + r * wrap, wind, inside: A.inside || B.inside
+      wrap, turn, arc: r * wrap, total: A.len + B.len + r * wrap, wind, inside: A.inside || B.inside, offWheel: false
     };
   }
 
-  // The current path of a pulley's rope. wind defaults to the one the geometry chooses.
-  function pulleyPath(scene, l, poseOf, wind) {
+  // The current path of a pulley's rope. wind defaults to the one the geometry chooses;
+  // a running simulation passes its own wind and turn.
+  function pulleyPath(scene, l, poseOf, wind, prevTurn) {
     const pa = endPoint(scene, l.a, l.la, poseOf);
     const pb = endPoint(scene, l.b, l.lb, poseOf);
     const c = { x: l.px, y: l.py };
-    return { pa, pb, c, ...pulleyGeometry(c, l.r, pa, pb, wind || pulleyWinding(c, pa, pb)) };
+    return { pa, pb, c, ...pulleyGeometry(c, l.r, pa, pb, wind || pulleyWinding(c, pa, pb), prevTurn) };
   }
 
   // Why a pulley's geometry cannot work, or '' when it can.

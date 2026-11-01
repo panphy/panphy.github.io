@@ -187,3 +187,38 @@ test('copying a pulley with its objects moves the wheel with them; moving an end
   assert.equal(S.pulleyProblem(scene, l), '');
   assert.match(S.pulleyProblem(scene, { ...l, r: 2.5 }), /outside the pulley wheel/);
 });
+
+test('an end swung over the top of the wheel lets the rope come off it, with no jump in length', () => {
+  // Geometry: move one end round from below the right of the wheel, over the top, to the far left.
+  const c = { x: 0, y: 0 }; const r = 0.35; const pa = { x: -0.35, y: -2 };
+  let turn; let prev = null; let biggest = 0; let off = false;
+  for (let i = 0; i <= 400; i++) {
+    const angle = -Math.PI / 2 + (i * 1.2 * Math.PI) / 400;
+    const geo = S.pulleyGeometry(c, r, pa, { x: 2 * Math.cos(angle), y: 2 * Math.sin(angle) }, 1, turn);
+    turn = geo.turn; off = off || geo.offWheel;
+    if (prev !== null) biggest = Math.max(biggest, Math.abs(geo.total - prev));
+    prev = geo.total;
+  }
+  assert.ok(off, 'the rope came off the wheel');
+  assert.ok(biggest < 0.02, `largest change between 2 cm moves: ${biggest} m`);
+  // Simulation: a light ball thrown up and over the wheel. Nothing jumps, and the rope never pushes.
+  const scene = S.createScene(); scene.world.floor = false;
+  const a = Object.assign(S.makeBody(scene, 'box', -0.35, 1), { w: 0.2, h: 0.2, mass: 1 });
+  const b = Object.assign(S.makeBody(scene, 'ball', 0.6, 1.5), { r: 0.1, mass: 0.2, vx: -1.4, vy: 7.5 });
+  scene.bodies.push(a, b);
+  const l = Object.assign(S.makeLink(scene, 'pulley', a.id, { x: 0, y: 0.1 }, b.id, { x: 0, y: 0 }), { px: 0, py: 3, r: 0.35 });
+  l.length = S.linkLength(scene, l) + 0.5;
+  scene.links.push(l);
+  const sim = P.createSim(scene);
+  let last = sim.readLink(l.id).length; let jump = 0; let maxSpeed = 0; let wentOff = false;
+  run(sim, 1.5, () => {
+    const now = sim.readLink(l.id).length;
+    jump = Math.max(jump, Math.abs(now - last)); last = now;
+    maxSpeed = Math.max(maxSpeed, sim.readBody(a.id).speed, sim.readBody(b.id).speed);
+    wentOff = wentOff || sim.pulleyPath(l.id).offWheel;
+    assert.ok(sim.readLink(l.id).force >= 0);
+  });
+  assert.ok(wentOff, 'the ball crossed over the top');
+  assert.ok(jump < 0.1, `path length jumped by ${jump} m in one step`);
+  assert.ok(maxSpeed < 20, `speed reached ${maxSpeed} m/s`);
+});

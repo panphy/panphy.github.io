@@ -271,19 +271,21 @@
     // Straight parts end at the wheel's tangent points, which slide round the wheel as the ends
     // move; the wrap round the wheel counts in the length. The wheel itself is a fixed solid
     // circle, so an object hauled up stops against it.
-    const pulleys = new Map(); // link id → { joint, wind, L, lambda, ua, ub }
+    const pulleys = new Map(); // link id → { joint, wind, turn, L, lambda, ua, ub }
     function buildPulley(l, A, B) {
       const c = { x: l.px, y: l.py };
       world.createBody({ position: pl.Vec2(c.x, c.y) }).createFixture(new pl.Circle(l.r), { friction: 0.4, restitution: 0 });
       if (isStatic(A) && isStatic(B)) return;
-      const wind = S.pulleyWinding(c, anchorWorld(l.a, l.la), anchorWorld(l.b, l.lb));
+      const pa0 = anchorWorld(l.a, l.la), pb0 = anchorWorld(l.b, l.lb);
+      const wind = S.pulleyWinding(c, pa0, pb0);
       const joint = new pl.PulleyJoint({
         collideConnected: true, ratio: 1, lengthA: 1, lengthB: 1,
         groundAnchorA: pl.Vec2(c.x, c.y), groundAnchorB: pl.Vec2(c.x, c.y),
         localAnchorA: pl.Vec2(l.la.x, l.la.y), localAnchorB: pl.Vec2(l.lb.x, l.lb.y)
       }, A, B);
       // lambda: the rope's tension impulse in the latest step (never negative).
-      const st = { joint, wind, L: l.length, lambda: 0, ua: { x: 0, y: 0 }, ub: { x: 0, y: 0 }, C: 0 };
+      // turn: the wrap angle, followed continuously from step to step (see S.pulleyGeometry).
+      const st = { joint, wind, turn: S.pulleyGeometry(c, l.r, pa0, pb0, wind).turn, L: l.length, lambda: 0, ua: { x: 0, y: 0 }, ub: { x: 0, y: 0 }, C: 0 };
       const ends = [
         { body: joint.m_bodyA, local: joint.m_localAnchorA },
         { body: joint.m_bodyB, local: joint.m_localAnchorB }
@@ -316,7 +318,8 @@
       joint.initVelocityConstraints = function initVelocityConstraints(step) {
         rA = arm(ends[0], ends[0].body.c_position);
         rB = arm(ends[1], ends[1].body.c_position);
-        const g = S.pulleyGeometry(c, l.r, rA.p, rB.p, wind);
+        const g = S.pulleyGeometry(c, l.r, rA.p, rB.p, wind, st.turn);
+        st.turn = g.turn;
         st.ua = g.ua; st.ub = g.ub; st.C = g.total - st.L;
         mass = effMass(rA, rB, g.ua, g.ub);
         if (step.warmStarting) { st.lambda *= step.dtRatio; pull(st.lambda, rA, rB); } else st.lambda = 0;
@@ -334,7 +337,7 @@
       joint.solvePositionConstraints = function solvePositionConstraints() {
         const pa = ends[0].body.c_position, pb = ends[1].body.c_position;
         const qa = arm(ends[0], pa), qb = arm(ends[1], pb);
-        const g = S.pulleyGeometry(c, l.r, qa.p, qb.p, wind);
+        const g = S.pulleyGeometry(c, l.r, qa.p, qb.p, wind, st.turn);
         const C = g.total - st.L;
         // Only an overlong rope is corrected; a slack one is left alone.
         const P = effMass(qa, qb, g.ua, g.ub) * Math.min(Math.max(C, 0), pl.Settings.maxLinearCorrection);
@@ -650,7 +653,7 @@
           const ps = pulleys.get(l.id);
           if (!ps) return;
           const T = ps.lambda * inv;
-          const g = S.pulleyGeometry({ x: l.px, y: l.py }, l.r, pa, pbw, ps.wind);
+          const g = S.pulleyGeometry({ x: l.px, y: l.py }, l.r, pa, pbw, ps.wind, ps.turn);
           if (atA) add('T', surfacePoint(pa, g.ta), -T * g.ua.x, -T * g.ua.y);
           if (atB) add('T', surfacePoint(pbw, g.tb), -T * g.ub.x, -T * g.ub.y);
           return;
@@ -764,7 +767,7 @@
       const l = S.linkById(scene, id);
       if (!l) return null;
       const ps = pulleys.get(id);
-      return S.pulleyPath(scene, l, (b) => sim.pose(b.id) || b, ps ? ps.wind : undefined);
+      return S.pulleyPath(scene, l, (b) => sim.pose(b.id) || b, ps ? ps.wind : undefined, ps ? ps.turn : undefined);
     };
 
     sim.totals = function totals() {

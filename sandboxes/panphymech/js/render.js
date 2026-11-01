@@ -393,8 +393,11 @@
       ctx.moveTo(A.x, A.y);
       ropePart(path.pa, path.ta, share(path.segA), path.c);
       // Screen angles run the other way from world angles (y is down).
-      const R = Math.max(4, (Math.hypot(path.ta.x - path.c.x, path.ta.y - path.c.y)) * cam().scale);
-      ctx.arc(q.x, q.y, R, -path.angleA, -path.angleA + path.wind * path.wrap, path.wind < 0);
+      // A rope that has come off the wheel runs straight from end to end.
+      if (!path.offWheel) {
+        const R = Math.max(4, (Math.hypot(path.ta.x - path.c.x, path.ta.y - path.c.y)) * cam().scale);
+        ctx.arc(q.x, q.y, R, -path.angleA, -path.angleA + path.wind * path.wrap, path.wind < 0);
+      }
       ropePart(path.tb, path.pb, share(path.segB), path.c);
       ctx.stroke();
       ctx.setLineDash([]);
