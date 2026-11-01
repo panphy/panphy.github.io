@@ -20,4 +20,4 @@ Run `node --test tools/motion_tracker/tests/regression.test.cjs`. Numerical trac
 
 The entry page, all JavaScript modules, stylesheet, sample video, and Chart.js dependency are precached by the root service worker. When adding a module, update both `sw.js` and the PanPhyTrack requirements in `index.html`, then bump `BUILD_ID` after cached changes.
 
-The user guide lives at `manual.html`, with screenshots in `manual/`. Link it from the app bar Manual control. Cache the guide with the app in `sw.js` and `index.html`, then bump `BUILD_ID`.
+The user guide lives at `manual.html`, with screenshots in `manual/`. The app bar Manual control opens it in the shared overlay (`/assets/manual-overlay.js` and `.css`): a large popup, full-screen on small screens, with an Open in new tab option. Without JavaScript, or with a modified click, the link opens the page normally. Cache the guide with the app in `sw.js` and `index.html`, then bump `BUILD_ID`.
