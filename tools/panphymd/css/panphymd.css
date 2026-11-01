@@ -161,6 +161,9 @@ button:hover {
 /* ---------------------------------------------------------------------- */
 /* App bar                                                                 */
 /* ---------------------------------------------------------------------- */
+/* Color the home-screen top strip like the app bar, so they read as one header. */
+:root, :root[data-theme="dark"] { --standalone-top-bg: var(--surface); }
+
 .md-appbar {
   position: sticky;
   top: 0;

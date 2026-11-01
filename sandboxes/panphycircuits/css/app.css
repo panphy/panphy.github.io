@@ -62,6 +62,9 @@ button, input, select { font: inherit; color: inherit; }
 
 /* ---------- App bar ---------- */
 
+/* Color the home-screen top strip like the app bar, so they read as one header. */
+:root, :root[data-theme="dark"] { --standalone-top-bg: var(--surface); }
+
 .appbar {
   position: relative; flex: none; display: flex; align-items: center; gap: 14px; z-index: 20;
   min-height: var(--appbar-h);

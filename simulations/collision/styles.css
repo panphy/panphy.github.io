@@ -205,6 +205,9 @@ select {
 }
 
 /* ---------- App bar ---------- */
+/* Color the home-screen top strip like the app bar, so they read as one header. */
+:root, :root[data-theme="dark"] { --standalone-top-bg: var(--surface); }
+
 .cl-appbar {
     position: sticky;
     top: var(--standalone-top, 0px);
