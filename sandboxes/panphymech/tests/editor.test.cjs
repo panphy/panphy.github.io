@@ -326,3 +326,38 @@ test('dragging a selected object carries the connector ends a selection box caug
   assert.ok(Math.abs(body.x - 0.5) < 1e-9 && Math.abs(body.y - 0.5) < 1e-9);
   assert.ok(Math.abs(moved.la.x - -0.5) < 1e-9 && Math.abs(moved.la.y - 0.5) < 1e-9, 'the fixed end moved with the object');
 });
+
+test('with objects selected, dragging a connector attached to them moves the group; a click selects it', () => {
+  const h = setup(true);
+  const spring = h.app.scene.links[0];
+  // A second connector, between the background and a point away from the group.
+  const other = S.makeLink(h.app.scene, 'rope', null, { x: -2, y: 1.5 }, null, { x: 1, y: 1.5 });
+  h.app.scene.links.push(other);
+  const selectGroup = () => {
+    h.app.selection = { type: 'body', id: h.body.id };
+    h.app.isSelected = (type, id) => type === 'body' && id === h.body.id;
+    h.app.anchors = { ends: [{ id: spring.id, end: 'a' }], wheels: [] };
+    h.app.isAnchorSelected = (id, end) => h.app.anchors.ends.some((e) => e.id === id && e.end === end);
+  };
+  const press = (from, to) => {
+    h.emit('pointerdown', { clientX: from[0], clientY: from[1], pointerType: 'mouse' });
+    if (to) h.emit('pointermove', { clientX: to[0], clientY: to[1], pointerType: 'mouse' });
+    h.emit('pointerup', { clientX: (to || from)[0], clientY: (to || from)[1], pointerType: 'mouse' });
+  };
+  selectGroup();
+  press([240, 200], [240, 150]); // drag the spring's line up 0.5 m
+  const body = S.bodyById(h.app.scene, h.body.id);
+  const s1 = S.linkById(h.app.scene, spring.id);
+  assert.ok(Math.abs(body.y - 0.5) < 1e-9, 'the object moved');
+  assert.ok(Math.abs(s1.la.x + 1) < 1e-9 && Math.abs(s1.la.y - 0.5) < 1e-9, 'the caught fixed end moved with it');
+  assert.equal(h.app.selection.type, 'body', 'the group stays selected');
+  // A click on the spring (now 0.5 m higher) without dragging selects the spring, as before.
+  press([240, 150]);
+  assert.equal(h.app.selection.type, 'link');
+  assert.equal(h.app.selection.id, spring.id);
+  // A connector not attached to the group is picked up on its own.
+  selectGroup();
+  press([300, 50], [300, 30]);
+  assert.equal(h.app.selection.id, other.id);
+  assert.ok(Math.abs(S.bodyById(h.app.scene, h.body.id).y - 0.5) < 1e-9, 'the group stayed put');
+});
