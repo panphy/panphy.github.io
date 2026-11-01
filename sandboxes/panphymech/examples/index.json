@@ -93,6 +93,44 @@
     }
   },
   {
+    "file": "atwood.ppmech",
+    "title": "Atwood machine",
+    "text": "Masses of 2 kg and 3 kg hang over a fixed pulley. Compare the acceleration with \\(\\dfrac{(m_2 - m_1)g}{m_1 + m_2}\\) and, with the pulley selected, the tension with \\(\\dfrac{2m_1 m_2 g}{m_1 + m_2}\\).",
+    "plain": "Masses of 2 kg and 3 kg hang over a fixed pulley. Compare the acceleration with (m₂ − m₁)g / (m₁ + m₂) and, with the pulley selected, the tension with 2m₁m₂g / (m₁ + m₂).",
+    "track": {
+      "name": "3 kg mass",
+      "group": "velocity",
+      "hide": [
+        "vx"
+      ]
+    },
+    "view": {
+      "minX": -2.5,
+      "maxX": 2.5,
+      "minY": 0,
+      "maxY": 5.6
+    }
+  },
+  {
+    "file": "cart-pulley.ppmech",
+    "title": "Cart pulled by a hanging mass",
+    "text": "A 1.5 kg cart on a frictionless bench is pulled by a 0.5 kg mass over a pulley. Compare its acceleration with \\(\\dfrac{m_2 g}{m_1 + m_2}\\). When the mass lands, the rope goes slack and the cart coasts.",
+    "plain": "A 1.5 kg cart on a frictionless bench is pulled by a 0.5 kg mass over a pulley. Compare its acceleration with m₂g / (m₁ + m₂). When the mass lands, the rope goes slack and the cart coasts.",
+    "track": {
+      "name": "Cart",
+      "group": "velocity",
+      "hide": [
+        "vy"
+      ]
+    },
+    "view": {
+      "minX": -2.6,
+      "maxX": 1.8,
+      "minY": 0,
+      "maxY": 2.4
+    }
+  },
+  {
     "file": "bounce.ppmech",
     "title": "Bouncing balls",
     "text": "Three balls dropped from 3 m with restitution 0.9, 0.7 and 0.4. Each bounce reaches \\(e^2\\) times the last height.",

@@ -63,6 +63,7 @@
     spring: '<path class="p-stroke" d="M4 22h8l3-7 5 14 5-14 5 14 5-14 5 14 5-14 3 7h8"/><circle class="p-dot" cx="4" cy="22" r="2.4"/><circle class="p-dot" cx="60" cy="22" r="2.4"/>',
     rod: '<path class="p-stroke" d="M8 30L56 14" stroke-width="5"/><circle class="p-pin" cx="8" cy="30" r="3"/><circle class="p-pin" cx="56" cy="14" r="3"/>',
     rope: '<path class="p-rope" d="M6 10Q32 50 58 10"/><circle class="p-dot" cx="6" cy="10" r="2.4"/><circle class="p-dot" cx="58" cy="10" r="2.4"/>',
+    pulley: `<circle class="p-pin" cx="32" cy="13" r="9"/><path class="p-rope" d="M23 13V31M41 13V26M23 13A9 9 0 0 1 41 13"/><circle class="p-dot" cx="32" cy="13" r="2"/><rect x="17" y="31" width="12" height="10" rx="1" fill="${c('coral').fill}" stroke="${c('coral').stroke}" stroke-width="1.4"/><rect x="36" y="26" width="10" height="9" rx="1" fill="${c('blue').fill}" stroke="${c('blue').stroke}" stroke-width="1.4"/>`,
     hinge: `<rect x="6" y="16" width="34" height="10" rx="1" fill="${c('amber').fill}" stroke="${c('amber').stroke}" stroke-width="1.4" transform="rotate(-18 32 22)"/><rect x="26" y="16" width="32" height="10" rx="1" fill="${c('teal').fill}" stroke="${c('teal').stroke}" stroke-width="1.4" transform="rotate(18 32 22)"/><circle class="p-pin" cx="32" cy="22" r="5.5"/><circle class="p-dot" cx="32" cy="22" r="1.8"/>`,
     motor: `<circle cx="32" cy="22" r="13" fill="${c('slate').fill}" stroke="${c('slate').stroke}" stroke-width="1.4"/>${motorArrow}<circle class="p-pin" cx="32" cy="22" r="5"/><circle class="p-dot" cx="32" cy="22" r="1.8"/>`,
     weld: `<rect x="8" y="14" width="26" height="16" rx="1" fill="${c('violet').fill}" stroke="${c('violet').stroke}" stroke-width="1.4"/><rect x="28" y="10" width="26" height="16" rx="1" fill="${c('pink').fill}" stroke="${c('pink').stroke}" stroke-width="1.4"/><path class="p-glue" d="M31 13.5l6.5 6.5-6.5 6.5-6.5-6.5z"/><circle class="p-pin-dot" cx="31" cy="20" r="1.7"/>`
@@ -87,12 +88,13 @@
 
   const PART_GROUPS = [
     { title: 'Objects', items: ['ball', 'box', 'plank', 'polygon', 'wedge', 'wall'] },
-    { title: 'Connectors', items: ['spring', 'rod', 'rope', 'hinge', 'motor', 'weld'] }
+    { title: 'Connectors', items: ['spring', 'rod', 'rope', 'pulley', 'hinge', 'motor', 'weld'] }
   ];
   const PART_TITLES = {
     ball: 'Ball: a movable circle', box: 'Box: a movable square block', plank: 'Plank: a long thin movable bar',
     polygon: 'Polygon: a movable regular polygon', wedge: 'Ramp: a fixed right-angled wedge', wall: 'Wall: a fixed upright block',
     spring: 'Spring (Hooke’s law) between two points', rod: 'Rod: keeps two points a fixed distance apart', rope: 'Rope: a maximum distance; it can go slack',
+    pulley: 'Pulley: a fixed wheel with one rope over it, for an Atwood machine or a hanging mass pulling a cart',
     hinge: 'Hinge: pins objects together so they can turn', motor: 'Motor: a hinge that drives at a set speed', weld: 'Glue: joins objects rigidly'
   };
 
@@ -562,6 +564,40 @@
       return out;
     }
 
+    // A pulley: its rope length (at least the taut length; longer leaves it slack), and the
+    // wheel's radius and position. The length applies live; the wheel is part of the setup.
+    function pulleyFields(l, quick) {
+      const taut = () => {
+        const r = app.sim && app.sim.t > 0 ? app.sim.readLink(l().id) : null;
+        return r ? r.length : S.linkLength(app.scene, l());
+      };
+      const atLeastTaut = (v) => {
+        const min = Math.ceil(taut() * 1000) / 1000;
+        if (v < min - 1e-9) { app.toast(`The rope must be at least ${fmt(min)} m long to reach over the wheel to both ends.`); return min; }
+        return v;
+      };
+      // Geometry edits keep the rope taut, as moving its ends does; a change that would put an
+      // end inside the wheel or the wheel over a movable object is refused.
+      const setWheel = (fn) => (v, key) => {
+        const next = { ...l() };
+        fn(next, v);
+        const problem = S.pulleyProblem(app.scene, next, app.poseOf);
+        if (problem) { app.toast(problem); app.ui.refreshFields(); return; }
+        app.edit(() => { const x = l(); fn(x, v); x.length = Math.max(L.length[0], S.linkLength(app.scene, x)); }, { coalesce: key, fromInspector: true });
+      };
+      const out = [
+        numField({ label: 'Rope length \\(L\\)', plain: 'Rope length L', unit: 'm', get: () => l().length, set: (v, key) => app.editParam(() => { l().length = Math.max(v, Math.ceil(taut() * 1000) / 1000); }, key), parse: atLeastTaut, min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01,
+          help: quick ? '' : 'The whole rope: both sides and the part round the wheel. It cannot be shorter than the path over the wheel; longer leaves it slack.' }),
+        numField({ label: 'Wheel radius \\(r\\)', plain: 'Wheel radius r', unit: 'm', get: () => l().r, set: setWheel((x, v) => { x.r = v; }), min: L.wheel[0], max: L.wheel[1], slider: [0.05, 0.5], step: 0.01 })
+      ];
+      if (!quick) {
+        out.push(numField({ label: 'Wheel \\(x\\)', plain: 'Wheel x', unit: 'm', get: () => l().px, set: setWheel((x, v) => { x.px = v; }), min: L.coord[0], max: L.coord[1] }));
+        out.push(numField({ label: 'Wheel \\(y\\)', plain: 'Wheel y', unit: 'm', get: () => l().py, set: setWheel((x, v) => { x.py = v; }), min: L.coord[0], max: L.coord[1],
+          help: 'The wheel is fixed and frictionless and has no mass; objects collide with it. The rope is massless, cannot stretch, and pulls only when taut.' }));
+      }
+      return out;
+    }
+
     function card(label, extraClass = '') {
       const el = document.createElement('section');
       el.className = 'icard ' + extraClass;
@@ -741,7 +777,8 @@
       between.className = 'icard-note';
       between.textContent = l().kind === 'hinge' || l().kind === 'weld'
         ? `Joins ${endName(l().a)} to ${endName(l().b)}.`
-        : `From ${endName(l().a)} to ${endName(l().b)}.`;
+        : l().kind === 'pulley' ? `Over the wheel from ${endName(l().a)} to ${endName(l().b)}.`
+          : `From ${endName(l().a)} to ${endName(l().b)}.`;
       main.appendChild(between);
       const rows = [];
       if (l().kind === 'spring') {
@@ -762,6 +799,9 @@
       } else if (l().kind === 'rod' || l().kind === 'rope') {
         connectorFields(l, null).forEach((el) => main.appendChild(el));
         rows.push({ key: 'length', label: 'Distance between ends', plain: 'Distance' }, { key: 'force', label: 'Tension \\(T\\)', plain: 'Tension T' });
+      } else if (l().kind === 'pulley') {
+        pulleyFields(l, false).forEach((el) => main.appendChild(el));
+        rows.push({ key: 'force', label: 'Tension \\(T\\)', plain: 'Tension T' }, { key: 'sideA', label: `Side to ${endName(l().a)}`, plain: `Side to ${endName(l().a)}` }, { key: 'sideB', label: `Side to ${endName(l().b)}`, plain: `Side to ${endName(l().b)}` }, { key: 'slack', label: 'Slack', plain: 'Slack' });
       } else if (l().kind === 'hinge') {
         main.appendChild(toggleField('Motor', () => l().motor, (v) => app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true)));
         if (l().motor) {
@@ -964,6 +1004,8 @@
         items.push(numField({ label: 'Damping \\(c\\)', plain: 'Damping c', unit: 'N s/m', get: () => l().damping, set: param((x, v) => { x.damping = v; }), min: L.damping[0], max: L.damping[1], slider: [0, 20], step: 0.05 }));
       } else if (l().kind === 'rod' || l().kind === 'rope') {
         connectorFields(l, () => { if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y); }).forEach((el) => items.push(el));
+      } else if (l().kind === 'pulley') {
+        pulleyFields(l, true).forEach((el) => items.push(el));
       } else if (l().kind === 'hinge') {
         items.push(toggleField('Motor', () => l().motor, (v) => {
           app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true);
@@ -1060,6 +1102,7 @@
         set('length', fmt(d.length) + ' m');
         if (r.kind === 'spring') { set('extension', fmt(d.extension) + ' m'); set('tension', fmt(d.tension) + ' N'); set('EPE', fmt(d.EPE) + ' J'); }
         else { set('force', fmt(d.force) + ' N'); }
+        if (r.kind === 'pulley') { set('sideA', fmt(d.sideA) + ' m'); set('sideB', fmt(d.sideB) + ' m'); set('slack', fmt(d.slack) + ' m'); }
         if (d.torque !== undefined) set('torque', fmt(d.torque) + ' N m');
         if (d.rate !== undefined) set('rate', fmt(d.rate) + ' rad/s');
       } else {
