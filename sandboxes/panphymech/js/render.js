@@ -468,7 +468,7 @@
       const L = Math.hypot(dx, dy);
       if (L < 4) return;
       const ux = dx / L; const uy = dy / L;
-      const shape = (width, ink) => {
+      const shape = (width, ink, headOutline = 0) => {
         ctx.strokeStyle = ink;
         ctx.fillStyle = ink;
         ctx.lineWidth = width;
@@ -483,9 +483,10 @@
         ctx.lineTo(to.x - ux * 10 + uy * 5, to.y - uy * 10 - ux * 5);
         ctx.closePath();
         ctx.fill();
-        if (width > 3) ctx.stroke();
+        if (headOutline) { ctx.lineWidth = headOutline; ctx.stroke(); }
       };
-      if (outline) shape(3.5, r.colors.bg);
+      // Match the head's border to the exposed shaft border: (3.5 - 2.2) / 2.
+      if (outline) shape(3.5, r.colors.bg, 1.3);
       shape(2.2, color);
       ctx.lineJoin = 'miter';
       if (label) {
