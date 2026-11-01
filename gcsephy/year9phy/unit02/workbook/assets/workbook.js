@@ -25,7 +25,7 @@
 
   const footer = `Energy: Stores and Transfers, Year 9 ${REVIEW ? "Unit review" : "workbook"}${partNo ? ` Part ${partNo}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
-  pageStyle.textContent = `@page { @bottom-left { content: "${footer} · © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
+  pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
   document.title = `Energy - Stores and Transfers - Year 9 ${REVIEW ? "Unit Review" : "Workbook"}${partNo ? ` - Part ${partNo}` : ""}${answers ? " (Answers)" : ""}`;
 

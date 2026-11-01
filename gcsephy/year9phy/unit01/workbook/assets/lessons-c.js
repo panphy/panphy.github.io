@@ -13,7 +13,7 @@
     // ============================================================ 6
     {
       n: 6, accent: "cyan", title: "Solo flight", practical: true, practicalName: "Paper helicopter, on your own",
-      spec: "AQA Working scientifically WS 2.2, 2.7, 3.1 · Physics and Combined Science",
+      spec: "AQA Working scientifically WS 2.2, 2.7, 3.1; Physics and Combined Science",
       mapLine: "The whole process on your own: plan, table, graph, prediction, evaluation",
       big: "Can you run a whole investigation with nobody telling you what to do next?",
       goals: ["identify all three types of variable on your own", "design your own results table with units", "collect three trials for each of five values and calculate means", "plot a graph with a best-fit line and read a prediction from it", "write a conclusion and an evaluation using your own numbers"],
@@ -103,7 +103,7 @@
     // ============================================================ 7-8
     {
       n: 7, last: 8, name: "Lessons 7–8", accent: "copper", title: "Your investigation", practical: true, practicalName: "Your own, from a shared set of equipment",
-      spec: "AQA Working scientifically WS 1.6, 2.1, 2.7, 3.8 · Physics and Combined Science",
+      spec: "AQA Working scientifically WS 1.6, 2.1, 2.7, 3.8; Physics and Combined Science",
       mapLine: "Design, run, graph and defend your own investigation, in a pair or a three",
       big: "Can you produce a result that nobody, including you, can break?",
       goals: ["write a testable question in the form “How does X affect Y?”", "plan a safe, fair investigation and get it approved", "collect repeated measurements and calculate means", "choose and draw the right graph for your own data", "write a conclusion backed by evidence and an honest evaluation"],

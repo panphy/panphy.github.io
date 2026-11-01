@@ -15,7 +15,7 @@
     file: "Atoms and Nuclear Radiation - Year 11",
     preps: [
       /* 1 */
-      { lessons: "1–2", title: "Inside the atom", subtitle: "Protons, neutrons and electrons · atomic and mass numbers · isotopes and ions",
+      { lessons: "1–2", title: "Inside the atom", subtitle: "Protons, neutrons and electrons; atomic and mass numbers; isotopes and ions",
         doNow: [
           [90, "Define electric current.", "The rate of flow of electrical charge."],
           [643, "Name the two quantities that kinetic energy depends on.", "Mass and speed"],
@@ -33,7 +33,7 @@
         ] },
 
       /* 2 */
-      { lessons: "3–4", title: "From plum pudding to the nucleus", subtitle: "The plum pudding model · alpha scattering · the nuclear model · energy levels",
+      { lessons: "3–4", title: "From plum pudding to the nucleus", subtitle: "The plum pudding model; alpha scattering; the nuclear model; energy levels",
         doNow: [
           [224, "Describe the structure of an atom.", "A positive nucleus of protons and neutrons, surrounded by negative electrons."],
           [242, "Define isotopes.", "Atoms of the same element with different numbers of neutrons."],
@@ -53,7 +53,7 @@
         ] },
 
       /* 3 */
-      { lessons: "5–6", title: "Radioactive decay and nuclear equations", subtitle: "Unstable nuclei · activity and count-rate · alpha, beta and gamma · balancing equations",
+      { lessons: "5–6", title: "Radioactive decay and nuclear equations", subtitle: "Unstable nuclei; activity and count-rate; alpha, beta and gamma; balancing equations",
         doNow: [
           [246, "Name the model of the atom with electrons embedded in a positively charged sphere.", "The plum pudding model"],
           [235, "State how an electron can move to a higher energy level.", "By absorbing electromagnetic radiation."],
@@ -71,7 +71,7 @@
         ] },
 
       /* 4 */
-      { lessons: "7–8", title: "Using radiation and half-life", subtitle: "Ionising power, range and penetration · choosing a source · half-life from a graph",
+      { lessons: "7–8", title: "Using radiation and half-life", subtitle: "Ionising power, range and penetration; choosing a source; half-life from a graph",
         doNow: [
           [262, "State the standard unit of activity.", "Becquerel (Bq)"],
           [280, "Describe how the mass number and atomic number change when an alpha particle is emitted.", "Mass number decreases by 4. Atomic number decreases by 2."],
@@ -93,7 +93,7 @@
         ] },
 
       /* 5 */
-      { lessons: "9–10", title: "Half-life sums and staying safe", subtitle: "Counting half-lives · net decline as a ratio · contamination and irradiation",
+      { lessons: "9–10", title: "Half-life sums and staying safe", subtitle: "Counting half-lives; net decline as a ratio; contamination and irradiation",
         doNow: [
           [271, "List alpha, beta and gamma radiation from most to least ionising.", "Alpha, beta, gamma"],
           [637, "Define half-life in terms of the number of nuclei.", "The time taken for the number of nuclei of the isotope in a sample to halve."],

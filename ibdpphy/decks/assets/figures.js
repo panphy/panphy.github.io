@@ -35,12 +35,12 @@
   // Wavelengths in nm of the strong visible lines.
   const LINES = { H: [410.2, 434.0, 486.1, 656.3], He: [447.1, 471.3, 492.2, 501.6, 587.6, 667.8], Na: [589.0, 589.6] };
   const SPECTRA = {
-    continuous: { label: 'CONTINUOUS SPECTRUM · hot, dense source' },
-    'h-emit': { label: 'EMISSION SPECTRUM · hot hydrogen gas', dark: true, lines: LINES.H, name: true },
-    'h-absorb': { label: 'ABSORPTION SPECTRUM · white light through cool hydrogen', lines: LINES.H },
-    'he-emit': { label: 'HELIUM · emission', dark: true, lines: LINES.He },
-    'na-emit': { label: 'SODIUM · emission', dark: true, lines: LINES.Na },
-    star: { label: 'LIGHT FROM A STAR · absorption', lines: [...LINES.H, ...LINES.Na] }
+    continuous: { label: 'CONTINUOUS SPECTRUM: hot, dense source' },
+    'h-emit': { label: 'EMISSION SPECTRUM: hot hydrogen gas', dark: true, lines: LINES.H, name: true },
+    'h-absorb': { label: 'ABSORPTION SPECTRUM: white light through cool hydrogen', lines: LINES.H },
+    'he-emit': { label: 'HELIUM: emission', dark: true, lines: LINES.He },
+    'na-emit': { label: 'SODIUM: emission', dark: true, lines: LINES.Na },
+    star: { label: 'LIGHT FROM A STAR: absorption', lines: [...LINES.H, ...LINES.Na] }
   };
   // Hydrogen energy levels in eV, and where the level diagram draws them (not to scale).
   const H_LEVEL = n => n === 'inf' || n === Infinity ? 0 : -13.6 / (n * n);

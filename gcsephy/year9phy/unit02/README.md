@@ -1,6 +1,6 @@
 # Energy: Stores and Transfers
 
-**Year 9 Physics · AQA GCSE energy · nine lessons**
+**Year 9 Physics, AQA GCSE energy, nine lessons**
 
 A student workbook in three parts and a Unit review (each with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, the Unit review, their answers, the deck and the five Preps. The lesson plans are not linked there.
 

@@ -63,7 +63,7 @@ No equation scrolls sideways. Each is typeset in parts, split before every top-l
 Terracotta (`--hl`, with `--hl-text` where it is text on paper) means higher level only and is used for nothing else. The other colors come from the same palette: slate `#2C4654`, teal `#4F9C8F`, sage `#96B083`, sand `#E2C678`, apricot `#E8A66C` and terracotta `#D87759`.
 
 - A slide that is additional HL has the class `hl` on its `<section>`. That gives it the terracotta edge, the "HL only" flag and a terracotta footer, and tags its thumbnail.
-- Write the footer of such a slide as `… · ADDITIONAL HL` (or `… · HL ONLY` in a topic with no SL content) and of every other slide as `… · SL + HL`.
+- Write the footer of such a slide as `…, ADDITIONAL HL` (or `…, HL ONLY` in a topic with no SL content) and of every other slide as `…, SL + HL`.
 - One HL item on a mixed slide takes `<span class="hl-tag">HL only</span>`; a summary card takes `class="term hl"` or `class="card hl"`.
 - On the hub, a resource that is HL only uses `class="card t-deck hl"` and `<span class="level hl">`.
 
@@ -81,7 +81,7 @@ Every deck except A.1, A.2, E.1 and E.2 keeps its diagrams in a `figures.js` of 
 
 A lesson map does not move: give each of its figures `data-still`, which keeps the still picture and drops anything that plays, draws itself in, pulses or waits for a press. Moving pictures in those decks are SMIL animations inside the SVG, made with the `track`, `anim` and `spin` helpers. Draw the figure twice with `twoState(still, mover)`: `.still` is what thumbnails, print and reduced motion show, `.mover` is what plays on screen. A looping animation runs as soon as the slide opens. One that should play once on a press of → is made with `{ loop: false }` and the empty `PLAY` step in the same SVG; `deck.js` starts every such animation when that step is shown and swaps in a fresh copy of the figure when it is hidden again. A panel holds a figure about 550 to 800 px wide and 540 px high, so keep a `viewBox` near 800 × 500 and labels at `.lbl` size or above.
 
-Give a deck story slides whenever a suitable story and a freely licensed picture exist: a short piece of history tied to the physics on the slides around it, as a `class="slide history"` slide with the “Background story · not assessed” label, photographs in the deck’s `images/` folder, a caption, and a credit linking to the source. Check every date and number against a named source and record it below.
+Give a deck story slides whenever a suitable story and a freely licensed picture exist: a short piece of history tied to the physics on the slides around it, as a `class="slide history"` slide with the “Background story: not assessed” label, photographs in the deck’s `images/` folder, a caption, and a credit linking to the source. Check every date and number against a named source and record it below.
 
 The atom diagrams and eleven slides of E.1 began as copies from `gcsephy/decks/atoms-and-radiation/`. The two decks are now separate: a change to one does not reach the other. The story-slide photographs in `decks/e1-structure-of-the-atom/images/` are copies too, and their credits and the history dates follow the table in [`gcsephy/year11phy/unit01/README.md`](../gcsephy/year11phy/unit01/README.md).
 

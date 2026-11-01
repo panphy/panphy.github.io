@@ -191,7 +191,7 @@
       paper.className = "unit-paper";
       const chosen = topics.filter((topic) => state.selected.has(topic.name)).length;
       const paperLabel = BOTH_PAPER_UNITS.includes(unit) ? "Both papers" : PAPER_ONE_UNITS.includes(unit) ? "Paper 1" : "Paper 2";
-      paper.textContent = `${paperLabel} · ${chosen ? `${chosen} of ${topics.length} selected` : `${topics.length} topics`}`;
+      paper.textContent = `${paperLabel}, ${chosen ? `${chosen} of ${topics.length} selected` : `${topics.length} topics`}`;
       paper.dataset.unit = unit;
       if (chosen) paper.classList.add("has-selection");
       const all = document.createElement("button");
@@ -218,7 +218,7 @@
         input.addEventListener("change", () => {
           input.checked ? state.selected.add(topic.name) : state.selected.delete(topic.name);
           const picked = topics.filter((item) => state.selected.has(item.name)).length;
-          paper.textContent = paper.textContent.replace(/· .*$/, `· ${picked ? `${picked} of ${topics.length} selected` : `${topics.length} topics`}`);
+          paper.textContent = `${paperLabel}, ${picked ? `${picked} of ${topics.length} selected` : `${topics.length} topics`}`;
           paper.classList.toggle("has-selection", picked > 0);
           refresh(false);
         });
@@ -395,7 +395,7 @@
     status.className = "unit-paper";
     const describe = () => {
       const chosen = methods.filter((method) => state.methodPicks.includes(method.Number)).length;
-      status.textContent = `Optional · ${chosen ? `${chosen} of ${methods.length} selected` : `${methods.length} methods`}`;
+      status.textContent = `Optional, ${chosen ? `${chosen} of ${methods.length} selected` : `${methods.length} methods`}`;
       status.classList.toggle("has-selection", chosen > 0);
     };
     describe();
@@ -571,7 +571,7 @@
     const methodCount = pickedMethods().length;
     const bold = (value) => { const b = document.createElement("b"); b.textContent = value; return b; };
     const addMethods = (alone) => {
-      if (methodCount) els.summary.append(alone ? "" : " · ", bold(methodCount), ` required practical${methodCount === 1 ? "" : "s"}`);
+      if (methodCount) els.summary.append(alone ? "" : ", ", bold(methodCount), ` required practical${methodCount === 1 ? "" : "s"}`);
     };
     if (state.mode === "manual") {
       const picked = pickedQuestions().length;
@@ -597,7 +597,7 @@
       return;
     }
     const showing = Math.min(state.count, available);
-    els.summary.append(bold(topicCount), ` topic${topicCount === 1 ? "" : "s"} · `, bold(available), " questions to draw from · showing ", bold(showing));
+    els.summary.append(bold(topicCount), ` topic${topicCount === 1 ? "" : "s"}, `, bold(available), " questions to draw from, showing ", bold(showing));
     addMethods(false);
   }
 
@@ -972,7 +972,7 @@
   function renderCard() {
     const card = state.deck[0];
     const learned = state.deckSize - state.deck.length;
-    $("cards-progress").textContent = `Flashcards · ${learned} of ${state.deckSize} learned`;
+    $("cards-progress").textContent = `Flashcards, ${learned} of ${state.deckSize} learned`;
     $("card").hidden = !card;
     $("cards-done").hidden = Boolean(card);
     $("cards-undo").disabled = state.cardLog.length === 0;
@@ -1062,7 +1062,7 @@
     const head = element("header", "sheet-head");
     const topics = [...new Set(state.shown.map((question) => question.Topic.replace(/^\(S\)\s*/, "")))];
     head.append(element("h1", "", withAnswers ? "Do Now: answer key" : "Do Now"),
-      element("p", "", `GCSE Physics \u00b7 ${topics.length > 3 ? `${topics.slice(0, 3).join(", ")} and more` : topics.join(", ")}`));
+      element("p", "", `GCSE Physics: ${topics.length > 3 ? `${topics.slice(0, 3).join(", ")} and more` : topics.join(", ")}`));
 
     const info = element("div", "sheet-info");
     for (const label of ["Name", "Class", "Date"]) info.append(element("span", "", label), element("i"));

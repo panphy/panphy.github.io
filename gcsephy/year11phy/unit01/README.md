@@ -28,18 +28,18 @@ The Chadwick photo is from Los Alamos National Laboratory, which asks for this n
 
 ## Sequence
 
-| # | Lesson | Deck slides | Spec (Physics · Combined) |
+| # | Lesson | Deck slides | Spec (Physics; Combined) |
 |---:|---|---|---|
-| 1 | Inside the atom | 3–6 | 4.4.1.1–2 · 6.4.1.1–2 |
-| 2 | Isotopes and ions | 7–8 | 4.4.1.2 · 6.4.1.2 |
-| 3 | From plum pudding to the nucleus | 9–17 | 4.4.1.3 · 6.4.1.3 |
-| 4 | Energy levels and the nucleus | 18–25 | 4.4.1.1–3 · 6.4.1.1–3 |
-| 5 | Radioactive decay (Nuclear Decay sim) | 26–30 | 4.4.2.1 · 6.4.2.1 |
-| 6 | Nuclear equations | 28–31 | 4.4.2.2 · 6.4.2.2 |
-| 7 | Properties and uses of radiation | 32–34 | 4.4.2.1 · 6.4.2.1 |
-| 8 | Half-life and random decay (half-life lab) | 35–37 | 4.4.2.3 · 6.4.2.3 |
-| 9 | Half-life calculations (with net decline) | 36 | 4.4.2.3 · 6.4.2.3 |
-| 10 | Contamination and irradiation | 38–41 | 4.4.2.4 · 6.4.2.4 |
+| 1 | Inside the atom | 3–6 | 4.4.1.1–2; 6.4.1.1–2 |
+| 2 | Isotopes and ions | 7–8 | 4.4.1.2; 6.4.1.2 |
+| 3 | From plum pudding to the nucleus | 9–17 | 4.4.1.3; 6.4.1.3 |
+| 4 | Energy levels and the nucleus | 18–25 | 4.4.1.1–3; 6.4.1.1–3 |
+| 5 | Radioactive decay (Nuclear Decay sim) | 26–30 | 4.4.2.1; 6.4.2.1 |
+| 6 | Nuclear equations | 28–31 | 4.4.2.2; 6.4.2.2 |
+| 7 | Properties and uses of radiation | 32–34 | 4.4.2.1; 6.4.2.1 |
+| 8 | Half-life and random decay (half-life lab) | 35–37 | 4.4.2.3; 6.4.2.3 |
+| 9 | Half-life calculations (with net decline) | 36 | 4.4.2.3; 6.4.2.3 |
+| 10 | Contamination and irradiation | 38–41 | 4.4.2.4; 6.4.2.4 |
 
 The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4). The deck teaches them in Part 4, slides 42–56, after the Key words slide.
 

@@ -25,7 +25,7 @@
 
   const footer = `Work Like a Physicist, Year 9 ${REVIEW ? "Unit review" : "workbook"}${partNo ? ` Part ${partNo}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
-  pageStyle.textContent = `@page { @bottom-left { content: "${footer} · © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
+  pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
   document.title = `Work Like a Physicist - Year 9 ${REVIEW ? "Unit Review" : "Workbook"}${partNo ? ` - Part ${partNo}` : ""}${answers ? " (Answers)" : ""}`;
 
@@ -274,7 +274,7 @@
       ? `<div class="cover-part"><b>Unit review</b><span>After Lessons 7–8</span></div>
       <p class="lede">Mixed exam-style questions from the whole unit, a fix-it log and the Physicist’s toolkit.</p>`
       : partNo
-        ? `<div class="cover-part"><b>Part ${partNo} of ${PARTS.length}</b><span>${LESSONS.some((l) => l.last) || LESSONS.length > 1 ? "Lessons" : "Lesson"} ${span(LESSONS)}: ${LESSONS.map((l) => l.title).join(" · ")}</span></div>
+        ? `<div class="cover-part"><b>Part ${partNo} of ${PARTS.length}</b><span>${LESSONS.some((l) => l.last) || LESSONS.length > 1 ? "Lessons" : "Lesson"} ${span(LESSONS)}: ${LESSONS.map((l) => l.title).join("; ")}</span></div>
       <div class="cover-stats"><div><b>${LESSONS.reduce((s, l) => s + (l.last ? l.last - l.n + 1 : 1), 0)}</b>lessons</div><div><b>${pr}</b>practical${pr === 1 ? "" : "s"}</div><div><b>${U.glossary.filter(([, , n]) => inPart(n)).length}</b>key words</div></div>`
         : `<p class="lede">Collecting, processing and presenting data: eight lessons on how to produce evidence that other people can trust.</p>`;
     return `<section class="cover"><div class="eyebrow">Year 9 Physics, AQA GCSE, Unit 1${REVIEW ? ", Unit review" : partNo ? `, Part ${partNo}` : ""}</div>

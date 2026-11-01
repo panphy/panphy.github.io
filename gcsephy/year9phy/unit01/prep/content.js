@@ -14,7 +14,7 @@
     file: "Work Like a Physicist - Year 9",
     preps: [
       /* 1 */
-      { lessons: "1–2", title: "Can this data be trusted?", subtitle: "Mean and uncertainty · random and systematic errors · variables and choosing a graph",
+      { lessons: "1–2", title: "Can this data be trusted?", subtitle: "Mean and uncertainty; random and systematic errors; variables and choosing a graph",
         doNow: [
           [852, "Define the resolution of a measuring instrument.", "The smallest change the instrument can detect."],
           [860, "Describe the effect of a random error on a set of readings.", "It scatters the readings unpredictably (some too high, some too low)."],
@@ -39,7 +39,7 @@
         ] },
 
       /* 2 */
-      { lessons: "3–4", title: "Drop tests and ramps", subtitle: "Repeats and means · bar charts · choosing a scale · plotting a line graph",
+      { lessons: "3–4", title: "Drop tests and ramps", subtitle: "Repeats and means; bar charts; choosing a scale; plotting a line graph",
         doNow: [
           [851, "Define accuracy.", "How close a measurement is to the true value."],
           [870, "What is the independent variable?", "The one variable that is deliberately changed."],
@@ -65,7 +65,7 @@
         ] },
 
       /* 3 */
-      { lessons: "5–6", title: "The point that does not fit", subtitle: "Best-fit lines · anomalous results · conclusions · directly proportional",
+      { lessons: "5–6", title: "The point that does not fit", subtitle: "Best-fit lines; anomalous results; conclusions; directly proportional",
         doNow: [
           [861, "Describe the effect of a systematic error on a set of readings.", "It shifts every reading in the same direction by the same amount."],
           [885, "State which variable is plotted on the x-axis of a graph.", "The independent variable"],
@@ -87,7 +87,7 @@
         ] },
 
       /* 4 */
-      { lessons: "7–8", title: "Your investigation", subtitle: "Planning a fair test · dealing with odd repeats · evaluating and improving a method",
+      { lessons: "7–8", title: "Your investigation", subtitle: "Planning a fair test; dealing with odd repeats; evaluating and improving a method",
         doNow: [
           [873, "Explain why control variables must be kept the same.", "If two variables change together, you cannot tell which one caused the result."],
           [856, "State how uncertainty is calculated from a set of repeated readings.", "Uncertainty = (largest reading − smallest reading) ÷ 2"],

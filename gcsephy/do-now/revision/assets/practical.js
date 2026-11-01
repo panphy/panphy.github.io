@@ -22,10 +22,10 @@
     document.title = `Required practical - ${practical.title}`;
     const top = element("header", "top");
     const heading = element("div");
-    heading.append(element("p", "brand", "Do Now \u00b7 Required practical"), element("h1", "", practical.title));
+    heading.append(element("p", "brand", "Do Now, Required practical"), element("h1", "", practical.title));
     const meta = element("p", "meta");
     meta.append(element("b", "", practical.unit), document.createElement("br"),
-      `${practical.paper} \u00b7 ${practical.separate ? "Separate Physics only" : "Combined and Separate"}`, document.createElement("br"),
+      `${practical.paper}, ${practical.separate ? "Separate Physics only" : "Combined and Separate"}`, document.createElement("br"),
       `${practical.steps.length} steps`);
     top.append(heading, meta);
 

@@ -4,7 +4,7 @@
 @page {
   size: A4;
   margin: 18mm 18mm 20mm;
-  @bottom-left { content: "Prepared by YPL · © 2026 PanPhy Labs. All rights reserved."; font: 7.5pt Helvetica, Arial, sans-serif; color: #2b4560; }
+  @bottom-left { content: "Prepared by YPL, © 2026 PanPhy Labs. All rights reserved."; font: 7.5pt Helvetica, Arial, sans-serif; color: #2b4560; }
   @bottom-right { content: "Page " counter(page); font: 7.5pt Helvetica, Arial, sans-serif; color: #2b4560; }
 }
 

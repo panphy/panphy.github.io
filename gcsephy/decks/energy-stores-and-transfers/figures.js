@@ -215,7 +215,7 @@ window.DeckSvgTex = {
       for (let i = 0; i < n; i++) masses += `<rect class="dk-mass" x="${x - 32}" y="${bar + 10 + i * 8}" width="64" height="7" rx="2"/>`;
       sp.innerHTML = `<path class="dk-ink" d="${d}L${x} ${bar - 8}V${bar}"/><path class="dk-ink" d="M${x} ${bar}v${n * 8 + 14}"/>${masses}` +
         `<path class="dk-pointer" d="M${x - 24} ${bar}H262"/>`;
-      out.innerHTML = `Mass added <b>${n * 100} g</b> · force <b>${n} N</b> · pointer at <b>${(L0 + e).toFixed(1)} cm</b> · extension <b>${e.toFixed(1)} cm</b>, or <b>${(e / 100).toFixed(3)} m</b>`;
+      out.innerHTML = `Mass added <b>${n * 100} g</b>, force <b>${n} N</b>, pointer at <b>${(L0 + e).toFixed(1)} cm</b>, extension <b>${e.toFixed(1)} cm</b>, or <b>${(e / 100).toFixed(3)} m</b>`;
     }
     function drawGraph() {
       const a = graphAxes(gx, gy, gw, gh, g1);

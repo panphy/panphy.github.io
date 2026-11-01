@@ -1,6 +1,6 @@
 # Electric Circuits
 
-**Year 10 Physics · AQA GCSE electricity · eight missions**
+**Year 10 Physics, AQA GCSE electricity, eight missions**
 
 A student companion site for the Year 10 electricity unit: revision notes, worked examples, common mistakes, practice questions and an Exam Zone. It sits alongside the unit workbook (`workbook/`), the teaching deck and the *Electric circuits virtual labs* worksheet.
 

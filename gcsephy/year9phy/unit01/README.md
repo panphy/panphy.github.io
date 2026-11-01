@@ -1,6 +1,6 @@
 # Work Like a Physicist
 
-**Year 9 Physics · Collecting, Processing and Presenting Data · eight lessons**
+**Year 9 Physics, Collecting, Processing and Presenting Data, eight lessons**
 
 A complete unit on how to produce evidence other people will accept. Lesson plans, a student workbook, a teaching deck and an online companion site — ready to pick up and run, or to pull apart and rebuild for your own classes.
 

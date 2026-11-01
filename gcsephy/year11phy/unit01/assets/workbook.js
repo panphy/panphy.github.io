@@ -20,7 +20,7 @@
   const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
   const footer = `Atoms & Nuclear Radiation, Year 11 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
-  pageStyle.textContent = `@page { @bottom-left { content: "${footer} · © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
+  pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
   document.title = `Atoms and Nuclear Radiation - Year 11 Workbook${ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
 
