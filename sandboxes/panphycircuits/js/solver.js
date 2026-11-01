@@ -766,6 +766,9 @@
         if (sim.scopes[c.id]) sim.scopes[c.id].frequency = frequency;
         else sim.scopes[c.id] = { t: [], ch1: [], ch2: [], frequency };
       }
+      // Initial-energy sliders update the document before recompiling it. Read
+      // their new values from these primitives, before solving the held state.
+      if (opts.initialConditions) sim.applyInitialConditions(opts.initialConditions);
       sim.trial();
     };
 
