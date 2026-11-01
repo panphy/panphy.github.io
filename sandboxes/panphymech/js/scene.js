@@ -377,6 +377,23 @@
     return null;
   }
 
+  // Bring a moving object's center onto the nearest edge of another object (any outline,
+  // including a cut shape's holes) when it is within tolerance. Returns the translation.
+  function centerSnap(scene, ids, tolerance) {
+    let best = null;
+    const others = scene.bodies.filter((b) => !ids.has(b.id));
+    scene.bodies.forEach((a) => {
+      if (!ids.has(a.id)) return;
+      others.forEach((b) => {
+        const q = closestSurface(b, a);
+        const d = { x: q.x - a.x, y: q.y - a.y };
+        const len = Math.hypot(d.x, d.y);
+        if (len <= tolerance && (!best || len < Math.hypot(best.x, best.y))) best = d;
+      });
+    });
+    return best;
+  }
+
   function closestSurface(b, p) {
     if (b.kind === 'ball') {
       const dx = p.x - b.x, dy = p.y - b.y, len = Math.hypot(dx, dy) || 1;
@@ -655,7 +672,7 @@
     ACCURACY, worldAccuracy, accuracyNote,
     FORMAT, VERSION, COLORS, COLOR_CYCLE, BODY_KINDS, LINK_KINDS, LIMITS,
     createScene, makeBody, makeLink, newId, nextName,
-    vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, closestSurface, copyFragment, pasteFragment,
+    vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, centerSnap, closestSurface, copyFragment, pasteFragment,
     bodyById, linkById, endPoint, rigidGroup, transformBodies, mirrorBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp
   };

@@ -398,7 +398,9 @@
 
     function snapBodies(ids, scene = app.scene) {
       if (!snapOn()) return false;
-      const d = S.contactSnap(scene, ids, 10 / app.scene.camera.scale);
+      // Surface contact first, then an object's center onto another object's edge.
+      const tolerance = 10 / app.scene.camera.scale;
+      const d = S.contactSnap(scene, ids, tolerance) || S.centerSnap(scene, ids, tolerance);
       if (d) S.transformBodies(scene, ids, (p, angle) => ({ x: p.x + d.x, y: p.y + d.y, angle }));
       return !!d;
     }
