@@ -825,7 +825,8 @@
       reset.title = 'Reset world settings to defaults';
       reset.setAttribute('aria-label', reset.title);
       reset.innerHTML = icon('reset');
-      reset.addEventListener('click', () => {
+      reset.addEventListener('click', async () => {
+        if (!(await ui.confirm('Reset world settings?', 'This restores all World settings, including gravity, drag, floor and accuracy, to their defaults. You can undo it.', 'Reset world settings'))) return;
         const defaults = S.createScene().world;
         const restoreDefaults = () => { app.scene.world = defaults; };
         // Floor changes rebuild the scene; other settings can apply live.

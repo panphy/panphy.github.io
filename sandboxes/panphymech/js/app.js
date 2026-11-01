@@ -499,8 +499,9 @@
     app.edit(() => app.ui.moveBodyTo(b, b.x + dx, b.y + dy), { coalesce: 'nudge' });
   };
 
-  app.clearScene = function clearScene() {
+  app.clearScene = async function clearScene() {
     if (!app.scene.bodies.length && !app.scene.links.length) return;
+    if (!(await app.ui.confirm('Clear the whole scene?', 'This removes every object and connector. You can undo it.', 'Clear scene'))) return;
     app.emptyDismissed = true;
     app.edit(() => {
       app.scene.bodies = [];
