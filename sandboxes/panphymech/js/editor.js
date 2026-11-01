@@ -378,6 +378,21 @@
       return best;
     }
 
+    // Whether a connector belongs to the selected group: an end on a selected object (or one
+    // hinged or glued to it), a fixed end or pulley wheel a selection box caught, or a joined
+    // partner that does.
+    function attachedToSelection(l) {
+      const sel = app.selection;
+      if (!sel || sel.type !== 'body' || !S.bodyById(app.scene, sel.id)) return false;
+      const ids = new Set();
+      app.selectedBodies().forEach((id) => S.rigidGroup(app.scene, id).forEach((g) => ids.add(g)));
+      const caught = (id, end) => !!(app.isAnchorSelected && app.isAnchorSelected(id, end));
+      const holds = (x) => ['a', 'b'].some((end) => (x[end] ? ids.has(x[end]) : caught(x.id, end))) || (x.kind === 'pulley' && caught(x.id));
+      if (holds(l)) return true;
+      const pair = S.joinPair(app.scene, l);
+      return !!pair && holds(pair.spring === l ? pair.other : pair.spring);
+    }
+
     // The connector an end is joined to, or null.
     const joinedId = (l, end) => (l[end] && !S.bodyById(app.scene, l[end]) && S.linkById(app.scene, l[end]) ? l[end] : null);
 
@@ -894,6 +909,13 @@
         return;
       }
       if (hit.type === 'link') {
+        // With objects selected, dragging a connector attached to them moves the whole group;
+        // a click without a drag still selects the connector.
+        if (!app.running && attachedToSelection(hit.link)) {
+          startGesture('move', e, sp, { bodyId: app.selection.id, linkClick: hit.link.id });
+          armHold(e, { type: 'link', id: hit.link.id });
+          return;
+        }
         app.select({ type: 'link', id: hit.link.id });
         const joint = hit.link.kind === 'hinge' || hit.link.kind === 'weld';
         if (app.running) startGesture('none', e, sp);
@@ -1053,6 +1075,7 @@
       if (g.kind === 'grab') app.sim.release();
       if (g.kind === 'pan' && !g.moved && g.deselect) app.select(null);
       if (['move', 'rotate', 'resize'].includes(g.kind) && g.moved) app.endGesture(true);
+      if (g.kind === 'move' && !g.moved && g.linkClick) app.select({ type: 'link', id: g.linkClick });
       app.requestDraw();
     }
 
