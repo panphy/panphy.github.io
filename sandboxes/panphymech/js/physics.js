@@ -127,13 +127,25 @@
       return polygonPieces(b);
     }
 
+    // A Planck polygon for one convex piece, or null for a sliver Planck cannot build:
+    // it welds corners closer than linearSlop / 2 and swaps a piece left with fewer
+    // than three for a 2 m box. Cut outlines can leave such slivers along an edge.
+    function planckPolygon(piece) {
+      let area = 0;
+      piece.forEach((p, i) => { const q = piece[(i + 1) % piece.length]; area += (p.x * q.y - q.x * p.y) / 2; });
+      const shape = new pl.Polygon(piece.map((p) => pl.Vec2(p.x, p.y)));
+      const md = { mass: 0, center: pl.Vec2(0, 0), I: 0 };
+      shape.computeMass(md, 1);
+      return Math.abs(md.mass - Math.abs(area)) <= 0.01 * Math.abs(area) + 1e-9 ? shape : null;
+    }
+
     function fixtureFor(pb, b) {
       const density = b.mass / Math.max(S.area(b), 1e-9);
       const opts = { density, friction: b.friction, restitution: b.restitution };
       if (b.kind === 'ball') return pb.createFixture(new pl.Circle(b.r), opts);
       // A custom shape is one rigid body made of its convex pieces. They collide slightly
       // inset, so that with Box2D's skin the object rests exactly on its drawn outline.
-      collisionPieces(b).forEach((piece) => pb.createFixture(new pl.Polygon(piece.map((p) => pl.Vec2(p.x, p.y))), opts));
+      collisionPieces(b).map(planckPolygon).filter(Boolean).forEach((shape) => pb.createFixture(shape, opts));
       setTrueMass(pb, b);
       return pb.getFixtureList();
     }
@@ -141,7 +153,7 @@
     // Mass, center and rotational inertia of the shape as drawn, not of the inset pieces.
     function setTrueMass(pb, b) {
       if (b.fixed || b.kind === 'ball') return;
-      const pieces = polygonPieces(b).map((piece) => new pl.Polygon(piece.map((p) => pl.Vec2(p.x, p.y))));
+      const pieces = polygonPieces(b).map(planckPolygon).filter(Boolean);
       const density = b.mass / Math.max(S.area(b), 1e-9);
       let mass = 0, cx = 0, cy = 0, I = 0;
       pieces.forEach((shape) => {

@@ -105,7 +105,7 @@
   {
     "file": "car.ppmech",
     "title": "Motor car",
-    "text": "A motor turns the back wheel, which drives the car up a slope; the front wheel turns freely on a hinge. Try changing the motor speed and torque.",
+    "text": "A motor turns the back wheel, which drives the car up a slope; the front wheel turns freely on a hinge. Try changing the motor speed and torque. The body was built with Merge and Subtract: boxes, ramps and balls merged into one shape, then the wheel arches and windows cut out.",
     "track": {
       "name": "Chassis",
       "group": "velocity"
