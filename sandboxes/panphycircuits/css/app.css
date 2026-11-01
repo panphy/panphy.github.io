@@ -358,7 +358,7 @@ a.atool { text-decoration: none; }
 .tool:hover:not(:disabled) { background: var(--surface-3); color: var(--ink); }
 .tool[aria-pressed="true"], .tool-panel[aria-expanded="true"] { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
 /* Keep the Tidy icon green while retaining the standard toolbar button. */
-#btn-tidy .icon { color: var(--good); }
+#btn-tidy .icon { color: var(--target); }
 .tool:disabled { opacity: 0.35; cursor: default; }
 .tool-panel { display: none; }
 #btn-show-inspector { margin-left: auto; }
