@@ -818,6 +818,22 @@
       top.className = 'insp-head';
       top.innerHTML = '<div class="insp-swatch world-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 7.5h14M5 16.5h14"/></svg></div>'
         + '<div class="insp-head-text"><h3 class="world-title">World</h3><p class="world-sub">Applies to the whole scene</p></div>';
+      const reset = document.createElement('button');
+      reset.type = 'button';
+      reset.id = 'btn-world-reset';
+      reset.className = 'tool world-reset';
+      reset.title = 'Reset world settings to defaults';
+      reset.setAttribute('aria-label', reset.title);
+      reset.innerHTML = icon('reset');
+      reset.addEventListener('click', () => {
+        const defaults = S.createScene().world;
+        const restoreDefaults = () => { app.scene.world = defaults; };
+        // Floor changes rebuild the scene; other settings can apply live.
+        if (w().floor !== defaults.floor) app.edit(restoreDefaults);
+        else app.editParam(restoreDefaults, null, false, true);
+        $('btn-world-reset').focus({ preventScroll: true });
+      });
+      top.appendChild(reset);
       world.appendChild(top);
       const section = (label) => {
         const el = document.createElement('section');
