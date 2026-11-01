@@ -182,3 +182,35 @@ test('dropping an already-armed library body creates one object and clears the p
   assert.equal(h.ed.dropBody('ball', -1, 200), false);
   assert.equal(h.ed.armed, 'ball'); assert.equal(h.app.scene.bodies.length, 2);
 });
+
+test('a pulley is placed with three clicks (wheel, first end, second end), and dragging it moves the wheel', () => {
+  const h = setup(); const toasts = []; h.app.toast = (t) => toasts.push(t);
+  const click = (clientX, clientY) => { h.emit('pointerdown', { pointerType: 'mouse', clientX, clientY }); h.emit('pointerup', { pointerType: 'mouse', clientX, clientY }); };
+  // Dropped from the library: the drop places the wheel at (0, 1.5).
+  assert.equal(h.ed.dropConnector('pulley', 300, 50), true);
+  assert.deepEqual([h.ed.pending.c.x, h.ed.pending.c.y], [0, 1.5]);
+  assert.equal(h.ed.preview().pulley.c.y, 1.5);
+  click(300, 45); // inside the wheel: refused
+  assert.match(toasts.pop(), /outside the wheel/);
+  click(300, 200); // on the box
+  assert.equal(h.ed.pending.a, h.body.id);
+  assert.ok(h.ed.preview().pulley.from, 'the rope runs from the first end over the wheel to the pointer');
+  click(450, 150); // the background at (1.5, 0.5)
+  assert.equal(h.app.scene.links.length, 1);
+  const l = h.app.scene.links[0];
+  assert.equal(l.kind, 'pulley'); assert.equal(l.a, h.body.id); assert.equal(l.b, null);
+  assert.deepEqual([l.px, l.py, l.lb.x, l.lb.y], [0, 1.5, 1.5, 0.5]);
+  assert.ok(Math.abs(l.length - S.linkLength(h.app.scene, l)) < 1e-12, 'a new rope is taut');
+  assert.equal(h.ed.tool, 'select'); assert.deepEqual([h.app.selection.type, h.app.selection.id], ['link', l.id]);
+  // Dragging the wheel moves it; the ends stay attached and the rope refits.
+  h.emit('pointerdown', { pointerType: 'mouse', clientX: 300, clientY: 50 });
+  h.emit('pointermove', { pointerType: 'mouse', clientX: 350, clientY: 30 });
+  h.emit('pointerup', { pointerType: 'mouse', clientX: 350, clientY: 30 });
+  const moved = h.app.scene.links[0];
+  assert.ok(Math.abs(moved.px - 0.5) < 1e-9 && Math.abs(moved.py - 1.7) < 1e-9, `${moved.px}, ${moved.py}`);
+  assert.equal(moved.a, h.body.id);
+  assert.ok(Math.abs(moved.length - S.linkLength(h.app.scene, moved)) < 1e-12);
+  // Both ends on the background, or both on one object, are refused.
+  h.ed.setTool('pulley'); click(300, 0); click(100, 300); click(500, 300);
+  assert.match(toasts.pop(), /at least one end/);
+});

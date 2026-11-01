@@ -37,7 +37,9 @@
     rope: { label: 'Rope', points: 2 },
     hinge: { label: 'Hinge', points: 1 },
     motor: { label: 'Motor', points: 1, kind: 'hinge' },
-    weld: { label: 'Glue', points: 1 }
+    weld: { label: 'Glue', points: 1 },
+    // A fixed wheel with one rope over it: three placement points (wheel, end a, end b).
+    pulley: { label: 'Pulley', points: 3 }
   };
 
   // Limits used by the inspector and by file import.
@@ -45,9 +47,11 @@
     r: [0.02, 5], w: [0.02, 20], h: [0.02, 20], sides: [3, 8],
     mass: [0.001, 10000], friction: [0, 2], restitution: [0, 1], drag: [0, 50], linearDrag: [0, 1000],
     k: [0.1, 100000], rest: [0, 50], damping: [0, 1000], length: [0.01, 50],
-    speed: [-100, 100], torque: [0, 100000],
+    speed: [-100, 100], torque: [0, 100000], wheel: [0.02, 1],
     gravity: [0, 100], viscosity: [0, 1], coord: [-1000, 1000], velocity: [-500, 500], omega: [-200, 200]
   };
+
+  const PULLEY_RADIUS = 0.15; // m: a new pulley's wheel
 
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const num = (v, fallback) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
@@ -108,6 +112,8 @@
     const link = { id: newId(scene, 'l'), kind, name: nextName(scene, def.label), a, la, b, lb };
     if (kind === 'spring') Object.assign(link, { k: 50, rest: 1, damping: 0 });
     if (kind === 'rod' || kind === 'rope') Object.assign(link, { length: 1, solid: false, mass: kind === 'rope' ? 0.1 : 0.5 });
+    // The wheel's center (px, py) and radius r, fixed to the background; length is the whole rope.
+    if (kind === 'pulley') Object.assign(link, { px: 0, py: 0, r: PULLEY_RADIUS, length: 1 });
     // A motor turns clockwise (dir −1) or counterclockwise (dir +1); speed carries the same sign.
     if (kind === 'hinge') Object.assign(link, { motor: type === 'motor', speed: type === 'motor' ? -3 : 0, dir: -1, torque: type === 'motor' ? 50 : 0 });
     return link;
@@ -278,6 +284,8 @@
         else { l[end] = null; const shift = f.bodies.length ? offset : 0; l['l' + end] = { x: anchors[end].x + shift, y: anchors[end].y + shift }; }
       }
       if (!l.a && !l.b) continue;
+      // A pulley's wheel moves with the pasted objects.
+      if (l.kind === 'pulley' && f.bodies.length) { l.px += offset; l.py += offset; }
       l.id = newId(scene, 'l');
       l.name = nextName(scene, l.name.replace(/\s+\d+$/, ''));
       scene.links.push(l); links.push(l.id);
@@ -492,6 +500,7 @@
   }
 
   function linkLength(scene, l) {
+    if (l.kind === 'pulley') return pulleyPath(scene, l).total;
     const p = endPoint(scene, l.a, l.la);
     const q = endPoint(scene, l.b, l.lb);
     return Math.hypot(q.x - p.x, q.y - p.y);
@@ -499,7 +508,7 @@
 
   function refitLengths(scene, ids) {
     scene.links.forEach((l) => {
-      if (l.kind !== 'rod' && l.kind !== 'rope') return;
+      if (l.kind !== 'rod' && l.kind !== 'rope' && l.kind !== 'pulley') return;
       if (ids && !ids.has(l.a) && !ids.has(l.b)) return;
       l.length = Math.max(LIMITS.length[0], linkLength(scene, l));
     });
@@ -524,6 +533,7 @@
     scene.links.forEach((l) => {
       if (!l.a) add(l.la.x, l.la.y);
       if (!l.b) add(l.lb.x, l.lb.y);
+      if (l.kind === 'pulley') { add(l.px - l.r, l.py - l.r); add(l.px + l.r, l.py + l.r); }
     });
     if (!Number.isFinite(minX)) return null;
     return { minX, minY, maxX, maxY };
@@ -546,6 +556,7 @@
     scene.links.forEach((l) => {
       if (!l.a) items.push({ name: l.name, x: l.la.x, y: l.la.y, pts: [l.la] });
       if (!l.b) items.push({ name: l.name, x: l.lb.x, y: l.lb.y, pts: [l.lb] });
+      if (l.kind === 'pulley') items.push({ name: l.name, x: l.px, y: l.py, pts: [{ x: l.px - l.r, y: l.py - l.r }, { x: l.px + l.r, y: l.py + l.r }] });
     });
     const good = items.filter((i) => !i.bad);
     const far = items.filter((i) => i.bad);
@@ -563,6 +574,74 @@
     // Show the floor when the scene sits on it or close above it.
     if (scene.world.floor && minY < Math.max(3, 0.6 * (maxY - minY))) minY = Math.min(minY, 0);
     return { box: { minX, minY, maxX, maxY }, far };
+  }
+
+  // ---------- Pulleys ----------
+  //
+  // An ideal fixed pulley: a wheel of radius r centered at c, and one rope from end a, onto the
+  // wheel at its tangent point ta, round the wheel to tb, and off to end b. The rope's length is
+  // the whole of it: |a − ta| + arc + |tb − b|. The rope wraps round the far side of the wheel
+  // from the narrower gap between its ends, so two hanging ends go over the top.
+  // wind = 1: from a to b the rope runs clockwise round the wheel; −1: counterclockwise.
+  const PULLEY_CLEARANCE = 0.02; // m: an end must be at least this far outside the wheel
+
+  function pulleyWinding(c, pa, pb) {
+    const cross = (pa.x - c.x) * (pb.y - c.y) - (pa.y - c.y) * (pb.x - c.x);
+    return cross >= 0 ? 1 : -1;
+  }
+
+  // Tangent points, straight parts, the wrap and the total length. ua and ub are unit vectors
+  // from each tangent point out to its end: the rope pulls each end along −u, and the total
+  // length changes at the rate ua·va + ub·vb (the arc's change cancels the tangent points' slide).
+  function pulleyGeometry(c, r, pa, pb, wind) {
+    const side = (p, sign) => {
+      const dx = p.x - c.x, dy = p.y - c.y;
+      const d = Math.hypot(dx, dy);
+      const phi = Math.atan2(dy, dx);
+      if (d <= r) {
+        // An end inside the wheel: no tangent; the rope meets the rim straight out from the center.
+        const u = d > 1e-12 ? { x: dx / d, y: dy / d } : { x: 0, y: -1 };
+        return { angle: phi, t: { x: c.x + r * u.x, y: c.y + r * u.y }, len: 0, u, inside: true };
+      }
+      const angle = phi - sign * Math.acos(r / d);
+      const t = { x: c.x + r * Math.cos(angle), y: c.y + r * Math.sin(angle) };
+      const len = Math.sqrt(d * d - r * r);
+      return { angle, t, len, u: { x: (p.x - t.x) / len, y: (p.y - t.y) / len }, inside: false };
+    };
+    const A = side(pa, wind);
+    const B = side(pb, -wind);
+    const TAU = 2 * Math.PI;
+    const wrap = (((wind * (A.angle - B.angle)) % TAU) + TAU) % TAU;
+    return {
+      ta: A.t, tb: B.t, angleA: A.angle, angleB: B.angle, segA: A.len, segB: B.len, ua: A.u, ub: B.u,
+      wrap, arc: r * wrap, total: A.len + B.len + r * wrap, wind, inside: A.inside || B.inside
+    };
+  }
+
+  // The current path of a pulley's rope. wind defaults to the one the geometry chooses.
+  function pulleyPath(scene, l, poseOf, wind) {
+    const pa = endPoint(scene, l.a, l.la, poseOf);
+    const pb = endPoint(scene, l.b, l.lb, poseOf);
+    const c = { x: l.px, y: l.py };
+    return { pa, pb, c, ...pulleyGeometry(c, l.r, pa, pb, wind || pulleyWinding(c, pa, pb)) };
+  }
+
+  // Why a pulley's geometry cannot work, or '' when it can.
+  function pulleyProblem(scene, l, poseOf) {
+    const pa = endPoint(scene, l.a, l.la, poseOf);
+    const pb = endPoint(scene, l.b, l.lb, poseOf);
+    const near = (p) => Math.hypot(p.x - l.px, p.y - l.py) < l.r + PULLEY_CLEARANCE;
+    if (near(pa) || near(pb)) return 'Each end of the rope must be outside the pulley wheel.';
+    const overlaps = scene.bodies.some((b) => !b.fixed && overlapsCircle(b, poseOf, { x: l.px, y: l.py }, l.r));
+    if (overlaps) return 'The pulley wheel would overlap a movable object.';
+    return '';
+  }
+  function overlapsCircle(b, poseOf, c, r) {
+    const pose = poseOf ? poseOf(b) : b;
+    const live = { ...b, x: pose.x, y: pose.y, angle: pose.angle };
+    if (containsPoint(live, c)) return true;
+    const q = closestSurface(live, c);
+    return Math.hypot(q.x - c.x, q.y - c.y) < r - 1e-6;
   }
 
   // ---------- Files ----------
@@ -641,7 +720,7 @@
     const point = (p) => ({ x: clamp(num(p && p.x, 0), ...LIMITS.coord), y: clamp(num(p && p.y, 0), ...LIMITS.coord) });
     const linkIds = new Set();
     (Array.isArray(data.links) ? data.links : []).forEach((src) => {
-      if (!src || typeof src.id !== 'string' || linkIds.has(src.id) || ids.has(src.id) || !['spring', 'rod', 'rope', 'hinge', 'weld'].includes(src.kind)) { skipped++; return; }
+      if (!src || typeof src.id !== 'string' || linkIds.has(src.id) || ids.has(src.id) || !['spring', 'rod', 'rope', 'hinge', 'weld', 'pulley'].includes(src.kind)) { skipped++; return; }
       const a = src.a && ids.has(src.a) ? src.a : null;
       const b = src.b && ids.has(src.b) ? src.b : null;
       if ((src.a && !a) || (src.b && !b) || (!a && !b)) { skipped++; return; }
@@ -651,6 +730,11 @@
         l.length = clamp(num(src.length, 1), ...LIMITS.length);
         l.solid = !!src.solid;
         l.mass = clamp(num(src.mass, defaultSolidMass(l)), ...LIMITS.mass);
+      }
+      if (l.kind === 'pulley') {
+        l.px = clamp(num(src.px, 0), ...LIMITS.coord); l.py = clamp(num(src.py, 0), ...LIMITS.coord);
+        l.r = clamp(num(src.r, PULLEY_RADIUS), ...LIMITS.wheel);
+        l.length = clamp(num(src.length, 1), ...LIMITS.length);
       }
       if (l.kind === 'hinge') {
         l.motor = !!src.motor; l.speed = clamp(num(src.speed, 0), ...LIMITS.speed); l.torque = clamp(num(src.torque, 50), ...LIMITS.torque);
@@ -673,6 +757,7 @@
     FORMAT, VERSION, COLORS, COLOR_CYCLE, BODY_KINDS, LINK_KINDS, LIMITS,
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, centerSnap, closestSurface, copyFragment, pasteFragment,
+    pulleyWinding, pulleyGeometry, pulleyPath, pulleyProblem, PULLEY_CLEARANCE, PULLEY_RADIUS,
     bodyById, linkById, endPoint, rigidGroup, transformBodies, mirrorBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp
   };

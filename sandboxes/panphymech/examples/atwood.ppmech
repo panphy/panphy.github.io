@@ -1,0 +1,95 @@
+{
+ "format": "panphy-mech",
+ "version": 1,
+ "world": {
+  "gravity": 9.81,
+  "dragModel": "none",
+  "linearDragSource": "coefficient",
+  "linearDrag": 1,
+  "drag": 0.1,
+  "viscosity": 0,
+  "floor": true,
+  "floorFriction": 0.5,
+  "gpeZero": 0,
+  "accuracy": "standard"
+ },
+ "bodies": [
+  {
+   "id": "b1",
+   "kind": "box",
+   "name": "2 kg mass",
+   "x": -0.35,
+   "y": 2,
+   "angle": 0,
+   "w": 0.4,
+   "h": 0.4,
+   "mass": 2,
+   "friction": 0.4,
+   "restitution": 0,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "blue",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  },
+  {
+   "id": "b2",
+   "kind": "box",
+   "name": "3 kg mass",
+   "x": 0.35,
+   "y": 2,
+   "angle": 0,
+   "w": 0.4,
+   "h": 0.4,
+   "mass": 3,
+   "friction": 0.4,
+   "restitution": 0,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "coral",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  }
+ ],
+ "links": [
+  {
+   "id": "l3",
+   "kind": "pulley",
+   "name": "Pulley",
+   "a": "b1",
+   "la": {
+    "x": 0,
+    "y": 0.2
+   },
+   "b": "b2",
+   "lb": {
+    "x": 0,
+    "y": 0.2
+   },
+   "px": 0,
+   "py": 5,
+   "r": 0.35,
+   "length": 6.699557428756427
+  }
+ ],
+ "nextId": 4,
+ "camera": {
+  "cx": 0,
+  "cy": 2.7,
+  "scale": 80
+ }
+}

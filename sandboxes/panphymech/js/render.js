@@ -325,6 +325,90 @@
       ctx.setLineDash([]);
     }
 
+    // A pulley: the wheel, and the rope from end a onto the wheel, round it and off to end b,
+    // along the same path the simulation uses. A slack rope sags on both sides, sharing the
+    // slack in proportion to their lengths; a vertical side bows outward, away from the wheel.
+    function pulleyPath(l) {
+      return app.sim && !app.simStale ? app.sim.pulleyPath(l.id) : S.pulleyPath(app.scene, l, app.poseOf);
+    }
+    function drawWheel(c, radius, color, dashed = false) {
+      const q = r.toScreen(c);
+      const R = Math.max(4, radius * cam().scale);
+      ctx.setLineDash(dashed ? [4, 3] : []);
+      ctx.fillStyle = r.colors.surface;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, R, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      // The groove the rope runs in.
+      if (R > 9) {
+        ctx.lineWidth = 1;
+        ctx.globalAlpha *= 0.45;
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, R - 3.5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha /= 0.45;
+      }
+      ctx.setLineDash([]);
+      // A mount below the axle, as on a hinge pinned to the background: the wheel is fixed.
+      if (R > 9) {
+        ctx.fillStyle = r.colors.ink3;
+        ctx.globalAlpha *= 0.5;
+        ctx.beginPath();
+        ctx.moveTo(q.x, q.y); ctx.lineTo(q.x - 6, q.y + Math.min(11, R - 2)); ctx.lineTo(q.x + 6, q.y + Math.min(11, R - 2)); ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha /= 0.5;
+      }
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, Math.min(3, R * 0.35), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // A straight part of the rope from p to q (world), sagging when it has extra length.
+    function ropePart(p, q, extra, c) {
+      const A = r.toScreen(p);
+      const B = r.toScreen(q);
+      const d = Math.hypot(q.x - p.x, q.y - p.y);
+      if (!(extra > 0.002 * d) || d < 1e-6) { ctx.lineTo(B.x, B.y); return; }
+      const sag = Math.min(d / 2, Math.sqrt((3 * d * extra) / 8)) * cam().scale;
+      let nx = -(B.y - A.y) / (d * cam().scale), ny = (B.x - A.x) / (d * cam().scale);
+      if (Math.abs(ny) > 0.2) { if (ny < 0) { nx = -nx; ny = -ny; } } else {
+        const W = r.toScreen(c);
+        if (nx * ((A.x + B.x) / 2 - W.x) < 0) { nx = -nx; ny = -ny; }
+      }
+      ctx.quadraticCurveTo((A.x + B.x) / 2 + nx * 2 * sag, (A.y + B.y) / 2 + ny * 2 * sag, B.x, B.y);
+    }
+    function drawPulleyRope(path, length, color, dashed = false) {
+      const slack = Math.max(0, length - path.total);
+      const straight = path.segA + path.segB;
+      const share = (seg) => (straight > 1e-9 ? (slack * seg) / straight : 0);
+      const A = r.toScreen(path.pa);
+      const q = r.toScreen(path.c);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.setLineDash(dashed ? [5, 4] : []);
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ropePart(path.pa, path.ta, share(path.segA), path.c);
+      // Screen angles run the other way from world angles (y is down).
+      const R = Math.max(4, (Math.hypot(path.ta.x - path.c.x, path.ta.y - path.c.y)) * cam().scale);
+      ctx.arc(q.x, q.y, R, -path.angleA, -path.angleA + path.wind * path.wrap, path.wind < 0);
+      ropePart(path.tb, path.pb, share(path.segB), path.c);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    function drawPulley(l, sel, hov) {
+      const path = pulleyPath(l);
+      if (!path) return;
+      const color = sel ? r.colors.accent : hov ? r.colors.ink : r.colors.ink2;
+      drawPulleyRope(path, l.length, sel ? r.colors.accent : r.colors.rope);
+      drawWheel(path.c, l.r, color);
+      if (!l.a) anchorMount(path.pa, color);
+      if (!l.b) anchorMount(path.pb, color);
+    }
+
     function drawHinge(l, p, selected) {
       const q = r.toScreen(p);
       const ink = selected ? r.colors.accent : r.colors.ink2;
@@ -417,6 +501,7 @@
       const [pa, pb] = linkEnds(l);
       const color = sel ? r.colors.accent : hov ? r.colors.ink : r.colors.link;
       if (l.kind === 'hinge' || l.kind === 'weld') { drawHinge(l, pa, sel || hov); return; }
+      if (l.kind === 'pulley') { drawPulley(l, sel, hov); return; }
       if (l.kind === 'spring') drawSpring(pa, pb, color, sel ? 2.2 : 1.7);
       else if (l.solid && drawSolid(l, sel ? r.colors.accent : l.kind === 'rope' ? r.colors.rope : color)) { /* drawn from its bodies */ }
       else if (l.kind === 'rod') drawRod(pa, pb, color);
@@ -604,6 +689,32 @@
         drawBody(pv.body);
         ctx.globalAlpha = 1;
         return;
+      }
+      if (pv.pulley) {
+        // Placing a pulley: the wheel, then the rope to the first end, then over to the cursor.
+        const { c, radius, from, to } = pv.pulley;
+        if (to) {
+          const pa = from || to;
+          const g = S.pulleyGeometry(c, radius, pa, to, from ? S.pulleyWinding(c, pa, to) : 1);
+          if (from) drawPulleyRope({ ...g, pa, pb: to, c }, 0, r.colors.accent, true);
+          else {
+            // Only the first end so far: a straight line from it to the wheel's rim.
+            const A = r.toScreen(to);
+            const d = Math.hypot(to.x - c.x, to.y - c.y) || 1;
+            const T = r.toScreen({ x: c.x + (radius * (to.x - c.x)) / d, y: c.y + (radius * (to.y - c.y)) / d });
+            ctx.strokeStyle = r.colors.accent; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+            ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(T.x, T.y); ctx.stroke(); ctx.setLineDash([]);
+          }
+        }
+        drawWheel(c, radius, r.colors.accent, true);
+        if (from) {
+          ctx.globalAlpha = 1;
+          const q = r.toScreen(from);
+          ctx.fillStyle = r.colors.accent;
+          ctx.beginPath();
+          ctx.arc(q.x, q.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
       if (pv.link) {
         const { kind, from, to } = pv.link;

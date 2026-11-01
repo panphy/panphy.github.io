@@ -1,0 +1,120 @@
+{
+ "format": "panphy-mech",
+ "version": 1,
+ "world": {
+  "gravity": 9.81,
+  "dragModel": "none",
+  "linearDragSource": "coefficient",
+  "linearDrag": 1,
+  "drag": 0.1,
+  "viscosity": 0,
+  "floor": true,
+  "floorFriction": 0.5,
+  "gpeZero": 0,
+  "accuracy": "standard"
+ },
+ "bodies": [
+  {
+   "id": "b1",
+   "kind": "box",
+   "name": "Bench",
+   "x": -0.6,
+   "y": 0.8,
+   "angle": 0,
+   "w": 3.2,
+   "h": 1.6,
+   "mass": 10,
+   "friction": 0,
+   "restitution": 0,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": true,
+   "lockRotation": false,
+   "flip": false,
+   "color": "slate",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  },
+  {
+   "id": "b2",
+   "kind": "box",
+   "name": "Cart",
+   "x": -1.6,
+   "y": 1.75,
+   "angle": 0,
+   "w": 0.6,
+   "h": 0.3,
+   "mass": 1.5,
+   "friction": 0,
+   "restitution": 0,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "blue",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  },
+  {
+   "id": "b3",
+   "kind": "box",
+   "name": "Hanging mass",
+   "x": 1.2999999999999998,
+   "y": 1.35,
+   "angle": 0,
+   "w": 0.2,
+   "h": 0.2,
+   "mass": 0.5,
+   "friction": 0.4,
+   "restitution": 0,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "coral",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  }
+ ],
+ "links": [
+  {
+   "id": "l4",
+   "kind": "pulley",
+   "name": "Pulley",
+   "a": "b2",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": "b3",
+   "lb": {
+    "x": 0,
+    "y": 0.1
+   },
+   "px": 1.15,
+   "py": 1.6,
+   "r": 0.15,
+   "length": 3.135619449019234
+  }
+ ],
+ "nextId": 5,
+ "camera": {
+  "cx": 0,
+  "cy": 1.2,
+  "scale": 80
+ }
+}

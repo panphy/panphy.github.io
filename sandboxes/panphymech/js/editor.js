@@ -17,8 +17,12 @@
     rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack. Right-click or Esc cancels.',
     hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background. Right-click or Esc cancels.',
     motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle). Right-click or Esc cancels.',
-    weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background. Right-click or Esc cancels.'
+    weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background. Right-click or Esc cancels.',
+    pulley: 'Pulley: click where the wheel goes, then the first end of the rope, then the second end. Right-click or Esc cancels.'
   };
+
+  // Connectors whose length follows their ends when the setup changes.
+  const refits = (l) => l.kind === 'rod' || l.kind === 'rope' || l.kind === 'pulley';
 
   function createEditor(app, canvas) {
     const ed = { tool: 'select', armed: null, pending: null, cursorWorld: null };
@@ -69,6 +73,7 @@
         const pb = rr().toScreen(S.endPoint(scene, l.b, l.lb, app.poseOf));
         let d;
         if (l.kind === 'hinge' || l.kind === 'weld') d = Math.hypot(sp.x - pa.x, sp.y - pa.y) - 3;
+        else if (l.kind === 'pulley') d = pulleyDistance(l, sp);
         else {
           // Near an end on an object, a click picks the object rather than the connector.
           const len = Math.hypot(pb.x - pa.x, pb.y - pa.y) || 1;
@@ -82,6 +87,24 @@
         if (d < bestD) { bestD = d; best = l; }
       });
       return bestD <= 9 ? best : null;
+    }
+
+    // Screen distance from a pulley's wheel or either straight part of its rope (0 on the wheel).
+    function pulleyDistance(l, sp) {
+      const path = pulleyPathNow(l);
+      const c = rr().toScreen(path.c);
+      const R = Math.max(4, l.r * app.scene.camera.scale);
+      const part = (p, t, onBody) => {
+        const P = rr().toScreen(p); const T = rr().toScreen(t);
+        // Near an end on an object, a click picks the object rather than the rope.
+        const len = Math.hypot(T.x - P.x, T.y - P.y) || 1;
+        const k = onBody ? Math.min(14, len * 0.3) / len : 0;
+        return segDist(sp, { x: P.x + (T.x - P.x) * k, y: P.y + (T.y - P.y) * k }, T);
+      };
+      return Math.min(Math.max(0, Math.hypot(sp.x - c.x, sp.y - c.y) - R - 3), part(path.pa, path.ta, !!l.a), part(path.pb, path.tb, !!l.b));
+    }
+    function pulleyPathNow(l) {
+      return app.sim && !app.simStale && app.sim.pulleyPath ? app.sim.pulleyPath(l.id) : S.pulleyPath(app.scene, l, app.poseOf);
     }
 
     function hitTest(sp) {
@@ -155,6 +178,11 @@
       if (!l) return null;
       const pa = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
       const pb = l.kind === 'hinge' || l.kind === 'weld' ? pa : rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf));
+      if (l.kind === 'pulley') {
+        const c = rr().toScreen({ x: l.px, y: l.py });
+        const R = Math.max(4, l.r * app.scene.camera.scale) + 12;
+        return { minX: Math.min(pa.x - 12, pb.x - 12, c.x - R), maxX: Math.max(pa.x + 12, pb.x + 12, c.x + R), minY: Math.min(pa.y - 12, pb.y - 12, c.y - R), maxY: Math.max(pa.y + 12, pb.y + 12, c.y + R) };
+      }
       return { minX: Math.min(pa.x, pb.x) - 12, maxX: Math.max(pa.x, pb.x) + 12, minY: Math.min(pa.y, pb.y) - 12, maxY: Math.max(pa.y, pb.y) + 12 };
     };
 
@@ -173,7 +201,12 @@
         if (!l) return null;
         const pa = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
         if (l.kind === 'hinge' || l.kind === 'weld') p = { x: pa.x - 17, y: pa.y - 17 };
-        else {
+        else if (l.kind === 'pulley') {
+          // Up and left of the wheel.
+          const c = rr().toScreen({ x: l.px, y: l.py });
+          const R = Math.max(4, l.r * app.scene.camera.scale) + 15;
+          p = { x: c.x - R * Math.SQRT1_2, y: c.y - R * Math.SQRT1_2 };
+        } else {
           const pb = rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf));
           const len = Math.hypot(pb.x - pa.x, pb.y - pa.y) || 1;
           let nx = -(pb.y - pa.y) / len;
@@ -306,6 +339,12 @@
         const bs = jointBodies(w);
         return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
       }
+      if (ed.tool === 'pulley') {
+        const p = ed.pending;
+        if (!p) { const c = wheelPoint(w); return { pulley: { c, radius: PULLEY_R } }; }
+        const target = endTarget(w);
+        return { pulley: { c: p.c, radius: PULLEY_R, from: p.world || null, to: target.world }, point: target.world, ok: true };
+      }
       return null;
     };
 
@@ -378,6 +417,46 @@
       else app.setHint(HINTS[kind]);
     }
 
+    // ---------- Pulleys ----------
+
+    const PULLEY_R = S.PULLEY_RADIUS;
+    const wheelPoint = (w) => ({ x: snapV(w.x, SNAP_POS), y: snapV(w.y, SNAP_POS) });
+    const outsideWheel = (p, c, radius) => Math.hypot(p.x - c.x, p.y - c.y) >= radius + S.PULLEY_CLEARANCE;
+
+    // Three clicks: the wheel, the first end of the rope, then the second end.
+    function placePulleyPoint(w, keep) {
+      const p = ed.pending;
+      if (!p) {
+        const c = wheelPoint(w);
+        const probe = { kind: 'pulley', a: null, la: { x: c.x + 1, y: c.y - 1 }, b: null, lb: { x: c.x - 1, y: c.y - 1 }, px: c.x, py: c.y, r: PULLEY_R };
+        const problem = S.pulleyProblem(app.scene, probe, app.poseOf);
+        if (problem) { app.toast(problem); return; }
+        ed.pending = { c };
+        app.setHint('Now click the first end of the rope, on an object or the background. Right-click or Esc cancels.');
+        return;
+      }
+      const t = endTarget(w);
+      if (!outsideWheel(t.world, p.c, PULLEY_R)) { app.toast('Put the end of the rope outside the wheel.'); return; }
+      if (!p.world) {
+        Object.assign(p, { a: t.body ? t.body.id : null, la: t.local, world: t.world });
+        app.setHint('Now click the second end of the rope. Right-click or Esc cancels.');
+        return;
+      }
+      const b = t.body ? t.body.id : null;
+      if (!p.a && !b) { app.toast('Attach at least one end to an object.'); return; }
+      if (p.a && p.a === b) { app.toast('Connect two different objects, or an object and the background.'); return; }
+      app.edit(() => {
+        const l = S.makeLink(app.scene, 'pulley', p.a, p.la, b, t.local);
+        Object.assign(l, { px: p.c.x, py: p.c.y, r: PULLEY_R });
+        l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+        app.scene.links.push(l);
+        app.select({ type: 'link', id: l.id });
+      });
+      ed.pending = null;
+      if (!keep) ed.setTool('select');
+      else app.setHint(HINTS.pulley);
+    }
+
     function placeJoint(w, keep) {
       const bs = jointBodies(w);
       if (!bs.length) { app.toast('Click on an object.'); return; }
@@ -442,6 +521,7 @@
       if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
         const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
         if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w).world, ok: true };
+        else if (type === 'pulley') connectorDropPreview = { pulley: { c: wheelPoint(w), radius: PULLEY_R } };
         else {
           const bs = bodiesAt(w);
           connectorDropPreview = { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
@@ -464,6 +544,7 @@
       const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
       ed.cursorWorld = w;
       if (['spring', 'rod', 'rope'].includes(type)) placeLinkEnd(w, false);
+      else if (type === 'pulley') placePulleyPoint(w, false);
       else placeJoint(w, false);
       app.requestDraw();
       return true;
@@ -498,7 +579,7 @@
       if (!l) return;
       l[gesture.end] = null;
       l['l' + gesture.end] = endTarget(w).world;
-      if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      if (refits(l)) l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
     }
 
     function finishLinkEnd(w) {
@@ -512,8 +593,23 @@
       if (id && id === other) return 'Connect two different objects, or an object and the background.';
       l[end] = id;
       l['l' + end] = t.local;
-      if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
-      return null;
+      if (refits(l)) l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      return l.kind === 'pulley' ? S.pulleyProblem(app.scene, l, app.poseOf) || null : null;
+    }
+
+    // Dragging a pulley by its wheel or rope moves the wheel; the rope's ends stay attached
+    // and the rope refits to the new path.
+    function applyPulleyMove(w) {
+      restoreOrig();
+      const l = S.linkById(app.scene, gesture.linkId);
+      if (!l) return;
+      l.px = snapV(l.px + w.x - gesture.startWorld.x, SNAP_POS);
+      l.py = snapV(l.py + w.y - gesture.startWorld.y, SNAP_POS);
+      l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+    }
+    function finishPulleyMove(w) {
+      applyPulleyMove(w);
+      return S.pulleyProblem(app.scene, S.linkById(app.scene, gesture.linkId), app.poseOf) || null;
     }
 
     // Dragging a spring, rod or rope by its line picks the whole connector up: both ends
@@ -544,7 +640,7 @@
       if (ta.body && tb.body && ta.body.id === tb.body.id) return 'The two ends would land on the same object.';
       l.a = ta.body ? ta.body.id : null; l.la = ta.local;
       l.b = tb.body ? tb.body.id : null; l.lb = tb.local;
-      if (l.kind === 'rod' || l.kind === 'rope') l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+      if (refits(l)) l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
       return null;
     }
 
@@ -681,6 +777,7 @@
       }
       if (['spring', 'rod', 'rope'].includes(ed.tool)) { placeLinkEnd(w, e.shiftKey); app.requestDraw(); return; }
       if (['hinge', 'motor', 'weld'].includes(ed.tool)) { placeJoint(w, e.shiftKey); app.requestDraw(); return; }
+      if (ed.tool === 'pulley') { placePulleyPoint(w, e.shiftKey); app.requestDraw(); return; }
       const hit = hitTest(sp);
       if (!hit) { startGesture('pan', e, sp, { deselect: true }); return; }
       if (hit.type === 'delete') { app.deleteSelection(); return; }
@@ -697,7 +794,7 @@
         app.select({ type: 'link', id: hit.link.id });
         const joint = hit.link.kind === 'hinge' || hit.link.kind === 'weld';
         if (app.running) startGesture('none', e, sp);
-        else startGesture(joint ? 'jointMove' : 'linkMove', e, sp, { linkId: hit.link.id });
+        else startGesture(joint ? 'jointMove' : hit.link.kind === 'pulley' ? 'pulleyMove' : 'linkMove', e, sp, { linkId: hit.link.id });
         armHold(e, { type: 'link', id: hit.link.id });
         return;
       }
@@ -805,8 +902,9 @@
           break;
         case 'linkEnd':
         case 'linkMove':
+        case 'pulleyMove':
           if (firstMove) beginSceneDrag();
-          if (gesture.kind === 'linkEnd') applyLinkEnd(w); else applyLinkMove(w);
+          if (gesture.kind === 'linkEnd') applyLinkEnd(w); else if (gesture.kind === 'pulleyMove') applyPulleyMove(w); else applyLinkMove(w);
           app.gestureChanged();
           break;
         case 'jointMove':
@@ -827,8 +925,8 @@
       clearHold();
       const g = gesture;
       const w = rr().toWorld(localPoint(e).x, localPoint(e).y);
-      if (g.moved && (g.kind === 'linkEnd' || g.kind === 'jointMove' || g.kind === 'linkMove')) {
-        const problem = g.kind === 'linkEnd' ? finishLinkEnd(w) : g.kind === 'linkMove' ? finishLinkMove(w) : finishJointMove(w);
+      if (g.moved && (g.kind === 'linkEnd' || g.kind === 'jointMove' || g.kind === 'linkMove' || g.kind === 'pulleyMove')) {
+        const problem = g.kind === 'linkEnd' ? finishLinkEnd(w) : g.kind === 'linkMove' ? finishLinkMove(w) : g.kind === 'pulleyMove' ? finishPulleyMove(w) : finishJointMove(w);
         gesture = null;
         if (problem) { app.cancelGesture(); app.toast(problem); } else app.endGesture(true);
         app.requestDraw();
@@ -879,7 +977,7 @@
       snapKeyHeld = on;
       if (gesture && gesture.moved) {
         const w = rr().toWorld(gesture.last.x, gesture.last.y);
-        const apply = { move: applyMove, rotate: applyRotate, resize: applyResize, linkEnd: applyLinkEnd, linkMove: applyLinkMove }[gesture.kind];
+        const apply = { move: applyMove, rotate: applyRotate, resize: applyResize, linkEnd: applyLinkEnd, linkMove: applyLinkMove, pulleyMove: applyPulleyMove }[gesture.kind];
         if (apply) { apply(w); app.gestureChanged(); }
       }
       app.ui.syncToolbar();

@@ -262,10 +262,103 @@
       solids.set(l.id, { segs, seg, endJoint, endJoints, endJointsB });
     }
 
+    // ---------- Pulleys ----------
+    // An ideal fixed pulley: a massless, inextensible rope over a frictionless wheel (see
+    // S.pulleyGeometry). Planck's pulley joint holds lengthA + lengthB constant both ways, like a
+    // rod, so its solver steps are replaced here with a rope's: the rope can only pull, it goes
+    // slack when the ends come closer, and a slack rope is caught in the step it would overshoot
+    // its length (as Box2D's rope joint does), so going taut needs no manual velocity changes.
+    // Straight parts end at the wheel's tangent points, which slide round the wheel as the ends
+    // move; the wrap round the wheel counts in the length. The wheel itself is a fixed solid
+    // circle, so an object hauled up stops against it.
+    const pulleys = new Map(); // link id → { joint, wind, L, lambda, ua, ub }
+    function buildPulley(l, A, B) {
+      const c = { x: l.px, y: l.py };
+      world.createBody({ position: pl.Vec2(c.x, c.y) }).createFixture(new pl.Circle(l.r), { friction: 0.4, restitution: 0 });
+      if (isStatic(A) && isStatic(B)) return;
+      const wind = S.pulleyWinding(c, anchorWorld(l.a, l.la), anchorWorld(l.b, l.lb));
+      const joint = new pl.PulleyJoint({
+        collideConnected: true, ratio: 1, lengthA: 1, lengthB: 1,
+        groundAnchorA: pl.Vec2(c.x, c.y), groundAnchorB: pl.Vec2(c.x, c.y),
+        localAnchorA: pl.Vec2(l.la.x, l.la.y), localAnchorB: pl.Vec2(l.lb.x, l.lb.y)
+      }, A, B);
+      // lambda: the rope's tension impulse in the latest step (never negative).
+      const st = { joint, wind, L: l.length, lambda: 0, ua: { x: 0, y: 0 }, ub: { x: 0, y: 0 }, C: 0 };
+      const ends = [
+        { body: joint.m_bodyA, local: joint.m_localAnchorA },
+        { body: joint.m_bodyB, local: joint.m_localAnchorB }
+      ];
+      // An end's lever arm from its body's center of mass, and its world point, at a solver pose.
+      const arm = (e, pos) => {
+        const lc = e.body.m_sweep.localCenter;
+        const cs = Math.cos(pos.a), sn = Math.sin(pos.a);
+        const lx = e.local.x - lc.x, ly = e.local.y - lc.y;
+        const rx = cs * lx - sn * ly, ry = sn * lx + cs * ly;
+        return { rx, ry, p: { x: pos.c.x + rx, y: pos.c.y + ry } };
+      };
+      const cross = (r, u) => r.rx * u.y - r.ry * u.x;
+      // Pull each end toward its tangent point with impulse P (applied as −P·u at the end).
+      const pull = (P, rA, rB) => {
+        [[ends[0], rA, st.ua], [ends[1], rB, st.ub]].forEach(([e, r, u]) => {
+          const b = e.body;
+          if (!(b.m_invMass > 0) && !(b.m_invI > 0)) return;
+          const v = b.c_velocity;
+          v.v.x -= b.m_invMass * P * u.x; v.v.y -= b.m_invMass * P * u.y;
+          v.w -= b.m_invI * P * cross(r, u);
+        });
+      };
+      const effMass = (rA, rB, ua, ub) => {
+        const a = ends[0].body, b = ends[1].body;
+        const k = a.m_invMass + a.m_invI * cross(rA, ua) ** 2 + b.m_invMass + b.m_invI * cross(rB, ub) ** 2;
+        return k > 0 ? 1 / k : 0;
+      };
+      let rA = null, rB = null, mass = 0;
+      joint.initVelocityConstraints = function initVelocityConstraints(step) {
+        rA = arm(ends[0], ends[0].body.c_position);
+        rB = arm(ends[1], ends[1].body.c_position);
+        const g = S.pulleyGeometry(c, l.r, rA.p, rB.p, wind);
+        st.ua = g.ua; st.ub = g.ub; st.C = g.total - st.L;
+        mass = effMass(rA, rB, g.ua, g.ub);
+        if (step.warmStarting) { st.lambda *= step.dtRatio; pull(st.lambda, rA, rB); } else st.lambda = 0;
+      };
+      joint.solveVelocityConstraints = function solveVelocityConstraints(step) {
+        const a = ends[0].body.c_velocity, b = ends[1].body.c_velocity;
+        // Rate at which the rope's path lengthens.
+        let Cdot = (a.v.x - a.w * rA.ry) * st.ua.x + (a.v.y + a.w * rA.rx) * st.ua.y
+          + (b.v.x - b.w * rB.ry) * st.ub.x + (b.v.y + b.w * rB.rx) * st.ub.y;
+        if (st.C < 0) Cdot += step.inv_dt * st.C; // slack: free to close the gap this step
+        const old = st.lambda;
+        st.lambda = Math.max(0, old + mass * Cdot);
+        pull(st.lambda - old, rA, rB);
+      };
+      joint.solvePositionConstraints = function solvePositionConstraints() {
+        const pa = ends[0].body.c_position, pb = ends[1].body.c_position;
+        const qa = arm(ends[0], pa), qb = arm(ends[1], pb);
+        const g = S.pulleyGeometry(c, l.r, qa.p, qb.p, wind);
+        const C = g.total - st.L;
+        // Only an overlong rope is corrected; a slack one is left alone.
+        const P = effMass(qa, qb, g.ua, g.ub) * Math.min(Math.max(C, 0), pl.Settings.maxLinearCorrection);
+        if (P > 0) {
+          [[ends[0], qa, g.ua, pa], [ends[1], qb, g.ub, pb]].forEach(([e, r, u, pos]) => {
+            const b = e.body;
+            pos.c.x -= b.m_invMass * P * u.x; pos.c.y -= b.m_invMass * P * u.y;
+            pos.a -= b.m_invI * P * cross(r, u);
+          });
+        }
+        return C < pl.Settings.linearSlop;
+      };
+      // Planck reports the force on body B.
+      joint.getReactionForce = (inv) => pl.Vec2(-st.lambda * inv * st.ub.x, -st.lambda * inv * st.ub.y);
+      joint.getReactionTorque = () => 0;
+      joints.set(l.id, world.createJoint(joint));
+      pulleys.set(l.id, st);
+    }
+
     scene.links.forEach((l) => {
       const A = bodyFor(l.a);
       const B = bodyFor(l.b);
       if (!A || !B) return;
+      if (l.kind === 'pulley') { buildPulley(l, A, B); return; }
       // A solid rod or rope matters even between two fixed things: objects land on it.
       if ((l.kind === 'rod' || l.kind === 'rope') && l.solid) { buildSolid(l, A, B); return; }
       if (isStatic(A) && isStatic(B)) return;
@@ -552,6 +645,16 @@
         const firstOutside = (pts, from) => pts.find((q) => Math.hypot(q.x - from.x, q.y - from.y) > reach) || pts[pts.length - 1];
         const towardA = solidPts ? firstOutside([...solidPts].reverse(), pbw) : pa;
         const towardB = solidPts ? firstOutside(solidPts, pa) : pbw;
+        if (l.kind === 'pulley') {
+          // Tension along each straight part, toward its tangent point on the wheel.
+          const ps = pulleys.get(l.id);
+          if (!ps) return;
+          const T = ps.lambda * inv;
+          const g = S.pulleyGeometry({ x: l.px, y: l.py }, l.r, pa, pbw, ps.wind);
+          if (atA) add('T', surfacePoint(pa, g.ta), -T * g.ua.x, -T * g.ua.y);
+          if (atB) add('T', surfacePoint(pbw, g.tb), -T * g.ub.x, -T * g.ub.y);
+          return;
+        }
         if (l.kind === 'spring') {
           const st = springState(l);
           if (atA) add('F_s', surfacePoint(pa, towardB), st.tension * st.ux, st.tension * st.uy);
@@ -597,6 +700,13 @@
       if (l.kind === 'spring') {
         const s = springState(l);
         return { length: s.L, extension: s.ext, tension: s.tension, EPE: 0.5 * l.k * s.ext * s.ext, pa: s.pa, pb: s.pb };
+      }
+      if (l.kind === 'pulley') {
+        // One tension all along an ideal rope over a frictionless wheel.
+        const ps = pulleys.get(id);
+        const path = sim.pulleyPath(id);
+        const force = ps && sim.t > 0 ? ps.lambda / sim.lastH : 0;
+        return { length: path.total, slack: Math.max(0, l.length - path.total), sideA: path.segA, sideB: path.segB, force, pa: path.pa, pb: path.pb };
       }
       const solid = solids.get(id);
       const j = solid ? solid.endJoint : joints.get(id);
@@ -647,6 +757,14 @@
       const pts = s.segs.map((pb) => pb.getWorldPoint(pl.Vec2(-s.seg / 2, 0)));
       pts.push(s.segs[s.segs.length - 1].getWorldPoint(pl.Vec2(s.seg / 2, 0)));
       return pts.map((p) => ({ x: p.x, y: p.y }));
+    };
+
+    // A pulley's rope path now, wound the way the simulation holds it.
+    sim.pulleyPath = function pulleyPath(id) {
+      const l = S.linkById(scene, id);
+      if (!l) return null;
+      const ps = pulleys.get(id);
+      return S.pulleyPath(scene, l, (b) => sim.pose(b.id) || b, ps ? ps.wind : undefined);
     };
 
     sim.totals = function totals() {
@@ -725,6 +843,7 @@
       }
       if (j && l.kind === 'rod') j.setLength(l.length);
       if (j && l.kind === 'rope') j.setMaxLength(l.length);
+      if (l.kind === 'pulley' && pulleys.has(l.id)) pulleys.get(l.id).L = l.length;
       const solid = solids.get(l.id);
       if (solid) {
         const thickness = l.kind === 'rope' ? 0.03 : 0.06;

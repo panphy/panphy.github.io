@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-01T14:03:00Z';
+const BUILD_ID = '2026-11-01T14:33:49Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -155,8 +155,10 @@ const ASSETS_TO_CACHE = [
   '/sandboxes/panphymech.html',
   '/sandboxes/panphymech/css/app.css',
   '/sandboxes/panphymech/examples/index.json',
+  '/sandboxes/panphymech/examples/atwood.ppmech',
   '/sandboxes/panphymech/examples/bounce.ppmech',
   '/sandboxes/panphymech/examples/car.ppmech',
+  '/sandboxes/panphymech/examples/cart-pulley.ppmech',
   '/sandboxes/panphymech/examples/collision.ppmech',
   '/sandboxes/panphymech/examples/dominoes.ppmech',
   '/sandboxes/panphymech/examples/horizontal-spring.ppmech',
