@@ -716,7 +716,7 @@ test('force arrows: a block on a ramp feels W, N = mg cos θ and friction μN, e
   const block = scene.bodies.find((b) => b.name === 'Block');
   const sim = P.createSim(scene);
   const atStart = Object.fromEntries(sim.forcesOn(block.id).map((f) => [f.label, f]));
-  assert.deepEqual(Object.keys(atStart).sort(), ['F_f', 'N', 'W'], 'every force shows before time starts');
+  assert.deepEqual(Object.keys(atStart).sort(), ['N', 'W', 'f'], 'every force shows before time starts');
   assert.equal(sim.t, 0, 'reading the starting forces does not advance the simulation');
   run(sim, 0.5);
   const forces = Object.fromEntries(sim.forcesOn(block.id).map((f) => [f.label, f]));
@@ -726,7 +726,7 @@ test('force arrows: a block on a ramp feels W, N = mg cos θ and friction μN, e
   const W = block.mass * 9.81;
   assert.ok(Math.abs(mag(forces.W) - W) < 1e-9);
   assert.ok(Math.abs(mag(forces.N) - W * Math.cos(theta)) < 0.01 * W, `N ${mag(forces.N)}`);
-  assert.ok(Math.abs(mag(forces.F_f) - 0.25 * W * Math.cos(theta)) < 0.01 * W, `friction ${mag(forces.F_f)}`);
+  assert.ok(Math.abs(mag(forces.f) - 0.25 * W * Math.cos(theta)) < 0.01 * W, `friction ${mag(forces.f)}`);
   const c = sim.readBody(block.id);
   assert.ok(Math.hypot(forces.W.x - c.x, forces.W.y - c.y) < 1e-9, 'weight at the center of mass');
   assert.ok(Math.hypot(forces.N.x - c.x, forces.N.y - c.y) > 0.15, 'normal reaction at the contact');
@@ -768,8 +768,8 @@ test('motor car: the driven back wheel pushes the car along and the free front w
   const fx = (id, label) => sim.forcesOn(id).filter((f) => f.label === label).reduce((sum, f) => sum + f.fx, 0);
   const weight = sim.forcesOn(chassis.id).find((f) => f.label === 'W');
   assert.ok(Math.abs(weight.fy + chassis.mass * 9.81) < 0.01 * chassis.mass * 9.81, 'the cut-out chassis has its own mass (no sliver turned into a box)');
-  assert.ok(fx(back.id, 'F_f') > 5, 'speeding up: friction drives the back wheel forward');
+  assert.ok(fx(back.id, 'f') > 5, 'speeding up: friction drives the back wheel forward');
   run(sim, 1);
-  assert.ok(Math.abs(fx(back.id, 'F_f')) < 0.5 && Math.abs(fx(front.id, 'F_f')) < 0.5, 'steady on the flat: almost no friction');
+  assert.ok(Math.abs(fx(back.id, 'f')) < 0.5 && Math.abs(fx(front.id, 'f')) < 0.5, 'steady on the flat: almost no friction');
   sim.forcesOn(chassis.id).filter((f) => f.label === 'R').forEach((f) => assert.ok(Math.abs(f.fx) < 0.5, `axle force ${f.fx}`));
 });

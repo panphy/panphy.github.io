@@ -597,7 +597,7 @@
       shape(2.2, color);
       ctx.lineJoin = 'miter';
       if (label) {
-        // "F_f" draws F with a small upright f below it.
+        // "F_s" draws F with a small upright s below it.
         const [main, sub] = label.split('_');
         ctx.font = 'italic 600 12px Figtree, system-ui, sans-serif';
         ctx.textAlign = 'left';
@@ -655,7 +655,7 @@
     };
 
     // Each kind of force has its own color, so the forces on one object are easy to tell apart.
-    const FORCE_COLORS = { W: 'forceW', N: 'forceN', F_f: 'forceF', T: 'forceT', F_s: 'forceS', R: 'forceR', D: 'forceD' };
+    const FORCE_COLORS = { W: 'forceW', N: 'forceN', f: 'forceF', T: 'forceT', F_s: 'forceS', R: 'forceR', D: 'forceD' };
     function drawForces() {
       r.forceArrows(cam().scale).forEach((a) => arrow(r.toScreen(a.from), r.toScreen(a.to), r.colors[FORCE_COLORS[a.label]] || r.colors.ink, a.label, true));
     }
