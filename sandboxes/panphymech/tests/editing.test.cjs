@@ -143,3 +143,32 @@ test('an object center near another object edge snaps onto that edge, including 
   const c = k.body('ball', 0.95, 0.3, { r: 0.2 });
   const e = S.centerSnap(k.scene, new Set([c.id]), 0.1); near(e.x, 0.05); near(e.y, 0);
 });
+
+test('a selection box holds whole objects, fixed connector ends and whole pulley wheels; they move together', () => {
+  const S = globalThis.PPM.scene;
+  const scene = S.createScene();
+  const ball = S.makeBody(scene, 'ball', 0, 1);
+  const ramp = S.makeBody(scene, 'wedge', 3, 0.75);
+  scene.bodies.push(ball, ramp);
+  const rope = Object.assign(S.makeLink(scene, 'rope', ball.id, { x: 0, y: 0 }, null, { x: 0, y: 3 }), { length: 2 });
+  const box = S.makeBody(scene, 'box', -1, 1);
+  scene.bodies.push(box);
+  const pulley = Object.assign(S.makeLink(scene, 'pulley', box.id, { x: 0, y: 0 }, ball.id, { x: 0, y: 0 }), { px: -0.5, py: 3, r: 0.15 });
+  pulley.length = S.linkLength(scene, pulley);
+  scene.links.push(rope, pulley);
+  // The ramp reaches past the box, so it is left out.
+  const found = S.boxContents(scene, { minX: -2, maxX: 2, minY: 0, maxY: 4 });
+  assert.deepEqual(found.bodies.sort(), [ball.id, box.id].sort());
+  assert.deepEqual(found.ends, [{ id: rope.id, end: 'b' }]);
+  assert.deepEqual(found.wheels, [pulley.id]);
+  // Moving them keeps every length: the whole build shifts rigidly.
+  const before = { rope: rope.length, pulley: pulley.length };
+  S.transformBodies(scene, new Set(found.bodies), (p, angle) => ({ x: p.x + 1.5, y: p.y - 0.25, angle }), found);
+  assert.ok(Math.abs(rope.lb.x - 1.5) < 1e-12 && Math.abs(rope.lb.y - 2.75) < 1e-12);
+  assert.ok(Math.abs(pulley.px - 1) < 1e-12 && Math.abs(pulley.py - 2.75) < 1e-12);
+  assert.ok(Math.abs(rope.length - before.rope) < 1e-9);
+  assert.ok(Math.abs(pulley.length - before.pulley) < 1e-9);
+  // Without the anchors the rope and pulley would have refitted to new lengths.
+  S.transformBodies(scene, new Set(found.bodies), (p, angle) => ({ x: p.x + 1, y: p.y, angle }));
+  assert.ok(Math.abs(rope.length - before.rope) > 1e-3);
+});

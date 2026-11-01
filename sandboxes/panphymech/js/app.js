@@ -25,6 +25,9 @@
     recorder: G.createRecorder(),
     selection: null,
     extra: [], // further selected objects, in the order they were picked
+    // Connector ends fixed to the background ({ id, end }) and pulley wheels (link ids) caught
+    // by a selection box: they move with the selected objects.
+    anchors: { ends: [], wheels: [] },
     multiMode: false,
     hover: null,
     running: false,
@@ -102,6 +105,11 @@
     const exists = (sel) => sel && (sel.type === 'body' ? !!S.bodyById(app.scene, sel.id) : sel.type === 'link' ? !!S.linkById(app.scene, sel.id) : true);
     if (app.selection && !exists(app.selection)) app.selection = null;
     app.extra = app.extra.filter((id) => S.bodyById(app.scene, id) && app.selection && app.selection.type === 'body');
+    const bodySel = app.selection && app.selection.type === 'body';
+    app.anchors = {
+      ends: bodySel ? app.anchors.ends.filter(({ id, end }) => { const l = S.linkById(app.scene, id); return l && !l[end]; }) : [],
+      wheels: bodySel ? app.anchors.wheels.filter((id) => { const l = S.linkById(app.scene, id); return l && l.kind === 'pulley'; }) : []
+    };
     if (app.track.type !== 'system') {
       const ok = app.track.type === 'body'
         ? (() => { const b = S.bodyById(app.scene, app.track.id); return b && !b.fixed; })()
@@ -270,6 +278,7 @@
     if (!sel || !prev || sel.type !== prev.type || sel.id !== prev.id) app.ui.closeQuick();
     app.selection = sel;
     app.extra = [];
+    app.anchors = { ends: [], wheels: [] };
     if (sel) {
       const b = sel.type === 'body' ? S.bodyById(app.scene, sel.id) : null;
       const l = sel.type === 'link' ? S.linkById(app.scene, sel.id) : null;
@@ -328,8 +337,32 @@
   app.setMultiMode = function setMultiMode(on) {
     app.multiMode = on;
     app.ui.syncToolbar();
-    app.setHint(on ? 'Select several: click objects to add or remove them. Then merge, subtract, move or delete them together.' : app.editor.HINTS.select);
+    app.setHint(on ? 'Select several: click objects or drag a box round them to add them. Turn this off, then drag any selected object to move them all. Two fingers pan.' : app.editor.HINTS.select);
   };
+
+  // Add what a selection box caught (S.boxContents) to the selection. Fixed connector ends
+  // and pulley wheels count only alongside objects, which carry them when moved.
+  app.addBoxToSelection = function addBoxToSelection(found) {
+    const prev = app.selection && app.selection.type === 'body' ? app.selectedBodies() : [];
+    const ids = prev.concat(found.bodies.filter((id) => !prev.includes(id)));
+    if (!ids.length) { app.requestDraw(); return; }
+    const keep = prev.length ? app.anchors : { ends: [], wheels: [] };
+    const ends = keep.ends.concat(found.ends.filter((e) => !keep.ends.some((k) => k.id === e.id && k.end === e.end)));
+    const wheels = keep.wheels.concat(found.wheels.filter((id) => !keep.wheels.includes(id)));
+    if (!prev.length) app.select({ type: 'body', id: ids[0] });
+    app.extra = ids.slice(1);
+    app.anchors = { ends, wheels };
+    app.ui.closeQuick();
+    app.ui.renderInspector();
+    app.ui.syncToolbar();
+    needsDraw = true;
+  };
+  app.selectAll = function selectAll() {
+    if (!app.scene.bodies.length) return;
+    app.select(null);
+    app.addBoxToSelection(S.boxContents(app.scene, { minX: -Infinity, minY: -Infinity, maxX: Infinity, maxY: Infinity }, app.poseOf));
+  };
+  app.isAnchorSelected = (id, end) => (end ? app.anchors.ends.some((e) => e.id === id && e.end === end) : app.anchors.wheels.includes(id));
 
   // ---------- Merge and subtract ----------
 
@@ -496,12 +529,17 @@
     app.edit(() => S.mirrorBodies(app.scene, S.rigidGroup(app.scene, b.id), b.x));
   };
 
+  // Arrow keys move every selected object (with what is hinged or glued to it) and any
+  // connector ends and wheels a selection box caught.
   app.nudge = function nudge(dx, dy) {
     const sel = app.selection;
     if (!sel || sel.type !== 'body' || app.running) return;
-    const b = S.bodyById(app.scene, sel.id);
-    if (!b) return;
-    app.edit(() => app.ui.moveBodyTo(b, b.x + dx, b.y + dy), { coalesce: 'nudge' });
+    if (!S.bodyById(app.scene, sel.id)) return;
+    app.edit(() => {
+      const group = new Set();
+      app.selectedBodies().forEach((id) => S.rigidGroup(app.scene, id).forEach((g) => group.add(g)));
+      S.transformBodies(app.scene, group, (p, angle) => ({ x: p.x + dx, y: p.y + dy, angle }), app.anchors);
+    }, { coalesce: 'nudge' });
   };
 
   app.clearScene = async function clearScene() {
@@ -851,6 +889,8 @@
     if (mod && (k === 'y' || k === 'Y')) { e.preventDefault(); app.redo(); return; }
     if (mod && k.toLowerCase() === 'c') { e.preventDefault(); app.copySelection(); return; }
     if (mod && k.toLowerCase() === 'v') { e.preventDefault(); app.pasteSelection(); return; }
+    // Ctrl+A selects the whole build only from the canvas; elsewhere it selects page text.
+    if (mod && k.toLowerCase() === 'a' && document.activeElement === app.canvas) { e.preventDefault(); app.selectAll(); return; }
     if (mod) return;
     if (k === ' ') {
       if (tag === 'BUTTON') return;

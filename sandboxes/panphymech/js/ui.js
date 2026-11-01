@@ -852,6 +852,14 @@
       const last = bodies[bodies.length - 1];
       note.textContent = `Merge joins them into one rigid shape with their total mass. Subtract cuts ${last ? last.name : 'the last one'} (picked last) out of the others and removes it. Shift-click an object to add or remove it.`;
       c2.appendChild(note);
+      const ends = app.anchors.ends.length, wheels = app.anchors.wheels.length;
+      if (ends || wheels) {
+        const carried = document.createElement('p');
+        carried.className = 'icard-note';
+        const parts = [ends ? `${ends} fixed connector end${ends === 1 ? '' : 's'}` : '', wheels ? `${wheels} pulley wheel${wheels === 1 ? '' : 's'}` : ''].filter(Boolean);
+        carried.textContent = `Dragging them also moves ${parts.join(' and ')} selected with them (ringed).`;
+        c2.appendChild(carried);
+      }
       c2.appendChild(actions([
         { icon: 'merge', label: 'Merge', run: () => app.mergeSelection() },
         { icon: 'subtract', label: 'Subtract', run: () => app.subtractSelection() },
