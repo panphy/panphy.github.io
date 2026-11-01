@@ -214,3 +214,65 @@ test('a pulley is placed with three clicks (wheel, first end, second end), and d
   h.ed.setTool('pulley'); click(300, 0); click(100, 300); click(500, 300);
   assert.match(toasts.pop(), /at least one end/);
 });
+
+test('a rope or spring end clicked on a spring’s free end joins it; the pair rests as drawn', () => {
+  const h = setup(true);
+  const toasts = []; h.app.toast = (m) => toasts.push(m);
+  const spring = h.app.scene.links[0];
+  const click = (x, y) => { h.emit('pointerdown', { clientX: x, clientY: y, pointerType: 'mouse' }); h.emit('pointerup', { clientX: x, clientY: y, pointerType: 'mouse' }); };
+  h.ed.setTool('rope');
+  click(203, 202); // within a few pixels of the spring's free end at (−1, 0)
+  assert.equal(h.ed.pending.join.link, spring);
+  click(200, 100); // the background at (−1, 1)
+  const rope = h.app.scene.links[1];
+  assert.equal(rope.a, spring.id);
+  assert.equal(spring.a, rope.id);
+  assert.ok(Math.abs(rope.length - (Math.SQRT2 - spring.rest)) < 1e-9, 'rope takes up the gap with the spring at rest');
+  assert.deepEqual(toasts, []);
+  // A rod is never offered a rope end, and the joined rope offers nothing to another spring.
+  h.ed.setTool('rod');
+  click(200, 100);
+  assert.equal(h.ed.pending.join, null);
+  h.ed.cancel();
+  h.ed.setTool('spring');
+  click(200, 100);
+  assert.equal(h.ed.pending.join, null);
+  h.ed.cancel();
+  // Dragging the spring's joined end away would strand the rope, so the drag is refused.
+  h.app.selection = { type: 'link', id: spring.id };
+  const node = h.app.renderer.toScreen(S.endPoint(h.app.scene, spring.a, spring.la));
+  h.emit('pointerdown', { clientX: node.x, clientY: node.y, pointerType: 'mouse' });
+  h.emit('pointermove', { clientX: node.x + 60, clientY: node.y + 60, pointerType: 'mouse' });
+  h.emit('pointerup', { clientX: node.x + 60, clientY: node.y + 60, pointerType: 'mouse' });
+  assert.match(toasts.pop(), /would have no end on an object/);
+  const s2 = S.linkById(h.app.scene, spring.id);
+  assert.equal(s2.a, rope.id, 'still joined');
+});
+
+test('two springs join in series with no damping; joins need a spring and an object in the pair', () => {
+  const h = setup(true);
+  const toasts = []; h.app.toast = (m) => toasts.push(m);
+  const spring = h.app.scene.links[0];
+  spring.damping = 3;
+  const click = (x, y) => { h.emit('pointerdown', { clientX: x, clientY: y, pointerType: 'mouse' }); h.emit('pointerup', { clientX: x, clientY: y, pointerType: 'mouse' }); };
+  h.ed.setTool('spring');
+  click(200, 200);
+  click(100, 200); // background at (−2, 0)
+  const second = h.app.scene.links[1];
+  assert.equal(second.a, spring.id);
+  assert.equal(spring.damping, 0);
+  assert.equal(second.damping, 0);
+  assert.ok(Math.abs(second.rest - 1) < 1e-9, 'the new spring rests at its drawn length');
+  // A pulley end may join a spring's free end, but not both of its ends.
+  const h2 = setup(true);
+  h2.app.toast = (m) => toasts.push(m);
+  const c2 = (x, y) => { h2.emit('pointerdown', { clientX: x, clientY: y, pointerType: 'mouse' }); h2.emit('pointerup', { clientX: x, clientY: y, pointerType: 'mouse' }); };
+  h2.ed.setTool('pulley');
+  c2(200, 50); // wheel at (−1, 1.5)
+  c2(200, 200); // first end: the spring's free end
+  c2(150, 200); // second end: the background
+  const pulley = h2.app.scene.links[1];
+  assert.equal(pulley.kind, 'pulley');
+  assert.equal(pulley.a, h2.app.scene.links[0].id);
+  assert.equal(S.pulleyProblem(h2.app.scene, pulley), '');
+});

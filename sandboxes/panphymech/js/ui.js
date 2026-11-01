@@ -556,6 +556,7 @@
         numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: set((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01,
           help: quickRefresh ? '' : l().solid ? (rod ? 'A solid rod is a thin bar hinged at both ends: objects collide with it and its mass swings with it.' : 'A solid rope is a chain of short hinged segments: it drapes, wraps round objects and has weight.') : (rod ? 'A rod is massless and rigid; nothing collides with it.' : 'A rope is massless and pulls only when taut; nothing collides with it.') }),
         toggleField('Solid: collides and has mass', () => l().solid, (v) => {
+          if (v && S.joinPair(app.scene, l())) { app.toast('A joined rod or rope stays ideal; separate it from the spring first.'); app.ui.refreshFields(); return; }
           app.edit(() => { const x = l(); x.solid = v; if (v && !(x.mass > 0)) x.mass = S.defaultSolidMass(x); });
           if (quickRefresh) quickRefresh();
         }, 'Off: an ideal, massless connector, as in textbook problems.')
@@ -567,13 +568,15 @@
     // A pulley: its rope length (at least the taut length; longer leaves it slack), and the
     // wheel's radius and position. The length applies live; the wheel is part of the setup.
     function pulleyFields(l, quick) {
+      // Joined to a spring, the rope only has to keep the join off the wheel.
       const taut = () => {
+        if (S.joinPair(app.scene, l())) return S.minPulleyLength(app.scene, l(), app.poseOf);
         const r = app.sim && app.sim.t > 0 ? app.sim.readLink(l().id) : null;
         return r ? r.length : S.linkLength(app.scene, l());
       };
       const atLeastTaut = (v) => {
         const min = Math.ceil(taut() * 1000) / 1000;
-        if (v < min - 1e-9) { app.toast(`The rope must be at least ${fmt(min)} m long to reach over the wheel to both ends.`); return min; }
+        if (v < min - 1e-9) { app.toast(S.joinPair(app.scene, l()) ? `The rope must be at least ${fmt(min)} m long to keep the join off the wheel.` : `The rope must be at least ${fmt(min)} m long to reach over the wheel to both ends.`); return min; }
         return v;
       };
       // Geometry edits keep the rope taut, as moving its ends does; a change that would put an
@@ -583,7 +586,7 @@
         fn(next, v);
         const problem = S.pulleyProblem(app.scene, next, app.poseOf);
         if (problem) { app.toast(problem); app.ui.refreshFields(); return; }
-        app.edit(() => { const x = l(); fn(x, v); x.length = Math.max(L.length[0], S.linkLength(app.scene, x)); }, { coalesce: key, fromInspector: true });
+        app.edit(() => { const x = l(); fn(x, v); S.refitLink(app.scene, x); }, { coalesce: key, fromInspector: true });
       };
       const out = [
         numField({ label: 'Rope length \\(L\\)', plain: 'Rope length L', unit: 'm', get: () => l().length, set: (v, key) => app.editParam(() => { l().length = Math.max(v, Math.ceil(taut() * 1000) / 1000); }, key), parse: atLeastTaut, min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01,
@@ -763,8 +766,14 @@
     function endName(id) {
       if (!id) return 'the background';
       const b = S.bodyById(app.scene, id);
-      return b ? b.name : '?';
+      if (b) return b.name;
+      const l = S.linkById(app.scene, id);
+      return l ? l.name : '?';
     }
+    // Springs joined to springs have no damping: a massless join cannot share it exactly.
+    const seriesSprings = (l) => { const p = S.joinPair(app.scene, l); return !!p && p.other.kind === 'spring'; };
+    const DAMPING_HELP = 'Damping force c × (rate of extension). 0 for an ideal spring.';
+    const SERIES_HELP = 'Springs joined end to end have no damping in this model.';
 
     function linkInspector(link) {
       const l = () => S.linkById(app.scene, link.id) || link;
@@ -780,11 +789,19 @@
         : l().kind === 'pulley' ? `Over the wheel from ${endName(l().a)} to ${endName(l().b)}.`
           : `From ${endName(l().a)} to ${endName(l().b)}.`;
       main.appendChild(between);
+      const pair = S.joinPair(app.scene, l());
+      if (pair) {
+        const joined = document.createElement('p');
+        joined.className = 'icard-note';
+        const partner = pair.spring === l() ? pair.other : pair.spring;
+        joined.textContent = `Joined end to end with ${partner.name}: one pull runs through both, and the join has no mass.`;
+        main.appendChild(joined);
+      }
       const rows = [];
       if (l().kind === 'spring') {
         main.appendChild(numField({ label: 'Spring constant \\(k\\)', plain: 'Spring constant k', unit: 'N/m', get: () => l().k, set: param((x, v) => { x.k = v; }), min: L.k[0], max: L.k[1], slider: [1, 5000], log: true }));
         main.appendChild(numField({ label: 'Natural length \\(L_0\\)', plain: 'Natural length L0', unit: 'm', get: () => l().rest, set: param((x, v) => { x.rest = v; }), min: L.rest[0], max: L.rest[1], slider: [0, 5], step: 0.01 }));
-        main.appendChild(numField({ label: 'Damping \\(c\\)', plain: 'Damping c', unit: 'N s/m', get: () => l().damping, set: param((x, v) => { x.damping = v; }), min: L.damping[0], max: L.damping[1], slider: [0, 20], step: 0.05, help: 'Damping force c × (rate of extension). 0 for an ideal spring.' }));
+        main.appendChild(numField({ label: 'Damping \\(c\\)', plain: 'Damping c', unit: 'N s/m', get: () => l().damping, set: param((x, v) => { x.damping = v; }), min: L.damping[0], max: L.damping[1], slider: [0, 20], step: 0.05, disabled: () => seriesSprings(l()), help: seriesSprings(l()) ? SERIES_HELP : DAMPING_HELP }));
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'btn-secondary';
@@ -1001,7 +1018,7 @@
       if (l().kind === 'spring') {
         items.push(numField({ label: 'Spring constant \\(k\\)', plain: 'Spring constant k', unit: 'N/m', get: () => l().k, set: param((x, v) => { x.k = v; }), min: L.k[0], max: L.k[1], slider: [1, 5000], log: true }));
         items.push(numField({ label: 'Natural length \\(L_0\\)', plain: 'Natural length L0', unit: 'm', get: () => l().rest, set: param((x, v) => { x.rest = v; }), min: L.rest[0], max: L.rest[1], slider: [0, 5], step: 0.01 }));
-        items.push(numField({ label: 'Damping \\(c\\)', plain: 'Damping c', unit: 'N s/m', get: () => l().damping, set: param((x, v) => { x.damping = v; }), min: L.damping[0], max: L.damping[1], slider: [0, 20], step: 0.05 }));
+        items.push(numField({ label: 'Damping \\(c\\)', plain: 'Damping c', unit: 'N s/m', get: () => l().damping, set: param((x, v) => { x.damping = v; }), min: L.damping[0], max: L.damping[1], slider: [0, 20], step: 0.05, disabled: () => seriesSprings(l()) }));
       } else if (l().kind === 'rod' || l().kind === 'rope') {
         connectorFields(l, () => { if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y); }).forEach((el) => items.push(el));
       } else if (l().kind === 'pulley') {
