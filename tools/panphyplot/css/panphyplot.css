@@ -242,6 +242,9 @@ input[type="number"]:focus {
 	min-height: 100dvh;
 }
 
+/* Color the home-screen top strip like the app bar, so they read as one header. */
+:root, :root[data-theme="dark"] { --standalone-top-bg: var(--surface); }
+
 .neo-appbar {
 	position: sticky;
 	top: var(--standalone-top, 0px);
