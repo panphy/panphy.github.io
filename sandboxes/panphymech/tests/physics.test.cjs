@@ -766,6 +766,8 @@ test('motor car: the driven back wheel pushes the car along and the free front w
   const [chassis, back, front] = scene.bodies;
   const sim = P.createSim(scene);
   const fx = (id, label) => sim.forcesOn(id).filter((f) => f.label === label).reduce((sum, f) => sum + f.fx, 0);
+  const weight = sim.forcesOn(chassis.id).find((f) => f.label === 'W');
+  assert.ok(Math.abs(weight.fy + chassis.mass * 9.81) < 0.01 * chassis.mass * 9.81, 'the cut-out chassis has its own mass (no sliver turned into a box)');
   assert.ok(fx(back.id, 'F_f') > 5, 'speeding up: friction drives the back wheel forward');
   run(sim, 1);
   assert.ok(Math.abs(fx(back.id, 'F_f')) < 0.5 && Math.abs(fx(front.id, 'F_f')) < 0.5, 'steady on the flat: almost no friction');
