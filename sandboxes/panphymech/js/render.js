@@ -366,18 +366,35 @@
       ctx.fill();
     }
     // A straight part of the rope from p to q (world), sagging when it has extra length.
-    function ropePart(p, q, extra, c) {
+    // wheelAt ('start' or 'end') is the end on the wheel's rim: a slack side leaves the rim along
+    // the tangent, as a rope hanging off a wheel does, so it never cuts into the wheel.
+    function ropePart(p, q, extra, c, radius, wheelAt) {
       const A = r.toScreen(p);
       const B = r.toScreen(q);
       const d = Math.hypot(q.x - p.x, q.y - p.y);
       if (!(extra > 0.002 * d) || d < 1e-6) { ctx.lineTo(B.x, B.y); return; }
-      const sag = Math.min(d / 2, Math.sqrt((3 * d * extra) / 8)) * cam().scale;
-      let nx = -(B.y - A.y) / (d * cam().scale), ny = (B.x - A.x) / (d * cam().scale);
+      const s = cam().scale;
+      const sag = Math.min(d / 2, Math.sqrt((3 * d * extra) / 8)); // the sag of a parabola that long (m)
+      const ux = (B.x - A.x) / (d * s), uy = (B.y - A.y) / (d * s);
+      let nx = -uy, ny = ux;
       if (Math.abs(ny) > 0.2) { if (ny < 0) { nx = -nx; ny = -ny; } } else {
         const W = r.toScreen(c);
         if (nx * ((A.x + B.x) / 2 - W.x) < 0) { nx = -nx; ny = -ny; }
       }
-      ctx.quadraticCurveTo((A.x + B.x) / 2 + nx * 2 * sag, (A.y + B.y) / 2 + ny * 2 * sag, B.x, B.y);
+      if (!wheelAt) {
+        ctx.quadraticCurveTo((A.x + B.x) / 2 + nx * 2 * sag * s, (A.y + B.y) / 2 + ny * 2 * sag * s, B.x, B.y);
+        return;
+      }
+      // A cubic whose control point beside the wheel lies on the tangent line, and the other one
+      // offset sideways. Its greatest offset is 4/9 of that, so 9/4 × sag gives the same sag. Near
+      // the wheel it bends away as 3h·x²/d², which stays outside the rim (x²/2r) while h < d²/6r.
+      const h = Math.min((9 / 4) * sag, (0.9 * d * d) / (6 * radius)) * s;
+      const third = (d * s) / 3;
+      const c1 = { x: A.x + ux * third, y: A.y + uy * third };
+      const c2 = { x: B.x - ux * third, y: B.y - uy * third };
+      const off = wheelAt === 'end' ? c1 : c2;
+      off.x += nx * h; off.y += ny * h;
+      ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, B.x, B.y);
     }
     function drawPulleyRope(path, length, color, dashed = false) {
       const slack = Math.max(0, length - path.total);
@@ -391,14 +408,15 @@
       ctx.setLineDash(dashed ? [5, 4] : []);
       ctx.beginPath();
       ctx.moveTo(A.x, A.y);
-      ropePart(path.pa, path.ta, share(path.segA), path.c);
+      const radius = Math.hypot(path.ta.x - path.c.x, path.ta.y - path.c.y);
+      ropePart(path.pa, path.ta, share(path.segA), path.c, radius, path.offWheel ? null : 'end');
       // Screen angles run the other way from world angles (y is down).
       // A rope that has come off the wheel runs straight from end to end.
       if (!path.offWheel) {
         const R = Math.max(4, (Math.hypot(path.ta.x - path.c.x, path.ta.y - path.c.y)) * cam().scale);
         ctx.arc(q.x, q.y, R, -path.angleA, -path.angleA + path.wind * path.wrap, path.wind < 0);
       }
-      ropePart(path.tb, path.pb, share(path.segB), path.c);
+      ropePart(path.tb, path.pb, share(path.segB), path.c, radius, path.offWheel ? null : 'start');
       ctx.stroke();
       ctx.setLineDash([]);
     }
@@ -406,8 +424,9 @@
       const path = pulleyPath(l);
       if (!path) return;
       const color = sel ? r.colors.accent : hov ? r.colors.ink : r.colors.ink2;
-      drawPulleyRope(path, l.length, sel ? r.colors.accent : r.colors.rope);
+      // The wheel first, so the rope lies on its rim.
       drawWheel(path.c, l.r, color);
+      drawPulleyRope(path, l.length, sel ? r.colors.accent : r.colors.rope);
       if (!l.a) anchorMount(path.pa, color);
       if (!l.b) anchorMount(path.pb, color);
     }
@@ -696,6 +715,7 @@
       if (pv.pulley) {
         // Placing a pulley: the wheel, then the rope to the first end, then over to the cursor.
         const { c, radius, from, to } = pv.pulley;
+        drawWheel(c, radius, r.colors.accent, true);
         if (to) {
           const pa = from || to;
           const g = S.pulleyGeometry(c, radius, pa, to, from ? S.pulleyWinding(c, pa, to) : 1);
@@ -709,7 +729,6 @@
             ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(T.x, T.y); ctx.stroke(); ctx.setLineDash([]);
           }
         }
-        drawWheel(c, radius, r.colors.accent, true);
         if (from) {
           ctx.globalAlpha = 1;
           const q = r.toScreen(from);
