@@ -72,6 +72,6 @@ Done: both views fully editable and synchronized; Tidy up and Clear circuit; cor
 
 Not done / limitations: no thermal lag in lamps, no reverse breakdown, no magnetic saturation or coupling between separate inductors, no transistor Early effect or capacitance, no gate propagation delay; logic modules share one hidden 5 V supply; phone-width layout works but is cramped.
 
-The user guide lives at `manual.html`, with screenshots in `manual/`. The app bar Manual control opens it in a large overlay, full-screen on small screens, with an Open in new tab option. Cache the guide with the app in `sw.js` and `index.html`, then bump `BUILD_ID`.
+The user guide lives at `manual.html`, with screenshots in `manual/`. Its Physics model and limits reference explains component assumptions, meter averaging, time-step accuracy and stored-energy behavior; keep it aligned with the models in `registry.js` and `solver.js`. The app bar Manual control opens it in a large overlay, full-screen on small screens, with an Open in new tab option. Cache the guide with the app in `sw.js` and `index.html`, then bump `BUILD_ID`.
 
 The manual overlay uses `/assets/manual-overlay.js` and `/assets/manual-overlay.css`. It loads the standalone guide on first use and keeps it mounted so reading position and expanded topics survive closing and reopening. Escape closes the guide after any open Contents or screenshot dialog; closing restores focus to Manual. Same-tab links back to the app close the guide; explicit new-tab links and links to other pages open separately to preserve the workspace.
