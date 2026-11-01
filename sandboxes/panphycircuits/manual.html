@@ -228,7 +228,7 @@
 
 		<section class="reference" aria-labelledby="reference">
 			<h2 id="reference" tabindex="-1">Reference</h2>
-			<p class="section-intro">Building your own circuits, wiring rules, graphs and classroom notes.</p>
+			<p class="section-intro">Building your own circuits, wiring rules, graphs, physics models and classroom notes.</p>
 
 <details class="reference-item" id="build" open>
 <summary>Build your own</summary>
@@ -258,9 +258,27 @@
 	<li>Opening Graph enables “Plot on graph” for selected meters or scopes, or for all of them if none is selected and none is plotted yet.</li>
 	<li>The menu beside the Graph title lists every graph the plotted readings allow: <strong>Readings against time</strong>, then each reading against each other one, such as <strong>A1 current against V1 p.d.</strong> For an I–V characteristic, plot an ammeter and a voltmeter, choose current against p.d., then change the supply or a variable resistor while the simulation runs: each recorded sample adds a point. Use a DC supply: on AC, meters show averages over each cycle, not instantaneous values. The choice is saved with the circuit, and Export to PanPhyPlot uses the same X and Y columns.</li>
 	<li>Hover over the graph to mark the nearest sample and read its time and values. Drag across the graph to select a time range for viewing and export. Full Graph restores the entire recording. Pause while the graph is open to show Export CSV and Export to PanPhyPlot for the displayed range.</li>
-	<li>Very small capacitances and inductances can make an LC circuit oscillate faster than the shortest automatic time step (1 µs) can follow; a long manual time step can do the same. The oscillations then die away too quickly, and <strong>Problems and notes</strong> names the parts responsible. Use larger values or a lower frequency.</li>
 	<li>New oscilloscopes start with Auto scale and Auto time base on. Turn either off for manual volts/div or time/div.</li>
 	<li>The ohmmeter (outside Core) drives at most 1 mA. Use it with no live supply between its leads; OL means open circuit.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="physics">
+<summary>Physics model and limits</summary>
+<div class="reference-body">
+<ul>
+	<li>The solver uses Kirchhoff’s current and voltage laws to find currents and potential differences. Values use SI units, and displayed readings use three significant figures; this display precision does not guarantee the same accuracy for every circuit. Select a component to read its model notes in the inspector.</li>
+	<li>Wires and closed switches have zero resistance. Cells and supplies are ideal unless you add internal resistance; the DC supply has no current limit. Ammeters default to zero resistance and voltmeters to infinite resistance, but their <strong>Resistance</strong> setting lets you explore how real meters change the circuit.</li>
+	<li>A short circuit across an ideal source, or conflicting ideal sources in a zero-resistance loop, produces an error. If the EMFs around such a loop add up to zero, the current around it is undefined and shows “?”. Separate electrical networks have their own voltage references: the p.d. between them is undefined.</li>
+	<li>Resistors are ohmic. A filament lamp’s resistance rises with temperature, producing a curved I–V characteristic, but its temperature changes instantly: there is no warm-up or cooling delay. A thermistor uses the temperature you set and ignores self-heating; an LDR uses the illumination you set.</li>
+	<li>Diodes and LEDs use nonlinear junction models with series resistance; reverse breakdown is omitted. Transistors model cut-off, amplification and saturation, but omit the Early effect and internal capacitance. These are educational models, so extreme values can fail to converge; check <strong>Problems and notes</strong> if the solver cannot find a result.</li>
+	<li>A motor is modeled electrically as its coil resistance, without back EMF or mechanical load dynamics. A loudspeaker is also a resistance; its sound is a sine tone at the connected AC supply’s frequency, with volume following changing current. A fuse blows immediately above its rating, without the time delay of a real fuse.</li>
+	<li>Capacitors store charge and inductors store magnetic energy. Inductors can include winding resistance, but have no saturation or coupling to separate inductors. The transformer does model coupled windings, with leakage, winding loss and magnetizing current; it omits core loss and saturation. Its turns ratio is approximate under load, and DC produces a switching transient rather than a sustained secondary voltage.</li>
+	<li>Time-dependent circuits advance in fixed steps, independently of the screen’s frame rate. Capacitors and inductors use a first-order backward step after edits or a time-step change, then second-order backward differentiation. In the <strong>Simulation</strong> inspector, <strong>Time step → Auto</strong> shortens the step for AC periods and RC, RL and LC behavior, down to a minimum of 1 µs. Smaller steps need more computing time; demanding circuits can run slower than the chosen speed. <strong>Speed</strong> changes playback speed, not the time step.</li>
+	<li>Very small capacitances and inductances can make an LC circuit oscillate faster than the shortest automatic time step (1 µs) can follow; a long manual time step can do the same. The oscillations then die away too quickly, and <strong>Problems and notes</strong> names the parts responsible. Use larger values or a lower frequency.</li>
+	<li>With an active AC supply in a meter’s network, <strong>DC (average)</strong> shows the mean and <strong>AC (r.m.s.)</strong> shows the root mean square, including any DC offset. Averaging needs a full cycle of the lowest supply frequency; before that, readings are instantaneous. Without AC, DC mode shows the instantaneous signed value and AC mode its magnitude. Use the oscilloscope for the waveform. Fast AC current animation may replay at one visual cycle per second; the dashes are a guide to conventional current, not the speed of charge carriers.</li>
+	<li>Logic modules share a hidden 5 V supply. Inputs read HIGH above 3 V and LOW below 2 V, retain their last state between those thresholds, and default LOW when unconnected. Gates switch without propagation delay, so gate-delay timing and real high-frequency switching behavior are not modeled.</li>
+	<li>Try <strong>Examples → Capacitor charging and discharging</strong> to explore a transient. Pause holds stored capacitor p.d. and inductor current, even while you edit the rest of the circuit. <strong>Reset time and stored energy</strong> returns them to their initial settings. Saved circuit files keep those initial settings, rather than the live stored energy.</li>
 </ul>
 </div>
 </details>
@@ -269,8 +287,7 @@
 <div class="reference-body">
 <ul>
 	<li>Free, browser-based, no install — works on school Chromebooks. Offline after the first visit when the homepage shows Offline ready.</li>
-	<li>Models are educational: ideal wires and ideal meters, three significant figures, no thermal lag or magnetic saturation. Each component’s inspector explains its model.</li>
-	<li>Short circuits and conflicting ideal sources produce errors. Potential difference between separate networks is undefined.</li>
+	<li>Use <a href="#physics">Physics model and limits</a> to discuss the assumptions behind the readings and how they differ from a real circuit. Each component’s inspector also explains its model.</li>
 </ul>
 </div>
 </details>
@@ -322,6 +339,7 @@
 				<li><a href="#build">Build your own</a></li>
 				<li><a href="#views">Two views, one circuit</a></li>
 				<li><a href="#measure">Meters, graph and oscilloscope</a></li>
+				<li><a href="#physics">Physics model and limits</a></li>
 				<li><a href="#classroom">Classroom notes</a></li>
 				<li><a href="#keyboard">Keyboard</a></li>
 			</ul>
