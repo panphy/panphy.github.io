@@ -1,8 +1,11 @@
 /*
  * Home-screen apps on iOS/iPadOS 26+ draw a Liquid Glass blur across the top
  * of the screen, reaching past the status bar whatever the status-bar style.
- * In that mode, reserve a flat strip tall enough to cover the blur and start
- * the page below it, so nothing but a solid color sits in the blurred band.
+ * In that mode, reserve a flat strip the height of the top safe area and start
+ * the page below it, so the blur sits over a solid color, not page content.
+ * Pages offset only pinned (fixed or sticky) elements by var(--standalone-top);
+ * in-flow elements are already pushed down by the body border, so they must
+ * not add it again.
  *
  * Pages use var(--standalone-top) to offset anything pinned to the top edge
  * (sticky headers, fixed buttons, fullscreen panes). It is 0px elsewhere.
@@ -20,7 +23,7 @@
   /* -webkit-touch-callout is only supported by iOS/iPadOS WebKit. */
   @supports (-webkit-touch-callout: none) {
     :root {
-      --standalone-top: calc(max(env(safe-area-inset-top, 0px), 24px) + 16px);
+      --standalone-top: max(env(safe-area-inset-top, 0px), 24px);
     }
 
     body {

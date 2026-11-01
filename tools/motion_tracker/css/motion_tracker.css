@@ -182,8 +182,8 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
-  padding: var(--standalone-top, 0px) 14px 0;
+  min-height: var(--appbar-h);
+  padding: 0 14px 0;
   background: var(--surface);
   border-bottom: 1px solid var(--line);
 }

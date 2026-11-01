@@ -64,8 +64,8 @@ button, input, select { font: inherit; color: inherit; }
 
 .appbar {
   position: relative; flex: none; display: flex; align-items: center; gap: 14px; z-index: 20;
-  min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
-  padding: var(--standalone-top, 0px) max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+  min-height: var(--appbar-h);
+  padding: 0 max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
   background: var(--surface); border-bottom: 1px solid var(--line);
 }
 /* One thin spectrum line under the app bar marks the app as PanPhy. */
