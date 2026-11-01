@@ -63,7 +63,7 @@
     });
     if (window.DeckNotes) window.DeckNotes.show(slide);
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
-    document.title = slide.dataset.title && !DECK_TITLE.startsWith(slide.dataset.title) ? `${slide.dataset.title} · ${DECK_TITLE}` : DECK_TITLE;
+    document.title = slide.dataset.title && !DECK_TITLE.startsWith(slide.dataset.title) ? `${slide.dataset.title} — ${DECK_TITLE}` : DECK_TITLE;
     setScatterActive();
   }
 

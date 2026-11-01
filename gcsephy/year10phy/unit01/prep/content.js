@@ -14,7 +14,7 @@
     file: "Electric Circuits - Year 10",
     preps: [
       /* 1 */
-      { lessons: "1–2", title: "Complete circuits and current", subtitle: "Circuit symbols · ammeters · current as a flow of charge · Q = I t",
+      { lessons: "1–2", title: "Complete circuits and current", subtitle: "Circuit symbols; ammeters; current as a flow of charge; Q = I t",
         doNow: [
           [2, "State the law of conservation of energy.", "Energy can be transferred usefully, stored or dissipated, but it cannot be created or destroyed."],
           [31, "Define power.", "The rate at which energy is transferred (or work is done)."],
@@ -36,7 +36,7 @@
         ] },
 
       /* 2 */
-      { lessons: "3–4", title: "Potential difference and resistance", subtitle: "Voltmeters · energy per coulomb, E = Q V · resistance, V = I R",
+      { lessons: "3–4", title: "Potential difference and resistance", subtitle: "Voltmeters; energy per coulomb, E = Q V; resistance, V = I R",
         doNow: [
           [90, "Define electric current.", "The rate of flow of electrical charge."],
           [91, "State the standard units of charge, current and time.", "Charge: coulomb (C); current: ampere (A); time: second (s)"],
@@ -53,7 +53,7 @@
         ] },
 
       /* 3 */
-      { lessons: "5–6", title: "Wires, series and parallel", subtitle: "Resistance of a wire (required practical) · rules for series and parallel circuits",
+      { lessons: "5–6", title: "Wires, series and parallel", subtitle: "Resistance of a wire (required practical); rules for series and parallel circuits",
         doNow: [
           [96, "State the standard units of potential difference and resistance.", "Potential difference: volt (V); resistance: ohm (Ω)"],
           [98, "Describe how current depends on potential difference for an ohmic conductor.", "Current is directly proportional to potential difference."],
@@ -79,7 +79,7 @@
         ] },
 
       /* 4 */
-      { lessons: "7–8", title: "Combining resistors and I–V graphs", subtitle: "Resistors in series and parallel (required practical) · I–V characteristics",
+      { lessons: "7–8", title: "Combining resistors and I–V graphs", subtitle: "Resistors in series and parallel (required practical); I–V characteristics",
         doNow: [
           [118, "Describe how to calculate the total resistance of two resistors in series.", "Add the two resistances: R<sub>total</sub> = R₁ + R₂"],
           [129, "Describe the potential difference across components in parallel.", "It is the same across each component."],
@@ -103,7 +103,7 @@
         ] },
 
       /* 5 */
-      { lessons: "9–10", title: "I–V investigations and sensors", subtitle: "Investigating I–V characteristics (required practical) · thermistors, LDRs and sensing circuits",
+      { lessons: "9–10", title: "I–V investigations and sensors", subtitle: "Investigating I–V characteristics (required practical); thermistors, LDRs and sensing circuits",
         doNow: [
           [102, "Explain why the resistance of a filament lamp increases with current.", "A greater current makes the filament hotter, and its resistance increases with temperature."],
           [77, "State the function of a diode.", "To allow current in one direction only."],
@@ -124,7 +124,7 @@
         ] },
 
       /* 6 */
-      { lessons: "11–12", title: "Power, mains and the National Grid", subtitle: "P = V I and P = I² R · energy transferred · mains electricity, safety and the Grid",
+      { lessons: "11–12", title: "Power, mains and the National Grid", subtitle: "P = V I and P = I² R; energy transferred; mains electricity, safety and the Grid",
         doNow: [
           [105, "Describe how the resistance of a thermistor varies with temperature.", "As the temperature increases, the resistance decreases."],
           [106, "Describe how the resistance of an LDR varies with light intensity.", "As the light intensity increases, the resistance decreases."],

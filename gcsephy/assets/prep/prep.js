@@ -53,27 +53,27 @@
 
   function page(p, i) {
     const n = i + 1, out = total(p);
-    const label = `Prep ${n} · Lesson${p.lessons.includes("–") ? "s" : ""} ${p.lessons}`;
+    const label = `Prep ${n}, Lesson${p.lessons.includes("–") ? "s" : ""} ${p.lessons}`;
     if (out !== 10) console.warn(`Prep ${n} is out of ${out}, not 10`);
     const doNow = p.doNow.map(([id, q, a, l], k) => question({ q: `${q}<span class="bank">DN ${id}</span>`, m: 1, a, lines: l == null ? 1 : l }, k + 1)).join("");
     const rest = p.questions.map((q, k) => question(q, p.doNow.length + k + 1)).join("");
     return `<section class="page">
-      <div class="run-head"><span>Year ${U.year} · ${U.unit}</span><span>${label}${answers ? " · Answers" : ""}</span></div>
+      <div class="run-head"><span>Year ${U.year}, ${U.unit}</span><span>${label}${answers ? ", Answers" : ""}</span></div>
       <div class="top"><div><span class="badge">${label}</span><h1 class="title">${p.title}</h1><p class="subtitle">${p.subtitle}</p></div>
         <div class="score"><span>Score</span><b><i></i>/ ${out}</b></div></div>
       <div class="title-rule"></div>
       <div class="fields"><div>Name <i></i></div><div>Class <i></i></div><div>Due <i></i></div></div>
-      <div class="donow"><div class="sec"><h2>Do Now</h2><span class="tag">Remember</span><span class="aside">From earlier lessons · 1 mark each</span></div>${doNow}</div>
+      <div class="donow"><div class="sec"><h2>Do Now</h2><span class="tag">Remember</span><span class="aside">From earlier lessons, 1 mark each</span></div>${doNow}</div>
       <div class="sec"><h2>Key ideas</h2><span class="tag">Lesson${p.lessons.includes("–") ? "s" : ""} ${p.lessons}</span><span class="aside">Show your working</span></div>
       ${rest}
-      <div class="run-foot"><span><b>${U.unit}</b> · Year ${U.year} Prep ${n} · © 2026 PanPhy Labs. All rights reserved.</span><span>${answers ? "Answer edition" : "Hand in on the due date"}</span></div>
+      <div class="run-foot"><span><b>${U.unit}</b>, Year ${U.year} Prep ${n}, © 2026 PanPhy Labs. All rights reserved.</span><span>${answers ? "Answer edition" : "Hand in on the due date"}</span></div>
     </section>`;
   }
 
   const book = document.createElement("main");
   const nav = U.preps.map((p, i) => `<a href="?n=${i + 1}${answers ? "&answers" : ""}">Prep ${i + 1}</a>`).join("");
   const flip = only ? `?n=${only}${answers ? "" : "&answers"}` : `?${answers ? "" : "answers"}`;
-  book.innerHTML = `<div class="screen-bar"><a href="?${answers ? "answers" : ""}">All</a>${nav} · <a href="${flip}">${answers ? "Student edition" : "Answer edition"}</a> · Print with Chrome, A4, headers and footers off</div>` +
+  book.innerHTML = `<div class="screen-bar"><a href="?${answers ? "answers" : ""}">All</a>${nav}, <a href="${flip}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>` +
     U.preps.map((p, i) => (!only || only === i + 1 ? page(p, i) : "")).join("");
   document.title = only ? `${U.file} Prep ${only}${answers ? " (Answers)" : ""}` : `${U.file} Preps`;
   document.body.appendChild(book);

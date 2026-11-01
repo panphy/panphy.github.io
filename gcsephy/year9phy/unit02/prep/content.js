@@ -12,7 +12,7 @@
     file: "Energy - Year 9",
     preps: [
       /* 1 */
-      { lessons: "1–2", title: "Stores and the kinetic store", subtitle: "Energy stores and transfers · describing a transfer · kinetic energy",
+      { lessons: "1–2", title: "Stores and the kinetic store", subtitle: "Energy stores and transfers; describing a transfer; kinetic energy",
         doNow: [
           [850, "Define precision.", "How close repeated measurements are to each other."],
           [872, "What is a control variable?", "A variable kept the same to make the test fair."],
@@ -30,7 +30,7 @@
         ] },
 
       /* 2 */
-      { lessons: "3–4", title: "Lifting and stretching", subtitle: "Gravitational potential energy · stretching springs · spring constant",
+      { lessons: "3–4", title: "Lifting and stretching", subtitle: "Gravitational potential energy; stretching springs; spring constant",
         doNow: [
           [5, "State the standard unit of energy.", "Joule (J)"],
           [16, "Name the four ways energy is transferred between stores.", "Mechanically, electrically, by heating and by waves (or by radiation)"],
@@ -49,7 +49,7 @@
         ] },
 
       /* 3 */
-      { lessons: "5–6", title: "Springs, swings and conservation", subtitle: "Elastic potential energy · conservation of energy · energy dissipated",
+      { lessons: "5–6", title: "Springs, swings and conservation", subtitle: "Elastic potential energy; conservation of energy; energy dissipated",
         doNow: [
           [352, "State the standard unit of spring constant.", "Newton per metre (N/m)"],
           [10, "Name the store of energy associated with changes in height.", "The gravitational potential energy store"],
@@ -69,7 +69,7 @@
         ] },
 
       /* 4 */
-      { lessons: "7–8", title: "Power and wasted energy", subtitle: "Power as the rate of energy transfer · wasted energy · reducing it",
+      { lessons: "7–8", title: "Power and wasted energy", subtitle: "Power as the rate of energy transfer; wasted energy; reducing it",
         doNow: [
           [2, "State the law of conservation of energy.", "Energy can be transferred usefully, stored or dissipated, but it cannot be created or destroyed."],
           [357, "Describe how to find the spring constant from a graph of force (y-axis) against extension (x-axis).", "It is the gradient of the straight section."],
@@ -86,7 +86,7 @@
         ] },
 
       /* 5 */
-      { lessons: "9", title: "How much is useful?", subtitle: "Efficiency as a decimal and a percentage · Sankey diagrams",
+      { lessons: "9", title: "How much is useful?", subtitle: "Efficiency as a decimal and a percentage; Sankey diagrams",
         doNow: [
           [31, "Define power.", "The rate at which energy is transferred (or work is done)."],
           [654, "State what is meant by dissipated energy.", "Energy transferred to the surroundings and stored in less useful ways."],

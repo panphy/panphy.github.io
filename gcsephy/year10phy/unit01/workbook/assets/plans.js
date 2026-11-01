@@ -8,7 +8,7 @@
   const only = Number(new URLSearchParams(location.search).get("lesson")) || 0;
 
   const style = document.createElement("style");
-  style.textContent = '@page { @bottom-left { content: "Electric Circuits, Year 10 teacher guide · © 2026 PanPhy Labs. All rights reserved."; } }';
+  style.textContent = '@page { @bottom-left { content: "Electric Circuits, Year 10 teacher guide, © 2026 PanPhy Labs. All rights reserved."; } }';
   document.head.appendChild(style);
   document.title = only ? `Lesson ${only} plan | Electric Circuits` : "Electric Circuits - Year 10 Teacher Guide";
 

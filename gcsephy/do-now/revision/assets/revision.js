@@ -27,7 +27,7 @@
     link.href = href;
     strong.append(link);
     const info = element("span", "", detail);
-    if (separate) info.append(" · ", element("b", "badge", "Separate Physics only"));
+    if (separate) info.append(", ", element("b", "badge", "Separate Physics only"));
     const links = element("small");
     const pdf = element("a", "", pdfLabel);
     pdf.href = href;
@@ -65,13 +65,13 @@
     const shown = topics.filter((topic) => !(combinedOnly && topic.separate));
     for (const unit of [...new Set(shown.map((topic) => topic.unit))]) {
       const inUnit = shown.filter((topic) => topic.unit === unit);
-      section(unit, `${inUnit[0].paper} · ${inUnit.length} topics`, inUnit.map((topic) => card(
+      section(unit, `${inUnit[0].paper}, ${inUnit.length} topics`, inUnit.map((topic) => card(
         topic.title, `pdf/${encodeURIComponent(topic.file)}`, `${topic.questions.length} questions`, "Questions and answers PDF", topic.separate)));
     }
     const methods = practicals.filter((practical) => !(combinedOnly && practical.separate));
     if (methods.length) {
-      section(PRACTICALS, `Method and diagrams · ${methods.length} practicals`, methods.map((practical) => card(
-        practical.title, `pdf/${encodeURIComponent(practical.file)}`, `${practical.unit} · ${practical.steps.length} steps`, "Method and diagrams PDF", practical.separate)));
+      section(PRACTICALS, `Method and diagrams, ${methods.length} practicals`, methods.map((practical) => card(
+        practical.title, `pdf/${encodeURIComponent(practical.file)}`, `${practical.unit}, ${practical.steps.length} steps`, "Method and diagrams PDF", practical.separate)));
     }
     updateFoldAll();
   }

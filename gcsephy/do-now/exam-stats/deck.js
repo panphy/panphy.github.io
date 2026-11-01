@@ -178,15 +178,15 @@
     const notes = (text) => el("div", "", isTrilogy ? [el("p", "note", text)] : [el("p", "note", text), separateNote()]);
     const courseLink = (key, text) => { const a = el("a", "", text); a.href = `?course=${key}`; return a; };
 
-    document.title = `Exam statistics: ${course.name} · Do Now`;
+    document.title = `Exam statistics: ${course.name} — Do Now`;
     document.body.dataset.deckTitle = `Exam statistics: ${course.name}`;
     deck.textContent = "";
 
     // Title
     {
-      const section = slide("dark a-hi", "Exam statistics", "", "", `Exam statistics · ${course.name}`);
+      const section = slide("dark a-hi", "Exam statistics", "", "", `Exam statistics, ${course.name}`);
       const eyebrow = el("p", "eyebrow");
-      eyebrow.append(el("span", "on", "Do Now"), ` · exam statistics · ${course.name}`);
+      eyebrow.append(el("span", "on", "Do Now"), `, exam statistics, ${course.name}`);
       const heading = el("h1");
       heading.innerHTML = "What the<br>papers <em>ask.</em>";
       const switcher = el("div", "unlocks", [courseLink(course.other, `See the ${other.name} version`)]);
@@ -275,8 +275,8 @@
       section.append(bars, notes(note));
       finish(section);
     };
-    rankSlide("a-hi", "Most recall marks", `${course.name} · top twelve topics`, "Most recall <em>marks.</em>", ranked.slice(0, 12), perPaper("topic"));
-    rankSlide("a-hot", "Fewest recall marks", `${course.name} · bottom twelve topics`, "Fewest recall <em>marks.</em>", ranked.slice(-12),
+    rankSlide("a-hi", "Most recall marks", `${course.name}, top twelve topics`, "Most recall <em>marks.</em>", ranked.slice(0, 12), perPaper("topic"));
+    rankSlide("a-hot", "Fewest recall marks", `${course.name}, bottom twelve topics`, "Fewest recall <em>marks.</em>", ranked.slice(-12),
       "Same scale as the top twelve. Several of these topics are examined mainly through calculations.");
 
     // Each topic, series by series
@@ -285,7 +285,7 @@
       const shown = groupUnits.filter((unit) => units.includes(unit));
       if (!shown.length) return;
       const trimmed = shown.length < groupUnits.length && shortTitle;
-      const section = slide(ACCENTS[at % ACCENTS.length], trimmed ? shortTitle : fullTitle, `${course.name} · topic by topic`, trimmed ? shortHeading : fullHeading);
+      const section = slide(ACCENTS[at % ACCENTS.length], trimmed ? shortTitle : fullTitle, `${course.name}, topic by topic`, trimmed ? shortHeading : fullHeading);
       const grid = el("div", "grid");
       grid.style.setProperty("--series", series.length);
       const head = el("div", "grid-row head", [el("span", "name", "Recall marks in each series")]);
@@ -370,7 +370,7 @@
       }
       const most = Math.max(1, ...[...tagged.values()].flatMap((record) => Object.values(record)));
       const methods = marks.filter((part) => part.Levels === "1" && list(part.Practicals).length).length;
-      const section = slide("a-cyan", "Required practicals", `${course.name} · required practicals`, "Practicals earn <em>marks too.</em>");
+      const section = slide("a-cyan", "Required practicals", `${course.name}, required practicals`, "Practicals earn <em>marks too.</em>");
       const grid = el("div", "grid");
       grid.style.setProperty("--series", series.length);
       const head = el("div", "grid-row head", [el("span", "name", "Marks on each practical")]);

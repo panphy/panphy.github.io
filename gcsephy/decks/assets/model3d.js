@@ -126,7 +126,7 @@ function mount(THREE, fig, index, attr, make) {
   ['touchstart', 'touchend', 'click'].forEach(type => canvas.addEventListener(type, event => event.stopPropagation()));
   // Tell the viewer they can turn it: a hint in the panel heading, shown only on screen.
   const head = fig.closest('.panel')?.querySelector('.panel-head');
-  if (head && !head.querySelector('.drag-hint')) head.insertAdjacentHTML('beforeend', '<span class="pill reveal-hint drag-hint">DRAG · ZOOM</span>');
+  if (head && !head.querySelector('.drag-hint')) head.insertAdjacentHTML('beforeend', '<span class="pill reveal-hint drag-hint">DRAG, ZOOM</span>');
 
   // The slide's thumbnail is a copy made before the model was built: give it a still of the model,
   // from the starting view.

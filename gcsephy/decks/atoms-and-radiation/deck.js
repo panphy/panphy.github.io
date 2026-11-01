@@ -61,7 +61,7 @@
     });
     if (window.DeckNotes) window.DeckNotes.show(slide);
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
-    document.title = `${slide.dataset.title || 'Atoms and Nuclear Radiation'} · GCSE Physics`;
+    document.title = `${slide.dataset.title || 'Atoms and Nuclear Radiation'} — GCSE Physics`;
     setScatterActive();
   }
 

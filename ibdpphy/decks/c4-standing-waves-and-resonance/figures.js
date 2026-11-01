@@ -24,7 +24,7 @@ window.DeckFigures.add(P => {
       if (on) {
         for (let k = 0; k <= n; k++) s += `<circle cx="${f(x0 + (x1 - x0) * k / n)}" cy="${y}" r="8" style="fill:var(--text-main)"/>` + text(f(x0 + (x1 - x0) * k / n), y + 150, 'N', 'lbl mono strong');
         for (let k = 0; k < n; k++) s += text(f(x0 + (x1 - x0) * (k + 0.5) / n), y - 120, 'A', 'lbl mono strong', 'middle', 'style="fill:var(--brand-primary)"');
-        s += both(x0, y + 190, x0 + (x1 - x0) / n, y + 190) + text(x0 + (x1 - x0) / n / 2, y + 230, 'λ/2', 'lbl mono strong') + text(x1, y + 230, 'N: node · A: antinode', 'lbl', 'end');
+        s += both(x0, y + 190, x0 + (x1 - x0) / n, y + 190) + text(x0 + (x1 - x0) / n / 2, y + 230, 'λ/2', 'lbl mono strong') + text(x1, y + 230, 'N: node, A: antinode', 'lbl', 'end');
       }
       return svg(on ? '70 90 720 410' : '80 130 700 240', s + twoState(line(shape(x0, x1, y, amp, n, 0.8), 'brand-primary', 5), moving(x0, x1, y, amp, n, 'brand-primary', T)), `A standing wave on a string fixed at both ends, with ${n} loops. The points that never move are nodes; the points half way between, where the amplitude is greatest, are antinodes. Neighboring nodes are half a wavelength apart`);
     },
@@ -47,7 +47,7 @@ window.DeckFigures.add(P => {
       const x0 = 110, x1 = 750, y = 250, amp = 100, n = 3, w = (x1 - x0) / n;
       let s = `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="guide"/>` + envelope(x0, x1, y, amp, n) + line(shape(x0, x1, y, amp, n, 0.55), 'brand-primary', 6) + post(x0, y) + post(x1, y);
       for (let k = 0; k < n; k++) { const up = k % 2 === 0; [0.25, 0.5, 0.75].forEach(u => { const x = x0 + w * (k + u), h = 0.55 * amp * Math.sin(Math.PI * u), len = 46 * Math.sin(Math.PI * u), yy = y + (up ? -h : h); s += arrow(x, yy + (up ? -8 : 8), x, yy + (up ? -8 - len : 8 + len), 'brand-accent', 4); }); s += text(x0 + w * (k + 0.5), y + (up ? 190 : -150), up ? 'moving up' : 'moving down', 'lbl'); }
-      s += text(430, 480, 'within a loop: in phase · next loop: in antiphase', 'lbl strong');
+      s += text(430, 480, 'within a loop: in phase, next loop: in antiphase', 'lbl strong');
       return svg('70 70 720 430', s, 'A standing wave with three loops at one instant. All the points within one loop are moving in the same direction, in phase with each other but with different amplitudes. The points in the next loop are moving in the opposite direction, in antiphase');
     },
 
@@ -62,7 +62,7 @@ window.DeckFigures.add(P => {
         const [loops, name, lam, freq] = modes[i];
         if (kind === 'string') s += post(x0, y) + post(x1, y);
         else s += `<path d="M${x0},${y - 52} H${x1} M${x0},${y + 52} H${x1}${kind === 'closed' ? ` M${x0},${y - 52} V${y + 52}` : ''}" style="fill:none;stroke:var(--text-secondary);stroke-width:5;stroke-linecap:round"/>`;
-        s += envelope(x0, x1, y, amp, loops, fn) + text(x1 + 30, y - 12, name, 'lbl strong', 'start') + text(x1 + 30, y + 24, `${lam} · ${freq}`, 'lbl mono', 'start');
+        s += envelope(x0, x1, y, amp, loops, fn) + text(x1 + 30, y - 12, name, 'lbl strong', 'start') + text(x1 + 30, y + 24, `${lam}, ${freq}`, 'lbl mono', 'start');
         still += line(shape(x0, x1, y, amp, loops, 0.8, fn), 'brand-primary', 5); mover += moving(x0, x1, y, amp, loops, 'brand-primary', T / (2 * loops) * (kind === 'closed' ? 1 : 2), fn);
       });
       s += both(x0, 462, x1, 462) + text((x0 + x1) / 2, 498, 'L', 'lbl display italic');

@@ -24,7 +24,7 @@
   const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
   const footer = LABS ? "Electric Circuits, Year 10 virtual labs" : `Electric Circuits, Year 10 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
-  pageStyle.textContent = `@page { @bottom-left { content: "${footer} · © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
+  pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
   document.title = LABS ? "Electric Circuits - Year 10 Virtual Labs" : `Electric Circuits - Year 10 Workbook${ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
 

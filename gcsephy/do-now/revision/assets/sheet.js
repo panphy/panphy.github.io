@@ -48,10 +48,10 @@
     document.title = `AO1 revision - ${topic.title}`;
     const top = element("header", "top");
     const heading = element("div");
-    heading.append(element("p", "brand", "Do Now · AO1 revision"), element("h1", "", topic.title));
+    heading.append(element("p", "brand", "Do Now, AO1 revision"), element("h1", "", topic.title));
     const meta = element("p", "meta");
     meta.append(element("b", "", topic.unit), document.createElement("br"),
-      `${topic.paper} · ${topic.separate ? "Separate Physics only" : "Combined and Separate"}`, document.createElement("br"),
+      `${topic.paper}, ${topic.separate ? "Separate Physics only" : "Combined and Separate"}`, document.createElement("br"),
       `${topic.questions.length} questions`);
     // Priority questions (Target column "7") get a star, so one sheet serves both targets.
     const priority = topic.questions.filter((question) => question.Target === "7").length;

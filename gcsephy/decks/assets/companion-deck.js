@@ -69,7 +69,7 @@
     if (window.DeckNotes) window.DeckNotes.show(slide);
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
     const name = slide.dataset.title;
-    document.title = name && name !== deckTitle ? `${name} · ${deckTitle}` : deckTitle;
+    document.title = name && name !== deckTitle ? `${name} — ${deckTitle}` : deckTitle;
   }
 
   function next() {

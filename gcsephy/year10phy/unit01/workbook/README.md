@@ -25,9 +25,9 @@ Diagrams use the site's `../assets/diagrams.js`. Each booklet is self-contained:
 | # | Lesson |
 |---:|---|
 | 1 | Complete circuits and symbols |
-| 2 | Current and charge · Virtual Lab 1 |
-| 3 | Potential difference · Virtual Lab 2 |
-| 4 | Resistance and V = I R · Virtual Lab 3 |
+| 2 | Current and charge, Virtual Lab 1 |
+| 3 | Potential difference, Virtual Lab 2 |
+| 4 | Resistance and V = I R, Virtual Lab 3 |
 | 5 | RP: resistance of a wire |
 | 6 | Series and parallel circuits |
 | 7 | RP: resistors in series and parallel |

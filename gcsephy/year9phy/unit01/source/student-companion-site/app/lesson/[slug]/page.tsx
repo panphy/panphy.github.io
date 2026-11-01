@@ -34,7 +34,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
 
       <header className="lesson-hero">
         <div className="lesson-heading">
-          <p className="eyebrow"><span>Mission {lesson.number}</span> · Skills lab</p>
+          <p className="eyebrow"><span>Mission {lesson.number}</span>, Skills lab</p>
           <h1>{lesson.title}</h1>
           <p>{lesson.intro}</p>
         </div>

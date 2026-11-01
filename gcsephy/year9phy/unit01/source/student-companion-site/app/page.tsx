@@ -14,7 +14,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-grid" aria-hidden="true" />
         <div className="hero-copy">
-          <p className="eyebrow"><span>Year 9 physics</span> · 8-lesson field mission</p>
+          <p className="eyebrow"><span>Year 9 physics</span>, 8-lesson field mission</p>
           <h1>Evidence.<br /><em>Not guesses.</em></h1>
           <p className="hero-intro">
             Anyone can have an opinion about how the world works. A physicist produces

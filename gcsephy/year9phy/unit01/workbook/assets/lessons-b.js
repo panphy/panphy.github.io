@@ -13,7 +13,7 @@
     // ============================================================ 3
     {
       n: 3, accent: "copper", title: "The drop test", practical: true, practicalName: "Drop test: which material absorbs the shock?",
-      spec: "AQA Working scientifically WS 2.4, 3.1, 3.3 · Physics and Combined Science",
+      spec: "AQA Working scientifically WS 2.4, 3.1, 3.3; Physics and Combined Science",
       mapLine: "Shock absorber practical: three trials and a mean, results tables, bar charts",
       big: "Which material makes the best shock absorber, and how would you prove it to someone who was not there?",
       goals: ["recognise a categoric independent variable and what follows from it", "collect three trials for each material and calculate a mean", "build a results table with correct headings and units", "draw a bar chart that would satisfy a strict marker", "name a random and a systematic error in your own practical"],
@@ -100,7 +100,7 @@
     // ============================================================ 4
     {
       n: 4, accent: "leaf", title: "Higher ramp, further travel?", practical: true, practicalName: "Ramp: distance travelled",
-      spec: "AQA Working scientifically WS 2.6, 3.1 · Physics and Combined Science",
+      spec: "AQA Working scientifically WS 2.6, 3.1; Physics and Combined Science",
       mapLine: "Ramp practical: continuous data, choosing a scale, plotting a line graph",
       big: "Can a few measurements tell you about heights you never tested?",
       goals: ["recognise a continuous independent variable and what follows from it", "record five values with three trials each and a mean", "choose a scale that uses most of the grid", "plot points accurately as small crosses", "label both axes with the quantity and the unit"],
@@ -182,7 +182,7 @@
     // ============================================================ 5
     {
       n: 5, accent: "violet", title: "The point that does not fit", practicalName: "None: you analyse your Lesson 4 graph",
-      spec: "AQA Working scientifically WS 3.5, 3.6 · Physics and Combined Science",
+      spec: "AQA Working scientifically WS 3.5, 3.6; Physics and Combined Science",
       mapLine: "Best-fit lines, anomalous results, writing a conclusion with numbers",
       big: "One point is far from all the others. Do you delete it?",
       goals: ["draw a best-fit line, straight or curved, that shows the trend", "explain why dot-to-dot is wrong for measured data", "identify a possible anomalous result and say what to do about it", "write a conclusion supported by numbers"],

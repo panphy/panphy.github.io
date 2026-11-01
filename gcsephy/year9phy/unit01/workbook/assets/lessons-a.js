@@ -12,7 +12,7 @@
     // ============================================================ 1
     {
       n: 1, accent: "spark", title: "Can this data be trusted?", practical: true, practicalName: "Measure one thing three times",
-      spec: "AQA Working scientifically WS 2.6, 3.4, 3.7 · Physics and Combined Science",
+      spec: "AQA Working scientifically WS 2.6, 3.4, 3.7; Physics and Combined Science",
       mapLine: "Precision and accuracy, random and systematic error, uncertainty, resolution",
       big: "Thousands of repeat measurements agreed perfectly, and the result was still wrong. How can that happen?",
       goals: ["tell the difference between precise and accurate", "describe random and systematic errors, and say why repeats only help with one of them", "calculate a mean and an uncertainty from repeat readings", "say what the resolution of an instrument is"],
@@ -119,7 +119,7 @@
     // ============================================================ 2
     {
       n: 2, accent: "cyan", title: "What are you actually changing?", practicalName: "Class demo: which surface slows the car most?",
-      spec: "AQA Working scientifically WS 2.2, 3.1 · Physics and Combined Science",
+      spec: "AQA Working scientifically WS 2.2, 3.1; Physics and Combined Science",
       mapLine: "Independent, dependent and control variables; continuous and categoric data; choosing a graph",
       big: "An advert says a drink makes you smarter. What would you need to know before you believed it?",
       goals: ["identify the independent, dependent and control variables in any investigation", "decide whether data is continuous or categoric", "choose a line graph or a bar chart, and give the reason"],
