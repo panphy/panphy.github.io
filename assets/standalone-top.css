@@ -26,6 +26,15 @@
       --standalone-top: max(env(safe-area-inset-top, 0px), 24px);
     }
 
+    /* iPad: the reported safe area also leaves room for the window controls,
+       which only appear on demand, so reserve just the status bar. iPhones
+       keep the full inset, which clears the notch or Dynamic Island. */
+    @media (min-width: 744px) and (min-height: 600px) {
+      :root {
+        --standalone-top: 24px;
+      }
+    }
+
     body {
       box-sizing: border-box;
       border-top: var(--standalone-top) solid var(--standalone-top-bg);
