@@ -68,7 +68,7 @@
     const top = h.stack[h.index];
     const now = Date.now();
     if (top && top.snap === snap) { afterChange(); return; }
-    if (opts.merge && top && top.merge === opts.merge && now - top.time < 1500) {
+    if (opts.merge && h.index === h.stack.length - 1 && top && top.merge === opts.merge && now - top.time < 1500) {
       top.snap = snap; top.time = now;
     } else {
       h.stack = h.stack.slice(0, h.index + 1);
@@ -85,6 +85,7 @@
     if (!app.canUndo()) return;
     const undone = app.history.stack[app.history.index];
     app.history.index--;
+    app.history.stack[app.history.index].merge = null;
     applySnapshot(app.history.stack[app.history.index].snap);
     afterChange();
     ui.toast(`Undid: ${undone.label}${undone.view !== app.doc.view ? ` (in the ${viewName(undone.view)})` : ''}`);
@@ -94,6 +95,7 @@
     if (app.editor.wiring) app.editor.cancelWiring();
     app.history.index++;
     const redone = app.history.stack[app.history.index];
+    redone.merge = null;
     applySnapshot(redone.snap);
     afterChange();
     ui.toast(`Redid: ${redone.label}${redone.view !== app.doc.view ? ` (in the ${viewName(redone.view)})` : ''}`);
@@ -103,6 +105,12 @@
     app.history = { stack: [{ snap: snapshot(), label, view: app.doc.view, time: Date.now() }], index: 0 };
   }
 
+  // Scope controls only change how stored samples are displayed. Keep them in
+  // history and saved files, but out of the key that invalidates acquisition.
+  function electricalKey() {
+    return JSON.stringify([app.doc.components.map(c => c.type === 'scope' ? { ...c, props: {} } : c), app.doc.wires]);
+  }
+
   // After any document change: re-solve if the circuit changed electrically,
   // tidy the selection, redraw and autosave.
   function afterChange() {
@@ -110,7 +118,7 @@
     // A wire in progress cannot outlive the terminal it started from.
     const w = app.editor && app.editor.wiring;
     if (w && !circuit.getComp(app.doc, w.from.c)) app.editor.abortWiring();
-    const elecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    const elecKey = electricalKey();
     if (elecKey !== app.lastElecKey) {
       app.lastElecKey = elecKey;
       app.sim.setDoc(app.doc);
@@ -124,7 +132,7 @@
   }
 
   app.electricalChanged = function (opts = {}) {
-    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.lastElecKey = electricalKey();
     app.sim.setDoc(app.doc, opts);
     refreshProblems();
     app.renderer.renderAll();
@@ -139,7 +147,7 @@
   };
   // Display-only operational props (plot, sound) must not wipe scope traces.
   app.displayPropChanged = function () {
-    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.lastElecKey = electricalKey();
     app.rev++;
     app.renderAll();
     scheduleSave();
@@ -158,8 +166,7 @@
     ui.toast('Time and stored charge and current reset to their initial values.');
   };
   app.applyInitialEnergy = function (compId) {
-    app.sim.applyInitialConditions([compId]);
-    app.electricalChanged();
+    app.electricalChanged({ initialConditions: [compId] });
   };
 
   // ---------- Views ----------
@@ -379,7 +386,7 @@
     const c = circuit.getComp(app.doc, id);
     if (!c || c.type !== 'scope') return;
     c.props.autoScale = enabled;
-    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.lastElecKey = electricalKey();
     app.rev++;
     app.renderAll();
     scheduleSave();
@@ -414,7 +421,7 @@
     });
     if (!blown.length) return;
     for (const c of blown) c.props.blown = true;
-    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.lastElecKey = electricalKey();
     app.sim.setDoc(app.doc);
     app.rev++;
     blowFuses();
@@ -582,7 +589,11 @@
     const dt = Math.min(0.1, (now - lastFrame) / 1000);
     lastFrame = now;
     if (app.sim.running) {
-      const steps = app.sim.advance(dt, 10, () => performance.now(), (result) => { app.audio.sample(result); app.renderer.sampleFlow(result); });
+      const steps = app.sim.advance(dt, 10, () => performance.now(), () => {
+        blowFuses();
+        app.audio.sample(app.sim.result);
+        app.renderer.sampleFlow(app.sim.result);
+      });
       if (steps > 0) {
         refreshProblems();
         app.renderer.updateDynamic();
@@ -618,7 +629,7 @@
     app.lastElecKey = '';
     app.sim = solver.createSim();
     app.sim.setDoc(doc);
-    app.lastElecKey = JSON.stringify([doc.components, doc.wires]);
+    app.lastElecKey = electricalKey();
     ensureViewReady(doc.view);
     for (const v of layout.VIEWS) {
       const k = opts.cameras && opts.cameras[v];

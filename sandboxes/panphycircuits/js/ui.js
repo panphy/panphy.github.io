@@ -696,8 +696,8 @@
       if (p.kind === 'bool') {
         c.props[key] = t.checked;
         if (p.operational) {
-          // Plot and sound are display-only: keep scope traces and averaging windows.
-          if (key === 'plot' || key === 'sound') {
+          // Scope scales, plot and sound leave the electrical acquisition intact.
+          if (c.type === 'scope' || key === 'plot' || key === 'sound') {
             app.displayPropChanged();
             if (key === 'plot' && t.checked) app.showGraph(true);
             return;
