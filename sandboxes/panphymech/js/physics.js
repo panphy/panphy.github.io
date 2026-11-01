@@ -601,7 +601,7 @@
     };
 
     // The forces on one moving object in the latest step, each where it acts (world point, N):
-    // weight W at the center of mass, normal reaction N and friction F_f at each contact,
+    // weight W at the center of mass, normal reaction N and friction f at each contact,
     // spring force F_s, tension T and joint reaction R at attachments, and drag D.
     sim.forcesOn = function forcesOn(id) {
       const pb = bodies.get(id);
@@ -621,7 +621,7 @@
         const sign = f.B === pb ? 1 : f.A === pb ? -1 : 0;
         if (!sign) return;
         add('N', f, sign * f.nx, sign * f.ny);
-        add('F_f', f, sign * f.tx, sign * f.ty);
+        add('f', f, sign * f.tx, sign * f.ty);
       });
       const inv = 1 / sim.lastH;
       // A rod, rope or spring often joins an object at its center, but its pull acts where it
