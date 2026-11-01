@@ -485,7 +485,7 @@
         ctx.fill();
         if (width > 3) ctx.stroke();
       };
-      if (outline) shape(5.5, r.colors.bg);
+      if (outline) shape(3.5, r.colors.bg);
       shape(2.2, color);
       ctx.lineJoin = 'miter';
       if (label) {
@@ -494,7 +494,7 @@
         ctx.font = 'italic 600 12px Figtree, system-ui, sans-serif';
         ctx.textAlign = 'left';
         const text = (t, x, y) => {
-          if (outline) { ctx.lineWidth = 3; ctx.strokeStyle = r.colors.bg; ctx.strokeText(t, x, y); }
+          if (outline) { ctx.lineWidth = 1.5; ctx.strokeStyle = r.colors.bg; ctx.strokeText(t, x, y); }
           ctx.fillText(t, x, y);
         };
         text(main, to.x + 5, to.y - 5);

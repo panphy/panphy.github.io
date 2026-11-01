@@ -330,6 +330,7 @@ button, input, select { font: inherit; color: inherit; }
 /* ---------- Dialogs and toast ---------- */
 
 .dialog { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); padding: 20px 22px; max-width: min(460px, calc(100vw - 24px)); box-shadow: var(--shadow-2); }
+#dlg-confirm { width: 520px; max-width: calc(100vw - 24px); }
 .dialog-wide { width: min(900px, calc(100vw - 24px)); max-width: min(900px, calc(100vw - 24px)); max-height: calc(100vh - 48px); }
 .dialog::backdrop { background: rgba(8, 12, 24, 0.45); }
 .dialog h2 { margin: 0 0 8px; font-size: 1.2rem; }
