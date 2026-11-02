@@ -696,9 +696,7 @@
     function doSlider(d, p) {
       const pl = app.doc.layouts[view()].comps[d.id];
       const a = d.a;
-      // An upright slider runs left to right on screen, from its center.
-      const x = a.upright ? p.x - layout.xform(pl, a.cx, a.cy).x : toLocal(pl, p).x;
-      const f = Math.max(0, Math.min(1, (x - a.x0) / (a.x1 - a.x0)));
+      const f = layout.sliderFraction(pl, a, p.x, p.y);
       let value;
       if (!a.prop) value = Math.round(f * 100);
       else if (a.log) value = Number(Math.pow(10, Math.log10(a.min) + f * (Math.log10(a.max) - Math.log10(a.min))).toPrecision(2));

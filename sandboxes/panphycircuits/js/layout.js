@@ -46,6 +46,14 @@
     pl.f = !pl.f;
     return pl;
   }
+  // Position (0–1) along a slider control for a world point. An upright slider
+  // runs left to right on screen from its center. A `keepDirection` slider is
+  // drawn unmirrored, so it still rises to the right when its part is mirrored.
+  function sliderFraction(pl, a, x, y) {
+    let lx = a.upright ? x - xform(pl, a.cx, a.cy).x : toLocal(pl, x, y).x;
+    if (!a.upright && a.keepDirection && pl.f) lx = a.x0 + a.x1 - lx;
+    return Math.max(0, Math.min(1, (lx - a.x0) / (a.x1 - a.x0)));
+  }
   function xdir(pl, dx, dy) {
     const p = xform({ x: 0, y: 0, r: pl.r, f: pl.f }, dx, dy);
     return { x: p.x, y: p.y };
@@ -1896,7 +1904,7 @@
   }
 
   const api = {
-    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, mirror, clearSpot, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
+    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, mirror, sliderFraction, clearSpot, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, branchPoints, canMove, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
     resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, schematicQuality, distributeRuns, seriesParallel, layoutSeriesParallel
   };
