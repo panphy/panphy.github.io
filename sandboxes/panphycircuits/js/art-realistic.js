@@ -132,12 +132,14 @@
     return {
       bounds: () => [-84, -58, 168, 118],
       terms: () => ({ n: [-30, 30, 0, 1], p: [30, 30, 0, 1] }),
-      actuator: () => ({ kind: 'slider', x0: -60, x1: 60, rect: [-68, -44, 136, 60], prop: ac ? 'peak' : 'emf', min: 0, max: 30, step: 0.5 }),
+      // The slider and knob are drawn unmirrored: up to the right, clockwise.
+      actuator: () => ({ kind: 'slider', keepDirection: true, x0: -60, x1: 60, rect: [-68, -44, 136, 60], prop: ac ? 'peak' : 'emf', min: 0, max: 30, step: 0.5 }),
       draw(ctx) {
         const p = ctx.p;
         const line1 = ac ? `${trimNum(p.peak)} V pk` : `${(p.emf).toFixed(p.emf >= 10 ? 1 : 2)} V`;
         const line2 = ac ? `${trimNum(p.freq)} Hz` : (ctx.display2 || '—');
-        const angle = -135 + 270 * Math.min(1, (ac ? p.peak : p.emf) / 30);
+        const level = Math.max(0, Math.min(1, (ac ? p.peak : p.emf) / 30));
+        const angle = -135 + 270 * level, fx = ctx.f ? -1 : 1;
         return shadow(roundRect(-80, -54, 160, 108, 10, '')) +
           roundRect(-80, -54, 160, 108, 10, 'fill="url(#ppc-case)" stroke="#8A919C" stroke-width="1"') +
           roundRect(-72, -46, 144, 92, 7, `fill="${ac ? '#233452' : 'url(#ppc-panel)'}" stroke="#14171C" stroke-width="1"`) +
@@ -145,8 +147,8 @@
           up(ctx, -20, -21, `<text x="38" y="-3" class="ppc-seg" text-anchor="end">${esc(line1)}</text><text x="38" y="11" class="ppc-seg ppc-seg-small" text-anchor="end">${esc(line2)}</text>`) +
           `<circle cx="48" cy="-18" r="15" fill="#11141A"/>` +
           `<circle cx="48" cy="-19" r="13" fill="url(#ppc-knob)"/>` +
-          `<line x1="48" y1="-19" x2="${n(48 + 10 * Math.sin(angle * Math.PI / 180))}" y2="${n(-19 - 10 * Math.cos(angle * Math.PI / 180))}" stroke="#F4F4F4" stroke-width="2" stroke-linecap="round"/>` +
-          `<rect x="-60" y="7" width="120" height="3" rx="1.5" fill="#0B0F0C"/><circle cx="${n(-60 + 120 * Math.max(0, Math.min(1, (ac ? p.peak : p.emf) / 30)))}" cy="8.5" r="4" fill="#F4F4F4" stroke="#8A919C"/>` +
+          `<line x1="48" y1="-19" x2="${n(48 + fx * 10 * Math.sin(angle * Math.PI / 180))}" y2="${n(-19 - 10 * Math.cos(angle * Math.PI / 180))}" stroke="#F4F4F4" stroke-width="2" stroke-linecap="round"/>` +
+          `<rect x="-60" y="7" width="120" height="3" rx="1.5" fill="#0B0F0C"/><circle cx="${n(fx * (-60 + 120 * level))}" cy="8.5" r="4" fill="#F4F4F4" stroke="#8A919C"/>` +
           socket(-30, 30, ac ? 'yellow' : 'black') + socket(30, 30, ac ? 'yellow' : 'red') +
           utext(ctx, -52, 30, ac ? '2' : '−', 'ppc-panel-mark') + utext(ctx, 52, 30, ac ? '1' : '+', 'ppc-panel-mark') +
           utext(ctx, 0, 31, ac ? 'AC ~' : 'DC', 'ppc-panel-label') +
@@ -213,8 +215,9 @@
     terms: () => ({ a: [-20, 40, 0, 1], w: [0, 40, 0, 1], b: [20, 40, 0, 1] }),
     actuator: () => ({ kind: 'knob', rect: [-24, -34, 48, 48] }),
     draw(ctx) {
+      // The pointer turns clockwise as `pos` rises, even when mirrored.
       const ang = (-135 + 270 * (ctx.p.pos / 100)) * Math.PI / 180;
-      const px = n(16 * Math.sin(ang)), py = n(-10 - 16 * Math.cos(ang));
+      const px = n((ctx.f ? -16 : 16) * Math.sin(ang)), py = n(-10 - 16 * Math.cos(ang));
       let knurl = '';
       for (let i = 0; i < 24; i++) {
         const a = (i / 24) * Math.PI * 2;

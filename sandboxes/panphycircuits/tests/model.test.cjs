@@ -71,6 +71,32 @@ test('mirroring flips terminals left to right on screen at every rotation and un
   }
 });
 
+test('mirroring never reverses a control: supply sliders and knobs and sensor sliders rise to the right', () => {
+  const doc = circuit.createDoc();
+  for (const type of ['dcsupply', 'acsupply', 'ldr', 'thermistor']) {
+    const c = circuit.addComponent(doc, type);
+    const art = layout.artFor('realistic', type);
+    for (const f of [false, true]) for (const r of type.endsWith('supply') ? [0] : [0, 1, 2, 3]) {
+      const pl = { x: 300, y: 200, r, f };
+      const a = art.actuator(c.props, pl);
+      const center = a.upright ? layout.xform(pl, a.cx, a.cy) : layout.xform(pl, (a.x0 + a.x1) / 2, 0);
+      const at = (dx) => layout.sliderFraction(pl, a, center.x + dx, center.y);
+      assert.ok(at(-200) === 0 && at(200) === 1 && at(-5) < at(5), `${type} r${r} f${f}: drag right raises the value`);
+    }
+  }
+  // The drawn supply slider and knob pointer sit where an unmirrored supply shows them.
+  for (const type of ['dcsupply', 'acsupply']) {
+    const c = circuit.addComponent(doc, type);
+    const draw = (f) => layout.artFor('realistic', type).draw({ c, p: Object.assign({}, c.props, { emf: 7.5, peak: 7.5 }), uid: 'u', r: 0, f, st: {}, display2: '' });
+    const dot = (svg) => Number(/<circle cx="([-\d.]+)" cy="8.5"/.exec(svg)[1]);
+    const tip = (svg) => Number(/<line x1="48" y1="-19" x2="([-\d.]+)"/.exec(svg)[1]);
+    const plain = draw(false), mirrored = draw(true);
+    const world = (f, x, y) => layout.xform({ x: 0, y: 0, r: 0, f }, x, y).x;
+    assert.equal(world(true, dot(mirrored), 8.5), world(false, dot(plain), 8.5), `${type}: slider position`);
+    assert.ok(Math.abs((world(true, tip(mirrored), 0) - world(true, 48, 0)) - (tip(plain) - 48)) < 1e-9, `${type}: knob turns clockwise`);
+  }
+});
+
 test('45° rotations place terminals on the diagonal, invert exactly and survive a save', () => {
   const doc = circuit.createDoc();
   const r = circuit.addComponent(doc, 'resistor');
