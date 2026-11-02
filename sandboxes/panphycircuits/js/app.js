@@ -295,6 +295,9 @@
   };
   app.canRotate = c => !!c && c.type !== 'junction' && !(app.doc.view === 'realistic' && registry.get(c.type).fixedBenchOrientation);
   app.canRotateSelection = () => [...app.selection.comps].some(id => app.canRotate(circuit.getComp(app.doc, id)));
+  // Bench supplies keep their fixed orientation but may still be mirrored.
+  app.canMirror = c => !!c && c.type !== 'junction';
+  app.canMirrorSelection = () => [...app.selection.comps].some(id => app.canMirror(circuit.getComp(app.doc, id)));
   app.rotateSelection = function (dir) {
     const v = app.doc.view;
     let n = 0;
@@ -312,7 +315,7 @@
     let n = 0;
     for (const id of app.selection.comps) {
       const pl = app.doc.layouts[v].comps[id];
-      if (!pl || !app.canRotate(circuit.getComp(app.doc, id))) continue;
+      if (!pl || !app.canMirror(circuit.getComp(app.doc, id))) continue;
       layout.mirror(pl); n++;
     }
     if (n) app.commit('Mirror');

@@ -266,7 +266,7 @@
       const plot = def.props.find((p) => p.key === 'plot');
       const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
-        `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)', !app.canRotateSelection())}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)', !app.canRotateSelection())}${actButton('mirror', 'mirror', 'Mirror', false, 'Mirror (M)', !app.canRotateSelection())}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
+        `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)', !app.canRotateSelection())}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)', !app.canRotateSelection())}${actButton('mirror', 'mirror', 'Mirror', false, 'Mirror (M)', !app.canMirrorSelection())}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
       return card('', head) + (ui.hasLiveDisplay(c) && !app.pinned.has(c.id) ? liveCard(c, false) : '') +
         card('Readings', `<dl id="readings"></dl><p id="meter-note" class="meter-note" role="status" hidden></p>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
         (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id, c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv')))).join('')) : '') +
@@ -303,7 +303,7 @@
 
     function multiInspector(nc, nw) {
       return card('', `<div class="insp-head"><div><p class="icard-label">Selection</p><h2 class="insp-title">${nc} component${nc === 1 ? '' : 's'}${nw ? `, ${nw} wire${nw === 1 ? '' : 's'}` : ''}</h2></div></div>` +
-        `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)', !app.canRotateSelection())}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)', !app.canRotateSelection())}${actButton('mirror', 'mirror', 'Mirror', false, 'Mirror (M)', !app.canRotateSelection())}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`);
+        `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)', !app.canRotateSelection())}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)', !app.canRotateSelection())}${actButton('mirror', 'mirror', 'Mirror', false, 'Mirror (M)', !app.canMirrorSelection())}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`);
     }
 
     function circuitInspector() {
@@ -815,7 +815,8 @@
       $('btn-redo').disabled = !app.canRedo();
       const hasSel = app.selection.comps.size + app.selection.wires.size > 0;
       ['btn-duplicate', 'btn-delete'].forEach((id) => { $(id).disabled = !hasSel; });
-      ['btn-rotate', 'btn-rotate-ccw', 'btn-mirror'].forEach((id) => { $(id).disabled = !app.canRotateSelection(); });
+      ['btn-rotate', 'btn-rotate-ccw'].forEach((id) => { $(id).disabled = !app.canRotateSelection(); });
+      $('btn-mirror').disabled = !app.canMirrorSelection();
       ['btn-tidy', 'btn-clear'].forEach((id) => { $(id).disabled = app.doc.components.length === 0; });
       $('zoom-readout').textContent = 'Zoom: ' + Math.round(app.cameras[app.doc.view].z * 100) + ' %';
       $('empty-state').hidden = app.doc.components.length > 0 || app.emptyDismissed;
