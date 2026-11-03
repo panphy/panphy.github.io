@@ -68,6 +68,7 @@
     };
     const dynCache = new Map();
     let routes = new Map();
+    let overlayZoom = null;
 
     function view() { return app.doc.view; }
     function cam() { return app.cameras[view()]; }
@@ -115,6 +116,8 @@
       host.style.backgroundPosition = `${k.tx}px ${k.ty}px`;
       host.dataset.zoom = k.z < 0.5 ? 'far' : 'near';
       renderTerminals();
+      // Wire end handles keep clear of terminals, whose hit size depends on zoom.
+      if (k.z !== overlayZoom && app.selection.wires.size) renderOverlay();
     }
 
     // ---------- Components ----------
@@ -309,12 +312,38 @@
 
     // ---------- Terminals ----------
 
+    function termHitRadius() { return Math.min(22, Math.max(8, 13 / cam().z)); }
+
+    // A point on the route, walked in from one end until it is at least
+    // `clear` away from that end in a straight line, but no further than 40%
+    // of the way along, so the two ends' handles never meet.
+    function pointInFromEnd(poly, fromEnd, clear) {
+      const pts = fromEnd === 'a' ? poly : poly.slice().reverse();
+      const start = pts[0];
+      let total = 0;
+      for (let i = 0; i < pts.length - 1; i++) total += Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+      const limit = total * 0.4;
+      let acc = 0, last = start;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const a = pts[i], b = pts[i + 1];
+        const L = Math.hypot(b.x - a.x, b.y - a.y);
+        for (let k = 1; k <= 8; k++) {
+          const t = k / 8;
+          const q = { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
+          if (acc + t * L > limit) return last;
+          last = q;
+          if (Math.hypot(q.x - start.x, q.y - start.y) >= clear) return q;
+        }
+        acc += L;
+      }
+      return last;
+    }
+
     function renderTerminals() {
       const v = view();
       const doc = app.doc;
       const counts = circuit.terminalWireCounts(doc);
-      const z = cam().z;
-      const hitR = Math.min(22, Math.max(8, 13 / z));
+      const hitR = termHitRadius();
       const wiring = app.editor && app.editor.wiring;
       const parts = [];
       for (const c of doc.components) {
@@ -340,6 +369,7 @@
     // ---------- Selection overlay ----------
 
     function renderOverlay() {
+      overlayZoom = cam().z;
       const v = view();
       const doc = app.doc;
       const parts = [];
@@ -371,8 +401,11 @@
           r.pts.forEach(([x, y], i) => {
             parts.push(`<g class="handle handle-wp" data-hit="wp" data-id="${id}" data-i="${i}"><circle cx="${x}" cy="${y}" r="10" class="handle-hit"/><rect x="${x - 5}" y="${y - 5}" width="10" height="10" rx="2"/><title>Drag to move this bend; double-click to remove it</title></g>`);
           });
+          // End handles sit a little way along the wire, so the terminal
+          // itself stays free for starting another wire.
+          const clear = termHitRadius() + 12;
           for (const end of ['a', 'b']) {
-            const p = r[end];
+            const p = r.poly.length > 1 ? pointInFromEnd(r.poly, end, clear) : r[end];
             parts.push(`<g class="handle handle-end" data-hit="end" data-id="${id}" data-end="${end}"><circle cx="${p.x}" cy="${p.y}" r="11" class="handle-hit"/><circle cx="${p.x}" cy="${p.y}" r="6.5"/><title>Drag onto another terminal to reconnect this end</title></g>`);
           }
         }
@@ -383,17 +416,44 @@
         const b = layout.compBounds(doc, v, id);
         if (b) deleteButton(id, 'comp', b.x - 5, b.y - 5);
       }
+      // Terminals stay free for starting wires, so the wire delete button
+      // keeps clear of them.
+      let terms = null;
+      const termClear = termHitRadius() + 11;
+      const clearOfTerms = (x, y) => {
+        if (!terms) {
+          terms = [];
+          for (const c of doc.components) {
+            if (!doc.layouts[v].comps[c.id]) continue;
+            for (const t of registry.get(c.type).terminals) {
+              const q = layout.termWorld(doc, v, { c: c.id, t: t.id });
+              if (q) terms.push(q);
+            }
+          }
+        }
+        return terms.every((q) => Math.hypot(q.x - x, q.y - y) >= termClear);
+      };
       for (const id of app.selection.wires) {
         const r = routes.get(id);
         if (!r) continue;
-        // Beside the middle of the wire, on its upper side, clear of the bend handles.
+        // Beside the middle of the wire, on its upper side, clear of the bend
+        // handles; failing that, the first nearby spot clear of terminals.
         if (r.poly.length < 2) continue;
-        const m = layout.pointAtFraction(r.poly, 0.5);
-        const a = r.poly[m.index], b = r.poly[m.index + 1] || a;
-        const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-        let nx = -(b.y - a.y) / len, ny = (b.x - a.x) / len;
-        if (ny > 0 || (ny === 0 && nx > 0)) { nx = -nx; ny = -ny; }
-        deleteButton(id, 'wire', m.x + nx * 22, m.y + ny * 22);
+        let spot = null;
+        for (const frac of [0.5, 0.4, 0.6, 0.3, 0.7]) {
+          const m = layout.pointAtFraction(r.poly, frac);
+          const a = r.poly[m.index], b = r.poly[m.index + 1] || a;
+          const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+          let nx = -(b.y - a.y) / len, ny = (b.x - a.x) / len;
+          if (ny > 0 || (ny === 0 && nx > 0)) { nx = -nx; ny = -ny; }
+          for (const side of [1, -1]) {
+            const x = m.x + nx * 22 * side, y = m.y + ny * 22 * side;
+            if (!spot) spot = { x, y };
+            if (clearOfTerms(x, y)) { spot = { x, y }; break; }
+          }
+          if (spot && clearOfTerms(spot.x, spot.y)) break;
+        }
+        deleteButton(id, 'wire', spot.x, spot.y);
       }
       L.overlay.innerHTML = parts.join('');
       // Selected wires get a highlight class.
