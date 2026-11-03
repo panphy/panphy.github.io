@@ -1256,12 +1256,6 @@ function scheduleMusicStep(step, startTime) {
   }
 }
 
-function scheduleChord(frequencies, startTime) {
-  frequencies.forEach((frequency, index) => {
-    scheduleTone(frequency, startTime + index * 0.008, MUSIC_STEP_DURATION * 1.45, 'sawtooth', 0.028, musicGain, 3200);
-  });
-}
-
 function scheduleSpacePad(frequencies, startTime) {
   if (!audioContext || !musicGain) return;
   const duration = MUSIC_STEP_DURATION * 7.8;
@@ -1329,11 +1323,6 @@ function scheduleKick(startTime, duration, peakGain, output) {
 
 function scheduleHat(startTime) {
   scheduleNoise(startTime, 0.035, 0.052, 'highpass', 9000, musicGain);
-}
-
-function scheduleOpenHat(startTime) {
-  scheduleNoise(startTime, 0.15, 0.065, 'highpass', 7000, musicGain);
-  scheduleNoise(startTime, 0.2, 0.022, 'bandpass', 12000, musicGain);
 }
 
 function scheduleSnare(startTime) {

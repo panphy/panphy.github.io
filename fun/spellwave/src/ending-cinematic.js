@@ -59,7 +59,6 @@ const smooth = (edge0, edge1, value) => {
   const t = clamp01((value - edge0) / (edge1 - edge0));
   return t * t * (3 - 2 * t);
 };
-const easeOutCubic = (t) => 1 - Math.pow(1 - clamp01(t), 3);
 const easeInOutCubic = (t) => {
   const x = clamp01(t);
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -87,7 +86,6 @@ function seededRandom(seed) {
 }
 
 const color = (hex) => new THREE.Color(hex);
-const hsl = (h, s, l) => new THREE.Color().setHSL(h, s, l);
 
 // The wave of light: its radius grows faster and faster as it races to the horizon.
 function waveRadius(t) {

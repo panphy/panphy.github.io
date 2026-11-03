@@ -1588,34 +1588,6 @@ function estimateKFromData() {
 	return fitCore.estimateSinusoidal(getFiniteDatasetPoints(activeFitKey))?.k ?? null;
 }
 
-function normalizeWorkerCurve(rawX, rawY, fallbackX, evaluator) {
-	if (!Array.isArray(rawX) || !Array.isArray(rawY) || rawX.length !== rawY.length || rawX.length === 0) {
-		return {
-			xFit: fallbackX.slice(),
-			yFit: fallbackX.map((xValue) => evaluator(xValue))
-		};
-	}
-
-	const xFit = [];
-	const yFit = [];
-	for (let index = 0; index < rawX.length; index++) {
-		const xValue = Number(rawX[index]);
-		const yValue = Number(rawY[index]);
-		if (!Number.isFinite(xValue) || !Number.isFinite(yValue)) continue;
-		xFit.push(xValue);
-		yFit.push(yValue);
-	}
-
-	if (!xFit.length) {
-		return {
-			xFit: fallbackX.slice(),
-			yFit: fallbackX.map((xValue) => evaluator(xValue))
-		};
-	}
-
-	return { xFit, yFit };
-}
-
 async function performSinusoidalFit() {
 	try {
 		let A0 = parseNumericInput(document.getElementById('initial-A').value);

@@ -91,10 +91,6 @@ function getWeightingRequested() {
 	return plotState.weightFits === true;
 }
 
-function getWeightingSigmas(key = activeFitKey) {
-	return getWeightingRequested() ? getFitSigmas(key) : null;
-}
-
 function getDatasetFitSignature(key) {
 	// ΔY is included: a weighted fit and χ²/ν both depend on it.
 	return JSON.stringify(getDatasetPoints(key).map(({ x, y, yError }) => [x, y, yError]));

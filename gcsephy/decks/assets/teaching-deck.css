@@ -283,7 +283,6 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 [data-theme="dark"] .wf text.set-b-t { fill: #edaa8c; }
 [data-theme="dark"] .wf text.set-c-t { fill: #76c5d9; }
 [data-theme="dark"] .data .set-a th, [data-theme="dark"] .data .set-b th, [data-theme="dark"] .data .set-c th { color: #1b1b1b; }
-.model3d .model-label { background: var(--card-bg) !important; color: var(--ink) !important; }
 :is(button, a):focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
 body.is-fullscreen .banner { display: none; }
 body.is-fullscreen .stage { top: var(--standalone-top); }

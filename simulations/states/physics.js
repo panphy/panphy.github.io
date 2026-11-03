@@ -416,10 +416,6 @@ export function analyzeStructure(sim, bondBuffer) {
   };
 }
 
-export function volumeOf(sim) {
-  return LID_AREA * sim.lid;
-}
-
 // True when the potential energy is as low as a well-ordered crystal at this
 // temperature. A quickly frozen (amorphous) solid sits about 0.4 epsilon per
 // particle higher, so this separates a regrown crystal from a glass.
