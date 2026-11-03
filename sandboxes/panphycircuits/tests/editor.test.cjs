@@ -78,6 +78,21 @@ test('movement cancels the hold and continues component dragging', () => {
   assert.ok(h.calls.some(c => c[0] === 'commit' && c[1] === 'Move component'));
 });
 
+test('a dragged component comes to the front; a click leaves the order alone', () => {
+  const h = setup();
+  h.app.doc.components.push({ id: 'c2', type: 'resistor', label: 'R2', props: {} });
+  h.app.doc.layouts.realistic.comps.c2 = { x: 200, y: 0, r: 0 };
+  h.app.renderer.raise = ids => h.calls.push(['raise', ...ids]);
+  const order = () => h.app.doc.components.map(c => c.id).join(',');
+  h.emit('pointerdown', { pointerType: 'mouse' }); h.emit('pointerup', { pointerType: 'mouse' });
+  assert.equal(order(), 'c1,c2');
+  h.emit('pointerdown', { pointerType: 'mouse' });
+  h.emit('pointermove', { pointerType: 'mouse', clientX: 120 }); h.emit('pointermove', { pointerType: 'mouse', clientX: 140 });
+  h.emit('pointerup', { pointerType: 'mouse', clientX: 140 });
+  assert.equal(order(), 'c2,c1');
+  assert.deepEqual(h.calls.filter(c => c[0] === 'raise'), [['raise', 'c1']]);
+});
+
 test('holding a switch actuator opens settings without toggling; tapping still toggles', () => {
   const h = setup('switch'); h.emit('pointerdown', { hit: 'act' }); h.hold(); h.emit('pointerup');
   assert.equal(h.menus().length, 1); assert.equal(h.comp.props.closed, false);

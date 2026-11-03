@@ -486,6 +486,14 @@
       renderOverlay();
     }
 
+    // Bring components' drawings to the top of the component layer, in order.
+    function raise(ids) {
+      for (const id of ids) {
+        const g = L.comps.querySelector(`.comp[data-id="${id}"]`);
+        if (g) L.comps.appendChild(g);
+      }
+    }
+
     function setPreview(markup) { L.preview.innerHTML = markup || ''; }
 
     function route(id) { return routes.get(id); }
@@ -517,7 +525,7 @@
       L.flow.innerHTML = parts.join('');
     }
 
-    return { renderAll, renderMove, renderOverlay, renderTerminals, renderWires, renderLabels, updateDynamic, applyCamera, setPreview, route, updateFlow,
+    return { renderAll, renderMove, raise, renderOverlay, renderTerminals, renderWires, renderLabels, updateDynamic, applyCamera, setPreview, route, updateFlow,
       sampleFlow: flowAnimation.sample, artCtx, drawArt };
   }
 
