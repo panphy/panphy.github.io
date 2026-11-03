@@ -226,7 +226,7 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .route > div b { font: 800 24px var(--font-body); letter-spacing: .06em; }
 .path > div { font-weight: 600; }
 .path > div i { border: 0; font-family: var(--font-mono); color: var(--year-ink); }
-.path > div.gate i { background: var(--formula); color: var(--text-main); }
+.path > div.gate i { background: var(--formula); color: var(--text-main); box-shadow: inset 0 0 0 3px var(--brand-primary); }
 .frame { border-color: var(--input-border); border-radius: 16px; }
 .frame b { font-weight: 800; }
 .stores .store, .toolkit .tool { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; }
