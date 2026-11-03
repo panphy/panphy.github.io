@@ -1,7 +1,23 @@
-const BUILD_ID = '2026-11-03T16:10:22Z';
+const BUILD_ID = '2026-11-03T17:39:41Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
+// Large files that rarely change (Collision Lab hand tracking, about 30 MB). They
+// stay in ASSETS_TO_CACHE but are stored in their own cache, kept across builds,
+// so a new build downloads them only when they are missing. Change
+// STABLE_CACHE_VERSION whenever any of them changes; the repository checker
+// enforces this.
+const STABLE_CACHE_VERSION = 'mediapipe-0.10.32-1';
+const STABLE_CACHE = `${CACHE_PREFIX}-stable-${STABLE_CACHE_VERSION}`;
+const STABLE_ASSETS = [
+  '/simulations/collision/collision_assets/models/hand_landmarker.task',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.js',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.wasm',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.js',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.wasm'
+];
+const STABLE_ASSET_SET = new Set(STABLE_ASSETS);
 // Per-app content versions, stored in the precache so they survive worker restarts.
 const APP_VERSIONS_KEY = '/__app-versions__';
 const CORS_REQUIRED_ASSETS = new Set([
@@ -297,7 +313,7 @@ const ASSETS_TO_CACHE = [
   '/for_teachers/visualizer.html',
 ];
 
-async function cachePrecacheAsset(cache, url, onlyMissing) {
+async function cachePrecacheAsset(cache, url, onlyMissing, version = BUILD_ID) {
   try {
     const resolvedUrl = new URL(url, self.location.origin);
     if (onlyMissing && await cache.match(resolvedUrl.href)) {
@@ -314,7 +330,7 @@ async function cachePrecacheAsset(cache, url, onlyMissing) {
       try {
         const fetchUrl = new URL(resolvedUrl.href);
         if (isSameOrigin) {
-          fetchUrl.searchParams.set('v', BUILD_ID);
+          fetchUrl.searchParams.set('v', version);
         }
         const res = await fetch(
           new Request(fetchUrl.href, {
@@ -327,6 +343,11 @@ async function cachePrecacheAsset(cache, url, onlyMissing) {
         if (res.ok || isOpaque) {
           if (isCorsRequired && isOpaque) {
             continue;
+          }
+          // A stable file is kept across builds, so never keep a page (such as a
+          // network login page) in its place.
+          if (STABLE_ASSET_SET.has(url) && (res.headers.get('Content-Type') || '').includes('text/html')) {
+            break;
           }
           await cache.put(resolvedUrl.href, res);
           return true;
@@ -344,11 +365,14 @@ async function cachePrecacheAsset(cache, url, onlyMissing) {
 }
 
 async function cachePrecacheAssets(onlyMissing = false) {
-  const cache = await caches.open(PRECACHE_NAME);
+  const [precache, stableCache] = await Promise.all([caches.open(PRECACHE_NAME), caches.open(STABLE_CACHE)]);
   const results = await Promise.all(
     ASSETS_TO_CACHE.map(async (url) => ({
       url,
-      cached: await cachePrecacheAsset(cache, url, onlyMissing)
+      // Stable files are fetched only when they are missing, whatever the build.
+      cached: STABLE_ASSET_SET.has(url)
+        ? await cachePrecacheAsset(stableCache, url, true, STABLE_CACHE_VERSION)
+        : await cachePrecacheAsset(precache, url, onlyMissing)
     }))
   );
   const failed = results.filter((result) => !result.cached).map((result) => result.url);
@@ -376,14 +400,20 @@ async function sha256Hex(data) {
 // One version per app, hashed from the precached bytes of its own files plus
 // the shared ones, so an update prompt appears only in apps whose files changed.
 // CDN files are left out: their URLs are version-pinned in same-origin files.
+// Stable files count by STABLE_CACHE_VERSION, which changes with their content.
 async function computeAppVersions() {
-  const cache = await caches.open(PRECACHE_NAME);
+  const [cache, stableCache] = await Promise.all([caches.open(PRECACHE_NAME), caches.open(STABLE_CACHE)]);
   const groups = {};
   await Promise.all(ASSETS_TO_CACHE.map(async (url) => {
     const resolvedUrl = new URL(url, self.location.origin);
     if (resolvedUrl.origin !== self.location.origin) return;
-    const cached = await cache.match(resolvedUrl.href);
-    const hash = cached ? await sha256Hex(await cached.arrayBuffer()) : 'missing';
+    let hash;
+    if (STABLE_ASSET_SET.has(url)) {
+      hash = await stableCache.match(resolvedUrl.href) ? STABLE_CACHE_VERSION : 'missing';
+    } else {
+      const cached = await cache.match(resolvedUrl.href);
+      hash = cached ? await sha256Hex(await cached.arrayBuffer()) : 'missing';
+    }
     const group = getAssetGroup(resolvedUrl.pathname);
     (groups[group] = groups[group] || []).push(`${resolvedUrl.pathname}${resolvedUrl.search}=${hash}`);
   }));
@@ -487,7 +517,7 @@ self.addEventListener('activate', (event) => {
     }
     const keys = await caches.keys();
     await Promise.all(keys.map((k) => {
-      if (k.startsWith(CACHE_PREFIX) && k !== PRECACHE_NAME && k !== RUNTIME_CACHE) {
+      if (k.startsWith(CACHE_PREFIX) && k !== PRECACHE_NAME && k !== RUNTIME_CACHE && k !== STABLE_CACHE) {
         return caches.delete(k);
       }
       return null;
@@ -516,11 +546,14 @@ function getNavigationCandidates(requestUrl) {
   return [...new Set(candidates)];
 }
 
-// Search only this SW version's caches (precache first, then runtime).
+// Search only this SW version's caches (precache, then stable files, then runtime).
 async function matchCurrentCaches(request) {
   const precache = await caches.open(PRECACHE_NAME);
   const hit = await precache.match(request);
   if (hit) return hit;
+  const stableCache = await caches.open(STABLE_CACHE);
+  const stableHit = await stableCache.match(request);
+  if (stableHit) return stableHit;
   const runtime = await caches.open(RUNTIME_CACHE);
   return runtime.match(request);
 }

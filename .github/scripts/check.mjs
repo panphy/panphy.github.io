@@ -126,6 +126,27 @@ check("BUILD_ID");
   }
 }
 
+check("Stable cache");
+{
+  // Stable files are kept across builds, so changing one needs a new STABLE_CACHE_VERSION.
+  const stableVersion = (source) => (source.match(/^const STABLE_CACHE_VERSION = '([^']*)';/m) || [])[1];
+  const stable = literal(swSource, "STABLE_ASSETS", "sw.js");
+  const cachedSet = new Set(cached);
+  for (const url of stable) {
+    if (!cachedSet.has(url)) fail(`${url} is in STABLE_ASSETS but not in ASSETS_TO_CACHE`);
+  }
+  if (!stableVersion(swSource)) fail("STABLE_CACHE_VERSION not found in sw.js");
+  if (base) {
+    const fork = git("merge-base", base, "HEAD").trim();
+    const before = stableVersion(git("show", `${fork}:sw.js`));
+    const changed = new Set(git("diff", "--name-only", fork).split("\n").filter(Boolean));
+    const touched = stable.map(servedFile).filter((file) => changed.has(file));
+    if (before && touched.length && stableVersion(swSource) === before) {
+      fail(`stable files changed but STABLE_CACHE_VERSION was not updated: ${touched.join(", ")}`);
+    }
+  }
+}
+
 check("Links");
 {
   for (const page of LINK_PAGES) {
