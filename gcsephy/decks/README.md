@@ -23,6 +23,6 @@ A slide examined only in GCSE Physics (8463), not Combined Science: Trilogy, tak
 
 All four decks use `/assets/theme.js` with `data-theme-scope="gcsephy"`, so their preference follows the GCSE hub and remains independent of the main site and IB section. Keep essential labels and outlines high contrast; pastel year colours belong to accents and soft fills. Check both themes, including labels drawn over coloured shapes and 3D models.
 
-`assets/companion-deck.css` and `companion-deck.js` provide the Year 9/10 layouts and navigation. Year 11 retains its own `deck.css` and `deck.js`; its history slides have a distinct background to mark non-exam enrichment. `assets/deck-notes.js` and `deck-notes.css` provide the Note panel (N). `assets/model3d.js` supports the 3D models and refreshes their colours and thumbnails when the theme changes.
+`assets/companion-deck.css` and `companion-deck.js` provide the Year 9/10 layouts and navigation. Year 11 retains its own `deck.css` and `deck.js`; its history slides have a distinct background to mark non-exam enrichment. `assets/deck-notes.js` and `deck-notes.css` provide the Note panel (N).
 
 The decks are network-only and load `/gcsephy/sw-register.js` for freshness notifications. They are outside the root catalogue and offline cache.

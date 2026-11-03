@@ -241,17 +241,6 @@ function selfContainSvg(svg) {
 	return clone;
 }
 
-async function writeImageToClipboard(pngBlob, fallbackText) {
-	if (!pngBlob || !canWriteClipboardItems()) return writePlainTextToClipboard(fallbackText);
-	try {
-		await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
-		return true;
-	} catch (error) {
-		console.warn('Image copy failed; copying text instead.', error);
-		return writePlainTextToClipboard(fallbackText);
-	}
-}
-
 /* ---------- Fitted equation ---------- */
 
 // Safari needs the image as a promise passed straight to ClipboardItem, inside the tap.

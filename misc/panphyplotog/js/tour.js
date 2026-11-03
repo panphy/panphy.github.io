@@ -27,10 +27,6 @@ function openTourSection(sectionId) {
 		toggleSection(sectionId, document.querySelector(`[aria-controls="${sectionId}"]`));
 	}
 }
-function isTourSectionOpen(sectionId) {
-	const section = document.getElementById(sectionId);
-	return !!section && section.classList.contains('is-open');
-}
 function hasCurrentTourFit() {
 	const result = datasetFitResults[activeSet];
 	return !!result && !result.stale;

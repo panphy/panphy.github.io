@@ -24,14 +24,13 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 | `prep/` | Four one-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions (`pdf/`); the workbook hub links the sheets, not the answer editions | Set after Lessons 2, 4, 6 and 8. Edit `prep/content.js`, then rebuild; see [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 | `teaching-guides/` | The seven lesson-plan PDFs (`Lesson 1 …` to `Lessons 7-8 …`) and their editable source | Read the PDFs before teaching; they are the detail behind each lesson. Edit `teaching-guides/source/*.md`, then run `sh build-pdf.sh`. See `teaching-guides/README.md` |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
-| `source/` | Original Sites/React companion-site source and its Git history | Keep this when moving or backing up the project |
 
 ## Sources and how the parts fit
 
 - `teaching-guides/source/*.md` are the editable masters of the lesson plans; rebuild the PDFs with `teaching-guides/build-pdf.sh` and keep the two in step.
 - The teaching deck source is `../../decks/work-like-a-physicist/`; its shared calm style uses the light-orange Year 9 accent. See [`../../decks/README.md`](../../decks/README.md) for styling and controls.
 - `workbook/assets/lessons-a.js`, `lessons-b.js` and `lessons-c.js` are the workbook source; rebuild the PDFs with `workbook/build-pdfs.sh`.
-- `index.html`, `lesson/` and `assets/` are the static companion site; `source/` archives the original Sites/React version.
+- `index.html`, `lesson/` and `assets/` are the static companion site; edit them directly.
 
 Lesson plans give objectives, vocabulary, activities, answers and teacher notes. The deck gives slides and reveal steps. The workbook is where students write, and every task assumes they have it. The companion site is an optional extra; the unit works without it.
 
