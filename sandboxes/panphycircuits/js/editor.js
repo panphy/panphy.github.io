@@ -563,6 +563,7 @@
       else { dx = Math.round(dx); dy = Math.round(dy); }
       const current = app.doc.layouts[v].comps[d.primary];
       if (!layout.canMove(app.doc, v, d.ids, prim.x + dx - current.x, prim.y + dy - current.y)) return;
+      if (!d.raised) { raise(d.ids); d.raised = true; }
       for (const [id, pl] of d.init) {
         const cur = app.doc.layouts[v].comps[id];
         cur.x = pl.x + dx; cur.y = pl.y + dy;
@@ -572,6 +573,17 @@
         lay.pts = w.pts.map(([x, y]) => [x + dx, y + dy]);
       }
       app.renderer.renderMove(d.ids);
+    }
+
+    // Moved parts come to the front (drawn last), keeping their order among
+    // themselves. Undo restores the old order with the rest of the move.
+    function raise(ids) {
+      const set = new Set(ids);
+      const comps = app.doc.components;
+      const moved = comps.filter((c) => set.has(c.id));
+      if (!moved.length || moved.length === comps.length) return;
+      app.doc.components = comps.filter((c) => !set.has(c.id)).concat(moved);
+      app.renderer.raise(moved.map((c) => c.id));
     }
 
     // ---------- Handles on a selected wire ----------

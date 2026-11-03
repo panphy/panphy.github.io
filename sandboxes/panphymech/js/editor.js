@@ -649,7 +649,8 @@
     function beginSceneDrag() {
       // Editing after time has run makes the current state the new start (t = 0).
       app.beginGesture();
-      gesture.orig = JSON.parse(JSON.stringify({ bodies: app.scene.bodies, links: app.scene.links }));
+      const snapshot = () => { gesture.orig = JSON.parse(JSON.stringify({ bodies: app.scene.bodies, links: app.scene.links })); };
+      snapshot();
       if (!gesture.bodyId) return;
       const b = S.bodyById(app.scene, gesture.bodyId);
       gesture.b0 = b ? { x: b.x, y: b.y, angle: b.angle, w: b.w, h: b.h, r: b.r } : null;
@@ -659,6 +660,16 @@
       if (app.isSelected('body', gesture.bodyId)) {
         app.selectedBodies().forEach((id) => S.rigidGroup(app.scene, id).forEach((g) => gesture.group.add(g)));
         gesture.anchors = app.anchors;
+      }
+      // Moved objects come to the front (drawn last), keeping their order among themselves.
+      // Undo, taken above, restores the old order.
+      if (gesture.kind === 'move') {
+        const bodies = app.scene.bodies;
+        const moved = bodies.filter((x) => gesture.group.has(x.id));
+        if (moved.length && moved.length < bodies.length) {
+          app.scene.bodies = bodies.filter((x) => !gesture.group.has(x.id)).concat(moved);
+          snapshot();
+        }
       }
     }
 

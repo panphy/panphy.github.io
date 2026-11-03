@@ -138,7 +138,10 @@ test('dragging snaps surfaces before the grid, and Snap off retains free placeme
     h.emit('pointerdown', { pointerType: 'mouse', clientX: 300 });
     h.emit('pointermove', { pointerType: 'mouse', clientX: 403 });
     h.emit('pointerup', { pointerType: 'mouse', clientX: 403 });
-    assert.ok(Math.abs(h.app.scene.bodies[0].x - (snap ? 1 : 1.03)) < 1e-8);
+    const moved = S.bodyById(h.app.scene, h.body.id);
+    assert.ok(Math.abs(moved.x - (snap ? 1 : 1.03)) < 1e-8);
+    // The dragged object comes to the front.
+    assert.equal(h.app.scene.bodies.at(-1).id, h.body.id);
   }
 });
 
