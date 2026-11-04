@@ -226,7 +226,7 @@
       app.showQuickSettings(c.id, d.event.clientX, d.event.clientY);
     }
     function beginComponentPress(e, hit, p, revealInspector = true) {
-      if (hit.kind === 'act') { pressActuator(e, hit.id, p, revealInspector); return; }
+      if (hit.kind === 'act') { pressActuator(e, hit.id, p); return; }
       const id = hit.id;
       if (e.shiftKey || e.metaKey || e.ctrlKey) app.toggleSelection(id, 'comp');
       else if (!app.selection.comps.has(id)) app.setSelection([id], [], revealInspector);
@@ -676,10 +676,12 @@
 
     // ---------- Controls on components ----------
 
-    function pressActuator(e, id, p, revealInspector = true) {
+    // Using a control selects its part but never slides the inspector over the
+    // circuit on narrow screens, so switches and sliders can be operated freely.
+    function pressActuator(e, id, p) {
       const c = circuit.getComp(app.doc, id);
       const a = layout.artFor(view(), c.type).actuator(c.props, app.doc.layouts[view()].comps[id]);
-      if (!(e.shiftKey || e.metaKey || e.ctrlKey) && !app.selection.comps.has(id)) app.setSelection([id], [], revealInspector);
+      if (!(e.shiftKey || e.metaKey || e.ctrlKey) && !app.selection.comps.has(id)) app.setSelection([id], [], false);
       if (a.kind === 'toggle') { ed.drag = { type: 'act-toggle', id }; return; }
       if (a.kind === 'momentary') {
         app.sim.pressed[id] = true;
