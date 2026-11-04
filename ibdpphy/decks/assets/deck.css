@@ -768,3 +768,5 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 
 /* Keep a typeset quantity and its plain-text unit on the same line. */
 .equation-inline { white-space: nowrap; }
+/* Keep a hyphenated word whole instead of breaking it at the hyphen. */
+.nowrap { white-space: nowrap; }

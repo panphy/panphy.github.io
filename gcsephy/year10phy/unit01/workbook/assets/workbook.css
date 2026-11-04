@@ -208,6 +208,9 @@ strong { font-weight: 700; }
 .sym-bank svg { display: block; width: 100%; height: 12.5mm; }
 .sym-bank figcaption { padding: .8mm .6mm 1.2mm; border-top: 1px solid var(--rule); font: 700 7.4pt/1.2 Arial, sans-serif; }
 .sym-bank figcaption small { display: block; font-weight: 400; color: #333c48; font-size: 6.8pt; margin-top: .4mm; }
+/* Beside text, a short bank fills its column in one row instead of seven narrow slots. */
+.split .sym-bank { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2.5mm; margin: 0; }
+.split .sym-bank svg { height: 16mm; }
 .sym-legend { font-size: 8.4pt; color: var(--muted); margin: -1.5mm 0 3mm; }
 
 /* data tables */
