@@ -122,13 +122,26 @@
       if (open) document.body.classList.remove('show-' + (name === 'library' ? 'inspector' : 'library'));
       syncPanelButtons();
     }
+    const narrowQuery = window.matchMedia('(max-width: 900px)');
+    const narrow = () => narrowQuery.matches;
     function syncPanelButtons() {
-      $('btn-show-library').setAttribute('aria-expanded', String(document.body.classList.contains('show-library')));
-      $('btn-show-inspector').setAttribute('aria-expanded', String(document.body.classList.contains('show-inspector')));
+      const classes = document.body.classList;
+      $('btn-show-library').setAttribute('aria-expanded', String(classes.contains('show-library')));
+      // On wide screens the inspector is a column that the same button collapses.
+      const inspectorOpen = narrow() ? classes.contains('show-inspector') : !classes.contains('hide-inspector');
+      const btn = $('btn-show-inspector');
+      btn.setAttribute('aria-expanded', String(inspectorOpen));
+      btn.setAttribute('aria-label', `${inspectorOpen ? 'Hide' : 'Show'} inspector`);
+      btn.title = `${inspectorOpen ? 'Hide' : 'Show'} inspector`;
     }
-    const narrow = () => window.matchMedia('(max-width: 900px)').matches;
+    narrowQuery.addEventListener('change', syncPanelButtons);
+    syncPanelButtons();
     $('btn-show-library').addEventListener('click', () => setPanel('library', !document.body.classList.contains('show-library')));
-    $('btn-show-inspector').addEventListener('click', () => setPanel('inspector', !document.body.classList.contains('show-inspector')));
+    $('btn-show-inspector').addEventListener('click', () => {
+      if (narrow()) { setPanel('inspector', !document.body.classList.contains('show-inspector')); return; }
+      document.body.classList.toggle('hide-inspector');
+      syncPanelButtons();
+    });
     document.querySelectorAll('[data-close-panel]').forEach((b) => b.addEventListener('click', () => { setPanel('library', false); setPanel('inspector', false); }));
     ui.closePanels = () => { if (narrow()) { document.body.classList.remove('show-library', 'show-inspector'); syncPanelButtons(); } };
 

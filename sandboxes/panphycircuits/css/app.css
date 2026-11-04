@@ -622,6 +622,13 @@ a.atool { text-decoration: none; }
   .stage-head .pane-heading { display: none; }
 }
 
+/* Wider screens: the inspector button collapses the inspector column. */
+@media not all and (max-width: 900px) {
+  #btn-show-inspector { display: inline-grid; }
+  body.hide-inspector .main { grid-template-columns: var(--panel-w) minmax(0, 1fr); }
+  body.hide-inspector .inspector { display: none; }
+}
+
 /* Tablets and phones: the circuit fills the width; Components and the
    inspector slide in over it. */
 @media (max-width: 900px) {

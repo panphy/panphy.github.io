@@ -365,6 +365,13 @@ button, input, select { font: inherit; color: inherit; }
   .part svg { width: 48px; height: 34px; }
 }
 
+/* Wider screens: the inspector button collapses the inspector column. */
+@media not all and (max-width: 900px) {
+  #btn-show-inspector { display: inline-grid; }
+  body.hide-inspector .main { grid-template-columns: var(--panel-w) minmax(0, 1fr); }
+  body.hide-inspector .inspector { display: none; }
+}
+
 /* Tablets and phones: the scene fills the width; Parts and the inspector slide in over it. */
 @media (max-width: 900px) {
   .main { grid-template-columns: minmax(0, 1fr); padding: 8px; }
