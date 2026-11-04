@@ -14,9 +14,10 @@
   --select: #1C64D8;
   --select-soft: rgba(28, 100, 216, 0.14);
   --target: #0F9D58;
-  /* Hover outline on a part’s controls (switch lever, slider, knob), distinct from the selection blue. */
-  --interact: #E8590C;
-  --interact-soft: rgba(232, 89, 12, 0.16);
+  /* Hover outline on a part’s controls (switch lever, slider, knob): neutral ink,
+     so it implies no state (not warning, approval or selection). */
+  --interact: var(--ink);
+  --interact-soft: color-mix(in srgb, var(--ink) 10%, transparent);
   --warn-ring: #D9480F;
   --appbar-h: 56px;
   --panel-w: 264px;
@@ -40,8 +41,6 @@
   --select: #54A6FF;
   --select-soft: rgba(84, 166, 255, 0.18);
   --target: #4FDB98;
-  --interact: #FF922B;
-  --interact-soft: rgba(255, 146, 43, 0.24);
   --warn-ring: #FF8A4C;
   --paper-minor: rgba(150, 175, 255, 0.03);
   --paper-major: rgba(150, 175, 255, 0.065);
