@@ -252,6 +252,8 @@ body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(
 /* Typography */
 .eyebrow { display: flex; align-items: center; gap: 14px; margin: 0; font: 900 24px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
 .eyebrow .num { white-space: nowrap; padding: 5px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); color: var(--ink); letter-spacing: .08em; }
+/* Keep a hyphenated word whole instead of breaking it at the hyphen. */
+.nowrap { white-space: nowrap; }
 h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 900; text-transform: uppercase; }
 h2 { font-size: 64px; line-height: .95; letter-spacing: -.055em; margin: 16px 0 30px; }
 h2 em, h3 em { font-style: normal; box-shadow: inset 0 -.3em 0 var(--accent); }
