@@ -909,13 +909,14 @@
     // the picker there is left unfiltered; the contents are validated anyway.
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) $('file-input').removeAttribute('accept');
     $('file-input').addEventListener('change', (e) => { app.importFile(e.target.files[0]); e.target.value = ''; });
-    $('btn-show-library').addEventListener('click', () => { document.body.classList.toggle('show-library'); document.body.classList.remove('show-inspector'); });
-    $('btn-show-inspector').addEventListener('click', () => {
-      // Narrow screens slide the inspector over the circuit; wider ones collapse its column.
-      if (window.matchMedia('(max-width: 900px)').matches) { document.body.classList.toggle('show-inspector'); document.body.classList.remove('show-library'); return; }
-      document.body.classList.toggle('hide-inspector');
-      window.dispatchEvent(new Event('resize'));
-    });
+    // Narrow screens slide a side pane over the circuit; wider ones collapse its column.
+    for (const [name, other] of [['library', 'inspector'], ['inspector', 'library']]) {
+      $(`btn-show-${name}`).addEventListener('click', () => {
+        if (window.matchMedia('(max-width: 900px)').matches) { document.body.classList.toggle(`show-${name}`); document.body.classList.remove(`show-${other}`); return; }
+        document.body.classList.toggle(`hide-${name}`);
+        window.dispatchEvent(new Event('resize'));
+      });
+    }
     document.querySelectorAll('[data-close-panel]').forEach((b) => b.addEventListener('click', () => document.body.classList.remove('show-library', 'show-inspector')));
   }
 
