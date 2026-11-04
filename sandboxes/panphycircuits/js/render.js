@@ -135,8 +135,9 @@
         if (DYNAMIC.has(c.type)) dynCache.set(c.id, artSvg);
         const act = a.actuator ? a.actuator(c.props, pl) : null;
         const err = app.problemComps.has(c.id) ? ' is-problem' : app.noteComps.has(c.id) ? ' is-note' : '';
+        const operating = app.editor && app.editor.operatingId && app.editor.operatingId() === c.id ? ' is-operating' : '';
         const name = `${c.label}, ${registry.get(c.type).name}`;
-        parts.push(`<g class="comp comp-${c.type}${err}" data-id="${c.id}" transform="${layout.svgTransform(pl)}">` +
+        parts.push(`<g class="comp comp-${c.type}${err}${operating}" data-id="${c.id}" transform="${layout.svgTransform(pl)}">` +
           `<rect class="hit" data-hit="comp" data-id="${c.id}" x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="6"><title>${esc(name)}</title></rect>` +
           `<g class="art" data-hit="comp" data-id="${c.id}">${artSvg}</g>` +
           (act ? actRect(act, c, pl) : '') +
