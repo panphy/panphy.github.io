@@ -276,7 +276,8 @@ body.viewer-expanded { overflow: hidden; }
 .ladder-trail { position: absolute; left: 4px; width: 8px; border-radius: 4px; background: rgba(94, 234, 212, .35); }
 .ladder-dot { position: absolute; left: 1px; width: 14px; height: 14px; margin-bottom: -7px; border-radius: 50%; border: 2px solid var(--space-text); box-shadow: 0 0 8px rgba(0, 0, 0, .6); }
 .mini-hr canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 230; flex: none; }
-.true-scale figcaption { margin-top: 6px; font-size: .66rem; line-height: 1.35; color: var(--space-text); }
+/* Fixed height for the longest caption (3 lines here, 4 in the narrower phone box), so the box never jumps. */
+.true-scale figcaption { height: calc(3 * 1.35em); margin-top: 6px; font-size: .66rem; line-height: 1.35; color: var(--space-text); }
 .mini-hr figcaption { margin-top: 2px; font-size: .64rem; line-height: 1.35; text-align: center; color: var(--space-muted); }
 .gesture { bottom: 10px; left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; color: var(--space-muted); }
 /* A short viewer (fullscreen on a phone held sideways) has no room for full-size insets. */
@@ -429,6 +430,7 @@ footer a { min-height: 48px; display: inline-flex; align-items: center; }
   .readout { min-width: 0; width: 190px; font-size: .68rem; padding: 8px 10px; }
   .balance { width: 190px; }
   .true-scale, .mini-hr { width: 124px; }
+  .true-scale figcaption { height: calc(4 * 1.35em); }
   .stages { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   aside, .card, .reality { padding: 18px; }
   .reality > span { display: none; }
