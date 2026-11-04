@@ -148,7 +148,11 @@
     // A control's hit area. An upright control (a sensor's badge slider) keeps
     // its orientation however the part is turned, like the badge it covers.
     function actRect(act, c, pl) {
-      const rect = `<rect class="act act-${act.kind}" data-hit="act" data-id="${c.id}" x="${act.rect[0]}" y="${act.rect[1]}" width="${act.rect[2]}" height="${act.rect[3]}" rx="6"><title>${esc(actTitle(act.kind, c))}</title></rect>`;
+      // The halo is a paper-colored band under the dashed outline, so the dashes
+      // show on dark panels and light ones alike.
+      const geom = `x="${act.rect[0]}" y="${act.rect[1]}" width="${act.rect[2]}" height="${act.rect[3]}" rx="6"`;
+      const rect = `<rect class="act-halo" ${geom} aria-hidden="true"/>` +
+        `<rect class="act act-${act.kind}" data-hit="act" data-id="${c.id}" ${geom}><title>${esc(actTitle(act.kind, c))}</title></rect>`;
       if (!act.upright) return rect;
       return `<g transform="translate(${act.cx} ${act.cy}) scale(${pl.f ? -1 : 1} 1) rotate(${-90 * layout.normRot(pl.r)})">${rect}</g>`;
     }
@@ -682,7 +686,7 @@
     const bg = v === 'schematic' ? paper : (cs.getPropertyValue('--bench').trim() || '#E8EBF0');
     const world = svg.querySelector('.world').cloneNode(true);
     world.removeAttribute('transform');
-    world.querySelectorAll('.l-terms, .l-overlay, .l-preview, .l-flow, .hit, .act, .wire-hit, .wire-sel, title').forEach((n) => n.remove());
+    world.querySelectorAll('.l-terms, .l-overlay, .l-preview, .l-flow, .hit, .act, .act-halo, .wire-hit, .wire-sel, title').forEach((n) => n.remove());
     const style = `
       .sch-line{fill:none;stroke:${ink};stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
       .sch-thick{stroke-width:5}.sch-plate{stroke-width:3}
