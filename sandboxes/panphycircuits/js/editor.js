@@ -264,7 +264,10 @@
       }
       svg.setPointerCapture(e.pointerId);
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      host.focus({ preventScroll: true });
+      // Focus from a press is not keyboard focus: hide the workspace focus ring
+      // until a key is pressed (some browsers show it for scripted focus).
+      host.classList.add('pointer-focus');
+      host.focus({ preventScroll: true, focusVisible: false });
       if (pointers.size === 2) { startPinch(); return; }
       if (pointers.size > 2) return;
       const p = toWorld(e.clientX, e.clientY);
@@ -754,6 +757,7 @@
       return t && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
     }
 
+    document.addEventListener('keydown', () => host.classList.remove('pointer-focus'), true);
     document.addEventListener('keydown', (e) => {
       if (inField(e) || app.modalOpen()) return;
       const mod = e.ctrlKey || e.metaKey;

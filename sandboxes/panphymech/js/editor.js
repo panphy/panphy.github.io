@@ -861,7 +861,10 @@
         pointers.clear();
         pinch = null;
       }
-      canvas.focus({ preventScroll: true });
+      // Focus from a press is not keyboard focus: hide the scene focus ring
+      // until a key is pressed (some browsers show it for scripted focus).
+      canvas.dataset.pointerFocus = '';
+      canvas.focus({ preventScroll: true, focusVisible: false });
       const sp = localPoint(e);
       pointers.set(e.pointerId, sp);
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
@@ -1135,6 +1138,7 @@
       app.requestDraw();
     }
     if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', () => { delete canvas.dataset.pointerFocus; }, true);
       window.addEventListener('keydown', (e) => { if (SNAP_KEYS.includes(e.key)) setSnapKeyHeld(true); });
       window.addEventListener('keyup', (e) => { if (SNAP_KEYS.includes(e.key)) setSnapKeyHeld(e.ctrlKey || e.metaKey); });
       window.addEventListener('blur', () => setSnapKeyHeld(false));
