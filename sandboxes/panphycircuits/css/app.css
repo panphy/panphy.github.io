@@ -356,7 +356,7 @@ a.atool { text-decoration: none; }
 .tool-group:last-of-type { border-right: 0; }
 .tool { display: inline-grid; place-items: center; width: var(--tool-size); height: var(--tool-size); border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--ink-2); cursor: pointer; }
 .tool:hover:not(:disabled) { background: var(--surface-3); color: var(--ink); }
-.tool[aria-pressed="true"], .tool-panel[aria-expanded="true"] { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.tool[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
 /* Keep the Tidy icon green while retaining the standard toolbar button. */
 #btn-tidy .icon { color: var(--target); }
 .tool:disabled { opacity: 0.35; cursor: default; }
@@ -622,11 +622,13 @@ a.atool { text-decoration: none; }
   .stage-head .pane-heading { display: none; }
 }
 
-/* Wider screens: the inspector button collapses the inspector column. */
+/* Wider screens: the panel buttons collapse the side columns. */
 @media not all and (max-width: 900px) {
-  #btn-show-inspector { display: inline-grid; }
+  .tool-panel { display: inline-grid; }
+  body.hide-library .main { grid-template-columns: minmax(0, 1fr) var(--insp-w); }
   body.hide-inspector .main { grid-template-columns: var(--panel-w) minmax(0, 1fr); }
-  body.hide-inspector .inspector { display: none; }
+  body.hide-library.hide-inspector .main { grid-template-columns: minmax(0, 1fr); }
+  body.hide-library .library, body.hide-inspector .inspector { display: none; }
 }
 
 /* Tablets and phones: the circuit fills the width; Components and the

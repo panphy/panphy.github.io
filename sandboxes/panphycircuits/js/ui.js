@@ -57,15 +57,13 @@
     // ---------- Icons on static buttons ----------
     document.querySelectorAll('[data-icon]').forEach((el) => { el.insertAdjacentHTML('afterbegin', icon(el.dataset.icon)); });
     // Panel visibility can also change after selection or component placement.
-    // On wide screens the inspector is a column that the same button collapses.
+    // On wide screens the side panes are columns that the same buttons collapse.
     const narrowQuery = window.matchMedia('(max-width: 900px)');
     function syncPanelButtons() {
       const classes = document.body.classList;
-      for (const [id, label, expanded] of [
-        ['btn-show-library', 'components', classes.contains('show-library')],
-        ['btn-show-inspector', 'inspector', narrowQuery.matches ? classes.contains('show-inspector') : !classes.contains('hide-inspector')],
-      ]) {
-        const button = $(id);
+      for (const [name, label] of [['library', 'components'], ['inspector', 'inspector']]) {
+        const button = $(`btn-show-${name}`);
+        const expanded = narrowQuery.matches ? classes.contains(`show-${name}`) : !classes.contains(`hide-${name}`);
         button.setAttribute('aria-expanded', String(expanded));
         button.setAttribute('aria-label', `${expanded ? 'Hide' : 'Show'} ${label}`);
         button.title = `${expanded ? 'Hide' : 'Show'} ${label}`;
