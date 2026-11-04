@@ -233,8 +233,8 @@ a.atool { text-decoration: none; }
 .comp .act { fill: transparent; cursor: pointer; }
 .comp .act-slider, .comp .act-knob { cursor: ew-resize; }
 .comp .act-halo { fill: none; stroke: none; pointer-events: none; }
-.comp:hover .act-halo { stroke: var(--sch-paper); stroke-opacity: 0.9; stroke-width: 5; vector-effect: non-scaling-stroke; }
-.comp:hover .act { fill: var(--interact-soft); stroke: var(--interact); stroke-width: 2; stroke-dasharray: 5 3; vector-effect: non-scaling-stroke; }
+.comp:hover .act-halo, .comp.is-operating .act-halo { stroke: var(--sch-paper); stroke-opacity: 0.9; stroke-width: 5; vector-effect: non-scaling-stroke; }
+.comp:hover .act, .comp.is-operating .act { fill: var(--interact-soft); stroke: var(--interact); stroke-width: 2; stroke-dasharray: 5 3; vector-effect: non-scaling-stroke; }
 .comp.is-problem .art { filter: url(#ppc-glow-problem); }
 .comp.is-note .art { filter: url(#ppc-glow-note); }
 .meter-note { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, transparent); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }

@@ -841,6 +841,23 @@
       return circuit.getComp(app.doc, [...app.selection.comps][0]);
     }
 
+    // While a press is captured the canvas, not the part, counts as hovered, so
+    // the control's hover outline would vanish mid-drag. Mark the part being
+    // operated instead, after each pointer handler has updated the drag.
+    function operatingId() {
+      const d = ed.drag;
+      return d && /^act-/.test(d.type) ? d.id : null;
+    }
+    ed.operatingId = operatingId;
+    function syncOperating() {
+      if (!svg.querySelectorAll) return;
+      const id = operatingId();
+      svg.querySelectorAll('.comp.is-operating').forEach((g) => { if (g.dataset.id !== id) g.classList.remove('is-operating'); });
+      const g = id && svg.querySelector(`.comp[data-id="${id}"]`);
+      if (g) g.classList.add('is-operating');
+    }
+    ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'lostpointercapture'].forEach((t) => svg.addEventListener(t, syncOperating));
+
     return ed;
   }
 
