@@ -92,29 +92,32 @@
           <div class="stepper">
             <button type="button" id="mass-down" aria-label="Lower mass">−</button>
             <input id="mass-input" class="mono" type="number" inputmode="decimal" min="0.1" max="100" step="any" value="1">
-            <span class="unit mono">M☉</span>
+            <span class="unit mono">M<sub>☉</sub></span>
             <button type="button" id="mass-up" aria-label="Higher mass">+</button>
           </div>
-          <small>1 M☉ = the mass of the Sun. Range 0.1 to 100.</small>
+          <small>1 M<sub>☉</sub> = the mass of the Sun. Range 0.1 to 100.</small>
         </div>
         <div class="mass-scale">
-          <input id="mass-slider" type="range" min="-1" max="2" step="0.005" value="0" aria-label="Starting mass on a logarithmic scale">
-          <div class="fate-band" aria-hidden="true">
-            <span class="band-wd" style="flex:1.903"><b>White dwarf</b><i>below 8 M☉</i></span>
-            <span class="band-ns" style="flex:0.398"><b>Neutron star</b><i>8 to 20</i></span>
-            <span class="band-bh" style="flex:0.699"><b>Black hole</b><i>above 20 M☉</i></span>
+          <div class="ticks mono" aria-hidden="true"><span style="--x:0">0.1</span><span style="--x:.3333">1</span><span style="--x:.6667">10</span><span style="--x:1">100</span></div>
+          <div class="band-slider">
+            <div class="fate-band" aria-hidden="true">
+              <span class="band-wd" style="flex:1.903"><b>White dwarf</b><i>below 8 M<sub>☉</sub></i></span>
+              <span class="band-ns" style="flex:0.398"><b>Neutron star</b><i>8 to 20</i></span>
+              <span class="band-bh" style="flex:0.699"><b>Black hole</b><i>above 20 M<sub>☉</sub></i></span>
+            </div>
+            <input id="mass-slider" type="range" min="-1" max="2" step="0.005" value="0" aria-label="Starting mass on a logarithmic scale">
+            <output class="mass-bubble mono" id="mass-bubble" for="mass-slider" aria-hidden="true"></output>
           </div>
-          <div class="ticks mono" aria-hidden="true"><span style="left:0">0.1</span><span style="left:33.33%">1</span><span style="left:66.67%">10</span><span style="left:100%">100</span></div>
           <p class="fate-key"><span><i class="band-wd"></i>White dwarf: below 8</span><span><i class="band-ns"></i>Neutron star: 8 to 20</span><span><i class="band-bh"></i>Black hole: above 20</span></p>
+          <div class="presets" id="presets" aria-label="Example stars">
+            <button type="button" data-mass="0.12"><b>0.12</b> Proxima Centauri</button>
+            <button type="button" data-mass="1"><b>1</b> The Sun</button>
+            <button type="button" data-mass="2.1"><b>2.1</b> Sirius A</button>
+            <button type="button" data-mass="5"><b>5</b> Blue-white star</button>
+            <button type="button" data-mass="18"><b>18</b> Betelgeuse</button>
+            <button type="button" data-mass="40"><b>40</b> Blue giant</button>
+          </div>
         </div>
-      </div>
-      <div class="presets" id="presets" aria-label="Example stars">
-        <button type="button" data-mass="0.12"><b>0.12</b> Proxima Centauri</button>
-        <button type="button" data-mass="1"><b>1</b> The Sun</button>
-        <button type="button" data-mass="2.1"><b>2.1</b> Sirius A</button>
-        <button type="button" data-mass="5"><b>5</b> Blue-white star</button>
-        <button type="button" data-mass="18"><b>18</b> Betelgeuse</button>
-        <button type="button" data-mass="40"><b>40</b> Blue giant</button>
       </div>
     </section>
 
@@ -140,9 +143,14 @@
             <div class="balance-track"><i id="balance-fill"></i><b id="balance-marker"></b></div>
             <p id="balance-text"></p>
           </div>
-          <figure class="true-scale overlay">
-            <canvas id="scale-canvas" width="300" height="220" role="img" aria-label="True-scale size comparison"></canvas>
-            <figcaption id="scale-caption" class="mono"></figcaption>
+          <figure class="true-scale overlay" aria-label="Real size of the star on a ladder of familiar widths">
+            <p class="ladder-title mono">REAL SIZE</p>
+            <div class="ladder" id="ladder">
+              <ol id="ladder-rungs"></ol>
+              <i class="ladder-trail" id="ladder-trail"></i>
+              <i class="ladder-dot" id="ladder-dot"></i>
+            </div>
+            <figcaption id="scale-caption"></figcaption>
           </figure>
           <figure class="mini-hr overlay">
             <canvas id="mini-hr-canvas" width="300" height="230" role="img" aria-label="Small Hertzsprung–Russell diagram showing where the star is now"></canvas>
@@ -212,7 +220,7 @@
     <section class="reality"><span aria-hidden="true">↗</span><div>
       <h2>A model is an explanation, not a photograph.</h2>
       <p>The numbers come from standard physics: mass–luminosity and mass–radius relations for the main sequence, the Stefan–Boltzmann law linking brightness, radius and temperature, free-fall and Kelvin–Helmholtz timescales, and measured relations for the mass of the remnant. The star's color is the color of a hot body at its surface temperature, with the color strengthened so that cool and hot stars are easy to tell apart.</p>
-      <p>Sizes are compressed. Real stars range from 20 km to over 1000 times the width of the Sun, so the 3D view squeezes that range enormously; the small inset always shows the true scale. Cutaway layers are widened so you can see them: the core of a giant is really less than a thousandth of its radius. Time is compressed too: every stage plays for a few seconds, whether it really lasts a day or ten billion years.</p>
+      <p>Sizes are compressed. Real stars range from 20 km to over 1000 times the width of the Sun, so the 3D view squeezes that range enormously; the Real size ladder always shows the true width. Cutaway layers are widened so you can see them: the core of a giant is really less than a thousandth of its radius. Time is compressed too: every stage plays for a few seconds, whether it really lasts a day or ten billion years.</p>
       <p>The boundaries at 8 and 20 solar masses are approximate. They depend on what the star is made of, how fast it spins and whether it has a companion. The tracks after the main sequence are simplified, and stars lighter than about 0.5 solar masses live so long that their final stages are predictions that nobody has observed.</p>
     </div></section>
   </main>

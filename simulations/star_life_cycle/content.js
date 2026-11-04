@@ -46,8 +46,8 @@ function temp(kelvin) {
 function lum(L) {
   if (L === null) return '—';
   if (L === 0) return '0';
-  if (L >= 1e5 || L < 0.001) return `${sci(L)} L☉`;
-  return `${sig(L, L >= 100 ? 2 : 3)} L☉`;
+  if (L >= 1e5 || L < 0.001) return `${sci(L)}&nbsp;L<sub>☉</sub>`;
+  return `${sig(L, L >= 100 ? 2 : 3)}&nbsp;L<sub>☉</sub>`;
 }
 
 function radius(R) {
@@ -55,13 +55,14 @@ function radius(R) {
   const km = R * SUN_RADIUS_KM;
   if (km < 1000) return `${sig(km, 3)} km`;
   if (R < 0.05) return `${sig(km, 2)} km`;
-  if (R < 300) return `${sig(R, R < 10 ? 2 : 3)} R☉`;
+  if (R < 300) return `${sig(R, R < 10 ? 2 : 3)}&nbsp;R<sub>☉</sub>`;
   const au = R / AU_IN_RSUN;
-  if (au < 20) return `${sig(R, 2)} R☉ (${sig(au, 2)} AU)`;
+  if (au < 20) return `${sig(R, 2)}&nbsp;R<sub>☉</sub> (${sig(au, 2)} AU)`;
   return `${sig(au, 2)} AU`;
 }
 
-const mass = m => `${m < 10 ? m.toFixed(2) : m.toFixed(1)} M☉`;
+// No trailing zeros, so the description and readouts match the mass typed or chosen (2, not 2.00).
+const mass = m => `${Number(m < 10 ? m.toFixed(2) : m.toFixed(1))}&nbsp;M<sub>☉</sub>`;
 
 export const fmt = { sig, sci, years, temp, lum, radius, mass };
 
@@ -104,7 +105,7 @@ const onion = (stageIndex, ironGrowth = 0) => {
   });
   const iron = {
     name: 'Iron core', el: 'Fe', kind: 'inert',
-    info: 'Iron and nickel: the end of the line. Their nuclei are the most tightly bound of all, so fusing them takes energy in instead of giving it out. The core is held up only by electron degeneracy pressure, and it is growing towards 1.4 M☉.'
+    info: 'Iron and nickel: the end of the line. Their nuclei are the most tightly bound of all, so fusing them takes energy in instead of giving it out. The core is held up only by electron degeneracy pressure, and it is growing towards 1.4 M<sub>☉</sub>.'
   };
   const sets = [
     [[core('C', LATE_FUELS[0]), 0.2], [heShell, 0.3], [H, 1]],
@@ -145,7 +146,7 @@ export const STAGES = {
       <p><b>Virial theorem.</b> Half of the gravitational potential energy released heats the gas. The other half is radiated away, which is why the protostar shines.</p>
       <p><b>Kelvin–Helmholtz time.</b> \\(t \\approx \\dfrac{GM^2}{RL}\\), about ${years(c.life.kelvinHelmholtzYears)} here. Massive protostars are far more luminous, so they contract much faster.</p>
       <p><b>Hayashi track.</b> A fully convective protostar stays near 4000 K, so as \\(R\\) shrinks, \\(L = 4\\pi R^2\\sigma T^4\\) falls: the track drops almost straight down the HR diagram. Later the star heats up and moves left to the main sequence.</p>
-      <p>Protons need about \\(10^{7}\\) K to get close enough to tunnel through their electrostatic barrier. Below about 0.08 M☉ the core never gets that hot and the object becomes a <b>brown dwarf</b>.</p>`,
+      <p>Protons need about \\(10^{7}\\) K to get close enough to tunnel through their electrostatic barrier. Below about 0.08 M<sub>☉</sub> the core never gets that hot and the object becomes a <b>brown dwarf</b>.</p>`,
     layers: () => [
       { name: 'Core (no hydrogen fusion yet)', el: 'H', kind: 'inert', r: 0.28, info: 'Getting hotter and denser as the protostar shrinks, but still below the 10 million K needed for hydrogen fusion.' },
       { name: 'Convective interior', el: 'H', kind: 'convective', r: 1, info: 'Hot gas rises, cools at the surface and sinks again, carrying heat outward. The whole protostar is stirred like a pan of boiling water.' }
@@ -177,8 +178,8 @@ export const STAGES = {
     deeper: c => `
       <p><b>Mass decides everything.</b> \\(L \\propto M^{3.5}\\) roughly, so lifetime \\(\\propto \\dfrac{M}{L} \\propto M^{-2.5}\\).</p>
       <p><b>Which fusion?</b> ${c.M < 1.3
-        ? 'Below about 1.3 M☉ the proton–proton chain dominates (rate \\(\\propto T^{4}\\)).'
-        : 'Above about 1.3 M☉ the CNO cycle dominates. Carbon, nitrogen and oxygen act as catalysts and the rate is very sensitive to temperature (\\(\\propto T^{17}\\)), so the energy is released in a small region and the core has to convect.'} Either way \\(4\\,{}^{1}\\mathrm{H} \\rightarrow {}^{4}\\mathrm{He} + 2e^{+} + 2\\nu\\) + 26.7 MeV.</p>
+        ? 'Below about 1.3 M<sub>☉</sub> the proton–proton chain dominates (rate \\(\\propto T^{4}\\)).'
+        : 'Above about 1.3 M<sub>☉</sub> the CNO cycle dominates. Carbon, nitrogen and oxygen act as catalysts and the rate is very sensitive to temperature (\\(\\propto T^{17}\\)), so the energy is released in a small region and the core has to convect.'} Either way \\(4\\,{}^{1}\\mathrm{H} \\rightarrow {}^{4}\\mathrm{He} + 2e^{+} + 2\\nu\\) + 26.7 MeV.</p>
       <p><b>A built-in thermostat.</b> If fusion speeds up, the core expands and cools, and fusion slows again. Hydrostatic equilibrium: \\(\\dfrac{dP}{dr} = -\\dfrac{GM\\rho}{r^2}\\).</p>
       <p>As helium builds up, the core slowly contracts and heats, so the star brightens: the Sun is about 30% brighter now than when it formed.</p>`,
     layers: c => {
@@ -240,7 +241,7 @@ export const STAGES = {
       const end = last.keys[last.keys.length - 1];
       return `${start}
       <p>When the core reaches about 100 million K, <b>helium</b> begins to fuse into <b>carbon</b> and <b>oxygen</b>. When the helium in the core runs out too, this star is not massive enough to fuse carbon, so fusion in the core stops for good.</p>
-      <p>The star swells again, to about ${sig(end.R, 2)} R☉ (${orbitComparison(end.R)}), and blows its outer layers into space. It goes from ${mass(c.stage.mass[0])} to ${mass(c.stage.mass[1])} in this stage.</p>
+      <p>The star swells again, to about ${sig(end.R, 2)} R<sub>☉</sub> (${orbitComparison(end.R)}), and blows its outer layers into space. It goes from ${mass(c.stage.mass[0])} to ${mass(c.stage.mass[1])} in this stage.</p>
       <p class="note">While helium fuses in the core, the star shrinks and steadies for a while before it swells again. Astronomers count that as a separate phase: see Going further.</p>`;
     },
     look: c => (c.stage.phases.length > 1
@@ -250,13 +251,13 @@ export const STAGES = {
       const [first, he, agb] = c.stage.phases;
       const start = `
       <p><b>Stefan–Boltzmann law.</b> \\(L = 4\\pi R^2\\sigma T^4\\). A star that is cool yet very luminous must be enormous.</p>
-      <p>The core is so dense that it is held up by <b>electron degeneracy pressure</b>, which does not depend on temperature. ${c.M < 2 && he ? 'So when helium ignites, the core cannot expand and cool to steady itself. Fusion runs away, briefly releasing \\(10^{11}\\) L☉: the <b>helium flash</b>. All of it goes into expanding the core, so nothing is seen from outside.' : ''}</p>
+      <p>The core is so dense that it is held up by <b>electron degeneracy pressure</b>, which does not depend on temperature. ${c.M < 2 && he ? 'So when helium ignites, the core cannot expand and cool to steady itself. Fusion runs away, briefly releasing \\(10^{11}\\) L<sub>☉</sub>: the <b>helium flash</b>. All of it goes into expanding the core, so nothing is seen from outside.' : ''}</p>
       <p>The convective envelope reaches deep enough to carry fusion products up to the surface (the first dredge-up).</p>`;
       if (!he) return start;
       return `
       <p><b>Three phases in one stage.</b> Astronomers split the red giant stage into three phases, which is why the track on the HR diagram goes up, drops, then climbs again.</p>
       <p><b>1. Red giant branch</b> (${years(first.years)}). The helium core does not fuse. Hydrogen fuses in a shell around it and the star swells.</p>
-      <p><b>2. Core helium burning</b> (${years(he.years)}). With energy released in the core again, the star is balanced: it shrinks to about ${sig(he.keys[1].R, 2)} R☉ and its surface warms up a little. Helium fusion releases only about a tenth as much energy per kilogram as hydrogen fusion, so this lasts far less time than the main sequence.</p>
+      <p><b>2. Core helium burning</b> (${years(he.years)}). With energy released in the core again, the star is balanced: it shrinks to about ${sig(he.keys[1].R, 2)} R<sub>☉</sub> and its surface warms up a little. Helium fusion releases only about a tenth as much energy per kilogram as hydrogen fusion, so this lasts far less time than the main sequence.</p>
       <p><b>3. Asymptotic giant branch</b> (${years(agb.years)}). The carbon–oxygen core does not fuse: carbon would need 600 million K. Helium and hydrogen fuse in two thin shells and the star swells again.</p>
       ${start}
       <p><b>Triple-alpha process.</b> \\({}^{4}\\mathrm{He} + {}^{4}\\mathrm{He} \\rightleftharpoons {}^{8}\\mathrm{Be}\\), which falls apart in about \\(10^{-16}\\) s. Just occasionally a third \\({}^{4}\\mathrm{He}\\) hits it first and makes \\({}^{12}\\mathrm{C}\\). This only works because carbon has an excited state at exactly the right energy (the Hoyle state). The rate goes as \\(T^{40}\\).</p>
@@ -264,7 +265,7 @@ export const STAGES = {
       ${c.M >= 4 ? '<p>A star of this mass pulses in and out while it fuses helium in its core, as a <b>Cepheid variable</b>. The pulse period reveals its true brightness, which astronomers use to measure distances to other galaxies.</p>' : ''}
       <p><b>Thermal pulses.</b> On the asymptotic giant branch the helium shell switches on in a flash every \\(10^{4}\\) to \\(10^{5}\\) years. Each pulse mixes carbon up to the surface.</p>
       <p><b>s-process.</b> Free neutrons are captured slowly by nuclei, building elements heavier than iron such as strontium, barium and lead.</p>
-      <p>The "superwind" removes up to \\(10^{-4}\\) M☉ per year. Carbon and silicate dust forms in the cool outflow: this is where most of the dust in the galaxy comes from.</p>`;
+      <p>The "superwind" removes up to \\(10^{-4}\\) M<sub>☉</sub> per year. Carbon and silicate dust forms in the cool outflow: this is where most of the dust in the galaxy comes from.</p>`;
     },
     layers: c => ({
       rgb: [
@@ -293,7 +294,7 @@ export const STAGES = {
     tagline: 'The outer layers drift away as a glowing shell, uncovering the hot core.',
     balance: () => ({ v: 0.8, text: 'Outer layers escape; the core holds' }),
     body: c => `
-      <p>The star has pushed off its outer layers at about 20 km/s. There is no explosion: the core is only ${mass(c.life.remnant)}, well below the 1.4 M☉ needed for a collapse.</p>
+      <p>The star has pushed off its outer layers at about 20 km/s. There is no explosion: the core is only ${mass(c.life.remnant)}, well below the 1.4 M<sub>☉</sub> needed for a collapse.</p>
       <p>The bare core is tiny and extremely hot, over 100 000 K. Its ultraviolet light makes the shell of gas glow: green-blue from oxygen and red from hydrogen.</p>
       <p>The shell fades in about 20 000 years as it spreads out. Its carbon, nitrogen and oxygen mix into space and end up in new stars and planets.</p>
       <p class="note">It has nothing to do with planets. Through early telescopes these shells looked like the disks of planets.</p>`,
@@ -324,7 +325,7 @@ export const STAGES = {
     deeper: c => `
       <p><b>Electron degeneracy pressure.</b> The Pauli exclusion principle stops electrons sharing a quantum state. Squeezed together, they are forced into high-momentum states and push back, whatever the temperature. So a white dwarf does not shrink as it cools.</p>
       <p><b>More massive means smaller:</b> \\(R \\propto M^{-1/3}\\).</p>
-      <p><b>Chandrasekhar limit.</b> Above ${CHANDRASEKHAR_MASS} M☉ the electrons would have to move at the speed of light and the pressure fails. A white dwarf pushed over the limit by gas from a companion star explodes as a Type Ia supernova. This one is ${mass(c.life.remnant)}.</p>
+      <p><b>Chandrasekhar limit.</b> Above ${CHANDRASEKHAR_MASS} M<sub>☉</sub> the electrons would have to move at the speed of light and the pressure fails. A white dwarf pushed over the limit by gas from a companion star explodes as a Type Ia supernova. This one is ${mass(c.life.remnant)}.</p>
       <p>As it cools, the interior freezes from the center outward into a crystal lattice.</p>`,
     layers: c => {
       const helium = c.M < HELIUM_IGNITION_MASS;
@@ -344,7 +345,7 @@ export const STAGES = {
       const end = c.stage.keys[c.stage.keys.length - 1];
       const shape = c.stage.staysBlue
         ? `This star is so luminous (${lum(end.L)}) that its own light blows its outer layers off into space. Instead of swelling into a red supergiant it stays blue, shedding mass in outbursts, until only a bare, hot core is left (a Wolf–Rayet star). It goes from ${mass(c.stage.mass[0])} to ${mass(c.stage.mass[1])}.`
-        : `The outer layers swell enormously, to about ${sig(end.R, 2)} R☉ (${orbitComparison(end.R)}), and cool to ${temp(end.T)}: a <b>red supergiant</b> like Betelgeuse.`;
+        : `The outer layers swell enormously, to about ${sig(end.R, 2)} R<sub>☉</sub> (${orbitComparison(end.R)}), and cool to ${temp(end.T)}: a <b>red supergiant</b> like Betelgeuse.`;
       return `
       <p>After only ${years(c.ms.years)} the core hydrogen is gone. The core contracts and heats until helium begins to fuse into carbon and oxygen. Hydrogen keeps fusing in a shell around it.</p>
       <p>${shape}</p>
@@ -355,7 +356,7 @@ export const STAGES = {
       : 'On the HR diagram the dot moves almost straight to the right: much cooler, much bigger, about the same brightness. The surface is covered by a few giant convection cells.'),
     deeper: () => `
       <p>The core is not degenerate, so helium ignites gently: there is no helium flash.</p>
-      <p><b>Eddington limit.</b> Above about \\(3 \\times 10^{4}\\) L☉ per solar mass, radiation pressure on the gas beats gravity. The brightest stars sit close to this limit, which is why they lose so much mass.</p>
+      <p><b>Eddington limit.</b> Above about \\(3 \\times 10^{4}\\) L<sub>☉</sub> per solar mass, radiation pressure on the gas beats gravity. The brightest stars sit close to this limit, which is why they lose so much mass.</p>
       <p>The luminosity hardly changes as the star crosses the diagram, so \\(R\\) must rise as \\(T\\) falls: \\(L = 4\\pi R^2\\sigma T^4\\).</p>`,
     layers: c => [
       { name: 'Helium-fusing core', el: 'He', kind: 'fusion', r: 0.16, info: 'Helium fuses to carbon and oxygen at about 200 million K.' },
@@ -383,7 +384,7 @@ export const STAGES = {
     deeper: () => `
       <p><b>Binding energy per nucleon</b> peaks near \\({}^{56}\\mathrm{Fe}\\) and \\({}^{62}\\mathrm{Ni}\\). Fusion releases energy only on the way up to that peak.</p>
       <p>Above about \\(5 \\times 10^{8}\\) K most of the energy leaves as neutrinos, which escape straight through the star. The core has to burn fuel faster and faster to keep up, which is why the stages get so short.</p>
-      <p>The iron core is held up by electron degeneracy pressure. It grows until it reaches about ${CHANDRASEKHAR_MASS} M☉.</p>`,
+      <p>The iron core is held up by electron degeneracy pressure. It grows until it reaches about ${CHANDRASEKHAR_MASS} M<sub>☉</sub>.</p>`,
     layers: (c, p) => {
       const i = Math.min(3, Math.floor(p * 4));
       return onion(i, i === 3 ? p * 4 - 3 : 0);
@@ -403,7 +404,7 @@ export const STAGES = {
       return '<b>Act 3, the explosion.</b> The shock has reached the surface. The star outshines billions of Suns as its remains fly out at 10 000 km/s.';
     },
     body: c => `
-      <p>The iron core reaches about 1.4 M☉ and electron pressure can no longer hold it up. It collapses from the size of the Earth to about 30 km across in a quarter of a second. Protons and electrons are crushed together to make <b>neutrons</b>.</p>
+      <p>The iron core reaches about 1.4 M<sub>☉</sub> and electron pressure can no longer hold it up. It collapses from the size of the Earth to about 30 km across in a quarter of a second. Protons and electrons are crushed together to make <b>neutrons</b>.</p>
       <p>When the center is as dense as an atomic nucleus it suddenly stiffens. The infalling material bounces off it, sending a <b>shock wave</b> outward that blows the rest of the star into space.</p>
       <p>For weeks the supernova can outshine a whole galaxy. Elements heavier than iron are made in the explosion and scattered through space, where they end up in new stars, planets and people.</p>
       ${c.life.fate === 'blackHole' ? '<p>In a star this massive, so much material falls back on to the core that it cannot survive as a neutron star. In some cases the explosion fails and the star simply vanishes.</p>' : ''}`,
@@ -440,7 +441,7 @@ export const STAGES = {
       <p>When the core shrank, it spun up, just as the cloud did. It also has an intense magnetic field. Beams of radio waves leave its magnetic poles and sweep around like a lighthouse. If a beam crosses the Earth we detect regular pulses: a <b>pulsar</b>.</p>`,
     look: () => 'The magnetic axis is tilted away from the spin axis, so the beams sweep around. The debris of the supernova is still spreading out around it. The star is drawn far too large: at this scale it would be invisible.',
     deeper: c => `
-      <p><b>Neutron degeneracy pressure</b> works like electron degeneracy pressure, with help from the repulsive core of the strong force. It fails above about 2.2 M☉ (the Tolman–Oppenheimer–Volkoff limit).</p>
+      <p><b>Neutron degeneracy pressure</b> works like electron degeneracy pressure, with help from the repulsive core of the strong force. It fails above about 2.2 M<sub>☉</sub> (the Tolman–Oppenheimer–Volkoff limit).</p>
       <p>Surface gravity is about \\(10^{12}\\) N/kg and the escape speed is over half the speed of light.</p>
       <p>Conserving angular momentum: shrinking the radius by a factor of 500 makes the core spin about 250 000 times faster. Magnetic flux is also conserved, so \\(B \\propto \\dfrac{1}{R^2}\\) and the field reaches about \\(10^{8}\\) T.</p>
       <p>The first pulsar was discovered by Jocelyn Bell Burnell in 1967. Pulsars slow down over millions of years as they radiate their rotational energy away.</p>

@@ -142,26 +142,44 @@ h3 { font-size: .88rem; margin: 0; }
 .stepper .unit { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
 button:disabled { cursor: default; opacity: 0.9; }
 
-.mass-scale { position: relative; padding-top: 2px; }
 input[type=range] { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 48px; margin: 0; background: transparent; cursor: pointer; touch-action: pan-y; }
 input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--input-border); }
 input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--input-border); }
 input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -10px; border-radius: 50%; border: 3px solid var(--card-bg); background: var(--brand-primary); box-shadow: 0 1px 6px rgba(0, 0, 0, .3); }
 input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--card-bg); background: var(--brand-primary); box-shadow: 0 1px 6px rgba(0, 0, 0, .3); }
-/* The band and ticks are inset by half a thumb so they line up with the slider's travel. */
-.fate-band { display: flex; gap: 2px; margin: -6px 13px 0; }
-.fate-band span { min-width: 0; padding: 6px 8px; border-radius: 8px; color: #fff; font-size: .74rem; line-height: 1.25; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* The slider is the fate band: the range input lies over it with an invisible track. Ticks, band
+   and example-star flags use one mapping, x from 0 at 0.1 to 1 at 100, inset by half the thumb. */
+.mass-scale { --inset: 5px; position: relative; min-width: 0; container: massscale / inline-size; }
+.mass-scale [style*="--x"] { left: calc(var(--inset) + var(--x) * (100% - 2 * var(--inset))); }
+.ticks { position: relative; height: 18px; margin-bottom: 4px; font-size: .7rem; color: var(--text-secondary); }
+.ticks span { position: absolute; bottom: 0; transform: translateX(-50%); }
+.ticks span:first-child { transform: translateX(calc(-1 * var(--inset))); }
+.ticks span:last-child { transform: translateX(calc(-100% + var(--inset))); }
+.band-slider { position: relative; height: 48px; }
+.fate-band { position: absolute; inset: 0 var(--inset); display: flex; gap: 2px; }
+.fate-band span { min-width: 0; padding: 6px 10px; color: #fff; font-size: .76rem; line-height: 1.3; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.fate-band span:first-child { border-radius: 10px 0 0 10px; }
+.fate-band span:last-child { border-radius: 0 10px 10px 0; }
 .fate-band b, .fate-band i { display: block; font-style: normal; overflow: hidden; text-overflow: ellipsis; }
-.fate-band i { opacity: .85; font-size: .68rem; }
+.fate-band i { opacity: .88; font-size: .7rem; }
 .band-wd { background: var(--fate-wd); }
 .band-ns { background: var(--fate-ns); }
 .band-bh { background: var(--fate-bh); }
 [data-theme="dark"] .fate-band span { color: #111110; }
-.ticks { position: relative; height: 20px; margin: 4px 13px 0; font-size: .7rem; color: var(--text-secondary); }
-.ticks span { position: absolute; transform: translateX(-50%); }
-.fate-key { display: none; flex-wrap: wrap; gap: 4px 14px; margin: 6px 13px 0; font-size: .76rem; color: var(--text-secondary); }
+#mass-slider { position: absolute; inset: 0; height: 48px; border-radius: 10px; }
+#mass-slider::-webkit-slider-runnable-track { height: 48px; background: transparent; }
+#mass-slider::-moz-range-track { height: 48px; background: transparent; }
+#mass-slider::-webkit-slider-thumb { width: 10px; height: 58px; margin-top: -5px; border-radius: 5px; border: 3px solid var(--card-bg); background: var(--text-main); box-shadow: 0 1px 5px rgba(0, 0, 0, .35); }
+#mass-slider::-moz-range-thumb { box-sizing: border-box; width: 10px; height: 58px; border-radius: 5px; border: 3px solid var(--card-bg); background: var(--text-main); box-shadow: 0 1px 5px rgba(0, 0, 0, .35); }
+#mass-slider:focus { outline: none; }
+#mass-slider:focus-visible { outline: 3px solid var(--brand-accent); outline-offset: 4px; }
+/* The mass rides above the thumb while it is dragged or keyboard-focused, covering the ticks. */
+.mass-bubble { position: absolute; bottom: calc(100% + 8px); transform: translateX(-50%); padding: 2px 8px; border-radius: 8px; background: var(--text-main); color: var(--card-bg); font-size: .76rem; font-weight: 600; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s; }
+.band-slider.dragging .mass-bubble, .band-slider:has(#mass-slider:focus-visible) .mass-bubble { opacity: 1; }
+.fate-key { display: none; flex-wrap: wrap; gap: 4px 14px; margin: 6px 0 0; font-size: .76rem; color: var(--text-secondary); }
 .fate-key span { display: inline-flex; align-items: center; gap: 6px; }
 .fate-key i { width: 10px; height: 10px; border-radius: 3px; }
+/* Example stars: pills by default (narrow screens, fullscreen), flags on the band where it is wide. */
 .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .presets button { min-height: 48px; padding: 6px 14px; border: 1px solid var(--input-border); border-radius: 999px; background: var(--card-bg); font-size: .84rem; color: var(--text-secondary); }
 .presets button b { font-family: var(--font-mono); color: var(--text-main); margin-right: 4px; }
@@ -169,6 +187,21 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 
 .presets button[aria-pressed=true] { border-color: var(--brand-accent-strong); background: var(--brand-accent-strong); color: var(--accent-ink); }
 .presets button[aria-pressed=true] b { color: inherit; }
 [data-theme="dark"] .presets button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--accent-ink); }
+@container massscale (min-width: 560px) {
+  .mass-scale .presets { position: relative; display: block; height: 80px; margin-top: 0; }
+  .mass-scale .presets button {
+    position: absolute; top: 0; display: flex; align-items: flex-end; min-height: 0; height: 40px; padding: 0 6px 4px 8px;
+    border: 0; border-left: 2px solid var(--input-border); border-radius: 0; background: none; font-size: .8rem; white-space: nowrap;
+  }
+  .mass-scale .presets button:nth-child(even) { height: 80px; }
+  .mass-scale .presets button.flip { transform: translateX(-100%); border-left: 0; border-right: 2px solid var(--input-border); padding: 0 8px 4px 6px; }
+  .mass-scale .presets button:hover { border-color: var(--brand-accent); color: var(--text-main); }
+  .mass-scale .presets button[aria-pressed=true], [data-theme="dark"] .mass-scale .presets button[aria-pressed=true] { background: none; border-color: var(--brand-accent-strong); color: var(--brand-accent-strong); }
+  [data-theme="dark"] .mass-scale .presets button[aria-pressed=true] { border-color: var(--brand-accent); color: var(--brand-accent); }
+  .mass-scale .presets button[aria-pressed=true] b { color: inherit; }
+  .mass-scale .presets button:focus-visible { outline-offset: -2px; }
+}
+sub { font-size: .7em; line-height: 0; vertical-align: -.28em; }
 
 /* Workspace */
 .workspace {
@@ -232,14 +265,26 @@ body.viewer-expanded { overflow: hidden; }
 .true-scale, .mini-hr { right: 10px; width: 170px; margin: 0; padding: 6px; border-radius: 12px; background: var(--space-panel); border: 1px solid var(--space-border); }
 .true-scale { bottom: 10px; }
 .mini-hr { top: 10px; }
-.true-scale canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 220; flex: none; }
+/* Real size: a log ladder of familiar widths, largest at the top, with the star's width marked on it. */
+.ladder-title { margin: 0 0 4px; font-size: .62rem; letter-spacing: .08em; color: var(--space-muted); }
+.ladder { position: relative; height: 128px; margin: 0 2px 0 4px; }
+.ladder::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; border-radius: 1px; background: var(--space-border); }
+.ladder ol { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
+.ladder li { position: absolute; left: 3px; right: 0; display: flex; align-items: center; gap: 7px; transform: translateY(50%); font-size: .64rem; line-height: 1; white-space: nowrap; color: var(--space-muted); }
+.ladder li::before { content: ''; flex: none; width: 10px; height: 2px; background: var(--space-muted); }
+.ladder li.near { color: var(--space-text); }
+.ladder-trail { position: absolute; left: 4px; width: 8px; border-radius: 4px; background: rgba(94, 234, 212, .35); }
+.ladder-dot { position: absolute; left: 1px; width: 14px; height: 14px; margin-bottom: -7px; border-radius: 50%; border: 2px solid var(--space-text); box-shadow: 0 0 8px rgba(0, 0, 0, .6); }
 .mini-hr canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 230; flex: none; }
-.true-scale figcaption, .mini-hr figcaption { margin-top: 2px; font-size: .64rem; line-height: 1.35; text-align: center; color: var(--space-muted); }
+.true-scale figcaption { margin-top: 6px; font-size: .66rem; line-height: 1.35; color: var(--space-text); }
+.mini-hr figcaption { margin-top: 2px; font-size: .64rem; line-height: 1.35; text-align: center; color: var(--space-muted); }
 .gesture { bottom: 10px; left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; color: var(--space-muted); }
 /* A short viewer (fullscreen on a phone held sideways) has no room for full-size insets. */
 @container (max-height: 430px) {
-  .true-scale, .mini-hr { width: 104px; }
-  .true-scale figcaption, .mini-hr figcaption { display: none; }
+  .mini-hr { width: 104px; }
+  .true-scale { width: 124px; }
+  .ladder { height: 96px; }
+  .mini-hr figcaption, .true-scale figcaption { display: none; }
 }
 @container (max-width: 700px) { .gesture { display: none; } }
 

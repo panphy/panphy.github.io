@@ -31,6 +31,8 @@ const FATE = {
   blackHole: { name: 'black hole', color: 'var(--fate-bh)' }
 };
 
+// Position of a mass on the logarithmic band, from 0 at 0.1 to 1 at 100.
+const massX = M => (Math.log10(M) + 1) / 3;
 const state = { mass: 1, life: null, position: 0, playing: false, speed: 1, cutaway: false, layer: -1, gas: false };
 
 const viewer = $('viewer');
@@ -849,6 +851,9 @@ function setMass(mass, keepInput = false) {
   }
   if (!keepInput) $('mass-input').value = M;
   $('mass-slider').value = Math.log10(M);
+  const bubble = $('mass-bubble');
+  bubble.innerHTML = fmt.mass(M);
+  bubble.style.setProperty('--x', massX(M));
   $('mass-down').disabled = M <= MASS_MIN;
   $('mass-up').disabled = M >= MASS_MAX;
   document.querySelectorAll('#presets button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.mass) === M)));
@@ -990,17 +995,17 @@ function renderLayers(st) {
   // Rebuild the list only when the layers themselves change, so a pressed button keeps keyboard focus.
   if (rebuild) $('layers').innerHTML = layers.map((layer, i) => `<li><button type="button" data-layer="${i}"><i style="background:${ELEMENT[layer.el]}"></i>${layer.name}<em>${KIND_LABEL[layer.kind]}</em></button></li>`).join('');
   document.querySelectorAll('#layers button').forEach((button, i) => button.setAttribute('aria-pressed', String(state.layer === i)));
-  $('layer-info').textContent = state.layer >= 0 ? layers[state.layer].info : 'Layers are widened so that you can see them.';
+  $('layer-info').innerHTML = state.layer >= 0 ? layers[state.layer].info : 'Layers are widened so that you can see them.';
 }
 
 function renderReadout(st) {
   const { stage } = st;
   const id = stage.id;
   $('r-age').textContent = id === 'sn' ? `collapse + ${fmt.years(st.seconds / 3.156e7)}` : fmt.years(st.age);
-  $('r-mass').textContent = fmt.mass(st.mass);
-  $('r-radius').textContent = id === 'bh' ? `${fmt.radius(st.R)} horizon` : fmt.radius(st.R);
+  $('r-mass').innerHTML = fmt.mass(st.mass);
+  $('r-radius').innerHTML = id === 'bh' ? `${fmt.radius(st.R)} horizon` : fmt.radius(st.R);
   $('r-temp').textContent = id === 'bh' ? 'no surface' : fmt.temp(st.T);
-  $('r-lum').textContent = id === 'cloud' ? 'infrared only' : id === 'bh' ? (state.gas ? 'gas: X-rays' : 'none') : fmt.lum(st.L);
+  $('r-lum').innerHTML = id === 'cloud' ? 'infrared only' : id === 'bh' ? (state.gas ? 'gas: X-rays' : 'none') : fmt.lum(st.L);
   $('r-core').textContent = fmt.temp(st.coreT);
 
   const c = context(st);
@@ -1020,50 +1025,87 @@ function renderReadout(st) {
   drawScale(st);
 }
 
-// True-scale inset: the star against the nearest familiar object.
-const SCALE_REFERENCES = [
-  { name: 'a city 20 km across', R: 10 / SUN_RADIUS_KM },
-  { name: 'the Earth', R: 6371 / SUN_RADIUS_KM },
-  { name: 'Jupiter', R: 69911 / SUN_RADIUS_KM },
-  { name: 'the Sun', R: 1 },
-  { name: "Mercury's orbit", R: 0.387 * AU_IN_RSUN, orbit: true },
-  { name: "the Earth's orbit", R: AU_IN_RSUN, orbit: true },
-  { name: "Jupiter's orbit", R: 5.2 * AU_IN_RSUN, orbit: true },
-  { name: "Neptune's orbit", R: 30 * AU_IN_RSUN, orbit: true },
-  { name: 'the gap to the nearest star', R: 134000 * AU_IN_RSUN, orbit: true }
+// Real size: the width of the star on a fixed log ladder of familiar widths, largest at the top.
+// The faint trail is the range of sizes the star itself has had so far in its life.
+const KM_PER_LY = 9.461e12;
+const LADDER = [
+  { name: 'A city', km: 20, text: 'a city' },
+  { name: 'The Earth', km: 12742, text: 'the Earth' },
+  { name: 'The Sun', km: 2 * SUN_RADIUS_KM, text: 'the Sun' },
+  { name: "Earth's orbit", km: 2 * AU_IN_RSUN * SUN_RADIUS_KM, text: "the Earth's orbit" },
+  { name: "Neptune's orbit", km: 60 * AU_IN_RSUN * SUN_RADIUS_KM, text: "Neptune's orbit" },
+  { name: '1 light year', km: KM_PER_LY, text: 'a light year' }
 ];
+const LADDER_LO = Math.log10(8), LADDER_HI = Math.log10(2.2 * KM_PER_LY);
+const ladderY = km => clamp((Math.log10(km) - LADDER_LO) / (LADDER_HI - LADDER_LO), 0, 1) * 100;
+$('ladder-rungs').innerHTML = LADDER.map(r => `<li style="bottom:${ladderY(r.km)}%">${r.name}</li>`).join('');
+const ladderRungs = [...$('ladder-rungs').children];
+let ladderTrail = { key: '', lo: Infinity, hi: 0, upTo: -1 };
+// The star's own width (not the cloud or the debris) at a moment of its life, or null.
+function starWidthKm(st) {
+  if (!st.R || st.stage.id === 'cloud' || (st.stage.id === 'sn' && st.p >= SN_BREAKOUT)) return null;
+  return 2 * st.R * SUN_RADIUS_KM;
+}
+function widthWords(km) {
+  if (km < 1000) return `${fmt.sig(km, 2)} km`;
+  if (km < 1e6) return `${Number(km.toPrecision(2)).toLocaleString('en-US')} km`;
+  if (km < 1.5e8) return `${fmt.sig(km / 1e6, 2)} million km`;
+  if (km < 0.1 * KM_PER_LY) return `${fmt.sig(km / (AU_IN_RSUN * SUN_RADIUS_KM), 2)} AU`;
+  return `${fmt.sig(km / KM_PER_LY, 2)} light years`;
+}
 function drawScale(st) {
-  const canvas = $('scale-canvas');
-  const g = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  g.clearRect(0, 0, w, h);
-  if (!st.R) return;
-  const reference = SCALE_REFERENCES.reduce((best, r) => (Math.abs(Math.log(r.R / st.R)) < Math.abs(Math.log(best.R / st.R)) ? r : best));
-  const unit = 0.42 * h / Math.max(st.R, reference.R);
   const id = st.stage.id;
-  const starRadius = Math.max(1.5, st.R * unit);
-  const cx = w / 2, cy = h / 2;
-  g.beginPath();
-  g.arc(cx, cy, starRadius, 0, Math.PI * 2);
-  if (id === 'bh') {
-    g.fillStyle = '#000'; g.fill();
-    g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 2; g.stroke();
-  } else if (id === 'cloud' || (id === 'sn' && st.p >= SN_BREAKOUT)) {
-    const fog = g.createRadialGradient(cx, cy, 0, cx, cy, starRadius);
-    fog.addColorStop(0, 'rgba(251,146,60,.9)'); fog.addColorStop(1, 'rgba(251,146,60,.08)');
-    g.fillStyle = fog; g.fill();
-  } else {
-    g.fillStyle = `#${view.color.getHexString()}`; g.fill();
+  const km = st.R ? 2 * st.R * SUN_RADIUS_KM : null;
+  // Trail: sample the star's own width from the start of its life to now, once per mass.
+  const key = `${state.mass}`;
+  if (ladderTrail.key !== key || state.position < ladderTrail.upTo) ladderTrail = { key, lo: Infinity, hi: 0, upTo: 0 };
+  for (let t = ladderTrail.upTo; t <= state.position; t += 0.02) {
+    const w = starWidthKm(lifeState(state.life, t));
+    if (w) { ladderTrail.lo = Math.min(ladderTrail.lo, w); ladderTrail.hi = Math.max(ladderTrail.hi, w); }
+    ladderTrail.upTo = t + 0.02;
   }
-  g.beginPath();
-  g.arc(cx, cy, Math.max(1.5, reference.R * unit), 0, Math.PI * 2);
-  g.setLineDash(reference.orbit ? [6, 6] : []);
-  g.strokeStyle = '#5EEAD4'; g.lineWidth = 2.5; g.stroke();
-  g.setLineDash([]);
-  const ratio = st.R / reference.R;
-  const what = id === 'cloud' ? 'Cloud' : id === 'bh' ? 'Horizon' : id === 'sn' && st.p >= SN_BREAKOUT ? 'Debris' : 'Star';
-  const compare = Math.abs(Math.log(ratio)) < 0.05 ? 'the same width as' : ratio >= 1 ? `${fmt.sig(ratio, 2)}× wider than` : `${fmt.sig(1 / ratio, 2)}× narrower than`;
-  $('scale-caption').innerHTML = `TRUE SCALE<br>${what} is ${compare} <span style="color:#5EEAD4">${reference.name}</span>`;
+  const own = starWidthKm(st);
+  if (own) { ladderTrail.lo = Math.min(ladderTrail.lo, own); ladderTrail.hi = Math.max(ladderTrail.hi, own); }
+  const trail = $('ladder-trail');
+  trail.hidden = !(ladderTrail.hi > 0);
+  if (!trail.hidden) {
+    const lo = ladderY(ladderTrail.lo), hi = ladderY(ladderTrail.hi);
+    trail.style.bottom = `calc(${lo}% - 4px)`;
+    trail.style.height = `calc(${hi - lo}% + 8px)`;
+  }
+  const dot = $('ladder-dot');
+  dot.hidden = !km;
+  if (!km) { $('scale-caption').textContent = ''; return; }
+  dot.style.bottom = `${ladderY(km)}%`;
+  const debris = id === 'cloud' || (id === 'sn' && st.p >= SN_BREAKOUT);
+  dot.style.background = id === 'bh' ? '#000' : debris ? 'rgba(251,146,60,.5)' : `#${view.color.getHexString()}`;
+  // Compare with the largest familiar width below it, or say "about as wide as" when within 1.5 times.
+  const near = LADDER.find(r => km / r.km >= 1 / 1.5 && km / r.km <= 1.5);
+  const below = [...LADDER].reverse().find(r => r.km <= km) ?? LADDER[0];
+  ladderRungs.forEach((li, i) => li.classList.toggle('near', LADDER[i] === (near ?? below)));
+  const what = id === 'cloud' ? 'Cloud' : id === 'bh' ? 'Horizon' : debris ? 'Debris' : 'Star';
+  const ratio = km / below.km;
+  const compare = near ? `about as wide as ${near.text}`
+    : ratio < 1 ? `smaller than ${below.text}` : `about ${ratio < 3 ? fmt.sig(ratio, 2) : ratio < 100 ? Math.round(ratio) : fmt.sig(ratio, 1)} times as wide as ${below.text}`;
+  $('scale-caption').textContent = `${what}: ${widthWords(km)} across, ${compare}.`;
+}
+
+// Canvas text ending in a solar symbol, drawn as a true subscript: smaller and lowered.
+function fillSolar(g, text, px, py) {
+  const align = g.textAlign;
+  const size = parseFloat(g.font.match(/([\d.]+)px/)[1]);
+  const font = g.font;
+  const wText = g.measureText(text).width;
+  g.font = font.replace(/[\d.]+px/, `${size * 0.7}px`);
+  const wSun = g.measureText('☉').width;
+  let left = px;
+  if (align === 'center') left = px - (wText + wSun) / 2;
+  else if (align === 'right' || align === 'end') left = px - wText - wSun;
+  g.textAlign = 'left';
+  g.fillText('☉', left + wText, py + size * 0.28);
+  g.font = font;
+  g.fillText(text, left, py);
+  g.textAlign = align;
 }
 
 /* Hertzsprung–Russell diagram */
@@ -1107,17 +1149,17 @@ function drawHR(st) {
   g.fillStyle = text;
   g.fillText('Surface temperature / K  (hotter ←)', (pad.l + W - pad.r) / 2, H - 16);
   g.save(); g.translate(13, (pad.t + H - pad.b) / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'middle';
-  g.fillText('Brightness / L☉', 0, 0); g.restore();
+  fillSolar(g, 'Brightness / L', 0, 0); g.restore();
 
   g.save();
   g.beginPath(); g.rect(pad.l, pad.t, W - pad.l - pad.r, H - pad.t - pad.b); g.clip();
   // Lines of constant radius, from L = R²(T/T☉)⁴.
   g.setLineDash([4, 5]); g.strokeStyle = text; g.globalAlpha = 0.55; g.textAlign = 'left'; g.textBaseline = 'bottom';
-  [[0.01, '0.01 R☉'], [1, '1 R☉'], [100, '100 R☉']].forEach(([R, label]) => {
+  [[0.01, '0.01 R'], [1, '1 R'], [100, '100 R']].forEach(([R, label]) => {
     const L = T => R * R * (T / SUN_T) ** 4;
     g.beginPath(); g.moveTo(x(250000), y(L(250000))); g.lineTo(x(2000), y(L(2000))); g.stroke();
     const T = R === 100 ? 9000 : R === 1 ? 20000 : 60000;
-    g.fillText(label, x(T) + 4, y(L(T)) - 3);
+    fillSolar(g, label, x(T) + 4, y(L(T)) - 3);
   });
   g.setLineDash([]); g.globalAlpha = 1;
 
@@ -1200,9 +1242,29 @@ $('mass-input').addEventListener('change', event => {
   setMass(Number.isFinite(value) && value > 0 ? value : state.mass);
 });
 $('mass-input').addEventListener('keydown', event => { if (event.key === 'Enter') event.target.blur(); });
-$('mass-slider').addEventListener('input', event => setMass(10 ** Number(event.target.value)));
-$('mass-down').addEventListener('click', () => setMass([...MASS_STEPS].reverse().find(m => m < state.mass - 1e-9) ?? MASS_MIN));
-$('mass-up').addEventListener('click', () => setMass(MASS_STEPS.find(m => m > state.mass + 1e-9) ?? MASS_MAX));
+const massDown = () => [...MASS_STEPS].reverse().find(m => m < state.mass - 1e-9) ?? MASS_MIN;
+const massUp = () => MASS_STEPS.find(m => m > state.mass + 1e-9) ?? MASS_MAX;
+// Dragging snaps to two significant figures, so every readout shows the same tidy value.
+$('mass-slider').addEventListener('input', event => setMass(Number((10 ** Number(event.target.value)).toPrecision(2))));
+// Arrow keys step through the same values as the − and + buttons.
+$('mass-slider').addEventListener('keydown', event => {
+  const target = { ArrowRight: massUp, ArrowUp: massUp, PageUp: massUp, ArrowLeft: massDown, ArrowDown: massDown, PageDown: massDown,
+    Home: () => MASS_MIN, End: () => MASS_MAX }[event.key];
+  if (!target) return;
+  event.preventDefault();
+  setMass(target());
+});
+const bandSlider = document.querySelector('.band-slider');
+$('mass-slider').addEventListener('pointerdown', () => bandSlider.classList.add('dragging'));
+['pointerup', 'pointercancel', 'blur'].forEach(type => $('mass-slider').addEventListener(type, () => bandSlider.classList.remove('dragging')));
+// Example stars sit on the band at their masses; the last ones hang left so they stay inside it.
+document.querySelectorAll('#presets button').forEach(button => {
+  const x = massX(Number(button.dataset.mass));
+  button.style.setProperty('--x', x);
+  button.classList.toggle('flip', x > 0.8);
+});
+$('mass-down').addEventListener('click', () => setMass(massDown()));
+$('mass-up').addEventListener('click', () => setMass(massUp()));
 $('presets').addEventListener('click', event => {
   const button = event.target.closest('button');
   if (button) setMass(Number(button.dataset.mass));
