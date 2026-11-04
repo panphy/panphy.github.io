@@ -14,9 +14,9 @@
   --select: #1C64D8;
   --select-soft: rgba(28, 100, 216, 0.14);
   --target: #0F9D58;
-  /* Hover outline on a part's controls (switch lever, slider), distinct from selection. */
-  --interact: #7C3AED;
-  --interact-soft: rgba(124, 58, 237, 0.14);
+  /* Hover outline on a part’s controls (switch lever, slider, knob), distinct from the selection blue. */
+  --interact: #E8590C;
+  --interact-soft: rgba(232, 89, 12, 0.16);
   --warn-ring: #D9480F;
   --appbar-h: 56px;
   --panel-w: 264px;
@@ -40,8 +40,8 @@
   --select: #54A6FF;
   --select-soft: rgba(84, 166, 255, 0.18);
   --target: #4FDB98;
-  --interact: #B197FC;
-  --interact-soft: rgba(177, 151, 252, 0.2);
+  --interact: #FF922B;
+  --interact-soft: rgba(255, 146, 43, 0.24);
   --warn-ring: #FF8A4C;
   --paper-minor: rgba(150, 175, 255, 0.03);
   --paper-major: rgba(150, 175, 255, 0.065);
@@ -233,7 +233,7 @@ a.atool { text-decoration: none; }
 .workspace[data-active-tool="wire"] .comp, .workspace.is-wiring .comp { cursor: crosshair; }
 .comp .act { fill: transparent; cursor: pointer; }
 .comp .act-slider, .comp .act-knob { cursor: ew-resize; }
-.comp:hover .act { fill: var(--interact-soft); stroke: var(--interact); stroke-width: 1; stroke-dasharray: 3 3; }
+.comp:hover .act { fill: var(--interact-soft); stroke: var(--interact); stroke-width: 2; stroke-dasharray: 5 3; vector-effect: non-scaling-stroke; }
 .comp.is-problem .art { filter: url(#ppc-glow-problem); }
 .comp.is-note .art { filter: url(#ppc-glow-note); }
 .meter-note { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, transparent); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }
