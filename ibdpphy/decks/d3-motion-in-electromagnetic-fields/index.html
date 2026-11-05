@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic D.3 Motion in electromagnetic fields: charged particles in uniform electric and magnetic fields and in crossed fields, the force on a moving charge and on a current-carrying conductor, and the force between parallel wires.">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic D.3 Motion in electromagnetic fields: charged particles in uniform electric and magnetic fields and in crossed fields, the force on a moving charge and on a current-carrying conductor, the field of a long straight wire, and the force between parallel wires.">
   <meta name="theme-color" content="#F8F6F1">
   <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -73,7 +73,7 @@
             <div class="fig" data-fig="d3-wire-force" data-still data-plain style="height: 200px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Forces on currents</h3>
-            <p>A wire in a field, and two parallel wires</p>
+            <p>A wire in a field, the field of a wire, and two parallel wires</p>
           </div>
         </div>
         <div class="idea" style="margin-top: 22px;">D.3 has <b>no additional higher level content</b>: every slide is for SL and HL.</div>
@@ -638,6 +638,70 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="The field of a long straight wire">
+        <p class="eyebrow">The field a current makes</p>
+        <h2>The field of a long straight wire<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation small"><span>\(B = \dfrac{\mu_{0} I}{2 \pi r}\)</span></div>
+            <ul class="points small">
+              <li class="step">\(r\): the <b>perpendicular distance</b> from the wire, in meters</li>
+              <li class="step">\(B \propto I\): double the current, double the field</li>
+              <li class="step frac">\(B \propto \dfrac{1}{r}\): twice as far, <b>half</b> the field</li>
+              <li class="step">Direction: the <b>right-hand grip rule</b> (D.2)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>SEEN END ON</span><span class="pill">CURRENT OUT OF THE PAGE</span></div>
+            <div class="fig" data-fig="d3-wire-field"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why \(\frac{1}{r}\) and not \(\frac{1}{r^{2}}\)</h3>
+            <p>Each field line round the wire is a circle of circumference \(2 \pi r\), which is where the \(2 \pi r\) in the equation comes from. A point charge spreads its field over a sphere, whose area grows as \(r^{2}\). A long wire spreads its field round a circle, whose length grows only as \(r\). So the field of a wire fades more slowly with distance than the field of a point.</p>
+            <h3 class="rn-head">What “long” means</h3>
+            <p>The equation assumes the wire is much longer than the distance \(r\), so that it looks infinite from where you are. Near the end of a short wire, or close to a bend, the field is weaker than the equation gives. For a cable a few centimeters from you, a straight run of a meter is already long enough.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Measuring \(r\) from the surface of the wire. It is the distance from the center of the wire.</p>
+            <p class="tip">The field is only zero infinitely far away. There is no distance at which it suddenly stops.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Wire field: worked example">
+        <p class="eyebrow">Worked example</p>
+        <h2>A cable and a compass<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">A long cable carries 12 A. The field 3.0 cm from it?</span>
+            <span>\(B = \dfrac{\mu_{0} I}{2 \pi r}\)</span>
+            <span class="step">\(B = \dfrac{4 \pi \times 10^{-7} \times 12}{2 \pi \times 0.030}\)</span>
+            <span class="step">\(B = \class{res}{8.0 \times 10^{-5} \,\mathrm{T}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Where does it equal the Earth’s field?</span>
+            <span>\(B = 5.0 \times 10^{-5} \,\mathrm{T}\), so \(r = \dfrac{\mu_{0} I}{2 \pi B}\)</span>
+            <span class="step">\(r = \dfrac{4 \pi \times 10^{-7} \times 12}{2 \pi \times 5.0 \times 10^{-5}}\)</span>
+            <span class="step">\(r = \class{res}{0.048 \,\mathrm{m}}\), about 5 cm</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What the numbers mean</h3>
+            <p>A few centimeters from an ordinary cable, the wire’s field is as strong as the Earth’s. A compass held there points somewhere between magnetic north and the direction of the wire’s field. Move it ten times further away and the wire’s field falls to a tenth, so the compass swings back almost to north.</p>
+            <h3 class="rn-head">Why household cables hardly affect compasses</h3>
+            <p>A mains cable holds two wires side by side, carrying equal currents in opposite directions. Their fields are almost equal and opposite, so outside the cable they nearly cancel. A single wire on its own, like the one in this example, is what makes a compass needle swing.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The \(\pi\) always cancels: \(\dfrac{\mu_{0}}{2 \pi} = 2 \times 10^{-7} \,\mathrm{T} \,\mathrm{m} \,\mathrm{A}^{-1}\) with the data booklet value of \(\mu_{0}\).</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="Two parallel wires">
         <p class="eyebrow">Currents act on each other</p>
         <h2>The force between two parallel wires<span>.</span></h2>
@@ -697,7 +761,7 @@
             <h3 class="rn-head">Following the two rules</h3>
             <p>Wire 1 carries current out of the page, so by the right-hand grip rule its field circles counterclockwise. At wire 2, to the right of wire 1, that field points up the page. Now the left-hand rule at wire 2: index finger up the page, middle finger out of the page, and the thumb points to the left, towards wire 1.</p>
             <h3 class="rn-head">Reversing one current</h3>
-            <p>If the current in wire 2 goes into the page, the middle finger reverses and so does the thumb: wire 2 is pushed away. You only need to know the field of a straight wire as a pattern; the expression for \(B_{1}\) is not in the data booklet, but the final equation is.</p>
+            <p>If the current in wire 2 goes into the page, the middle finger reverses and so does the thumb: wire 2 is pushed away. Both the field of one wire, \(B_{1}\), and the force per meter are in the data booklet from 2028, and you may be asked to derive the second from the first in these three lines.</p>
           </div>
           <div class="rn-side">
             <p class="tip">Apply the same steps the other way round, with wire 1 in the field of wire 2, and the force on wire 1 comes out equal and opposite.</p>
@@ -782,7 +846,7 @@
           <div class="card step"><p class="eyebrow">Circular paths</p><h3>\(r = \frac{mv}{qB}\)</h3><p>Period independent of speed<br>The path gives \(\frac{q}{m}\)</p></div>
           <div class="card step"><p class="eyebrow">Crossed fields</p><h3>\(v = \frac{E}{B}\)</h3><p>Only one speed passes straight through</p></div>
           <div class="card step"><p class="eyebrow">A wire in a field</p><h3>\(F = BIL \sin \theta\)</h3><p>Left-hand rule for the direction</p></div>
-          <div class="card step"><p class="eyebrow">Parallel wires</p><h3>\(\frac{F}{L} = \mu_{0} \frac{I_{1} I_{2}}{2 \pi r}\)</h3><p>Same direction: attract<br>Opposite directions: repel</p></div>
+          <div class="card step"><p class="eyebrow">Long straight wires</p><h3>\(B = \frac{\mu_{0} I}{2 \pi r}\)</h3><p>Two parallel wires: \(\frac{F}{L} = \mu_{0} \frac{I_{1} I_{2}}{2 \pi r}\)<br>Same direction: attract</p></div>
         </div>
         <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS, SL + HL</span><span data-page></span></div>
       </section>
