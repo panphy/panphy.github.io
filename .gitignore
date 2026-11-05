@@ -16,6 +16,9 @@ skills-lock.json
 # Local Year 9 Physics assessment materials
 gcsephy/year9phy/unit01/assessment/
 
+# Local IB reference documents (IB copyright)
+ibdpphy/local_reference/
+
 # Editor/IDE settings
 .vscode/
 .idea/
