@@ -591,7 +591,7 @@
             <h3 class="rn-head">Why \(v^{2}\)</h3>
             <p>Use final minus initial for the molecule: its momentum changes from \(+mv\) to \(-mv\), giving \(\Delta p_\mathrm{molecule} = -2mv\). The impulse on the wall is opposite, \(+2mv\). Speed counts twice. A faster molecule hits the wall harder: the magnitude of its momentum change, \(2mv\), is proportional to \(v\). It also returns sooner: the time for the round trip, \(\frac{2L}{v}\), is inversely proportional to \(v\). Harder and more often together make the force proportional to \(v^{2}\).</p>
             <h3 class="rn-head">From one molecule to a gas</h3>
-            <p>Take a cubical box of side \(L\) holding \(N\) molecules. On average a third of the motion is along each of the three directions, so the total force on one wall is \(\frac{1}{3} N \frac{m v^{2}}{L}\). The wall has area \(L^{2}\), so the pressure is \(\frac{1}{3} \frac{N m v^{2}}{L^{3}}\). \(Nm\) is the mass of the gas and \(L^{3}\) its volume, so \(\frac{Nm}{L^{3}}\) is the density, and the result is \(P = \frac{1}{3} \rho v^{2}\).</p>
+            <p>Take a cubical box of side \(L\) holding \(N\) molecules. They do not all move at the same speed, so replace \(v^{2}\) by its average over all the molecules, the mean square speed \(v_\mathrm{rms}^{2}\). On average a third of the motion is along each of the three directions, so the total force on one wall is \(\frac{1}{3} N \frac{m v_\mathrm{rms}^{2}}{L}\). The wall has area \(L^{2}\), so the pressure is \(\frac{1}{3} \frac{N m v_\mathrm{rms}^{2}}{L^{3}}\). \(Nm\) is the mass of the gas and \(L^{3}\) its volume, so \(\frac{Nm}{L^{3}}\) is the density, and the result is \(P = \frac{1}{3} \rho v_\mathrm{rms}^{2}\).</p>
           </div>
           <div class="rn-side">
             <p class="tip">You will not be asked to reproduce the derivation in full, but questions do ask for its steps: momentum change, time between collisions, force, then pressure.</p>
@@ -604,18 +604,19 @@
         <h2>Pressure and molecular speed<span>.</span></h2>
         <div class="split even">
           <div class="stack">
-            <div class="equation"><span>\(P = \dfrac{1}{3} \rho v^{2}\)</span></div>
+            <div class="equation"><span>\(P = \dfrac{1}{3} \rho v_\mathrm{rms}^{2}\)</span></div>
             <ul class="points small">
               <li>\(\rho\): the density of the gas</li>
-              <li class="step">\(v\): the average translational speed of the molecules</li>
+              <li class="step">\(v_\mathrm{rms}\): the <b>root-mean-square</b> speed: square every speed, take the mean, then the square root</li>
+              <li class="step">Not the mean velocity: that is <b>zero</b>, as molecules move equally in all directions</li>
               <li class="step">Links what a gauge reads to what the molecules are doing</li>
             </ul>
           </div>
           <div class="work step">
             <span class="say">Air: \(P = 1.01 \times 10^{5} \,\mathrm{Pa}\), \(\rho = 1.2 \,\mathrm{kg} \,\mathrm{m}^{-3}\)</span>
-            <span>\(P = \dfrac{1}{3} \rho v^{2}\) &nbsp;so&nbsp; \(v = \sqrt{\dfrac{3P}{\rho}}\)</span>
-            <span class="step">\(v = \sqrt{\dfrac{3 \times 1.01 \times 10^{5}}{1.2}}\)</span>
-            <span class="step">\(v = \class{res}{5.0 \times 10^{2} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>\(P = \dfrac{1}{3} \rho v_\mathrm{rms}^{2}\) &nbsp;so&nbsp; \(v_\mathrm{rms} = \sqrt{\dfrac{3P}{\rho}}\)</span>
+            <span class="step">\(v_\mathrm{rms} = \sqrt{\dfrac{3 \times 1.01 \times 10^{5}}{1.2}}\)</span>
+            <span class="step">\(v_\mathrm{rms} = \class{res}{5.0 \times 10^{2} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
@@ -624,7 +625,9 @@
             <h3 class="rn-head">Molecules from a pressure gauge</h3>
             <p>Nothing in the worked example involves a single molecule: the pressure comes from a barometer and the density from weighing a flask of air. Yet the answer is the speed of the molecules, about 500 m s⁻¹, half as fast again as sound. This was one of the first successes of the kinetic theory.</p>
             <h3 class="rn-head">Which average</h3>
-            <p>The molecules have a wide range of speeds. The \(v^{2}\) in the equation is the average of the squares of their speeds, and \(v\) is its square root, the “root-mean-square” speed. It is a little larger than the ordinary mean speed, because squaring gives extra weight to the fastest molecules.</p>
+            <p>Take three molecules moving at 1, 2 and 3 m s⁻¹. Their mean speed is 2 m s⁻¹. The mean of the squares is \(\frac{1 + 4 + 9}{3} = 4.67\), and its square root, the rms speed, is 2.16 m s⁻¹: a little larger, because squaring gives extra weight to the fastest molecules. Pressure depends on the mean square because each molecule pushes on the wall in proportion to its own \(v^{2}\).</p>
+            <h3 class="rn-head">Why not the mean velocity</h3>
+            <p>Velocity has a direction. For every molecule moving to the right there is, on average, one moving to the left, so the mean velocity of the gas is zero, even though every molecule is moving fast. Squaring removes the sign, which is why the rms value is a useful measure of how fast the molecules move.</p>
             <h3 class="rn-head">If they move so fast, why do smells spread slowly?</h3>
             <p>A molecule travels less than a ten-thousandth of a millimeter before it hits another and changes direction. It makes billions of collisions a second and wanders, never going far in a straight line.</p>
           </div>
@@ -640,17 +643,17 @@
         <div class="split even">
           <div class="work">
             <span class="say">\(N\) molecules, each of mass \(m\), in a volume \(V\)</span>
-            <span>\(P = \dfrac{1}{3} \rho v^{2}\) &nbsp;with&nbsp; \(\rho = \dfrac{Nm}{V}\)</span>
-            <span class="step">\(PV = \dfrac{1}{3} N m v^{2}\)</span>
+            <span>\(P = \dfrac{1}{3} \rho v_\mathrm{rms}^{2}\) &nbsp;with&nbsp; \(\rho = \dfrac{Nm}{V}\)</span>
+            <span class="step">\(PV = \dfrac{1}{3} N m v_\mathrm{rms}^{2}\)</span>
             <span class="say step">But also \(PV = N k_\mathrm{B} T\)</span>
-            <span class="step">\(\dfrac{1}{3} m v^{2} = k_\mathrm{B} T\)</span>
-            <span class="step">\(\dfrac{1}{2} m v^{2} = \class{res}{\dfrac{3}{2} k_\mathrm{B} T}\)</span>
+            <span class="step">\(\dfrac{1}{3} m v_\mathrm{rms}^{2} = k_\mathrm{B} T\)</span>
+            <span class="step">\(\bar{E}_\mathrm{k} = \dfrac{1}{2} m v_\mathrm{rms}^{2} = \class{res}{\dfrac{3}{2} k_\mathrm{B} T}\)</span>
           </div>
           <div class="stack step">
-            <div class="idea">The average kinetic energy of a molecule depends <b>only</b> on the kelvin temperature.</div>
+            <div class="idea">For a <b>monatomic</b> ideal gas, the average kinetic energy of a particle depends <b>only</b> on the kelvin temperature.</div>
             <div class="work step">
               <span class="say">Helium at 300 K, <span class="equation-inline">\(m = 6.64 \times 10^{-27}\) kg</span></span>
-              <span>\(v = \sqrt{\dfrac{3 k_\mathrm{B} T}{m}} = \class{res}{1.4 \times 10^{3} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+              <span>\(v_\mathrm{rms} = \sqrt{\dfrac{3 k_\mathrm{B} T}{m}} = \class{res}{1.4 \times 10^{3} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             </div>
           </div>
         </div>
@@ -658,14 +661,16 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">What has been achieved</h3>
-            <p>\(P = \frac{1}{3} \rho v^{2}\) came from Newton’s laws applied to molecules. \(PV = N k_\mathrm{B} T\) came from experiments with gauges and thermometers. Setting them equal explains temperature: it is a measure of the average kinetic energy of the molecules. This is the equation that B.1 quoted without proof.</p>
+            <p>\(P = \frac{1}{3} \rho v_\mathrm{rms}^{2}\) came from Newton’s laws applied to molecules. \(PV = N k_\mathrm{B} T\) came from experiments with gauges and thermometers. Setting them equal explains temperature: it is a measure of the average kinetic energy of the molecules. This is the equation that B.1 quoted without proof.</p>
             <h3 class="rn-head">The helium numbers</h3>
-            <p><span class="equation-inline">\(v = \sqrt{\frac{3 \times 1.38 \times 10^{-23} \times 300}{6.64 \times 10^{-27}}} = \sqrt{1.87 \times 10^{6}} = 1.4 \times 10^{3}\) m s⁻¹</span>. Air molecules, about seven times heavier, move at about 500 m s⁻¹ at the same temperature: the same kinetic energy with more mass means less speed.</p>
+            <p><span class="equation-inline">\(v_\mathrm{rms} = \sqrt{\frac{3 \times 1.38 \times 10^{-23} \times 300}{6.64 \times 10^{-27}}} = \sqrt{1.87 \times 10^{6}} = 1.4 \times 10^{3}\) m s⁻¹</span>. Argon atoms, ten times heavier, move at about 430 m s⁻¹ at the same temperature: the same kinetic energy with more mass means less speed.</p>
+            <h3 class="rn-head">Why “monatomic”</h3>
+            <p>The data booklet’s \(\bar{E}_\mathrm{k} = \frac{3}{2} k_\mathrm{B} T\) is stated for a monatomic ideal gas, so say “monatomic” when you use it in an answer. A molecule of two or more atoms can also rotate and vibrate, so at the same temperature it holds more energy than a single atom.</p>
             <h3 class="rn-head">Why the Earth has no helium</h3>
             <p>At the top of the atmosphere a small fraction of helium atoms move faster than the escape speed, 11 km s⁻¹, and leave for good. Over millions of years nearly all of it has gone. Nitrogen and oxygen molecules are too slow to escape.</p>
           </div>
           <div class="rn-side">
-            <p class="trap">Thinking that doubling the temperature doubles the speed. It doubles \(v^{2}\), so the speed rises by \(\sqrt{2}\).</p>
+            <p class="trap">Thinking that doubling the temperature doubles the speed. It doubles \(v_\mathrm{rms}^{2}\), so the rms speed rises by a factor of \(\sqrt{2}\).</p>
           </div>
         </aside>
       </section>
@@ -684,8 +689,8 @@
           <div class="rn-main">
             <h3 class="rn-head">A model answer</h3>
             <p>“Explain, in terms of molecules, why the pressure of a gas in a sealed container rises when it is heated.” The average kinetic energy, and so the average speed, of the molecules increases. They therefore collide with the walls more frequently, and the change of momentum in each collision is greater. The rate of change of momentum at the walls is greater, so the force on the walls is greater. The area is unchanged, so the pressure is greater.</p>
-            <h3 class="rn-head">The link back to \(v^{2}\)</h3>
-            <p>Frequency and momentum change are each proportional to \(v\), which is why pressure goes as \(v^{2}\), and \(v^{2}\) is proportional to \(T\). The qualitative answer and \(P = \frac{1}{3} \rho v^{2}\) say the same thing.</p>
+            <h3 class="rn-head">The link back to \(v_\mathrm{rms}^{2}\)</h3>
+            <p>Frequency and momentum change are each proportional to the speed, which is why pressure goes as \(v_\mathrm{rms}^{2}\), and \(v_\mathrm{rms}^{2}\) is proportional to \(T\). The qualitative answer and \(P = \frac{1}{3} \rho v_\mathrm{rms}^{2}\) say the same thing.</p>
           </div>
           <div class="rn-side">
             <p class="trap">Writing that the molecules “collide more” without saying with what. It is collisions with the walls that give the pressure, not collisions with each other.</p>
@@ -776,7 +781,7 @@
           <div class="card"><p class="eyebrow">Pressure and amount</p><h3>\(P = \frac{F}{A}\), \(n = \frac{N}{N_\mathrm{A}}\)</h3><p>Pascals and moles</p></div>
           <div class="card step"><p class="eyebrow">Fixed mass of gas</p><h3>\(\frac{PV}{T} = \text{constant}\)</h3><p>\(T\) in kelvin<br>Contains all three gas laws</p></div>
           <div class="card step"><p class="eyebrow">Ideal gas equation</p><h3>\(PV = nRT = N k_\mathrm{B} T\)</h3><p>\(k_\mathrm{B} = \frac{R}{N_\mathrm{A}}\)</p></div>
-          <div class="card step"><p class="eyebrow">Kinetic theory</p><h3>\(P = \frac{1}{3} \rho v^{2}\)</h3><p>Pressure from the change of momentum of molecules at the walls</p></div>
+          <div class="card step"><p class="eyebrow">Kinetic theory</p><h3>\(P = \frac{1}{3} \rho v_\mathrm{rms}^{2}\)</h3><p>Pressure from the change of momentum of molecules at the walls</p></div>
           <div class="card step"><p class="eyebrow">Internal energy</p><h3>\(U = \frac{3}{2} nRT\)</h3><p>Monatomic ideal gas: kinetic only</p></div>
           <div class="card step"><p class="eyebrow">Real gases</p><h3>Nearly ideal when thin and hot</h3><p>Low pressure, low density, high temperature</p></div>
         </div>
@@ -786,7 +791,7 @@
       <section class="slide" data-title="Key words">
         <p class="eyebrow">Summary</p>
         <h2>Key words<span>.</span></h2>
-        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="terms fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="term"><b>Pressure</b><span>Force at right angles to a surface, per unit area</span></div>
           <div class="term"><b>Mole</b><span>The amount containing \(6.02 \times 10^{23}\) particles</span></div>
           <div class="term"><b>Avogadro constant</b><span>The number of particles in one mole</span></div>
@@ -796,6 +801,7 @@
           <div class="term"><b>Kinetic theory</b><span>Gas behavior explained by molecules in random motion</span></div>
           <div class="term"><b>Elastic collision</b><span>No kinetic energy is lost</span></div>
           <div class="term"><b>Monatomic</b><span>Made of single atoms</span></div>
+          <div class="term"><b>Rms speed</b><span>\(v_\mathrm{rms}\): root of the mean square speed</span></div>
         </div>
         <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
       </section>

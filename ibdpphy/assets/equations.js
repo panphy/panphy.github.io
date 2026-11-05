@@ -1,4 +1,4 @@
-// Equations of the DP Physics data booklet (first assessment 2025, version 1.2),
+// Equations of the DP Physics data booklet (first assessment 2028, version 1.0),
 // grouped by the syllabus topics of the subject guide. Shared by the
 // course summary and the annotated data booklet, which typeset them with MathJax and
 // explain each symbol on hover, focus or tap.
@@ -47,7 +47,7 @@
             'E_\\mathrm{H}': 'elastic potential energy stored in a spring (J)', k: 'spring constant (N m⁻¹)', '\\Delta x': 'signed displacement from the spring’s natural length; squared in the energy equation (m)',
             P: 'power (W)', '\\Delta W': 'work done (J)', '\\Delta t': 'time taken (s)', '\\eta': 'efficiency (no unit; often given as a percentage)'
           },
-          eqs: ['W=Fs\\cos\\theta', 'E_\\mathrm{k}=\\tfrac{1}{2}mv^{2}=\\dfrac{p^{2}}{2m}', '\\Delta E_\\mathrm{p}=mg\\Delta h', 'E_\\mathrm{H}=\\tfrac{1}{2}k\\Delta x^{2}', 'P=\\dfrac{\\Delta W}{\\Delta t}=Fv', '\\eta=\\dfrac{\\text{useful work out}}{\\text{total work in}}', '\\eta=\\dfrac{\\text{useful power out}}{\\text{total power in}}']
+          eqs: ['W=Fs\\cos\\theta', 'E_\\mathrm{k}=\\tfrac{1}{2}mv^{2}=\\dfrac{p^{2}}{2m}', '\\Delta E_\\mathrm{p}=mg\\Delta h', { tex: 'E_\\mathrm{H}=\\tfrac{1}{2}k(\\Delta x)^{2}', note: 'The 2028 booklet labels this \\(E_\\mathrm{k}\\), but it is the elastic potential energy stored in the spring, not kinetic energy.' }, 'P=\\dfrac{\\Delta W}{\\Delta t}=Fv', '\\eta=\\dfrac{\\text{useful work out}}{\\text{total work in}}', '\\eta=\\dfrac{\\text{useful power out}}{\\text{total power in}}']
         },
         {
           id: 'A.4', title: 'Rigid body mechanics', level: HL,
@@ -82,17 +82,18 @@
         {
           id: 'B.1', title: 'Thermal energy transfers', level: SL,
           syms: {
-            '\\rho': 'density (kg m⁻³)', m: 'mass (kg)', V: 'volume (m³)', '\\bar{E}_\\mathrm{k}': 'average kinetic energy of one particle (J)', 'k_\\mathrm{B}': 'Boltzmann constant', T: 'absolute temperature (K)',
+            '\\rho': 'density (kg m⁻³)', m: 'mass (kg)', V: 'volume (m³)', '\\bar{E}_\\mathrm{k}': 'average kinetic energy of one particle of a monatomic ideal gas (J)', 'k_\\mathrm{B}': 'Boltzmann constant', T: 'absolute temperature (K)',
             Q: 'signed thermal energy transferred to the body: positive into it, negative out (J)', c: 'specific heat capacity (J kg⁻¹ K⁻¹)', '\\Delta T': 'signed temperature change: final minus initial (K)',
             '\\dfrac{\\Delta Q}{\\Delta t}': 'signed rate of thermal energy transfer along the chosen positive x-direction (W)', k: 'thermal conductivity of the material (W m⁻¹ K⁻¹)', A: 'area: cross-section for conduction, or surface area of the radiating body (m²)', '\\Delta x': 'spatial separation x₂ − x₁, using the same ordered points as the temperature difference (m)',
             '\\sigma': 'Stefan–Boltzmann constant', b: 'apparent brightness: power received per unit area (W m⁻²)', d: 'distance from the source (m)', '\\lambda_\\mathrm{max}': 'wavelength at which the black body emits most strongly (m)'
           },
           eqs: [
-            '\\rho=\\dfrac{m}{V}', '\\bar{E}_\\mathrm{k}=\\tfrac{3}{2}k_\\mathrm{B}T', 'Q=mc\\Delta T',
+            '\\rho=\\dfrac{m}{V}', { tex: '\\bar{E}_\\mathrm{k}=\\tfrac{3}{2}k_\\mathrm{B}T', note: 'For a monatomic ideal gas only: say “monatomic” when you use it.' }, 'Q=mc\\Delta T',
             { tex: '|Q|=mL', syms: { L: 'specific latent heat of fusion or vaporization: a positive magnitude (J kg⁻¹)' }, note: 'The booklet gives the magnitude mL. Signed heat is \\(Q=+mL\\) for melting or vaporization and \\(Q=-mL\\) for freezing or condensation.' },
             { tex: '\\dfrac{\\Delta Q}{\\Delta t}=-kA\\dfrac{\\Delta T}{\\Delta x}', syms: { '\\Delta T': 'spatial temperature difference T₂ − T₁, in the same direction as x₂ − x₁ (K)' }, note: 'Use \\(\\Delta T=T_{2}-T_{1}\\) and \\(\\Delta x=x_{2}-x_{1}\\). The minus sign makes energy flow from hot to cold, opposite to the temperature gradient.' },
             { tex: 'L=\\sigma AT^{4}', syms: { L: 'luminosity: total power radiated by the body (W)' } },
             { tex: 'b=\\dfrac{L}{4\\pi d^{2}}', syms: { L: 'luminosity of the source (W)' } },
+            { tex: 'I=\\dfrac{P}{A}', syms: { I: 'intensity: power per unit area, the same quantity as apparent brightness (W m⁻²)', P: 'power arriving at, or passing through, the surface (W)', A: 'area at right angles to the direction the energy travels (m²)' }, note: 'New in the 2028 booklet.' },
             '\\lambda_\\mathrm{max}T=2.9\\times10^{-3}\\,\\mathrm{m\\,K}'
           ]
         },
@@ -105,9 +106,9 @@
           id: 'B.3', title: 'Gas laws', level: SL,
           syms: {
             P: 'pressure (Pa)', F: 'force acting at right angles to the surface (N)', A: 'area of the surface (m²)', n: 'amount of substance (mol)', N: 'number of molecules', 'N_\\mathrm{A}': 'Avogadro constant',
-            V: 'volume of the gas (m³)', T: 'absolute temperature (K)', R: 'gas constant', 'k_\\mathrm{B}': 'Boltzmann constant', '\\rho': 'density of the gas (kg m⁻³)', v: 'average (root-mean-square) translational speed of the molecules (m s⁻¹)', U: 'internal energy of an ideal monatomic gas (J)'
+            V: 'volume of the gas (m³)', T: 'absolute temperature (K)', R: 'gas constant', 'k_\\mathrm{B}': 'Boltzmann constant', '\\rho': 'density of the gas (kg m⁻³)', 'v_\\mathrm{rms}': 'root-mean-square speed of the molecules: the square root of the mean of their squared speeds (m s⁻¹)', U: 'internal energy of an ideal monatomic gas (J)'
           },
-          eqs: ['P=\\dfrac{F}{A}', 'n=\\dfrac{N}{N_\\mathrm{A}}', '\\dfrac{PV}{T}=\\text{constant}', 'PV=nRT=Nk_\\mathrm{B}T', 'P=\\tfrac{1}{3}\\rho v^{2}', 'U=\\tfrac{3}{2}nRT=\\tfrac{3}{2}Nk_\\mathrm{B}T']
+          eqs: ['P=\\dfrac{F}{A}', 'n=\\dfrac{N}{N_\\mathrm{A}}', '\\dfrac{PV}{T}=\\text{constant}', 'PV=nRT=Nk_\\mathrm{B}T', { tex: 'P=\\tfrac{1}{3}\\rho v_\\mathrm{rms}^{2}', note: 'The 2028 booklet writes the rms speed; earlier versions had \\(v^{2}\\).' }, 'U=\\tfrac{3}{2}nRT=\\tfrac{3}{2}Nk_\\mathrm{B}T']
         },
         {
           id: 'B.4', title: 'Thermodynamics', level: HL,
@@ -200,7 +201,7 @@
         {
           id: 'D.3', title: 'Motion in electromagnetic fields', level: SL,
           syms: { F: 'magnetic force (N)', q: 'charge of the particle (C)', v: 'speed of the particle (m s⁻¹)', B: 'magnetic field strength: magnetic flux density (T)', '\\theta': 'angle between the field and the velocity or current', I: 'current in the conductor (A)', L: 'length of conductor in the field (m)', '\\mu_{0}': 'permeability of free space', 'I_{1}': 'current in the first wire (A)', 'I_{2}': 'current in the second wire (A)', r: 'separation of the two wires (m)' },
-          eqs: [{ label: 'Moving charge', tex: 'F=qvB\\sin\\theta' }, { label: 'Current-carrying conductor', tex: 'F=BIL\\sin\\theta' }, { label: 'Parallel wires: force per unit length', tex: '\\dfrac{F}{L}=\\mu_{0}\\dfrac{I_{1}I_{2}}{2\\pi r}' }]
+          eqs: [{ label: 'Moving charge', tex: 'F=qvB\\sin\\theta' }, { label: 'Current-carrying conductor', tex: 'F=BIL\\sin\\theta' }, { label: 'Long straight wire: magnetic field', tex: 'B=\\dfrac{\\mu_{0}I}{2\\pi r}', syms: { B: 'magnetic field strength made by the wire (T)', I: 'current in the wire (A)', r: 'perpendicular distance from the wire (m)' }, note: 'New in the 2028 booklet.' }, { label: 'Parallel wires: force per unit length', tex: '\\dfrac{F}{L}=\\mu_{0}\\dfrac{I_{1}I_{2}}{2\\pi r}' }]
         },
         {
           id: 'D.1', title: 'Gravitational fields', level: HL,

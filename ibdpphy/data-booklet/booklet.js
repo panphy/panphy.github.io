@@ -1,5 +1,5 @@
 // Annotated data booklet: the constants, tables and diagrams of the DP Physics data
-// booklet (first assessment 2025, version 1.2). The equations by topic, the symbol
+// booklet (first assessment 2028, version 1.0). The equations by topic, the symbol
 // explanations and the MathJax setup are in ../assets/equations.js, loaded first.
 (() => {
   const { HL, THEMES, equationRows, mathHtml, symbol, esc } = window.IBEquations;
@@ -14,11 +14,23 @@
       { label: 'Volume of a cylinder', tex: 'V=\\pi r^{2}h', syms: { V: 'volume', r: 'radius', h: 'height (length) of the cylinder' } },
       { label: 'Volume of a prism', tex: 'V=Ah', syms: { V: 'volume', A: 'area of cross-section', h: 'height (length) of the prism' } },
       { label: 'Volume of a sphere', tex: 'V=\\tfrac{4}{3}\\pi r^{3}', syms: { V: 'volume', r: 'radius' } },
+      { label: 'Surface area of a sphere', tex: 'A=4\\pi r^{2}', syms: { A: 'surface area', r: 'radius' }, note: 'New in the 2028 booklet.' },
       { label: 'Area of the curved surface of a cylinder', tex: 'A=2\\pi rh', syms: { A: 'area of the curved surface', r: 'radius', h: 'height (length) of the cylinder' } },
-      { label: 'Components of a vector', tex: 'A_\\mathrm{H}=A\\cos\\theta', syms: { 'A_\\mathrm{H}': 'horizontal component of the vector', A: 'magnitude of the vector', '\\theta': 'angle between the vector and the horizontal' } },
-      { label: '', tex: 'A_\\mathrm{V}=A\\sin\\theta', syms: { 'A_\\mathrm{V}': 'vertical component of the vector', A: 'magnitude of the vector', '\\theta': 'angle between the vector and the horizontal' } },
+      { label: 'Horizontal component of a vector', tex: 'A_\\mathrm{H}=A\\cos\\theta', syms: { 'A_\\mathrm{H}': 'horizontal component of the vector', A: 'magnitude of the vector', '\\theta': 'angle between the vector and the horizontal' } },
+      { label: 'Vertical component of a vector', tex: 'A_\\mathrm{V}=A\\sin\\theta', syms: { 'A_\\mathrm{V}': 'vertical component of the vector', A: 'magnitude of the vector', '\\theta': 'angle between the vector and the horizontal' } },
       { label: 'Trigonometric relationships', tex: '\\tan\\theta=\\dfrac{\\sin\\theta}{\\cos\\theta}', syms: { '\\theta': 'any angle' } },
-      { label: '', tex: '\\sin^{2}\\theta+\\cos^{2}\\theta=1', syms: { '\\theta': 'any angle' } }
+      { label: 'Trigonometric identity', tex: '\\sin^{2}\\theta+\\cos^{2}\\theta=1', syms: { '\\theta': 'any angle' } }
+    ]
+  };
+
+  // The words are the symbols here: each equation explains itself, so only notes are needed.
+  const PERCENTAGES = {
+    title: 'Percentages, new in the 2028 booklet',
+    eqs: [
+      { tex: '\\text{percentage change}=\\dfrac{\\text{final value}-\\text{initial value}}{\\text{initial value}}\\times100\\%', note: 'Signed: negative for a decrease. Compare with the starting value.' },
+      { tex: '\\text{percentage difference}=\\dfrac{\\text{difference}}{\\left(\\dfrac{\\text{final value}+\\text{initial value}}{2}\\right)}\\times100\\%', note: 'Compares two values against their mean, so neither one is treated as the reference.' },
+      { tex: '\\text{percentage error}=\\dfrac{\\text{measured value}-\\text{actual value}}{\\text{actual value}}\\times100\\%', note: 'How far a result is from the accepted value. Negative when the measured value is too small.' },
+      { tex: '\\text{percentage uncertainty}=\\dfrac{\\text{absolute uncertainty}}{\\text{measured value}}\\times100\\%', note: 'The fractional uncertainty, \\(\\frac{\\Delta a}{a}\\), as a percentage. Always positive.' }
     ]
   };
 
@@ -136,7 +148,7 @@
   const sectionHtml = (id, title, body, letter = '', sub = '') => `<section id="${id}"><h2>${letter ? `<span class="letter">${letter}</span>` : ''}${esc(title)}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}${body}</section>`;
 
   document.getElementById('booklet').innerHTML = [
-    sectionHtml('math', 'Mathematical equations', `<div class="grid two">${blockHtml({ ...MATH, title: 'Areas, volumes, vectors and trigonometry' })}${vectorHtml}</div>`),
+    sectionHtml('math', 'Mathematical equations', `<div class="grid two">${blockHtml({ ...MATH, title: 'Areas, volumes, vectors and trigonometry' })}${vectorHtml}</div>${blockHtml(PERCENTAGES)}`),
     sectionHtml('uncertainties', 'Uncertainties', blockHtml({ ...UNCERTAINTIES, title: 'Combining uncertainties' })),
     sectionHtml('constants', 'Fundamental constants', constantsHtml(), '', 'Values are those of the data booklet, rounded as it rounds them.'),
     sectionHtml('multipliers', 'Metric (SI) multipliers', multipliersHtml()),

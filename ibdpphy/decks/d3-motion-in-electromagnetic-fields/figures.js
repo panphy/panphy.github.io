@@ -126,6 +126,20 @@ window.DeckFigures.add(P => {
     },
 
     // Why parallel currents attract: wire 2 sits in the field of wire 1.
+    // One long wire seen end on: the field at r is twice the field at 2r.
+    'd3-wire-field': () => {
+      const cx = 260, cy = 270, r = 120;
+      let s = [r, 2 * r].map(R => `<circle cx="${cx}" cy="${cy}" r="${R}" style="fill:none;stroke:var(--brand-accent-strong);stroke-width:3;opacity:.6"/>`).join('');
+      s += [[r, 215], [2 * r, 140], [2 * r, 250]].map(([R, deg]) => { const a = deg * Math.PI / 180, x = cx + R * Math.cos(a), y = cy + R * Math.sin(a); return `<path d="M-9,-8 L9,0 L-9,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${deg - 90})" style="fill:var(--brand-accent-strong)"/>`; }).join('');
+      s += `<line x1="${cx}" y1="${cy}" x2="${cx + 2 * r}" y2="${cy}" class="guide"/>`;
+      s += arrow(cx + r, cy, cx + r, cy - 150, 'brand-accent-strong', 5) + arrow(cx + 2 * r, cy, cx + 2 * r, cy - 75, 'brand-accent-strong', 5);
+      s += `<circle cx="${cx + r}" cy="${cy}" r="7" style="fill:var(--text-primary)"/><circle cx="${cx + 2 * r}" cy="${cy}" r="7" style="fill:var(--text-primary)"/>`;
+      s += wireEnd(cx, cy, true);
+      s += text(cx + r + 16, cy - 120, 'B', 'lbl display', 'start') + text(cx + 2 * r + 16, cy - 50, 'B/2', 'lbl display', 'start');
+      s += both(cx + 6, cy + 30, cx + r - 6, cy + 30) + text(cx + r / 2, cy + 64, 'r', 'lbl display halo');
+      s += both(cx + 6, cy + 2 * r + 40, cx + 2 * r - 6, cy + 2 * r + 40) + text(cx + r, cy + 2 * r + 32, '2r', 'lbl display halo');
+      return svg('0 0 660 560', s, 'A long straight wire seen end on, with current out of the page. Its field lines are circles centered on the wire and point counterclockwise. At distance r the field is B, pointing up the page; at distance 2 r it points the same way and is half as strong');
+    },
     'd3-parallel-end': () => {
       let s = [70, 130, 250].map(r => `<circle cx="280" cy="260" r="${r}" style="fill:none;stroke:var(--brand-accent-strong);stroke-width:3;opacity:.6"/>`).join('');
       s += [[70, 200], [130, 250], [250, 180]].map(([r, deg]) => { const a = deg * Math.PI / 180, x = 280 + r * Math.cos(a), y = 260 + r * Math.sin(a); return `<path d="M-9,-8 L9,0 L-9,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${deg - 90})" style="fill:var(--brand-accent-strong)"/>`; }).join('');

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic C.3 Wave phenomena, standard and higher level: wavefronts and rays, reflection, refraction and Snell’s law, total internal reflection, diffraction, superposition and double-slit interference, and at higher level single-slit diffraction and diffraction gratings.">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic C.3 Wave phenomena, standard and higher level: wavefronts and rays, reflection, refraction and Snell’s law, total internal reflection, diffraction, superposition, intensity and amplitude, double-slit interference, and at higher level single-slit diffraction and diffraction gratings.">
   <meta name="theme-color" content="#F8F6F1">
   <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -468,6 +468,44 @@
           </div>
           <div class="rn-side">
             <p class="tip">Complete cancellation needs equal amplitudes. If they differ, the minimum is the difference of the two amplitudes, not zero.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Intensity and amplitude">
+        <p class="eyebrow">How bright, how loud</p>
+        <h2>Intensity and amplitude<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(I \propto A^{2}\)</span></div>
+            <ul class="points small">
+              <li>\(I\): the <b>intensity</b>, power per unit area (B.1), in <span class="nowrap">W m⁻²</span></li>
+              <li class="step">Twice the amplitude: <b>four times</b> the intensity</li>
+              <li class="step">Not in the data booklet: learn it</li>
+            </ul>
+            <div class="idea step">To combine waves: add the <b>amplitudes</b>, then square.</div>
+          </div>
+          <div class="work step">
+            <span class="say">Waves of intensity \(I\) and \(4I\) meet</span>
+            <span>\(A \propto \sqrt{I}\): amplitudes \(A\) and \(2A\)</span>
+            <span class="say step">In phase, constructive</span>
+            <span class="step">\(A + 2A = 3A\), so intensity \(3^{2} I = \class{res}{9I}\)</span>
+            <span class="say step">In antiphase, destructive</span>
+            <span class="step">\(2A - A = A\), so intensity \(1^{2} I = \class{res}{I}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why the square</h3>
+            <p>Each particle of the medium oscillates, and the energy of an oscillation is proportional to the square of its amplitude (C.1). Double the amplitude and every particle carries four times the energy, so the wave carries four times the power through each square meter.</p>
+            <h3 class="rn-head">Is 9I too much?</h3>
+            <p>The two waves bring \(I + 4I = 5I\) between them, yet a maximum has \(9I\). Energy is not created: it is moved. Across the pattern the intensity swings between \(9I\) at the maxima and \(I\) at the minima, and its average is exactly \(5I\). Interference redistributes the energy without changing the total.</p>
+            <h3 class="rn-head">Reading interference graphs</h3>
+            <p>The graphs of single-slit and double-slit patterns later in this deck plot intensity against position. Where two equal waves meet in phase the amplitude doubles, so the peak is four times the intensity of one wave alone, and where they cancel it is zero.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Adding the intensities: \(I + 4I = 5I\) at a maximum. Intensities do not add when waves interfere. Amplitudes do.</p>
           </div>
         </aside>
       </section>
@@ -1001,7 +1039,7 @@
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Refraction</p><h3>\(\frac{n_{1}}{n_{2}} = \frac{\sin \theta_{2}}{\sin \theta_{1}} = \frac{v_{2}}{v_{1}}\)</h3><p>Frequency unchanged<br>Critical angle: \(\sin \theta_\mathrm{c} = \frac{n_{2}}{n_{1}}\)</p></div>
           <div class="card step"><p class="eyebrow">Diffraction</p><h3>Spreading at a gap or edge</h3><p>Greatest when the gap is about one wavelength</p></div>
-          <div class="card step"><p class="eyebrow">Interference</p><h3>\(n \lambda\), \(\left(n + \frac{1}{2}\right) \lambda\)</h3><p>Path difference for constructive and destructive<br>Coherent sources</p></div>
+          <div class="card step"><p class="eyebrow">Interference</p><h3>\(n \lambda\), \(\left(n + \frac{1}{2}\right) \lambda\)</h3><p>Path difference for constructive and destructive<br>Coherent sources; \(I \propto A^{2}\)</p></div>
           <div class="card step"><p class="eyebrow">Young’s double slit</p><h3>\(s = \frac{\lambda D}{d}\)</h3><p>Equally spaced fringes</p></div>
           <div class="card hl step"><p class="eyebrow">Single slit</p><h3>\(\theta = \frac{\lambda}{b}\)</h3><p>First minimum<br>It modulates the double-slit pattern</p></div>
           <div class="card hl step"><p class="eyebrow">Grating</p><h3>\(n \lambda = d \sin \theta\)</h3><p>Sharp, bright maxima<br>White light: a spectrum in each order</p></div>
