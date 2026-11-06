@@ -29,6 +29,19 @@ export const MODES = {
     emitted: { symbol: 'e', A: 0, Z: -1, label: 'beta particle (electron)' },
     halfLife: '5730 years'
   },
+  // Beta-plus is shown through the Beta decay tab's β⁻/β⁺ toggle, so it is not in MODE_ORDER.
+  betaPlus: {
+    title: 'BETA DECAY',
+    date: '\\(\\beta^{+}\\) · FLUORINE-18',
+    heading: 'A proton turns into a neutron.',
+    description: 'In beta-plus decay a proton in the nucleus changes into a neutron and a fast positron. A positron is the antiparticle of an electron: the same mass, but a +1 charge. The mass number stays the same; the atomic number goes down by 1. Fluorine-18 becomes oxygen-18.',
+    look: 'Press “Decay this nucleus”. One red proton glows, then becomes a gray neutron as an amber positron leaves. Count the protons before and after: 9 becomes 8, so fluorine becomes oxygen. The faint particle leaving in another direction is a neutrino. Beta-plus decay is not needed for GCSE.',
+    evidence: 'Positrons are small and fast like electrons, so they also travel several meters in air and are stopped by a few millimeters of aluminum. When a positron meets an electron, both are annihilated and two gamma rays leave in opposite directions: PET scanners detect these to image the body.',
+    parent: { symbol: 'F', name: 'fluorine-18', A: 18, Z: 9 },
+    daughter: { symbol: 'O', name: 'oxygen-18', A: 18, Z: 8 },
+    emitted: { symbol: 'e', A: 0, Z: 1, zText: '+1', label: 'beta-plus particle (positron)' },
+    halfLife: '110 minutes'
+  },
   gamma: {
     title: 'GAMMA EMISSION',
     date: '\\(\\gamma\\) · TECHNETIUM-99m',
@@ -64,7 +77,9 @@ export const PARTICLES = {
   neutron: 'NEUTRON · Charge 0 · Relative mass 1. Protons + neutrons = the mass number.',
   alpha: 'ALPHA PARTICLE · 2 protons + 2 neutrons, a helium nucleus · Charge +2 · Strongly ionizing, stopped by paper or a few cm of air.',
   electron: 'BETA PARTICLE · A fast electron made when a neutron turns into a proton · Charge −1 · Stopped by a few mm of aluminum.',
-  antineutrino: 'ANTINEUTRINO · Also made in beta decay. It has no charge and almost no mass, and hardly interacts with anything. You do not need to know about antineutrinos for GCSE.',
+  positron: 'BETA-PLUS PARTICLE · A fast positron made when a proton turns into a neutron · Charge +1 · The antiparticle of an electron. Stopped by a few mm of aluminum. Not needed for GCSE.',
+  neutrino: 'NEUTRINO · Also made in beta-plus decay. It has no charge and almost no mass, and hardly interacts with anything. You do not need to know about neutrinos for GCSE.',
+  antineutrino: 'ANTINEUTRINO · Also made in beta-minus decay. It has no charge and almost no mass, and hardly interacts with anything. You do not need to know about antineutrinos for GCSE.',
   gamma: 'GAMMA RAY · An electromagnetic wave from the nucleus · No mass, no charge · Weakly ionizing, reduced by thick lead or concrete.',
   paper: 'PAPER · One sheet stops alpha particles.',
   aluminum: 'ALUMINUM · A few millimeters stop beta particles.',
