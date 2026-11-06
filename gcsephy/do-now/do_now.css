@@ -231,8 +231,10 @@ sub, sup { font-size: .68em; line-height: 0; }
 .q-actions .swap-btn { display: grid; place-items: center; padding: 0; }
 .q-actions .swap-btn svg { width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 /* Remove: a small badge on the card's top-right corner, shown while the card is
-   hovered or has focus (always on touch screens). Its hit area is 48px. */
-.remove-btn { position: absolute; top: -12px; right: -12px; z-index: 1; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: #fff; color: var(--ink); cursor: pointer; transition: opacity .15s; }
+   hovered or has focus (always on touch screens). Its hit area is 48px. It is
+   moved onto the corner with a transform: a top offset that sticks out above
+   the card stops Chrome from splitting the board into two columns. */
+.remove-btn { position: absolute; top: 0; right: 0; transform: translate(12px, -12px); z-index: 1; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: #fff; color: var(--ink); cursor: pointer; transition: opacity .15s; }
 .remove-btn::before { content: ""; position: absolute; inset: -9px; border-radius: 50%; }
 .remove-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
 .remove-btn:hover, .remove-btn:focus-visible { background: #d0182b; border-color: #d0182b; color: #fff; }
