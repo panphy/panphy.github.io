@@ -1,0 +1,235 @@
+{
+ "format": "panphy-mech",
+ "version": 2,
+ "world": {
+  "gravity": 9.81,
+  "dragModel": "none",
+  "linearDragSource": "coefficient",
+  "linearDrag": 1,
+  "drag": 0.1,
+  "viscosity": 0,
+  "floor": true,
+  "floorFriction": 0.5,
+  "gpeZero": 0,
+  "accuracy": "standard"
+ },
+ "bodies": [
+  {
+   "id": "b1",
+   "kind": "ball",
+   "name": "Driver",
+   "x": -1.2,
+   "y": 2.6,
+   "angle": 0,
+   "r": 0.15915494309189535,
+   "mass": 0.5,
+   "friction": 0.4,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "amber",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  },
+  {
+   "id": "b3",
+   "kind": "ball",
+   "name": "Compound gear",
+   "x": -0.5633802276324187,
+   "y": 2.6,
+   "angle": 0,
+   "r": 0.477464829275686,
+   "mass": 3,
+   "friction": 0.4,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "blue",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0,
+   "rings": [
+    10
+   ]
+  },
+  {
+   "id": "b5",
+   "kind": "ball",
+   "name": "Output gear",
+   "x": 0.0732395447351627,
+   "y": 2.6,
+   "angle": 0,
+   "r": 0.477464829275686,
+   "mass": 3,
+   "friction": 0.4,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "green",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  },
+  {
+   "id": "b9",
+   "kind": "box",
+   "name": "25 kg load",
+   "x": 0.0732395447351627,
+   "y": 0.25,
+   "angle": 0,
+   "w": 0.5,
+   "h": 0.5,
+   "mass": 25,
+   "friction": 0.4,
+   "restitution": 0.2,
+   "drag": 0.1,
+   "dragModel": "world",
+   "linearDragSource": "coefficient",
+   "linearDrag": 1,
+   "viscosity": 0,
+   "fixed": false,
+   "lockRotation": false,
+   "flip": false,
+   "color": "coral",
+   "vx": 0,
+   "vy": 0,
+   "omega": 0
+  }
+ ],
+ "links": [
+  {
+   "id": "l2",
+   "kind": "hinge",
+   "name": "Motor",
+   "a": "b1",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": null,
+   "lb": {
+    "x": -1.2,
+    "y": 2.6
+   },
+   "motor": true,
+   "speed": 3,
+   "dir": 1,
+   "torque": 20
+  },
+  {
+   "id": "l4",
+   "kind": "hinge",
+   "name": "Axle 1",
+   "a": "b3",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": null,
+   "lb": {
+    "x": -0.5633802276324187,
+    "y": 2.6
+   },
+   "motor": false,
+   "speed": 0,
+   "dir": -1,
+   "torque": 0
+  },
+  {
+   "id": "l6",
+   "kind": "hinge",
+   "name": "Axle 2",
+   "a": "b5",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": null,
+   "lb": {
+    "x": 0.0732395447351627,
+    "y": 2.6
+   },
+   "motor": false,
+   "speed": 0,
+   "dir": -1,
+   "torque": 0
+  },
+  {
+   "id": "l7",
+   "kind": "gear",
+   "name": "Gear 1",
+   "a": "b1",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": "b3",
+   "lb": {
+    "x": 0,
+    "y": 0
+   },
+   "ra": 0,
+   "rb": 0
+  },
+  {
+   "id": "l8",
+   "kind": "gear",
+   "name": "Gear 2",
+   "a": "b3",
+   "la": {
+    "x": 0,
+    "y": 0
+   },
+   "b": "b5",
+   "lb": {
+    "x": 0,
+    "y": 0
+   },
+   "ra": 1,
+   "rb": 0
+  },
+  {
+   "id": "l10",
+   "kind": "rope",
+   "name": "Rope",
+   "a": "b5",
+   "la": {
+    "x": 0,
+    "y": -0.477464829275686
+   },
+   "b": "b9",
+   "lb": {
+    "x": 0,
+    "y": 0.25
+   },
+   "length": 1.6225351707243139,
+   "solid": false,
+   "mass": 0.1
+  }
+ ],
+ "nextId": 11,
+ "camera": {
+  "cx": 0,
+  "cy": 1.6,
+  "scale": 120
+ }
+}

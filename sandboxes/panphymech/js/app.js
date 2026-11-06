@@ -503,7 +503,14 @@
     const box = S.bounds({ bodies: fragment.bodies, links: [] });
     return Math.max(0.3, Math.min(box.maxX - box.minX, box.maxY - box.minY) + 0.1);
   }
+  // A gear copied on its own would gear the same two wheels twice.
+  const gearAlone = () => {
+    const l = app.selection && app.selection.type === 'link' && S.linkById(app.scene, app.selection.id);
+    if (l && l.kind === 'gear') { app.toast('A gear can’t be copied on its own. Select both wheels to copy them with their gear.'); return true; }
+    return false;
+  };
   app.copySelection = function copySelection() {
+    if (gearAlone()) return;
     const fragment = S.copyFragment(app.scene, app.selection, app.extra, app.poseOf);
     if (!fragment) return;
     clipboard = fragment;
@@ -514,6 +521,7 @@
     if (clipboard) insertCopy(clipboard, copyOffset(clipboard) * ++pasteCount);
   };
   app.duplicateSelection = function duplicateSelection() {
+    if (gearAlone()) return;
     const fragment = S.copyFragment(app.scene, app.selection, app.extra, app.poseOf);
     if (fragment) insertCopy(fragment, copyOffset(fragment));
   };

@@ -16,6 +16,8 @@
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
     cross: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
     undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/>',
     redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 000 10h3"/>',
     zoomIn: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/>',
@@ -66,6 +68,7 @@
     pulley: `<circle class="p-pin" cx="32" cy="13" r="9"/><path class="p-rope" d="M23 13V31M41 13V26M23 13A9 9 0 0 1 41 13"/><circle class="p-dot" cx="32" cy="13" r="2"/><rect x="17" y="31" width="12" height="10" rx="1" fill="${c('coral').fill}" stroke="${c('coral').stroke}" stroke-width="1.4"/><rect x="36" y="26" width="10" height="9" rx="1" fill="${c('blue').fill}" stroke="${c('blue').stroke}" stroke-width="1.4"/>`,
     hinge: `<rect x="6" y="16" width="34" height="10" rx="1" fill="${c('amber').fill}" stroke="${c('amber').stroke}" stroke-width="1.4" transform="rotate(-18 32 22)"/><rect x="26" y="16" width="32" height="10" rx="1" fill="${c('teal').fill}" stroke="${c('teal').stroke}" stroke-width="1.4" transform="rotate(18 32 22)"/><circle class="p-pin" cx="32" cy="22" r="5.5"/><circle class="p-dot" cx="32" cy="22" r="1.8"/>`,
     motor: `<circle cx="32" cy="22" r="13" fill="${c('slate').fill}" stroke="${c('slate').stroke}" stroke-width="1.4"/>${motorArrow}<circle class="p-pin" cx="32" cy="22" r="5"/><circle class="p-dot" cx="32" cy="22" r="1.8"/>`,
+    gear: `<path d="M32.4 23.9L36.9 23.3L36.9 20.7L32.4 20.1L31.8 17.9L35.4 15.1L34.2 12.9L30.0 14.7L28.3 13.0L30.1 8.8L27.9 7.6L25.1 11.2L22.9 10.6L22.3 6.1L19.7 6.1L19.1 10.6L16.9 11.2L14.1 7.6L11.9 8.8L13.7 13.0L12.0 14.7L7.8 12.9L6.6 15.1L10.2 17.9L9.6 20.1L5.1 20.7L5.1 23.3L9.6 23.9L10.2 26.1L6.6 28.9L7.8 31.1L12.0 29.3L13.7 31.0L11.9 35.2L14.1 36.4L16.9 32.8L19.1 33.4L19.7 37.9L22.3 37.9L22.9 33.4L25.1 32.8L27.9 36.4L30.1 35.2L28.3 31.0L30.0 29.3L34.2 31.1L35.4 28.9L31.8 26.1z" fill="${c('blue').fill}" stroke="${c('blue').stroke}" stroke-width="1.3" stroke-linejoin="round"/><path d="M37.5 23.0L33.5 25.1L34.7 27.6L38.9 25.8L40.4 27.0L39.6 31.5L42.3 32.1L43.5 27.7L45.4 27.3L48.4 30.7L50.5 29.0L47.8 25.3L48.7 23.6L53.2 23.4L53.2 20.6L48.7 20.4L47.8 18.7L50.5 15.0L48.4 13.3L45.4 16.7L43.5 16.3L42.3 11.9L39.6 12.5L40.4 17.0L38.9 18.2L34.7 16.4L33.5 18.9L37.5 21.0z" fill="${c('amber').fill}" stroke="${c('amber').stroke}" stroke-width="1.3" stroke-linejoin="round"/><circle class="p-pin" cx="21" cy="22" r="3.2"/><circle class="p-pin" cx="43.2" cy="22" r="2.6"/>`,
     weld: `<rect x="8" y="14" width="26" height="16" rx="1" fill="${c('violet').fill}" stroke="${c('violet').stroke}" stroke-width="1.4"/><rect x="28" y="10" width="26" height="16" rx="1" fill="${c('pink').fill}" stroke="${c('pink').stroke}" stroke-width="1.4"/><path class="p-glue" d="M31 13.5l6.5 6.5-6.5 6.5-6.5-6.5z"/><circle class="p-pin-dot" cx="31" cy="20" r="1.7"/>`
   };
   const partSvg = (kind) => `<svg viewBox="0 0 64 44" aria-hidden="true">${PART_ART[kind] || ''}</svg>`;
@@ -88,14 +91,15 @@
 
   const PART_GROUPS = [
     { title: 'Objects', items: ['ball', 'box', 'plank', 'polygon', 'wedge', 'wall'] },
-    { title: 'Connectors', items: ['spring', 'rod', 'rope', 'pulley', 'hinge', 'motor', 'weld'] }
+    { title: 'Connectors', items: ['spring', 'rod', 'rope', 'pulley', 'hinge', 'motor', 'gear', 'weld'] }
   ];
   const PART_TITLES = {
     ball: 'Ball: a movable circle', box: 'Box: a movable square block', plank: 'Plank: a long thin movable bar',
     polygon: 'Polygon: a movable regular polygon', wedge: 'Ramp: a fixed right-angled wedge', wall: 'Wall: a fixed upright block',
     spring: 'Spring (Hooke’s law) between two points', rod: 'Rod: keeps two points a fixed distance apart', rope: 'Rope: a maximum distance; it can go slack',
     pulley: 'Pulley: a fixed wheel with one rope over it, for an Atwood machine or a hanging mass pulling a cart',
-    hinge: 'Hinge: pins objects together so they can turn', motor: 'Motor: a hinge that drives at a set speed', weld: 'Glue: joins objects rigidly'
+    hinge: 'Hinge: pins objects together so they can turn', motor: 'Motor: a hinge that drives at a set speed',
+    gear: 'Gear: meshes the teeth of two balls, each turning on its own axle', weld: 'Glue: joins objects rigidly'
   };
 
   const fmt = (v, d = 3) => {
@@ -293,12 +297,13 @@
     // Settings that differ from the usual: objects with their own drag, and a finer World accuracy.
     function dragNotes() {
       const notes = app.scene.bodies.map((b) => ({ body: b, message: S.dragOverrideNote(app.scene, b) })).filter((n) => n.message);
+      const gears = app.scene.links.filter((l) => l.kind === 'gear').map((l) => ({ link: l, message: `${l.name}: ${S.gearProblem(app.scene, l)}` })).filter((n) => S.gearProblem(app.scene, n.link));
       const accuracy = S.accuracyNote(app.scene);
-      return accuracy ? [{ world: true, message: accuracy }, ...notes] : notes;
+      return accuracy ? [{ world: true, message: accuracy }, ...notes, ...gears] : [...notes, ...gears];
     }
     function renderDragNotes() {
       $('drag-notes-pop').innerHTML = '<div class="drag-notes-head"><strong>Notes</strong><button type="button" data-close-notes aria-label="Close notes">Close</button></div><ul>'
-        + dragNotes().map((n) => `<li><button type="button" ${n.world ? 'data-world-note' : `data-drag-body="${esc(n.body.id)}"`}>${esc(n.message)}</button></li>`).join('') + '</ul>';
+        + dragNotes().map((n) => `<li><button type="button" ${n.world ? 'data-world-note' : n.link ? `data-gear-link="${esc(n.link.id)}"` : `data-drag-body="${esc(n.body.id)}"`}>${esc(n.message)}</button></li>`).join('') + '</ul>';
     }
     function syncDragNotes() {
       const notes = dragNotes();
@@ -326,6 +331,12 @@
         setPanel('inspector', true);
         const choice = $('inspector-body').querySelector('[data-accuracy]:checked');
         if (choice) { choice.closest('.world-section').scrollIntoView({ block: 'start' }); choice.focus({ preventScroll: true }); }
+        return;
+      }
+      const gearNote = event.target.closest('[data-gear-link]');
+      if (gearNote) {
+        closeMenus();
+        if (S.linkById(app.scene, gearNote.dataset.gearLink)) { app.select({ type: 'link', id: gearNote.dataset.gearLink }); setPanel('inspector', true); }
         return;
       }
       const button = event.target.closest('[data-drag-body]');
@@ -701,6 +712,7 @@
         { icon: 'trash', label: 'Delete', run: () => app.deleteSelection(), danger: true }
       ]));
 
+      const gearCard = S.isGearWheel(app.scene, b()) ? gearWheelCard(b) : null;
       const drag = card('Drag');
       drag.appendChild(dragFields(b));
       const geo = card('Size and position');
@@ -735,7 +747,7 @@
       geo.appendChild(numField({ label: '\\(y\\)', plain: 'y', unit: 'm', get: () => b().y, set: setup((x, v) => moveBodyTo(x, x.x, v)), min: L.coord[0], max: L.coord[1] }));
       geo.appendChild(numField({ label: 'Angle \\(\\theta\\)', plain: 'Angle θ', unit: '°', get: () => b().angle * deg, set: setup((x, v) => rotateBodyTo(x, v / deg)), min: -3600, max: 3600, slider: [-180, 180], step: 1 }));
 
-      const cards = [main, drag, geo];
+      const cards = gearCard ? [main, gearCard, drag, geo] : [main, drag, geo];
       if (!b().fixed) {
         const vel = card('Velocity at the start');
         const speedOf = (x) => Math.hypot(x.vx, x.vy);
@@ -790,6 +802,72 @@
     const DAMPING_HELP = 'Damping force c × (rate of extension). 0 for an ideal spring.';
     const SERIES_HELP = 'Springs joined end to end have no damping in this model.';
 
+    // ---------- Gears ----------
+
+    // Teeth on ring `ring` of wheel x (0 is the rim, whose teeth set the radius). Every gear on
+    // that ring then slides its other wheel, or this one, back into mesh where it can.
+    function setTeeth(x, ring, n) {
+      if (ring === 0) x.r = S.gearRadius(Math.max(n, ...(x.rings || []).map((m) => m + S.RING_GAP)));
+      else x.rings = x.rings.map((m, i) => (i === ring - 1 ? Math.min(n, S.rimTeeth(x) - S.RING_GAP) : m));
+      S.tidyLinks(app.scene);
+      S.gearsOf(app.scene, x.id).forEach((l) => {
+        if ((l.a === x.id ? l.ra : l.rb) !== ring) return;
+        if (!S.meshGear(app.scene, l, l.a === x.id ? l.b : l.a)) S.meshGear(app.scene, l, x.id);
+      });
+      S.refitLengths(app.scene, new Set([x.id]));
+    }
+    const ringName = (b, i) => (i === 0 ? 'Rim' : `Ring ${i + 1}`);
+
+    // A gear's settings: the teeth on each meshing ring, and which ring of a compound wheel meshes.
+    function gearFields(l) {
+      const out = [];
+      ['a', 'b'].forEach((end) => {
+        const w = () => S.bodyById(app.scene, l()[end]);
+        const ringKey = 'r' + end;
+        if (!w()) return;
+        if (S.gearRings(w()).length > 1) {
+          // Short labels, so the choice fits beside its name: each ring by its teeth.
+          out.push(choiceField(`${w().name} ring`, S.gearRings(w()).map((n, i) => ({ v: i, label: String(n), title: `${ringName(w(), i)}, ${n} teeth` })),
+            () => l()[ringKey], (v) => app.edit(() => { l()[ringKey] = v; if (!S.meshGear(app.scene, l(), l()[end === 'a' ? 'b' : 'a'])) S.meshGear(app.scene, l(), l()[end]); }, { fromInspector: true })));
+        }
+        out.push(numField({ label: `Teeth on ${w().name}`, unit: '', get: () => S.ringTeeth(w(), l()[ringKey]), set: (v, key) => app.edit(() => setTeeth(w(), l()[ringKey], v), { coalesce: key, fromInspector: true }), min: S.LIMITS.teeth[0], max: S.LIMITS.teeth[1], slider: [6, 60], step: 1, integer: true }));
+      });
+      const ratio = document.createElement('p');
+      ratio.className = 'field-help';
+      const showRatio = () => {
+        const A = S.bodyById(app.scene, l().a), B = S.bodyById(app.scene, l().b);
+        if (!A || !B) return;
+        const na = S.ringTeeth(A, l().ra), nb = S.ringTeeth(B, l().rb);
+        const nice = (v) => String(Number(v.toPrecision(3)));
+        ratio.textContent = `Gear ratio ${nb} : ${na} = ${nice(nb / na)}. ${B.name} turns the other way at ${nice(na / nb)} times the speed of ${A.name}, with ${nice(nb / na)} times the torque.`;
+      };
+      showRatio();
+      ui.fields.push(showRatio);
+      out.push(ratio);
+      return out;
+    }
+
+    // A gear wheel's rings: the rim's teeth set its radius; smaller rings make it a compound gear.
+    function gearWheelCard(b) {
+      const c2 = card('Gear wheel');
+      c2.appendChild(numField({ label: 'Teeth on the rim', unit: '', get: () => S.rimTeeth(b()), set: (v, key) => app.edit(() => setTeeth(b(), 0, v), { coalesce: key, fromInspector: true }), min: S.LIMITS.teeth[0], max: S.LIMITS.teeth[1], slider: [6, 60], step: 1, integer: true, help: `Every gear has teeth ${Math.round(S.GEAR_PITCH * 100)} cm apart along its rim, so the teeth set the radius.` }));
+      (b().rings || []).forEach((n, i) => {
+        c2.appendChild(numField({ label: `Teeth on ring ${i + 2}`, unit: '', get: () => (b().rings || [])[i] || 0, set: (v, key) => app.edit(() => setTeeth(b(), i + 1, v), { coalesce: key, fromInspector: true }), min: S.LIMITS.teeth[0], max: S.LIMITS.teeth[1], slider: [6, 60], step: 1, integer: true }));
+      });
+      const rings = (b().rings || []).length;
+      const list = [];
+      if (rings < S.MAX_RINGS && S.rimTeeth(b()) - S.RING_GAP >= S.LIMITS.teeth[0]) {
+        list.push({ icon: 'plus', label: 'Add a smaller ring', run: () => app.edit(() => { const x = b(); const top = Math.min(...[S.rimTeeth(x), ...(x.rings || [])]); x.rings = [...(x.rings || []), Math.max(S.LIMITS.teeth[0], Math.round(top / 3))]; }) });
+      }
+      if (rings) list.push({ icon: 'minus', label: 'Remove the last ring', run: () => app.edit(() => { const x = b(); x.rings = x.rings.slice(0, -1); S.gearsOf(app.scene, x.id).forEach((l) => { if (l.a === x.id && l.ra > x.rings.length) l.ra = 0; if (l.b === x.id && l.rb > x.rings.length) l.rb = 0; }); }) });
+      const note = document.createElement('p');
+      note.className = 'field-help';
+      note.textContent = 'Smaller rings are fixed to the same axle and turn with the rim: a compound gear. Choose which ring each gear meshes in the gear’s settings.';
+      c2.appendChild(note);
+      if (list.length) c2.appendChild(actions(list));
+      return c2;
+    }
+
     function linkInspector(link) {
       const l = () => S.linkById(app.scene, link.id) || link;
       const param = (fn) => (v, key) => app.editParam(() => fn(l(), v), key);
@@ -799,7 +877,8 @@
       main.appendChild(head(kindLabel, l().name, partSvg(artKind), (v) => app.editParam(() => { l().name = v; }, null, true)));
       const between = document.createElement('p');
       between.className = 'icard-note';
-      between.textContent = l().kind === 'hinge' || l().kind === 'weld'
+      between.textContent = l().kind === 'gear' ? `Meshes ${endName(l().a)} with ${endName(l().b)}.`
+        : l().kind === 'hinge' || l().kind === 'weld'
         ? `Joins ${endName(l().a)} to ${endName(l().b)}.`
         : l().kind === 'pulley' ? `Over the wheel from ${endName(l().a)} to ${endName(l().b)}.`
           : `From ${endName(l().a)} to ${endName(l().b)}.`;
@@ -844,6 +923,18 @@
         rows.push({ key: 'force', label: 'Force on the pin', plain: 'Force on the pin' });
       } else if (l().kind === 'weld') {
         rows.push({ key: 'force', label: 'Force on the joint', plain: 'Force on the joint' });
+      } else if (l().kind === 'gear') {
+        const problem = S.gearProblem(app.scene, l());
+        if (problem) {
+          const warn = document.createElement('p');
+          warn.className = 'drag-override-note';
+          warn.textContent = `${problem} Until then the wheels turn freely.`;
+          main.appendChild(warn);
+        }
+        gearFields(l).forEach((el) => main.appendChild(el));
+        const nameA = endName(l().a), nameB = endName(l().b);
+        rows.push({ key: 'omegaA', label: `Angular velocity of ${nameA}`, plain: `Angular velocity of ${nameA}` }, { key: 'omegaB', label: `Angular velocity of ${nameB}`, plain: `Angular velocity of ${nameB}` },
+          { key: 'torqueA', label: `Torque on ${nameA}`, plain: `Torque on ${nameA}` }, { key: 'torqueB', label: `Torque on ${nameB}`, plain: `Torque on ${nameB}` }, { key: 'force', label: 'Force between the teeth', plain: 'Force between the teeth' });
       }
       main.appendChild(actions([
         ...(l().kind === 'spring' ? [{ icon: 'graph', label: 'Graph', run: () => app.trackObject({ type: 'link', id: l().id }, true), pressed: app.track.type === 'link' && app.track.id === l().id }] : []),
@@ -1046,6 +1137,8 @@
         connectorFields(l, () => { if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y); }).forEach((el) => items.push(el));
       } else if (l().kind === 'pulley') {
         pulleyFields(l, true).forEach((el) => items.push(el));
+      } else if (l().kind === 'gear') {
+        gearFields(l).forEach((el) => items.push(el));
       } else if (l().kind === 'hinge') {
         items.push(toggleField('Motor', () => l().motor, (v) => {
           app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true);
@@ -1145,6 +1238,10 @@
         if (r.kind === 'pulley') { set('sideA', fmt(d.sideA) + ' m'); set('sideB', fmt(d.sideB) + ' m'); set('slack', fmt(d.slack) + ' m'); }
         if (d.torque !== undefined) set('torque', fmt(d.torque) + ' N m');
         if (d.rate !== undefined) set('rate', fmt(d.rate) + ' rad/s');
+        if (r.kind === 'gear') {
+          set('omegaA', fmt(d.omegaA) + ' rad/s'); set('omegaB', fmt(d.omegaB) + ' rad/s');
+          set('torqueA', fmt(d.torqueA) + ' N m'); set('torqueB', fmt(d.torqueB) + ' N m');
+        }
       } else {
         const d = app.sim.totals();
         set('KE', fmt(d.KE) + ' J'); set('GPE', fmt(d.GPE) + ' J'); set('EPE', fmt(d.EPE) + ' J'); set('E', fmt(d.E) + ' J');

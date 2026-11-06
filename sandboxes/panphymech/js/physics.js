@@ -8,6 +8,9 @@
   const BASE_STEP = 1 / 240; // the Standard accuracy step, before stiff springs shorten it
   const MIN_STEP = 1 / 5000;
   const VELOCITY_ITERATIONS = 12;
+  // Gear wheels share one collision group that never collides with itself: meshing rings
+  // overlap on screen, as if each pair of gears turned in its own layer.
+  const GEAR_GROUP = -100000;
   const POSITION_ITERATIONS = 5;
 
   function createSim(scene) {
@@ -142,6 +145,7 @@
     function fixtureFor(pb, b) {
       const density = b.mass / Math.max(S.area(b), 1e-9);
       const opts = { density, friction: b.friction, restitution: b.restitution };
+      if (S.isGearWheel(scene, b)) opts.filterGroupIndex = GEAR_GROUP;
       if (b.kind === 'ball') return pb.createFixture(new pl.Circle(b.r), opts);
       // A custom shape is one rigid body made of its convex pieces. They collide slightly
       // inset, so that with Box2D's skin the object rests exactly on its drawn outline.
@@ -406,6 +410,42 @@
       }
       if (joint) joints.set(l.id, world.createJoint(joint));
     });
+
+    // Gears, once every axle exists. Planck's gear joint keeps θ_a + ratio·θ_b constant, with
+    // each angle measured from its axle joint's body A to its body B. A wheel can be either
+    // body of its axle, so each side's sign s turns that back into the wheel's own angle.
+    const gears = new Map(); // link id → { joint, sa, sb, ratio, A, B }
+    scene.links.forEach((l) => {
+      if (l.kind !== 'gear' || S.gearProblem(scene, l)) return;
+      const A = S.bodyById(scene, l.a), B = S.bodyById(scene, l.b);
+      const ja = joints.get(S.gearAxles(scene, A)[0].link.id), jb = joints.get(S.gearAxles(scene, B)[0].link.id);
+      const wa = bodies.get(l.a), wb = bodies.get(l.b);
+      if (!ja || !jb || !wa || !wb) return;
+      const sa = ja.getBodyB() === wa ? 1 : -1, sb = jb.getBodyB() === wb ? 1 : -1;
+      const na = S.ringTeeth(A, l.ra), nb = S.ringTeeth(B, l.rb);
+      const ratio = (nb / na) * sa * sb;
+      const joint = world.createJoint(new pl.GearJoint({ collideConnected: false }, wa, wb, ja, jb, ratio));
+      gears.set(l.id, { joint, sa, sb, ratio, na, nb, ja, jb, wa, wb });
+      joints.set(l.id, joint);
+    });
+    // The torques a gear puts on its wheels (counterclockwise positive) and the force between
+    // its teeth on wheel a, applied where the rings touch; wheel b feels the opposite force.
+    function gearForces(id) {
+      const g = gears.get(id);
+      const l = S.linkById(scene, id);
+      if (!g || !l || !(sim.t > 0)) return null;
+      // Planck reports the torque on the gear's body A: wheel a, or its base when sa is −1.
+      const T = g.joint.getReactionTorque(1 / sim.lastH);
+      const ta = g.sa * T;
+      const tb = (g.nb / g.na) * ta;
+      const pa = g.wa.getPosition(), pb = g.wb.getPosition();
+      const dx = pb.x - pa.x, dy = pb.y - pa.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const u = { x: dx / d, y: dy / d };
+      const ra = S.gearRadius(g.na);
+      const F = ta / ra; // along u rotated a quarter turn counterclockwise
+      return { ta, tb, force: Math.abs(F), fa: { x: -u.y * F, y: u.x * F }, point: { x: pa.x + u.x * ra, y: pa.y + u.y * ra } };
+    }
 
     const sim = {
       world, ground, bodies, joints, scene,
@@ -747,9 +787,32 @@
         }
         return { x: from.x + (anchor.x - from.x) * best, y: from.y + (anchor.y - from.y) * best };
       };
+      // Box2D's gear joint turns the wheels with torques alone, so their axles carry the whole
+      // sideways load. In a real gear the teeth push each other where the rings touch, and each
+      // axle carries the rest: move that tooth force from the axle to the teeth.
+      const tooth = new Map(); // wheel id → total tooth force on it
+      const axleOf = new Map(); // axle hinge id → wheel id
+      gears.forEach((g, gid) => {
+        const f = gearForces(gid);
+        const l = S.linkById(scene, gid);
+        if (!f || !l) return;
+        [[l.a, 1], [l.b, -1]].forEach(([wid, sign]) => {
+          const t = tooth.get(wid) || { x: 0, y: 0 };
+          tooth.set(wid, { x: t.x + sign * f.fa.x, y: t.y + sign * f.fa.y });
+          const axle = S.gearAxles(scene, S.bodyById(scene, wid))[0];
+          if (axle) axleOf.set(axle.link.id, wid);
+        });
+      });
       scene.links.forEach((l) => {
         const atA = bodyFor(l.a) === pb; const atB = bodyFor(l.b) === pb;
         if (!atA && !atB) return;
+        if (l.kind === 'gear') {
+          const f = gearForces(l.id);
+          if (!f) return;
+          if (atA) add('R', f.point, f.fa.x, f.fa.y);
+          if (atB) add('R', f.point, -f.fa.x, -f.fa.y);
+          return;
+        }
         const pa = anchorWorld(l.a, l.la); const pbw = anchorWorld(l.b, l.lb);
         // Along a solid rod or rope, aim from its first joint outside this object.
         const solidPts = solids.has(l.id) ? sim.solidPoints(l.id) : null;
@@ -800,6 +863,13 @@
           fb = onLinkB ? { x: f.x, y: f.y } : { x: -f.x, y: -f.y };
           fa = { x: -fb.x, y: -fb.y };
         }
+        const geared = axleOf.get(l.id);
+        if (geared) {
+          const t = tooth.get(geared);
+          const wheelEnd = l.a === geared ? fa : fb, baseEnd = l.a === geared ? fb : fa;
+          wheelEnd.x -= t.x; wheelEnd.y -= t.y;
+          baseEnd.x += t.x; baseEnd.y += t.y;
+        }
         // A hinge or glue joint acts at one point, where end a sits.
         if (label === 'R') {
           if (atA) add(label, pa, fa.x, fa.y);
@@ -831,6 +901,17 @@
         const path = sim.pulleyPath(id);
         const force = ps && sim.t > 0 ? ps.lambda / sim.lastH : 0;
         return { length: path.total, slack: Math.max(0, l.length - path.total), sideA: path.segA, sideB: path.segB, force, pa: path.pa, pb: path.pb };
+      }
+      if (l.kind === 'gear') {
+        // Speeds relative to each axle's base, and the torques the gear puts on each wheel.
+        const g = gears.get(id);
+        const rel = (w, j) => w.getAngularVelocity() - (j.getBodyA() === w ? j.getBodyB() : j.getBodyA()).getAngularVelocity();
+        const f = gearForces(id);
+        return {
+          active: !!g, ratio: g ? g.nb / g.na : 0,
+          omegaA: g ? rel(g.wa, g.ja) : 0, omegaB: g ? rel(g.wb, g.jb) : 0,
+          torqueA: f ? f.ta : 0, torqueB: f ? f.tb : 0, force: f ? f.force : 0
+        };
       }
       const solid = solids.get(id);
       const j = solid ? solid.endJoint : joints.get(id);

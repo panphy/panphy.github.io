@@ -43,16 +43,6 @@
     }
   },
   {
-    "file": "spring.ppmech",
-    "title": "Mass on a spring",
-    "text": "A 1 kg mass released from the spring’s natural length. The period is \\(2\\pi\\sqrt{\\dfrac{m}{k}}\\) and the total energy stays constant.",
-    "plain": "A 1 kg mass released from the spring’s natural length. The period is 2π√(m/k) and the total energy stays constant.",
-    "track": {
-      "name": "Mass",
-      "group": "energy"
-    }
-  },
-  {
     "file": "horizontal-spring.ppmech",
     "title": "Oscillator on a frictionless floor",
     "text": "A block pulled 0.5 m from a wall and released. Displacement and velocity are a quarter cycle apart.",
@@ -137,6 +127,24 @@
     "track": {
       "name": "Chassis",
       "group": "velocity"
+    }
+  },
+  {
+    "file": "gear-train.ppmech",
+    "title": "Gear train",
+    "text": "A motor that gives at most 20 N m turns a 10-tooth gear. Two 3 : 1 steps, through a compound gear, make the output gear turn 9 times slower with 9 times the torque: about 117 N m, enough to lift the 25 kg load.",
+    "track": {
+      "name": "25 kg load",
+      "group": "position",
+      "hide": [
+        "x"
+      ]
+    },
+    "view": {
+      "minX": -2,
+      "maxX": 2.4,
+      "minY": 0,
+      "maxY": 3.4
     }
   },
   {
