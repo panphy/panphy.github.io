@@ -467,6 +467,52 @@
 		</form>
 	</dialog>
 
+	<dialog id="export-dialog" class="neo-dialog" aria-labelledby="export-dialog-title">
+		<form method="dialog" class="neo-dialog-body" id="export-form">
+			<h2 id="export-dialog-title">Download graph</h2>
+			<fieldset class="neo-option-group">
+				<legend>Style</legend>
+				<label class="neo-option">
+					<input type="radio" name="export-style" value="publication">
+					<span class="neo-option-text">
+						<span class="neo-choice-title">Publication</span>
+						<span class="neo-choice-note">Black frame, inward ticks, no grid, on white at 4:3, in either theme.</span>
+					</span>
+				</label>
+				<label class="neo-option">
+					<input type="radio" name="export-style" value="screen">
+					<span class="neo-option-text">
+						<span class="neo-choice-title">Screen</span>
+						<span class="neo-choice-note">As shown here, in the current theme and size.</span>
+					</span>
+				</label>
+			</fieldset>
+			<fieldset class="neo-option-group">
+				<legend>Format</legend>
+				<label class="neo-option">
+					<input type="radio" name="export-format" value="png">
+					<span class="neo-option-text">
+						<span class="neo-choice-title">PNG</span>
+						<span class="neo-choice-note">An image for slides, documents and reports.</span>
+					</span>
+				</label>
+				<label class="neo-option">
+					<input type="radio" name="export-format" value="svg">
+					<span class="neo-option-text">
+						<span class="neo-choice-title">SVG</span>
+						<span class="neo-choice-note">A vector drawing that stays sharp at any size.</span>
+					</span>
+				</label>
+			</fieldset>
+			<label for="export-filename">Filename</label>
+			<input type="text" id="export-filename" autocomplete="off" spellcheck="false">
+			<div class="neo-dialog-actions">
+				<button type="button" class="neo-dialog-cancel" data-close>Cancel</button>
+				<button type="submit" class="neo-dialog-confirm" id="export-apply">Download</button>
+			</div>
+		</form>
+	</dialog>
+
 	<dialog id="fill-dialog" class="neo-dialog" aria-labelledby="fill-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="fill-dialog-title">Fill column</h2>
