@@ -40,7 +40,9 @@
     motor: { label: 'Motor', points: 1, kind: 'hinge' },
     weld: { label: 'Glue', points: 1 },
     // A fixed wheel with one rope over it: three placement points (wheel, end a, end b).
-    pulley: { label: 'Pulley', points: 3 }
+    pulley: { label: 'Pulley', points: 3 },
+    // Meshes a ring of teeth on one ball with a ring on another; each turns on its own axle.
+    gear: { label: 'Gear', points: 2 }
   };
 
   // Limits used by the inspector and by file import.
@@ -48,11 +50,20 @@
     r: [0.02, 5], w: [0.02, 20], h: [0.02, 20], sides: [3, 8],
     mass: [0.001, 10000], friction: [0, 2], restitution: [0, 1], drag: [0, 50], linearDrag: [0, 1000],
     k: [0.1, 100000], rest: [0, 50], damping: [0, 1000], length: [0.01, 50],
-    speed: [-100, 100], torque: [0, 100000], wheel: [0.02, 1],
+    speed: [-100, 100], torque: [0, 100000], wheel: [0.02, 1], teeth: [6, 120],
     gravity: [0, 100], viscosity: [0, 1], coord: [-1000, 1000], velocity: [-500, 500], omega: [-200, 200]
   };
 
   const PULLEY_RADIUS = 0.15; // m: a new pulley's wheel
+
+  // Every gear has teeth of one size, GEAR_PITCH of rim per tooth, so any two gears mesh and a
+  // ring's radius follows from its teeth: r = N·p/(2π). The radius is the pitch circle, where
+  // meshing rings touch; the teeth are drawn half a tooth height either side of it.
+  const GEAR_PITCH = 0.1; // m
+  const MAX_RINGS = 2; // smaller rings on one wheel, besides its rim
+  const RING_GAP = 4; // an inner ring has at least this many teeth fewer than the rim
+  const AXLE_TOLERANCE = 0.01; // m: an axle's hinge sits this close to the wheel's center
+  const MESH_TOLERANCE = 0.01; // m: meshing axles are this close to the sum of the radii
 
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const num = (v, fallback) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
@@ -115,6 +126,8 @@
     if (kind === 'rod' || kind === 'rope') Object.assign(link, { length: 1, solid: false, mass: kind === 'rope' ? 0.1 : 0.5 });
     // The wheel's center (px, py) and radius r, fixed to the background; length is the whole rope.
     if (kind === 'pulley') Object.assign(link, { px: 0, py: 0, r: PULLEY_RADIUS, length: 1 });
+    // ra and rb: which ring of each wheel meshes (0 is the rim, 1 and 2 the smaller rings).
+    if (kind === 'gear') Object.assign(link, { ra: 0, rb: 0 });
     // A motor turns clockwise (dir −1) or counterclockwise (dir +1); speed carries the same sign.
     if (kind === 'hinge') Object.assign(link, { motor: type === 'motor', speed: type === 'motor' ? -3 : 0, dir: -1, torque: type === 'motor' ? 50 : 0 });
     return link;
@@ -299,7 +312,7 @@
       for (const end of ['a', 'b']) {
         if (ids.has(l[end])) l[end] = ids.get(l[end]);
         else if (linkIds.has(l[end])) { l[end] = linkIds.get(l[end]); if (f.bodies.length) l['l' + end] = { x: anchors[end].x + offset, y: anchors[end].y + offset }; }
-        else if (l[end] && bodyById(scene, l[end])) continue; // Connector-only copy retains attachments.
+        else if (l[end] && bodyById(scene, l[end])) { if (l.kind === 'gear') l.a = l.b = null; continue; } // Connector-only copy retains attachments; a gear's would gear the same pair twice.
         else { l[end] = null; const shift = f.bodies.length ? offset : 0; l['l' + end] = { x: anchors[end].x + shift, y: anchors[end].y + shift }; }
       }
       if (!l.a && !l.b) continue;
@@ -464,6 +477,181 @@
     return b ? toWorld(poseOf ? poseOf(b) : b, local) : { x: local.x, y: local.y };
   }
 
+  // ---------- Gears ----------
+  //
+  // A gear wheel is a ball with teeth: its rim has one tooth per GEAR_PITCH of its radius's
+  // circumference, and `rings` lists any smaller rings fixed to it (a compound gear), as tooth
+  // counts. A gear link meshes ring ra of ball a with ring rb of ball b. Each wheel turns on one
+  // hinge or motor at its center, and both axles are fixed to the same thing, so the gear is a
+  // fixed speed ratio: ω_a N_a = −ω_b N_b, relative to that base.
+  const gearRadius = (n) => (n * GEAR_PITCH) / (2 * Math.PI);
+  const rimTeeth = (b) => Math.round(clamp((2 * Math.PI * b.r) / GEAR_PITCH, ...LIMITS.teeth));
+  function gearRings(b) { return [rimTeeth(b), ...(Array.isArray(b.rings) ? b.rings : [])]; }
+  function ringTeeth(b, i) { const rings = gearRings(b); return rings[i] || rings[0]; }
+  function gearsOf(scene, id) { return scene.links.filter((l) => l.kind === 'gear' && (l.a === id || l.b === id)); }
+  function isGearWheel(scene, b) { return !!b && b.kind === 'ball' && (gearsOf(scene, b.id).length > 0 || !!(b.rings && b.rings.length)); }
+
+  // The hinges and motors pinned at a ball's center, each with the base it fixes the ball to:
+  // another object's id, or null for the background.
+  function gearAxles(scene, b, poseOf) {
+    const pose = poseOf ? poseOf(b) : b;
+    return scene.links.filter((l) => {
+      if (l.kind !== 'hinge' || (l.a !== b.id && l.b !== b.id)) return false;
+      const p = endPoint(scene, l.a, l.la, poseOf);
+      return Math.hypot(p.x - pose.x, p.y - pose.y) <= AXLE_TOLERANCE;
+    }).map((l) => ({ link: l, base: l.a === b.id ? l.b : l.a }));
+  }
+  // What an axle is fixed to, as one key: fixed objects and the background are all one.
+  function baseKey(scene, base) {
+    const b = base && bodyById(scene, base);
+    return b && !b.fixed ? b.id : 'fixed';
+  }
+
+  // The distance a gear's axles need, and where its rings touch (on the line from a to b).
+  function gearMesh(scene, l, poseOf) {
+    const A = bodyById(scene, l.a), B = bodyById(scene, l.b);
+    const pa = poseOf ? poseOf(A) : A, pb = poseOf ? poseOf(B) : B;
+    const ra = gearRadius(ringTeeth(A, l.ra)), rb = gearRadius(ringTeeth(B, l.rb));
+    const dx = pb.x - pa.x, dy = pb.y - pa.y;
+    const d = Math.hypot(dx, dy);
+    const u = d > 1e-9 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 };
+    return { A, B, ra, rb, na: ringTeeth(A, l.ra), nb: ringTeeth(B, l.rb), d, want: ra + rb, u, point: { x: pa.x + u.x * ra, y: pa.y + u.y * ra } };
+  }
+
+  // Why a gear cannot turn its wheels, or '' when it works.
+  function gearProblem(scene, l) {
+    const A = bodyById(scene, l.a), B = bodyById(scene, l.b);
+    if (!A || !B || A.kind !== 'ball' || B.kind !== 'ball' || A === B) return 'A gear joins two balls.';
+    const bases = [];
+    for (const [w, other] of [[A, B], [B, A]]) {
+      if (w.fixed) return `${w.name} is fixed in place, so it can’t turn. Switch Fixed in place off.`;
+      if (w.lockRotation) return `${w.name} can’t turn while Lock rotation is on.`;
+      const axles = gearAxles(scene, w);
+      if (!axles.length) return `${w.name} needs a hinge or motor at its center.`;
+      if (axles.length > 1) return `${w.name} has more than one hinge at its center.`;
+      if (axles[0].base === other.id) return `${A.name} and ${B.name} are hinged to each other.`;
+      bases.push(baseKey(scene, axles[0].base));
+    }
+    if (bases[0] !== bases[1]) return 'Both wheels must turn on axles fixed to the same thing: the background or one object.';
+    const m = gearMesh(scene, l);
+    if (Math.abs(m.d - m.want) > MESH_TOLERANCE) {
+      const cm = (v) => `${Math.round(v * 100)} cm`;
+      return `The wheels don’t mesh: their centers must be ${cm(m.want)} apart, but they are ${cm(m.d)} apart.`;
+    }
+    return '';
+  }
+
+  // The angle of one tooth of each ring, in its wheel's own frame, so meshing rings interleave:
+  // a tooth of one ring meets a gap of the other where they touch. Each gear sets the ring it
+  // reaches second from the one it reaches first. Keys are `${ball id}:${ring}`.
+  function gearPhases(scene) {
+    const phase = new Map();
+    const gears = scene.links.filter((l) => l.kind === 'gear' && bodyById(scene, l.a) && bodyById(scene, l.b));
+    const key = (id, ring) => `${id}:${ring}`;
+    const place = (from, fromRing, to, toRing, u, nFrom, nTo, rFrom, rTo) => {
+      // A tooth of `from` sits delta (rad) behind the contact; the matching gap of `to` sits
+      // the same arc length past its own contact, which faces the other way.
+      const theta = Math.atan2(u.y, u.x);
+      const step = (2 * Math.PI) / nFrom;
+      const delta = ((((theta - from.angle - phase.get(key(from.id, fromRing))) % step) + step) % step);
+      phase.set(key(to.id, toRing), theta + Math.PI + (delta * rFrom) / rTo + Math.PI / nTo - to.angle);
+    };
+    // Spread out from each train's first gear; a ring met again keeps its first phase.
+    for (;;) {
+      let progressed = false;
+      for (const l of gears) {
+        const ka = key(l.a, l.ra), kb = key(l.b, l.rb);
+        if (phase.has(ka) === phase.has(kb)) continue;
+        const m = gearMesh(scene, l);
+        if (phase.has(ka)) place(m.A, l.ra, m.B, l.rb, m.u, m.na, m.nb, m.ra, m.rb);
+        else place(m.B, l.rb, m.A, l.ra, { x: -m.u.x, y: -m.u.y }, m.nb, m.na, m.rb, m.ra);
+        progressed = true;
+      }
+      if (progressed) continue;
+      const next = gears.find((l) => !phase.has(key(l.a, l.ra)));
+      if (!next) break;
+      const m = gearMesh(scene, next);
+      phase.set(key(next.a, next.ra), Math.atan2(m.u.y, m.u.x) - m.A.angle);
+    }
+    return phase;
+  }
+
+  // The ring a new gear should use on a wheel: the rim, or the first ring no other gear uses.
+  function freeRing(scene, b) {
+    const used = new Set(gearsOf(scene, b.id).map((l) => (l.a === b.id ? l.ra : l.rb)));
+    const n = gearRings(b).length;
+    for (let i = 0; i < n; i++) if (!used.has(i)) return i;
+    return 0;
+  }
+
+  // Why two balls cannot be geared together, or ''.
+  function gearPairProblem(scene, A, B) {
+    if (!A || !B || A.kind !== 'ball' || B.kind !== 'ball') return 'A gear joins two balls: click one ball, then another.';
+    if (A.id === B.id) return 'Click a second, different ball.';
+    if (gearsOf(scene, A.id).some((l) => l.a === B.id || l.b === B.id)) return `${A.name} and ${B.name} are already geared together.`;
+    return '';
+  }
+
+  // A wheel moves alone when nothing is hinged or glued to it but its own axle to the background.
+  function movesAlone(scene, b) {
+    return rigidGroup(scene, b.id).size === 1;
+  }
+
+  // Slide wheel `id` along the line between the axles until gear l meshes. Only a wheel that
+  // moves alone and meshes nothing else moves; returns whether the gear now meshes.
+  function meshGear(scene, l, id) {
+    const m = gearMesh(scene, l);
+    if (Math.abs(m.d - m.want) <= 1e-9) return true;
+    const w = id === l.a ? m.A : m.B;
+    if (!movesAlone(scene, w) || gearsOf(scene, w.id).length > 1) return false;
+    const s = id === l.b ? 1 : -1;
+    const shift = (m.want - m.d) * s;
+    transformBodies(scene, new Set([w.id]), (p, angle) => ({ x: p.x + m.u.x * shift, y: p.y + m.u.y * shift, angle }));
+    return true;
+  }
+
+  // A hinge to the background at a wheel's center, unless it has an axle already.
+  function ensureAxle(scene, b) {
+    if (gearAxles(scene, b).length) return null;
+    const l = makeLink(scene, 'hinge', b.id, { x: 0, y: 0 }, null, { x: b.x, y: b.y });
+    scene.links.push(l);
+    return l;
+  }
+
+  // Gears stay consistent after any edit: a gear needs two different balls and one gear per
+  // pair; a gear wheel's radius fits its whole number of teeth; its smaller rings stay smaller.
+  function tidyGears(scene) {
+    const balls = new Set(scene.bodies.filter((b) => b.kind === 'ball').map((b) => b.id));
+    const pairs = new Set();
+    scene.links = scene.links.filter((l) => {
+      if (l.kind !== 'gear') return true;
+      if (!balls.has(l.a) || !balls.has(l.b) || l.a === l.b) return false;
+      const k = [l.a, l.b].sort().join('|');
+      if (pairs.has(k)) return false;
+      pairs.add(k);
+      return true;
+    });
+    scene.bodies.forEach((b) => {
+      if (b.kind !== 'ball') { delete b.rings; return; }
+      if (b.rings !== undefined) {
+        const max = rimTeeth(b) - RING_GAP;
+        const rings = (Array.isArray(b.rings) ? b.rings : []).map((n) => Math.round(num(n, 0)))
+          .filter((n, i, all) => n >= LIMITS.teeth[0] && n <= max && all.indexOf(n) === i).slice(0, MAX_RINGS);
+        if (rings.length) b.rings = rings; else delete b.rings;
+      }
+      if (isGearWheel(scene, b)) b.r = gearRadius(rimTeeth(b));
+    });
+    scene.links.forEach((l) => {
+      if (l.kind !== 'gear') return;
+      ['a', 'b'].forEach((end) => {
+        const key = 'r' + end;
+        const n = gearRings(bodyById(scene, l[end])).length;
+        l[key] = Math.round(clamp(num(l[key], 0), 0, n - 1));
+        l['l' + end] = { x: 0, y: 0 };
+      });
+    });
+  }
+
   // ---------- Joined connectors ----------
   //
   // A spring end may join one end of another connector (a spring, an ideal rope or rod, or a
@@ -619,6 +807,7 @@
         && (l.a || l.b));
       if (scene.links.length === before) break;
     }
+    tidyGears(scene);
     syncJoinPoints(scene);
   }
   // A join that already exists stays valid while its kinds, solidity and outer ends allow it.
@@ -1001,7 +1190,10 @@
         color: COLORS[src.color] ? src.color : 'blue',
         vx: clamp(num(src.vx, 0), ...LIMITS.velocity), vy: clamp(num(src.vy, 0), ...LIMITS.velocity), omega: clamp(num(src.omega, 0), ...LIMITS.omega)
       };
-      if (b.kind === 'ball') b.r = clamp(num(src.r, 0.25), ...LIMITS.r);
+      if (b.kind === 'ball') {
+        b.r = clamp(num(src.r, 0.25), ...LIMITS.r);
+        if (Array.isArray(src.rings)) b.rings = src.rings.slice(0, MAX_RINGS).map((n) => Math.round(clamp(num(n, 0), 0, LIMITS.teeth[1])));
+      }
       else if (b.kind === 'polygon') { b.r = clamp(num(src.r, 0.3), ...LIMITS.r); b.sides = Math.round(clamp(num(src.sides, 6), ...LIMITS.sides)); }
       else if (b.kind === 'custom') b.paths = paths;
       else { b.w = clamp(num(src.w, 0.5), ...LIMITS.w); b.h = clamp(num(src.h, 0.5), ...LIMITS.h); }
@@ -1013,7 +1205,7 @@
     // An end may also name another connector it is joined to; tidyLinks checks those below.
     const fileLinkIds = new Set((Array.isArray(data.links) ? data.links : []).map((src) => src && typeof src.id === 'string' && !ids.has(src.id) ? src.id : null).filter(Boolean));
     (Array.isArray(data.links) ? data.links : []).forEach((src) => {
-      if (!src || typeof src.id !== 'string' || linkIds.has(src.id) || ids.has(src.id) || !['spring', 'rod', 'rope', 'hinge', 'weld', 'pulley'].includes(src.kind)) { skipped++; return; }
+      if (!src || typeof src.id !== 'string' || linkIds.has(src.id) || ids.has(src.id) || !['spring', 'rod', 'rope', 'hinge', 'weld', 'pulley', 'gear'].includes(src.kind)) { skipped++; return; }
       const endRef = (v) => (typeof v === 'string' && (ids.has(v) || (fileLinkIds.has(v) && v !== src.id)) ? v : null);
       const a = endRef(src.a);
       const b = endRef(src.b);
@@ -1030,6 +1222,7 @@
         l.r = clamp(num(src.r, PULLEY_RADIUS), ...LIMITS.wheel);
         l.length = clamp(num(src.length, 1), ...LIMITS.length);
       }
+      if (l.kind === 'gear') { l.ra = Math.round(clamp(num(src.ra, 0), 0, MAX_RINGS)); l.rb = Math.round(clamp(num(src.rb, 0), 0, MAX_RINGS)); }
       if (l.kind === 'hinge') {
         l.motor = !!src.motor; l.speed = clamp(num(src.speed, 0), ...LIMITS.speed); l.torque = clamp(num(src.torque, 50), ...LIMITS.torque);
         l.dir = src.dir === 1 || src.dir === -1 ? src.dir : l.speed > 0 ? 1 : -1;
@@ -1055,6 +1248,8 @@
     createScene, makeBody, makeLink, newId, nextName,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, centerSnap, closestSurface, copyFragment, pasteFragment,
     pulleyWinding, pulleyGeometry, pulleyPath, pulleyProblem, PULLEY_CLEARANCE, PULLEY_RADIUS,
+    GEAR_PITCH, MAX_RINGS, RING_GAP, gearRadius, rimTeeth, gearRings, ringTeeth, gearsOf, isGearWheel, gearAxles, gearMesh, gearProblem,
+    gearPhases, freeRing, gearPairProblem, meshGear, ensureAxle, tidyGears,
     bodyById, linkById, endPoint, rigidGroup,
     JOIN_KINDS, joinedEnd, joinPair, pairGeometry, joinProblem, joinLinks, fitJoin, unjoin, minPulleyLength, tidyLinks, refitLink, transformBodies, boxContents, mirrorBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp

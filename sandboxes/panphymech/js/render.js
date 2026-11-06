@@ -55,12 +55,43 @@
     r.toScreen = (p) => ({ x: r.w / 2 + (p.x - cam().cx) * cam().scale, y: r.h / 2 - (p.y - cam().cy) * cam().scale });
     r.toWorld = (x, y) => ({ x: cam().cx + (x - r.w / 2) / cam().scale, y: cam().cy - (y - r.h / 2) / cam().scale });
 
+    // Gear wheels this frame, and the angle of one tooth of each ring in its wheel's frame.
+    let gearWheels = new Set();
+    let gearPhase = new Map();
+    function refreshGears() {
+      gearWheels = new Set(app.scene.bodies.filter((b) => S.isGearWheel(app.scene, b)).map((b) => b.id));
+      gearPhase = gearWheels.size ? S.gearPhases(app.scene) : new Map();
+    }
+    // A ring of n teeth round pitch radius R (m) at world center c, turned to angle (rad):
+    // trapezoid teeth half a tooth height either side of the pitch circle. Zoomed far out,
+    // where teeth would be a blur, it is the plain pitch circle.
+    function gearRingPath(c, R, n, angle) {
+      const s = cam().scale;
+      const q = r.toScreen(c);
+      const h = (S.GEAR_PITCH / Math.PI) * s; // tooth height: one module each side
+      if (h < 2.2) { ctx.arc(q.x, q.y, R * s, 0, Math.PI * 2); return; }
+      const step = (2 * Math.PI) / n;
+      const tip = R * s + h * 0.9, root = R * s - h * 1.1;
+      // Screen y points down, so world angles turn the other way on screen.
+      const at = (rad, a) => ({ x: q.x + rad * Math.cos(a), y: q.y - rad * Math.sin(a) });
+      for (let k = 0; k < n; k++) {
+        const a = angle + k * step;
+        [[root, a - 0.31 * step], [tip, a - 0.15 * step], [tip, a + 0.15 * step], [root, a + 0.31 * step]].forEach(([rad, ang], i) => {
+          const p = at(rad, ang);
+          if (k === 0 && i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+        });
+      }
+      ctx.closePath();
+    }
+    const ringAngle = (b, pose, ring) => pose.angle + (gearPhase.get(`${b.id}:${ring}`) || 0);
+
     function bodyPath(b, pose) {
       const s = cam().scale;
       const c = r.toScreen(pose);
       ctx.beginPath();
       if (b.kind === 'ball') {
-        ctx.arc(c.x, c.y, b.r * s, 0, Math.PI * 2);
+        if (gearWheels.has(b.id)) gearRingPath(pose, b.r, S.rimTeeth(b), ringAngle(b, pose, 0));
+        else ctx.arc(c.x, c.y, b.r * s, 0, Math.PI * 2);
         return;
       }
       if (b.kind === 'custom') {
@@ -225,6 +256,33 @@
         ctx.beginPath();
         ctx.arc(c.x, c.y, 2.2, 0, Math.PI * 2);
         ctx.fill();
+      }
+    }
+
+    // A compound gear's smaller rings, drawn after every wheel: the wheel a ring meshes with
+    // overlaps the rim behind it, and the ring must stay in sight where their teeth meet.
+    function drawRings(b) {
+      if (!gearWheels.has(b.id) || !(b.rings && b.rings.length)) return;
+      const pose = app.poseOf(b);
+      const col = S.COLORS[b.color] || S.COLORS.blue;
+      b.rings.forEach((n, i) => {
+        ctx.beginPath();
+        gearRingPath(pose, S.gearRadius(n), n, ringAngle(b, pose, i + 1));
+        ctx.fillStyle = col.fill;
+        ctx.fill();
+        ctx.lineWidth = 1.6;
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = col.stroke;
+        ctx.stroke();
+      });
+      const c = r.toScreen(pose);
+      const R = S.gearRadius(b.rings[b.rings.length - 1]) * cam().scale;
+      if (R > 5) {
+        ctx.strokeStyle = col.stroke;
+        ctx.beginPath();
+        ctx.moveTo(c.x, c.y);
+        ctx.lineTo(c.x + Math.cos(pose.angle) * R * 0.92, c.y - Math.sin(pose.angle) * R * 0.92);
+        ctx.stroke();
       }
     }
 
@@ -514,6 +572,32 @@
       ctx.fill();
     }
 
+    // A gear is drawn by its wheels' teeth. Selected or hovered, its two meshing rings are
+    // outlined; while it cannot turn them, a dashed line joins their centers.
+    function drawGear(l, sel, hov) {
+      const A = S.bodyById(app.scene, l.a), B = S.bodyById(app.scene, l.b);
+      if (!A || !B) return;
+      const pa = app.poseOf(A), pb = app.poseOf(B);
+      if (S.gearProblem(app.scene, l)) {
+        const P = r.toScreen(pa), Q = r.toScreen(pb);
+        ctx.strokeStyle = sel ? r.colors.accent : r.colors.danger;
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(P.x, P.y); ctx.lineTo(Q.x, Q.y); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      if (!sel && !hov) return;
+      [[A, pa, l.ra], [B, pb, l.rb]].forEach(([w, pose, ring]) => {
+        const n = S.ringTeeth(w, ring);
+        ctx.beginPath();
+        gearRingPath(pose, S.gearRadius(n), n, ringAngle(w, pose, ring));
+        ctx.strokeStyle = r.colors.accent;
+        ctx.lineWidth = sel ? 2.6 : 1.4;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      });
+    }
+
     // A solid rod or rope as simulated: a thick line through its segments' joints.
     function drawSolid(l, color) {
       const pts = app.sim && !app.simStale ? app.sim.solidPoints(l.id) : null;
@@ -541,6 +625,7 @@
       const [pa, pb] = linkEnds(l);
       const color = sel ? r.colors.accent : hov ? r.colors.ink : r.colors.link;
       if (l.kind === 'hinge' || l.kind === 'weld') { drawHinge(l, pa, sel || hov); return; }
+      if (l.kind === 'gear') { drawGear(l, sel, hov); return; }
       if (l.kind === 'pulley') { drawPulley(l, sel, hov); return; }
       if (l.kind === 'spring') drawSpring(pa, pb, color, sel ? 2.2 : 1.7);
       else if (l.solid && drawSolid(l, sel ? r.colors.accent : l.kind === 'rope' ? r.colors.rope : color)) { /* drawn from its bodies */ }
@@ -758,6 +843,15 @@
           ctx.fill();
         }
       }
+      if (pv.gear) {
+        // Choosing the second wheel: a dashed line from the first wheel's center.
+        ctx.globalAlpha = 1;
+        const P = r.toScreen(pv.gear.from), Q = r.toScreen(pv.gear.to);
+        ctx.strokeStyle = r.colors.accent; ctx.lineWidth = 1.8; ctx.setLineDash([5, 4]);
+        ctx.beginPath(); ctx.moveTo(P.x, P.y); ctx.lineTo(Q.x, Q.y); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = r.colors.accent;
+        ctx.beginPath(); ctx.arc(P.x, P.y, 4, 0, Math.PI * 2); ctx.fill();
+      }
       if (pv.link) {
         const { kind, from, to } = pv.link;
         if (kind === 'spring') drawSpring(from, to, r.colors.accent, 1.8, true);
@@ -880,6 +974,7 @@
       ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
       ctx.fillStyle = r.colors.bg;
       ctx.fillRect(0, 0, r.w, r.h);
+      refreshGears();
       drawGrid();
       drawFloor();
       drawEnergyZero();
@@ -892,6 +987,7 @@
         ctx.restore();
       });
       app.scene.bodies.forEach(drawBody);
+      app.scene.bodies.forEach(drawRings);
       // Hover and selection outlines sit on top of every object.
       if (!clean) app.scene.bodies.forEach((b) => {
         if (app.isSelected('body', b.id)) outline(b, r.colors.accent, 2.6);

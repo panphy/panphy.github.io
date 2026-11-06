@@ -18,7 +18,8 @@
     hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background. Right-click or Esc cancels.',
     motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle). Right-click or Esc cancels.',
     weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background. Right-click or Esc cancels.',
-    pulley: 'Pulley: click where the wheel goes, then the first end of the rope, then the second end. Right-click or Esc cancels.'
+    pulley: 'Pulley: click where the wheel goes, then the first end of the rope, then the second end. Right-click or Esc cancels.',
+    gear: 'Gear: click a ball, then a second ball to mesh with it. Each turns on a hinge at its center (added if missing), and the second slides into mesh. Right-click or Esc cancels.'
   };
 
   // Connectors whose length follows their ends when the setup changes.
@@ -74,6 +75,7 @@
         const pb = rr().toScreen(S.endPoint(scene, l.b, l.lb, app.poseOf));
         let d;
         if (l.kind === 'hinge' || l.kind === 'weld') d = Math.hypot(sp.x - pa.x, sp.y - pa.y) - 3;
+        else if (l.kind === 'gear') { const m = gearPoint(l); d = Math.hypot(sp.x - m.x, sp.y - m.y) - 4; }
         else if (l.kind === 'pulley') d = pulleyDistance(l, sp);
         else {
           // Near an end on an object, a click picks the object rather than the connector.
@@ -103,6 +105,10 @@
         return segDist(sp, { x: P.x + (T.x - P.x) * k, y: P.y + (T.y - P.y) * k }, T);
       };
       return Math.min(Math.max(0, Math.hypot(sp.x - c.x, sp.y - c.y) - R - 3), part(path.pa, path.ta, !!l.a), part(path.pb, path.tb, !!l.b));
+    }
+    // Where a gear's rings touch, on screen: the gear's handle for selecting and deleting.
+    function gearPoint(l) {
+      return rr().toScreen(S.gearMesh(app.scene, l, app.poseOf).point);
     }
     function pulleyPathNow(l) {
       return app.sim && !app.simStale && app.sim.pulleyPath ? app.sim.pulleyPath(l.id) : S.pulleyPath(app.scene, l, app.poseOf);
@@ -177,8 +183,8 @@
       if (sel.type === 'body') { const b = S.bodyById(app.scene, sel.id); return b ? screenBox(b) : null; }
       const l = S.linkById(app.scene, sel.id);
       if (!l) return null;
-      const pa = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
-      const pb = l.kind === 'hinge' || l.kind === 'weld' ? pa : rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf));
+      const pa = l.kind === 'gear' ? gearPoint(l) : rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
+      const pb = l.kind === 'hinge' || l.kind === 'weld' || l.kind === 'gear' ? pa : rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf));
       if (l.kind === 'pulley') {
         const c = rr().toScreen({ x: l.px, y: l.py });
         const R = Math.max(4, l.r * app.scene.camera.scale) + 12;
@@ -207,8 +213,8 @@
       } else {
         const l = S.linkById(app.scene, sel.id);
         if (!l) return null;
-        const pa = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
-        if (l.kind === 'hinge' || l.kind === 'weld') p = { x: pa.x - 17, y: pa.y - 17 };
+        const pa = l.kind === 'gear' ? gearPoint(l) : rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
+        if (l.kind === 'hinge' || l.kind === 'weld' || l.kind === 'gear') p = { x: pa.x - 17, y: pa.y - 17 };
         else if (l.kind === 'pulley') {
           // Up and left of the wheel.
           const c = rr().toScreen({ x: l.px, y: l.py });
@@ -279,7 +285,7 @@
 
     // End handles of a selected spring, rod or rope.
     ed.linkHandles = function linkHandles(l) {
-      if (l.kind === 'hinge' || l.kind === 'weld') return null;
+      if (l.kind === 'hinge' || l.kind === 'weld' || l.kind === 'gear') return null;
       return {
         a: rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf)),
         b: rr().toScreen(S.endPoint(app.scene, l.b, l.lb, app.poseOf))
@@ -346,6 +352,13 @@
       if (['hinge', 'motor', 'weld'].includes(ed.tool)) {
         const bs = jointBodies(w);
         return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
+      }
+      if (ed.tool === 'gear') {
+        const ball = gearBall(w);
+        const at = ball ? { x: app.poseOf(ball).x, y: app.poseOf(ball).y } : w;
+        const first = ed.pending && S.bodyById(app.scene, ed.pending.a);
+        if (first) return { gear: { from: app.poseOf(first), to: at }, point: at, ok: !!ball && ball !== first };
+        return { point: at, ok: !!ball };
       }
       if (ed.tool === 'pulley') {
         const p = ed.pending;
@@ -565,6 +578,57 @@
       if (!keep) ed.setTool('select');
     }
 
+    // ---------- Gears ----------
+
+    // The ball under the pointer, or (with Snap on) the nearest within 10 px of it.
+    function gearBall(w) {
+      const hit = bodiesAt(w).find((b) => b.kind === 'ball');
+      if (hit || !snapOn()) return hit || null;
+      let best = null, bestD = 10 / app.scene.camera.scale;
+      app.scene.bodies.forEach((b) => {
+        if (b.kind !== 'ball') return;
+        const p = app.poseOf(b);
+        const d = Math.hypot(w.x - p.x, w.y - p.y) - b.r;
+        if (d < bestD) { bestD = d; best = b; }
+      });
+      return best;
+    }
+
+    // Two clicks: a ball, then the ball to mesh with it. Each gets an axle to the background
+    // if it has no joint at all, and the second slides along the line between them into mesh.
+    function placeGear(w, keep) {
+      const ball = gearBall(w);
+      if (!ball) { app.toast('Click a ball. A gear meshes the teeth of two balls.'); return; }
+      const first = ed.pending && S.bodyById(app.scene, ed.pending.a);
+      if (!first) {
+        ed.pending = { a: ball.id };
+        app.setHint(`Now click the ball to mesh with ${ball.name}. Right-click or Esc cancels.`);
+        return;
+      }
+      const problem = S.gearPairProblem(app.scene, first, ball);
+      if (problem) { app.toast(problem); return; }
+      let made = null;
+      app.edit(() => {
+        const scene = app.scene;
+        const A = S.bodyById(scene, first.id), B = S.bodyById(scene, ball.id);
+        const l = S.makeLink(scene, 'gear', A.id, { x: 0, y: 0 }, B.id, { x: 0, y: 0 });
+        l.ra = S.freeRing(scene, A);
+        l.rb = S.freeRing(scene, B);
+        scene.links.push(l);
+        // A wheel already joined to something keeps its joints; the inspector says what it needs.
+        [A, B].forEach((b) => { if (!scene.links.some((x) => (x.kind === 'hinge' || x.kind === 'weld') && (x.a === b.id || x.b === b.id))) S.ensureAxle(scene, b); });
+        S.tidyLinks(scene);
+        if (!S.meshGear(scene, l, B.id)) S.meshGear(scene, l, A.id);
+        made = l;
+        app.select({ type: 'link', id: l.id });
+      });
+      ed.pending = null;
+      const problemNow = made && S.linkById(app.scene, made.id) && S.gearProblem(app.scene, made);
+      if (problemNow) app.toast(problemNow);
+      if (!keep) ed.setTool('select');
+      else app.setHint(HINTS.gear);
+    }
+
     function snapBodies(ids, scene = app.scene, anchors) {
       if (!snapOn()) return false;
       // Surface contact first, then an object's center onto another object's edge.
@@ -612,6 +676,7 @@
         const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
         if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w, type).world, ok: true };
         else if (type === 'pulley') connectorDropPreview = { pulley: { c: wheelPoint(w), radius: PULLEY_R } };
+        else if (type === 'gear') { const ball = gearBall(w); connectorDropPreview = { point: ball ? app.poseOf(ball) : w, ok: !!ball }; }
         else {
           const bs = bodiesAt(w);
           connectorDropPreview = { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
@@ -635,6 +700,7 @@
       ed.cursorWorld = w;
       if (['spring', 'rod', 'rope'].includes(type)) placeLinkEnd(w, false);
       else if (type === 'pulley') placePulleyPoint(w, false);
+      else if (type === 'gear') placeGear(w, false);
       else placeJoint(w, false);
       app.requestDraw();
       return true;
@@ -904,6 +970,7 @@
       if (['spring', 'rod', 'rope'].includes(ed.tool)) { placeLinkEnd(w, e.shiftKey); app.requestDraw(); return; }
       if (['hinge', 'motor', 'weld'].includes(ed.tool)) { placeJoint(w, e.shiftKey); app.requestDraw(); return; }
       if (ed.tool === 'pulley') { placePulleyPoint(w, e.shiftKey); app.requestDraw(); return; }
+      if (ed.tool === 'gear') { placeGear(w, e.shiftKey); app.requestDraw(); return; }
       const hit = hitTest(sp);
       // Shift, or Select several, turns a drag from empty space (or a connector's line) into
       // a selection box. A press on an object still adds or removes that object.
@@ -932,7 +999,7 @@
         }
         app.select({ type: 'link', id: hit.link.id });
         const joint = hit.link.kind === 'hinge' || hit.link.kind === 'weld';
-        if (app.running) startGesture('none', e, sp);
+        if (app.running || hit.link.kind === 'gear') startGesture('none', e, sp);
         // A joined connector moves by its end handles; dragging its line would pull it apart.
         else if (hit.link.kind !== 'pulley' && !joint && S.joinPair(app.scene, hit.link)) startGesture('none', e, sp);
         else startGesture(joint ? 'jointMove' : hit.link.kind === 'pulley' ? 'pulleyMove' : 'linkMove', e, sp, { linkId: hit.link.id });
