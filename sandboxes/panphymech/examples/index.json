@@ -132,7 +132,7 @@
   {
     "file": "gear-train.ppmech",
     "title": "Gear train",
-    "text": "A motor that gives at most 20 N m turns a 10-tooth gear. Two 3 : 1 steps, through a compound gear, make the output gear turn 9 times slower with 9 times the torque: up to about 117 N m, enough to lift the 25 kg load tied to its rim. The load rises about 1 m over half a turn, then lowers as the rim comes round.",
+    "text": "A 20 N m motor drives two 3 : 1 steps, so the output gear turns 9 times slower with 9 times the torque: enough to lift the 25 kg load about 1 m before the rim lowers it again.",
     "track": {
       "name": "25 kg load",
       "group": "position",
