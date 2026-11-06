@@ -451,6 +451,8 @@ button, input, select { font: inherit; color: inherit; }
 /* Two-way choices such as a motor's direction. */
 .choice-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .choice-label { font-size: 0.86rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.choice-wrap .choice-label { white-space: normal; min-width: 0; overflow-wrap: anywhere; }
+.choice-wrap .seg { flex-shrink: 0; }
 .seg { display: inline-flex; padding: 2px; gap: 2px; border-radius: 10px; background: var(--surface-3); border: 1px solid var(--line); }
 .seg button { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 2px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink-2); font-size: 0.74rem; font-weight: 650; cursor: pointer; white-space: nowrap; }
 .seg button .icon { width: 15px; height: 15px; }

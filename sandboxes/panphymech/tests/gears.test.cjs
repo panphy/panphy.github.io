@@ -193,3 +193,36 @@ test('tooth phases interleave where rings touch', () => {
   close(frac(pb - Math.PI, 30), 0.5, 1e-9, 'a gap faces a');
   assert.ok(l);
 });
+
+test('gears on a free frame: the frame turns back and angular momentum is conserved', () => {
+  // No gravity or floor: a motor on the frame turns a 30-tooth wheel, which turns a 10-tooth one.
+  const scene = S.createScene();
+  scene.world.floor = false;
+  scene.world.gravity = 0;
+  const frame = Object.assign(S.makeBody(scene, 'box', 0.3, 0), { w: 2, h: 0.3, mass: 5 });
+  const r10 = S.gearRadius(10), r30 = S.gearRadius(30);
+  const a = Object.assign(S.makeBody(scene, 'ball', 0, 0), { r: r10, mass: 1 });
+  const b = Object.assign(S.makeBody(scene, 'ball', r10 + r30, 0), { r: r30, mass: 2 });
+  scene.bodies.push(frame, a, b);
+  // Wheel a is the axle's end b, so it is body A of its joint: the other sign case.
+  scene.links.push(S.makeLink(scene, 'hinge', frame.id, S.toLocal(frame, a), a.id, { x: 0, y: 0 }));
+  const motor = Object.assign(S.makeLink(scene, 'motor', b.id, { x: 0, y: 0 }, frame.id, S.toLocal(frame, b)), { speed: 3, dir: 1, torque: 5 });
+  scene.links.push(motor);
+  const l = gear(scene, a, b);
+  assert.equal(S.gearProblem(scene, l), '');
+  const sim = P.createSim(scene);
+  const momentum = () => {
+    let L = 0;
+    sim.bodies.forEach((pb) => {
+      const c = pb.getWorldCenter(), v = pb.getLinearVelocity(), lc = pb.getLocalCenter();
+      L += pb.getMass() * (c.x * v.y - c.y * v.x) + (pb.getInertia() - pb.getMass() * (lc.x * lc.x + lc.y * lc.y)) * pb.getAngularVelocity();
+    });
+    return L;
+  };
+  run(sim, 10);
+  const r = sim.readLink(l.id);
+  close(r.omegaB, 3, 1e-6, 'motor speed relative to the frame');
+  close(r.omegaA, -9, 1e-6, 'driven wheel relative to the frame');
+  assert.ok(sim.readBody(frame.id).omega < -0.1, 'the frame turns the other way');
+  close(momentum(), 0, 1e-3, 'total angular momentum');
+});

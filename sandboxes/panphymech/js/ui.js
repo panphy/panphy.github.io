@@ -827,8 +827,11 @@
         if (!w()) return;
         if (S.gearRings(w()).length > 1) {
           // Short labels, so the choice fits beside its name: each ring by its teeth.
-          out.push(choiceField(`${w().name} ring`, S.gearRings(w()).map((n, i) => ({ v: i, label: String(n), title: `${ringName(w(), i)}, ${n} teeth` })),
-            () => l()[ringKey], (v) => app.edit(() => { l()[ringKey] = v; if (!S.meshGear(app.scene, l(), l()[end === 'a' ? 'b' : 'a'])) S.meshGear(app.scene, l(), l()[end]); }, { fromInspector: true })));
+          const choice = choiceField(`${w().name} ring`, S.gearRings(w()).map((n, i) => ({ v: i, label: String(n), title: `${ringName(w(), i)}, ${n} teeth` })),
+            () => l()[ringKey], (v) => app.edit(() => { l()[ringKey] = v; if (!S.meshGear(app.scene, l(), l()[end === 'a' ? 'b' : 'a'])) S.meshGear(app.scene, l(), l()[end]); }, { fromInspector: true }));
+          // A long wheel name wraps rather than pushing the choice out of the panel.
+          choice.classList.add('choice-wrap');
+          out.push(choice);
         }
         out.push(numField({ label: `Teeth on ${w().name}`, unit: '', get: () => S.ringTeeth(w(), l()[ringKey]), set: (v, key) => app.edit(() => setTeeth(w(), l()[ringKey], v), { coalesce: key, fromInspector: true }), min: S.LIMITS.teeth[0], max: S.LIMITS.teeth[1], slider: [6, 60], step: 1, integer: true }));
       });

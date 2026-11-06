@@ -425,9 +425,51 @@
       const na = S.ringTeeth(A, l.ra), nb = S.ringTeeth(B, l.rb);
       const ratio = (nb / na) * sa * sb;
       const joint = world.createJoint(new pl.GearJoint({ collideConnected: false }, wa, wb, ja, jb, ratio));
+      solveGearByBody(joint);
       gears.set(l.id, { joint, sa, sb, ratio, na, nb, ja, jb, wa, wb });
       joints.set(l.id, joint);
     });
+    // Planck's gear joint treats its four bodies (each wheel and each axle's base) as four. When
+    // both axles sit on one moving body, as on a chassis, that body appears twice: Planck then
+    // writes its angular velocity twice, losing one update, and miscounts its inertia, so the
+    // chassis gains angular momentum from nowhere. These replacements solve the same constraint,
+    // θA − θC + ratio(θB − θD) = constant, with each distinct body counted once.
+    function solveGearByBody(joint) {
+      const r = joint.m_ratio;
+      // Each distinct body with its total weight in the constraint.
+      const terms = () => {
+        const out = [];
+        [[joint.m_bodyA, 1], [joint.m_bodyC, -1], [joint.m_bodyB, r], [joint.m_bodyD, -r]].forEach(([body, w]) => {
+          const t = out.find((x) => x.body === body);
+          if (t) t.w += w; else out.push({ body, w });
+        });
+        return out.filter((t) => Math.abs(t.w) > 1e-12);
+      };
+      const massOf = (list) => { const k = list.reduce((sum, t) => sum + t.body.m_invI * t.w * t.w, 0); return k > 0 ? 1 / k : 0; };
+      joint.initVelocityConstraints = function initVelocityConstraints(step) {
+        joint.m_JwA = 1; // getReactionTorque reports m_impulse × m_JwA: the torque on body A
+        joint.gearTerms = terms();
+        joint.m_mass = massOf(joint.gearTerms);
+        if (step.warmStarting) joint.gearTerms.forEach((t) => { t.body.c_velocity.w += t.body.m_invI * t.w * joint.m_impulse; });
+        else joint.m_impulse = 0;
+      };
+      joint.solveVelocityConstraints = function solveVelocityConstraints() {
+        const list = joint.gearTerms;
+        const cdot = list.reduce((sum, t) => sum + t.w * t.body.c_velocity.w, 0);
+        const impulse = -joint.m_mass * cdot;
+        joint.m_impulse += impulse;
+        list.forEach((t) => { t.body.c_velocity.w += t.body.m_invI * t.w * impulse; });
+      };
+      joint.solvePositionConstraints = function solvePositionConstraints() {
+        const list = joint.gearTerms;
+        const a = (body) => body.c_position.a;
+        const C = (a(joint.m_bodyA) - a(joint.m_bodyC) - joint.m_referenceAngleA) + r * (a(joint.m_bodyB) - a(joint.m_bodyD) - joint.m_referenceAngleB) - joint.m_constant;
+        const impulse = -massOf(list) * C;
+        list.forEach((t) => { t.body.c_position.a += t.body.m_invI * t.w * impulse; });
+        return true;
+      };
+    }
+
     // The torques a gear puts on its wheels (counterclockwise positive) and the force between
     // its teeth on wheel a, applied where the rings touch; wheel b feels the opposite force.
     function gearForces(id) {
