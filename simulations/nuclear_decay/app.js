@@ -8,6 +8,7 @@ const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state = {
   mode: 'alpha',
+  betaSign: 'minus', // 'minus' or 'plus', chosen on the Beta decay tab
   playing: !reducedMotion,
   time: 0,
   visible: true
@@ -44,6 +45,10 @@ const GAMMA_EXCITE_TIME = 1.2;
 const GAMMA_RELAX_TIME = 1.0;
 const TEST_SPEED = { alpha: 2.2, beta: 3.4, gamma: 4.6 };
 const GAMMA_THROUGH_LEAD = 0.25;
+
+// The beta tab shows beta-minus or beta-plus decay.
+const modeKey = () => (state.mode === 'beta' && state.betaSign === 'plus' ? 'betaPlus' : state.mode);
+const modeData = () => MODES[modeKey()];
 
 const viewer = $('viewer');
 const viewerPanel = $('viewer-panel');
@@ -156,6 +161,7 @@ function readPalette() {
     neutron: color('--neutron'),
     alpha: color('--alpha'),
     electron: color('--electron'),
+    positron: color('--positive'),
     photon: color('--photon'),
     antineutrino: color('--antineutrino'),
     undecayed: color('--undecayed'),
@@ -242,6 +248,13 @@ function makeElectron() {
   mesh.add(glow(palette.electron, 0.5));
   return mesh;
 }
+function makePositron() {
+  const mesh = sphere(ELECTRON_RADIUS, palette.positron, { map: sharedSymbol('positron', '+'), emissive: 0.15 });
+  mesh.add(glow(palette.positron, 0.5));
+  return mesh;
+}
+const betaPlus = () => state.mode === 'beta' && state.betaSign === 'plus';
+const makeBetaParticle = () => (betaPlus() ? makePositron() : makeElectron());
 // WebGL ignores line widths, so photon waves are drawn as a thin ribbon facing the camera.
 const WAVE_POINTS = 90;
 const WAVE_HALF_WIDTH = 0.008;
@@ -414,8 +427,8 @@ function shuffledKinds(protons, neutrons, seed) {
   }
   return kinds;
 }
-function buildNucleus(mode) {
-  const { parent } = MODES[mode];
+function buildNucleus() {
+  const { parent } = modeData();
   const count = parent.nucleons ?? parent.A;
   const points = packNucleus(count, count * 7 + 3);
   const kinds = shuffledKinds(parent.Z, count - parent.Z, count + 11);
@@ -446,7 +459,7 @@ function buildNucleus(mode) {
   const label = labelSprite(labelText(parent), palette.line, Math.max(0.9, radius * 0.95));
   label.position.set(0, radius + 0.42, 0);
   stage.add(label);
-  nucleus = { group, nucleons, radius, materials, geometry, glow: glowSprite, label, excited: mode === 'gamma', jiggle: mode === 'gamma' ? 0.04 : 0.012, spin: 0 };
+  nucleus = { group, nucleons, radius, materials, geometry, glow: glowSprite, label, excited: state.mode === 'gamma', jiggle: state.mode === 'gamma' ? 0.04 : 0.012, spin: 0 };
   floorShadow.position.y = -radius - 0.9;
   floorShadow.scale.setScalar(Math.max(0.6, radius / 1.2));
 }
@@ -484,9 +497,10 @@ function countKinds() {
 
 // ---------- Nuclear equation ----------
 // Typeset once MathJax is ready; until then the numbers are stacked in HTML.
-function nuclideHTML({ A, Z, symbol }, className = '') {
+function nuclideHTML({ A, Z, zText, symbol }, className = '') {
+  Z = zText ?? Z;
   if (PanPhyMath.ready()) return `<span class="nuclide ${className}">${PanPhyMath.mathHtml(`\\(${PanPhyMath.nuclideTex({ A, Z, symbol })}\\)`)}</span>`;
-  const z = Z < 0 ? `−${-Z}` : Z;
+  const z = typeof Z === 'number' && Z < 0 ? `−${-Z}` : Z;
   return `<span class="nuclide ${className}"><span class="nums"><span>${A}</span><span>${z}</span></span>${symbol}</span>`;
 }
 const sign = (tex, plain) => `<span>${PanPhyMath.mathHtml(tex, plain)}</span>`;
@@ -494,14 +508,14 @@ let equationDone = null; // null until the equation is first shown
 onMathReady(() => { if (equationDone !== null) renderEquation(equationDone); });
 function renderEquation(done) {
   equationDone = done;
-  const data = MODES[state.mode];
+  const data = modeData();
   const box = $('equation');
   if (!data.parent || test) {
     box.hidden = true;
     return;
   }
   box.hidden = false;
-  const kind = { alpha: 'alpha', beta: 'electron', gamma: 'gamma' }[state.mode];
+  const kind = { alpha: 'alpha', beta: 'electron', betaPlus: 'positive', gamma: 'gamma' }[modeKey()];
   const left = nuclideHTML(data.parent);
   if (!done) {
     box.innerHTML = `<div class="eq">${left}${sign('\\(\\rightarrow\\)', '→')}<span class="nuclide unknown">?</span></div><div class="check">Decay the nucleus to complete the equation</div>`;
@@ -601,15 +615,19 @@ function prepareAlpha() {
   decay.speed = 0;
   setMath(readout, 'ALPHA DECAY · Two protons and two neutrons group together and are pushed out of the nucleus…');
 }
+// Beta-minus turns a neutron into a proton; beta-plus turns a proton into a neutron.
 function prepareBeta() {
   const local = toLocal(decay.direction);
-  const neutron = nucleus.nucleons.filter(n => n.kind === 'neutron').sort((a, b) => b.home.dot(local) - a.home.dot(local))[0];
-  neutron.mesh.material = neutron.mesh.material.clone();
+  decay.plus = betaPlus();
+  decay.from = decay.plus ? 'proton' : 'neutron';
+  decay.to = decay.plus ? 'neutron' : 'proton';
+  const nucleon = nucleus.nucleons.filter(n => n.kind === decay.from).sort((a, b) => b.home.dot(local) - a.home.dot(local))[0];
+  nucleon.mesh.material = nucleon.mesh.material.clone();
   const spark = glow(new THREE.Color('#ffffff'), 0.9, 0);
-  neutron.mesh.add(spark);
-  decay.neutron = neutron;
+  nucleon.mesh.add(spark);
+  decay.nucleon = nucleon;
   decay.spark = spark;
-  setMath(readout, 'BETA DECAY · One neutron in the nucleus is about to change…');
+  setMath(readout, `BETA-${decay.plus ? 'PLUS' : 'MINUS'} DECAY · One ${decay.from} in the nucleus is about to change…`);
 }
 function stepDecay(delta) {
   if (!decay || decay.phase === 'done') return;
@@ -673,50 +691,53 @@ function stepAlpha(delta) {
 }
 function stepBeta() {
   const d = decay;
-  const mesh = d.neutron.mesh;
+  const mesh = d.nucleon.mesh;
   if (d.phase === 'prepare') {
     const k = Math.min(1, d.t / BETA_GLOW_TIME);
     mesh.material.emissiveIntensity = 0.04 + 0.9 * k * (0.6 + 0.4 * Math.sin(d.t * 18));
     d.spark.material.opacity = 0.8 * k;
     if (d.t >= BETA_GLOW_TIME) {
       d.phase = 'change';
-      setMath(readout, 'BETA DECAY · The neutron changes into a proton, and a fast electron is created and shoots out…');
+      setMath(readout, d.plus
+        ? 'BETA-PLUS DECAY · The proton changes into a neutron, and a fast positron is created and shoots out…'
+        : 'BETA-MINUS DECAY · The neutron changes into a proton, and a fast electron is created and shoots out…');
       d.t = 0;
-      // A new proton appears where the neutron was while the neutron fades.
-      const proton = new THREE.Mesh(nucleus.geometry, nucleus.materials.proton.clone());
-      proton.position.copy(mesh.position);
-      proton.rotation.copy(mesh.rotation);
-      proton.userData.radius = NUCLEON_RADIUS;
-      setOpacity(proton, 0);
-      nucleus.group.add(proton);
-      d.proton = proton;
+      // The new nucleon appears where the old one was while the old one fades.
+      const replacement = new THREE.Mesh(nucleus.geometry, nucleus.materials[d.to].clone());
+      replacement.position.copy(mesh.position);
+      replacement.rotation.copy(mesh.rotation);
+      replacement.userData.radius = NUCLEON_RADIUS;
+      setOpacity(replacement, 0);
+      nucleus.group.add(replacement);
+      d.replacement = replacement;
       emitBetaParticles(mesh);
     }
   } else if (d.phase === 'change') {
     const k = Math.min(1, d.t / BETA_CHANGE_TIME);
     setOpacity(mesh, 1 - k);
-    setOpacity(d.proton, k);
-    d.proton.position.copy(mesh.position);
+    setOpacity(d.replacement, k);
+    d.replacement.position.copy(mesh.position);
     if (k >= 1) {
-      const { neutron, proton } = d;
-      proton.material.dispose();
-      proton.material = nucleus.materials.proton;
-      neutron.mesh.removeFromParent();
-      disposeObject(neutron.mesh.children[0]);
-      neutron.mesh.material.dispose();
-      neutron.mesh = proton;
-      neutron.kind = 'proton';
-      neutron.pick.object = proton;
-      neutron.pick.kind = 'proton';
+      const { nucleon, replacement } = d;
+      replacement.material.dispose();
+      replacement.material = nucleus.materials[d.to];
+      nucleon.mesh.removeFromParent();
+      disposeObject(nucleon.mesh.children[0]);
+      nucleon.mesh.material.dispose();
+      nucleon.mesh = replacement;
+      nucleon.kind = d.to;
+      nucleon.pick.object = replacement;
+      nucleon.pick.kind = d.to;
       finishDecay();
     }
   }
 }
 function emitBetaParticles(from) {
   const start = from.getWorldPosition(new THREE.Vector3());
-  const electron = makeElectron();
+  const plus = decay.plus;
+  const electron = plus ? makePositron() : makeElectron();
   electron.position.copy(start);
-  const trail = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(30 * 3), 3)), new THREE.LineBasicMaterial({ color: palette.electron, transparent: true, opacity: 0.45 }));
+  const trail = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(30 * 3), 3)), new THREE.LineBasicMaterial({ color: plus ? palette.positron : palette.electron, transparent: true, opacity: 0.45 }));
   trail.frustumCulled = false;
   const history = [];
   addFlyer(trail, straightFlight(trail, { direction: decay.direction, speed: 0, range: 7, getPosition: () => electron.position }));
@@ -734,8 +755,8 @@ function emitBetaParticles(from) {
       }
       positions.needsUpdate = true;
     }
-  }), 'electron');
-  // The antineutrino leaves in another direction and is drawn faintly.
+  }), plus ? 'positron' : 'electron');
+  // The antineutrino (a neutrino in beta-plus decay) leaves in another direction and is drawn faintly.
   const view = camera.position.clone().sub(start).normalize();
   const direction = decay.direction.clone().applyAxisAngle(view, 2.1).normalize();
   const antineutrino = sphere(0.05, palette.antineutrino, { emissive: 0.3 });
@@ -743,7 +764,7 @@ function emitBetaParticles(from) {
   antineutrino.position.copy(start);
   antineutrino.add(glow(palette.antineutrino, 0.35));
   setOpacity(antineutrino, 0.6);
-  addFlyer(antineutrino, straightFlight(antineutrino, { direction, speed: BETA_ANTINEUTRINO_SPEED, range: 7 }), 'antineutrino');
+  addFlyer(antineutrino, straightFlight(antineutrino, { direction, speed: BETA_ANTINEUTRINO_SPEED, range: 7 }), plus ? 'neutrino' : 'antineutrino');
 }
 function stepGamma() {
   const d = decay;
@@ -781,7 +802,7 @@ function stepGamma() {
   }
 }
 function finishDecay() {
-  const data = MODES[state.mode];
+  const data = modeData();
   decay.phase = 'done';
   setLabel(data.daughter);
   renderEquation(true);
@@ -789,8 +810,9 @@ function finishDecay() {
   const summary = {
     alpha: `${data.daughter.name.toUpperCase()} · ${protons} protons + ${neutrons} neutrons. The alpha particle carried away 2 protons + 2 neutrons, so the element changed.`,
     beta: `${data.daughter.name.toUpperCase()} · ${protons} protons + ${neutrons} neutrons. A neutron became a proton, so the element changed but the mass number did not.`,
+    betaPlus: `${data.daughter.name.toUpperCase()} · ${protons} protons + ${neutrons} neutrons. A proton became a neutron, so the element changed but the mass number did not.`,
     gamma: `${data.daughter.name.toUpperCase()} · Still ${protons} protons + ${neutrons} neutrons. Only energy left, as a gamma ray.`
-  }[state.mode];
+  }[modeKey()];
   setMath(readout, summary);
   updateDecayButton();
 }
@@ -832,7 +854,7 @@ function startTest() {
   renderEquation(false);
   updateDecayButton();
   updateTestStats();
-  setMath(readout, `PENETRATION TEST · ${MODES[state.mode].parent.name} is used as a source. Each marker stands for radiation from a large sample. Watch where each type is stopped.`);
+  setMath(readout, `PENETRATION TEST · ${modeData().parent.name} is used as a source. Each marker stands for radiation from a large sample. Watch where each type is stopped.`);
   const end = slabs[2].end;
   const mid = (end - radius) / 2;
   flyTo({ direction: new THREE.Vector3(0.12, 0.38, 1), distance: fitDistance((end + radius) / 2 + 0.5), target: new THREE.Vector3(mid, 0, 0) });
@@ -841,7 +863,7 @@ function stopTest() {
   if (!test) return;
   buildMode(false);
   resetView();
-  setMath(readout, DEFAULT_READOUT[state.mode]());
+  setMath(readout, DEFAULT_READOUT[modeKey()]());
 }
 function spawnTestParticle() {
   const kind = state.mode;
@@ -864,10 +886,11 @@ function spawnTestParticle() {
     object.add(glow(palette.alpha, 0.6));
     position = object.position.copy(origin);
   } else {
-    object = makeElectron();
+    object = makeBetaParticle();
     position = object.position.copy(origin);
   }
   test.counts.emitted += 1;
+  updateTestStats();
   let absorbed = 0;
   let fading = 0;
   addFlyer(object, delta => {
@@ -882,16 +905,17 @@ function spawnTestParticle() {
       return k < 1;
     }
     position.addScaledVector(direction, TEST_SPEED[kind] * delta);
+    // Stop first, so a long frame never carries a particle past its absorber and counts it as through.
+    if (position.x >= stopX) {
+      position.x = stopX;
+      absorbed = 1e-6;
+    }
     for (const slab of test.slabs) {
       if (!passed.has(slab.key) && position.x > slab.end) {
         passed.add(slab.key);
         test.counts[slab.key] += 1;
         updateTestStats();
       }
-    }
-    if (position.x >= stopX) {
-      position.x = stopX;
-      absorbed = 1e-6;
     }
     if (kind === 'gamma') drawWave(object, position, direction, time, 0.7);
     if (position.x > lead.end + 2.2) {
@@ -900,7 +924,7 @@ function spawnTestParticle() {
       return fading < 1;
     }
     return true;
-  }, kind === 'beta' ? 'electron' : kind);
+  }, kind === 'beta' ? (betaPlus() ? 'positron' : 'electron') : kind);
   if (kind === 'gamma') object.userData.center = position;
 }
 function stepTest(delta) {
@@ -1216,7 +1240,7 @@ function describe(kind) {
   if ((kind === 'proton' || kind === 'neutron') && nucleus) {
     const { protons, neutrons } = countKinds();
     const done = decay?.phase === 'done';
-    const current = done ? MODES[state.mode].daughter : MODES[state.mode].parent;
+    const current = done ? modeData().daughter : modeData().parent;
     return `${PARTICLES[kind]} This nucleus: ${protons} protons + ${neutrons} neutrons (${current.name}).`;
   }
   return PARTICLES[kind];
@@ -1290,15 +1314,19 @@ function resetScene() {
     updateEmissionLegend();
   }
   state.playing = !reducedMotion;
+  if (state.mode === 'beta' && state.betaSign !== 'minus') {
+    state.betaSign = 'minus';
+    showModeText();
+  }
   buildMode(false);
   resetView();
-  setMath(readout, DEFAULT_READOUT[state.mode]());
+  setMath(readout, DEFAULT_READOUT[modeKey()]());
 }
 $('reset').addEventListener('click', resetScene);
 $('decay').addEventListener('click', () => {
   if (decay?.phase === 'done') {
     buildMode(false);
-    setMath(readout, DEFAULT_READOUT[state.mode]());
+    setMath(readout, DEFAULT_READOUT[modeKey()]());
   } else {
     startDecay();
   }
@@ -1343,6 +1371,7 @@ viewer.addEventListener('keydown', event => {
 const DEFAULT_READOUT = {
   alpha: () => 'AMERICIUM-241 · 95 protons + 146 neutrons. Press “Decay this nucleus”, then test which material stops alpha radiation. Tap a particle to find out what it is.',
   beta: () => 'CARBON-14 · 6 protons + 8 neutrons: too many neutrons makes it unstable. Press “Decay this nucleus” and count the protons, then test penetration.',
+  betaPlus: () => 'FLUORINE-18 · 9 protons + 9 neutrons: too many protons for its size makes it unstable. Press “Decay this nucleus” and count the protons, then test penetration.',
   gamma: () => 'TECHNETIUM-99m · 43 protons + 56 neutrons, with extra energy (an excited state). Press “Decay this nucleus”, compare the nucleon counts before and after, then test penetration.',
   halflife: () => {
     const isotope = ISOTOPES[$('isotope').value];
@@ -1352,6 +1381,7 @@ const DEFAULT_READOUT = {
 const LEGEND = {
   alpha: ['proton', 'neutron', 'alpha'],
   beta: ['proton', 'neutron', 'electron', 'antineutrino'],
+  betaPlus: ['proton', 'neutron', 'positron', 'neutrino'],
   gamma: ['proton', 'neutron', 'gamma'],
   halflife: ['undecayed', 'decayed']
 };
@@ -1363,7 +1393,7 @@ function buildMode(animate) {
   $('penetration').setAttribute('aria-pressed', 'false');
   $('penetration').textContent = 'Test penetration';
   if (halfLife) buildSample();
-  else buildNucleus(state.mode);
+  else buildNucleus();
   renderEquation(false);
   updateDecayButton();
   updateMotionButton();
@@ -1372,12 +1402,13 @@ function buildMode(animate) {
 function selectMode(mode, animate = true) {
   const previous = state.mode;
   state.mode = mode;
-  const data = MODES[mode];
+  // Entering the beta tab always starts with beta-minus.
+  state.betaSign = 'minus';
   const halfLife = mode === 'halflife';
   document.body.dataset.mode = mode;
   cameraTween = null;
   buildMode(animate && previous !== mode);
-  document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[mode].includes(item.dataset.legend); });
+  showModeText();
   if (halfLife) {
     const emits = ISOTOPES[$('isotope').value].emits;
     document.querySelector(`[data-legend="${emits === 'alpha' ? 'alpha' : 'electron'}"]`).hidden = false;
@@ -1386,12 +1417,30 @@ function selectMode(mode, animate = true) {
   $('experiments').hidden = halfLife;
   $('step-half').hidden = !halfLife;
   $('sample-controls').hidden = !halfLife;
+  $('beta-sign').hidden = mode !== 'beta';
   setMath(readout, DEFAULT_READOUT[mode]());
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-  viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   resetView();
 }
+// Texts, legend and beta toggle for the current mode (and beta sign).
+function showModeText() {
+  const data = modeData();
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
+  document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[modeKey()].includes(item.dataset.legend); });
+  document.querySelectorAll('#beta-sign [data-sign]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.sign === state.betaSign)));
+  viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
+}
+function setBetaSign(sign) {
+  if (state.mode !== 'beta' || sign === state.betaSign) return;
+  const hadTest = Boolean(test);
+  state.betaSign = sign;
+  showModeText();
+  buildMode(false);
+  resetView();
+  if (hadTest) startTest();
+  else setMath(readout, DEFAULT_READOUT[modeKey()]());
+}
+document.querySelectorAll('#beta-sign [data-sign]').forEach(button => button.addEventListener('click', () => setBetaSign(button.dataset.sign)));
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {
   if (button.dataset.mode !== state.mode) selectMode(button.dataset.mode);
 }));
@@ -1416,7 +1465,7 @@ window.addEventListener('panphy:theme-change', () => {
   const wasDone = decay?.phase === 'done';
   buildMode(false);
   if (hadTest) startTest();
-  else setMath(readout, wasDone ? 'The theme changed, so the nucleus was reset. Decay it again to see the change.' : DEFAULT_READOUT[state.mode]());
+  else setMath(readout, wasDone ? 'The theme changed, so the nucleus was reset. Decay it again to see the change.' : DEFAULT_READOUT[modeKey()]());
 });
 document.fonts?.ready.then(() => {
   // Redraw canvas labels once the mono font has loaded.

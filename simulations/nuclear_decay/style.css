@@ -211,6 +211,7 @@ body.viewer-expanded { overflow: hidden; }
 .nuclide .nums { display: inline-flex; flex-direction: column; align-items: flex-end; margin-right: 2px; font-size: .66rem; line-height: 1.15; }
 .nuclide.alpha { color: var(--alpha); }
 .nuclide.electron { color: var(--electron); }
+.nuclide.positive { color: var(--positive); }
 .nuclide.gamma { color: var(--photon); }
 .nuclide.unknown { color: var(--text-secondary); }
 .equation .check { margin-top: 4px; font-size: .68rem; color: var(--text-secondary); text-align: right; }
