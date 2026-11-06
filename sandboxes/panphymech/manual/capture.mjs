@@ -1,7 +1,7 @@
 // Retakes the PanPhyMech manual screenshots in headless Chrome, driving the real app over the
 // DevTools protocol. Needs Chrome, cwebp and a local server at the repository root:
 //   python3 -m http.server 8000
-//   node sandboxes/panphymech/manual/capture.mjs [pendulum|build|drive]
+//   node sandboxes/panphymech/manual/capture.mjs [pendulum|build|drive|gears]
 // Set CHROME to the browser binary and BASE to another server if needed.
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
@@ -191,6 +191,77 @@ async function drive() {
   await capture('build-5');
 }
 
+// The gear train tip rebuilds Examples → Gear train (without its load) as the steps describe,
+// then runs the example itself.
+async function gears() {
+  await open();
+  const VIEW = `{ minX: -1.85, maxX: 0.75, minY: 1.75, maxY: 3.45 }`;
+  await evaluate(`(async () => {
+    const a = PPM.app, S = PPM.scene;
+    await a.openExample(a.examples.findIndex((e) => e.title === 'Gear train'));
+    a.edit(() => {
+      const sc = a.scene;
+      sc.bodies = []; sc.links = [];
+      const ball = (x, name, n, mass, color) => { const b = Object.assign(S.makeBody(sc, 'ball', x, 2.6), { name, r: S.gearRadius(n), mass, restitution: 0.2, color }); sc.bodies.push(b); return b; };
+      const A = ball(-1.2, 'Driver', 10, 0.5, 'amber');
+      const B = ball(-0.4, 'Compound gear', 30, 3, 'blue');
+      const l = S.makeLink(sc, 'gear', A.id, { x: 0, y: 0 }, B.id, { x: 0, y: 0 });
+      sc.links.push(l);
+      S.ensureAxle(sc, A); S.ensureAxle(sc, B);
+      S.tidyLinks(sc);
+      S.meshGear(sc, l, B.id);
+      a.selection = null;
+    });
+    a.fit(${VIEW});
+    a.select({ type: 'link', id: a.scene.links.find((l) => l.kind === 'gear').id });
+    return true;
+  })()`);
+  await capture('gear-1');
+  await evaluate(`(() => {
+    const a = PPM.app;
+    const driver = a.scene.bodies.find((b) => b.name === 'Driver');
+    const axle = a.scene.links.find((l) => l.kind === 'hinge' && l.a === driver.id);
+    a.edit(() => { Object.assign(axle, { name: 'Motor', motor: true, speed: 3, dir: 1, torque: 20 }); });
+    a.select({ type: 'link', id: axle.id });
+    return true;
+  })()`);
+  await capture('gear-2');
+  await evaluate(`(() => {
+    const a = PPM.app;
+    const B = a.scene.bodies.find((b) => b.name === 'Compound gear');
+    a.edit(() => { B.rings = [10]; });
+    a.select({ type: 'body', id: B.id });
+    return true;
+  })()`);
+  await capture('gear-3');
+  await evaluate(`(() => {
+    const a = PPM.app, S = PPM.scene;
+    let made;
+    a.edit(() => {
+      const sc = a.scene;
+      const B = sc.bodies.find((b) => b.name === 'Compound gear');
+      const C = Object.assign(S.makeBody(sc, 'ball', 0.2, 2.6), { name: 'Output gear', r: S.gearRadius(30), mass: 3, restitution: 0.2, color: 'green' });
+      sc.bodies.push(C);
+      const l = S.makeLink(sc, 'gear', B.id, { x: 0, y: 0 }, C.id, { x: 0, y: 0 });
+      l.ra = S.freeRing(sc, B); l.rb = S.freeRing(sc, C);
+      sc.links.push(l);
+      S.ensureAxle(sc, C);
+      S.tidyLinks(sc);
+      S.meshGear(sc, l, C.id);
+      made = l;
+    });
+    a.fit(${VIEW});
+    a.select({ type: 'link', id: made.id });
+    return made.ra;
+  })()`);
+  await capture('gear-4');
+  // The finished example lifts its load, so the readings show the torque ratio too.
+  await evaluate(`(async () => { const a = PPM.app; await a.openExample(a.examples.findIndex((e) => e.title === 'Gear train')); a.select(null); return true; })()`);
+  console.log('t =', await runSteps(240));
+  await evaluate(`(() => { const a = PPM.app; a.select({ type: 'link', id: a.scene.links.find((l) => l.name === 'Gear 2').id }); return true; })()`);
+  await capture('gear-5');
+}
+
 try {
   await connect();
   await send('Page.enable');
@@ -201,6 +272,7 @@ try {
   if (!only || only === 'pendulum') await pendulum();
   if (!only || only === 'build') await build();
   if (!only || only === 'drive') await drive();
+  if (!only || only === 'gears') await gears();
 } finally {
   try { ws && ws.close(); } catch (e) {}
   chrome.kill();

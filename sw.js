@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-06T14:03:14Z';
+const BUILD_ID = '2026-11-06T14:20:05Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -204,6 +204,16 @@ const ASSETS_TO_CACHE = [
   '/sandboxes/panphymech/manual/build-4-dark.webp',
   '/sandboxes/panphymech/manual/build-4-light.webp',
   '/sandboxes/panphymech/manual/build-5-dark.webp',
+  '/sandboxes/panphymech/manual/gear-1-light.webp',
+  '/sandboxes/panphymech/manual/gear-1-dark.webp',
+  '/sandboxes/panphymech/manual/gear-2-light.webp',
+  '/sandboxes/panphymech/manual/gear-2-dark.webp',
+  '/sandboxes/panphymech/manual/gear-3-light.webp',
+  '/sandboxes/panphymech/manual/gear-3-dark.webp',
+  '/sandboxes/panphymech/manual/gear-4-light.webp',
+  '/sandboxes/panphymech/manual/gear-4-dark.webp',
+  '/sandboxes/panphymech/manual/gear-5-light.webp',
+  '/sandboxes/panphymech/manual/gear-5-dark.webp',
   '/sandboxes/panphymech/manual/build-5-light.webp',
   '/sandboxes/panphymech/manual/file-dark.webp',
   '/sandboxes/panphymech/manual/file-light.webp',
