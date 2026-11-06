@@ -542,7 +542,7 @@
     function choiceField(label, options, get, set) {
       const el = document.createElement('div');
       el.className = 'field choice-row';
-      el.innerHTML = `<span class="choice-label">${esc(label)}</span><span class="seg" role="group" aria-label="${esc(label)}">${options.map((o) => `<button type="button" data-v="${o.v}" title="${esc(o.title || o.label)}">${o.icon ? icon(o.icon) : ''}<span>${esc(o.label)}</span></button>`).join('')}</span>`;
+      el.innerHTML = `<span class="choice-label">${esc(label)}</span><span class="seg" role="group" aria-label="${esc(label)}">${options.map((o) => `<button type="button" data-v="${o.v}" title="${esc(o.title || o.label)}"${o.title ? ` aria-label="${esc(o.title)}"` : ''}>${o.icon ? icon(o.icon) : ''}<span>${esc(o.label)}</span></button>`).join('')}</span>`;
       const sync = () => el.querySelectorAll('[data-v]').forEach((b) => b.setAttribute('aria-pressed', String(String(get()) === b.dataset.v)));
       el.querySelectorAll('[data-v]').forEach((b) => b.addEventListener('click', () => { set(Number(b.dataset.v)); sync(); }));
       sync();
@@ -554,7 +554,7 @@
     const motorDir = (x) => (x.dir === 1 || x.dir === -1 ? x.dir : x.speed > 0 ? 1 : -1);
     function motorFields(l, param, help) {
       return [
-        choiceField('Direction', [{ v: -1, label: 'Clockwise', icon: 'rotate' }, { v: 1, label: 'Counterclockwise', icon: 'rotateCcw' }], () => motorDir(l()), (d) => app.editParam(() => { const x = l(); x.dir = d; x.speed = d * Math.abs(x.speed); }, null)),
+        choiceField('Direction', [{ v: -1, label: 'CW', title: 'Clockwise', icon: 'rotate' }, { v: 1, label: 'CCW', title: 'Counterclockwise', icon: 'rotateCcw' }], () => motorDir(l()), (d) => app.editParam(() => { const x = l(); x.dir = d; x.speed = d * Math.abs(x.speed); }, null)),
         numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => Math.abs(l().speed), set: param((x, v) => { x.speed = motorDir(x) * v; }), min: 0, max: L.speed[1], slider: [0, 30], step: 0.1, help: help ? 'How fast the part turns relative to what it is hinged to. Clockwise drives a wheel to the right.' : '' })
       ];
     }
