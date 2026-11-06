@@ -11,18 +11,18 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="default">
 	<link rel="stylesheet" href="/assets/standalone-top.css">
 	<title>PanPhyMech Manual: Mechanics Sandbox Guide — PanPhy Labs</title>
-	<meta name="description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.">
+	<meta name="description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough, tips for building a car and a gear train, and reference for objects, connectors, graphs and exports.">
 	<link rel="canonical" href="https://panphy.app/sandboxes/panphymech/manual.html">
 <!-- panphy-discovery -->
   <meta property="og:title" content="PanPhyMech Manual: Mechanics Sandbox Guide — PanPhy Labs">
-  <meta property="og:description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.">
+  <meta property="og:description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough, tips for building a car and a gear train, and reference for objects, connectors, graphs and exports.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://panphy.app/sandboxes/panphymech/manual.html">
   <meta property="og:image" content="https://panphy.app/assets/og-default.png">
   <meta property="og:site_name" content="PanPhy Labs">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="PanPhyMech Manual: Mechanics Sandbox Guide — PanPhy Labs">
-  <meta name="twitter:description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.">
+  <meta name="twitter:description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough, tips for building a car and a gear train, and reference for objects, connectors, graphs and exports.">
   <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
   <script type="application/ld+json">
 {
@@ -30,7 +30,7 @@
   "@type": "TechArticle",
   "headline": "PanPhyMech Manual",
   "name": "PanPhyMech Manual",
-  "description": "Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.",
+  "description": "Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough, tips for building a car and a gear train, and reference for objects, connectors, graphs and exports.",
   "url": "https://panphy.app/sandboxes/panphymech/manual.html",
   "isAccessibleForFree": true,
   "author": {
@@ -76,7 +76,7 @@
 <p class="eyebrow">PanPhyMech · User guide</p>
 <h1>Build an experiment, then measure its motion</h1>
 <p class="lead">Start with a pendulum, watch its energy change, then explore your own objects, connectors and graphs.</p>
-<div class="intro-actions"><a class="primary-link" href="#step-example">Start the walkthrough</a><a href="#tip">Build a complex object</a><a href="#reference">Browse the reference</a>
+<div class="intro-actions"><a class="primary-link" href="#step-example">Start the walkthrough</a><a href="#tip">Build a complex object</a><a href="#gear-tip">Build a gear train</a><a href="#reference">Browse the reference</a>
 </div>
 </header>
 <section aria-labelledby="walkthrough">
@@ -329,7 +329,130 @@
 <figcaption><strong>Finished car.</strong> The car drives up the slope with its trail showing.</figcaption>
 </figure>
 </div>
-<nav class="step-nav" aria-label="Tip step 5 navigation"><a href="#tip-cut">← Previous</a><a href="#reference">Browse the reference →</a>
+<nav class="step-nav" aria-label="Tip step 5 navigation"><a href="#tip-cut">← Previous</a><a href="#gear-tip">Next: Tip: build a gear train →</a>
+</nav>
+</section>
+</section>
+<section aria-labelledby="gear-tip">
+<h2 id="gear-tip" tabindex="-1">Tip: build a gear train</h2>
+<p class="section-intro">A Gear connector meshes the teeth of two balls. These five steps build the 9 : 1 train from <strong>Examples → Gear train</strong>, with a compound gear in the middle.</p>
+<nav class="step-index" aria-label="Gear tip steps">
+<a href="#gear-mesh"><span>1</span>Mesh two gears</a>
+<a href="#gear-motor"><span>2</span>Drive it with a motor</a>
+<a href="#gear-ring"><span>3</span>Make a compound gear</a>
+<a href="#gear-output"><span>4</span>Mesh a gear with the ring</a>
+<a href="#gear-run"><span>5</span>Run it</a>
+</nav>
+<section class="walkthrough-step" aria-labelledby="gear-mesh">
+<p class="eyebrow">Step 1 of 5</p>
+<h3 id="gear-mesh" tabindex="-1">Mesh two gears</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Add two <strong>Balls</strong> side by side and name them Driver and Compound gear.</li>
+<li>Choose <strong>Gear</strong>, click Driver, then Compound gear. Each gets a hinge at its center, and Compound gear slides over until the teeth touch.</li>
+<li>In the gear’s Inspector, set <strong>Teeth on Driver</strong> to 10 and <strong>Teeth on Compound gear</strong> to 30. Teeth are 10 cm apart, so the teeth set each radius.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>Two wheels mesh, and the Inspector gives the ratio 30 : 10 = 3. Compound gear will turn 3 times slower than Driver, the other way, with 3 times the torque.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/gear-1-light.webp" target="_blank" rel="noopener" aria-label="Enlarge mesh two gears screenshot"><img src="manual/gear-1-light.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Driver (10 teeth) meshes Compound gear (30 teeth), with the gear selected."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/gear-1-dark.webp" target="_blank" rel="noopener" aria-label="Enlarge mesh two gears screenshot"><img src="manual/gear-1-dark.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Driver (10 teeth) meshes Compound gear (30 teeth), with the gear selected."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Two meshed gears.</strong> Driver (10 teeth) meshes Compound gear (30 teeth), with the gear selected.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Gear tip step 1 navigation"><a href="#gear-tip">← All steps</a><a href="#gear-motor">Next: Drive it with a motor →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="gear-motor">
+<p class="eyebrow">Step 2 of 5</p>
+<h3 id="gear-motor" tabindex="-1">Drive it with a motor</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Click the dot at Driver’s center to select its hinge, and turn on <strong>Motor</strong>.</li>
+<li>Set the direction to CCW, the speed to 3 rad/s and the maximum torque to 20 N m.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The hinge is now a motor. Driver will turn at 3 rad/s and Compound gear at 1 rad/s.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/gear-2-light.webp" target="_blank" rel="noopener" aria-label="Enlarge drive it with a motor screenshot"><img src="manual/gear-2-light.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Driver’s hinge turned into a 3 rad/s motor."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/gear-2-dark.webp" target="_blank" rel="noopener" aria-label="Enlarge drive it with a motor screenshot"><img src="manual/gear-2-dark.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Driver’s hinge turned into a 3 rad/s motor."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Motor on.</strong> Driver’s hinge turned into a 3 rad/s motor.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Gear tip step 2 navigation"><a href="#gear-mesh">← Previous</a><a href="#gear-ring">Next: Make a compound gear →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="gear-ring">
+<p class="eyebrow">Step 3 of 5</p>
+<h3 id="gear-ring" tabindex="-1">Make a compound gear</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Select Compound gear and scroll its Inspector to the <strong>Gear wheel</strong> card.</li>
+<li>Press <strong>Add a smaller ring</strong>, then set <strong>Teeth on ring 2</strong> to 10. A wheel can have up to two extra rings, each with at least 4 fewer teeth than the rim.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>A 10-tooth ring sits inside the 30-tooth rim. The two rings are one rigid wheel, so they turn together.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/gear-3-light.webp" target="_blank" rel="noopener" aria-label="Enlarge make a compound gear screenshot"><img src="manual/gear-3-light.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: A 10-tooth ring added inside the 30-tooth rim."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/gear-3-dark.webp" target="_blank" rel="noopener" aria-label="Enlarge make a compound gear screenshot"><img src="manual/gear-3-dark.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: A 10-tooth ring added inside the 30-tooth rim."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Compound gear.</strong> A 10-tooth ring added inside the 30-tooth rim.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Gear tip step 3 navigation"><a href="#gear-motor">← Previous</a><a href="#gear-output">Next: Mesh a gear with the ring →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="gear-output">
+<p class="eyebrow">Step 4 of 5</p>
+<h3 id="gear-output" tabindex="-1">Mesh a gear with the ring</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Add a third <strong>Ball</strong> to the right and name it Output gear.</li>
+<li>Choose <strong>Gear</strong>, click Compound gear first, then Output gear. A new gear takes a free ring, so it meshes the 10-tooth ring, and Output gear slides in to touch it.</li>
+<li>Set <strong>Teeth on Output gear</strong> to 30. To switch rings, choose 30 or 10 under <strong>Compound gear ring</strong>.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>Output gear overlaps the big rim without hitting it, because gear wheels never collide with each other. Two 3 : 1 steps make a 9 : 1 train.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/gear-4-light.webp" target="_blank" rel="noopener" aria-label="Enlarge mesh a gear with the ring screenshot"><img src="manual/gear-4-light.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Output gear meshes the 10-tooth ring, chosen in the gear’s Inspector."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/gear-4-dark.webp" target="_blank" rel="noopener" aria-label="Enlarge mesh a gear with the ring screenshot"><img src="manual/gear-4-dark.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Output gear meshes the 10-tooth ring, chosen in the gear’s Inspector."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Gear on the ring.</strong> Output gear meshes the 10-tooth ring, chosen in the gear’s Inspector.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Gear tip step 4 navigation"><a href="#gear-ring">← Previous</a><a href="#gear-run">Next: Run it →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="gear-run">
+<p class="eyebrow">Step 5 of 5</p>
+<h3 id="gear-run" tabindex="-1">Run it</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Press <strong>Play</strong>. Driver turns at 3 rad/s, Compound gear at 1 rad/s and Output gear at 0.333 rad/s, 9 times slower.</li>
+<li>Open <strong>Examples → Gear train</strong>, which adds a rope from the output rim to a 25 kg load. Press Play and select Gear 2 to compare the torques on its two wheels.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>Each 3 : 1 step divides the speed by 3 and multiplies the torque by 3: about 38 N m on Compound gear and 114 N m on Output gear as the load rises.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/gear-5-light.webp" target="_blank" rel="noopener" aria-label="Enlarge run it screenshot"><img src="manual/gear-5-light.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The Gear train example at 4 s, with Gear 2 selected: Output gear turns 3 times slower than Compound gear, with 3 times the torque."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/gear-5-dark.webp" target="_blank" rel="noopener" aria-label="Enlarge run it screenshot"><img src="manual/gear-5-dark.webp" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The Gear train example at 4 s, with Gear 2 selected: Output gear turns 3 times slower than Compound gear, with 3 times the torque."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Lifting a load.</strong> The Gear train example at 4 s, with Gear 2 selected: Output gear turns 3 times slower than Compound gear, with 3 times the torque.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Gear tip step 5 navigation"><a href="#gear-output">← Previous</a><a href="#reference">Browse the reference →</a>
 </nav>
 </section>
 </section>
@@ -500,6 +623,19 @@
 <li><a href="#tip-cut">Cut the arches and windows</a>
 </li>
 <li><a href="#tip-drive">Drive it</a>
+</li>
+</ol>
+<h3>Tip: build a gear train</h3>
+<ol>
+<li><a href="#gear-mesh">Mesh two gears</a>
+</li>
+<li><a href="#gear-motor">Drive it with a motor</a>
+</li>
+<li><a href="#gear-ring">Make a compound gear</a>
+</li>
+<li><a href="#gear-output">Mesh a gear with the ring</a>
+</li>
+<li><a href="#gear-run">Run it</a>
 </li>
 </ol>
 <h3>Reference</h3>
