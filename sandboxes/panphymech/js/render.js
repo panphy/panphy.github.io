@@ -719,19 +719,14 @@
       }
     }
 
-    function drawVectors() {
-      if (!app.sim) return;
-      app.scene.bodies.forEach((b) => {
-        if (b.fixed) return;
-        const v = app.velocityOf(b);
-        if (!v) return;
+    function drawVectors(vectors, labels) {
+      vectors.forEach(({ b, v }) => {
         const speed = Math.hypot(v.vx, v.vy);
-        if (speed < 0.02) return;
         const pose = app.poseOf(b);
         // 0.25 s of motion, capped so fast objects keep their arrow on screen.
         const len = Math.min(0.25 * speed * cam().scale, 160);
         const from = r.toScreen(pose);
-        arrow(from, { x: from.x + (v.vx / speed) * len, y: from.y - (v.vy / speed) * len }, r.colors.vector, 'v');
+        arrow(from, { x: from.x + (v.vx / speed) * len, y: from.y - (v.vy / speed) * len }, r.colors.vector, labels.velocity(b));
       });
     }
 
@@ -744,7 +739,7 @@
       const moving = app.scene.bodies.filter((b) => !b.fixed);
       const picked = app.selectedBodies().map((id) => S.bodyById(app.scene, id)).filter((b) => b && !b.fixed);
       const shown = picked.length ? picked : moving;
-      const list = shown.flatMap((b) => app.sim.forcesOn(b.id));
+      const list = shown.flatMap((b) => app.sim.forcesOn(b.id).map((f) => ({ ...f, body: b.id })));
       const heaviest = shown.reduce((m, b) => (!m || b.mass > m.mass ? b : m), null);
       let ref = heaviest ? Math.abs(app.scene.world.gravity) * heaviest.mass : 0;
       if (!(ref > 0)) ref = Math.max(0, ...list.map((f) => Math.hypot(f.fx, f.fy)));
@@ -755,28 +750,88 @@
         const F = Math.hypot(f.fx, f.fy);
         if (F < 0.01 * ref) return null;
         const len = Math.min((unit * F) / ref, 3 * unit);
-        return { from: { x: f.x, y: f.y }, to: { x: f.x + (f.fx / F) * len, y: f.y + (f.fy / F) * len }, label: f.label };
+        return { from: { x: f.x, y: f.y }, to: { x: f.x + (f.fx / F) * len, y: f.y + (f.fy / F) * len }, label: f.label, body: f.body };
       }).filter(Boolean);
+    };
+
+    // Moving objects with a velocity arrow, and their velocities.
+    function movingWithSpeed() {
+      if (!app.sim) return [];
+      return app.scene.bodies.flatMap((b) => {
+        if (b.fixed) return [];
+        const v = app.velocityOf(b);
+        return v && Math.hypot(v.vx, v.vy) >= 0.02 ? [{ b, v }] : [];
+      });
+    }
+
+    // Subscripts that tell arrows apart. When two or three objects show arrows, each object's
+    // arrows carry its tag: its name when that is short (up to 3 characters with no space or underscore, like "A" or "m1"),
+    // otherwise the next free letter A, B, C. When at most three objects show arrows, several
+    // forces of one kind on one object are also numbered (N1, N2). Busier scenes keep plain labels.
+    const SHORT_NAME = /^[^\s_]{1,3}$/;
+    r.arrowLabels = function arrowLabels(forces, vectors) {
+      const ids = new Set([...forces.map((a) => a.body), ...vectors.map((m) => m.b.id)]);
+      const tags = new Map();
+      if (ids.size > 3) return { tags, force: (a) => a.label, velocity: () => 'v' };
+      if (ids.size > 1) {
+        const objs = app.scene.bodies.filter((b) => ids.has(b.id));
+        objs.forEach((b) => {
+          const name = String(b.name || '').trim();
+          if (SHORT_NAME.test(name) && ![...tags.values()].includes(name)) tags.set(b.id, name);
+        });
+        const used = new Set(tags.values());
+        let code = 65;
+        objs.forEach((b) => {
+          if (tags.has(b.id)) return;
+          while (used.has(String.fromCharCode(code))) code++;
+          tags.set(b.id, String.fromCharCode(code));
+          used.add(String.fromCharCode(code));
+        });
+      }
+      const count = new Map();
+      forces.forEach((a) => { const k = a.body + ' ' + a.label; count.set(k, (count.get(k) || 0) + 1); });
+      const seen = new Map();
+      const numbers = forces.map((a) => {
+        const k = a.body + ' ' + a.label;
+        if (count.get(k) < 2) return '';
+        seen.set(k, (seen.get(k) || 0) + 1);
+        return String(seen.get(k));
+      });
+      const compose = (label, tag, num) => {
+        const [main, base] = label.split('_');
+        const own = tag && num ? (tag.length === 1 ? tag + num : tag + ',' + num) : tag || num;
+        const sub = [base, own].filter(Boolean).join(',');
+        return sub ? main + '_' + sub : main;
+      };
+      return {
+        tags,
+        force: (a, i) => compose(a.label, tags.get(a.body), numbers[i]),
+        velocity: (b) => compose('v', tags.get(b.id), '')
+      };
     };
 
     // Each kind of force has its own color, so the forces on one object are easy to tell apart.
     const FORCE_COLORS = { W: 'forceW', N: 'forceN', f: 'forceF', T: 'forceT', F_s: 'forceS', R: 'forceR', D: 'forceD' };
-    function drawForces() {
-      r.forceArrows(cam().scale).forEach((a) => arrow(r.toScreen(a.from), r.toScreen(a.to), r.colors[FORCE_COLORS[a.label]] || r.colors.ink, a.label, true));
+    function drawForces(forces, labels) {
+      forces.forEach((a, i) => arrow(r.toScreen(a.from), r.toScreen(a.to), r.colors[FORCE_COLORS[a.label]] || r.colors.ink, labels.force(a, i), true));
     }
 
-    function drawLabels() {
+    // Object names (with Labels on) and the tags that arrow subscripts refer to, above each object.
+    function drawLabels(tags, names) {
       ctx.font = '600 11.5px Figtree, system-ui, sans-serif';
       ctx.textAlign = 'center';
       app.scene.bodies.forEach((b) => {
+        const tag = tags.get(b.id);
+        if (!names && !tag) return;
+        const text = !names ? tag : tag && tag !== String(b.name).trim() ? `${b.name} (${tag})` : b.name;
         const pose = app.poseOf(b);
         const e = S.extent(b);
         const q = r.toScreen({ x: pose.x, y: pose.y + Math.hypot(e.x, e.y) });
         ctx.lineWidth = 3;
         ctx.strokeStyle = r.colors.bg;
-        ctx.strokeText(b.name, q.x, q.y - 6);
+        ctx.strokeText(text, q.x, q.y - 6);
         ctx.fillStyle = r.colors.ink2;
-        ctx.fillText(b.name, q.x, q.y - 6);
+        ctx.fillText(text, q.x, q.y - 6);
       });
     }
 
@@ -995,9 +1050,12 @@
       });
       app.scene.links.filter((l) => l.kind !== 'hinge' && l.kind !== 'weld').forEach(drawLink);
       app.scene.links.filter((l) => l.kind === 'hinge' || l.kind === 'weld').forEach(drawLink);
-      if (app.display.forces) drawForces();
-      if (app.display.vectors) drawVectors();
-      if (app.display.labels) drawLabels();
+      const forces = app.display.forces ? r.forceArrows(cam().scale) : [];
+      const vectors = app.display.vectors ? movingWithSpeed() : [];
+      const labels = r.arrowLabels(forces, vectors);
+      drawForces(forces, labels);
+      drawVectors(vectors, labels);
+      if (app.display.labels || labels.tags.size) drawLabels(labels.tags, app.display.labels);
       const sel = clean ? null : app.selection;
       if (sel && sel.type === 'body' && app.canEditGeometry() && !app.extra.length) {
         const b = S.bodyById(app.scene, sel.id);
