@@ -27,6 +27,8 @@ export const MODES = {
     parent: { symbol: 'C', name: 'carbon-14', A: 14, Z: 6 },
     daughter: { symbol: 'N', name: 'nitrogen-14', A: 14, Z: 7 },
     emitted: { symbol: 'e', A: 0, Z: -1, label: 'beta particle (electron)' },
+    // Also released, with no mass number or charge.
+    partner: { tex: '\\bar{\\nu}_{e}', plain: 'ν̄', label: 'antineutrino' },
     halfLife: '5730 years'
   },
   // Beta-plus is shown through the Beta decay tab's β⁻/β⁺ toggle, so it is not in MODE_ORDER.
@@ -40,6 +42,7 @@ export const MODES = {
     parent: { symbol: 'F', name: 'fluorine-18', A: 18, Z: 9 },
     daughter: { symbol: 'O', name: 'oxygen-18', A: 18, Z: 8 },
     emitted: { symbol: 'e', A: 0, Z: 1, zText: '+1', label: 'beta-plus particle (positron)' },
+    partner: { tex: '\\nu_{e}', plain: 'ν', label: 'neutrino' },
     halfLife: '110 minutes'
   },
   gamma: {
