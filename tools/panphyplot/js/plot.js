@@ -208,30 +208,10 @@
 			};
 
 			const downloadImageButton = {
-				name: 'Download plot as png',
+				name: 'Download graph',
 				icon: Plotly.Icons.camera,
-				click: async function(gd) {
-					const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
-					if (userInput === null) return;
-					const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
-					const exportScale = getAdaptivePlotExportScale(gd);
-					try {
-						const dataUrl = await Plotly.toImage(getExportFigure(gd), {
-							format: 'png',
-							scale: exportScale,
-							width: gd._fullLayout.width,
-							height: gd._fullLayout.height
-						});
-						const imageBlob = await fetch(dataUrl).then(res => res.blob());
-						await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
-					} catch (error) {
-						console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
-						Plotly.downloadImage(gd, {
-							format: 'png',
-							filename: filenameBase,
-							scale: exportScale
-						});
-					}
+				click: function(gd) {
+					openExportDialog(gd, defaultFilename);
 				}
 			};
 
@@ -250,6 +230,263 @@
 				]]
 			};
 		}
+
+	/* ---------- Download graph ---------- */
+
+	const EXPORT_PREFS_KEY = 'panphyplot-neo-export';
+	const PUBLICATION_WIDTH = 640;
+	const PUBLICATION_HEIGHT = 480;
+	const PUBLICATION_PNG_SCALE = 4;
+	const PUBLICATION_FONT = 'Arial, Helvetica, sans-serif';
+	const PUBLICATION_COLORS = ['#1f4e9a', '#c62828', '#2e7d32', '#6a1b9a', '#e65100', '#00838f'];
+	const PUBLICATION_SYMBOLS = ['square', 'circle', 'triangle-up', 'diamond', 'triangle-down', 'star'];
+	const PUBLICATION_SINGLE_FIT_COLOR = '#d62728';
+	let exportTarget = null;
+
+	function readExportPrefs() {
+		let prefs = {};
+		try {
+			prefs = JSON.parse(localStorage.getItem(EXPORT_PREFS_KEY) || '{}') || {};
+		} catch (error) {
+			prefs = {};
+		}
+		return {
+			style: prefs.style === 'screen' ? 'screen' : 'publication',
+			format: prefs.format === 'svg' ? 'svg' : 'png'
+		};
+	}
+
+	function writeExportPrefs(prefs) {
+		try {
+			localStorage.setItem(EXPORT_PREFS_KEY, JSON.stringify(prefs));
+		} catch (error) {
+			// Without storage the dialog simply starts from the defaults next time.
+		}
+	}
+
+	function isShownTrace(trace) {
+		return trace && trace.visible !== false && trace.visible !== 'legendonly';
+	}
+
+	function isPointsTrace(trace) {
+		return typeof trace?.mode === 'string' && trace.mode.includes('markers');
+	}
+
+	// The fit's legend entry, in the same notation as its points' entry.
+	function publicationFitName(pointsName, stale, single) {
+		const word = stale ? 'Outdated fit' : 'Fit';
+		if (single) return word;
+		const name = String(pointsName || '');
+		const latex = name.match(/^\$(.*)\$$/s);
+		return latex ? `$\\text{${word}: }${latex[1]}$` : `${word}: ${name}`;
+	}
+
+	// Put the legend in whichever top corner holds fewer points and fit samples.
+	function publicationLegendSide(traces, xRange, yRange) {
+		const [x0, x1] = xRange;
+		const [y0, y1] = yRange;
+		const width = x1 - x0;
+		const height = y1 - y0;
+		if (!(width > 0) || !(height > 0)) return 'left';
+		let left = 0;
+		let right = 0;
+		traces.forEach((trace) => {
+			const xs = Array.isArray(trace.x) ? trace.x : [];
+			const ys = Array.isArray(trace.y) ? trace.y : [];
+			const weight = isPointsTrace(trace) ? 1 : 0.2;
+			xs.forEach((x, index) => {
+				const y = ys[index];
+				if (!Number.isFinite(x) || !Number.isFinite(y) || y < y1 - 0.38 * height || y > y1) return;
+				if (x >= x0 && x <= x0 + 0.42 * width) left += weight;
+				if (x <= x1 && x >= x1 - 0.42 * width) right += weight;
+			});
+		});
+		return right < left ? 'right' : 'left';
+	}
+
+	function publicationAxis(axis, fullAxis) {
+		const black = '#000000';
+		const title = axis?.title || {};
+		return {
+			title: { text: title.text || '', standoff: 12, font: { family: PUBLICATION_FONT, size: 17, color: black } },
+			range: Array.isArray(fullAxis?.range) ? fullAxis.range.slice() : undefined,
+			autorange: !Array.isArray(fullAxis?.range),
+			automargin: true,
+			showgrid: false,
+			zeroline: false,
+			showline: true,
+			mirror: 'ticks',
+			linecolor: black,
+			linewidth: 1.6,
+			ticks: 'inside',
+			ticklen: 7,
+			tickwidth: 1.6,
+			tickcolor: black,
+			tickfont: { family: PUBLICATION_FONT, size: 15, color: black },
+			minor: { ticks: 'inside', ticklen: 4, tickwidth: 1.2, tickcolor: black, nticks: 2, showgrid: false }
+		};
+	}
+
+	// An automatic range ends exactly at a point on zero, which would sit half on the frame;
+	// give that side a little room instead. A range the user zoomed to is kept as it is.
+	function padPublicationRange(axis, traces, key) {
+		const range = axis.range;
+		if (!Array.isArray(range) || !(range[1] > range[0])) return;
+		const values = traces.flatMap(trace => (Array.isArray(trace[key]) ? trace[key] : [])).filter(Number.isFinite);
+		if (!values.length) return;
+		const span = range[1] - range[0];
+		const min = Math.min(...values);
+		const max = Math.max(...values);
+		if (min - range[0] < 0.01 * span) range[0] = min - 0.04 * span;
+		if (range[1] - max < 0.01 * span) range[1] = max + 0.04 * span;
+	}
+
+	// An Origin-like figure for print: black frame with inward major and minor ticks on all
+	// four sides, no grid, black Arial text, edged markers, capped error bars and a framed legend.
+	// It keeps the graph's current zoom, and leaves out hidden series.
+	function buildPublicationFigure(gd) {
+		const full = gd._fullLayout || {};
+		const shown = (Array.isArray(gd.data) ? gd.data : []).filter(isShownTrace);
+		const groups = shown.filter(isPointsTrace).map(trace => trace.legendgroup);
+		const single = groups.length === 1;
+		const pointNames = {};
+		shown.filter(isPointsTrace).forEach((trace) => { pointNames[trace.legendgroup] = trace.name; });
+		const errorBars = (bars) => bars ? { ...bars, color: '#000000', thickness: 1.2, width: 4 } : bars;
+		const data = shown.map((trace) => {
+			const index = Math.max(0, groups.indexOf(trace.legendgroup));
+			const color = PUBLICATION_COLORS[index % PUBLICATION_COLORS.length];
+			if (isPointsTrace(trace)) {
+				const count = Array.isArray(trace.x) ? trace.x.length : 0;
+				return {
+					...trace,
+					visible: true,
+					showlegend: true,
+					marker: {
+						color,
+						symbol: PUBLICATION_SYMBOLS[index % PUBLICATION_SYMBOLS.length],
+						size: count > 400 ? 5 : count > 150 ? 6.5 : 9,
+						opacity: 1,
+						line: { color: '#000000', width: count > 400 ? 0.5 : 1.1 }
+					},
+					error_x: errorBars(trace.error_x),
+					error_y: errorBars(trace.error_y)
+				};
+			}
+			const stale = trace.line?.dash === 'dash';
+			return {
+				...trace,
+				visible: true,
+				showlegend: true,
+				name: publicationFitName(pointNames[trace.legendgroup], stale, single),
+				line: { ...(trace.line || {}), color: single ? PUBLICATION_SINGLE_FIT_COLOR : color, width: 2 }
+			};
+		});
+		const xaxis = publicationAxis(gd.layout?.xaxis, full.xaxis);
+		const yaxis = publicationAxis(gd.layout?.yaxis, full.yaxis);
+		const points = data.filter(isPointsTrace);
+		if (gd.layout?.xaxis?.autorange !== false) padPublicationRange(xaxis, points, 'x');
+		if (gd.layout?.yaxis?.autorange !== false) padPublicationRange(yaxis, points, 'y');
+		const side = xaxis.range && yaxis.range ? publicationLegendSide(data, xaxis.range, yaxis.range) : 'left';
+		const titleText = gd.dataset.exportTitle || gd.layout?.title?.text || '';
+		const layout = {
+			width: PUBLICATION_WIDTH,
+			height: PUBLICATION_HEIGHT,
+			paper_bgcolor: '#ffffff',
+			plot_bgcolor: '#ffffff',
+			font: { family: PUBLICATION_FONT, size: 14, color: '#000000' },
+			title: titleText ? { text: titleText, font: { family: PUBLICATION_FONT, size: 18, color: '#000000' } } : { text: '' },
+			showlegend: data.length > 1,
+			legend: {
+				x: side === 'right' ? 0.97 : 0.03,
+				xanchor: side,
+				y: 0.97,
+				yanchor: 'top',
+				bgcolor: '#ffffff',
+				bordercolor: '#000000',
+				borderwidth: 1,
+				font: { family: PUBLICATION_FONT, size: 14, color: '#000000' }
+			},
+			xaxis,
+			yaxis,
+			margin: { t: titleText ? 56 : 24, b: 64, l: 76, r: 28 }
+		};
+		return { data, layout };
+	}
+
+	function exportOptions(gd, style, format) {
+		if (style === 'publication') {
+			return {
+				figure: buildPublicationFigure(gd),
+				width: PUBLICATION_WIDTH,
+				height: PUBLICATION_HEIGHT,
+				scale: format === 'svg' ? 1 : PUBLICATION_PNG_SCALE
+			};
+		}
+		return {
+			figure: getExportFigure(gd),
+			width: gd._fullLayout.width,
+			height: gd._fullLayout.height,
+			scale: format === 'svg' ? 1 : getAdaptivePlotExportScale(gd)
+		};
+	}
+
+	async function downloadGraph(gd, filenameBase, style, format) {
+		const options = exportOptions(gd, style, format);
+		try {
+			const dataUrl = await Plotly.toImage(options.figure, {
+				format,
+				scale: options.scale,
+				width: options.width,
+				height: options.height
+			});
+			const imageBlob = await fetch(dataUrl).then(res => res.blob());
+			const typedBlob = format === 'svg' && imageBlob.type !== 'image/svg+xml'
+				? new Blob([imageBlob], { type: 'image/svg+xml' })
+				: imageBlob;
+			await saveBlobWithFallback(typedBlob, `${filenameBase}.${format}`, { title: 'Save graph' });
+		} catch (error) {
+			console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
+			Plotly.downloadImage(options.figure, {
+				format,
+				filename: filenameBase,
+				scale: options.scale,
+				width: options.width,
+				height: options.height
+			});
+		}
+	}
+
+	function openExportDialog(gd, defaultFilename) {
+		const dialog = document.getElementById('export-dialog');
+		if (!dialog || typeof openDialog !== 'function') return;
+		exportTarget = { gd, defaultFilename };
+		const prefs = readExportPrefs();
+		dialog.querySelector(`input[name="export-style"][value="${prefs.style}"]`).checked = true;
+		dialog.querySelector(`input[name="export-format"][value="${prefs.format}"]`).checked = true;
+		const input = document.getElementById('export-filename');
+		input.value = defaultFilename;
+		if (dialog.dataset.bound !== 'true') {
+			dialog.dataset.bound = 'true';
+			document.getElementById('export-form').addEventListener('submit', submitExportDialog);
+		}
+		openDialog('export-dialog');
+		input.focus();
+		input.select();
+	}
+
+	function submitExportDialog(event) {
+		event.preventDefault();
+		if (!exportTarget) return;
+		const { gd, defaultFilename } = exportTarget;
+		const form = event.currentTarget;
+		const style = form.querySelector('input[name="export-style"]:checked')?.value === 'screen' ? 'screen' : 'publication';
+		const format = form.querySelector('input[name="export-format"]:checked')?.value === 'svg' ? 'svg' : 'png';
+		const filenameBase = sanitizeFilename(document.getElementById('export-filename').value, defaultFilename).replace(/\.(png|svg)$/i, '');
+		writeExportPrefs({ style, format });
+		exportTarget = null;
+		closeDialog('export-dialog');
+		downloadGraph(gd, filenameBase, style, format);
+	}
 
 	function processLabel(label) {
 		if (!label) return '';
