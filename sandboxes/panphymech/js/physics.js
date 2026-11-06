@@ -903,6 +903,13 @@
           const f = j.getReactionForce(inv);
           const onLinkB = l.kind === 'rod' || l.kind === 'rope';
           fb = onLinkB ? { x: f.x, y: f.y } : { x: -f.x, y: -f.y };
+          // Planck aims a rod or rope's force along the line at the start of the step, a
+          // step behind the objects as drawn; aim it along the line as it is now.
+          const dx = pa.x - pbw.x, dy = pa.y - pbw.y, d = Math.hypot(dx, dy);
+          if (onLinkB && d > 1e-9) {
+            const mag = Math.hypot(fb.x, fb.y) * (fb.x * dx + fb.y * dy < 0 ? -1 : 1);
+            fb = { x: mag * dx / d, y: mag * dy / d };
+          }
           fa = { x: -fb.x, y: -fb.y };
         }
         const geared = axleOf.get(l.id);
