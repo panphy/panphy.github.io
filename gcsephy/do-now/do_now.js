@@ -753,6 +753,7 @@
     reveal.textContent = "Answer";
     reveal.setAttribute("aria-pressed", "false");
     reveal.setAttribute("aria-label", `Show answer to question ${index + 1}`);
+    reveal.dataset.label = "Show answer to question";
     reveal.addEventListener("click", () => {
       setAnswer(item, answer.hidden);
       syncShowAll();
@@ -769,8 +770,18 @@
     swap.innerHTML = SWAP_ICON;
     swap.title = "Swap for a different question";
     swap.setAttribute("aria-label", `Swap question ${index + 1} for a different one`);
-    swap.addEventListener("click", () => swapQuestion(index));
-    actions.append(reveal, swap);
+    swap.dataset.label = "Swap question";
+    swap.dataset.labelEnd = " for a different one";
+    swap.addEventListener("click", () => swapQuestion(cardIndex(item)));
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "remove-btn";
+    remove.innerHTML = CLOSE_ICON;
+    remove.title = "Remove this question";
+    remove.setAttribute("aria-label", `Remove question ${index + 1}`);
+    remove.dataset.label = "Remove question";
+    remove.addEventListener("click", () => removeQuestion(cardIndex(item)));
+    actions.append(reveal, swap, remove);
 
     item.append(number, body, actions);
     return item;
@@ -794,8 +805,82 @@
     state.fitAnswers = false;
     els.list.textContent = "";
     state.shown.forEach((question, index) => els.list.append(buildCard(question, index)));
+    syncBoardEdits();
     syncShowAll();
     fitBoard();
+  }
+
+  // Where a card is now: adding and removing questions moves the others.
+  function cardIndex(item) {
+    return [...els.list.children].indexOf(item);
+  }
+
+  // Number the cards (and their button labels) in board order.
+  function renumber() {
+    [...els.list.children].forEach((item, index) => {
+      item.querySelector(".q-num").textContent = index + 1;
+      item.querySelectorAll("[data-label]").forEach((button) => {
+        button.setAttribute("aria-label", `${button.dataset.label} ${index + 1}${button.dataset.labelEnd || ""}`);
+      });
+    });
+  }
+
+  // A recall question that could join the board: from the chosen topics, not
+  // already shown and not sharing a diagram, taken from a topic with the
+  // fewest questions showing so the spread stays fair.
+  function extraQuestion() {
+    if (state.shown.filter((question) => !question.steps).length >= MAX_COUNT) return null;
+    const taken = takenBy(state.shown);
+    const candidates = pool().filter((question) => !clashes(question, taken));
+    if (!candidates.length) return null;
+    const showing = (topic) => state.shown.filter((question) => question.Topic === topic).length;
+    const fewest = Math.min(...candidates.map((question) => showing(question.Topic)));
+    const source = candidates.filter((question) => showing(question.Topic) === fewest);
+    return source[Math.floor(Math.random() * source.length)];
+  }
+
+  // The board keeps at least one question, and adds only what the topics can give.
+  function syncBoardEdits() {
+    const single = els.list.children.length <= 1;
+    els.list.querySelectorAll(".remove-btn").forEach((button) => { button.disabled = single; });
+    const add = $("add-question");
+    add.disabled = !extraQuestion();
+    add.title = add.disabled ? "No more questions in the chosen topics" : "Add another question (+)";
+  }
+
+  // A new question goes after the other recall questions, before any practical methods.
+  function addQuestion() {
+    const question = extraQuestion();
+    if (!question) return;
+    let index = state.shown.findIndex((item) => item.steps);
+    if (index < 0) index = state.shown.length;
+    state.shown.splice(index, 0, question);
+    const card = buildCard(question, index);
+    els.list.insertBefore(card, els.list.children[index] || null);
+    renumber();
+    syncBoardEdits();
+    syncShowAll();
+    fitBoard();
+    card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function removeQuestion(index) {
+    if (index < 0 || state.shown.length <= 1) return;
+    const card = els.list.children[index];
+    // Keep the keyboard nearby: on the next card's button, else the one before.
+    const refocus = card.contains(document.activeElement);
+    state.shown.splice(index, 1);
+    card.remove();
+    renumber();
+    syncBoardEdits();
+    syncShowAll();
+    if (state.fitAnswers && !els.list.querySelector(".q-answer:not([hidden])")) state.fitAnswers = false;
+    fitBoard();
+    if (refocus) {
+      const next = els.list.children[index] || els.list.children[index - 1];
+      const button = next && next.querySelector(".remove-btn:not(:disabled)");
+      (button || $("add-question")).focus();
+    }
   }
 
   function swapQuestion(index) {
@@ -808,6 +893,7 @@
     const source = sameTopic.length ? sameTopic : candidates;
     state.shown[index] = source[Math.floor(Math.random() * source.length)];
     els.list.replaceChild(buildCard(state.shown[index], index), els.list.children[index]);
+    syncBoardEdits();
     syncShowAll();
     fitBoard();
   }
@@ -1215,6 +1301,7 @@
       fitBoard();
     });
     $("reshuffle").addEventListener("click", redrawBoard);
+    $("add-question").addEventListener("click", addQuestion);
     $("smaller").addEventListener("click", () => setScale(1 / 1.1));
     $("larger").addEventListener("click", () => setScale(1.1));
     $("fullscreen").addEventListener("click", toggleFullscreen);
@@ -1264,6 +1351,7 @@
       const key = event.key.toLowerCase();
       if (key === "a") els.showAll.click();
       else if (key === "n" && state.mode === "random") redrawBoard();
+      else if (key === "+" || key === "=") addQuestion();
       else if (key === "?") openKeys();
       else if (key === "f") toggleFullscreen();
       else if (key === "w") openSheet();
