@@ -781,9 +781,10 @@
     remove.setAttribute("aria-label", `Remove question ${index + 1}`);
     remove.dataset.label = "Remove question";
     remove.addEventListener("click", () => removeQuestion(cardIndex(item)));
-    actions.append(reveal, swap, remove);
+    actions.append(reveal, swap);
 
-    item.append(number, body, actions);
+    // The remove button sits on the card's corner, out of the text's way.
+    item.append(number, body, actions, remove);
     return item;
   }
 
@@ -1016,7 +1017,7 @@
     if (arriving) els.showAll.focus();
   }
 
-  // A stray press of "New questions" part-way through the answers would lose the set.
+  // A stray press of "New set" part-way through the answers would lose the set.
   function redrawBoard() {
     const answers = [...els.list.querySelectorAll(".q-answer")];
     const revealed = answers.filter((answer) => !answer.hidden).length;

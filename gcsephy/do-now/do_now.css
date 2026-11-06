@@ -205,7 +205,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 
 .board-area { flex: 1; min-height: 0; overflow: auto; padding: 2vh max(2vw, env(safe-area-inset-right)) 2vh max(2vw, env(safe-area-inset-left)); }
 .questions { --q: 40px; list-style: none; margin: 0; padding: 0; column-gap: 1.6vw; font-size: var(--q); line-height: 1.22; }
-.q { break-inside: avoid; display: grid; grid-template-columns: auto 1fr auto; gap: .5em; align-items: start; margin: 0 0 .36em; padding: .3em .4em .3em .34em; border: 2px solid var(--ink); border-radius: .22em; background: var(--card); color: var(--ink); }
+.q { position: relative; break-inside: avoid; display: grid; grid-template-columns: auto 1fr auto; gap: .5em; align-items: start; margin: 0 0 .36em; padding: .3em .4em .3em .34em; border: 2px solid var(--ink); border-radius: .22em; background: var(--card); color: var(--ink); }
 .q-num { display: grid; place-items: center; width: 1.5em; height: 1.5em; border: 2px solid var(--ink); border-radius: 50%; background: var(--hi); font: 900 .78em/1 var(--display); margin-top: .03em; }
 .neg { color: #d0182b; font-weight: 900; }
 /* Mass number over atomic number, right-aligned against the symbol. The stack has no height of its own, so the line keeps its spacing. */
@@ -228,9 +228,20 @@ sub, sup { font-size: .68em; line-height: 0; }
 .q-actions .ans-btn { background: var(--pop); }
 .q-actions .ans-btn[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .q-actions button:hover { transform: translate(-1px, -1px); }
-.q-actions .swap-btn, .q-actions .remove-btn { display: grid; place-items: center; padding: 0; }
-.q-actions .remove-btn:disabled { opacity: .35; transform: none; cursor: default; }
-.q-actions .swap-btn svg, .q-actions .remove-btn svg { width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.q-actions .swap-btn { display: grid; place-items: center; padding: 0; }
+.q-actions .swap-btn svg { width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+/* Remove: a small badge on the card's top-right corner, shown while the card is
+   hovered or has focus (always on touch screens). Its hit area is 48px. */
+.remove-btn { position: absolute; top: -12px; right: -12px; z-index: 1; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: #fff; color: var(--ink); cursor: pointer; transition: opacity .15s; }
+.remove-btn::before { content: ""; position: absolute; inset: -9px; border-radius: 50%; }
+.remove-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+.remove-btn:hover, .remove-btn:focus-visible { background: #d0182b; border-color: #d0182b; color: #fff; }
+.remove-btn:disabled { display: none; }
+@media (hover: hover) {
+  .q:not(:hover):not(:focus-within) .remove-btn { opacity: 0; }
+}
+.add-btn { display: inline-flex; align-items: center; gap: 6px; }
+.add-btn svg { width: 18px; height: 18px; margin: 0; }
 
 .keys { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; overflow: auto; background: rgba(3, 12, 30, .8); }
 .keys-card { width: min(100%, 460px); padding: 20px 22px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); color: var(--ink); box-shadow: 6px 6px 0 var(--hi); }
