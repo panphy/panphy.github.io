@@ -228,8 +228,9 @@ sub, sup { font-size: .68em; line-height: 0; }
 .q-actions .ans-btn { background: var(--pop); }
 .q-actions .ans-btn[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .q-actions button:hover { transform: translate(-1px, -1px); }
-.q-actions .swap-btn { display: grid; place-items: center; padding: 0; }
-.q-actions .swap-btn svg { width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.q-actions .swap-btn, .q-actions .remove-btn { display: grid; place-items: center; padding: 0; }
+.q-actions .remove-btn:disabled { opacity: .35; transform: none; cursor: default; }
+.q-actions .swap-btn svg, .q-actions .remove-btn svg { width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 
 .keys { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; overflow: auto; background: rgba(3, 12, 30, .8); }
 .keys-card { width: min(100%, 460px); padding: 20px 22px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); color: var(--ink); box-shadow: 6px 6px 0 var(--hi); }
