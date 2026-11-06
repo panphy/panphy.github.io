@@ -81,7 +81,7 @@
     <div class="intro"><div><p class="eyebrow">THE NUCLEUS LAB / UNSTABLE BY NATURE</p><h1>Unstable nucleus.<br>Random decay<span>!</span></h1></div><p>Trigger it. Balance it. Block it.<br>Explore three kinds of radiation and the clock of half-life.</p></div>
     <nav class="models" aria-label="Choose a type of decay">
       <button type="button" data-mode="alpha" aria-pressed="true"><span data-math-static>01 / \(\alpha\)</span><strong>Alpha decay</strong><small>Americium-241</small></button>
-      <button type="button" data-mode="beta" aria-pressed="false"><span data-math-static>02 / \(\beta^{-}\)</span><strong>Beta decay</strong><small>Carbon-14</small></button>
+      <button type="button" data-mode="beta" aria-pressed="false"><span data-math-static>02 / \(\beta\)</span><strong>Beta decay</strong><small>Carbon-14 or Fluorine-18</small></button>
       <button type="button" data-mode="gamma" aria-pressed="false"><span data-math-static>03 / \(\gamma\)</span><strong>Gamma emission</strong><small>Technetium-99m</small></button>
       <button type="button" data-mode="halflife" aria-pressed="false"><span data-math-static>04 / \(T_{\frac{1}{2}}\)</span><strong>Half-life</strong><small>A random sample</small></button>
     </nav>
@@ -99,6 +99,8 @@
             <span data-legend="alpha"><i class="alpha">α</i> Alpha particle</span>
             <span data-legend="electron"><i class="electron">β</i> Beta particle (electron)</span>
             <span data-legend="antineutrino"><i class="antineutrino">ν̄</i> Antineutrino (not needed for GCSE)</span>
+            <span data-legend="positron" hidden><i class="positive">β</i> Beta-plus particle (positron)</span>
+            <span data-legend="neutrino" hidden><i class="antineutrino">ν</i> Neutrino (not needed for GCSE)</span>
             <span data-legend="gamma"><i class="gamma">γ</i> Gamma ray</span>
             <span data-legend="undecayed"><i class="undecayed"></i> <span id="undecayed-label">Undecayed nucleus</span></span>
             <span data-legend="decayed"><i class="decayed"></i> <span id="decayed-label">Decayed nucleus</span></span>
@@ -114,6 +116,13 @@
         </div>
       </div>
       <div class="console" id="side-controls" role="group" aria-label="Experiment controls">
+        <div class="section" id="beta-sign" hidden>
+          <span class="section-title">Type of beta decay</span>
+          <div class="choice-row segmented" role="group" aria-label="Type of beta decay">
+            <button type="button" data-sign="minus" aria-pressed="true" aria-label="Beta-minus" data-math-static>\(\beta^{-}\)</button>
+            <button type="button" data-sign="plus" aria-pressed="false" aria-label="Beta-plus" data-math-static>\(\beta^{+}\)</button>
+          </div>
+        </div>
         <button type="button" id="decay" class="fire">Decay this nucleus</button>
         <button type="button" id="step-half" class="fire" hidden>Run one half-life</button>
         <p class="particle-readout" id="particle-readout" role="status">Tap a particle to discover its job.</p>
@@ -153,7 +162,7 @@
         </div>
       </aside>
     </section>
-    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Protons and neutrons are drawn as colored balls packed together; real nucleons are not hard spheres, and colors and sizes are chosen to help you see the ideas. A nucleus is about 1/100 000 of an atom’s width; the electrons around the atom are not shown. Every motion is slowed down enormously: real alpha particles leave at about 5% of the speed of light, beta particles at up to 99%, and gamma rays travel at the speed of light.</p><p>“Decay this nucleus” makes one nucleus decay on demand so that you can watch it. Real decay is random: nothing can make a particular nucleus decay, or predict when it will. Americium-241 has a half-life of 432 years, carbon-14 5730 years and technetium-99m 6.0 hours. In the half-life view, one half-life always takes a few seconds on screen, whatever the isotope. Beta-minus decay also releases an antineutrino, which is drawn faintly; knowledge of antineutrinos is not required for GCSE. Technetium-99m emits almost only gamma rays, a reason it is chosen as a medical tracer.</p><p>Penetration ranges are typical classroom values: alpha is stopped by a sheet of paper or a few centimeters of air; beta by a few millimeters of aluminum; gamma is reduced, but never stopped completely, by several centimeters of lead. In the test, a quarter of the gamma rays get through the lead to show this; the real fraction depends on the thickness.</p></div></section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Protons and neutrons are drawn as colored balls packed together; real nucleons are not hard spheres, and colors and sizes are chosen to help you see the ideas. A nucleus is about 1/100 000 of an atom’s width; the electrons around the atom are not shown. Every motion is slowed down enormously: real alpha particles leave at about 5% of the speed of light, beta particles at up to 99%, and gamma rays travel at the speed of light.</p><p>“Decay this nucleus” makes one nucleus decay on demand so that you can watch it. Real decay is random: nothing can make a particular nucleus decay, or predict when it will. Americium-241 has a half-life of 432 years, carbon-14 5730 years and technetium-99m 6.0 hours. In the half-life view, one half-life always takes a few seconds on screen, whatever the isotope. Beta-minus decay also releases an antineutrino, which is drawn faintly; knowledge of antineutrinos is not required for GCSE. Beta-plus decay, in which a proton becomes a neutron and a positron and a neutrino are emitted, is not required for GCSE either; fluorine-18 (half-life 110 minutes) is the tracer used in PET scans. Technetium-99m emits almost only gamma rays, a reason it is chosen as a medical tracer.</p><p>Penetration ranges are typical classroom values: alpha is stopped by a sheet of paper or a few centimeters of air; beta by a few millimeters of aluminum; gamma is reduced, but never stopped completely, by several centimeters of lead. In the test, a quarter of the gamma rays get through the lead to show this; the real fraction depends on the thickness.</p></div></section>
   </main>
   <footer class="panphy-footer">
     <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
