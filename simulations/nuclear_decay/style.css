@@ -212,6 +212,7 @@ body.viewer-expanded { overflow: hidden; }
 .nuclide.alpha { color: var(--alpha); }
 .nuclide.electron { color: var(--electron); }
 .nuclide.positive { color: var(--positive); }
+.nuclide.antineutrino { color: var(--antineutrino); }
 .nuclide.gamma { color: var(--photon); }
 .nuclide.unknown { color: var(--text-secondary); }
 .equation .check { margin-top: 4px; font-size: .68rem; color: var(--text-secondary); text-align: right; }

@@ -523,14 +523,19 @@ function renderEquation(done) {
     return;
   }
   const mass = parseInt(data.parent.A, 10);
-  const { daughter, emitted } = data;
+  const { daughter, emitted, partner } = data;
   const z = value => (value < 0 ? `(−${-value})` : value);
   const zTex = value => (value < 0 ? `(-${-value})` : value);
-  const check = `Top: \\(${mass} = ${daughter.A} + ${emitted.A}\\) <b>✓</b> · Bottom: \\(${data.parent.Z} = ${daughter.Z} + ${zTex(emitted.Z)}\\) <b>✓</b>`;
-  const plainCheck = `Top: ${mass} = ${daughter.A} + ${emitted.A} <b>✓</b> · Bottom: ${data.parent.Z} = ${daughter.Z} + ${z(emitted.Z)} <b>✓</b>`;
-  box.innerHTML = `<div class="eq">${left}${sign('\\(\\rightarrow\\)', '→')}${nuclideHTML(daughter)}${sign('\\(+\\)', '+')}${nuclideHTML(emitted, kind)}</div>`
+  // The (anti)neutrino in beta decay has 0 for both numbers, so it is added to each side of the check.
+  const extra = partner ? ' + 0' : '';
+  const check = `Top: \\(${mass} = ${daughter.A} + ${emitted.A}${extra}\\) <b>✓</b> · Bottom: \\(${data.parent.Z} = ${daughter.Z} + ${zTex(emitted.Z)}${extra}\\) <b>✓</b>`;
+  const plainCheck = `Top: ${mass} = ${daughter.A} + ${emitted.A}${extra} <b>✓</b> · Bottom: ${data.parent.Z} = ${daughter.Z} + ${z(emitted.Z)}${extra} <b>✓</b>`;
+  const partnerHTML = partner ? sign('\\(+\\)', '+') + (PanPhyMath.ready()
+    ? `<span class="nuclide antineutrino">${PanPhyMath.mathHtml(`\\({}^{0}_{0}${partner.tex}\\)`)}</span>`
+    : `<span class="nuclide antineutrino"><span class="nums"><span>0</span><span>0</span></span>${partner.plain}</span>`) : '';
+  box.innerHTML = `<div class="eq">${left}${sign('\\(\\rightarrow\\)', '→')}${nuclideHTML(daughter)}${sign('\\(+\\)', '+')}${nuclideHTML(emitted, kind)}${partnerHTML}</div>`
     + `<div class="check">${PanPhyMath.mathMarkup(check, plainCheck)}</div>`;
-  box.setAttribute('aria-label', `Nuclear equation: ${data.parent.name} decays to ${daughter.name} plus a ${emitted.label}. Mass numbers: ${mass} equals ${daughter.A} plus ${emitted.A}. Atomic numbers: ${data.parent.Z} equals ${daughter.Z} plus ${emitted.Z}.`);
+  box.setAttribute('aria-label', `Nuclear equation: ${data.parent.name} decays to ${daughter.name} plus a ${emitted.label}${partner ? ` plus ${/^[aeiou]/.test(partner.label) ? 'an' : 'a'} ${partner.label}` : ''}. Mass numbers: ${mass} equals ${daughter.A} plus ${emitted.A}${partner ? ' plus 0' : ''}. Atomic numbers: ${data.parent.Z} equals ${daughter.Z} plus ${emitted.Z}${partner ? ' plus 0' : ''}.`);
 }
 
 // ---------- Flyers (particles leaving the nucleus) ----------
