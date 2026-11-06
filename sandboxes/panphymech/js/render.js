@@ -63,15 +63,22 @@
       gearPhase = gearWheels.size ? S.gearPhases(app.scene) : new Map();
     }
     // A ring of n teeth round pitch radius R (m) at world center c, turned to angle (rad):
-    // trapezoid teeth half a tooth height either side of the pitch circle. Zoomed far out,
-    // where teeth would be a blur, it is the plain pitch circle.
+    // trapezoid teeth half a tooth height either side of the pitch circle. Teeth stay visible
+    // at every zoom: zoomed out, each is at least MIN_TOOTH px tall, and when the real teeth
+    // would be packed closer than MIN_PITCH px, every k-th one is drawn so the rim still reads
+    // as a gear and its turning shows.
+    const MIN_TOOTH = 1.6, MIN_PITCH = 6;
     function gearRingPath(c, R, n, angle) {
       const s = cam().scale;
       const q = r.toScreen(c);
-      const h = (S.GEAR_PITCH / Math.PI) * s; // tooth height: one module each side
-      if (h < 2.2) { ctx.arc(q.x, q.y, R * s, 0, Math.PI * 2); return; }
+      const rs = R * s;
+      if (rs < 3) { ctx.arc(q.x, q.y, Math.max(rs, 0.5), 0, Math.PI * 2); return; }
+      const skip = Math.max(1, Math.ceil(MIN_PITCH / (S.GEAR_PITCH * s)));
+      if (skip > 1) n = Math.max(6, Math.round(n / skip));
+      const pitch = (2 * Math.PI * rs) / n; // screen px of rim per drawn tooth
+      const h = Math.min(Math.max(pitch / Math.PI, MIN_TOOTH), rs * 0.2); // one module each side
       const step = (2 * Math.PI) / n;
-      const tip = R * s + h * 0.9, root = R * s - h * 1.1;
+      const tip = rs + h * 0.9, root = rs - h * 1.1;
       // Screen y points down, so world angles turn the other way on screen.
       const at = (rad, a) => ({ x: q.x + rad * Math.cos(a), y: q.y - rad * Math.sin(a) });
       for (let k = 0; k < n; k++) {
