@@ -207,14 +207,6 @@
 				}
 			};
 
-			const downloadImageButton = {
-				name: 'Download graph',
-				icon: Plotly.Icons.camera,
-				click: function(gd) {
-					openExportDialog(gd, defaultFilename);
-				}
-			};
-
 			return {
 				responsive: true,
 				displayModeBar: true,
@@ -225,8 +217,7 @@
 					'zoomIn2d',
 					'zoomOut2d',
 					autoScaleButton,
-					'resetScale2d',
-					downloadImageButton
+					'resetScale2d'
 				]]
 			};
 		}
@@ -1065,7 +1056,7 @@
 		return colors[index % colors.length];
 	}
 
-	// The Download button in the graph pane's header opens the same dialog as the camera button.
+	// The Download button in the graph pane's header opens the Download graph dialog.
 	document.getElementById('graph-download-button')?.addEventListener('click', () => {
 		const gd = document.getElementById('plot');
 		if (typeof Plotly === 'undefined' || !gd || !gd._fullLayout) return;
