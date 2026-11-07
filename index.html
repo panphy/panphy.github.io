@@ -219,12 +219,9 @@
             white-space: nowrap;
         }
 
-        .offline-status[hidden],
         .card-offline-pill[hidden],
         .section[hidden],
         .card[hidden] { display: none !important; }
-
-        .offline-status[data-state="ready"] { color: var(--status-ready); }
 
         /* Offline badge on each card */
         .card-offline-pill {
@@ -772,7 +769,6 @@
             background: linear-gradient(var(--card-solid), var(--card-solid)) padding-box, var(--spectrum) border-box;
         }
 
-        .offline-status { margin: 0.8rem 0 0; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.72rem; }
 
         /* Sections */
         .section { max-width: 1220px; margin: 0 auto 5.5rem; padding: 0 1.5rem; scroll-margin-top: 96px; }
@@ -1091,7 +1087,6 @@
                 <div class="filter-row" role="group" aria-label="Filter apps by topic">
                     <button class="filter-button" type="button" data-topic-filter="all" aria-pressed="true">Any topic</button>
                     <button class="filter-button" type="button" data-topic-filter="waves" aria-pressed="false">Waves</button>
-                    <button class="filter-button" type="button" data-topic-filter="sound" aria-pressed="false">Sound</button>
                     <button class="filter-button" type="button" data-topic-filter="mechanics" aria-pressed="false">Mechanics</button>
                     <button class="filter-button" type="button" data-topic-filter="matter" aria-pressed="false">Matter</button>
                     <button class="filter-button" type="button" data-topic-filter="electricity" aria-pressed="false">Electricity</button>
@@ -1102,7 +1097,6 @@
                     <button class="filter-button" type="button" data-topic-filter="data" aria-pressed="false">Data &amp; video</button>
                     <button class="filter-button" type="button" data-topic-filter="classroom" aria-pressed="false">Classroom</button>
                 </div>
-                <p class="offline-status" id="offline-status" hidden></p>
                 <span class="sr-only" id="results-status" aria-live="polite">23 apps shown.</span>
             </div>
         </div>
@@ -1185,7 +1179,7 @@
                     <p>Step through video frames, track objects, and extract motion data.</p>
                 </div>
             </a>
-            <a class="card" href="/tools/sound_analyzer.html" data-topic="sound waves">
+            <a class="card" href="/tools/sound_analyzer.html" data-topic="waves">
                 <div class="card-art" aria-hidden="true">
                     <svg viewBox="0 0 360 168" focusable="false">
                         <path class="a-ink" d="M28 140h304" stroke-width="2"/>
@@ -1202,7 +1196,7 @@
                     <span class="card-note">Uses microphone</span>
                 </div>
             </a>
-            <a class="card" href="/tools/tone_generator.html" data-topic="sound waves">
+            <a class="card" href="/tools/tone_generator.html" data-topic="waves">
                 <div class="card-art" aria-hidden="true">
                     <svg viewBox="0 0 360 168" focusable="false">
                         <text class="a-ts" x="24" y="52">CH 1</text>
@@ -2550,7 +2544,6 @@
 
         const OFFLINE_POLL_MS = 3000;
         const OFFLINE_POLL_MAX = 40;
-        const offlineStatus = document.getElementById('offline-status');
         let offlinePollCount = 0;
         let offlineReadyPollId = 0;
         let offlineReadinessUpdateInFlight = false;
@@ -2639,24 +2632,10 @@
                 setCardOfflineState(pill, 'checking', '');
             });
 
-            updateOfflineStatus(readyApps, OFFLINE_APP_PATHS.length);
-
             return {
                 readyApps,
                 totalApps: OFFLINE_APP_PATHS.length
             };
-        }
-
-        function updateOfflineStatus(readyApps, totalApps) {
-            if (!offlineStatus) return;
-            offlineStatus.hidden = false;
-            if (readyApps === totalApps) {
-                offlineStatus.dataset.state = 'ready';
-                offlineStatus.textContent = '\u2713 All ' + totalApps + ' offline-capable apps are saved on this device.';
-            } else {
-                offlineStatus.dataset.state = 'saving';
-                offlineStatus.textContent = 'Saving apps for offline use: ' + readyApps + ' of ' + totalApps + ' ready.';
-            }
         }
 
         function requestOfflineCacheRepair() {
