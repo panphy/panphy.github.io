@@ -699,8 +699,8 @@
       s += arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 230, 760, 230, 'text-secondary', 2.5) + text(754, 266, 'time', 'lbl mono', 'end') + text(126, 44, 'velocity', 'lbl mono', 'start');
       s += `<path d="M670,230 V390" class="guide"/>` + plot('M110,70 L670,390');
       s += text(94, 78, '+u', 'lbl display', 'end') + text(684, 398, '−u', 'lbl display', 'start') + text(94, 238, '0', 'lbl mono', 'end');
-      s += `<circle cx="390" cy="230" r="9" style="fill:var(--brand-accent-strong)"/>` + text(404, 208, 'top: v = 0', 'lbl strong', 'start');
-      s += text(440, 110, 'gradient = −g all the way', 'lbl', 'start');
+      // The two hints are part of the method, so they appear after the worked example's last step.
+      s += `<g class="step"><circle cx="390" cy="230" r="9" style="fill:var(--brand-accent-strong)"/>${text(404, 208, 'top: v = 0', 'lbl strong', 'start') + text(440, 110, 'gradient = −g all the way', 'lbl', 'start')}</g>`;
       s += text(122, 212, 'going up', 'lbl small', 'start') + text(660, 262, 'coming down', 'lbl small', 'end');
       return svg('0 0 800 460', s, 'Velocity against time for a ball thrown straight up: a straight line of gradient minus g from plus u, through zero at the top, to minus u; the areas above and below the time axis are equal');
     },
