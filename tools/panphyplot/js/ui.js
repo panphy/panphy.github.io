@@ -479,6 +479,17 @@ function buildHeaderCell(sheet, column, index) {
 
 	const preview = document.createElement('div');
 	preview.className = 'neo-col-preview';
+	if (headerFolded) {
+		preview.tabIndex = 0;
+		preview.setAttribute('role', 'button');
+		preview.title = 'Edit the name and unit';
+		preview.addEventListener('click', () => unfoldHeaderAt(column.id));
+		preview.addEventListener('keydown', (event) => {
+			if (event.key !== 'Enter' && event.key !== ' ') return;
+			event.preventDefault();
+			unfoldHeaderAt(column.id);
+		});
+	}
 
 	const resizer = document.createElement('div');
 	resizer.className = 'neo-col-resize';
@@ -498,15 +509,68 @@ function buildHeaderCell(sheet, column, index) {
 	return th;
 }
 
+// A folded header row shows the label as plain text when LaTeX mode is off, so columns stay told apart.
 function renderHeaderPreview(th, sheet, column) {
 	const preview = th.querySelector('.neo-col-preview');
 	if (!preview) return;
-	preview.hidden = !latexMode;
+	preview.hidden = !latexMode && !headerFolded;
 	if (!latexMode) {
-		setPlainLabel(preview, '');
+		setPlainLabel(preview, headerFolded ? columnAxisText(sheet, column) : '');
 		return;
 	}
 	typesetLabel(preview, `\\(${columnAxisText(sheet, column)}\\)`);
+}
+
+/* ---------- Folding the header row ---------- */
+
+const HEADER_FOLD_STORAGE_KEY = 'panphyplot-neo-header-folded';
+let headerFolded = readHeaderFolded();
+
+function readHeaderFolded() {
+	try {
+		return localStorage.getItem(HEADER_FOLD_STORAGE_KEY) === '1';
+	} catch (error) {
+		return false;
+	}
+}
+
+// Remembered in this browser only, like the pane widths.
+function setHeaderFolded(folded) {
+	headerFolded = folded;
+	try {
+		if (folded) localStorage.setItem(HEADER_FOLD_STORAGE_KEY, '1');
+		else localStorage.removeItem(HEADER_FOLD_STORAGE_KEY);
+	} catch (error) {
+		// A private window may refuse; the choice then lasts for this visit only.
+	}
+	renderTable();
+}
+
+function buildHeaderFoldButton() {
+	const button = document.createElement('button');
+	button.type = 'button';
+	button.className = 'neo-header-fold';
+	button.setAttribute('aria-expanded', String(!headerFolded));
+	const label = headerFolded ? 'Show the name and unit boxes' : 'Hide the name and unit boxes';
+	button.setAttribute('aria-label', label);
+	button.title = label;
+	button.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+	button.addEventListener('click', () => {
+		setHeaderFolded(!headerFolded);
+		document.querySelector('#neo-table-head .neo-header-fold')?.focus();
+	});
+	return button;
+}
+
+// In a folded row, the label opens the row and puts the cursor in that column's name.
+function unfoldHeaderAt(columnId) {
+	if (!headerFolded) return;
+	setHeaderFolded(false);
+	const name = document.querySelector(`#neo-table-head .neo-col-head[data-column-id="${columnId}"] .neo-col-name`);
+	if (name) {
+		name.focus();
+		name.select();
+	}
 }
 
 function buildDataCell(sheet, column, row) {
@@ -609,8 +673,9 @@ function renderTable() {
 	const headRow = document.createElement('tr');
 	const corner = document.createElement('th');
 	corner.className = 'neo-row-head neo-corner';
-	corner.textContent = '#';
+	corner.appendChild(buildHeaderFoldButton());
 	headRow.appendChild(corner);
+	head.closest('table').classList.toggle('is-header-folded', headerFolded);
 	sheet.columns.forEach((column, index) => headRow.appendChild(buildHeaderCell(sheet, column, index)));
 	const addCell = document.createElement('th');
 	addCell.className = 'neo-add-col';

@@ -1149,6 +1149,44 @@ input[type="number"]:focus {
 	display: none;
 }
 
+/* The corner button folds the header row down to the role line and the label. */
+.neo-table thead .neo-corner .neo-header-fold {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	border-radius: 6px;
+}
+
+.neo-header-fold svg {
+	transition: transform 0.15s ease;
+}
+
+.neo-table.is-header-folded .neo-header-fold svg {
+	transform: rotate(180deg);
+}
+
+.neo-table.is-header-folded .neo-col-name,
+.neo-table.is-header-folded .neo-col-unit {
+	display: none;
+}
+
+.neo-table.is-header-folded .neo-col-preview {
+	min-height: 1.6em;
+	border: 1px solid transparent;
+	text-align: center;
+	cursor: pointer;
+}
+
+.neo-table.is-header-folded .neo-col-preview:hover {
+	border-color: var(--line);
+}
+
+.neo-table.is-header-folded .neo-col-preview:focus-visible {
+	outline: none;
+	border-color: var(--accent);
+}
+
 .neo-col-formula {
 	display: block;
 	width: 100%;
