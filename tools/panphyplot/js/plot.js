@@ -35,8 +35,8 @@
 		return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
 	}
 
-	function getPlotThemeSettings() {
-		const theme = document.documentElement.getAttribute('data-theme') || 'light';
+	function getPlotThemeSettings(themeName) {
+		const theme = themeName || document.documentElement.getAttribute('data-theme') || 'light';
 		if (theme !== 'dark') {
 			// Light theme – distinct data colors with contrasting fit hues
 			return {
@@ -238,9 +238,7 @@
 	const PUBLICATION_HEIGHT = 480;
 	const PUBLICATION_PNG_SCALE = 4;
 	const PUBLICATION_FONT = 'Arial, Helvetica, sans-serif';
-	const PUBLICATION_COLORS = ['#1f4e9a', '#c62828', '#2e7d32', '#6a1b9a', '#e65100', '#00838f'];
 	const PUBLICATION_SYMBOLS = ['square', 'circle', 'triangle-up', 'diamond', 'triangle-down', 'star'];
-	const PUBLICATION_SINGLE_FIT_COLOR = '#d62728';
 	const PUBLICATION_CURVE_POINTS = 1500;
 	const PUBLICATION_EDGE_GAP = 14;
 	let exportTarget = null;
@@ -377,9 +375,19 @@
 		const pointNames = {};
 		shown.filter(isPointsTrace).forEach((trace) => { pointNames[trace.legendgroup] = trace.name; });
 		const errorBars = (bars) => bars ? { ...bars, color: '#000000', thickness: 1.2, width: 4 } : bars;
+		// Publication colors are the screen's light-theme colors, since the figure is always on white.
+		// Each series keeps its palette slot, found from its color in the current theme.
+		const screenColors = getPlotThemeSettings().datasetColors;
+		const light = getPlotThemeSettings('light');
+		const slots = {};
+		shown.filter(isPointsTrace).forEach((trace, order) => {
+			const slot = screenColors.indexOf(trace.marker?.color);
+			slots[trace.legendgroup] = slot >= 0 ? slot : order;
+		});
 		const data = shown.map((trace) => {
 			const index = Math.max(0, groups.indexOf(trace.legendgroup));
-			const color = PUBLICATION_COLORS[index % PUBLICATION_COLORS.length];
+			const slot = slots[trace.legendgroup] ?? index;
+			const color = light.datasetColors[slot % light.datasetColors.length];
 			if (isPointsTrace(trace)) {
 				const count = Array.isArray(trace.x) ? trace.x.length : 0;
 				return {
@@ -389,9 +397,9 @@
 					marker: {
 						color,
 						symbol: PUBLICATION_SYMBOLS[index % PUBLICATION_SYMBOLS.length],
-						size: count > 400 ? 5 : count > 150 ? 6.5 : 9,
+						size: count > 400 ? 3.5 : count > 150 ? 4.5 : 6.5,
 						opacity: 1,
-						line: { color: '#000000', width: count > 400 ? 0.5 : 1.1 }
+						line: { color: '#000000', width: count > 400 ? 0.4 : count > 150 ? 0.6 : 0.8 }
 					},
 					error_x: errorBars(trace.error_x),
 					error_y: errorBars(trace.error_y)
@@ -406,7 +414,7 @@
 				visible: true,
 				showlegend: true,
 				name: publicationFitName(pointNames[trace.legendgroup], stale, single),
-				line: { ...(trace.line || {}), color: single ? PUBLICATION_SINGLE_FIT_COLOR : color, width: 2, simplify: false }
+				line: { ...(trace.line || {}), color: light.fitColors[slot % light.fitColors.length], width: 2, simplify: false }
 			};
 		});
 		const xaxis = publicationAxis(gd.layout?.xaxis, full.xaxis);
