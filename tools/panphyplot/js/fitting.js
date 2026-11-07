@@ -1485,7 +1485,7 @@ function performPolynomialFit(x, y, degree) {
 		});
 		const uCoefficients = final.params;
 		const fitFunction = xi => model(uCoefficients, xi);
-		const { xFit, yFit } = sampleCurve(data, fitFunction, 100);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, 300);
 		// Carry the coefficients and their covariance from u to x: a = T b, Cov(a) = T Cov(b) Tᵀ.
 		const transform = polynomialToXMatrix(degree, fit.meanX, fit.stdX);
 		const xCoefficients = transform.map(row => row.reduce((sum, value, col) => sum + value * uCoefficients[col], 0));
@@ -1524,7 +1524,7 @@ function performExponentialFit() {
 		const final = finalizeParametricFit(data, { names: ['A', 'b', 'c'], params: [A, b, c], model, refine: false });
 		const params = final.params;
 		const fitFunction = x => model(params, x);
-		const xFit = buildFitDomainFromData(data, 100), yFit = xFit.map(fitFunction);
+		const xFit = buildFitDomainFromData(data, 300), yFit = xFit.map(fitFunction);
 		// A is the amplitude at the fixed reference x shown in the equation.
 		const equation = formatExpEquation(params[0], params[1], params[2], true, xRef);
 		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation, model: { kind: 'exponential', params: params.slice(), reference: xRef } };
@@ -1564,7 +1564,7 @@ function performPowerFit() {
 		});
 		const [A, b, x0, c] = final.params;
 		const fitFunction = xi => model(final.params, xi);
-		const { xFit, yFit } = sampleCurve(data, fitFunction, 100);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, 300);
 		const x0Text = x0 >= 0 ? ` - ${formatFitNumber(x0)}` : ` + ${formatFitNumber(Math.abs(x0))}`;
 		const cText = c >= 0 ? ` + ${formatFitNumber(c)}` : ` - ${formatFitNumber(Math.abs(c))}`;
 		const equation = `y = ${formatFitNumber(A)}(x${x0Text})^{${formatFitNumber(b)}}${cText}`;

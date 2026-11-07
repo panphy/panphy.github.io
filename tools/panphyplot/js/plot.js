@@ -241,6 +241,8 @@
 	const PUBLICATION_COLORS = ['#1f4e9a', '#c62828', '#2e7d32', '#6a1b9a', '#e65100', '#00838f'];
 	const PUBLICATION_SYMBOLS = ['square', 'circle', 'triangle-up', 'diamond', 'triangle-down', 'star'];
 	const PUBLICATION_SINGLE_FIT_COLOR = '#d62728';
+	const PUBLICATION_CURVE_POINTS = 1500;
+	const PUBLICATION_EDGE_GAP = 14;
 	let exportTarget = null;
 
 	function readExportPrefs() {
@@ -327,6 +329,29 @@
 		};
 	}
 
+	// Redraws a fit line from its fit function with enough points to look smooth at print size;
+	// a fit whose function is unavailable keeps its own points.
+	function densePublicationCurve(trace) {
+		const own = { x: trace.x, y: trace.y };
+		const fn = typeof fitFunctions !== 'undefined' ? fitFunctions[trace.meta] : null;
+		const xs = (Array.isArray(trace.x) ? trace.x : []).filter(Number.isFinite);
+		if (typeof fn !== 'function' || xs.length < 2) return own;
+		const from = Math.min(...xs);
+		const to = Math.max(...xs);
+		if (!(to > from)) return own;
+		const count = Math.min(Math.max(xs.length, PUBLICATION_CURVE_POINTS), 6000);
+		const x = Array.from({ length: count }, (_, i) => from + (i * (to - from)) / (count - 1));
+		const y = x.map((value) => {
+			try {
+				const result = fn(value);
+				return Number.isFinite(result) ? result : null;
+			} catch (error) {
+				return null;
+			}
+		});
+		return y.some(value => value !== null) ? { x, y } : own;
+	}
+
 	// An automatic range ends exactly at a point on zero, which would sit half on the frame;
 	// give that side a little room instead. A range the user zoomed to is kept as it is.
 	function padPublicationRange(axis, traces, key) {
@@ -373,12 +398,15 @@
 				};
 			}
 			const stale = trace.line?.dash === 'dash';
+			const dense = densePublicationCurve(trace);
 			return {
 				...trace,
+				x: dense.x,
+				y: dense.y,
 				visible: true,
 				showlegend: true,
 				name: publicationFitName(pointNames[trace.legendgroup], stale, single),
-				line: { ...(trace.line || {}), color: single ? PUBLICATION_SINGLE_FIT_COLOR : color, width: 2 }
+				line: { ...(trace.line || {}), color: single ? PUBLICATION_SINGLE_FIT_COLOR : color, width: 2, simplify: false }
 			};
 		});
 		const xaxis = publicationAxis(gd.layout?.xaxis, full.xaxis);
@@ -430,10 +458,68 @@
 		};
 	}
 
+	// Plotly sizes each margin to fit its labels exactly, so an axis title would end flush with the
+	// image edge. Draw the figure off-screen, measure its labels, and set every side to the same gap.
+	async function drawPublicationFigure(figure) {
+		const holder = document.createElement('div');
+		holder.setAttribute('aria-hidden', 'true');
+		holder.style.cssText = `position:fixed;left:-20000px;top:0;width:${PUBLICATION_WIDTH}px;height:${PUBLICATION_HEIGHT}px;pointer-events:none;`;
+		document.body.appendChild(holder);
+		try {
+			await Plotly.newPlot(holder, figure.data, figure.layout, { staticPlot: true });
+			for (let pass = 0; pass < 3; pass++) {
+				const margin = publicationMarginsFor(holder);
+				if (!margin) break;
+				await Plotly.relayout(holder, { margin });
+			}
+			return holder;
+		} catch (error) {
+			Plotly.purge(holder);
+			holder.remove();
+			throw error;
+		}
+	}
+
+	function publicationMarginsFor(holder) {
+		const full = holder._fullLayout;
+		const box = holder.getBoundingClientRect();
+		if (!full || !full.margin || !full._size) return null;
+		let left = Infinity;
+		let right = -Infinity;
+		let bottom = -Infinity;
+		holder.querySelectorAll('.xtick, .ytick, .g-xtitle, .g-ytitle').forEach((node) => {
+			const rect = node.getBoundingClientRect();
+			if (!rect.width || !rect.height) return;
+			left = Math.min(left, rect.left - box.left);
+			right = Math.max(right, rect.right - box.left);
+			bottom = Math.max(bottom, rect.bottom - box.top);
+		});
+		const size = full._size;
+		right = Math.max(right, size.l + size.w);
+		if (!Number.isFinite(left) || !Number.isFinite(bottom)) return null;
+		const gap = PUBLICATION_EDGE_GAP;
+		const margin = {
+			l: Math.round(full.margin.l + gap - left),
+			r: Math.round(full.margin.r + gap - (PUBLICATION_WIDTH - right)),
+			b: Math.round(full.margin.b + gap - (PUBLICATION_HEIGHT - bottom)),
+			t: full.margin.t
+		};
+		const changed = ['l', 'r', 'b'].some(side => Math.abs(margin[side] - full.margin[side]) >= 1);
+		return changed ? margin : null;
+	}
+
 	async function downloadGraph(gd, filenameBase, style, format) {
 		const options = exportOptions(gd, style, format);
+		let holder = null;
 		try {
-			const dataUrl = await Plotly.toImage(options.figure, {
+			if (style === 'publication') {
+				try {
+					holder = await drawPublicationFigure(options.figure);
+				} catch (error) {
+					console.warn('Publication layout could not be measured; using default margins.', error);
+				}
+			}
+			const dataUrl = await Plotly.toImage(holder || options.figure, {
 				format,
 				scale: options.scale,
 				width: options.width,
@@ -453,6 +539,11 @@
 				width: options.width,
 				height: options.height
 			});
+		} finally {
+			if (holder) {
+				Plotly.purge(holder);
+				holder.remove();
+			}
 		}
 	}
 
@@ -739,7 +830,8 @@
 		if (curve && Array.isArray(curve.x)) {
 			const stale = !!datasetFitResults[key]?.stale;
 			// The fit sits above the points but is narrower than them, so points that lie
-			// exactly on it still show on both sides.
+			// exactly on it still show on both sides. Plotly's line simplification is off, because
+			// it drops points by screen pixels and leaves visible corners in enlarged image exports.
 			traces.push({
 				x: curve.x,
 				y: curve.y,
@@ -750,7 +842,7 @@
 				showlegend: false,
 				hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
 				visible: hidden ? 'legendonly' : true,
-				line: { color: fitColor, width: 1.75, dash: stale ? 'dash' : 'solid' }
+				line: { color: fitColor, width: 1.75, dash: stale ? 'dash' : 'solid', simplify: false }
 			});
 		}
 		return traces;
