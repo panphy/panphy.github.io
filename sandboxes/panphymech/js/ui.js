@@ -917,7 +917,6 @@
         pulleyFields(l, false).forEach((el) => main.appendChild(el));
         rows.push({ key: 'force', label: 'Tension \\(T\\)', plain: 'Tension T' }, { key: 'sideA', label: `Side to ${endName(l().a)}`, plain: `Side to ${endName(l().a)}` }, { key: 'sideB', label: `Side to ${endName(l().b)}`, plain: `Side to ${endName(l().b)}` }, { key: 'slack', label: 'Slack', plain: 'Slack' });
       } else if (l().kind === 'hinge') {
-        main.appendChild(toggleField('Motor', () => l().motor, (v) => app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true)));
         if (l().motor) {
           motorFields(l, param, true).forEach((el) => main.appendChild(el));
           main.appendChild(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
@@ -1143,10 +1142,6 @@
       } else if (l().kind === 'gear') {
         gearFields(l).forEach((el) => items.push(el));
       } else if (l().kind === 'hinge') {
-        items.push(toggleField('Motor', () => l().motor, (v) => {
-          app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true);
-          if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y);
-        }));
         if (l().motor) {
           motorFields(l, param, false).forEach((el) => items.push(el));
           items.push(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
@@ -1163,7 +1158,8 @@
       ui.fields = saved;
       if (!items.length) {
         ui.closeQuick();
-        app.toast('Glue has no settings. Select it to see the force on the joint.');
+        const none = sel.type === 'link' && S.linkById(app.scene, sel.id);
+        app.toast(none && none.kind === 'hinge' ? 'A hinge has no settings. Select it to see the force on the pin.' : 'Glue has no settings. Select it to see the force on the joint.');
         return;
       }
       const obj = sel.type === 'body' ? S.bodyById(app.scene, sel.id) : S.linkById(app.scene, sel.id);

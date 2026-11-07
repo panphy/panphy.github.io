@@ -218,10 +218,14 @@ async function gears() {
   })()`);
   await capture('gear-1');
   await evaluate(`(() => {
-    const a = PPM.app;
+    const a = PPM.app, S = PPM.scene;
     const driver = a.scene.bodies.find((b) => b.name === 'Driver');
     const axle = a.scene.links.find((l) => l.kind === 'hinge' && l.a === driver.id);
-    a.edit(() => { Object.assign(axle, { name: 'Motor', motor: true, speed: 3, dir: 1, torque: 20 }); });
+    // As choosing Motor and clicking the hinge does: a motor in its place, on the same objects.
+    a.edit(() => {
+      const i = a.scene.links.indexOf(axle);
+      a.scene.links[i] = Object.assign(S.makeLink(a.scene, 'motor', axle.a, axle.la, axle.b, axle.lb), { id: axle.id, name: 'Motor', speed: 3, dir: 1, torque: 20 });
+    });
     a.select({ type: 'link', id: axle.id });
     return true;
   })()`);
