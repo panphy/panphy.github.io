@@ -388,15 +388,8 @@ function applyMean() {
 
 let csvImport = null;
 
-function chooseCsvFile() {
-	const input = document.getElementById('csv-file-input');
-	input.value = '';
-	input.click();
-}
-
-function handleCsvFile(event) {
-	const file = event.target.files && event.target.files[0];
-	if (!file) return;
+// File → Open passes CSV and text files here; project.js decides which kind a file is.
+function importCsvFile(file) {
 	const reader = new FileReader();
 	reader.onload = () => {
 		const rows = PlotModel.parseCsv(String(reader.result || ''));
@@ -585,12 +578,9 @@ function initializeDialogs() {
 	});
 	document.getElementById('mean-button').addEventListener('click', openMeanDialog);
 	document.getElementById('mean-apply').addEventListener('click', applyMean);
-	document.getElementById('import-csv-button').addEventListener('click', chooseCsvFile);
-	document.getElementById('csv-file-input').addEventListener('change', handleCsvFile);
 	document.getElementById('csv-headers').addEventListener('change', () => {
 		resetCsvRoles();
 		renderCsvPreview();
 	});
 	document.getElementById('csv-apply').addEventListener('click', applyCsvImport);
-	document.getElementById('export-csv-button').addEventListener('click', exportCsv);
 }

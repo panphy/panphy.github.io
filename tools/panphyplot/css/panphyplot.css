@@ -491,6 +491,13 @@ input[type="number"]:focus {
 	color: var(--accent);
 }
 
+.neo-tool .neo-icon-chevron {
+	width: 14px;
+	height: 14px;
+	margin-left: -3px;
+	color: var(--ink-3);
+}
+
 .neo-tool-quiet {
 	color: var(--ink-2);
 }
@@ -2207,6 +2214,12 @@ input[type="number"]:focus {
 
 .neo-menu button.is-danger:not(:disabled) {
 	color: var(--danger);
+}
+
+.neo-menu-separator {
+	height: 1px;
+	margin: 4px 6px;
+	background: var(--line);
 }
 
 /* ---------- Dialogs ---------- */

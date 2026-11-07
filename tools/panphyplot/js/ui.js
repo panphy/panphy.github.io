@@ -926,6 +926,7 @@ function closeMenu() {
 	if (!menu || menu.hidden) return;
 	menu.hidden = true;
 	menu.replaceChildren();
+	if (menuOpener && menuOpener.hasAttribute('aria-expanded')) menuOpener.setAttribute('aria-expanded', 'false');
 	if (menuOpener && menuOpener.isConnected) menuOpener.focus();
 	menuOpener = null;
 }
@@ -939,6 +940,13 @@ function openMenu(opener, items) {
 	}
 	menu.replaceChildren();
 	items.forEach((item) => {
+		if (item.separator) {
+			const line = document.createElement('div');
+			line.className = 'neo-menu-separator';
+			line.setAttribute('role', 'separator');
+			menu.appendChild(line);
+			return;
+		}
 		const button = document.createElement('button');
 		button.type = 'button';
 		button.setAttribute('role', 'menuitem');
@@ -952,6 +960,7 @@ function openMenu(opener, items) {
 		menu.appendChild(button);
 	});
 	menuOpener = opener;
+	if (opener.hasAttribute('aria-expanded')) opener.setAttribute('aria-expanded', 'true');
 	menu.hidden = false;
 	const rect = opener.getBoundingClientRect();
 	const width = menu.offsetWidth;
@@ -1869,7 +1878,7 @@ function initializeInterface() {
 
 	document.addEventListener('pointerdown', (event) => {
 		const menu = document.getElementById('neo-menu');
-		if (menu && !menu.hidden && !menu.contains(event.target) && event.target !== menuOpener) closeMenu();
+		if (menu && !menu.hidden && !menu.contains(event.target) && !(menuOpener && menuOpener.contains(event.target))) closeMenu();
 	});
 	document.addEventListener('keydown', (event) => {
 		if (event.key !== 'Escape') return;

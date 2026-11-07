@@ -253,10 +253,9 @@ function commitProject(project) {
 	flushSaveState();
 }
 
-async function handleProjectFile(event) {
-	const file = event.target.files?.[0];
-	event.target.value = '';
-	if (!file) return;
+async function openProjectFile(file) {
+	if (projectFitBusy()) return showToast('Wait for the current fit to finish before opening a project.');
+	if (persistenceDisabled || changedElsewhere) return showToast('Finish the tour or resolve the other-tab changes before opening a project.');
 	try {
 		if (file.size > window.PanPhyPlotProject.MAX_BYTES) throw new Error('The project file is too large (maximum 50 MB).');
 		const project = prepareProject(await file.text());
@@ -269,12 +268,32 @@ async function handleProjectFile(event) {
 	}
 }
 
+// File → Open takes either kind of file: a project replaces the workspace, while a CSV
+// goes to the import dialog. Files without a known extension are judged by their first character.
+async function handleOpenFile(event) {
+	const file = event.target.files?.[0];
+	event.target.value = '';
+	if (!file) return;
+	let isProject = /\.ppplot$/i.test(file.name);
+	if (!isProject && !/\.(csv|txt)$/i.test(file.name)) {
+		const start = await file.slice(0, 64).text().catch(() => '');
+		isProject = start.trimStart().startsWith('{');
+	}
+	if (isProject) openProjectFile(file);
+	else importCsvFile(file);
+}
+
+function openFileMenu(opener) {
+	openMenu(opener, [
+		{ label: 'Open project or CSV…', action: () => document.getElementById('open-file-input').click() },
+		{ separator: true },
+		{ label: 'Save project (.ppplot)', action: saveProject },
+		{ label: 'Export this sheet as CSV', action: exportCsv }
+	]);
+}
+
 function initializeProjects() {
-	document.getElementById('save-project-button').addEventListener('click', saveProject);
-	document.getElementById('open-project-button').addEventListener('click', () => {
-		if (projectFitBusy()) return showToast('Wait for the current fit to finish before opening a project.');
-		if (persistenceDisabled || changedElsewhere) return showToast('Finish the tour or resolve the other-tab changes before opening a project.');
-		document.getElementById('project-file-input').click();
-	});
-	document.getElementById('project-file-input').addEventListener('change', handleProjectFile);
+	const fileButton = document.getElementById('file-menu-button');
+	fileButton.addEventListener('click', () => openFileMenu(fileButton));
+	document.getElementById('open-file-input').addEventListener('change', handleOpenFile);
 }
