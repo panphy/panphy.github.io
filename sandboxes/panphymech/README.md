@@ -2,7 +2,7 @@
 
 A 2D mechanics sandbox in the style of Algodoo. Entry point: `sandboxes/panphymech.html`, listed under Sandboxes on the homepage. Plain HTML, CSS and classic scripts on the global `PPM` namespace; no build step. It works offline: runtime files and the manual are listed in `ASSETS_TO_CACHE` in `sw.js` and `OFFLINE_CARD_REQUIREMENTS` in `index.html`. Add new runtime files to both and bump `BUILD_ID`.
 
-Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rope, pulley, hinge, motor, gear, glue) go on a canvas in SI units; a spring can join another connector end to end. Play runs the physics; the graph shows position, velocity or energy of one object, a spring or the whole system, with CSV and PanPhyPlot export.
+Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, glue, rope, hinge, motor, pulley, gear) go on a canvas in SI units; a spring can join another connector end to end. Play runs the physics; the graph shows position, velocity or energy of one object, a spring or the whole system, with CSV and PanPhyPlot export.
 
 The [user manual](manual.html) has a five-step pendulum walkthrough, two five-step tips (building the Motor car with Merge and Subtract, and the Gear train with a compound gear) and a reference for building, connectors, graphs, files and shortcuts. The app’s Manual control opens it in a large overlay, full-screen on small screens, with an Open in new tab option.
 
@@ -36,7 +36,7 @@ The Terminal velocity example drops two identical 0.5 kg balls through 6 m: the 
 
 ## Physics model
 
-- The scene is the setup at t = 0. Play builds a world from it; Reset rebuilds it. Editing the setup after time has run (moving, resizing, adding or deleting anything) first makes the current state the new start, with one undo step back to the old one. Parameters (mass, friction, restitution, drag, spring and motor settings, rope lengths, gravity) apply immediately without restarting.
+- The scene is the setup at t = 0. Play builds a world from it; Reset rebuilds it. Editing the setup after time has run (moving, resizing, adding or deleting anything) first makes the current state the new start, including each object's velocity and spin, with one undo step back to the old one. A toast says so on every such edit and counts the objects still moving. Parameters (mass, friction, restitution, drag, spring and motor settings, rope lengths, gravity) apply immediately without restarting.
 - World **Accuracy** (`world.accuracy`: `standard`, `fine` or `veryFine`, saved with the scene) sets the longest step: 1/240, 1/480 or 1/1000 s. Solid rods and ropes halve it, and it is shortened so the stiffest spring has ω·h ≤ 0.05 (not below 1/5000 s). One step serves the whole scene and is recomputed whenever parameters sync. A non-Standard accuracy is listed in the notes pill.
 - The reset icon in the World card restores all world settings to the new-scene defaults in one undoable edit. Parameters apply live; restoring a disabled floor follows the usual floor edit behavior and makes the current state the new start.
 - Springs follow Hooke's law with optional linear damping; air resistance is F = kv². Both are applied before each step. When a spring’s stiffness or damping cannot be resolved at the minimum step, its spring and damper are solved together with a backward-Euler impulse, including rotational inertia at off-center attachments. This fallback is stable but adds numerical damping; ordinary spring settings retain the force integrator.
