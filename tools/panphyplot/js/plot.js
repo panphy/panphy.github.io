@@ -238,6 +238,8 @@
 	const PUBLICATION_HEIGHT = 480;
 	const PUBLICATION_PNG_SCALE = 4;
 	const PUBLICATION_FONT = 'Arial, Helvetica, sans-serif';
+	// Okabe–Ito colors: vivid on white and distinguishable with color blindness and in grayscale.
+	const PUBLICATION_COLORS = ['#0072b2', '#e69f00', '#009e73', '#d55e00', '#cc79a7', '#56b4e9'];
 	const PUBLICATION_SYMBOLS = ['square', 'circle', 'triangle-up', 'diamond', 'triangle-down', 'star'];
 	const PUBLICATION_CURVE_POINTS = 1500;
 	const PUBLICATION_EDGE_GAP = 14;
@@ -375,10 +377,9 @@
 		const pointNames = {};
 		shown.filter(isPointsTrace).forEach((trace) => { pointNames[trace.legendgroup] = trace.name; });
 		const errorBars = (bars) => bars ? { ...bars, color: '#000000', thickness: 1.2, width: 4 } : bars;
-		// Publication colors are the screen's light-theme colors, since the figure is always on white.
-		// Each series keeps its palette slot, found from its color in the current theme.
+		// Each series keeps its palette slot, found from its color in the current theme, and each fit
+		// is a darker shade of its own points so the two pair up at a glance.
 		const screenColors = getPlotThemeSettings().datasetColors;
-		const light = getPlotThemeSettings('light');
 		const slots = {};
 		shown.filter(isPointsTrace).forEach((trace, order) => {
 			const slot = screenColors.indexOf(trace.marker?.color);
@@ -387,7 +388,7 @@
 		const data = shown.map((trace) => {
 			const index = Math.max(0, groups.indexOf(trace.legendgroup));
 			const slot = slots[trace.legendgroup] ?? index;
-			const color = light.datasetColors[slot % light.datasetColors.length];
+			const color = PUBLICATION_COLORS[slot % PUBLICATION_COLORS.length];
 			if (isPointsTrace(trace)) {
 				const count = Array.isArray(trace.x) ? trace.x.length : 0;
 				return {
@@ -414,7 +415,7 @@
 				visible: true,
 				showlegend: true,
 				name: publicationFitName(pointNames[trace.legendgroup], stale, single),
-				line: { ...(trace.line || {}), color: light.fitColors[slot % light.fitColors.length], width: 2, simplify: false }
+				line: { ...(trace.line || {}), color: mixHex(color, '#000000', 0.3), width: 2, simplify: false }
 			};
 		});
 		const xaxis = publicationAxis(gd.layout?.xaxis, full.xaxis);
