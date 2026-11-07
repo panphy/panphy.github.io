@@ -489,6 +489,8 @@
     'level-diagram': el => {
       const arrows = (el.dataset.arrows || '').split(',').filter(Boolean).map(pair => pair.split('-').map(Number));
       const values = el.dataset.values !== 'off';
+      // data-gaps="off" leaves the arrows unlabeled, for a worked example that finds the gap.
+      const gaps = values && el.dataset.gaps !== 'off';
       let s = arrow(36, 480, 36, 70, 'text-secondary', 2.5) + text(22, 280, 'energy', 'lbl mono', 'middle', 'transform="rotate(-90 22 280)"');
       Object.entries(LEVELS).forEach(([n, level]) => {
         const free = n === 'inf';
@@ -503,7 +505,7 @@
         const up = LEVELS[to].y < LEVELS[from].y;
         s += arrow(x, LEVELS[from].y + (up ? -4 : 4), x, LEVELS[to].y + (up ? 14 : -14), up ? 'photon' : 'brand-accent', 4);
         const gap = Math.abs(H_LEVEL(from) - H_LEVEL(to));
-        if (values) s += text(x + 12, Math.max(LEVELS[from].y, LEVELS[to].y) - 30, `${gap.toFixed(gap < 10 ? 2 : 1)} eV`, 'lbl mono small halo', 'start');
+        if (gaps) s += text(x + 12, Math.max(LEVELS[from].y, LEVELS[to].y) - 30, `${gap.toFixed(gap < 10 ? 2 : 1)} eV`, 'lbl mono small halo', 'start');
       });
       return svg('0 0 700 520', s, 'Energy level diagram for hydrogen: n = 1 at minus 13.6 electronvolts, n = 2 at minus 3.40, n = 3 at minus 1.51, n = 4 at minus 0.85, and zero for a free electron');
     },
@@ -638,7 +640,8 @@
         s += `<line x1="98" y1="130" x2="110" y2="130" class="tick"/>` + text(88, 138, '12', 'lbl mono', 'end') + text(96, 438, '0', 'lbl mono', 'end');
         s += text(772, 408, 't / s', 'lbl mono', 'start');
         s += `<path d="M286,130 V400 M550,130 V400" class="guide"/>`;
-        s += text(226, 340, '24 m', 'lbl strong') + text(418, 280, '72 m', 'lbl strong') + text(594, 340, '18 m', 'lbl strong');
+        // The areas are part of the worked answer, so they appear on the last click.
+        s += `<g class="step">${text(226, 340, '24 m', 'lbl strong') + text(418, 280, '72 m', 'lbl strong') + text(594, 340, '18 m', 'lbl strong')}</g>`;
       } else {
         s += `<path d="M170,308 H250 V185" class="guide accent"/>` + text(268, 240, 'gradient = acceleration', 'lbl strong', 'start');
         s += text(400, 335, 'area = displacement', 'lbl strong') + text(418, 112, 'constant velocity', 'lbl small');
