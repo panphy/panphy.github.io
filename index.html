@@ -677,24 +677,6 @@
             box-shadow: 0 10px 30px -12px rgba(59, 91, 255, 0.5);
         }
 
-        .hero-facts {
-            display: flex;
-            gap: 2.4rem;
-            margin: 2.2rem 0 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .hero-facts strong { display: block; font-family: var(--font-display); font-size: 2.2rem; font-weight: 600; line-height: 1.1; }
-
-        .hero-facts span {
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-
         /* Showcase: a glass instrument panel with a spectral rim */
         .scope {
             --scope-bg: var(--card-solid);
@@ -1019,7 +1001,6 @@
             }
             nav a { justify-content: center; padding: 0.4rem 0.2rem; font-size: 0.62rem; letter-spacing: 0.02em; }
             .grid, .grid.is-scroller { grid-template-columns: 1fr; }
-            .hero-facts { gap: 1.6rem; }
         }
 
         @media (max-width: 480px) {
@@ -1077,11 +1058,6 @@
             </div>
             <h1>PanPhy <em>Labs</em></h1>
             <p class="hero-tagline">Physics apps, tools, sims, and some random stuff.</p>
-            <ul class="hero-facts">
-                <li><strong id="fact-apps">21</strong><span>apps</span></li>
-                <li><strong id="fact-offline">19</strong><span>work offline</span></li>
-                <li><strong>0</strong><span>installs</span></li>
-            </ul>
         </div>
         <a class="scope" id="scope" href="/simulations/superposition.html" aria-label="Open the Wave Superposition simulation">
             <span class="scope-note scope-swap" id="scope-note" aria-hidden="true">y = y₁ + y₂</span>
@@ -1754,9 +1730,6 @@
             var activeTopic = 'all';
 
             if (!appSections.length) return;
-
-            var appsFact = document.getElementById('fact-apps');
-            if (appsFact) appsFact.textContent = document.querySelectorAll('.app-section .card').length;
 
             // Give each card a concise accessible name and description.
             document.querySelectorAll('.card').forEach(function (card, index) {
@@ -2578,8 +2551,6 @@
         const OFFLINE_POLL_MS = 3000;
         const OFFLINE_POLL_MAX = 40;
         const offlineStatus = document.getElementById('offline-status');
-        const offlineFact = document.getElementById('fact-offline');
-        if (offlineFact) offlineFact.textContent = OFFLINE_APP_PATHS.length;
         let offlinePollCount = 0;
         let offlineReadyPollId = 0;
         let offlineReadinessUpdateInFlight = false;
