@@ -91,7 +91,7 @@
 
   const PART_GROUPS = [
     { title: 'Objects', items: ['ball', 'box', 'plank', 'polygon', 'wedge', 'wall'] },
-    { title: 'Connectors', items: ['spring', 'rod', 'rope', 'pulley', 'hinge', 'motor', 'gear', 'weld'] }
+    { title: 'Connectors', items: ['spring', 'rod', 'weld', 'rope', 'hinge', 'motor', 'pulley', 'gear'] }
   ];
   const PART_TITLES = {
     ball: 'Ball: a movable circle', box: 'Box: a movable square block', plank: 'Plank: a long thin movable bar',
