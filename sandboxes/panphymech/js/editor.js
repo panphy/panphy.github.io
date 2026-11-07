@@ -15,8 +15,8 @@
     spring: 'Spring: click the first end on an object or the background, then the second end. Right-click or Esc cancels.',
     rod: 'Rod: click the first end on an object or the background, then the second end. A rod keeps its length. Right-click or Esc cancels.',
     rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack. Right-click or Esc cancels.',
-    hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background. Right-click or Esc cancels.',
-    motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle). Right-click or Esc cancels.',
+    hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background. Click a motor to replace it with a hinge. Right-click or Esc cancels.',
+    motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle). Click a hinge to replace it with a motor. Right-click or Esc cancels.',
     weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background. Right-click or Esc cancels.',
     pulley: 'Pulley: click where the wheel goes, then the first end of the rope, then the second end. Right-click or Esc cancels.',
     gear: 'Gear: click a ball, then a second ball to mesh with it. Each turns on a hinge at its center (added if missing), and the second slides into mesh. Right-click or Esc cancels.'
@@ -350,6 +350,8 @@
         return { point: target.world, ok: true };
       }
       if (['hinge', 'motor', 'weld'].includes(ed.tool)) {
+        const swap = swapTarget(w);
+        if (swap) return { point: S.endPoint(app.scene, swap.a, swap.la, app.poseOf), ok: true };
         const bs = jointBodies(w);
         return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
       }
@@ -560,7 +562,38 @@
       else app.setHint(HINTS.pulley);
     }
 
+    // A hinge under the pointer when placing a motor, or a motor when placing a hinge: clicking
+    // it swaps it for the new joint in the same spot, on the same objects.
+    function swapTarget(w) {
+      if (ed.tool !== 'hinge' && ed.tool !== 'motor') return null;
+      const sp = rr().toScreen(w);
+      let best = null, bestD = 10;
+      app.scene.links.forEach((l) => {
+        if (l.kind !== 'hinge' || !!l.motor === (ed.tool === 'motor')) return;
+        const p = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
+        const d = Math.hypot(sp.x - p.x, sp.y - p.y);
+        if (d <= bestD) { bestD = d; best = l; }
+      });
+      return best;
+    }
+
+    function swapJoint(old, keep) {
+      const kind = ed.tool;
+      app.edit(() => {
+        const i = app.scene.links.findIndex((l) => l.id === old.id);
+        const l = S.makeLink(app.scene, kind, old.a, { ...old.la }, old.b, old.lb && { ...old.lb });
+        l.id = old.id;
+        // A name the user chose stays; a default one follows the new kind.
+        if (!/^(Hinge|Motor) \d+$/.test(old.name)) l.name = old.name;
+        app.scene.links[i] = l;
+        app.select({ type: 'link', id: l.id });
+      });
+      if (!keep) ed.setTool('select');
+    }
+
     function placeJoint(w, keep) {
+      const swap = swapTarget(w);
+      if (swap) { swapJoint(swap, keep); return; }
       const bs = jointBodies(w);
       if (!bs.length) { app.toast('Click on an object.'); return; }
       const top = bs[0];

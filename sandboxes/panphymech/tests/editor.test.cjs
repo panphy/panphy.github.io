@@ -47,6 +47,28 @@ test('every connector can be dropped directly without choosing a tool first', ()
   }
 });
 
+test('a motor dropped on a hinge replaces it in place, and a hinge dropped on a motor turns it back', () => {
+  const h = setup();
+  h.ed.dropConnector('hinge', 310, 205);
+  const hinge = h.app.scene.links[0];
+  const at = { la: { ...hinge.la }, lb: { ...hinge.lb } };
+  h.ed.dropConnector('motor', 312, 203);
+  assert.equal(h.app.scene.links.length, 1);
+  let l = h.app.scene.links[0];
+  assert.equal(l.id, hinge.id); assert.equal(l.kind, 'hinge'); assert.equal(l.motor, true);
+  assert.equal(l.name, 'Motor 1'); assert.ok(l.torque > 0 && l.speed !== 0);
+  assert.equal(JSON.stringify({ la: l.la, lb: l.lb }), JSON.stringify(at));
+  assert.equal(l.a, hinge.a); assert.equal(l.b, hinge.b);
+  l.name = 'Drive';
+  h.ed.dropConnector('hinge', 310, 205);
+  l = h.app.scene.links[0];
+  assert.equal(h.app.scene.links.length, 1);
+  assert.equal(l.motor, false); assert.equal(l.speed, 0); assert.equal(l.name, 'Drive');
+  // Away from the joint, a motor is a new joint as before.
+  h.ed.dropConnector('motor', 280, 220);
+  assert.equal(h.app.scene.links.length, 2);
+});
+
 test('dropping outside the canvas preserves the active tool and pending endpoint', () => {
   const h = setup(); h.ed.setTool('rope');
   h.ed.dropConnector('rope', 300, 200);
