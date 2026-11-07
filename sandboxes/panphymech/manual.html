@@ -490,7 +490,7 @@
 <div class="reference-body">
 <ul>
 <li>Pause keeps the current motion and recording. Play resumes. While running, drag an object to pull it with a force.</li>
-<li>Moving, resizing, adding or deleting after time has run makes the current state the new starting setup and starts a fresh recording. Undo can return to the previous setup.</li>
+<li>Moving, resizing, adding or deleting after time has run makes the current state the new starting setup and starts a fresh recording. Objects keep the speed and spin they had then, so a gear whose motor you delete keeps turning; set its Angular velocity to 0 to stop it. A message says so each time, and Undo returns to the previous setup.</li>
 <li>Parameter changes such as mass, friction, restitution, drag, gravity, World accuracy, spring or motor settings and rope lengths apply immediately. Reset first when you want to compare runs from the same initial conditions.</li>
 <li>Reset rebuilds the starting setup at time zero and clears the graph. A saved scene is an editable setup, not a replay or a graph recording.</li>
 </ul>

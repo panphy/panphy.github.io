@@ -199,12 +199,13 @@
 
   // ---------- Edits ----------
 
-  let committedNotice = false;
-  // Editing the setup after time has run makes the current state the new start.
+  // Editing the setup after time has run makes the current state the new start, keeping
+  // every object's motion. Each time, a notice says so and offers Undo.
   function commitLiveIfNeeded() {
     if (!app.sim || app.sim.t <= 0) return false;
     const t = app.sim.t;
     const state = app.sim.capture();
+    let moving = 0;
     app.scene.bodies.forEach((b) => {
       const s = state[b.id];
       if (!s || b.fixed) return;
@@ -212,12 +213,11 @@
       b.vx = Math.abs(s.vx) < 1e-9 ? 0 : s.vx;
       b.vy = Math.abs(s.vy) < 1e-9 ? 0 : s.vy;
       b.omega = Math.abs(s.omega) < 1e-9 ? 0 : s.omega;
+      if (Math.hypot(b.vx, b.vy) > 1e-3 || Math.abs(b.omega) > 1e-3) moving++; // resting jitter does not count
     });
     rebuild();
-    if (!committedNotice) {
-      committedNotice = true;
-      app.toast(`Edited at t = ${t.toFixed(2)} s: that moment is now the start (t = 0).`, { label: 'Undo', run: () => app.undo() });
-    }
+    const keep = moving === 1 ? ' 1 object keeps moving.' : moving ? ` ${moving} objects keep moving.` : '';
+    app.toast(`Edited at ${t.toFixed(2)} s, so this is now the start.${keep}`, { label: 'Undo', run: () => app.undo() });
     return true;
   }
 
