@@ -1291,6 +1291,20 @@ input[type="number"]:focus {
 	padding: 8px 12px;
 }
 
+/* Download graph sits just left of the maximize button. */
+.neo-graph-download {
+	align-self: center;
+	margin-left: auto;
+}
+
+.neo-graph-download + .neo-pane-max {
+	margin-left: 0;
+}
+
+@media (max-width: 520px) {
+	.neo-graph-download > span { display: none; }
+}
+
 .neo-title-input {
 	flex: 1;
 	min-width: 0;
