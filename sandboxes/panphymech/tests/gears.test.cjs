@@ -226,3 +226,12 @@ test('gears on a free frame: the frame turns back and angular momentum is conser
   assert.ok(sim.readBody(frame.id).omega < -0.1, 'the frame turns the other way');
   close(momentum(), 0, 1e-3, 'total angular momentum');
 });
+
+test('a fast gear train keeps its ratio: Box2D’s per-step turn limit does not cap the small gear', () => {
+  const { scene, l } = pair(120, 6, { speed: 30, dir: 1, torque: 100000 });
+  const sim = P.createSim(scene);
+  run(sim, 1);
+  const r = sim.readLink(l.id);
+  close(r.omegaA, 30, 1e-6, 'driver ω');
+  close(r.omegaB, -600, 1e-3, 'small gear ω = −ω₁N₁/N₂');
+});

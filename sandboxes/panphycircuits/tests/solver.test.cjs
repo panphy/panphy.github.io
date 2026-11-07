@@ -756,3 +756,96 @@ test('a circuit faster than the time step can follow is flagged, and an ordinary
   slow.sim.setDoc(slow.doc);
   assert.ok(/Choose the Auto time step/.test(solver.stepNote(slow.sim).msg), 'a manual step that is too long');
 });
+
+test('the automatic step resolves an RC time constant behind an ideal ammeter or a closed switch', () => {
+  for (const middle of [['ammeter', {}, 'p', 'n'], ['switch', { closed: true }, 'a', 'b']]) {
+    const c = build({
+      comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 1000 }], X1: [middle[0], middle[1]], C1: ['capacitor', { C: 10e-6 }] },
+      wires: [['B1.p', 'R1.a'], ['R1.b', `X1.${middle[2]}`], [`X1.${middle[3]}`, 'C1.p'], ['C1.n', 'B1.n']]
+    });
+    assert.ok(c.sim.dt <= 1e-4, `${middle[0]}: dt ${c.sim.dt}`);
+    while (c.sim.t < 0.01 - 1e-12) c.sim.step();
+    close(c.read('C1').v('p', 'n'), 6 * (1 - Math.exp(-c.sim.t / 0.01)), 1e-3, middle[0]);
+  }
+});
+
+test('a capacitor discharging through a filament lamp gets a step from the lamp’s resistance', () => {
+  const c = build({
+    comps: { L1: ['lamp', { ratedV: 6, ratedI: 0.3 }], C1: ['ecap', { C: 1e-3, v0: 6 }] },
+    wires: [['C1.p', 'L1.a'], ['L1.b', 'C1.n']]
+  });
+  close(c.sim.dt, 1e-3 * 20 / 100, 1e-9, 'C × R(hot) / 100');
+});
+
+test('an LDR’s resistance at 10 lx is its “Resistance at 10 lx” setting', () => {
+  for (const R10 of [1e3, 20e3, 1e6]) close(registry.models.ldrR(R10, 10), R10, 1e-9, `R10 ${R10}`);
+  close(registry.models.ldrR(20e3, 0), 1e6, 1e-9, 'dark resistance');
+});
+
+test('held parallel capacitors share current in proportion to C, without warnings', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 100 }], C1: ['capacitor', { C: 10e-6, v0: 3 }], C2: ['capacitor', { C: 30e-6, v0: 3 }] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'C1.p'], ['C1.n', 'B1.n'], ['C1.p', 'C2.p'], ['C2.n', 'C1.n']]
+  });
+  const r = c.result();
+  assert.equal(r.errors.length + r.warnings.length, 0, JSON.stringify(r.warnings));
+  const i1 = c.read('C1').i('p'), i2 = c.read('C2').i('p');
+  close(i2 / i1, 3, 1e-9, 'current ratio');
+  close(i1 + i2, 0.03, 0.01, 'total current from the resistor');
+});
+
+test('held capacitors with different p.d.s in parallel share charge instead of reporting a conflict', () => {
+  const c = build({
+    comps: { C1: ['capacitor', { C: 10e-6, v0: 5 }], C2: ['capacitor', { C: 10e-6, v0: 0 }] },
+    wires: [['C1.p', 'C2.p'], ['C2.n', 'C1.n']]
+  });
+  assert.equal(c.result().errors.length, 0);
+  close(c.read('C1').v('p', 'n'), 2.5, 1e-9, 'shared p.d.');
+});
+
+test('a charged capacitor across an ideal battery reads zero current while held', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], C1: ['capacitor', { C: 10e-6, v0: 6 }] },
+    wires: [['B1.p', 'C1.p'], ['C1.n', 'B1.n']]
+  });
+  const r = c.result();
+  assert.equal(r.errors.length + r.warnings.length, 0);
+  close(c.read('C1').i('p'), 0, 1e-12, 'held current');
+});
+
+test('opening an RL circuit while held keeps the stored current and explains the coming spike', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], S1: ['switch', { closed: true }], L1: ['inductor', { L: 1 }], R1: ['resistor', { R: 60 }] },
+    wires: [['B1.p', 'S1.a'], ['S1.b', 'L1.a'], ['L1.b', 'R1.a'], ['R1.b', 'B1.n']]
+  });
+  for (let k = 0; k < 20000; k++) c.sim.step();
+  circuit.getComp(c.doc, c.ids.S1).props.closed = false;
+  c.sim.setDoc(c.doc);
+  const r = c.result();
+  assert.equal(r.errors.length, 0, JSON.stringify(r.errors));
+  assert.ok(r.warnings.some((w) => w.comps.includes(c.ids.L1) && /cannot flow/.test(w.msg)));
+  close(c.read('L1').i('a'), 0.1, 1e-6, 'stored current');
+  c.sim.step();
+  close(c.read('L1').i('a'), 0, 1e-9, 'current after one step');
+});
+
+test('series inductors holding different currents solve while held and share flux when time runs', () => {
+  const c = build({
+    comps: { L1: ['inductor', { L: 1, i0: 1 }], L2: ['inductor', { L: 1, i0: 0 }], R1: ['resistor', { R: 10 }] },
+    wires: [['L1.b', 'L2.a'], ['L2.b', 'R1.a'], ['R1.b', 'L1.a']]
+  });
+  assert.equal(c.result().errors.length, 0);
+  c.sim.step();
+  close(c.read('L1').i('a'), c.read('L2').i('a'), 1e-9, 'one series current');
+});
+
+test('a short circuit across an AC supply is reported at t = 0 and at zero crossings', () => {
+  const c = build({
+    comps: { S1: ['acsupply', { peak: 5, freq: 50 }], A1: ['ammeter'] },
+    wires: [['S1.p', 'A1.p'], ['A1.n', 'S1.n']]
+  });
+  assert.ok(c.result().errors.some((e) => /Short circuit/.test(e.msg)));
+  c.sim.t = 0.01; // a zero crossing of the 50 Hz sine
+  c.sim.trial();
+  assert.ok(c.result().errors.some((e) => /Short circuit/.test(e.msg)));
+});

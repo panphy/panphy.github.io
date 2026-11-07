@@ -2,26 +2,32 @@
 // and chi-squared. Pure functions, so the same file runs in the browser and in node tests.
 (function(root) {
 	// Least-squares straight line y = mx + c. With sigmas, each point has weight 1/σ²;
-	// without, the uncertainties come from the scatter of the residuals.
+	// without, the uncertainties come from the scatter of the residuals. Sums are taken about the
+	// weighted mean x, so x values far from zero (years, timestamps) keep their precision.
 	function linearFit(x, y, sigmas = null) {
 		const n = x.length;
 		const w = sigmas ? sigmas.map(sigma => 1 / (sigma * sigma)) : x.map(() => 1);
-		let S = 0, Sx = 0, Sy = 0, Sxx = 0, Sxy = 0;
+		let S = 0, Sx = 0, Sy = 0;
 		for (let i = 0; i < n; i++) {
 			S += w[i];
 			Sx += w[i] * x[i];
 			Sy += w[i] * y[i];
-			Sxx += w[i] * x[i] * x[i];
-			Sxy += w[i] * x[i] * y[i];
 		}
-		const delta = S * Sxx - Sx * Sx;
-		if (!(Math.abs(delta) > 0)) return null;
-		const m = (S * Sxy - Sx * Sy) / delta;
-		const c = (Sxx * Sy - Sx * Sxy) / delta;
-		const residuals = x.map((xi, i) => y[i] - (m * xi + c));
+		if (!(S > 0)) return null;
+		const xMean = Sx / S, yMean = Sy / S;
+		let Sxx = 0, Sxy = 0;
+		for (let i = 0; i < n; i++) {
+			const dx = x[i] - xMean;
+			Sxx += w[i] * dx * dx;
+			Sxy += w[i] * dx * (y[i] - yMean);
+		}
+		if (!(Sxx > 0)) return null;
+		const m = Sxy / Sxx;
+		const c = yMean - m * xMean;
+		const residuals = x.map((xi, i) => y[i] - (yMean + m * (xi - xMean)));
 		const dof = n - 2;
-		let varianceM = S / delta;
-		let varianceC = Sxx / delta;
+		let varianceM = 1 / Sxx;
+		let varianceC = 1 / S + (xMean * xMean) / Sxx;
 		if (!sigmas) {
 			const s2 = dof > 0 ? residuals.reduce((sum, r) => sum + r * r, 0) / dof : NaN;
 			varianceM *= s2;
@@ -108,8 +114,17 @@
 		const shift = useScientific ? exponent : 0;
 		const v = value / 10 ** shift;
 		const u = uncertainty / 10 ** shift;
-		const uncertaintyDecimals = Math.max(0, 1 - Math.floor(Math.log10(u)));
-		const pair = `${v.toFixed(uncertaintyDecimals)} \\pm ${u.toFixed(uncertaintyDecimals)}`;
+		// Round the uncertainty to two significant figures first (9.96 becomes 10), then give the
+		// value the same last place; above 10 that place is tens or more (1230 ± 570).
+		const u2 = Number(u.toPrecision(2));
+		const place = Math.floor(Math.log10(u2)) - 1;
+		let pair;
+		if (place > 0) {
+			const unit = 10 ** place;
+			pair = `${(Math.round(v / unit) * unit).toFixed(0)} \\pm ${(Math.round(u2 / unit) * unit).toFixed(0)}`;
+		} else {
+			pair = `${v.toFixed(-place)} \\pm ${u2.toFixed(-place)}`;
+		}
 		return useScientific ? `(${pair}) \\times 10^{${shift}}` : pair;
 	}
 

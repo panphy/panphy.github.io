@@ -773,3 +773,17 @@ test('motor car: the driven back wheel pushes the car along and the free front w
   assert.ok(Math.abs(fx(back.id, 'f')) < 0.5 && Math.abs(fx(front.id, 'f')) < 0.5, 'steady on the flat: almost no friction');
   sim.forcesOn(chassis.id).filter((f) => f.label === 'R').forEach((f) => assert.ok(Math.abs(f.fx) < 0.5, `axle force ${f.fx}`));
 });
+
+test('the fastest allowed start speed and spin are not capped by Box2D’s per-step limits', () => {
+  const scene = emptyScene();
+  scene.world.gravity = 0;
+  const ball = S.makeBody(scene, 'ball', 0, 0); ball.vx = S.LIMITS.velocity[1];
+  const box = S.makeBody(scene, 'box', 0, 50); box.omega = S.LIMITS.omega[1];
+  scene.bodies.push(ball, box);
+  const sim = P.createSim(scene);
+  run(sim, 0.5);
+  const r = sim.readBody(ball.id);
+  assert.ok(Math.abs(r.vx - S.LIMITS.velocity[1]) < 1e-9, `vx ${r.vx}`);
+  assert.ok(Math.abs(r.x - S.LIMITS.velocity[1] * sim.t) < 1e-6, `x ${r.x}`);
+  assert.ok(Math.abs(sim.readBody(box.id).omega - S.LIMITS.omega[1]) < 1e-9);
+});

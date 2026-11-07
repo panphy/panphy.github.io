@@ -165,12 +165,28 @@
       const ni = networkOf[netOf.get(c.id + ':' + terminal.id)];
       if (ni !== undefined) networks[ni].acMin = Math.min(networks[ni].acMin, freq);
     }
+    // Nodes joined by zero-resistance links (wires through ideal meters, closed switches and
+    // ideal sources) count as one point, so a resistor behind an ammeter or switch still sets
+    // the capacitor's time constant. A filament lamp counts at its rated (hot) resistance,
+    // which governs while it carries most of the charge; its cold resistance only matters at
+    // small p.d.s and would make the step needlessly short.
+    const zParent = nodes.map((_, i) => i);
+    const zFind = (i) => { while (zParent[i] !== i) { zParent[i] = zParent[zParent[i]]; i = zParent[i]; } return i; };
+    for (const p of prims) if (p.k === 'V') { const ra = zFind(p.a.n), rb = zFind(p.b.n); if (ra !== rb) zParent[ra] = rb; }
+    const resistanceOf = (q) => {
+      if (q.k === 'G' && typeof q.g === 'number') return 1 / q.g;
+      if (q.k === 'N' && q.model.params && q.model.params.Rhot > 0) return q.model.params.Rhot;
+      return Infinity;
+    };
     for (const p of prims) {
       if (p.k !== 'C') continue;
+      const ends = new Set([zFind(p.a.n), zFind(p.b.n)]);
       let rMin = Infinity;
       for (const q of prims) {
-        if (q.k !== 'G' || typeof q.g !== 'number' || q.owner === p.owner) continue;
-        if ([q.a.n, q.b.n].some((n) => n === p.a.n || n === p.b.n)) rMin = Math.min(rMin, 1 / q.g);
+        if (q.owner === p.owner) continue;
+        const r = resistanceOf(q);
+        if (!Number.isFinite(r)) continue;
+        if ((q.nodes || [q.a, q.b]).some((t) => ends.has(zFind(t.n)))) rMin = Math.min(rMin, r);
       }
       if (Number.isFinite(rMin)) need((p.c * rMin) / 100, [p.owner]);
     }
@@ -238,20 +254,39 @@
 
   // ---------- Ideal loop analysis ----------
 
-  // Find loops of V-edges. Returns { kept, dropped, conflicts, undefinedPrims }.
+  // Sum of EMFs round a loop [p, path from p.b back to p.a]: zero when KVL holds.
+  function loopMismatch(loop, ctx) {
+    const [p, ...path] = loop;
+    let y = p.b.n, P = 0; // potential relative to p.b, walking back to p.a
+    for (const e of path) {
+      const ve = valueOf(e.v, ctx, 1);
+      if (e.a.n === y) { P -= ve; y = e.b.n; } else { P += ve; y = e.a.n; }
+    }
+    return valueOf(p.v, ctx, 1) - P; // EMF of p minus V(a) − V(b) along the path
+  }
+  // A time-varying EMF can cross zero: judge its loop over a spread of times, so a short circuit
+  // across an AC supply is not mistaken for a balanced loop at t = 0 or a zero crossing.
+  const LOOP_TIME_SHIFTS = [0.00131, 0.0173, 0.0941, 0.237, 0.611];
+  function loopConflicts(loop, ctx) {
+    const tol = (c) => EMF_TOL + EMF_TOL * Math.abs(valueOf(loop[0].v, c, 1));
+    if (Math.abs(loopMismatch(loop, ctx)) > tol(ctx)) return true;
+    if (!loop.some((e) => typeof e.v === 'function')) return false;
+    return LOOP_TIME_SHIFTS.some((dt) => { const c = { ...ctx, t: ctx.t + dt }; return Math.abs(loopMismatch(loop, c)) > tol(c); });
+  }
+
+  // Find loops of V-edges. Returns { kept, conflicts, undefinedPrims, undefinedLoops }.
   function analyseVoltageLoops(net, ctx) {
     const parent = new Map();
     const find = (i) => { if (!parent.has(i)) parent.set(i, i); while (parent.get(i) !== i) i = parent.get(i); return i; };
     const adj = new Map();
     const link = (n, e) => { if (!adj.has(n)) adj.set(n, []); adj.get(n).push(e); };
-    const kept = [], conflicts = [], undefinedPrims = new Set();
+    const kept = [], conflicts = [], undefinedPrims = new Set(), undefinedLoops = [];
     for (const p of net.prims) {
       if (p.k !== 'V') continue;
       const a = p.a.n, b = p.b.n;
-      const v = valueOf(p.v, ctx, 1);
       if (a === b) {
-        if (Math.abs(v) > EMF_TOL) conflicts.push([p]);
-        else undefinedPrims.add(p);
+        if (loopConflicts([p], ctx)) conflicts.push([p]);
+        else { undefinedPrims.add(p); undefinedLoops.push([p]); }
         continue;
       }
       if (find(a) !== find(b)) {
@@ -260,29 +295,27 @@
         kept.push(p);
         continue;
       }
-      // Path through the forest from a to b, tracking potentials.
-      const phi = new Map([[a, 0]]);
+      // Path through the forest from a to b.
       const via = new Map();
+      const seen = new Set([a]);
       const queue = [a];
       while (queue.length) {
         const x = queue.shift();
         if (x === b) break;
         for (const e of adj.get(x) || []) {
           const y = e.a.n === x ? e.b.n : e.a.n;
-          if (phi.has(y)) continue;
-          const ve = valueOf(e.v, ctx, 1);
-          phi.set(y, e.a.n === x ? phi.get(x) - ve : phi.get(x) + ve);
+          if (seen.has(y)) continue;
+          seen.add(y);
           via.set(y, e);
           queue.push(y);
         }
       }
       const loop = [p];
       for (let y = b; y !== a; ) { const e = via.get(y); loop.push(e); y = e.a.n === y ? e.b.n : e.a.n; }
-      const mismatch = v - (phi.get(a) - phi.get(b));
-      if (Math.abs(mismatch) > EMF_TOL + EMF_TOL * Math.abs(v)) conflicts.push(loop);
-      else for (const e of loop) undefinedPrims.add(e);
+      if (loopConflicts(loop, ctx)) conflicts.push(loop);
+      else { for (const e of loop) undefinedPrims.add(e); undefinedLoops.push(loop); }
     }
-    return { kept, conflicts, undefinedPrims };
+    return { kept, conflicts, undefinedPrims, undefinedLoops };
   }
 
   function describeConflict(loop, doc) {
@@ -304,8 +337,12 @@
 
   // ---------- Network solve ----------
 
-  function solveNetwork(compiled, net, ctx, warm, lambda) {
+  // hold.freezeL: owners of inductors whose held current cannot flow (an open path, or series
+  // inductors holding different currents). Like an open transformer winding, each keeps its
+  // last p.d. as a voltage source and reports its stored current.
+  function solveNetwork(compiled, net, ctx, warm, lambda, hold = {}) {
     const { nodes } = compiled;
+    const freezeL = hold.freezeL || new Set();
     const u = new Map();
     let nU = 0;
     for (const i of net.nodes) if (!net.refs.has(i)) u.set(i, nU++);
@@ -322,6 +359,10 @@
         if (p.k === 'C') {
           const h = ctx.capHist[p.owner] || { v1: p.v0 };
           holdCapVs.push({ k: 'V', a: p.a, b: p.b, v: h.v1, owner: p.owner, holdCap: p });
+        } else if (p.k === 'L' && freezeL.has(p.owner)) {
+          const va = warm.get(nodes[p.a.n].key) ?? 0;
+          const vb = warm.get(nodes[p.b.n].key) ?? 0;
+          holdCapVs.push({ k: 'V', a: p.a, b: p.b, v: va - vb, owner: p.owner, holdInd: p });
         } else if (p.k === 'T') {
           const h = ctx.indHist[p.owner] || { i1: 0, j1: 0 };
           const ih = [h.i1 || 0, h.j1 || 0];
@@ -346,9 +387,28 @@
         }
       }
     }
-    const loopNet = holdCapVs.length ? { prims: net.prims.concat(holdCapVs) } : net;
-    const loops = analyseVoltageLoops(loopNet, ctx);
+    // A held capacitor in a zero-resistance loop (in parallel with another capacitor, or
+    // straight across a steady source) is solved instead as a stiff companion, C/dt: parallel
+    // capacitors then share current in proportion to C, as they do while time runs, and
+    // unequal p.d.s share charge as the next step would, instead of reading as a conflict.
+    // A loop with a time-varying EMF stays undefined: its current would need dV/dt.
+    const soften = new Set();
+    let loops;
+    for (let pass = 0; ; pass++) {
+      const edges = holdCapVs.filter((e) => !(e.holdCap && soften.has(e.holdCap)));
+      loops = analyseVoltageLoops(edges.length ? { prims: net.prims.concat(edges) } : net, ctx);
+      const fresh = [];
+      for (const loop of loops.conflicts) for (const e of loop) if (e.holdCap && !soften.has(e.holdCap)) fresh.push(e.holdCap);
+      for (const loop of loops.undefinedLoops) {
+        if (loop.some((e) => typeof e.v === 'function')) continue;
+        for (const e of loop) if (e.holdCap && !soften.has(e.holdCap)) fresh.push(e.holdCap);
+      }
+      if (!fresh.length || pass >= 8) break;
+      for (const p of fresh) soften.add(p);
+    }
     if (loops.conflicts.length) return { ok: false, conflicts: loops.conflicts };
+    // A held capacitor left in an undefined loop has an undefined current too.
+    for (const e of [...loops.undefinedPrims]) if (e.holdCap) loops.undefinedPrims.add(e.holdCap);
     const vEdges = loops.kept;
     const size = nU + vEdges.length;
     const idx = (n) => (net.refs.has(n) ? -1 : u.get(n));
@@ -369,7 +429,10 @@
         addZ(idx(p.a.n), -i); addZ(idx(p.b.n), i);
       } else if (p.k === 'L') {
         const h = ctx.indHist[p.owner] || { i1: p.i0 || 0, j1: 0 };
-        if (ctx.method === 'hold') {
+        if (ctx.method === 'hold' && freezeL.has(p.owner)) {
+          // Frozen as a voltage source above; report the stored current.
+          indInfo.push({ p, hold: true, ihist: h.i1 });
+        } else if (ctx.method === 'hold') {
           // An isolated inductor has nowhere for the current to go; report the
           // stored current without injecting an impossible source.
           const closed = net.prims.some((q) => q !== p && (q.k === 'G' || q.k === 'V' || q.k === 'I' || q.k === 'C' || q.k === 'N' || q.k === 'T' || q.k === 'L'));
@@ -416,7 +479,7 @@
           }
         }
       } else if (p.k === 'C') {
-        if (ctx.method === 'hold') {
+        if (ctx.method === 'hold' && !soften.has(p)) {
           const edge = holdCapVs.find((e) => e.holdCap === p);
           capInfo.push({ p, hold: true, edge });
         } else {
@@ -551,18 +614,51 @@
     return { ok: true, V, primI, loops, capInfo, indInfo };
   }
 
+  // Inductors whose two ends are joined by nothing that can carry a current except themselves
+  // (current sources cannot): their held current has nowhere to go.
+  function openInductors(net, ls) {
+    const open = new Set();
+    for (const p of ls) {
+      const parent = new Map();
+      const find = (i) => { if (!parent.has(i)) parent.set(i, i); while (parent.get(i) !== i) i = parent.get(i); return i; };
+      const join = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent.set(ra, rb); };
+      for (const q of net.prims) {
+        if (q === p || q.k === 'I') continue;
+        if (q.k === 'T') { join(q.nodes[0].n, q.nodes[1].n); join(q.nodes[2].n, q.nodes[3].n); continue; }
+        const ns = q.nodes || [q.a, q.b];
+        for (let j = 1; j < ns.length; j++) join(ns[0].n, ns[j].n);
+      }
+      if (find(p.a.n) !== find(p.b.n)) open.add(p.owner);
+    }
+    return open;
+  }
+
   // Solve every network, with logic settling and source stepping as needed.
   function solveAll(compiled, ctx, warm) {
     const results = new Array(compiled.networks.length);
     const doc = compiled.doc;
     const errors = [];
     const solveOne = (net) => {
-      let r = solveNetwork(compiled, net, ctx, warm, 1);
+      let hold = {};
+      let r = solveNetwork(compiled, net, ctx, warm, 1, hold);
+      // Held inductor currents that cannot flow make the equations singular: freeze first
+      // the inductors with no complete path, then every inductor in the network.
+      if (!r.ok && r.singular && ctx.method === 'hold') {
+        const ls = net.prims.filter((p) => p.k === 'L');
+        const open = openInductors(net, ls);
+        for (const set of [open, new Set(ls.map((p) => p.owner))]) {
+          if (!set.size) continue;
+          const tryHold = { freezeL: set };
+          const r2 = solveNetwork(compiled, net, ctx, warm, 1, tryHold);
+          if (r2.ok || !r2.singular) { r = r2; hold = tryHold; break; }
+        }
+        if (r.ok && hold.freezeL) r.frozenL = [...hold.freezeL];
+      }
       if (!r.ok && r.noConvergence) {
         // Source stepping: ramp all sources from 10 % to 100 %.
         let w = new Map(warm);
         for (let s = 1; s <= 10; s++) {
-          r = solveNetwork(compiled, net, ctx, w, s / 10);
+          r = solveNetwork(compiled, net, ctx, w, s / 10, hold);
           if (!r.ok) break;
           w = new Map(w);
           for (const i of net.nodes) w.set(compiled.nodes[i].key, r.V[i]);
@@ -597,6 +693,12 @@
       }
     }
     const warnings = [];
+    const frozen = compiled.networks.flatMap((net) => (results[net.index] && results[net.index].frozenL) || []);
+    if (frozen.length) {
+      const labels = frozen.map((id) => circuit.getComp(doc, id)).filter(Boolean).map((c) => c.label);
+      const one = labels.length === 1;
+      warnings.push({ msg: `The stored current in ${labels.join(', ')} cannot flow in the circuit as it is now (an open circuit, or inductors in series holding different currents), so ${one ? 'its' : 'their'} stored current is shown while time is held. When time runs, the current changes at once, which induces a very large p.d.; its size depends on the time step.`, comps: frozen });
+    }
     if (!settled) warnings.push({ msg: 'The logic circuit does not settle: its outputs keep changing (a feedback loop oscillates). Outputs are shown as last calculated.', comps: compiled.logicComps.map((l) => l.comp.id) });
     for (const net of compiled.networks) {
       const r = results[net.index];

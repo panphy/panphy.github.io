@@ -101,3 +101,19 @@ test('fit parameter readouts follow the equation decimal setting without hiding 
 	assert.equal(stats.formatMeasurement(0, 0, 2), '0.00 \\pm 0.00');
 	assert.equal(stats.formatMeasurement(2.00345, NaN, 2), '2.00');
 });
+
+test('uncertainties of 10 or more keep two significant figures, with the value to the same place', () => {
+	assert.equal(stats.formatMeasurement(1234.5, 567.8), '1230 \\pm 570');
+	assert.equal(stats.formatMeasurement(9.87, 9.96), '10 \\pm 10');
+	assert.equal(stats.formatMeasurement(15.2, 12.3), '15 \\pm 12');
+	assert.equal(stats.formatMeasurement(15.2, 0.0952), '15.200 \\pm 0.095');
+});
+
+test('the straight-line sums stay accurate for x values far from zero', () => {
+	const x = Array.from({ length: 10 }, (_, i) => 1.7e9 + i);
+	const y = x.map((_, i) => 2 * i + 1 + ((i * 7) % 3 - 1) * 0.1);
+	const near0 = stats.linearFit(x.map((_, i) => i), y);
+	const far = stats.linearFit(x, y);
+	assert.ok(Math.abs(far.m - near0.m) < 1e-9, `${far.m} vs ${near0.m}`);
+	assert.ok(Math.abs(far.uncertaintyM - near0.uncertaintyM) < 1e-9);
+});

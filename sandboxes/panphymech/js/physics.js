@@ -12,12 +12,19 @@
   // overlap on screen, as if each pair of gears turned in its own layer.
   const GEAR_GROUP = -100000;
   const POSITION_ITERATIONS = 5;
+  const MAX_TRANSLATION = 20; // m per step: 4800 m/s at Standard accuracy
+  const MAX_ROTATION = 40; // rad per step: about 9600 rad/s at Standard accuracy
 
   function createSim(scene) {
     const pl = root.planck;
     // Collisions slower than this are treated as perfectly inelastic. The restitution
     // correction below keeps resting contacts quiet, so this only stops creeping contacts chattering.
     pl.Settings.velocityThreshold = 0.01;
+    // Box2D caps each step's movement (2 m) and turn (π/2), which silently held speeds to
+    // 480 m/s and 377 rad/s at Standard accuracy: below the start-speed limit, and below what a
+    // gear train can reach. These caps sit far above anything the inputs or gears can produce.
+    pl.Settings.maxTranslation = MAX_TRANSLATION;
+    pl.Settings.maxRotation = MAX_ROTATION;
     // Box2D collides polygons with a skin of polygonRadius round them. Contacts rest
     // anywhere from where the skins meet to linearSlop into each other, and are only pushed
     // apart beyond that. Insetting each side by the skin less a quarter of the slop centers
