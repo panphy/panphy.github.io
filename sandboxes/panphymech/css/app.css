@@ -10,6 +10,8 @@
   --floor-line: #6B7488;
   --link: #4A5466;
   --rope: #9A6B2F;
+  /* Pins, axles, wheels and mounts: a metal gray that never matches the stage. */
+  --pin: #C5CCD8;
   --vector: #D6336C;
   /* Force arrows, one color per kind of force. */
   --force-w: #E8590C;
@@ -37,6 +39,7 @@
   --floor-line: #8A94A8;
   --link: #B5BDCC;
   --rope: #D6A15E;
+  --pin: #5B6577;
   --vector: #FF6B9D;
   --force-w: #FF922B;
   --force-n: #4DABF7;
@@ -132,13 +135,13 @@ button, input, select { font: inherit; color: inherit; }
 .part-name { font-size: 0.78rem; font-weight: 650; text-align: center; line-height: 1.15; color: var(--ink); }
 :is(.part, .insp-swatch) .p-stroke { fill: none; stroke: var(--link); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 :is(.part, .insp-swatch) .p-rope { fill: none; stroke: var(--rope); stroke-width: 2.2; stroke-linecap: round; }
-:is(.part, .insp-swatch) .p-pin { fill: var(--surface); stroke: var(--link); stroke-width: 1.8; }
+:is(.part, .insp-swatch) .p-pin { fill: var(--pin); stroke: var(--link); stroke-width: 1.8; }
 :is(.part, .insp-swatch) .p-dot { fill: var(--link); }
 :is(.part, .insp-swatch) .p-motor { fill: none; stroke: var(--good); stroke-width: 2; stroke-linecap: round; }
 :is(.part, .insp-swatch) .p-motor-head { fill: var(--good); }
 :is(.part, .insp-swatch) .p-glue { fill: var(--link); stroke: var(--surface-2); stroke-width: 1.4; stroke-linejoin: round; }
-:is(.part, .insp-swatch) .p-pin-dot { fill: var(--surface-2); }
-:is(.part, .insp-swatch) .p-mount { fill: var(--surface); stroke: var(--link); stroke-width: 1.5; }
+:is(.part, .insp-swatch) .p-pin-dot { fill: var(--pin); }
+:is(.part, .insp-swatch) .p-mount { fill: var(--pin); stroke: var(--link); stroke-width: 1.5; }
 .lib-note { margin: 14px 2px 0; font-size: 0.78rem; line-height: 1.45; color: var(--ink-3); }
 .drag-ghost { position: fixed; left: 0; top: 0; width: 64px; height: 44px; pointer-events: none; z-index: 100; opacity: 0.85; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25)); }
 .drag-ghost svg { width: 100%; height: 100%; overflow: visible; }

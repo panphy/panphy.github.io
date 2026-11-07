@@ -17,7 +17,7 @@ test('SVG exports every example as vectors with escaped labels and no editing co
     const ctx = PPM.svg.createContext(800, 500);
     const renderer = PPM.render.createRenderer(app, {}, ctx);
     Object.assign(renderer, { w: 800, h: 500 });
-    renderer.colors = Object.fromEntries(['bg', 'grid', 'gridMajor', 'axis', 'floor', 'floorLine', 'ink', 'ink2', 'ink3', 'accent', 'surface', 'link', 'rope', 'vector', 'motor', 'danger'].map((key) => [key, '#abcdef']));
+    renderer.colors = Object.fromEntries(['bg', 'grid', 'gridMajor', 'axis', 'floor', 'floorLine', 'ink', 'ink2', 'ink3', 'accent', 'surface', 'pin', 'link', 'rope', 'vector', 'motor', 'danger'].map((key) => [key, '#abcdef']));
     const svg = renderer.exportSvg();
     assert.match(svg, /<svg xmlns=/);
     assert.match(svg, /<path /);
@@ -65,7 +65,7 @@ test('raster exports use a separate canvas and omit body and connector editing c
   globalThis.document = { createElement: tag => { assert.equal(tag, 'canvas'); return output; } };
   try {
     const renderer = PPM.render.createRenderer(app, live, PPM.svg.createContext(800, 500));
-    Object.assign(renderer, { w: 800, h: 500, dpr: 2, colors: { bg: '#ffffff', surface: '#ffffff', axis: '#cccccc', link: '#123456', accent: '#ff00ff' } });
+    Object.assign(renderer, { w: 800, h: 500, dpr: 2, colors: { bg: '#ffffff', surface: '#ffffff', pin: '#c5ccd8', axis: '#cccccc', link: '#123456', accent: '#ff00ff' } });
     assert.equal(renderer.exportCanvas(), output);
     assert.notEqual(output, live);
     assert.equal(output.width, 1600); assert.equal(output.height, 1000);
