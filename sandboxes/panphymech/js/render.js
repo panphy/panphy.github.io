@@ -36,7 +36,7 @@
       r.colors = {
         bg: v('--stage'), grid: v('--stage-grid'), gridMajor: v('--stage-grid-major'), axis: v('--stage-axis'),
         floor: v('--floor'), floorLine: v('--floor-line'), ink: v('--ink'), ink2: v('--ink-2'), ink3: v('--ink-3'),
-        accent: v('--accent'), surface: v('--surface'), link: v('--link'), rope: v('--rope'), vector: v('--vector'),
+        accent: v('--accent'), surface: v('--surface'), pin: v('--pin'), link: v('--link'), rope: v('--rope'), vector: v('--vector'),
         forceW: v('--force-w'), forceN: v('--force-n'), forceF: v('--force-f'), forceT: v('--force-t'), forceS: v('--force-s'), forceR: v('--force-r'), forceD: v('--force-d'),
         motor: v('--good'), danger: v('--danger')
       };
@@ -305,7 +305,7 @@
     function anchorMount(p, color) {
       // A small hatched block: this end is fixed to the background.
       const q = r.toScreen(p);
-      ctx.fillStyle = r.colors.surface;
+      ctx.fillStyle = r.colors.pin;
       ctx.strokeStyle = color;
       ctx.lineWidth = 1.4;
       ctx.beginPath();
@@ -383,7 +383,7 @@
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.lineCap = 'butt';
-      [A, B].forEach((p) => { ctx.fillStyle = r.colors.surface; ctx.beginPath(); ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2); ctx.fill(); });
+      [A, B].forEach((p) => { ctx.fillStyle = r.colors.pin; ctx.beginPath(); ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2); ctx.fill(); });
     }
 
     function drawRope(pa, pb, length, color, dashed = false) {
@@ -416,7 +416,7 @@
       const q = r.toScreen(c);
       const R = Math.max(4, radius * cam().scale);
       ctx.setLineDash(dashed ? [4, 3] : []);
-      ctx.fillStyle = r.colors.surface;
+      ctx.fillStyle = r.colors.pin;
       ctx.strokeStyle = color;
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -525,7 +525,7 @@
         ctx.beginPath();
         ctx.moveTo(q.x, q.y - 7); ctx.lineTo(q.x + 7, q.y); ctx.lineTo(q.x, q.y + 7); ctx.lineTo(q.x - 7, q.y); ctx.closePath();
         ctx.fill(); ctx.stroke();
-        ctx.fillStyle = r.colors.surface;
+        ctx.fillStyle = r.colors.pin;
         ctx.beginPath();
         ctx.arc(q.x, q.y, 1.8, 0, Math.PI * 2);
         ctx.fill();
@@ -567,7 +567,7 @@
         ctx.moveTo(a.tip.x, a.tip.y); ctx.lineTo(a.left.x, a.left.y); ctx.lineTo(a.right.x, a.right.y); ctx.closePath();
         ctx.fill();
       }
-      ctx.fillStyle = r.colors.surface;
+      ctx.fillStyle = r.colors.pin;
       ctx.strokeStyle = ink;
       ctx.lineWidth = 1.8;
       ctx.beginPath();
@@ -619,7 +619,7 @@
       ctx.stroke();
       // Dots at the joints show it is made of links.
       if (l.kind === 'rope' && cam().scale * (l.length / (pts.length - 1)) > 8) {
-        ctx.fillStyle = r.colors.surface;
+        ctx.fillStyle = r.colors.pin;
         pts.forEach((p) => { const q = r.toScreen(p); ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1, ctx.lineWidth * 0.22), 0, Math.PI * 2); ctx.fill(); });
       }
       ctx.lineCap = 'butt';

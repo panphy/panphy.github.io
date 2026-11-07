@@ -2,7 +2,7 @@
 
 A 2D mechanics sandbox in the style of Algodoo. Entry point: `sandboxes/panphymech.html`, listed under Sandboxes on the homepage. Plain HTML, CSS and classic scripts on the global `PPM` namespace; no build step. It works offline: runtime files and the manual are listed in `ASSETS_TO_CACHE` in `sw.js` and `OFFLINE_CARD_REQUIREMENTS` in `index.html`. Add new runtime files to both and bump `BUILD_ID`.
 
-Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rope, pulley, hinge, motor, gear, glue) go on a canvas in SI units; a spring can join another connector end to end. Play runs the physics; the graph shows position, velocity or energy of one object, a spring or the whole system, with CSV and PanPhyPlot export.
+Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, glue, rope, hinge, motor, pulley, gear) go on a canvas in SI units; a spring can join another connector end to end. Play runs the physics; the graph shows position, velocity or energy of one object, a spring or the whole system, with CSV and PanPhyPlot export.
 
 The [user manual](manual.html) has a five-step pendulum walkthrough, two five-step tips (building the Motor car with Merge and Subtract, and the Gear train with a compound gear) and a reference for building, connectors, graphs, files and shortcuts. The app’s Manual control opens it in a large overlay, full-screen on small screens, with an Open in new tab option.
 
