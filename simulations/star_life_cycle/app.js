@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { radialTexture } from '../../assets/three-textures.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
-  MASS_MIN, MASS_MAX, SUN_T, SUN_RADIUS_KM, AU_IN_RSUN, SN_COLLAPSE_END, SN_BREAKOUT,
+  MASS_MIN, MASS_MAX, CHANDRASEKHAR_MASS, OPPENHEIMER_VOLKOFF_MASS, SUN_T, SUN_RADIUS_KM, AU_IN_RSUN, SN_COLLAPSE_END, SN_BREAKOUT,
   buildLife, lifeState, hrTrack, mainSequence, blackbodyRGB
 } from './physics.js';
 import { STAGES, ELEMENT, fmt } from './content.js';
@@ -863,7 +863,12 @@ function setMass(mass, keepInput = false) {
   const fateBox = $('fate');
   fateBox.style.setProperty('--fate-color', fate.color);
   const universe = life.outlivesUniverse ? ` That is ${fmt.sig(life.yearsToRemnant / 1.38e10, 2)} times the present age of the universe.` : '';
-  fateBox.innerHTML = `A star of <b>${fmt.mass(M)}</b> shines for about ${fmt.years(life.yearsToRemnant)} and ends as a <b>${fate.name}</b> of ${fmt.mass(life.remnant)}.${universe}`;
+  const limit = {
+    whiteDwarf: `below the Chandrasekhar limit of about ${CHANDRASEKHAR_MASS}&nbsp;M<sub>☉</sub>`,
+    neutronStar: `between the Chandrasekhar limit (about ${CHANDRASEKHAR_MASS}&nbsp;M<sub>☉</sub>) and the Oppenheimer–Volkoff limit (about ${OPPENHEIMER_VOLKOFF_MASS}&nbsp;M<sub>☉</sub>)`,
+    blackHole: `above the Oppenheimer–Volkoff limit of about ${OPPENHEIMER_VOLKOFF_MASS}&nbsp;M<sub>☉</sub>`
+  }[life.fate];
+  fateBox.innerHTML = `A star with a starting mass of <b>${fmt.mass(M)}</b> shines for about ${fmt.years(life.yearsToRemnant)} and ends as a <b>${fate.name}</b>. Its core mass is ${fmt.mass(life.remnant)}, ${limit}.${universe}`;
 
   $('stages').innerHTML = life.stages.map((stage, i) => `<li><button type="button" data-index="${i}"><strong>${stageName(stage)}</strong><span>${chipDuration(stage)}</span><i></i></button></li>`).join('');
   $('scrub').max = life.stages.length;

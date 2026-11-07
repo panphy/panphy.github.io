@@ -36,7 +36,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/e2-quantum-physics/` | E.2 teaching deck, 34 slides: HL only |
 | `decks/e3-radioactive-decay/` | E.3 teaching deck, 46 slides: SL and HL, then an additional HL part (slides 33 to 44); the range of the strong force on slide 5 carries an `hl-tag` |
 | `decks/e4-fission/` | E.4 teaching deck, 27 slides: SL and HL, with no additional HL content |
-| `decks/e5-fusion-and-stars/` | E.5 teaching deck, 32 slides: SL and HL, with no additional HL content |
+| `decks/e5-fusion-and-stars/` | E.5 teaching deck, 33 slides: SL and HL, with no additional HL content |
 | `decks/assets/deck.css`, `deck.js`, `figures.js`, `deck-math.js` | Styles, slide engine, shared drawing helpers with the A.1, A.2, E.1 and E.2 diagrams, and MathJax setup |
 | `decks/<deck>/figures.js` | The diagrams of one deck (every deck except A.1, A.2, E.1 and E.2), loaded after the shared `figures.js` |
 | `decks/a4-rigid-body-mechanics/disks.js` | The two disks of slide 25, drawn with Three.js over the flat `a4-coupled` figure |
@@ -44,6 +44,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/b2-greenhouse-effect/quarter.js` | The planet, its intercepting disk and the sunlight of slide 8, drawn with Three.js over the flat `b2-quarter` figure |
 | `decks/d3-motion-in-electromagnetic-fields/hand.js` | The left hand of slide 11, drawn with Three.js (from the CDN the rest of the site uses) over the flat `d3-rule` figure |
 | `decks/d4-induction/models.js` | Seven Three.js models over flat figures: the magnet and coil (slide 5), flux through a turning loop (6), Lenz’s law (13), the two tubes (14), the rod on rails (15), the magnet on a spring with its emf traced live (18) and the rotating coil with its emf graph (22) |
+| `decks/e5-fusion-and-stars/parallax.js` | The Earth, the Sun, a nearby star and a wall of distant stars on slide 26, drawn with Three.js over the flat `e5-parallax` figure, with an inset of the sky seen from the Earth; the six-months step stops the Earth and marks the angle p |
 | `decks/assets/model3d.js` | Puts a deck's Three.js models over their flat figures, with drag to turn, scroll or pinch to zoom, MathJax in their labels, a thumbnail still and the theme; a model can play on a step, move its labels and share the figure with a flat graph; used by `brightness.js`, `quarter.js` and D.4’s `models.js` |
 | `decks/assets/deck-notes.css`, `deck-notes.js` | A compact Note pill at the lower right opens a panel above navigation without resizing the slide, which a click outside it (other than on the navigation or thumbnails) closes; hidden on slides without a note, copied unchanged from `gcsephy/decks/assets/` |
 | `sw.js`, `sw-register.js` | Freshness worker for `/ibdpphy/`, a copy of the `gcsephy/` pair; keep the two in step |

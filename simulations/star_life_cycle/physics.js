@@ -13,7 +13,9 @@ export const MASS_MAX = 100;
 export const HELIUM_IGNITION_MASS = 0.5;
 export const WHITE_DWARF_MAX_MASS = 8;
 export const NEUTRON_STAR_MAX_MASS = 20;
-export const CHANDRASEKHAR_MASS = 1.44;
+// Limits on the core left at the end, as in the IB course: the largest white dwarf and the largest neutron star.
+export const CHANDRASEKHAR_MASS = 1.4;
+export const OPPENHEIMER_VOLKOFF_MASS = 3;
 
 const G = 6.674e-11;
 const SOLAR_MASS_KG = 1.989e30;
@@ -72,7 +74,8 @@ export function remnantMass(M) {
   const fate = fateOf(M);
   // Initial–final mass relation (Kalirai et al. 2008); the lightest stars keep nearly all their mass.
   if (fate === 'whiteDwarf') return Math.min(0.96 * M, 0.109 * M + 0.394);
-  if (fate === 'neutronStar') return 1.2 + 0.05 * (M - WHITE_DWARF_MAX_MASS);
+  // Neutron stars sit between the two limits: 1.4 M☉ for a starting mass of 8 M☉, rising to 1.7 M☉ at 20 M☉.
+  if (fate === 'neutronStar') return CHANDRASEKHAR_MASS + 0.025 * (M - WHITE_DWARF_MAX_MASS);
   return 5 + 0.3 * (M - NEUTRON_STAR_MAX_MASS);
 }
 

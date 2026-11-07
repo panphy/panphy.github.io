@@ -94,17 +94,31 @@ window.DeckFigures.add(P => {
     },
 
     // Stellar parallax: a nearby star seems to shift against distant stars as the Earth goes round the Sun.
+    // Stellar parallax seen from above the plane of the Earth's orbit: the orbit is a circle and
+    // everything lies in one plane. The live deck puts parallax.js's 3D model over it.
     'e5-parallax': () => {
-      const sx = 140, cy = 260, a = 90, star = [520, cy], bg = 820, T = 6;
-      const earth = t => [sx + 22 * Math.cos(TAU * t), cy - a * Math.sin(TAU * t)], seen = t => { const [ex, ey] = earth(t); return cy + (cy - ey) * (bg - star[0]) / (star[0] - ex); };
-      let s = `<ellipse cx="${sx}" cy="${cy}" rx="22" ry="${a}" class="orbit"/>` + disk(sx, cy, 20, 'var(--sand)', 'stroke="var(--brand-accent)" stroke-width="3"') + disk(star[0], star[1], 11, '#FFE08A', 'stroke="var(--text-secondary)" stroke-width="1.5"') + `<line x1="${bg}" y1="70" x2="${bg}" y2="450" class="tick"/>` + [100, 170, 215, 310, 365, 420].map(y => disk(bg + 26, y, 5, 'var(--text-secondary)')).join('');
+      const sx = 150, cy = 260, a = 90, star = [520, cy], bg = 820, T = 6;
+      const earth = t => [sx + a * Math.cos(TAU * t), cy - a * Math.sin(TAU * t)], seen = t => { const [ex, ey] = earth(t); return cy + (cy - ey) * (bg - star[0]) / (star[0] - ex); };
+      let s = `<circle cx="${sx}" cy="${cy}" r="${a}" class="orbit"/>` + disk(sx, cy, 20, 'var(--sand)', 'stroke="var(--brand-accent)" stroke-width="3"') + disk(star[0], star[1], 11, '#FFE08A', 'stroke="var(--text-secondary)" stroke-width="1.5"') + `<line x1="${bg}" y1="70" x2="${bg}" y2="450" class="tick"/>` + [100, 170, 215, 310, 365, 420].map(y => disk(bg + 26, y, 5, 'var(--text-secondary)')).join('');
       s += line(`M${sx},${cy - a} L${star[0]},${cy} L${sx},${cy + a}`, 'text-secondary', 1.5, 'stroke-dasharray="5 6"') + `<line x1="${sx}" y1="${cy}" x2="${star[0]}" y2="${cy}" class="guide"/>` + `<path d="M${star[0] - 150},${cy} A150,150 0 0 1 ${f(star[0] - 150 * Math.cos(Math.atan2(a, star[0] - sx)))},${f(cy - 150 * Math.sin(Math.atan2(a, star[0] - sx)))}" class="guide accent"/>`;
-      s += text(star[0] - 170, cy - 16, 'p', 'lbl display italic', 'end') + both(sx - 50, cy - a, sx - 50, cy) + text(sx - 64, cy - a / 2 + 8, '1 AU', 'lbl mono', 'end') + text(sx, cy + a + 50, 'Sun and Earth’s orbit', 'lbl') + text(star[0], cy + 50, 'nearby star', 'lbl') + text(bg + 20, 44, 'distant stars', 'lbl', 'end') + both(sx, 470, star[0], 470) + text((sx + star[0]) / 2, 506, 'd', 'lbl display italic');
+      s += text(star[0] - 170, cy - 16, 'p', 'lbl display italic', 'end') + both(sx - 18, cy + 18, sx - 60, cy + 60) + text(sx - 52, cy + 22, '1 AU', 'lbl mono', 'end') + text(sx, cy + a + 50, 'Sun and Earth’s orbit', 'lbl') + text(star[0], cy + 50, 'nearby star', 'lbl') + text(bg + 20, 44, 'distant stars', 'lbl', 'end') + both(sx, 470, star[0], 470) + text((sx + star[0]) / 2, 506, 'd', 'lbl display italic');
       const planet = disk(0, 0, 9, 'var(--electron)');
       const still = `<g transform="translate(${sx} ${cy - a})">${planet}</g><line x1="${sx}" y1="${cy - a}" x2="${bg}" y2="${f(seen(0.25))}" style="stroke:var(--brand-accent);stroke-width:2.5"/>` + disk(bg, f(seen(0.25)), 8, 'var(--brand-accent)');
       const n = 48, ts = Array.from({ length: n + 1 }, (_, i) => i / n);
-      const mover = `<line x2="${bg}" style="stroke:var(--brand-accent);stroke-width:2.5" x1="${sx + 22}" y1="${cy}" y2="${cy}">${anim('x1', ts.map(t => f(earth(t)[0])), T)}${anim('y1', ts.map(t => f(earth(t)[1])), T)}${anim('y2', ts.map(t => f(seen(t))), T)}</line><g>${track(ts.map(earth), T)}${planet}</g><g>${track(ts.map(t => [bg, seen(t)]), T)}${disk(0, 0, 8, 'var(--brand-accent)')}</g>`;
-      return svg('-40 0 940 530', s + twoState(still, mover), 'Stellar parallax. As the Earth moves round the Sun, a nearby star is seen from slightly different directions and appears to shift back and forth against the very distant stars behind it. The parallax angle p is the angle at the star between the Sun and the Earth when they are one astronomical unit apart across the line of sight');
+      const mover = `<line x2="${bg}" style="stroke:var(--brand-accent);stroke-width:2.5" x1="${sx + a}" y1="${cy}" y2="${cy}">${anim('x1', ts.map(t => f(earth(t)[0])), T)}${anim('y1', ts.map(t => f(earth(t)[1])), T)}${anim('y2', ts.map(t => f(seen(t))), T)}</line><g>${track(ts.map(earth), T)}${planet}</g><g>${track(ts.map(t => [bg, seen(t)]), T)}${disk(0, 0, 8, 'var(--brand-accent)')}</g>`;
+      return svg('-40 0 940 530', s + twoState(still, mover), 'Stellar parallax, seen from above the plane of the Earth’s orbit. As the Earth moves round the Sun, a nearby star is seen from slightly different directions and appears to shift back and forth against the very distant stars behind it. The parallax angle p is the angle at the star between the Sun and the Earth when they are one astronomical unit apart across the line of sight');
+    },
+    // The parallax triangle on its own: Sun, Earth and star, with the right angle at the Sun.
+    'e5-parallax-triangle': () => {
+      const sun = [130, 420], earthAt = [130, 110], star = [820, 420], r = 200;
+      const toEarth = Math.atan2(earthAt[1] - star[1], earthAt[0] - star[0]);
+      let s = `<path d="M${sun[0]},${sun[1] - 30} H${sun[0] + 30} V${sun[1]}" style="fill:none;stroke:var(--text-secondary);stroke-width:2"/>`;
+      s += line(`M${sun[0]},${sun[1]} L${star[0]},${star[1]}`, 'text-secondary', 3) + line(`M${sun[0]},${sun[1]} L${earthAt[0]},${earthAt[1]}`, 'text-secondary', 3) + line(`M${earthAt[0]},${earthAt[1]} L${star[0]},${star[1]}`, 'brand-accent', 3.5);
+      s += `<path d="M${star[0] - r},${star[1]} A${r},${r} 0 0 1 ${f(star[0] + r * Math.cos(toEarth))},${f(star[1] + r * Math.sin(toEarth))}" class="guide accent"/>`;
+      s += disk(sun[0], sun[1], 22, 'var(--sand)', 'stroke="var(--brand-accent)" stroke-width="3"') + disk(earthAt[0], earthAt[1], 11, 'var(--electron)') + disk(star[0], star[1], 12, '#FFE08A', 'stroke="var(--text-secondary)" stroke-width="1.5"');
+      s += text(sun[0], sun[1] + 56, 'Sun', 'lbl') + text(earthAt[0], earthAt[1] - 30, 'Earth', 'lbl') + text(star[0], star[1] + 52, 'star', 'lbl');
+      s += text(sun[0] - 22, (sun[1] + earthAt[1]) / 2 + 9, '1 AU', 'lbl mono', 'end') + text((sun[0] + star[0]) / 2, star[1] + 52, 'd', 'lbl display italic') + text(star[0] - r - 18, star[1] - 14, 'p', 'lbl display italic', 'end');
+      return svg('0 50 900 450', s, 'A right-angled triangle. The Sun and the Earth are one astronomical unit apart, at right angles to the line from the Sun to a nearby star, a distance d away. The parallax angle p is the angle at the star between the lines to the Sun and to the Earth, so tan p equals 1 AU divided by d');
     }
   };
 });
