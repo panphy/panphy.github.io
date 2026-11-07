@@ -829,12 +829,13 @@
 		const curve = fittedCurves[key];
 		if (curve && Array.isArray(curve.x)) {
 			const stale = !!datasetFitResults[key]?.stale;
+			const line = options.xView ? zoomedCurve(key, curve, options.xView) : curve;
 			// The fit sits above the points but is narrower than them, so points that lie
 			// exactly on it still show on both sides. Plotly's line simplification is off, because
 			// it drops points by screen pixels and leaves visible corners in enlarged image exports.
 			traces.push({
-				x: curve.x,
-				y: curve.y,
+				x: line.x,
+				y: line.y,
 				mode: 'lines',
 				name: stale ? `Outdated fit: ${prefix}${yLabel}` : `Fit: ${prefix}${yLabel}`,
 				meta: key,
@@ -846,6 +847,37 @@
 			});
 		}
 		return traces;
+	}
+
+	// A fit line holds a fixed number of points across its whole length, so a zoomed-in view of a
+	// fast curve (such as a sinusoid over many cycles) would show straight segments. When zoomed,
+	// the line is redrawn from its fit function across the view, plus one view width on each side
+	// so a short pan still shows the line before it is redrawn.
+	const ZOOMED_CURVE_POINTS = 1500;
+
+	function zoomedCurve(key, curve, xView) {
+		const fn = typeof fitFunctions !== 'undefined' ? fitFunctions[key] : null;
+		const xs = curve.x.filter(Number.isFinite);
+		if (typeof fn !== 'function' || xs.length < 2) return curve;
+		const low = Math.min(...xs);
+		const high = Math.max(...xs);
+		const viewLow = Math.min(xView[0], xView[1]);
+		const viewHigh = Math.max(xView[0], xView[1]);
+		const width = viewHigh - viewLow;
+		const from = Math.max(low, viewLow - width);
+		const to = Math.min(high, viewHigh + width);
+		// Only worth it when the view is narrower than the line and still meets it.
+		if (!(to > from) || to - from >= 0.9 * (high - low)) return curve;
+		const x = Array.from({ length: ZOOMED_CURVE_POINTS }, (_, i) => from + (i * (to - from)) / (ZOOMED_CURVE_POINTS - 1));
+		const y = x.map((value) => {
+			try {
+				const result = fn(value);
+				return Number.isFinite(result) ? result : null;
+			} catch (error) {
+				return null;
+			}
+		});
+		return y.some(value => value !== null) ? { x, y } : curve;
 	}
 
 	// Points first, then every fit, so no series' points cover another series' fit.
@@ -907,7 +939,10 @@
 				}
 				changed = true;
 			});
-			if (changed) scheduleSaveState();
+			if (!changed) return;
+			scheduleSaveState();
+			// Redraw fit lines for the new x view (see zoomedCurve).
+			if (Object.keys(changes).some(key => key.startsWith('xaxis.'))) requestAnimationFrame(() => plotGraph());
 		});
 	}
 
@@ -917,7 +952,8 @@
 		const sheet = getActiveSheet();
 		const themeSettings = getPlotThemeSettings();
 		const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
-		const data = pointsBeforeFits(series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings)));
+		const xView = PlotModel.normalizeGraphView(sheet.graphView).xaxis || null;
+		const data = pointsBeforeFits(series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings, { xView })));
 		const titles = getAxisTitles(sheet);
 		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 1 }), themeSettings);
 		const element = document.getElementById('plot');
