@@ -1065,7 +1065,10 @@ function finalizeParametricFit(data, spec) {
 	let note = '';
 	if (getWeightingRequested()) {
 		if (!effectiveSigmas(data, modelAt(params))) {
-			note = ' Not weighted: every point needs a ±ΔY or ±ΔX above zero.';
+			const everyPointHasOne = data.every(point => point.yError > 0 || point.xError > 0);
+			note = everyPointHasOne
+				? ' Not weighted: where the curve is flat, a ±ΔX gives no uncertainty in y. Add ±ΔY to weight this fit.'
+				: ' Not weighted: every point needs a ±ΔY or ±ΔX above zero.';
 		} else {
 			for (let pass = 0; pass < 5; pass++) {
 				const sigmas = effectiveSigmas(data, modelAt(params));
@@ -1409,14 +1412,34 @@ function performLinearFit(x, y) {
 			alert('A straight line needs at least two different x values.');
 			return;
 		}
-		// The unweighted line is exact, so only a weighted fit refines it.
+		// The unweighted line is exact, so only a weighted fit refines it. Both work in x − x̄, as
+		// the polynomial does, so x values far from zero (years, timestamps) keep their precision;
+		// the intercept and its ± are then carried back to x: c = c̄ − m x̄.
+		const xMean = data.reduce((sum, point) => sum + point.x, 0) / data.length;
+		const model = ([m, c0], xi) => m * (xi - xMean) + c0;
 		const final = finalizeParametricFit(data, {
 			names: ['m', 'c'],
-			params: [line.m, line.c],
-			model: ([m, c], xi) => m * xi + c,
+			params: [line.m, line.c + line.m * xMean],
+			model,
 			refine: false
 		});
-		const [slope, intercept] = final.params;
+		const centered = final.params;
+		const slope = centered[0];
+		const intercept = centered[1] - slope * xMean;
+		const residuals = data.map(point => point.y - model(centered, point.x));
+		const covariance = data.length > 2 && residuals.every(Number.isFinite)
+			? PanPhyPlotStats.parameterCovariance(numericJacobian(model, centered, data), residuals, final.weighted ? final.chiSigmas : null)
+			: null;
+		if (covariance) {
+			const varC = covariance[1][1] + xMean * xMean * covariance[0][0] - 2 * xMean * covariance[0][1];
+			const sm = Math.sqrt(Math.max(covariance[0][0], 0)), sc = Math.sqrt(Math.max(varC, 0));
+			final.parameters = [sm, sc].every(Number.isFinite)
+				? [{ name: 'm', value: slope, uncertainty: sm }, { name: 'c', value: intercept, uncertainty: sc }]
+				: null;
+		} else if (final.parameters) {
+			final.parameters = null;
+		}
+		final.params = [slope, intercept];
 		const fitFunction = xi => slope * xi + intercept;
 		const { min: xMin, max: xMax } = minMaxFinite(x);
 		const xFit = [xMin, xMax];
@@ -1571,8 +1594,13 @@ function performPowerFit() {
 		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation, model: { kind: 'power', params: final.params.slice() } };
 		const solver = final.solver || solution;
 		const extras = fitExtras(final);
-		// Only diagnose parameter ambiguity when the solver has evidence for it.
-		if (solution.ambiguous) {
+		// Diagnose parameter ambiguity when the solver has evidence for it: an exact straight line,
+		// or an amplitude or exponent whose ± is larger than the value itself (as for a pendulum's
+		// T against L, where the shift and offset trade off against the exponent).
+		const loose = Array.isArray(final.parameters) && final.parameters
+			.filter(p => p.name === 'A' || p.name === 'b')
+			.some(p => !(p.uncertainty <= Math.abs(p.value)));
+		if (solution.ambiguous || loose) {
 			extras.statusOverride = 'The four parameters are not pinned down by this data: many combinations of A, x₀ and c fit almost equally well, as their ± values show. If theory fixes x₀ or c, a Custom fit such as A*x^b pins them; a straight line suits Linear.';
 		}
 		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeFitKey, solver, { kind: 'basic', method: 'Power' }, extras);

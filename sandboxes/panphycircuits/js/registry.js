@@ -164,8 +164,11 @@
     const T = celsius + 273.15;
     return R25 * Math.exp(B * (1 / T - 1 / 298.15));
   }
+  // The dark conductance (1 MΩ) is part of the light law, so R(10 lx) is exactly R10.
+  const LDR_DARK = 1e6;
   function ldrR(R10, lux) {
-    const G = 1 / 1e6 + Math.pow(Math.max(lux, 0) / 10, 0.7) / R10;
+    const lit = Math.max(1 / R10 - 1 / LDR_DARK, 0);
+    const G = 1 / LDR_DARK + Math.pow(Math.max(lux, 0) / 10, 0.7) * lit;
     return 1 / G;
   }
 

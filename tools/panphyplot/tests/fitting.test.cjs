@@ -16,7 +16,7 @@ function harness() {
 	context.window = context;
 	vm.createContext(context);
 	for (const file of ['vendor/math.min.js', 'fit-core.js']) vm.runInContext(fs.readFileSync(path.join(js, file), 'utf8'), context);
-	const source = fs.readFileSync(path.join(js, 'fitting.js'), 'utf8').replace(/\}\)\(\);\s*$/, 'window.testFit = { getCustomFitDataStats, getCustomFitGuessByName, buildCustomFitInitialCandidates, solveLinearCustomFit, finalizeParametricFit }; })();');
+	const source = fs.readFileSync(path.join(js, 'fitting.js'), 'utf8').replace(/\}\)\(\);\s*$/, 'window.testFit = { getCustomFitDataStats, getCustomFitGuessByName, buildCustomFitInitialCandidates, solveLinearCustomFit, finalizeParametricFit, performLinearFit, performPowerFit }; })();');
 	vm.runInContext(source, context);
 	return { context, core: context.PanPhyFitCore, api: context.testFit, elements, setData: points => { data = points; } };
 }
@@ -254,4 +254,45 @@ test('FFT starts preserve low cycles, damping, units and frequencies near Nyquis
 		predictions(data,x=>core.evaluateSinusoidal(fit.params,x),1e-6);
 		near(fit.params.k,omega,1e-5);
 	}
+});
+
+// The Basic fits end in updateResults, which writes the app's result stores; stub those here.
+function resultHarness() {
+	const r = harness();
+	Object.assign(r.context, {
+		fittedCurves: {}, fitFunctions: {}, fitExtents: {}, datasetFitResults: {},
+		plotGraph() {}, renderFittingResult() {}, syncFitExtendControl() {}, scheduleSaveState() {},
+		getDatasetFitSignature: () => '', getFitSigmas: () => null, alert: (m) => { throw new Error(m); }
+	});
+	r.fit = (name, data) => {
+		r.setData(data);
+		const x = data.map(p => p.x), y = data.map(p => p.y);
+		r.api[name](x, y);
+		return r.context.datasetFitResults.test;
+	};
+	return r;
+}
+
+test('a straight line keeps its slope, intercept and ± when x is far from zero (years, timestamps)', () => {
+	const r = resultHarness();
+	const base = Array.from({ length: 10 }, (_, i) => ({ x: i, y: 2 * i + 1 + ((i * 7) % 3 - 1) * 0.1 }));
+	const reference = r.fit('performLinearFit', base).parameters;
+	for (const offset of [2000, 1e8, 1.7e9]) {
+		const shifted = base.map(p => ({ x: p.x + offset, y: p.y }));
+		const [m, c] = r.fit('performLinearFit', shifted).parameters;
+		near(m.value, reference[0].value, 1e-6);
+		near(m.uncertainty, reference[0].uncertainty, 1e-5);
+		// Moving x moves the intercept by −m × offset; its ± grows with the lever arm.
+		near(c.value, reference[1].value - m.value * offset, 1e-6);
+		assert.ok(c.uncertainty > reference[1].uncertainty && Number.isFinite(c.uncertainty));
+	}
+});
+
+test('a power law whose amplitude or exponent is not pinned down says so instead of "Converged"', () => {
+	const r = resultHarness();
+	const pendulum = [[0.2, 0.91], [0.3, 1.09], [0.4, 1.28], [0.5, 1.41], [0.6, 1.56], [0.7, 1.67], [0.8, 1.8], [0.9, 1.9]].map(([x, y]) => ({ x, y }));
+	const result = r.fit('performPowerFit', pendulum);
+	assert.match(result.status, /not pinned down/);
+	const clean = points(12, 1, 5, x => 3 * Math.pow(x, 1.5) + 2);
+	assert.doesNotMatch(r.fit('performPowerFit', clean).status, /not pinned down/);
 });
