@@ -1056,6 +1056,13 @@
 		return colors[index % colors.length];
 	}
 
+	// The Download button in the graph pane's header opens the same dialog as the camera button.
+	document.getElementById('graph-download-button')?.addEventListener('click', () => {
+		const gd = document.getElementById('plot');
+		if (typeof Plotly === 'undefined' || !gd || !gd._fullLayout) return;
+		openExportDialog(gd, getActiveSheet()?.name || 'data_plot');
+	});
+
 	Object.assign(window, {
 		getSeriesColor,
 		sanitizeFilename,
