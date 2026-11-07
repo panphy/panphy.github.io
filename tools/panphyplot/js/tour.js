@@ -258,12 +258,12 @@ const TOUR_CHAPTERS = {
 			{
 				title: 'Share your work',
 				target: '#view-table-button',
-				body: 'Table in the View section opens a formatted table with every value and its ± uncertainty. Copy it for a spreadsheet or report. Export in the File section saves this sheet as CSV; tap the fitted equation to copy it as an image or LaTeX.'
+				body: 'Table in the View section opens a formatted table with every value and its ± uncertainty. Copy it for a spreadsheet or report. File → Export this sheet as CSV saves its values; tap the fitted equation to copy it as an image or LaTeX.'
 			},
 			{
 				title: 'Save and resume',
-				target: '#save-project-button',
-				body: 'File → Save downloads a .ppplot project with all sheets, formulas, graph settings and fit results. File → Open resumes it, including on another device. CSV contains values only. Practice data is never autosaved; finishing this tour brings back your own work.'
+				target: '#file-menu-button',
+				body: 'File → Save project downloads a .ppplot file with all sheets, formulas, graph settings and fit results. File → Open resumes it, including on another device. CSV contains values only. Practice data is never autosaved; finishing this tour brings back your own work.'
 			},
 			{
 				title: 'Tour complete',

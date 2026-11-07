@@ -132,11 +132,7 @@
 
 		<div class="neo-toolbar" role="toolbar" aria-label="Sheet tools">
 			<div class="neo-tool-group" role="group" aria-label="File">
-				<span class="neo-tool-group-label" aria-hidden="true">File</span>
-				<button type="button" class="neo-tool" id="open-project-button" title="Open a PanPhyPlot project (.ppplot)"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9V5.5h6l2 2h9v3M3.5 10.5h18l-3 10h-16z"/></svg><span>Open</span></button>
-				<button type="button" class="neo-tool" id="save-project-button" title="Save all sheets, graphs and fit results as a project (.ppplot)"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3.5h13l3 3v14H4zM8 3.5v6h8v-6M8 20.5v-7h8v7"/></svg><span>Save</span></button>
-				<button type="button" class="neo-tool" id="import-csv-button" title="Import a CSV file and choose the role of each column"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Import</span></button>
-				<button type="button" class="neo-tool" id="export-csv-button" title="Export every column of this sheet as a CSV file"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14.5v-11M7.5 8 12 3.5 16.5 8M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Export</span></button>
+				<button type="button" class="neo-tool" id="file-menu-button" aria-haspopup="menu" aria-expanded="false" aria-controls="neo-menu" title="Open, save and export"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9V5.5h6l2 2h9v3M3.5 10.5h18l-3 10h-16z"/></svg><span>File</span><svg class="neo-icon neo-icon-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>
 			</div>
 			<div class="neo-tool-group" role="group" aria-label="Data">
 				<span class="neo-tool-group-label" aria-hidden="true">Data</span>
@@ -184,8 +180,7 @@
 					<p id="data-validation-message" class="validation-message" role="status"></p>
 					<p class="neo-hint">Paste a block from a spreadsheet into any cell. A heading row such as <code>L / m</code> becomes names and units.</p>
 				</div>
-				<input type="file" id="project-file-input" accept=".ppplot,application/json" hidden>
-				<input type="file" id="csv-file-input" accept=".csv,.txt,text/csv,text/plain" hidden>
+				<input type="file" id="open-file-input" accept=".ppplot,.csv,.txt,application/json,text/csv,text/plain" hidden>
 			</section>
 
 			<div class="neo-divider" id="divider-data" role="separator" tabindex="0" aria-label="Data pane width"

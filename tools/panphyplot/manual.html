@@ -305,12 +305,12 @@
     <div class="step-layout">
 <div class="step-instructions">
 <ol class="actions">
-<li>Choose <strong>Save</strong> in the toolbar to download an editable <code>.ppplot</code> project.</li>
+<li>Choose <strong>File → Save project</strong> in the toolbar to download an editable <code>.ppplot</code> project.</li>
 <li>To copy the readings into a report, choose <strong>Table</strong>, then select <strong>Copy for Spreadsheet</strong> or <strong>Copy as Image</strong>.</li>
 <li>For a graph image, use Download above the graph and choose Publication or Screen style.</li>
 </ol>
 <div class="checkpoint"><strong>What you should see</strong>
-<p>The .ppplot file preserves your data, formulas and fits. You can use Open to continue on another device; copied tables and graph images are ready for a report.</p>
+<p>The .ppplot file preserves your data, formulas and fits. You can use File → Open to continue on another device; copied tables and graph images are ready for a report.</p>
 </div>
 </div>
 <figure class="screenshot">
@@ -415,7 +415,7 @@
 		<h3>Selecting, copying and clearing cells</h3>
 		<p>Drag across cells with a mouse or pen to select a block, or hold <kbd>Shift</kbd> and click, or use <kbd>Shift</kbd> with the arrow keys. The status bar shows how many cells are selected. Copy (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>C</kbd>) puts the block on the clipboard as rows and columns that paste straight into a spreadsheet; cut (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>X</kbd>) also empties it. Pasting a block starts at the top-left cell of the selection; pasting one value fills every selected cell. <kbd>Delete</kbd> or <kbd>Backspace</kbd> empties the selection and <kbd>Esc</kbd> cancels it. Formula columns are copied but never overwritten. On a touchscreen, dragging scrolls the table, so select with <kbd>Shift</kbd> on a keyboard or paste into one cell.</p>
 		<h3>Importing a CSV file</h3>
-		<p><strong>Import</strong> opens a preview of the file. Check the role chosen for each column and whether the first row holds names, then choose a new sheet or the current one. Roles are only suggested from clear headings: a column called <code>Δx</code> is suggested as the uncertainty of the column named <code>x</code>. Nothing is decided without the preview.</p>
+		<p><strong>File → Open project or CSV</strong> with a <code>.csv</code> file opens a preview of it. Check the role chosen for each column and whether the first row holds names, then choose a new sheet or the current one. Roles are only suggested from clear headings: a column called <code>Δx</code> is suggested as the uncertainty of the column named <code>x</code>. Nothing is decided without the preview.</p>
 		<p><strong>From PanPhyTrack</strong>, Export to PanPhyPlot opens PanPhyPlot in a new tab with the data in a new sheet: <code>t</code>, <code>x</code> and <code>y</code>, then a second <code>t</code> column with the smoothed velocities <code>vx</code> and <code>vy</code>, which belong to the times midway between marks. The velocities start hidden; show them in the Series list.</p>
 </div>
 </details>
@@ -526,7 +526,7 @@
 <div class="reference-body">
 <ul>
 			<li><strong>View → Table</strong> shows the sheet with each value beside its own ± uncertainty, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX. Calculated values are rounded to the decimal place of their uncertainty; typed values appear as entered.</li>
-			<li><strong>Export</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that Import reads back. Formulas themselves are not saved in the file.</li>
+			<li><strong>File → Export this sheet as CSV</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that File → Open reads back. Formulas themselves are not saved in the file.</li>
 			<li>The Download button above the graph, or the camera button on it, saves the graph as a PNG image or an SVG drawing. <strong>Publication</strong> style gives a report-ready figure: a black frame with inward ticks, no grid and black text on white, at 4:3, in either theme. <strong>Screen</strong> style saves the graph as it looks on screen.</li>
 		</ul>
 </div>
@@ -534,10 +534,10 @@
 <details class="reference-item" id="saving">
 <summary>Saving and devices</summary>
 <div class="reference-body">
-<p>Your sheets are saved automatically in this browser on this device. They are not uploaded anywhere, and clearing the browser's site data removes them: use <strong>File → Save</strong> to keep a complete project file or move your work to another device.</p>
-		<p><strong>Save</strong> downloads a <code>.ppplot</code> project containing every sheet, data and formulas, graph titles and zoom ranges, hidden series, fit results and uncertainties, custom fit formulas and bounds, equation symbols, decimal places, line extensions and current fit controls. The graphs are rebuilt from these settings when you reopen the file.</p>
-		<p><strong>Open</strong> selects a project file and checks it before asking to replace all current sheets. Cancel to keep your current work, or save it first. A malformed or unsupported file leaves the current project intact. You can open files on another device and continue editing; new fits can be extended immediately. Browser theme and pane widths stay with the device.</p>
-		<p><strong>Import</strong> and <strong>Export</strong> continue to handle CSV data for an individual sheet; CSV does not preserve formulas or fitted results.</p>
+<p>Your sheets are saved automatically in this browser on this device. They are not uploaded anywhere, and clearing the browser's site data removes them: use <strong>File → Save project</strong> to keep a complete project file or move your work to another device.</p>
+		<p><strong>Save project</strong> downloads a <code>.ppplot</code> project containing every sheet, data and formulas, graph titles and zoom ranges, hidden series, fit results and uncertainties, custom fit formulas and bounds, equation symbols, decimal places, line extensions and current fit controls. The graphs are rebuilt from these settings when you reopen the file.</p>
+		<p><strong>Open project or CSV</strong> with a <code>.ppplot</code> file checks it before asking to replace all current sheets. Cancel to keep your current work, or save it first. A malformed or unsupported file leaves the current project intact. You can open files on another device and continue editing; new fits can be extended immediately. Browser theme and pane widths stay with the device.</p>
+		<p>A CSV file opened from the same menu is imported into a sheet instead, and <strong>Export this sheet as CSV</strong> saves one sheet's values; CSV does not preserve formulas or fitted results.</p>
 		<p>Every tab or window you open this page in shares the same sheets, so use a new <strong>sheet</strong>, not a new tab, for another experiment. If the work changes in another tab, this tab stops saving and asks whether to reload and see the other tab's version, or keep its own; nothing is overwritten without asking.</p>
 		<p>If data from an earlier version is found in this browser, a one-time offer can add it as new sheets with names, units and uncertainties. Fits are not imported. Accepting or declining leaves the earlier save untouched.</p>
 		<p>PanPhyPlot works best on a laptop or tablet. On a small screen, choose <strong>Continue</strong> to use the workspace or <strong>Not now</strong> to return to the homepage.</p>
