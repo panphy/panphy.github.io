@@ -170,6 +170,23 @@ function restoreProjectView(view) {
 	document.getElementById('equation-symbols').open = view.symbolsOpen === true;
 }
 
+// Fits saved by older versions can hold too few points to draw a smooth line, so a curved fit
+// with fewer than this many is redrawn from its model when the workspace or a project loads.
+const MIN_SAVED_CURVE_SAMPLES = 300;
+
+function densifySavedCurve(key, curve) {
+	if (!curve || curve.model?.kind === 'linear' || typeof applyFitExtent !== 'function') return;
+	const xs = Array.isArray(curve.x) ? curve.x.filter(Number.isFinite) : [];
+	if ((curve.samples || xs.length) >= MIN_SAVED_CURVE_SAMPLES) return;
+	if (!Array.isArray(curve.dataRange)) {
+		if (xs.length < 2) return;
+		curve.dataRange = [Math.min(...xs), Math.max(...xs)];
+	}
+	const previous = { x: curve.x, y: curve.y, samples: curve.samples };
+	curve.samples = MIN_SAVED_CURVE_SAMPLES;
+	if (!applyFitExtent(key) || !curve.y.some(Number.isFinite)) Object.assign(curve, previous);
+}
+
 function restoreProjectFitFunctions() {
 	Object.keys(fitFunctions).forEach(key => delete fitFunctions[key]);
 	Object.entries(fittedCurves).forEach(([key, curve]) => {
@@ -178,6 +195,7 @@ function restoreProjectFitFunctions() {
 			if (!model) return;
 			fitFunctions[key] = window.PanPhyPlotProject.createEvaluator(model, math);
 			curve.model = model;
+			densifySavedCurve(key, curve);
 		} catch (error) {
 			console.warn('Saved fit remains visible, but needs fitting again before extending:', error);
 		}
