@@ -32,6 +32,8 @@
     reset: '<path d="M4 12a8 8 0 108-8H8"/><path d="M10.5 1.5L8 4l2.5 2.5"/>',
     panelLeft: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/><path d="M4 6a1 1 0 011-1h3v14H5a1 1 0 01-1-1z" fill="currentColor" stroke="none" opacity=".2"/>',
     panelRight: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M15 4v16"/><path d="M16 5h3a1 1 0 011 1v12a1 1 0 01-1 1h-3z" fill="currentColor" stroke="none" opacity=".2"/>',
+    maximize: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    restore: '<path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/>',
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
     examples: '<rect x="3.5" y="4" width="7" height="7" rx="1.5"/><rect x="13.5" y="4" width="7" height="7" rx="1.5"/><rect x="3.5" y="14" width="7" height="6" rx="1.5"/><path d="M14 17h6M17 14v6"/>',
     folder: '<path d="M3.5 7.5a2 2 0 012-2h4l2 2.2h7a2 2 0 012 2V17a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/>',
@@ -139,6 +141,27 @@
         btn.title = `${open ? 'Hide' : 'Show'} ${label}`;
       }
     }
+    // ---------- Full-screen scene ----------
+
+    // The scene can fill the whole window, without the app bar, Parts, Inspector and status bar,
+    // until its button (or Esc) puts it back. This lasts for the visit only.
+    const maxBtn = $('btn-scene-max');
+    maxBtn.innerHTML = icon('maximize').replace('class="icon"', 'class="icon icon-max"') + icon('restore').replace('class="icon"', 'class="icon icon-restore"');
+    ui.sceneMax = false;
+    ui.setSceneMax = (on) => {
+      ui.sceneMax = !!on;
+      document.body.classList.toggle('scene-max', ui.sceneMax);
+      const label = ui.sceneMax ? 'Exit full screen' : 'Show the scene full screen';
+      maxBtn.setAttribute('aria-pressed', String(ui.sceneMax));
+      maxBtn.setAttribute('aria-label', label);
+      maxBtn.title = ui.sceneMax ? `${label} (Esc)` : label;
+      if (ui.sceneMax) window.scrollTo(0, 0);
+    };
+    maxBtn.addEventListener('click', () => {
+      ui.setSceneMax(!ui.sceneMax);
+      maxBtn.focus({ preventScroll: true });
+    });
+
     narrowQuery.addEventListener('change', syncPanelButtons);
     syncPanelButtons();
     for (const name of ['library', 'inspector']) {
@@ -285,11 +308,15 @@
       });
       menu.addEventListener('click', (e) => e.stopPropagation());
     }
+    // Returns whether a menu was open.
     function closeMenus() {
-      ['menu-file', 'display-menu', 'drag-notes-pop'].forEach((id) => { $(id).hidden = true; });
+      const ids = ['menu-file', 'display-menu', 'drag-notes-pop'];
+      const wasOpen = ids.some((id) => !$(id).hidden);
+      ids.forEach((id) => { $(id).hidden = true; });
       $('btn-file').setAttribute('aria-expanded', 'false');
       $('btn-display').setAttribute('aria-expanded', 'false');
       $('btn-drag-notes').setAttribute('aria-expanded', 'false');
+      return wasOpen;
     }
     ui.closeMenus = closeMenus;
     setupMenu('btn-file', 'menu-file');

@@ -917,7 +917,15 @@
       app.togglePlay();
       return;
     }
-    if (k === 'Escape') { app.ui.closeMenus(); if (!app.editor.cancel()) app.select(null); return; }
+    if (k === 'Escape') {
+      const hadMenu = app.ui.closeMenus();
+      const hadSelection = !!app.selection;
+      const cancelled = app.editor.cancel();
+      if (!cancelled) app.select(null);
+      // Esc leaves the full-screen scene only when it had nothing else to close.
+      if (!hadMenu && !hadSelection && !cancelled && app.ui.sceneMax) app.ui.setSceneMax(false);
+      return;
+    }
     if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); app.deleteSelection(); return; }
     if (k === '.') { app.stepOnce(); return; }
     if (k === 'v' || k === 'V') { app.editor.arm(null); app.editor.setTool('select'); return; }

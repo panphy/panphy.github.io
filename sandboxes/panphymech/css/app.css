@@ -148,6 +148,7 @@ button, input, select { font: inherit; color: inherit; }
 
 /* ---------- Stage ---------- */
 
+.stage { container: stage / inline-size; }
 .stage-head { gap: 10px; flex-wrap: nowrap; }
 .stage-head .pane-heading { margin-right: 4px; }
 .run-controls { display: flex; align-items: center; gap: 4px; }
@@ -165,7 +166,9 @@ button, input, select { font: inherit; color: inherit; }
 .time-readout { flex: none; width: 11ch; font-size: 0.92rem; font-weight: 500; color: var(--ink); text-align: left; white-space: nowrap; }
 .speed-select select, .graph-track select { min-height: 36px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 4px 8px; font-size: 0.84rem; cursor: pointer; }
 .speed-select select { font-family: var(--font-mono); }
-#btn-show-inspector { margin-left: auto; }
+#btn-scene-max { margin-left: auto; }
+.tool-max .icon-restore, .tool-max[aria-pressed="true"] .icon-max { display: none; }
+.tool-max[aria-pressed="true"] .icon-restore { display: block; }
 
 .toolbar { flex: none; display: flex; align-items: center; flex-wrap: wrap; gap: 2px; padding: 5px 8px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
 .tool-group { display: flex; gap: 2px; padding-right: 4px; border-right: 1px solid var(--line); flex: 0 0 auto; }
@@ -359,7 +362,6 @@ button, input, select { font: inherit; color: inherit; }
 @media (max-width: 1240px) {
   :root { --panel-w: 212px; --insp-w: 288px; }
   .main { gap: 10px; padding: 10px; }
-  .stage-head .pane-heading { display: none; }
 }
 
 @media (max-width: 1080px) {
@@ -405,10 +407,6 @@ button, input, select { font: inherit; color: inherit; }
   .atool span { display: none; }
   .atool .icon-chevron { display: none; }
   .appbar-group { margin-right: 2px; padding-right: 2px; }
-  .stage-head { padding-left: 8px; gap: 6px; }
-  .run-play { min-width: 0; padding: 6px 12px; }
-  .run-label { display: none; }
-  .time-readout { width: 9.5ch; font-size: 0.84rem; }
   :root { --graph-h: 300px; }
   .graph-panel { min-height: 300px; }
   .graph-actions { order: 1; width: 100%; margin-left: 0; }
@@ -420,17 +418,43 @@ button, input, select { font: inherit; color: inherit; }
   .legend-value { min-width: 0; }
 }
 
-@media (max-width: 480px) {
-  .stage-head { gap: 4px; padding-right: 8px; }
+@media (max-width: 440px) {
+  .wordmark { display: none; }
+}
+
+/* The Scene heading compacts by the pane's own width, so it fits with either side pane open. */
+@container stage (max-width: 640px) {
+  .stage-head .pane-heading { display: none; }
+}
+@container stage (max-width: 570px) {
+  .stage-head { padding-left: 8px; gap: 6px; }
+  .run-play { min-width: 0; padding: 6px 12px; }
+  .run-label { display: none; }
+  .time-readout { width: 9.5ch; font-size: 0.84rem; }
+}
+@container stage (max-width: 456px) {
+  .stage-head { gap: 2px; padding-left: 6px; padding-right: 6px; }
+  .stage-head .tool { width: 32px; }
   .t-prefix { display: none; }
   .time-readout { width: 7ch; }
   .speed-select select { padding: 4px; }
   .run-controls { gap: 0; }
 }
-
-@media (max-width: 440px) {
-  .wordmark { display: none; }
+@container stage (max-width: 350px) {
+  .stage-head { padding-left: 4px; padding-right: 4px; }
+  .stage-head .tool { width: 30px; }
 }
+
+/* ---------- Full-screen scene ---------- */
+
+/* The scene fills the window (ui.js): the app bar, side panes and status bar go. */
+body.scene-max .appbar, body.scene-max .statusbar,
+body.scene-max .library, body.scene-max .inspector, body.scene-max .tool-panel { display: none; }
+body.scene-max .app .main {
+  grid-template-columns: minmax(0, 1fr); gap: 0;
+  padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+body.scene-max .stage { border: 0; border-radius: 0; box-shadow: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .library, .inspector, .toggle-track, .toggle-track::after { transition: none; }

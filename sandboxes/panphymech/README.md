@@ -20,7 +20,7 @@ The [user manual](manual.html) has a five-step pendulum walkthrough, two five-st
 | `js/render.js` | Canvas drawing: grid, floor, objects, connectors, trails, vectors, handles |
 | `js/editor.js` | Pointer interaction: placing, connecting, moving, rotating, resizing, moving and re-attaching connectors, the delete cross, right-click and touch-and-hold settings, grabbing, panning, zooming |
 | `js/graph.js` | The sample recorder, the time graph, CSV and PanPhyPlot export |
-| `js/ui.js`, `js/app.js` | Panels, inspector and quick settings; state, run loop, undo, autosave, fitting the view, files and shortcuts |
+| `js/ui.js`, `js/app.js` | Panels, the full-screen Scene (`body.scene-max`, left by its button or Esc), inspector and quick settings; state, run loop, undo, autosave, fitting the view, files and shortcuts |
 
 Adding an example: build it in the app, save it as a `.ppmech` file into `examples/`, add an entry to `examples/index.json`, and add the file to `ASSETS_TO_CACHE` in `/sw.js` and to this app's offline requirements in `/index.html`. `tests/examples.cjs` loads the files for the tests, so every example is also run by them.
 
