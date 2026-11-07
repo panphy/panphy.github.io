@@ -2730,7 +2730,7 @@ input[type="number"]:focus {
 
 /* ---------- Maximized section ---------- */
 
-/* The data or graph section can cover the whole workspace (panes.js); its button swaps
+/* The data section can cover the whole workspace, and the graph section the whole window (panes.js); its button swaps
    between the maximize and restore drawings. */
 .neo-pane-max {
 	align-self: center;
@@ -2795,6 +2795,13 @@ input[type="number"]:focus {
 	flex: 1;
 	height: auto;
 	min-height: 0;
+}
+
+/* A maximized graph takes the whole window: the app bar, toolbar and status bar go too. */
+.neo-app[data-maximized="graph"] > .neo-appbar,
+.neo-app[data-maximized="graph"] > .neo-toolbar,
+.neo-app[data-maximized="graph"] > .neo-statusbar {
+	display: none;
 }
 
 /* ---------- Toast ---------- */

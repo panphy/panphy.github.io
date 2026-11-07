@@ -21,8 +21,9 @@ const PANE_SNAP_DISTANCE = 16;
 // The data pane's share of the space it splits with the graph, before any dragging.
 const PANE_DEFAULT_DATA_SHARE = { wide: 1 / 2.35, medium: 0.95 / 2 };
 
-// The data or graph section can fill the whole workspace, covering the other columns, until its
-// button (or Esc) puts it back. This lasts for the visit only.
+// The data section can fill the whole workspace, covering the other columns, and the graph section
+// the whole window, without the app bar, toolbar and status bar, until its button (or Esc) puts it
+// back. This lasts for the visit only.
 let maximizedPane = null;
 
 function setMaximizedPane(pane) {
@@ -31,6 +32,8 @@ function setMaximizedPane(pane) {
 	maximizedPane = pane === maximizedPane ? null : pane;
 	if (maximizedPane) app.dataset.maximized = maximizedPane;
 	else delete app.dataset.maximized;
+	// On stacked layouts the page may be scrolled; start the full-window graph at the top.
+	if (maximizedPane === 'graph') window.scrollTo(0, 0);
 	document.querySelectorAll('[data-maximize]').forEach((button) => {
 		const name = button.dataset.maximize === 'data' ? 'data section' : 'graph section';
 		const isMax = button.dataset.maximize === maximizedPane;
