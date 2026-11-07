@@ -1,7 +1,7 @@
 // Stage descriptions, interior layers and number formatting for the star life cycle sim.
 import {
   AU_IN_RSUN, SUN_RADIUS_KM, LATE_FUELS, SN_COLLAPSE_END, SN_BREAKOUT,
-  HELIUM_IGNITION_MASS, CHANDRASEKHAR_MASS, NEUTRON_STAR_RADIUS_KM, schwarzschildKm
+  HELIUM_IGNITION_MASS, CHANDRASEKHAR_MASS, OPPENHEIMER_VOLKOFF_MASS, NEUTRON_STAR_RADIUS_KM, schwarzschildKm
 } from './physics.js';
 
 const SUPERSCRIPT = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
@@ -317,7 +317,7 @@ export const STAGES = {
       const km = c.stage.keys[0].R * SUN_RADIUS_KM;
       const helium = c.M < HELIUM_IGNITION_MASS;
       return `
-      <p>What is left is ${mass(c.life.remnant)} of ${helium ? 'helium' : 'carbon and oxygen'} squeezed into a ball ${sig(2 * km, 2)} km across (the Earth is 12 700 km). A teaspoonful would have a mass of several tonnes.</p>
+      <p>What is left is the core: ${mass(c.life.remnant)} of ${helium ? 'helium' : 'carbon and oxygen'} squeezed into a ball ${sig(2 * km, 2)} km across (the Earth is 12 700 km). That core mass is below the Chandrasekhar limit of about ${CHANDRASEKHAR_MASS} M<sub>☉</sub>, so electrons can hold it up. A teaspoonful would have a mass of several tonnes.</p>
       <p>There is no fusion. It shines only because it is hot, so it cools: from white, through yellow and red, until it is a cold, dark <b>black dwarf</b>.</p>
       <p>That takes far longer than the present age of the universe. No black dwarfs exist yet.</p>`;
     },
@@ -325,7 +325,7 @@ export const STAGES = {
     deeper: c => `
       <p><b>Electron degeneracy pressure.</b> The Pauli exclusion principle stops electrons sharing a quantum state. Squeezed together, they are forced into high-momentum states and push back, whatever the temperature. So a white dwarf does not shrink as it cools.</p>
       <p><b>More massive means smaller:</b> \\(R \\propto M^{-1/3}\\).</p>
-      <p><b>Chandrasekhar limit.</b> Above ${CHANDRASEKHAR_MASS} M<sub>☉</sub> the electrons would have to move at the speed of light and the pressure fails. A white dwarf pushed over the limit by gas from a companion star explodes as a Type Ia supernova. This one is ${mass(c.life.remnant)}.</p>
+      <p><b>Chandrasekhar limit.</b> Above about ${CHANDRASEKHAR_MASS} M<sub>☉</sub> the electrons would have to move at the speed of light and the pressure fails. A white dwarf pushed over the limit by gas from a companion star explodes as a Type Ia supernova. This one has a core mass of ${mass(c.life.remnant)}.</p>
       <p>As it cools, the interior freezes from the center outward into a crystal lattice.</p>`,
     layers: c => {
       const helium = c.M < HELIUM_IGNITION_MASS;
@@ -436,16 +436,16 @@ export const STAGES = {
     tagline: 'A ball of neutrons the size of a city, spinning many times a second.',
     balance: () => ({ v: 0, text: 'Held up by neutron degeneracy pressure' }),
     body: c => `
-      <p>The collapsed core survives: ${mass(c.life.remnant)} packed into a ball only ${sig(2 * NEUTRON_STAR_RADIUS_KM, 2)} km across. It is as dense as an atomic nucleus. A teaspoonful would have a mass of a few billion tonnes.</p>
+      <p>The collapsed core survives. Its core mass, ${mass(c.life.remnant)}, is between the Chandrasekhar limit (about ${CHANDRASEKHAR_MASS} M<sub>☉</sub>) and the Oppenheimer–Volkoff limit (about ${OPPENHEIMER_VOLKOFF_MASS} M<sub>☉</sub>). It is packed into a ball only ${sig(2 * NEUTRON_STAR_RADIUS_KM, 2)} km across. It is as dense as an atomic nucleus. A teaspoonful would have a mass of a few billion tonnes.</p>
       <p>It is made almost entirely of <b>neutrons</b>, and it is the pressure of those neutrons that stops gravity crushing it further.</p>
       <p>When the core shrank, it spun up, just as the cloud did. It also has an intense magnetic field. Beams of radio waves leave its magnetic poles and sweep around like a lighthouse. If a beam crosses the Earth we detect regular pulses: a <b>pulsar</b>.</p>`,
     look: () => 'The magnetic axis is tilted away from the spin axis, so the beams sweep around. The debris of the supernova is still spreading out around it. The star is drawn far too large: at this scale it would be invisible.',
     deeper: c => `
-      <p><b>Neutron degeneracy pressure</b> works like electron degeneracy pressure, with help from the repulsive core of the strong force. It fails above about 2.2 M<sub>☉</sub> (the Tolman–Oppenheimer–Volkoff limit).</p>
+      <p><b>Neutron degeneracy pressure</b> works like electron degeneracy pressure, with help from the repulsive core of the strong force. It fails above about ${OPPENHEIMER_VOLKOFF_MASS} M<sub>☉</sub>, the Oppenheimer–Volkoff limit. That limit is less certain than the Chandrasekhar limit, because nobody knows exactly how matter behaves at nuclear density: estimates lie between about 2 and 3 M<sub>☉</sub>.</p>
       <p>Surface gravity is about \\(10^{12}\\) N/kg and the escape speed is over half the speed of light.</p>
       <p>Conserving angular momentum: shrinking the radius by a factor of 500 makes the core spin about 250 000 times faster. Magnetic flux is also conserved, so \\(B \\propto \\dfrac{1}{R^2}\\) and the field reaches about \\(10^{8}\\) T.</p>
       <p>The first pulsar was discovered by Jocelyn Bell Burnell in 1967. Pulsars slow down over millions of years as they radiate their rotational energy away.</p>
-      <p>This one is ${mass(c.life.remnant)}.</p>`,
+      <p>This one has a core mass of ${mass(c.life.remnant)}, from a star with a starting mass of ${mass(c.M)}.</p>`,
     layers: () => [
       { name: 'Inner core', el: 'q', kind: 'degenerate', r: 0.45, info: 'Several times denser than an atomic nucleus. Nobody knows what matter does here: it may dissolve into a soup of quarks.' },
       { name: 'Outer core', el: 'n', kind: 'radiative', r: 0.88, info: 'A liquid of neutrons with a few protons and electrons. It flows with no friction at all (a superfluid).' },
@@ -459,7 +459,7 @@ export const STAGES = {
     tagline: 'Gravity wins completely. Not even light can escape.',
     balance: () => ({ v: -1, text: 'Gravity wins: nothing can stop the collapse' }),
     body: c => `
-      <p>The collapsed core is ${mass(c.life.remnant)}, too massive for neutrons to hold it up. Nothing known can stop the collapse.</p>
+      <p>The collapsed core has a mass of ${mass(c.life.remnant)}, above the Oppenheimer–Volkoff limit of about ${OPPENHEIMER_VOLKOFF_MASS} M<sub>☉</sub>. That is too massive for neutrons to hold it up. Nothing known can stop the collapse.</p>
       <p>Around it is the <b>event horizon</b>, ${sig(2 * schwarzschildKm(c.life.remnant), 2)} km across. Inside it the escape speed is greater than the speed of light, so nothing that crosses it can come back out.</p>
       <p>A black hole on its own gives out no light. We detect black holes by their gravity: stars orbiting something invisible, X-rays from gas heated as it falls in, gravitational waves when two of them merge, and the bending of light from whatever is behind them.</p>
       <p>A black hole left by a single star usually has nothing to feed on. If gas does fall in, for example from a companion star, it spirals around in a flat <b>accretion disk</b> and is heated to millions of degrees before it crosses the horizon. That disk is the glowing ring in the film <i>Interstellar</i>. Its picture of the black hole, Gargantua, was made by tracing how light bends near it, so the shape is accurate: the disk is flat, but light from its far side bends over the top of the hole and under it.</p>`,

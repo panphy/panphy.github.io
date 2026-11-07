@@ -101,14 +101,14 @@
           <div class="ticks mono" aria-hidden="true"><span style="--x:0">0.1</span><span style="--x:.3333">1</span><span style="--x:.6667">10</span><span style="--x:1">100</span></div>
           <div class="band-slider">
             <div class="fate-band" aria-hidden="true">
-              <span class="band-wd" style="flex:1.903"><b>White dwarf</b><i>below 8 M<sub>☉</sub></i></span>
+              <span class="band-wd" style="flex:1.903"><b>White dwarf</b><i>starting mass below 8 M<sub>☉</sub></i></span>
               <span class="band-ns" style="flex:0.398"><b>Neutron star</b><i>8 to 20</i></span>
               <span class="band-bh" style="flex:0.699"><b>Black hole</b><i>above 20 M<sub>☉</sub></i></span>
             </div>
             <input id="mass-slider" type="range" min="-1" max="2" step="0.005" value="0" aria-label="Starting mass on a logarithmic scale">
             <output class="mass-bubble mono" id="mass-bubble" for="mass-slider" aria-hidden="true"></output>
           </div>
-          <p class="fate-key"><span><i class="band-wd"></i>White dwarf: below 8</span><span><i class="band-ns"></i>Neutron star: 8 to 20</span><span><i class="band-bh"></i>Black hole: above 20</span></p>
+          <p class="fate-key"><span>Starting mass:</span><span><i class="band-wd"></i>White dwarf: below 8</span><span><i class="band-ns"></i>Neutron star: 8 to 20</span><span><i class="band-bh"></i>Black hole: above 20</span></p>
           <div class="presets" id="presets" aria-label="Example stars">
             <button type="button" data-mass="0.12"><b>0.12</b> Proxima Centauri</button>
             <button type="button" data-mass="1"><b>1</b> The Sun</button>
@@ -132,7 +132,7 @@
           <p id="load-status" role="status">Loading the 3D model…</p>
           <dl class="readout overlay mono" id="readout" aria-label="Current values">
             <div><dt>Age</dt><dd id="r-age">—</dd></div>
-            <div><dt>Mass</dt><dd id="r-mass">—</dd></div>
+            <div><dt>Mass now</dt><dd id="r-mass">—</dd></div>
             <div><dt>Radius</dt><dd id="r-radius">—</dd></div>
             <div><dt>Surface</dt><dd id="r-temp">—</dd></div>
             <div><dt>Brightness</dt><dd id="r-lum">—</dd></div>
@@ -221,7 +221,7 @@
       <h2>A model is an explanation, not a photograph.</h2>
       <p>The numbers come from standard physics: mass–luminosity and mass–radius relations for the main sequence, the Stefan–Boltzmann law linking brightness, radius and temperature, free-fall and Kelvin–Helmholtz timescales, and measured relations for the mass of the remnant. The star's color is the color of a hot body at its surface temperature, with the color strengthened so that cool and hot stars are easy to tell apart.</p>
       <p>Sizes are compressed. Real stars range from 20 km to over 1000 times the width of the Sun, so the 3D view squeezes that range enormously; the Real size ladder always shows the true width. Cutaway layers are widened so you can see them: the core of a giant is really less than a thousandth of its radius. Time is compressed too: every stage plays for a few seconds, whether it really lasts a day or ten billion years.</p>
-      <p>The boundaries at 8 and 20 solar masses are approximate. They depend on what the star is made of, how fast it spins and whether it has a companion. The tracks after the main sequence are simplified, and stars lighter than about 0.5 solar masses live so long that their final stages are predictions that nobody has observed.</p>
+      <p>The boundaries at starting masses of 8 and 20 solar masses are approximate. They are not the limits on the core: the Chandrasekhar limit (about 1.4 solar masses) and the Oppenheimer–Volkoff limit (about 3 solar masses) apply to the core left at the end, after the star has lost most of its mass. The starting-mass boundaries depend on what the star is made of, how fast it spins and whether it has a companion. The tracks after the main sequence are simplified, and stars lighter than about 0.5 solar masses live so long that their final stages are predictions that nobody has observed.</p>
     </div></section>
   </main>
   <footer class="panphy-footer">
