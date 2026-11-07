@@ -449,8 +449,9 @@
         <h2>A length of copper cable<span>.</span></h2>
         <div class="split even">
           <div class="work">
+            <span class="ask">Find its resistance.</span>
             <span class="say">20 m of copper wire, diameter 1.0 mm; \(\rho = 1.7 \times 10^{-8} \,\Omega \,\mathrm{m}\)</span>
-            <span>\(A = \pi r^{2} = \pi \times (0.50 \times 10^{-3})^{2}\)</span>
+            <span class="step">\(A = \pi r^{2} = \pi \times (0.50 \times 10^{-3})^{2}\)</span>
             <span class="step">\(A = 7.9 \times 10^{-7} \,\mathrm{m}^{2}\)</span>
             <span class="step">\(R = \dfrac{\rho L}{A} = \dfrac{1.7 \times 10^{-8} \times 20}{7.9 \times 10^{-7}}\)</span>
             <span class="step">\(R = \class{res}{0.43 \,\Omega}\)</span>
@@ -514,13 +515,14 @@
         <h2>A kettle and its cable<span>.</span></h2>
         <div class="split even">
           <div class="work">
+            <span class="ask">Find the current and the resistance of the kettle. Its cable has a resistance of 0.10 Ω: what power does the cable dissipate?</span>
             <span class="say">A 2.0 kW kettle on a 230 V supply</span>
-            <span>\(I = \dfrac{P}{V} = \dfrac{2.0 \times 10^{3}}{230} = \class{res}{8.7 \,\mathrm{A}}\)</span>
+            <span class="step">\(I = \dfrac{P}{V} = \dfrac{2.0 \times 10^{3}}{230} = \class{res}{8.7 \,\mathrm{A}}\)</span>
             <span class="step">\(R = \dfrac{V^{2}}{P} = \dfrac{230^{2}}{2.0 \times 10^{3}} = \class{res}{26 \,\Omega}\)</span>
           </div>
           <div class="work step">
             <span class="say">Its cable has a resistance of 0.10 Ω</span>
-            <span>\(P_\mathrm{cable} = I^{2} R = 8.7^{2} \times 0.10\)</span>
+            <span class="step">\(P_\mathrm{cable} = I^{2} R = 8.7^{2} \times 0.10\)</span>
             <span class="step">\(P_\mathrm{cable} = \class{res}{7.6 \,\mathrm{W}}\)</span>
             <span class="say step">Under 0.5% of the power: it stays cool</span>
           </div>
@@ -638,8 +640,9 @@
         <h2>A combination<span>.</span></h2>
         <div class="split">
           <div class="work">
-            <span class="say">The parallel pair</span>
-            <span>\(\dfrac{1}{R_\mathrm{p}} = \dfrac{1}{4.0} + \dfrac{1}{12} = \dfrac{4}{12}\) &nbsp;so&nbsp; \(R_\mathrm{p} = 3.0 \,\Omega\)</span>
+            <span class="ask">Find the current from the supply and the potential difference across the parallel pair.</span>
+            <span class="say step">The parallel pair</span>
+            <span class="step">\(\dfrac{1}{R_\mathrm{p}} = \dfrac{1}{4.0} + \dfrac{1}{12} = \dfrac{4}{12}\) &nbsp;so&nbsp; \(R_\mathrm{p} = 3.0 \,\Omega\)</span>
             <span class="say step">The whole circuit</span>
             <span class="step">\(R = 6.0 + 3.0 = 9.0 \,\Omega\)</span>
             <span class="step">\(I = \dfrac{V}{R} = \dfrac{9.0}{9.0} = \class{res}{1.0 \,\mathrm{A}}\)</span>
@@ -795,15 +798,16 @@
         <h2>A cell and a lamp<span>.</span></h2>
         <div class="split even">
           <div class="work">
+            <span class="ask">Find the current, the terminal potential difference and the lost volts. Where does the power from the cell go?</span>
             <span class="say">\(\varepsilon = 1.5 \,\mathrm{V}\), \(r = 0.50 \,\Omega\), lamp \(R = 2.5 \,\Omega\)</span>
-            <span>\(\varepsilon = I(R + r)\) &nbsp;so&nbsp; \(I = \dfrac{\varepsilon}{R + r}\)</span>
+            <span class="step">\(\varepsilon = I(R + r)\) &nbsp;so&nbsp; \(I = \dfrac{\varepsilon}{R + r}\)</span>
             <span class="step">\(I = \dfrac{1.5}{2.5 + 0.50} = \class{res}{0.50 \,\mathrm{A}}\)</span>
             <span class="step">\(V = IR = 0.50 \times 2.5 = \class{res}{1.25 \,\mathrm{V}}\)</span>
             <span class="step">Lost volts \(= Ir = 0.50 \times 0.50 = 0.25 \,\mathrm{V}\)</span>
           </div>
           <div class="work step">
             <span class="say">Where the power goes</span>
-            <span>Cell supplies: \(\varepsilon I = 1.5 \times 0.50 = 0.75 \,\mathrm{W}\)</span>
+            <span class="step">Cell supplies: \(\varepsilon I = 1.5 \times 0.50 = 0.75 \,\mathrm{W}\)</span>
             <span class="step">Lamp: \(I^{2} R = 0.50^{2} \times 2.5 = 0.625 \,\mathrm{W}\)</span>
             <span class="step">Inside the cell: \(I^{2} r = 0.50^{2} \times 0.50 = 0.125 \,\mathrm{W}\)</span>
           </div>
@@ -891,8 +895,9 @@
         <h2>A thermistor in a potential divider<span>.</span></h2>
         <div class="split">
           <div class="work">
+            <span class="ask">Find \(V_\mathrm{out}\) when the thermistor is cold, \(R_{1} = 5.0 \,\mathrm{k}\Omega\), and when it is hot, \(R_{1} = 1.0 \,\mathrm{k}\Omega\).</span>
             <span class="say">\(V_\mathrm{in} = 6.0 \,\mathrm{V}\), \(R_{2} = 10 \,\mathrm{k}\Omega\), thermistor \(R_{1}\)</span>
-            <span>\(V_\mathrm{out} = \dfrac{R_{2}}{R_{1} + R_{2}} V_\mathrm{in}\)</span>
+            <span class="step">\(V_\mathrm{out} = \dfrac{R_{2}}{R_{1} + R_{2}} V_\mathrm{in}\)</span>
             <span class="say step">Cold: \(R_{1} = 5.0 \,\mathrm{k}\Omega\)</span>
             <span class="step">\(V_\mathrm{out} = \dfrac{10}{5.0 + 10} \times 6.0 = \class{res}{4.0 \,\mathrm{V}}\)</span>
             <span class="say step">Hot: \(R_{1} = 1.0 \,\mathrm{k}\Omega\)</span>

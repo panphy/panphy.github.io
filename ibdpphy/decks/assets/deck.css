@@ -394,6 +394,9 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
 .work > span { display: block; white-space: nowrap; }
 .work .say { font: 600 24px var(--font-mono); letter-spacing: .02em; color: var(--text-secondary); }
 .work .say mjx-container { font-size: 109%; }
+/* A worked example opens on its question; the tighter gap leaves room for it. */
+.work:has(> .ask) { gap: 16px; }
+.work .ask { font: 700 27px/1.35 var(--font-body); white-space: normal; color: var(--text-main); }
 .work b { color: var(--brand-primary); }
 .slide.hl .work b { color: var(--hl-text); }
 
