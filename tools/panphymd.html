@@ -263,6 +263,11 @@
         <button type="button" class="page-preview-paper-btn" data-paper="A4" aria-pressed="true">A4</button>
         <button type="button" class="page-preview-paper-btn" data-paper="letter" aria-pressed="false">Letter</button>
       </div>
+      <label class="md-switch page-preview-numbers" for="pagePreviewNumbers" title="Print the page number at the foot of each page">
+        <input type="checkbox" id="pagePreviewNumbers" role="switch" />
+        <span class="md-switch-track" aria-hidden="true"></span>
+        <span>Page numbers</span>
+      </label>
       <button type="button" id="pagePreviewPrint" class="md-tool page-preview-print" title="Print these pages; choose Save as PDF in the print dialog for a PDF" disabled><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 16.5H5.5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v3.5a2 2 0 0 1-2 2H17"/><path d="M7 13.5h10V20H7z"/></svg><span>Print<span class="page-preview-wide"> / Save PDF</span></span></button>
       <button type="button" id="pagePreviewClose" class="md-tool page-preview-close" aria-label="Close page preview" title="Close (Esc)"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="page-preview-wide">Close</span></button>
     </div>

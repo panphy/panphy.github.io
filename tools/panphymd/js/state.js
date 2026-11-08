@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   PREVIEW_FONT: 'markdownPreviewFont',
   PANE_SPLIT: 'markdownPaneSplit',
   PAPER_SIZE: 'markdownPaperSize',
+  PAGE_NUMBERS: 'markdownPageNumbers',
   SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
   SUPPRESS_CLEAR_HISTORY_WARNING: 'markdownSuppressClearHistoryWarning',
   SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning',
@@ -185,6 +186,22 @@ export function savePaperSizePreference(paperKey) {
  */
 export function loadPaperSizePreference() {
   return safeGetStorageItem(STORAGE_KEYS.PAPER_SIZE);
+}
+
+/**
+ * Save whether printed pages show page numbers
+ * @param {boolean} enabled
+ */
+export function savePageNumbersPreference(enabled) {
+  safeSetStorageItem(STORAGE_KEYS.PAGE_NUMBERS, String(enabled));
+}
+
+/**
+ * Load whether printed pages show page numbers (off by default)
+ * @returns {boolean}
+ */
+export function loadPageNumbersPreference() {
+  return safeGetStorageItem(STORAGE_KEYS.PAGE_NUMBERS) === 'true';
 }
 
 // ------------------------------------------------------------------ //

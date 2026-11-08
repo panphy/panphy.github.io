@@ -2,15 +2,20 @@
  * Page preview and print layout.
  *
  * Paged.js lays the rendered document out on real pages (A4 or Letter, with
- * page numbers) inside an overlay. Its Print button prints exactly those
- * pages, so what you see is what the PDF holds, in every browser.
+ * optional page numbers) inside an overlay. Its Print button prints exactly
+ * those pages, so what you see is what the PDF holds, in every browser.
  *
  * Printing without the preview (Ctrl+P) uses the same paper size, margins and
- * footer through an injected @page rule; Chrome and Edge draw that footer,
- * other browsers may leave it out.
+ * page numbers through an injected @page rule; Chrome and Edge draw the
+ * numbers there, other browsers may leave them out.
  */
 
-import { loadPaperSizePreference, savePaperSizePreference } from './state.js';
+import {
+  loadPaperSizePreference,
+  savePaperSizePreference,
+  loadPageNumbersPreference,
+  savePageNumbersPreference
+} from './state.js';
 
 const PAGED_JS_URL = 'https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.min.js';
 
@@ -20,8 +25,7 @@ const PAPER_SIZES = {
 };
 
 const PAGE_MARGIN = '20mm 15mm';
-const FOOTER_FONT = "8pt 'Figtree', 'Segoe UI', system-ui, sans-serif";
-const MAX_FOOTER_TITLE = 80;
+const FOOTER_FONT = "9pt 'Figtree', 'Segoe UI', system-ui, sans-serif";
 
 const PAGED_BREAK_CSS = `.md-paged-doc .page-break { break-after: page; }
 .md-paged-doc h1, .md-paged-doc h2, .md-paged-doc h3,
@@ -48,25 +52,16 @@ function loadPagedJs() {
   return pagedLoadPromise;
 }
 
-function cssString(text) {
-  return `"${text.replace(/[\\"]/g, '\\$&').replace(/[\n\r\f]+/g, ' ')}"`;
-}
-
-function shortenTitle(title) {
-  const clean = title.replace(/\s+/g, ' ').trim();
-  return clean.length > MAX_FOOTER_TITLE ? `${clean.slice(0, MAX_FOOTER_TITLE - 1).trimEnd()}…` : clean;
-}
-
 /** The @page rule shared by the preview and by plain printing. */
-export function buildPageCss(paperKey, title) {
+export function buildPageCss(paperKey, pageNumbers) {
   const paper = PAPER_SIZES[paperKey] || PAPER_SIZES.A4;
-  const footerTitle = title ? shortenTitle(title) : '';
-  const box = `font: ${FOOTER_FONT}; color: #5f6672;`;
+  const numbers = pageNumbers
+    ? `@bottom-center { content: "Page " counter(page) " of " counter(pages); font: ${FOOTER_FONT}; color: #5f6672; }`
+    : '';
   return `@page {
   size: ${paper.css};
   margin: ${PAGE_MARGIN};
-  ${footerTitle ? `@bottom-left { content: ${cssString(footerTitle)}; ${box} }` : ''}
-  @bottom-right { content: "Page " counter(page) " of " counter(pages); ${box} }
+  ${numbers}
 }`;
 }
 
@@ -74,10 +69,9 @@ export function buildPageCss(paperKey, title) {
  * @param {object} options
  * @param {HTMLElement} options.source - the rendered preview to lay out
  * @param {() => Promise<unknown>} options.whenRendered - settles once math is typeset
- * @param {() => string} options.getHeading - the document's first heading, or ''
  * @param {(open: boolean) => void} [options.onToggle] - called as the preview opens and closes
  */
-export function initPagePreview({ source, whenRendered, getHeading, onToggle }) {
+export function initPagePreview({ source, whenRendered, onToggle }) {
   const overlay = document.getElementById('pagePreview');
   const pagesHost = document.getElementById('pagePreviewPages');
   const scroller = document.getElementById('pagePreviewScroll');
@@ -85,6 +79,7 @@ export function initPagePreview({ source, whenRendered, getHeading, onToggle }) 
   const printButton = document.getElementById('pagePreviewPrint');
   const closeButton = document.getElementById('pagePreviewClose');
   const paperButtons = [...overlay.querySelectorAll('[data-paper]')];
+  const numbersToggle = document.getElementById('pagePreviewNumbers');
   const backgroundRegions = [...document.body.children].filter(element => element !== overlay);
 
   const pageStyle = document.createElement('style');
@@ -92,12 +87,14 @@ export function initPagePreview({ source, whenRendered, getHeading, onToggle }) 
   document.head.appendChild(pageStyle);
 
   let paperKey = PAPER_SIZES[loadPaperSizePreference()] ? loadPaperSizePreference() : 'A4';
+  let pageNumbers = loadPageNumbersPreference();
+  numbersToggle.checked = pageNumbers;
   let previewer = null;
   let layoutId = 0;
   let opener = null;
 
   function refreshPageStyle() {
-    pageStyle.textContent = buildPageCss(paperKey, getHeading());
+    pageStyle.textContent = buildPageCss(paperKey, pageNumbers);
   }
 
   function updatePaperButtons() {
@@ -170,7 +167,7 @@ export function initPagePreview({ source, whenRendered, getHeading, onToggle }) 
       const next = new Paged.Previewer();
       previewer = next;
       // Paged.js only follows break rules from the CSS it is given.
-      const pageCss = `${buildPageCss(paperKey, getHeading())}\n${PAGED_BREAK_CSS}`;
+      const pageCss = `${buildPageCss(paperKey, pageNumbers)}\n${PAGED_BREAK_CSS}`;
       const flow = await next.preview(buildContent(), [{ [new URL('panphymd-page.css', location.href).href]: pageCss }], pagesHost);
       if (id !== layoutId || overlay.hidden) {
         if (previewer === next) destroyPreviewer();
@@ -234,6 +231,11 @@ export function initPagePreview({ source, whenRendered, getHeading, onToggle }) 
       layOut();
     });
   });
+  numbersToggle.addEventListener('change', () => {
+    pageNumbers = numbersToggle.checked;
+    savePageNumbersPreference(pageNumbers);
+    layOut();
+  });
   printButton.addEventListener('click', print);
   closeButton.addEventListener('click', close);
   overlay.addEventListener('keydown', event => {
@@ -245,11 +247,6 @@ export function initPagePreview({ source, whenRendered, getHeading, onToggle }) 
   window.addEventListener('resize', () => {
     if (!overlay.hidden) fitPages();
   });
-  // Plain printing (Ctrl+P) picks up the current heading for its footer.
-  window.addEventListener('beforeprint', () => {
-    if (!document.body.classList.contains('md-pages-ready')) refreshPageStyle();
-  });
-
   refreshPageStyle();
   updatePaperButtons();
 

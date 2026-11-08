@@ -1302,7 +1302,6 @@ function toggleLaser() {
 const pagePreview = initPagePreview({
   source: renderedOutput,
   whenRendered: () => mathTypesetQueue,
-  getHeading: getDocumentHeading,
   onToggle: () => updateHighlightTheme()
 });
 

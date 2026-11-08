@@ -1665,7 +1665,8 @@ td[align="right"] {
 
 @media (pointer: coarse) {
   .page-preview .md-tool,
-  .page-preview-paper-btn {
+  .page-preview-paper-btn,
+  .page-preview-numbers {
     min-height: 48px;
   }
 }
