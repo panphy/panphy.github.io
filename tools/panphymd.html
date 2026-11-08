@@ -197,7 +197,7 @@
       </div>
       <div class="pane-toolbar no-print" role="toolbar" aria-label="Preview tools">
         <div class="md-tool-group" role="group" aria-label="Share">
-          <button type="button" id="printButton" class="md-tool" title="Print or save as PDF (always in light mode)"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 16.5H5.5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v3.5a2 2 0 0 1-2 2H17"/><path d="M7 13.5h10V20H7z"/></svg><span>Print / PDF</span></button>
+          <button type="button" id="printButton" class="md-tool" title="Preview the pages, then print or save as PDF (always in light mode)"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 16.5H5.5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v3.5a2 2 0 0 1-2 2H17"/><path d="M7 13.5h10V20H7z"/></svg><span>Print / PDF</span></button>
           <button type="button" id="exportHTMLButton" class="md-tool" title="Export as an HTML page, in the current theme"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13"/></svg><span>Export HTML</span></button>
           <button type="button" id="presentButton" class="md-tool" title="Show the preview full screen"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="11.5" rx="2"/><path d="M12 16v3.5M8 19.5h8"/><path d="m10.5 7.8 4 2.45-4 2.45z"/></svg><span>Present</span></button>
         </div>
@@ -253,6 +253,23 @@
     <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
       <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
   </footer>
+
+  <!-- Page preview: the document laid out on printed pages. -->
+  <div id="pagePreview" class="page-preview" role="dialog" aria-modal="true" aria-labelledby="pagePreviewTitle" hidden>
+    <div class="page-preview-bar">
+      <h2 id="pagePreviewTitle" class="page-preview-title">Page Preview</h2>
+      <span id="pagePreviewStatus" class="page-preview-status" role="status" aria-live="polite"></span>
+      <div class="page-preview-paper" role="group" aria-label="Paper size">
+        <button type="button" class="page-preview-paper-btn" data-paper="A4" aria-pressed="true">A4</button>
+        <button type="button" class="page-preview-paper-btn" data-paper="letter" aria-pressed="false">Letter</button>
+      </div>
+      <button type="button" id="pagePreviewPrint" class="md-tool page-preview-print" title="Print these pages; choose Save as PDF in the print dialog for a PDF" disabled><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 16.5H5.5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v3.5a2 2 0 0 1-2 2H17"/><path d="M7 13.5h10V20H7z"/></svg><span>Print<span class="page-preview-wide"> / Save PDF</span></span></button>
+      <button type="button" id="pagePreviewClose" class="md-tool page-preview-close" aria-label="Close page preview" title="Close (Esc)"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="page-preview-wide">Close</span></button>
+    </div>
+    <div id="pagePreviewScroll" class="page-preview-scroll">
+      <div id="pagePreviewPages" class="page-preview-pages"></div>
+    </div>
+  </div>
 
   <!-- Main Application Script (ES Module) -->
   <script type="module" src="panphymd/js/main.js"></script>

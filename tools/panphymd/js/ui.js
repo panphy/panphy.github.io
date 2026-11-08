@@ -52,9 +52,11 @@ export function isTouchInteractionMode() {
 /**
  * Keep syntax highlighting in step with the site-wide preference.
  */
-function updateHighlightTheme() {
+export function updateHighlightTheme() {
   if (highlightStyle) {
-    const style = window.PanPhyTheme.get() === 'dark' ? 'monokai' : 'default';
+    // The page preview shows paper, so its code keeps the light colors.
+    const showsPages = document.body.classList.contains('md-page-preview-open');
+    const style = window.PanPhyTheme.get() === 'dark' && !showsPages ? 'monokai' : 'default';
     highlightStyle.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/${style}.min.css`;
   }
 }

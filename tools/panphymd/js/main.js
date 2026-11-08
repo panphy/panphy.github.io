@@ -52,10 +52,12 @@ import {
   showConfirmationModal,
   showHistoryModal,
   updateDirtyIndicator,
-  normalizeCloudImageUrl
+  normalizeCloudImageUrl,
+  updateHighlightTheme
 } from './ui.js';
 
 import { createEmbeddedImageEditor, parseLinkedImageImport } from './embedded-images.js';
+import { initPagePreview } from './page-preview.js';
 
 // DOM element references
 const markdownInput = document.getElementById('markdownInput');
@@ -142,19 +144,29 @@ function ensureSyncAnchorMirror() {
   if (syncAnchorMirror) return syncAnchorMirror;
   // Singleton: intentionally never removed. The node lives for the full page
   // lifetime, which equals the app lifetime for this single-page tool.
+  // The mirror is as tall as the whole source text, so it sits in a
+  // zero-size clipping host; otherwise printing adds blank pages for it.
+  const host = document.createElement('div');
+  host.setAttribute('aria-hidden', 'true');
+  host.style.position = 'absolute';
+  host.style.left = '0';
+  host.style.top = '0';
+  host.style.width = '0';
+  host.style.height = '0';
+  host.style.overflow = 'hidden';
+  host.style.visibility = 'hidden';
+  host.style.pointerEvents = 'none';
+  host.style.zIndex = '-1';
   const mirror = document.createElement('div');
-  mirror.setAttribute('aria-hidden', 'true');
   mirror.style.position = 'absolute';
-  mirror.style.left = '-99999px';
+  mirror.style.left = '0';
   mirror.style.top = '0';
-  mirror.style.visibility = 'hidden';
-  mirror.style.pointerEvents = 'none';
-  mirror.style.zIndex = '-1';
   mirror.style.whiteSpace = 'pre-wrap';
   mirror.style.overflowWrap = 'break-word';
   mirror.style.wordBreak = 'break-word';
   mirror.style.contain = 'layout style paint';
-  document.body.appendChild(mirror);
+  host.appendChild(mirror);
+  document.body.appendChild(host);
   syncAnchorMirror = mirror;
   return mirror;
 }
@@ -1286,17 +1298,17 @@ function toggleLaser() {
   }
 }
 
-/**
- * Print the document to PDF.
- *
- * Must be synchronous so that window.print() runs inside the original
- * user-gesture context (Safari/iOS block it otherwise).  The @media print
- * CSS already forces light-mode colors, and the beforeprint / afterprint
- * handlers swap the highlight.js stylesheet, so we only need to call
- * window.print() here.
- */
+// Print / PDF opens the page preview; its Print button prints those pages.
+const pagePreview = initPagePreview({
+  source: renderedOutput,
+  whenRendered: () => mathTypesetQueue,
+  getHeading: getDocumentHeading,
+  onToggle: () => updateHighlightTheme()
+});
+
 function printToPDF() {
-  window.print();
+  if (isInFullscreen()) return;
+  pagePreview.open();
 }
 
 function sanitizeFilenameForDownload(filename, fallback) {
@@ -1379,10 +1391,13 @@ async function fetchStylesheetText(url) {
   }
 }
 
-function getExportTitle() {
+function getDocumentHeading() {
   const heading = renderedOutput.querySelector('h1, h2, h3');
-  const text = heading ? heading.textContent.trim() : '';
-  return text || 'Exported Document';
+  return heading ? heading.textContent.replace(/\s+/g, ' ').trim() : '';
+}
+
+function getExportTitle() {
+  return getDocumentHeading() || 'Exported Document';
 }
 
 /**
@@ -1948,16 +1963,21 @@ syncScrollToggle.addEventListener('change', event => {
   }
 });
 
-// Print event handlers
+// Print event handlers: light code colors, and a PDF named after the document.
+let titleBeforePrint = null;
 window.addEventListener('beforeprint', () => {
-  highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+  highlightStyle.href = HIGHLIGHT_LIGHT_CSS_URL;
+  if (titleBeforePrint === null) {
+    titleBeforePrint = document.title;
+    document.title = sanitizeFilenameForDownload(getDocumentHeading(), 'PanPhyMD document');
+  }
 });
 
 window.addEventListener('afterprint', () => {
-  if (document.documentElement.getAttribute('data-theme') === 'dark') {
-    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-  } else {
-    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+  updateHighlightTheme();
+  if (titleBeforePrint !== null) {
+    document.title = titleBeforePrint;
+    titleBeforePrint = null;
   }
 });
 

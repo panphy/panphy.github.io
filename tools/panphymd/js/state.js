@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
   FONT_SIZE: 'markdownFontSize',
   PREVIEW_FONT: 'markdownPreviewFont',
   PANE_SPLIT: 'markdownPaneSplit',
+  PAPER_SIZE: 'markdownPaperSize',
   SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
   SUPPRESS_CLEAR_HISTORY_WARNING: 'markdownSuppressClearHistoryWarning',
   SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning',
@@ -168,6 +169,22 @@ export function savePreviewFontPreference(fontKey) {
  */
 export function loadPreviewFontPreference() {
   return safeGetStorageItem(STORAGE_KEYS.PREVIEW_FONT);
+}
+
+/**
+ * Save the paper size used for printing ('A4' or 'letter')
+ * @param {string} paperKey
+ */
+export function savePaperSizePreference(paperKey) {
+  safeSetStorageItem(STORAGE_KEYS.PAPER_SIZE, paperKey);
+}
+
+/**
+ * Load the paper size used for printing
+ * @returns {string|null} The saved paper size or null
+ */
+export function loadPaperSizePreference() {
+  return safeGetStorageItem(STORAGE_KEYS.PAPER_SIZE);
 }
 
 // ------------------------------------------------------------------ //

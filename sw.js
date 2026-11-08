@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-08T00:25:16Z';
+const BUILD_ID = '2026-11-08T00:44:58Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -78,6 +78,7 @@ const ASSETS_TO_CACHE = [
   '/tools/panphymd/js/ui.js',
   '/tools/panphymd/js/main.js',
   '/tools/panphymd/js/embedded-images.js',
+  '/tools/panphymd/js/page-preview.js',
   '/tools/panphymd/sample_doc.md',
   '/tools/panphymd/templates/math-basic.md',
   '/tools/panphymd/templates/math-calculus.md',
@@ -137,6 +138,7 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js',
   'https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js',
   'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+  'https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.min.js',
   '/tools/motion_tracker.html',
   '/tools/motion_tracker/css/motion_tracker.css',
   '/tools/motion_tracker/js/analysis.js',
