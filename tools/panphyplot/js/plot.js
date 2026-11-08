@@ -215,9 +215,9 @@
 				icon: {
 					width: 24,
 					height: 24,
-					path: 'M2 2h1.8v18.2H22V22H2Z'
-						+ 'M17.99 14.75A6.2 6.2 0 1 0 8.17 12.12L9.87 11.50A4.4 4.4 0 1 1 16.83 13.37Z'
-						+ 'M6.10 12.56L10.18 15.01L11.74 10.50Z'
+					path: 'M1 1h2.8v19.2H23V23H1Z'
+						+ 'M18.96 15.47A7.4 7.4 0 1 0 7.25 12.33L9.88 11.37A4.6 4.6 0 1 1 17.16 13.32Z'
+						+ 'M4.48 12.91L10.07 15.99L12.37 10.04Z'
 				},
 				click: function(gd) {
 					Plotly.relayout(gd, { 'xaxis.autorange': true, 'yaxis.autorange': true });
