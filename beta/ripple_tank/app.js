@@ -18,7 +18,7 @@ const MODES = ['interference', 'refraction', 'diffraction'];
 const GRID = 256; // solver cells across the tank
 const LINE_SOURCE_X = -6.5; // straight-wave source, just inside the damping strip
 const WALL_HEIGHT = 0.55; // how far barriers stand above the water (cm)
-const ABSORB_DEPTH = 1.2; // cm of wave-soaking strip in front of barriers when reflections are reduced
+const ABSORB_DEPTH = 1.2; // cm of wave-soaking strip in front of barriers, to cut reflections
 const MIN_SOLVER_WAVELENGTH = 0.8; // cm: about 13 grid cells, which the solver shows faithfully
 const POINT_SOURCE_GAIN = 1.07; // matches the Interference tab: amplitude/√2 at 1 cm, about amplitude/2 at 3 cm
 const REFRACTION_SOURCE_X = -HALF + 0.45;
@@ -44,7 +44,6 @@ const DEFAULTS = {
   diffraction: {
     source: 'straight',
     waveform: 'continuous',
-    reflections: 'reduced',
     frequency: 2,
     amplitude: 0.4,
     speed: 4,
@@ -510,7 +509,7 @@ function syncScene() {
     u.uMode.value = 2;
     const sv = ensureSolver();
     const b = state.settings.diffraction;
-    if (sv) sv.setMask(RS.buildMask(b.shapes, GRID, maskBuffer, b.reflections === 'reduced' ? ABSORB_DEPTH : 0));
+    if (sv) sv.setMask(RS.buildMask(b.shapes, GRID, maskBuffer, ABSORB_DEPTH));
     updateBoundaryMeshes();
     return;
   }
@@ -1141,9 +1140,7 @@ function buildBarrierControls() {
     }));
   }
   controlsEl.append(card('Demonstrations', null, null, choiceRow('', demos, 'presets'),
-    choiceRow('Reflections', segmented([{ value: 'reduced', label: 'Reduced' }, { value: 'full', label: 'Full' }], b.reflections,
-      (v) => { b.reflections = v; changed(); }, 'Reflections off the barriers')),
-    note(`Waves spread out as they pass a gap or an edge. The spreading is greatest when the gap is about one wavelength wide. Reduced reflections line the barriers with a wave-absorbing strip, like the foam in a real tank. The frequency is kept low enough that waves stay at least ${MIN_SOLVER_WAVELENGTH} cm long, the shortest the tank shows accurately.`)));
+    note(`Waves spread out as they pass a gap or an edge. The spreading is greatest when the gap is about one wavelength wide. The barriers are lined with a wave-absorbing strip, like the foam in a real tank, so they reflect little. The frequency is kept low enough that waves stay at least ${MIN_SOLVER_WAVELENGTH} cm long, the shortest the tank shows accurately.`)));
 }
 
 function buildLegend() {
