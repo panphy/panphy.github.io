@@ -32,7 +32,7 @@ const DEFAULTS = {
     speed2: 2.4
   }
 };
-const DEFAULT_SHOW = { antinodal: false, nodal: false, probe: true, normal: true, rays: true };
+const DEFAULT_SHOW = { antinodal: false, nodal: false, probe: false, normal: false, rays: false };
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
@@ -444,9 +444,8 @@ function fitCamera() {
 
 function updateHint() {
   const turn = state.view === 'top' ? 'Scroll or pinch to zoom' : 'Drag to turn';
-  hint.textContent = state.mode === 'interference'
-    ? `${turn} · drag P to move the probe`
-    : `${turn} · drag the boundary or its end dots`;
+  if (state.mode === 'interference') hint.textContent = state.show.probe ? `${turn} · drag P to move the probe` : turn;
+  else hint.textContent = `${turn} · drag the boundary or its end dots`;
 }
 
 let cameraFitted = false;
@@ -895,7 +894,7 @@ function buildControls() {
     controlsEl.append(card('Tank', null, null,
       keep(numberField({ label: 'Source separation', unit: 'cm', unitName: 'centimeters', min: 0.5, max: 12, step: 0.5, get: () => s.separation, set: (v) => { s.separation = v; } })),
       numberField({ label: 'Wave speed', unit: 'cm/s', unitName: 'centimeters per second', min: 1.2, max: 8, step: 0.1, get: () => s.speed, set: (v) => { s.speed = v; } }),
-      note('Antinodal lines join points where the waves arrive in step; nodal lines, where they cancel. Drag P to measure the path difference; it snaps onto the lines on show.')
+      note('Antinodal lines join points where the waves arrive in step; nodal lines, where they cancel. Turn on Probe and drag P to measure the path difference; it snaps onto the lines on show.')
     ));
     return;
   }
@@ -961,6 +960,7 @@ function buildLegend() {
 
 function changed() {
   syncScene();
+  updateHint();
   liveFields.forEach((f) => f.refresh());
   updateReadouts();
 }
