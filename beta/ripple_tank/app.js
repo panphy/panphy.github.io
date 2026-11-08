@@ -16,7 +16,7 @@ const FRAME_STEP = 0.04;
 const RATES = [0.1, 0.25, 0.5, 1, 2];
 const MODES = ['interference', 'refraction', 'diffraction'];
 const GRID = 256; // solver cells across the tank
-const LINE_SOURCE_X = -6.5; // straight-wave source, just inside the damping strip
+const LINE_SOURCE_X = -5.5; // straight-wave source, just clear of the damping strip at the edge
 const WALL_HEIGHT = 0.55; // how far barriers stand above the water (cm)
 const ABSORB_DEPTH = 1.2; // cm of wave-soaking strip in front of barriers, to cut reflections
 const MIN_SOLVER_WAVELENGTH = 0.8; // cm: about 13 grid cells, which the solver shows faithfully
@@ -1345,8 +1345,8 @@ canvas.addEventListener('pointermove', (event) => {
     if (snap) { p.x = snap.x; p.y = snap.y; }
   } else if (drag.kind === 'source') {
     const p = state.settings.diffraction.point;
-    p.x = Math.round(THREE.MathUtils.clamp(point.x, -HALF + 1.6, HALF - 1.6) * 20) / 20;
-    p.y = Math.round(THREE.MathUtils.clamp(point.y, -HALF + 1.6, HALF - 1.6) * 20) / 20;
+    p.x = Math.round(THREE.MathUtils.clamp(point.x, -HALF + 2.6, HALF - 2.6) * 20) / 20;
+    p.y = Math.round(THREE.MathUtils.clamp(point.y, -HALF + 2.6, HALF - 2.6) * 20) / 20;
   } else if (drag.kind === 'move') {
     const r = state.settings.refraction;
     r.offset = drag.offset + point.clone().sub(drag.start).dot(boundaryNormal(r));
