@@ -1,16 +1,26 @@
-// Virtual Ripple Tank: two-source interference and refraction at a boundary.
-// The water is drawn in 3D by Three.js; teaching overlays (nodal lines, probe,
-// normal, rays and angles) are drawn on a 2D canvas laid over it.
+// Virtual Ripple Tank: two-source interference, refraction at a boundary, and
+// diffraction at barriers. Interference and refraction come from exact
+// formulas; diffraction uses a step-by-step wave solver (solver.js).
+// The water is drawn in 3D by Three.js; teaching overlays are drawn on a 2D
+// canvas laid over it.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createSolver } from './solver.js';
 
 const P = window.RipplePhysics;
+const RS = window.RippleShapes;
 const TANK = P.TANK_SIZE; // cm
 const HALF = TANK / 2;
 const SEGMENTS = 200;
 const FRAME_STEP = 0.04;
 const RATES = [0.1, 0.25, 0.5, 1, 2];
-const MODES = ['interference', 'refraction'];
+const MODES = ['interference', 'refraction', 'diffraction'];
+const GRID = 256; // solver cells across the tank
+const LINE_SOURCE_X = -5.5; // straight-wave source, just clear of the damping strip at the edge
+const WALL_HEIGHT = 0.55; // how far barriers stand above the water (cm)
+const ABSORB_DEPTH = 1.2; // cm of wave-soaking strip in front of barriers, to cut reflections
+const MIN_SOLVER_WAVELENGTH = 0.8; // cm: about 13 grid cells, which the solver shows faithfully
+const POINT_SOURCE_GAIN = 1.07; // matches the Interference tab: amplitude/√2 at 1 cm, about amplitude/2 at 3 cm
 const REFRACTION_SOURCE_X = -HALF + 0.45;
 const MAX_INCIDENCE = 43;
 
@@ -30,6 +40,15 @@ const DEFAULTS = {
     twoRegions: true,
     speed1: 4,
     speed2: 2.4
+  },
+  diffraction: {
+    source: 'straight',
+    waveform: 'continuous',
+    frequency: 2,
+    amplitude: 0.4,
+    speed: 4,
+    point: { x: -5, y: 0 },
+    shapes: RS.preset('single-slit')
   }
 };
 const DEFAULT_SHOW = { antinodal: false, nodal: false, probe: false, normal: false, rays: false };
@@ -83,11 +102,17 @@ const vertexShader = `
   uniform float uBoundaryOffset;
   uniform float uSpeedA;
   uniform float uSpeedB;
+  uniform sampler2D uHeight;
+  uniform sampler2D uMask;
+  uniform vec2 uTexel;
+  uniform float uCell;
+  uniform float uTopView;
 
   varying vec3 vWorldPos;
   varying vec3 vNormal;
   varying float vH1;
   varying float vH2;
+  varying vec2 vUv;
 
   const float PI = 3.14159265359;
   const float HALF_SIZE = ${HALF.toFixed(1)};
@@ -147,8 +172,29 @@ const vertexShader = `
     return a + b;
   }
 
+  // Diffraction: the solver's water height, with barriers standing up out of it.
+  float surface(vec2 uv) {
+    float wall = texture2D(uMask, uv).r;
+    float water = texture2D(uHeight, uv).r * (1.0 - wall);
+    return uTopView > 0.5 ? water : mix(water, ${WALL_HEIGHT.toFixed(2)}, wall);
+  }
+
   void main() {
     vec3 pos = position;
+    vUv = uv;
+    if (uMode > 1.5) {
+      float here = surface(uv);
+      float sx = (surface(uv + vec2(uTexel.x, 0.0)) - surface(uv - vec2(uTexel.x, 0.0))) / (2.0 * uCell);
+      float sz = -(surface(uv + vec2(0.0, uTexel.y)) - surface(uv - vec2(0.0, uTexel.y))) / (2.0 * uCell);
+      bool wall = texture2D(uMask, uv).r > 0.5;
+      pos.y = here;
+      vH1 = wall ? 0.0 : texture2D(uHeight, uv).r;
+      vH2 = 0.0;
+      vNormal = normalize(vec3(-sx, 1.0, -sz));
+      vWorldPos = (modelMatrix * vec4(pos, 1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      return;
+    }
     vec2 xz = pos.xz;
     float h1; float h2;
     heights(xz, h1, h2);
@@ -175,19 +221,46 @@ const fragmentShader = `
   uniform float uTopView;
   uniform vec3 uCrest;
   uniform vec3 uTrough;
+  uniform float uMode;
+  uniform sampler2D uHeight;
+  uniform sampler2D uMask;
+  uniform vec3 uWall;
+  uniform vec3 uWallEdge;
+  uniform vec2 uTexel;
 
   varying vec3 vWorldPos;
   varying vec3 vNormal;
   varying float vH1;
   varying float vH2;
+  varying vec2 vUv;
 
   void main() {
     float totalH = vH1 + vH2;
+    float wall = 0.0;
+    float rim = 0.0;
+    if (uMode > 1.5) {
+      float m = texture2D(uMask, vUv).r;
+      wall = smoothstep(0.55, 0.75, m);
+      // A dark rim round each barrier, so it stands out on bright crests and dark troughs alike.
+      // It looks in eight directions, so corners stay square, and starts at the barrier's own edge.
+      vec2 o = uTexel * 0.9;
+      vec2 d = o * 0.7071;
+      float near = max(max(max(texture2D(uMask, vUv + vec2(o.x, 0.0)).r, texture2D(uMask, vUv - vec2(o.x, 0.0)).r),
+                           max(texture2D(uMask, vUv + vec2(0.0, o.y)).r, texture2D(uMask, vUv - vec2(0.0, o.y)).r)),
+                       max(max(texture2D(uMask, vUv + d).r, texture2D(uMask, vUv - d).r),
+                           max(texture2D(uMask, vUv + vec2(d.x, -d.y)).r, texture2D(uMask, vUv + vec2(-d.x, d.y)).r)));
+      rim = smoothstep(0.05, 0.3, max(near, m));
+      totalH = texture2D(uHeight, vUv).r;
+    }
 
     // Top view: like the bright and dark bands a ripple tank casts on the screen below.
     if (uTopView > 0.5) {
-      float k = smoothstep(-0.32, 0.32, totalH);
-      gl_FragColor = vec4(mix(uTrough, uCrest, k), 1.0);
+      // Diffraction: a gentler curve, so weak diffracted waves still show.
+      float k = uMode > 1.5 ? 0.5 + 0.5 * totalH / (abs(totalH) + 0.1) : smoothstep(-0.32, 0.32, totalH);
+      vec3 top = mix(uTrough, uCrest, k);
+      top = mix(top, uWallEdge, rim);
+      top = mix(top, uWall, wall);
+      gl_FragColor = vec4(top, 1.0);
       return;
     }
 
@@ -206,8 +279,10 @@ const fragmentShader = `
     color = mix(color, uColor2, clamp(vH2 * 3.5, 0.0, 1.0) * 0.5);
     float constructive = clamp(totalH * 2.0, 0.0, 1.0);
     color += vec3(0.12) * constructive * constructive;
+    color = mix(color, uWallEdge, rim * 0.85);
+    color = mix(color, uWall, wall);
     color *= diffuse;
-    color += vec3(1.0) * spec;
+    color += vec3(1.0) * spec * (1.0 - wall * 0.7);
     color += vec3(0.06) * pow(1.0 - max(dot(N, V), 0.0), 3.0);
     gl_FragColor = vec4(color, 0.96);
   }
@@ -224,7 +299,9 @@ const THEMES = {
     trough: new THREE.Vector3(0.12, 0.22, 0.36),
     edge: 0xb0bac8,
     regionA: 0x0d9488,
-    regionB: 0xea580c
+    regionB: 0xea580c,
+    wall: new THREE.Vector3(0.66, 0.44, 0.24),
+    wallEdge: new THREE.Vector3(0.07, 0.09, 0.15)
   },
   dark: {
     sceneBg: 0x0a0c14,
@@ -236,7 +313,9 @@ const THEMES = {
     trough: new THREE.Vector3(0.03, 0.06, 0.12),
     edge: 0x3a4050,
     regionA: 0x2dd4bf,
-    regionB: 0xf4845f
+    regionB: 0xf4845f,
+    wall: new THREE.Vector3(0.56, 0.39, 0.22),
+    wallEdge: new THREE.Vector3(0.01, 0.02, 0.05)
   }
 };
 const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
@@ -279,7 +358,13 @@ const uniforms = {
   uLightDir: { value: new THREE.Vector3(4, 10, 6).normalize() },
   uTopView: { value: 0 },
   uCrest: { value: theme().crest.clone() },
-  uTrough: { value: theme().trough.clone() }
+  uTrough: { value: theme().trough.clone() },
+  uHeight: { value: null },
+  uMask: { value: null },
+  uTexel: { value: new THREE.Vector2(1 / GRID, 1 / GRID) },
+  uCell: { value: TANK / GRID },
+  uWall: { value: theme().wall.clone() },
+  uWallEdge: { value: theme().wallEdge.clone() }
 };
 
 const geometry = new THREE.PlaneGeometry(TANK, TANK, SEGMENTS, SEGMENTS);
@@ -362,9 +447,80 @@ function updateBoundaryMeshes() {
   regionBMesh.geometry = polygonGeometry(clipTank(true, r));
 }
 
+// ---------- Barriers & blocks: the wave solver ----------
+let solver = null;
+const maskBuffer = new Uint8Array(GRID * GRID * 4);
+const tankUv = (p) => new THREE.Vector2(p.x / TANK + 0.5, 0.5 - p.y / TANK);
+
+let solverUnavailable = false;
+function ensureSolver() {
+  if (!solver && !solverUnavailable) {
+    solver = createSolver(renderer, GRID);
+    if (solver) uniforms.uMask.value = solver.mask;
+    else solverUnavailable = true;
+  }
+  return solver;
+}
+
+function clearRipples() {
+  if (solver) solver.clear();
+  state.t = 0;
+  solverClock = 0;
+}
+
+// Run the water forward by simDt seconds. Every step has the same length, short
+// enough for the fastest wave speed: this method only stays stable with equal
+// steps, so leftover time waits for the next frame rather than shortening a step.
+const SOLVER_DT = (0.4 * (TANK / GRID)) / 8; // s, stable up to 8 cm/s
+let solverClock = 0;
+function advance(simDt) {
+  if (!solver || simDt <= 0) return;
+  const b = state.settings.diffraction;
+  const dx = TANK / GRID;
+  solverClock += simDt;
+  let steps = Math.floor(solverClock / SOLVER_DT);
+  solverClock -= steps * SOLVER_DT;
+  if (steps > 64) steps = 64; // on a very slow frame, let the tank fall behind instead of freezing
+  const dt = SOLVER_DT;
+  const k1 = ((b.speed * dt) / dx) ** 2;
+  const omega = 2 * Math.PI * b.frequency;
+  const sourceCell = tankUv(b.point).multiplyScalar(GRID);
+  const lineColumn = Math.floor((LINE_SOURCE_X / TANK + 0.5) * GRID);
+  // A line source adding f each step makes straight waves of amplitude f·dx / (2·v·ω·dt²).
+  // A point source's waves scale as 1/v² rather than 1/v, so its gain also grows with v;
+  // POINT_SOURCE_GAIN was measured at 4 cm/s.
+  const lineGain = (2 * b.amplitude * b.speed * omega * dt * dt) / dx;
+  const gain = b.source === 'point' ? lineGain * POINT_SOURCE_GAIN * (b.speed / 4) : lineGain;
+  for (let i = 0; i < steps; i++) {
+    state.t += dt;
+    let drive;
+    if (b.waveform === 'pulse') {
+      // One smooth crest, a period long: the water at the source rises and falls once.
+      drive = state.t * b.frequency <= 1 ? 0.5 * gain * Math.sin(omega * state.t) : 0;
+    } else {
+      const rampUp = Math.min(1, state.t * b.frequency); // start gently over the first cycle
+      drive = gain * rampUp * Math.cos(omega * state.t);
+    }
+    solver.step({ k1, k2: k1, drive, source: b.source, sourceCell, lineColumn });
+  }
+}
+
+// Highest frequency whose wavelength the grid can still show well.
+const maxSolverFrequency = (b) => Math.floor((b.speed / MIN_SOLVER_WAVELENGTH) * 10) / 10;
+function capFrequency(b) { b.frequency = Math.min(b.frequency, maxSolverFrequency(b)); }
+
+
 // Copy the settings into the shader.
 function syncScene() {
   const u = uniforms;
+  if (state.mode === 'diffraction') {
+    u.uMode.value = 2;
+    const sv = ensureSolver();
+    const b = state.settings.diffraction;
+    if (sv) sv.setMask(RS.buildMask(b.shapes, GRID, maskBuffer, ABSORB_DEPTH));
+    updateBoundaryMeshes();
+    return;
+  }
   if (state.mode === 'interference') {
     const s = state.settings.interference;
     u.uMode.value = 0;
@@ -399,6 +555,8 @@ function applyTheme() {
   uniforms.uColor2.value.copy(c.source2Color);
   uniforms.uCrest.value.copy(c.crest);
   uniforms.uTrough.value.copy(c.trough);
+  uniforms.uWall.value.copy(c.wall);
+  uniforms.uWallEdge.value.copy(c.wallEdge);
   edgeMat.color.set(c.edge);
   regionAMat.color.set(c.regionA);
   regionBMat.color.set(c.regionB);
@@ -445,6 +603,7 @@ function fitCamera() {
 function updateHint() {
   const turn = state.view === 'top' ? 'Scroll or pinch to zoom' : 'Drag the tank to turn it';
   if (state.mode === 'interference') hint.textContent = state.show.probe ? `${turn} · drag P to move the probe` : turn;
+  else if (state.mode === 'diffraction') hint.textContent = state.settings.diffraction.source === 'point' ? `${turn} · drag S to move the source` : turn;
   else hint.textContent = `${turn} · drag the boundary or its end dots`;
 }
 
@@ -577,6 +736,19 @@ function drawOverlay() {
   const h = wrap.clientHeight;
   octx.clearRect(0, 0, w, h);
 
+  if (state.mode === 'diffraction') {
+    const b = state.settings.diffraction;
+    if (b.source === 'point') {
+      sourceScreen = dot(b.point.x, b.point.y, css.s1, 7);
+      label('S', b.point.x, b.point.y, css.s1, 0, -18);
+    } else {
+      sourceScreen = null;
+      path([[LINE_SOURCE_X, -HALF + 1.4], [LINE_SOURCE_X, HALF - 1.4]]);
+      haloStroke(css.s1, 3);
+    }
+    return;
+  }
+
   if (state.mode === 'interference') {
     const s = state.settings.interference;
     const a = s.separation / 2;
@@ -647,6 +819,7 @@ function drawOverlay() {
 }
 
 let probeScreen = null;
+let sourceScreen = null;
 
 // Pull the probe onto the nearest nodal or antinodal line on show, when it is
 // within a few pixels of one, so the readout lands on a whole or half wavelength.
@@ -696,7 +869,16 @@ const fmt = (v, d = 2) => {
 function updateReadouts() {
   const isInt = state.mode === 'interference';
   $('interferenceReadout').hidden = !isInt;
-  $('refractionReadout').hidden = isInt;
+  $('refractionReadout').hidden = state.mode !== 'refraction';
+  $('diffractionReadout').hidden = state.mode !== 'diffraction';
+  if (state.mode === 'diffraction') {
+    const b = state.settings.diffraction;
+    $('deepLambda').textContent = P.wavelength(b.speed, b.frequency).toFixed(2);
+    const note = $('diffractionReadout').querySelector('.readout-verdict');
+    note.textContent = solverUnavailable ? 'This device cannot run the wave solver for this tab' : '';
+    note.dataset.kind = solverUnavailable ? 'total' : '';
+    return;
+  }
   if (isInt) {
     const s = state.settings.interference;
     const lambda = P.wavelength(s.speed, s.s1.frequency);
@@ -899,6 +1081,11 @@ function buildControls() {
     return;
   }
 
+  if (state.mode === 'diffraction') {
+    buildBarrierControls();
+    return;
+  }
+
   const r = state.settings.refraction;
   controlsEl.append(card('Waves', '--region1-color', null,
     numberField({ label: 'Frequency', unit: 'Hz', unitName: 'hertz', min: 0.5, max: 5, step: 0.1, get: () => r.frequency, set: (v) => { r.frequency = v; } }),
@@ -926,6 +1113,44 @@ function buildControls() {
     note('Waves travel more slowly in shallow water. Region 1 is where the waves start.')));
 }
 
+function actionButton(text, onClick, cls = 'preset-btn') {
+  const b = el('button', cls, text);
+  b.type = 'button';
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function buildBarrierControls() {
+  const b = state.settings.diffraction;
+  const keep = (f) => { liveFields.push(f); return f; };
+  const clearBtn = b.waveform === 'pulse'
+    ? actionButton('Send a pulse', () => { clearRipples(); state.playing = true; updatePlayButton(); })
+    : actionButton('Clear ripples', () => { clearRipples(); });
+  controlsEl.append(card('Waves', '--source1-color', null,
+    choiceRow('Source', segmented([{ value: 'straight', label: 'Straight' }, { value: 'point', label: 'Point' }], b.source,
+      (v) => { b.source = v; clearRipples(); changed(); }, 'Wave source')),
+    choiceRow('Send', segmented([{ value: 'continuous', label: 'Continuous' }, { value: 'pulse', label: 'Single pulse' }], b.waveform,
+      (v) => { b.waveform = v; clearRipples(); state.playing = true; updatePlayButton(); buildControls(); changed(); }, 'Continuous waves or a single pulse')),
+    keep(numberField({ label: 'Frequency', unit: 'Hz', unitName: 'hertz', min: 0.5, max: 4, step: 0.1, get: () => b.frequency, set: (v) => { b.frequency = v; capFrequency(b); } })),
+    numberField({ label: 'Amplitude', unit: 'cm', unitName: 'centimeters', min: 0.1, max: 1, step: 0.05, get: () => b.amplitude, set: (v) => { b.amplitude = v; } }),
+    numberField({ label: 'Wave speed', unit: 'cm/s', unitName: 'centimeters per second', min: 1.2, max: 8, step: 0.1, get: () => b.speed, set: (v) => { b.speed = v; capFrequency(b); } }),
+    choiceRow('', clearBtn, 'presets')
+  ));
+
+  const demos = el('div', 'preset-row');
+  for (const [text, name] of [['Single slit', 'single-slit'], ['Double slit', 'double-slit'], ['Edge', 'edge']]) {
+    demos.append(actionButton(text, () => {
+      b.shapes = RS.preset(name);
+      state.playing = true;
+      updatePlayButton();
+      clearRipples();
+      changed();
+    }));
+  }
+  controlsEl.append(card('Demonstrations', null, null, choiceRow('', demos, 'presets'),
+    note(`Waves spread out as they pass a gap or an edge. The spreading is greatest when the gap is about one wavelength wide. The barriers are lined with a wave-absorbing strip, like the foam in a real tank, so they reflect little. The frequency is kept low enough that waves stay at least ${MIN_SOLVER_WAVELENGTH} cm long, the shortest the tank shows accurately.`)));
+}
+
 function buildLegend() {
   legend.replaceChildren();
   const items = state.mode === 'interference'
@@ -934,6 +1159,8 @@ function buildLegend() {
       { key: 'nodal', name: 'Nodal', suffix: ' lines', swatch: '<path d="M1 6 H23" stroke-dasharray="5 3.5" stroke-width="2.6"/>', color: '--nodal-color' },
       { key: 'probe', name: 'Probe', swatch: '<circle cx="12" cy="6" r="4" fill="currentColor" stroke="none"/>', color: '--ink-2' }
     ]
+    : state.mode === 'diffraction'
+    ? []
     : [
       { key: 'normal', name: 'Normal & angles', swatch: '<path d="M12 0 V12" stroke-dasharray="3 2.5"/><path d="M12 4 A3 3 0 0 1 15 6" />', color: '--ink-2' },
       { key: 'rays', name: 'Rays', swatch: '<path d="M1 6 H19"/><path d="M15 2 L21 6 L15 10" fill="currentColor"/>', color: '--region2-color' }
@@ -988,7 +1215,11 @@ function togglePlay() {
 
 function step(dir) {
   state.playing = false;
-  state.t = Math.max(0, state.t + dir * FRAME_STEP);
+  if (state.mode === 'diffraction') {
+    if (dir > 0) advance(FRAME_STEP); // the solver can only run forward
+  } else {
+    state.t = Math.max(0, state.t + dir * FRAME_STEP);
+  }
   updatePlayButton();
 }
 
@@ -1002,6 +1233,7 @@ viewToggle.append(segmented([{ value: '3d', label: '3D' }, { value: 'top', label
 // Reset: this experiment's settings, overlays, playback and view as on arrival.
 function reset() {
   state.settings[state.mode] = clone(DEFAULTS[state.mode]);
+  if (state.mode === 'diffraction') clearRipples();
   state.show = { ...DEFAULT_SHOW };
   state.rate = 1;
   rateGroup.querySelectorAll('.seg-btn').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.value) === 1)));
@@ -1026,6 +1258,9 @@ function setMode(mode, { fromHash = false } = {}) {
   });
   if (!fromHash) history.replaceState(null, '', `#${mode}`);
   state.t = 0;
+  if (mode === 'diffraction') { ensureSolver(); clearRipples(); }
+  $('stepBackBtn').disabled = mode === 'diffraction';
+  $('stepBackBtn').title = mode === 'diffraction' ? 'Step back (not available here)' : 'Step back';
   state.playing = true;
   updatePlayButton();
   buildLegend();
@@ -1051,7 +1286,7 @@ window.addEventListener('hashchange', () => {
   if (MODES.includes(mode) && mode !== state.mode) setMode(mode, { fromHash: true });
 });
 
-// ---------- Dragging the probe and the boundary ----------
+// ---------- Dragging the probe, the boundary and the point source ----------
 const raycaster = new THREE.Raycaster();
 const waterPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
@@ -1094,6 +1329,8 @@ canvas.addEventListener('pointerdown', (event) => {
     const point = tankPoint(event);
     if (point) kind = boundaryDragKind(point);
   }
+  if (state.mode === 'diffraction' && state.settings.diffraction.source === 'point' && sourceScreen
+    && Math.hypot(sx - sourceScreen[0], sy - sourceScreen[1]) < 26) kind = 'source';
   if (!kind) return;
   event.preventDefault();
   event.stopPropagation();
@@ -1114,6 +1351,10 @@ canvas.addEventListener('pointermove', (event) => {
     p.y = Math.round(THREE.MathUtils.clamp(point.y, -HALF + 0.3, HALF - 0.3) * 20) / 20;
     const snap = snapToLine(p.x, p.y);
     if (snap) { p.x = snap.x; p.y = snap.y; }
+  } else if (drag.kind === 'source') {
+    const p = state.settings.diffraction.point;
+    p.x = Math.round(THREE.MathUtils.clamp(point.x, -HALF + 2.6, HALF - 2.6) * 20) / 20;
+    p.y = Math.round(THREE.MathUtils.clamp(point.y, -HALF + 2.6, HALF - 2.6) * 20) / 20;
   } else if (drag.kind === 'move') {
     const r = state.settings.refraction;
     r.offset = drag.offset + point.clone().sub(drag.start).dot(boundaryNormal(r));
@@ -1144,6 +1385,9 @@ canvas.addEventListener('pointermove', (event) => {
     const kind = point && boundaryDragKind(point);
     if (kind === 'rotate') cursor = 'alias';
     else if (kind === 'move') cursor = 'move';
+  } else if (state.mode === 'diffraction' && state.settings.diffraction.source === 'point' && sourceScreen
+    && Math.hypot(event.clientX - rect.left - sourceScreen[0], event.clientY - rect.top - sourceScreen[1]) < 26) {
+    cursor = 'move';
   }
   canvas.style.cursor = cursor;
 });
@@ -1176,7 +1420,12 @@ function animate(now) {
   requestAnimationFrame(animate);
   const dt = last === null ? 0 : Math.min((now - last) / 1000, 0.05);
   last = now;
-  if (state.playing) state.t += dt * state.rate;
+  if (state.mode === 'diffraction') {
+    if (state.playing) advance(dt * state.rate);
+    if (solver) uniforms.uHeight.value = solver.texture;
+  } else if (state.playing) {
+    state.t += dt * state.rate;
+  }
   uniforms.uTime.value = state.t;
   controls.update();
   renderer.render(scene, camera);

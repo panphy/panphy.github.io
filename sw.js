@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-08T20:21:14Z';
+const BUILD_ID = '2026-11-08T21:26:43Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -305,6 +305,8 @@ const ASSETS_TO_CACHE = [
   '/simulations/ripple_tank/app.css',
   '/simulations/ripple_tank/app.js',
   '/simulations/ripple_tank/physics.js',
+  '/simulations/ripple_tank/shapes.js',
+  '/simulations/ripple_tank/solver.js',
   '/simulations/superposition.html',
   '/simulations/superposition/app.css',
   '/simulations/superposition/app.js',

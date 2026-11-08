@@ -699,7 +699,8 @@ footer.panphy-footer kbd {
   .main { padding: 10px 12px 12px; gap: 10px; }
   .stage { padding: 8px; }
   .mode-tabs { width: 100%; }
-  .mode-tab { flex: 1; justify-content: center; padding: 0 6px; }
+  .mode-tab { flex: 1; justify-content: center; padding: 0 6px; font-size: 0.82rem; }
+  .mode-tab svg { display: none; }
   .legend { width: 100%; }
   .legend-chip { flex: 1 1 0; justify-content: center; padding: 0 6px; gap: 4px; font-size: 0.74rem; }
   .legend-swatch { width: 16px; }
@@ -721,10 +722,15 @@ footer.panphy-footer kbd {
   .seg-mini .seg-btn { min-height: 44px; min-width: 44px; }
   .step-btn { width: 44px; height: 44px; }
   .field-input { height: 44px; font-size: 1rem; }
-  .reset-btn, .preset-btn { min-height: 44px; }
+  .reset-btn, .preset-btn { min-height: 44px; min-width: 44px; }
   .range { height: 44px; }
   .range::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -11px; }
   .switch { width: 48px; height: 28px; }
   .switch span::before { width: 22px; height: 22px; }
   .switch input:checked + span::before { transform: translateX(20px); }
 }
+
+/* ---------- Diffraction ---------- */
+
+.icon-btn:disabled { opacity: 0.3; cursor: default; }
+.icon-btn:disabled:hover { background: transparent; color: var(--ink-2); }
