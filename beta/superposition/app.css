@@ -316,7 +316,7 @@ canvas:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   color: var(--ink-2);
 }
 
-.probe-readout[hidden] { display: none; }
+.probe-readout.is-off { visibility: hidden; }
 
 .probe-at { white-space: nowrap; }
 .probe-at .ds-readout { font-weight: 600; }

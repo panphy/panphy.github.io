@@ -426,7 +426,9 @@
   const signed = (v) => (Number(Math.abs(v).toFixed(1)) === 0 ? '0.0' : (v < 0 ? MINUS : '+') + Math.abs(v).toFixed(1));
 
   function updateReadout() {
-    readout.hidden = !state.show.probe;
+    // Keep the row's space when the probe is off, so the canvas never changes size.
+    readout.classList.toggle('is-off', !state.show.probe);
+    readout.setAttribute('aria-hidden', String(!state.show.probe));
     if (!state.show.probe) return;
     const s = current();
     // Round each part first, so the sum shown always adds up (2.1 + 1.9 = 4.0).
