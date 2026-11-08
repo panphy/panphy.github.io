@@ -1866,14 +1866,44 @@ function renderFittingResult(equation, rSquaredDisplay, syncSymbols = true) {
 	rSquaredElement.style.display = 'flex';
 	renderFitParameters();
 	refreshWorkspaceChrome();
-	// After a Fit Curve click, bring the result into view in the inspector.
-	if (document.activeElement && document.activeElement.classList.contains('fit-button')) {
-		const card = document.querySelector('.neo-card.result');
-		if (card) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+	if (resultScrollRequested) {
+		resultScrollRequested = false;
+		scrollResultIntoView();
 	}
 	renderFitDiagnostics();
 	safeTypeset(equationElement);
 	safeTypeset(rSquaredElement);
+}
+
+// A Fit Curve click asks for its result to be brought into view when it arrives; a fit can take a
+// while in the worker. Any other click or key press first cancels the request, so the view is never
+// pulled away from something the user has moved on to.
+let resultScrollRequested = false;
+
+function bindResultScroll() {
+	document.addEventListener('click', (event) => {
+		resultScrollRequested = !!event.target.closest?.('.fit-button');
+	}, true);
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Enter' || event.key === ' ') resultScrollRequested = !!event.target.closest?.('.fit-button');
+		else resultScrollRequested = false;
+	}, true);
+}
+
+function scrollResultIntoView() {
+	const card = document.querySelector('.neo-card.result');
+	if (!card) return;
+	// In one column the page scrolls under the header bars that stay pinned (on a phone, only the app
+	// bar), so the card stops below them.
+	let covered = 0;
+	if (window.innerWidth < 1000) {
+		document.querySelectorAll('.neo-appbar, .neo-toolbar').forEach((bar) => {
+			if (/sticky|fixed/.test(getComputedStyle(bar).position)) covered = Math.max(covered, bar.getBoundingClientRect().bottom);
+		});
+	}
+	card.style.scrollMarginTop = `${Math.round(covered) + 12}px`;
+	const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+	card.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
 }
 
 // The Excel-style pair under the equation: more or fewer decimal places, 0 to 8.
@@ -1989,6 +2019,7 @@ function closePopup() {
 }
 
 function initializeInterface() {
+	bindResultScroll();
 	// Top-layer tooltips stay clear of scrolling pane edges; dismiss on layout changes.
 	document.addEventListener('scroll', closeFitQualityHelp, true);
 	window.addEventListener('resize', closeFitQualityHelp);
