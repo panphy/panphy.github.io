@@ -16,8 +16,8 @@ const MAX_INCIDENCE = 43;
 
 const DEFAULTS = {
   interference: {
-    s1: { on: true, shape: 'point', frequency: 2, amplitude: 0.5 },
-    s2: { on: true, shape: 'point', frequency: 2, amplitude: 0.5, phase: 0 },
+    s1: { on: true, frequency: 2, amplitude: 0.5 },
+    s2: { on: true, frequency: 2, amplitude: 0.5, phase: 0 },
     separation: 6,
     speed: 4,
     probe: { x: 0, y: 5 }
@@ -70,12 +70,10 @@ const vertexShader = `
   uniform float uS1On;
   uniform float uS1Amp;
   uniform float uS1Freq;
-  uniform float uS1Shape;
   uniform vec2 uS1Pos;
   uniform float uS2On;
   uniform float uS2Amp;
   uniform float uS2Freq;
-  uniform float uS2Shape;
   uniform float uS2Phase;
   uniform vec2 uS2Pos;
   uniform float uRefrAmp;
@@ -96,10 +94,9 @@ const vertexShader = `
   const float EDGE_WIDTH = 1.8;
 
   // Point source: circular waves whose amplitude falls as 1/sqrt(r).
-  // Straight source: straight waves moving away on both sides.
-  float sourceWave(vec2 p, vec2 src, float shape, float amp, float freq, float phase) {
-    float r = shape > 0.5 ? abs(p.x - src.x) : distance(p, src);
-    float decay = shape > 0.5 ? 1.0 : 1.0 / sqrt(1.0 + r);
+  float sourceWave(vec2 p, vec2 src, float amp, float freq, float phase) {
+    float r = distance(p, src);
+    float decay = 1.0 / sqrt(1.0 + r);
     return amp * decay * cos(2.0 * PI * freq * (r / uSpeed - uTime) + phase);
   }
 
@@ -133,8 +130,8 @@ const vertexShader = `
 
   void heights(vec2 p, out float h1, out float h2) {
     if (uMode < 0.5) {
-      h1 = uS1On > 0.5 ? sourceWave(p, uS1Pos, uS1Shape, uS1Amp, uS1Freq, 0.0) : 0.0;
-      h2 = uS2On > 0.5 ? sourceWave(p, uS2Pos, uS2Shape, uS2Amp, uS2Freq, uS2Phase) : 0.0;
+      h1 = uS1On > 0.5 ? sourceWave(p, uS1Pos, uS1Amp, uS1Freq, 0.0) : 0.0;
+      h2 = uS2On > 0.5 ? sourceWave(p, uS2Pos, uS2Amp, uS2Freq, uS2Phase) : 0.0;
     } else {
       refractionWaves(p, h1, h2);
     }
@@ -268,8 +265,8 @@ const uniforms = {
   uTime: { value: 0 },
   uMode: { value: 0 },
   uSpeed: { value: 4 },
-  uS1On: { value: 1 }, uS1Amp: { value: 0.5 }, uS1Freq: { value: 2 }, uS1Shape: { value: 0 }, uS1Pos: { value: S1 },
-  uS2On: { value: 1 }, uS2Amp: { value: 0.5 }, uS2Freq: { value: 2 }, uS2Shape: { value: 0 }, uS2Phase: { value: 0 }, uS2Pos: { value: S2 },
+  uS1On: { value: 1 }, uS1Amp: { value: 0.5 }, uS1Freq: { value: 2 }, uS1Pos: { value: S1 },
+  uS2On: { value: 1 }, uS2Amp: { value: 0.5 }, uS2Freq: { value: 2 }, uS2Phase: { value: 0 }, uS2Pos: { value: S2 },
   uRefrAmp: { value: 0.5 }, uRefrFreq: { value: 2 },
   uTwoRegions: { value: 0 },
   uBoundaryNormal: { value: new THREE.Vector2(1, 0) },
@@ -374,8 +371,8 @@ function syncScene() {
     u.uSpeed.value = s.speed;
     S1.set(-s.separation / 2, 0);
     S2.set(s.separation / 2, 0);
-    u.uS1On.value = s.s1.on ? 1 : 0; u.uS1Amp.value = s.s1.amplitude; u.uS1Freq.value = s.s1.frequency; u.uS1Shape.value = s.s1.shape === 'straight' ? 1 : 0;
-    u.uS2On.value = s.s2.on ? 1 : 0; u.uS2Amp.value = s.s2.amplitude; u.uS2Freq.value = s.s2.frequency; u.uS2Shape.value = s.s2.shape === 'straight' ? 1 : 0;
+    u.uS1On.value = s.s1.on ? 1 : 0; u.uS1Amp.value = s.s1.amplitude; u.uS1Freq.value = s.s1.frequency;
+    u.uS2On.value = s.s2.on ? 1 : 0; u.uS2Amp.value = s.s2.amplitude; u.uS2Freq.value = s.s2.frequency;
     u.uS2Phase.value = THREE.MathUtils.degToRad(s.s2.phase);
   } else {
     clampBoundary();
@@ -573,7 +570,7 @@ function arc(cx, cy, radius, a0, a1, color) {
 }
 
 function interferenceLinesValid(s) {
-  return s.s1.on && s.s2.on && s.s1.shape === 'point' && s.s2.shape === 'point' && s.s1.frequency === s.s2.frequency;
+  return s.s1.on && s.s2.on && s.s1.frequency === s.s2.frequency;
 }
 
 function drawOverlay() {
@@ -652,6 +649,45 @@ function drawOverlay() {
 
 let probeScreen = null;
 
+// Pull the probe onto the nearest nodal or antinodal line on show, when it is
+// within a few pixels of one, so the readout lands on a whole or half wavelength.
+const SNAP_PX = 9;
+function snapToLine(x, y) {
+  const s = state.settings.interference;
+  if (!interferenceLinesValid(s)) return null;
+  const here = project(x, y);
+  if (!here) return null;
+  const a = s.separation / 2;
+  const lambda = P.wavelength(s.speed, s.s1.frequency);
+  let best = null;
+  for (const kind of ['antinodal', 'nodal']) {
+    if (!state.show[kind]) continue;
+    for (const d of P.interferenceOrders(s.separation, lambda, s.s2.phase, kind)) {
+      // Newton steps along the gradient of r1 − r2 reach the hyperbola r1 − r2 = d.
+      let px = x;
+      let py = y;
+      for (let i = 0; i < 5; i++) {
+        const r1 = Math.hypot(px + a, py);
+        const r2 = Math.hypot(px - a, py);
+        const gx = (px + a) / r1 - (px - a) / r2;
+        const gy = py / r1 - py / r2;
+        const g2 = gx * gx + gy * gy;
+        if (g2 < 1e-9) break;
+        const k = (r1 - r2 - d) / g2;
+        px -= k * gx;
+        py -= k * gy;
+      }
+      if (Math.abs(Math.hypot(px + a, py) - Math.hypot(px - a, py) - d) > 1e-4) continue;
+      if (Math.abs(px) > HALF - 0.3 || Math.abs(py) > HALF - 0.3) continue;
+      const there = project(px, py);
+      if (!there) continue;
+      const dist = Math.hypot(there[0] - here[0], there[1] - here[1]);
+      if (dist < SNAP_PX && (!best || dist < best.dist)) best = { x: px, y: py, dist };
+    }
+  }
+  return best;
+}
+
 // ---------- Readouts ----------
 const fmt = (v, d = 2) => {
   const t = Math.abs(v).toFixed(d);
@@ -677,10 +713,9 @@ function updateReadouts() {
     let kind = '';
     if (!s.s1.on || !s.s2.on) text = 'One source: no interference';
     else if (s.s1.frequency !== s.s2.frequency) text = 'Different frequencies: no steady pattern';
-    else if (s.s1.shape !== 'point' || s.s2.shape !== 'point') text = '';
     else if (state.show.probe) {
       kind = pd.kind;
-      text = kind === 'antinodal' ? 'Antinode: waves arrive in step' : kind === 'nodal' ? 'Node: waves arrive in antiphase' : 'Between a node and an antinode';
+      text = kind === 'antinodal' ? 'Antinode: waves arrive in step' : kind === 'nodal' ? 'Node: waves arrive in antiphase' : '';
     }
     verdict.textContent = text;
     verdict.dataset.kind = kind;
@@ -854,14 +889,13 @@ function buildControls() {
         { title: `Turn source ${n} on or off`, get: () => src.on, set: (v) => { src.on = v; } },
         numberField({ group: g, label: 'Frequency', unit: 'Hz', unitName: 'hertz', min: 0.5, max: 5, step: 0.1, get: () => src.frequency, set: (v) => { src.frequency = v; } }),
         numberField({ group: g, label: 'Amplitude', unit: 'cm', unitName: 'centimeters', min: 0, max: 1, step: 0.05, get: () => src.amplitude, set: (v) => { src.amplitude = v; } }),
-        n === 2 ? numberField({ group: g, label: 'Phase lead', unit: '°', unitName: 'degrees', min: 0, max: 360, step: 5, get: () => src.phase, set: (v) => { src.phase = v; } }) : null,
-        choiceRow('Shape', segmented([{ value: 'point', label: 'Point' }, { value: 'straight', label: 'Straight' }], src.shape, (v) => { src.shape = v; changed(); }, `${g} shape`))
+        n === 2 ? numberField({ group: g, label: 'Phase lead', unit: '°', unitName: 'degrees', min: 0, max: 360, step: 5, get: () => src.phase, set: (v) => { src.phase = v; } }) : null
       ));
     }
     controlsEl.append(card('Tank', null, null,
       keep(numberField({ label: 'Source separation', unit: 'cm', unitName: 'centimeters', min: 0.5, max: 12, step: 0.5, get: () => s.separation, set: (v) => { s.separation = v; } })),
       numberField({ label: 'Wave speed', unit: 'cm/s', unitName: 'centimeters per second', min: 1.2, max: 8, step: 0.1, get: () => s.speed, set: (v) => { s.speed = v; } }),
-      note('Antinodal lines join points where the waves arrive in step; nodal lines, where they cancel. Drag P to measure the path difference.')
+      note('Antinodal lines join points where the waves arrive in step; nodal lines, where they cancel. Drag P to measure the path difference; it snaps onto the lines on show.')
     ));
     return;
   }
@@ -1078,6 +1112,8 @@ canvas.addEventListener('pointermove', (event) => {
     const p = state.settings.interference.probe;
     p.x = Math.round(THREE.MathUtils.clamp(point.x, -HALF + 0.3, HALF - 0.3) * 20) / 20;
     p.y = Math.round(THREE.MathUtils.clamp(point.y, -HALF + 0.3, HALF - 0.3) * 20) / 20;
+    const snap = snapToLine(p.x, p.y);
+    if (snap) { p.x = snap.x; p.y = snap.y; }
   } else if (drag.kind === 'move') {
     const r = state.settings.refraction;
     r.offset = drag.offset + point.clone().sub(drag.start).dot(boundaryNormal(r));
