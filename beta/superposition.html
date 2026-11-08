@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#F5F6FA">
+  <script src="/assets/theme.js"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>Wave Superposition and Reflection Simulation: Pulses, Standing Waves, Fixed and Free Ends — PanPhy Labs</title>
+  <meta name="description" content="Watch two waves or two pulses add up on a string, and see how a fixed or free end reflects a pulse or builds a standing wave.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/design.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <link rel="stylesheet" href="/assets/footer.css">
+  <link rel="stylesheet" href="superposition/app.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/assets/fullscreen-button.js"></script>
+</head>
+
+<body class="ds-canvas">
+  <header class="appbar">
+    <a class="appbar-logo" href="/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo" width="32" height="32"></a>
+    <h1 class="appbar-title ds-title">Wave Superposition</h1>
+    <div class="appbar-actions">
+      <div class="theme-toggle">
+        <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+      </div>
+      <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="stage ds-panel" aria-label="String">
+      <div class="stage-head">
+        <div class="mode-tabs" role="tablist" aria-label="Experiment">
+          <button type="button" class="mode-tab" role="tab" data-mode="pulses" aria-selected="true">
+            <svg viewBox="0 0 28 14" aria-hidden="true"><path d="M1 11 H5 C7 11 7 3 9 3 C11 3 11 11 13 11 H15 C17 11 17 6 19 6 C21 6 21 11 23 11 H27"/></svg>
+            <span>Two pulses</span>
+          </button>
+          <button type="button" class="mode-tab" role="tab" data-mode="reflection" aria-selected="false" tabindex="-1">
+            <svg viewBox="0 0 28 14" aria-hidden="true"><path d="M1 7 H8 C10 7 10 1 12 1 C14 1 14 7 16 7 H24"/><path d="M25 0 V14" stroke-width="2.6"/></svg>
+            <span>Reflection</span>
+          </button>
+          <button type="button" class="mode-tab" role="tab" data-mode="waves" aria-selected="false" tabindex="-1">
+            <svg viewBox="0 0 28 14" aria-hidden="true"><path d="M1 7 C4 0 7 0 10 7 C13 14 16 14 19 7 C22 0 25 0 27 7"/></svg>
+            <span>Two waves</span>
+          </button>
+        </div>
+        <div class="legend" id="legend" aria-label="Show or hide"></div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="stringCanvas" tabindex="0" aria-label="The string. Drag, or use the arrow keys, to move the probe."></canvas>
+      </div>
+
+      <div class="transport">
+        <div class="transport-buttons">
+          <button type="button" class="icon-btn" id="restartBtn" aria-label="Restart" title="Restart from the beginning">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14" stroke-width="2.2"/><path d="M18 5.5v13L9 12z" fill="currentColor" stroke="none"/></svg>
+          </button>
+          <button type="button" class="icon-btn" id="stepBackBtn" aria-label="Step back" title="Step back">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke-width="2.4"/></svg>
+          </button>
+          <button type="button" class="play-btn" id="playBtn" aria-label="Pause" title="Pause (Space)"></button>
+          <button type="button" class="icon-btn" id="stepFwdBtn" aria-label="Step forward" title="Step forward">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke-width="2.4"/></svg>
+          </button>
+        </div>
+        <div class="timeline">
+          <input type="range" class="range scrubber" id="scrubber" min="0" max="1" step="0.01" value="0" aria-label="Time">
+          <span class="time-readout ds-readout"><span class="time-label">t</span> <span id="timeValue">0.00</span> s</span>
+        </div>
+        <div class="transport-end">
+          <div id="rateGroup" class="rate-group" title="Playback speed"></div>
+          <button type="button" class="reset-btn" id="resetBtn" title="Restore this experiment as it was on arrival">Reset</button>
+        </div>
+      </div>
+
+      <div class="probe-readout" id="probeReadout" aria-live="off">
+        <span class="probe-at">Probe at <span class="ds-readout"><span id="probeX">2.00</span> m</span></span>
+        <span class="probe-sum">
+          <span class="probe-term"><span class="probe-op"></span><i class="swatch c1"></i><span class="probe-name" id="probeName1">Pulse 1</span><b class="ds-readout" id="probeY1">0.0</b></span>
+          <span class="probe-term"><span class="probe-op">+</span><i class="swatch c2"></i><span class="probe-name" id="probeName2">Pulse 2</span><b class="ds-readout" id="probeY2">0.0</b></span>
+          <span class="probe-term total"><span class="probe-op">=</span><i class="swatch sum"></i><span class="probe-name" id="probeNameSum">String</span><b class="ds-readout" id="probeSum">0.0</b><span class="probe-unit">cm</span></span>
+        </span>
+      </div>
+    </section>
+
+    <div class="controls" id="controls"></div>
+  </main>
+
+  <footer class="panphy-footer">
+    <span class="panphy-footer-status"><kbd>Space</kbd> play / pause</span>
+    <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
+  </footer>
+
+  <script src="superposition/physics.js"></script>
+  <script src="superposition/app.js"></script>
+</body>
+
+</html>
