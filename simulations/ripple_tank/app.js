@@ -32,7 +32,7 @@ const DEFAULTS = {
     speed2: 2.4
   }
 };
-const DEFAULT_SHOW = { antinodal: false, nodal: true, probe: true, normal: true, rays: true };
+const DEFAULT_SHOW = { antinodal: false, nodal: false, probe: true, normal: true, rays: true };
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
 

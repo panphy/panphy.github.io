@@ -623,6 +623,9 @@ footer.panphy-footer kbd {
 .readout-label { color: var(--ink-2); }
 .readout-eq { color: var(--ink-3); font-family: var(--font-mono); }
 
+/* The note always sits on its own line at the lower right, so the values above never move. */
+.readout-break { flex-basis: 100%; height: 0; }
+
 .readout-verdict {
   margin-left: auto;
   padding: 3px 10px;
@@ -706,7 +709,7 @@ footer.panphy-footer kbd {
   .stage { display: flex; flex-direction: column; min-height: 0; }
   .canvas-wrap { flex: 1 1 0; height: auto; min-height: 260px; }
   .controls { min-height: 0; overflow-y: auto; padding-bottom: 2px; }
-  .readout { min-height: 66px; align-content: center; }
+  .readout { min-height: 66px; align-content: center; row-gap: 4px; }
   .card { padding: 10px 14px 12px; }
   .card-title { margin-bottom: 4px; }
   .field + .field, .field + .choice-row, .choice-row + .field, .choice-row + .choice-row { margin-top: 6px; }
@@ -733,7 +736,6 @@ footer.panphy-footer kbd {
   .controls { grid-template-columns: 1fr; }
   .transport-end { margin-left: 0; flex: 1; justify-content: space-between; }
   .timeline { flex: 1; }
-  .readout-verdict { margin-left: 0; }
   .tank-hint { font-size: 0.7rem; }
 }
 
