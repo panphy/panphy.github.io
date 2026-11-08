@@ -1178,7 +1178,6 @@ function animate(now) {
   last = now;
   if (state.playing) state.t += dt * state.rate;
   uniforms.uTime.value = state.t;
-  $('timeValue').textContent = state.t.toFixed(2);
   controls.update();
   renderer.render(scene, camera);
   drawOverlay();
