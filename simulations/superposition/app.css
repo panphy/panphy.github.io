@@ -282,7 +282,7 @@ canvas:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   white-space: nowrap;
 }
 
-.time-label { font-style: italic; color: var(--ink-3); font-family: var(--font-body); }
+.time-label { color: var(--ink-3); }
 
 .transport-end { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 
@@ -655,14 +655,14 @@ footer.panphy-footer kbd {
 
 @media (pointer: coarse) {
   .mode-tab { min-height: 44px; }
-  .legend-chip { min-height: 40px; }
+  .legend-chip { min-height: 44px; }
   .icon-btn { width: 44px; height: 44px; }
   .play-btn { width: 48px; height: 48px; }
-  .seg-btn { min-height: 40px; }
-  .seg-mini .seg-btn { min-height: 40px; min-width: 40px; }
+  .seg-btn { min-height: 44px; }
+  .seg-mini .seg-btn { min-height: 44px; min-width: 44px; }
   .field-head .seg-mini .seg-btn { min-width: 44px; }
   .step-btn { width: 44px; height: 44px; }
-  .field-input { height: 40px; font-size: 1rem; }
+  .field-input { height: 44px; font-size: 1rem; }
   .reset-btn, .preset-btn { min-height: 44px; }
   .range { height: 44px; }
   .range::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -11px; }
