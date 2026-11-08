@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-08T19:28:00Z';
+const BUILD_ID = '2026-11-08T19:33:02Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -302,6 +302,9 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
   '/simulations/ripple_tank.html',
+  '/simulations/ripple_tank/app.css',
+  '/simulations/ripple_tank/app.js',
+  '/simulations/ripple_tank/physics.js',
   '/simulations/superposition.html',
   '/simulations/superposition/app.css',
   '/simulations/superposition/app.js',
