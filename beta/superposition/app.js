@@ -11,7 +11,7 @@
   const DEFAULTS = {
     waves: { amplitude1: 3, frequency1: 1, speed1: 1, direction1: 1, amplitude2: 3, frequency2: 1, speed2: 1, direction2: -1, zoom: 1, probe: 2 },
     pulses: { height1: 3, width1: 0.8, height2: 2, width2: 0.6, speed: 0.5, shape: 'hump', probe: 2 },
-    reflection: { source: 'pulse', height: 3, width: 0.8, shape: 'fin', amplitude: 2, frequency: 0.6, speed: 1, end: 'fixed', probe: 3 }
+    reflection: { source: 'pulse', height: 3, width: 0.8, shape: 'hump', amplitude: 2, frequency: 0.6, speed: 1, end: 'fixed', probe: 3 }
   };
   const DEFAULT_SHOW = { c1: true, c2: true, sum: true, probe: true, nodes: true };
 
