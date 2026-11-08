@@ -299,8 +299,12 @@
 		return equation;
 	}
 
+	// A negative centre reads x + 5, not x - -5. The {} before the 2 of 2σ² marks it as part of the
+	// formula, so rounding the equation to fixed decimal places leaves it as 2.
 	function buildGaussianEquation(params) {
-		let equation = `y = ${formatFitNumber(params.A)} e^{-\\frac{(x - ${formatFitNumber(params.mu)})^2}{2(${formatFitNumber(params.sigma)})^2}}`;
+		const mu = Number(params.mu);
+		const shifted = mu > 0 ? `x - ${formatFitNumber(mu)}` : mu < 0 ? `x + ${formatFitNumber(Math.abs(mu))}` : 'x';
+		let equation = `y = ${formatFitNumber(params.A)} e^{-\\frac{(${shifted})^2}{{}2(${formatFitNumber(params.sigma)})^2}}`;
 		if (params.c > 0) equation += ` + ${formatFitNumber(params.c)}`;
 		else if (params.c < 0) equation += ` - ${formatFitNumber(Math.abs(params.c))}`;
 		return equation;

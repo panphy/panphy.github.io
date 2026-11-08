@@ -28,6 +28,14 @@ function predictions(data, evaluate, tolerance = 1e-7) {
 	for (const p of data) assert.ok(Number.isFinite(evaluate(p.x)) && Math.abs(evaluate(p.x) - p.y) < tolerance * scale, `bad prediction at ${p.x}`);
 }
 
+test('a Gaussian equation shows the centre with one sign', () => {
+	const eq = mu => core.buildGaussianEquation({ A: 2, mu, sigma: 3, c: 0 });
+	assert.match(eq(-1445.19), /\(x \+ 1445\.19\)\^2/);
+	assert.match(eq(5), /\(x - 5\)\^2/);
+	assert.match(eq(0), /\(x\)\^2/);
+	for (const mu of [-1445.19, 5, 0]) assert.doesNotMatch(eq(mu), /- -|\+ -/);
+});
+
 test('Gaussian automatic guesses recover off-center peaks, dips, baselines and small units', () => {
 	for (const A of [3, -3]) for (const c of [0, 10]) for (const scale of [1, 1e-6]) {
 		const truth = { A, c, mu: 2 * scale, sigma: 0.3 * scale };
