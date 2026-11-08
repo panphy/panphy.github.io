@@ -7,8 +7,6 @@
   --region2-color: #ea580c;
   --nodal-color: #fb7185;
   --antinodal-color: #fbbf24;
-  --wall-color: #e2e8f0;
-  --shallow-color: #e8b86a;
   --control-h: 32px;
 }
 
@@ -732,9 +730,7 @@ footer.panphy-footer kbd {
   .switch input:checked + span::before { transform: translateX(20px); }
 }
 
-/* ---------- Barriers & blocks ---------- */
+/* ---------- Diffraction ---------- */
 
-.preset-btn.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger), transparent 55%); }
-.preset-btn.danger:hover { background: var(--danger-soft); border-color: var(--danger); }
 .icon-btn:disabled { opacity: 0.3; cursor: default; }
 .icon-btn:disabled:hover { background: transparent; color: var(--ink-2); }
