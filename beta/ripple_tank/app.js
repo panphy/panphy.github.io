@@ -243,7 +243,7 @@ const fragmentShader = `
       wall = smoothstep(0.55, 0.75, m);
       // A dark rim round each barrier, so it stands out on bright crests and dark troughs alike.
       // It looks in eight directions, so corners stay square, and starts at the barrier's own edge.
-      vec2 o = uTexel * 1.6;
+      vec2 o = uTexel * 0.9;
       vec2 d = o * 0.7071;
       float near = max(max(max(texture2D(uMask, vUv + vec2(o.x, 0.0)).r, texture2D(uMask, vUv - vec2(o.x, 0.0)).r),
                            max(texture2D(uMask, vUv + vec2(0.0, o.y)).r, texture2D(uMask, vUv - vec2(0.0, o.y)).r)),
@@ -465,24 +465,32 @@ function ensureSolver() {
 function clearRipples() {
   if (solver) solver.clear();
   state.t = 0;
+  solverClock = 0;
 }
 
-// Run the water forward by simDt seconds, in steps short enough to stay stable.
+// Run the water forward by simDt seconds. Every step has the same length, short
+// enough for the fastest wave speed: this method only stays stable with equal
+// steps, so leftover time waits for the next frame rather than shortening a step.
+const SOLVER_DT = (0.4 * (TANK / GRID)) / 8; // s, stable up to 8 cm/s
+let solverClock = 0;
 function advance(simDt) {
   if (!solver || simDt <= 0) return;
   const b = state.settings.diffraction;
   const dx = TANK / GRID;
-  const steps = Math.min(48, Math.max(1, Math.ceil(simDt / ((0.45 * dx) / b.speed))));
-  const dt = simDt / steps;
+  solverClock += simDt;
+  let steps = Math.floor(solverClock / SOLVER_DT);
+  solverClock -= steps * SOLVER_DT;
+  if (steps > 64) steps = 64; // on a very slow frame, let the tank fall behind instead of freezing
+  const dt = SOLVER_DT;
   const k1 = ((b.speed * dt) / dx) ** 2;
-  const k2 = k1;
   const omega = 2 * Math.PI * b.frequency;
-  const sourceUv = tankUv(b.point);
-  const lineU = (Math.floor((LINE_SOURCE_X / TANK + 0.5) * GRID) + 0.5) / GRID; // the middle of one grid column
+  const sourceCell = tankUv(b.point).multiplyScalar(GRID);
+  const lineColumn = Math.floor((LINE_SOURCE_X / TANK + 0.5) * GRID);
   // A line source adding f each step makes straight waves of amplitude f·dx / (2·v·ω·dt²).
-  // A point source spreads its push over a small disc, so it gets its own, measured gain.
+  // A point source's waves scale as 1/v² rather than 1/v, so its gain also grows with v;
+  // POINT_SOURCE_GAIN was measured at 4 cm/s.
   const lineGain = (2 * b.amplitude * b.speed * omega * dt * dt) / dx;
-  const gain = b.source === 'point' ? lineGain * POINT_SOURCE_GAIN : lineGain;
+  const gain = b.source === 'point' ? lineGain * POINT_SOURCE_GAIN * (b.speed / 4) : lineGain;
   for (let i = 0; i < steps; i++) {
     state.t += dt;
     let drive;
@@ -493,7 +501,7 @@ function advance(simDt) {
       const rampUp = Math.min(1, state.t * b.frequency); // start gently over the first cycle
       drive = gain * rampUp * Math.cos(omega * state.t);
     }
-    solver.step({ k1, k2, drive, source: b.source, sourceUv, lineU });
+    solver.step({ k1, k2: k1, drive, source: b.source, sourceCell, lineColumn });
   }
 }
 
