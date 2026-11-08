@@ -63,7 +63,7 @@ Merge and Subtract turn selected objects into a `custom` object whose `paths` ho
 
 ## Storage
 
-The scene autosaves to `panphy-mech-scene-v1` and display choices to `panphy-mech-prefs-v1` in browser storage. Files are `.ppmech` JSON with `format: "panphy-mech"`. Save opens the browser’s filename/location picker where available and asks for a filename before downloading elsewhere. The File menu exports the current view as PNG or vector SVG, or sends an embedded SVG image to PanPhyMD; PNG and SVG exports omit editing controls and keep visible trails, labels and vectors.
+The scene autosaves to `panphy-mech-scene-v1` and display choices to `panphy-mech-prefs-v1` in browser storage. Files are `.ppmech` JSON with `format: "panphy-mech"`. iPhone and iPad get an unfiltered Open picker because they grey out unknown extensions; the contents are validated anyway. Save opens the browser’s filename/location picker where available and asks for a filename before downloading elsewhere. The File menu exports the current view as PNG or vector SVG, or sends an embedded SVG image to PanPhyMD; PNG and SVG exports omit editing controls and keep visible trails, labels and vectors.
 
 Fit frames the current object positions and connector anchors with the original margins and floor placement. Objects far from the rest are left out and named so a runaway object cannot shrink the scene to dots.
 
