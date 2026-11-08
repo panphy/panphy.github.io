@@ -443,7 +443,7 @@ function fitCamera() {
 }
 
 function updateHint() {
-  const turn = state.view === 'top' ? 'Scroll or pinch to zoom' : 'Drag to turn';
+  const turn = state.view === 'top' ? 'Scroll or pinch to zoom' : 'Drag the tank to turn it';
   if (state.mode === 'interference') hint.textContent = state.show.probe ? `${turn} · drag P to move the probe` : turn;
   else hint.textContent = `${turn} · drag the boundary or its end dots`;
 }
