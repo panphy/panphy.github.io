@@ -558,21 +558,16 @@ footer.panphy-footer kbd {
   box-shadow: var(--shadow-1);
 }
 
+/* How to use the tank, on its own line under it so it never covers the water. */
 .tank-hint {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  max-width: calc(100% - 130px);
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface), transparent 15%);
-  border: 1px solid var(--line);
-  color: var(--ink-2);
-  font-size: 0.74rem;
+  margin: 2px 0 0;
+  color: var(--ink-3);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none;
 }
 
 /* ---------- Readouts ---------- */
@@ -712,7 +707,7 @@ footer.panphy-footer kbd {
   .canvas-wrap { height: 330px; }
   .controls { grid-template-columns: 1fr; }
   .transport-end { margin-left: 0; flex: 1; justify-content: space-between; }
-  .tank-hint { font-size: 0.7rem; }
+  .tank-hint { font-size: 0.72rem; }
 }
 
 /* ---------- Touch: 44–48 px targets ---------- */
