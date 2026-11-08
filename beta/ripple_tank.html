@@ -48,9 +48,9 @@
             <svg viewBox="0 0 28 14" aria-hidden="true"><path d="M4 1v12M8 1v12M12 1v12"/><path d="M15 13L19 1M18.5 13L22.5 1M22 13L26 1"/></svg>
             <span>Refraction</span>
           </button>
-          <button type="button" class="mode-tab" role="tab" data-mode="barriers" aria-selected="false" tabindex="-1">
+          <button type="button" class="mode-tab" role="tab" data-mode="diffraction" aria-selected="false" tabindex="-1">
             <svg viewBox="0 0 28 14" aria-hidden="true"><path d="M3 2v10M6.5 2v10"/><path d="M12 1v4.5M12 8.5V13"/><path d="M16 4.5a3.5 3.5 0 0 1 0 5M19.5 2.5a6.5 6.5 0 0 1 0 9M23 1a9.5 9.5 0 0 1 0 12"/></svg>
-            <span>Barriers<span class="chip-suffix"> &amp; blocks</span></span>
+            <span>Diffraction</span>
           </button>
         </div>
         <div class="legend" id="legend" aria-label="Show or hide"></div>
@@ -99,9 +99,8 @@
         <span class="readout-verdict" id="refractionVerdict"></span>
       </div>
 
-      <div class="readout" id="barriersReadout" hidden>
-        <span class="readout-item"><span class="readout-label">Deep water</span><span class="readout-label" data-math-static>\(\lambda\)</span><span class="readout-eq">=</span><b><span id="deepLambda">2.00</span> cm</b></span>
-        <span class="readout-item"><span class="readout-label">Over shallow blocks</span><span class="readout-label" data-math-static>\(\lambda\)</span><span class="readout-eq">=</span><b><span id="shallowLambda">1.20</span> cm</b></span>
+      <div class="readout" id="diffractionReadout" hidden>
+        <span class="readout-item"><span class="readout-label">Wavelength</span><span class="readout-label" data-math-static>\(\lambda\)</span><span class="readout-eq">=</span><b><span id="deepLambda">2.00</span> cm</b></span>
         <span class="readout-break" aria-hidden="true"></span>
         <span class="readout-verdict"></span>
       </div>
