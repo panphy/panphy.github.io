@@ -613,6 +613,7 @@
       v = Math.min(spec.max, Math.max(spec.min, Number(v.toFixed(digits))));
       current()[spec.key] = v;
       show(v);
+      if (spec.key === 'zoom') current().probe = Math.min(current().probe, viewSpan());
       if (hasTimeline()) state.t = Math.min(state.t, duration());
       refresh();
     };
@@ -863,6 +864,13 @@
   let dragging = false;
   canvas.addEventListener('pointerdown', (e) => {
     if (!state.show.probe) return;
+    if (e.pointerType === 'touch') {
+      const rect = canvas.getBoundingClientRect();
+      const r = plotRect();
+      const probePx = r.x + (current().probe / viewSpan()) * r.w;
+      if (Math.abs(e.clientX - rect.left - probePx) > 28) return;
+      e.preventDefault();
+    }
     dragging = true;
     canvas.setPointerCapture(e.pointerId);
     probeFromEvent(e);
@@ -881,10 +889,17 @@
   });
 
   // ---------- Keyboard ----------
+  // A mouse or touch click leaves no focus on the button, so Space then plays or pauses
+  // instead of pressing the button again. Keyboard presses keep focus.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (btn && e.detail > 0) btn.blur();
+  });
   document.addEventListener('keydown', (e) => {
     if (e.code !== 'Space' || e.repeat) return;
-    const tag = e.target.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+    const target = e.target;
+    const isSlider = target.matches && target.matches('input[type="range"]');
+    if (!isSlider && target.closest && target.closest('input, textarea, select, button')) return;
     e.preventDefault();
     togglePlay();
   });
