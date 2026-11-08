@@ -2725,15 +2725,28 @@ input[type="number"]:focus {
 
 #popup-title {
 	margin: 0 0 8px;
+	/* Leaves room for the Download and Close buttons. */
+	padding-right: 220px;
 	font-family: var(--font-display);
 	font-size: 1.45rem;
 }
 
-#popup-close {
+.popup-actions {
 	position: absolute;
 	top: 16px;
 	right: 18px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+#popup-close {
 	min-height: 36px;
+}
+
+@media (max-width: 520px) {
+	#popup-download-button > span { display: none; }
+	#popup-title { padding-right: 130px; }
 }
 
 #popup-plot {

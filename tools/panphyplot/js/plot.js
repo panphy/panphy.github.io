@@ -207,6 +207,23 @@
 				}
 			};
 
+			// Plotly's own Reset axes wears a house icon and returns to the first view drawn, which may
+			// be a saved zoom. This one draws axes with a turn-back arrow and returns to automatic
+			// scaling, including zero; the relayout also clears the sheet's saved view.
+			const resetAxesButton = {
+				name: 'Reset axes',
+				icon: {
+					width: 24,
+					height: 24,
+					path: 'M2 2h1.8v18.2H22V22H2Z'
+						+ 'M17.99 14.75A6.2 6.2 0 1 0 8.17 12.12L9.87 11.50A4.4 4.4 0 1 1 16.83 13.37Z'
+						+ 'M6.10 12.56L10.18 15.01L11.74 10.50Z'
+				},
+				click: function(gd) {
+					Plotly.relayout(gd, { 'xaxis.autorange': true, 'yaxis.autorange': true });
+				}
+			};
+
 			return {
 				responsive: true,
 				displayModeBar: true,
@@ -217,7 +234,7 @@
 					'zoomIn2d',
 					'zoomOut2d',
 					autoScaleButton,
-					'resetScale2d'
+					resetAxesButton
 				]]
 			};
 		}
@@ -1061,6 +1078,13 @@
 		const gd = document.getElementById('plot');
 		if (typeof Plotly === 'undefined' || !gd || !gd._fullLayout) return;
 		openExportDialog(gd, getActiveSheet()?.name || 'data_plot');
+	});
+
+	// The combined window has its own Download button, with the same dialog.
+	document.getElementById('popup-download-button')?.addEventListener('click', () => {
+		const gd = document.getElementById('popup-plot');
+		if (typeof Plotly === 'undefined' || !gd || !gd._fullLayout) return;
+		openExportDialog(gd, 'combined_plot');
 	});
 
 	Object.assign(window, {

@@ -528,18 +528,17 @@ let headerFolded = readHeaderFolded();
 
 function readHeaderFolded() {
 	try {
-		return localStorage.getItem(HEADER_FOLD_STORAGE_KEY) === '1';
+		return localStorage.getItem(HEADER_FOLD_STORAGE_KEY) !== '0';
 	} catch (error) {
-		return false;
+		return true;
 	}
 }
 
-// Remembered in this browser only, like the pane widths.
+// Folded until opened; the choice is remembered in this browser only, like the pane widths.
 function setHeaderFolded(folded) {
 	headerFolded = folded;
 	try {
-		if (folded) localStorage.setItem(HEADER_FOLD_STORAGE_KEY, '1');
-		else localStorage.removeItem(HEADER_FOLD_STORAGE_KEY);
+		localStorage.setItem(HEADER_FOLD_STORAGE_KEY, folded ? '1' : '0');
 	} catch (error) {
 		// A private window may refuse; the choice then lasts for this visit only.
 	}
@@ -1951,7 +1950,8 @@ function initializeInterface() {
 		if (menu && !menu.hidden) {
 			event.preventDefault();
 			closeMenu();
-		} else if (document.getElementById('popup-container').style.display === 'block') {
+		} else if (document.getElementById('popup-container').style.display === 'block' && !document.querySelector('dialog[open]')) {
+			// Esc in a dialog opened from the combined window (Download) closes only that dialog.
 			event.preventDefault();
 			closePopup();
 		}
