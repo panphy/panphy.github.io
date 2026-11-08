@@ -208,11 +208,11 @@
 </table>
 <figure class="screenshot">
 			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/columns-light.webp" target="_blank" rel="noopener" aria-label="Enlarge columns screenshot">
-				<img src="/tools/panphyplot/manual/columns-light.webp" width="3308" height="998" loading="lazy" decoding="async" alt="Processed pendulum table showing L, T1, T2, T3, mean T, uncertainty ΔT, T^2 and uncertainty ΔT^2, with X, Y and ±ΔY roles.">
+				<img src="/tools/panphyplot/manual/columns-light.webp" width="3308" height="930" loading="lazy" decoding="async" alt="Processed pendulum table showing L, T1, T2, T3, mean T, uncertainty ΔT, T^2 and uncertainty ΔT^2, with X, Y and ±ΔY roles.">
 				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
 			</a>
 			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/columns-dark.webp" target="_blank" rel="noopener" aria-label="Enlarge columns screenshot">
-				<img src="/tools/panphyplot/manual/columns-dark.webp" width="3308" height="998" loading="lazy" decoding="async" alt="Processed pendulum table showing L, T1, T2, T3, mean T, uncertainty ΔT, T^2 and uncertainty ΔT^2, with X, Y and ±ΔY roles.">
+				<img src="/tools/panphyplot/manual/columns-dark.webp" width="3308" height="930" loading="lazy" decoding="async" alt="Processed pendulum table showing L, T1, T2, T3, mean T, uncertainty ΔT, T^2 and uncertainty ΔT^2, with X, Y and ±ΔY roles.">
 				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
 			</a>
 			<figcaption><strong>The completed sheet.</strong> Enlarge this image and choose <strong>Actual size</strong> to inspect individual readings.</figcaption>
@@ -285,11 +285,11 @@
 <p>Expand <strong>Residuals</strong> below the graph. These are the differences between the measurements and the fitted line. Look for scatter around zero; a curved pattern suggests trying another model. Drag the divider above the residuals to adjust the split height, or focus it and use Up/Down. Double-click or press Enter to reset the height.</p>
 <figure class="screenshot">
 			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/graph-light.webp" target="_blank" rel="noopener" aria-label="Enlarge graph screenshot">
-				<img src="/tools/panphyplot/manual/graph-light.webp" width="1762" height="1234" loading="lazy" decoding="async" alt="Graph of T squared against L with a fitted straight line, error bars, and an expanded residual plot below.">
+				<img src="/tools/panphyplot/manual/graph-light.webp" width="1760" height="1234" loading="lazy" decoding="async" alt="Graph of T squared against L with a fitted straight line, error bars, and an expanded residual plot below.">
 				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
 			</a>
 			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/graph-dark.webp" target="_blank" rel="noopener" aria-label="Enlarge graph screenshot">
-				<img src="/tools/panphyplot/manual/graph-dark.webp" width="1762" height="1234" loading="lazy" decoding="async" alt="Graph of T squared against L with a fitted straight line, error bars, and an expanded residual plot below.">
+				<img src="/tools/panphyplot/manual/graph-dark.webp" width="1760" height="1234" loading="lazy" decoding="async" alt="Graph of T squared against L with a fitted straight line, error bars, and an expanded residual plot below.">
 				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
 			</a>
 			<figcaption><strong>The fitted graph and residuals.</strong> The sample points sit close to the line; the residuals show their small differences from it.</figcaption>
@@ -340,7 +340,7 @@
 		<p>A sheet is a table with as many columns as you need. Every column has a letter (A, B, C…), a <strong>name</strong> and a <strong>unit</strong>. Axis titles are built from them in the form <em>name / unit</em>, for example <code>L / m</code>.</p>
 		<p>On a computer or a landscape tablet, drag the thin handle between two panes to make one wider; near its starting position it snaps back onto it. With the handle selected, the arrow keys also resize it, and a double-click or <kbd>Enter</kbd> resets it. To widen a column of the table, drag the right edge of its heading; double-click the edge for the default width.</p>
 		<p>The <svg class="manual-inline-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg> button at the top right of the Data section maximizes it, covering the other columns. In the graph section, it fills the whole window with the graph, hiding the toolbar too. The same button, now pointing inwards, or <kbd>Esc</kbd> puts it back.</p>
-		<p>The <kbd>⋯</kbd> button on a column heading moves, inserts, fills, clears or deletes the column, or gives it a formula. The row number on the left inserts or deletes a row. The arrow in the top-left corner of the table folds the headings down to each column&rsquo;s role and label, leaving more room for data; tap a label to unfold them and edit that column&rsquo;s name. The choice is remembered in this browser.</p>
+		<p>The <kbd>⋯</kbd> button on a column heading moves, inserts, fills, clears or deletes the column, or gives it a formula. The row number on the left inserts or deletes a row. The headings start folded to each column&rsquo;s role and label, leaving more room for data. The arrow in the top-left corner of the table unfolds them to show the name and unit boxes; tapping a label also unfolds them and puts the cursor in that column&rsquo;s name. The choice is remembered in this browser.</p>
 
 		<p><strong>Clear</strong>, at the right of the toolbar, offers two choices. <strong>Clear data, keep columns</strong> empties every cell and removes the sheet's fits, but keeps the names, units, roles and formulas, ready for a repeat of the experiment. <strong>Reset to a blank sheet</strong> goes back to a new sheet: two columns, x and y, and no name, so its tab shows its default name, such as Sheet 2. Both choices reset the zoom and axis ranges to automatic scaling, including zero.</p>
 <figure class="screenshot">
@@ -464,9 +464,9 @@
 			<li>Every Y series of the sheet is plotted, with error bars from its ±Δ columns.</li>
 			<li>The <strong>Series</strong> card on the right is the graph's color key: tap a series there, or its legend entry, to hide or show it with its fit. Each Y column's heading carries the same color.</li>
 			<li>The title follows the columns until you type your own; clear it to return to the automatic title.</li>
-			<li>The toolbar above the graph zooms, pans and rescales it.</li>
+			<li>The toolbar above the graph zooms, pans and rescales it. Auto-scale fits the axes closely to the data; Reset axes, the last button, returns to the automatic view that includes zero.</li>
 			<li><strong>LaTeX mode</strong> typesets names, units and titles: a unit of <code>m s^{-1}</code> reads as m s⁻¹. The title above the graph shows typeset; tap it to edit the LaTeX, and press <kbd>Enter</kbd> to see it typeset again.</li>
-			<li><strong>View → All sheets</strong> draws every series of every sheet together, with labels you can edit.</li>
+			<li><strong>View → All sheets</strong> draws every series of every sheet together, with labels you can edit. Its <strong>Download</strong> button saves the combined graph with the same choices as the main graph&rsquo;s.</li>
 		</ul>
 </div>
 </details>

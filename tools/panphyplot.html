@@ -586,7 +586,10 @@
 	<div id="popup-background" style="display: none;"></div>
 	<div id="popup-container" style="display: none;">
 		<div id="popup-content" role="dialog" aria-modal="true" aria-labelledby="popup-title">
-			<button id="popup-close" type="button" title="Close the combined plot window">Close</button>
+			<div class="popup-actions">
+				<button type="button" class="neo-tool" id="popup-download-button" aria-label="Download combined graph" title="Download the combined graph as a PNG or SVG image"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Download</span></button>
+				<button id="popup-close" type="button" title="Close the combined plot window">Close</button>
+			</div>
 			<div id="popup-title">Combined Plot of All Sheets</div>
 			<div id="popup-plot-container">
 				<div id="popup-plot"></div>
