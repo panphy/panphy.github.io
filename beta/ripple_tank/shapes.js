@@ -23,10 +23,13 @@
 
   const reach = (s) => Math.hypot(s.length, s.width) / 2;
 
-  // Grid mask for the solver, N×N RGBA bytes, red = barrier. Row j runs along
-  // the tank's −y direction so that texture coordinates match the water mesh:
-  // u = x/16 + 0.5, v = 0.5 − y/16.
-  function buildMask(shapes, N, out = new Uint8Array(N * N * 4)) {
+  // Grid mask for the solver, N×N RGBA bytes. Red = barrier. Blue = how strongly
+  // the water soaks up waves, in a strip `absorb` cm deep along each barrier's
+  // left face (the side the waves come from), like the foam lining of a real
+  // tank. Row j runs along the tank's −y direction so that texture coordinates
+  // match the water mesh: u = x/16 + 0.5, v = 0.5 − y/16.
+  // The absorbing strip assumes upright barriers, as in every demonstration.
+  function buildMask(shapes, N, out = new Uint8Array(N * N * 4), absorb = 0) {
     out.fill(0);
     const cell = TANK / N;
     for (const s of shapes) {
@@ -40,6 +43,28 @@
         for (let i = i0; i <= i1; i++) {
           const x = (i + 0.5) * cell - HALF;
           if (inside(s, x, y)) out[(j * N + i) * 4] = 255;
+        }
+      }
+    }
+    if (absorb > 0) {
+      for (const s of shapes) {
+        const face = s.x - s.width / 2;
+        const y0 = s.y - s.length / 2;
+        const y1 = s.y + s.length / 2;
+        const i0 = Math.max(0, Math.floor((face - absorb + HALF) / cell));
+        const i1 = Math.min(N - 1, Math.ceil((face + HALF) / cell));
+        const j0 = Math.max(0, Math.floor((HALF - y1) / cell));
+        const j1 = Math.min(N - 1, Math.ceil((HALF - y0) / cell));
+        for (let j = j0; j <= j1; j++) {
+          const y = HALF - (j + 0.5) * cell;
+          if (y < y0 || y > y1) continue;
+          for (let i = i0; i <= i1; i++) {
+            const x = (i + 0.5) * cell - HALF;
+            if (x >= face || x < face - absorb) continue;
+            const k = (j * N + i) * 4;
+            const depth = Math.round(255 * (1 - (face - x) / absorb)); // strongest at the face
+            if (out[k] === 0 && depth > out[k + 2]) out[k + 2] = depth;
+          }
         }
       }
     }

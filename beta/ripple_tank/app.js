@@ -18,6 +18,7 @@ const MODES = ['interference', 'refraction', 'diffraction'];
 const GRID = 256; // solver cells across the tank
 const LINE_SOURCE_X = -6.5; // straight-wave source, just inside the damping strip
 const WALL_HEIGHT = 0.55; // how far barriers stand above the water (cm)
+const ABSORB_DEPTH = 1.2; // cm of wave-soaking strip in front of barriers when reflections are reduced
 const MIN_SOLVER_WAVELENGTH = 0.8; // cm: about 13 grid cells, which the solver shows faithfully
 const POINT_SOURCE_GAIN = 1.07; // matches the Interference tab: amplitude/√2 at 1 cm, about amplitude/2 at 3 cm
 const REFRACTION_SOURCE_X = -HALF + 0.45;
@@ -43,6 +44,7 @@ const DEFAULTS = {
   diffraction: {
     source: 'straight',
     waveform: 'continuous',
+    reflections: 'reduced',
     frequency: 2,
     amplitude: 0.4,
     speed: 4,
@@ -238,12 +240,17 @@ const fragmentShader = `
     float wall = 0.0;
     float rim = 0.0;
     if (uMode > 1.5) {
-      wall = smoothstep(0.3, 0.7, texture2D(uMask, vUv).r);
-      // A dark rim just outside each barrier, so it stands out on bright crests and dark troughs alike.
-      vec2 o = uTexel * 1.8;
-      float near = max(max(texture2D(uMask, vUv + vec2(o.x, 0.0)).r, texture2D(uMask, vUv - vec2(o.x, 0.0)).r),
-                       max(texture2D(uMask, vUv + vec2(0.0, o.y)).r, texture2D(uMask, vUv - vec2(0.0, o.y)).r));
-      rim = smoothstep(0.3, 0.7, near) * (1.0 - wall);
+      float m = texture2D(uMask, vUv).r;
+      wall = smoothstep(0.55, 0.75, m);
+      // A dark rim round each barrier, so it stands out on bright crests and dark troughs alike.
+      // It looks in eight directions, so corners stay square, and starts at the barrier's own edge.
+      vec2 o = uTexel * 1.6;
+      vec2 d = o * 0.7071;
+      float near = max(max(max(texture2D(uMask, vUv + vec2(o.x, 0.0)).r, texture2D(uMask, vUv - vec2(o.x, 0.0)).r),
+                           max(texture2D(uMask, vUv + vec2(0.0, o.y)).r, texture2D(uMask, vUv - vec2(0.0, o.y)).r)),
+                       max(max(texture2D(uMask, vUv + d).r, texture2D(uMask, vUv - d).r),
+                           max(texture2D(uMask, vUv + vec2(d.x, -d.y)).r, texture2D(uMask, vUv + vec2(-d.x, d.y)).r)));
+      rim = smoothstep(0.05, 0.3, max(near, m));
       totalH = texture2D(uHeight, vUv).r;
     }
 
@@ -502,7 +509,8 @@ function syncScene() {
   if (state.mode === 'diffraction') {
     u.uMode.value = 2;
     const sv = ensureSolver();
-    if (sv) sv.setMask(RS.buildMask(state.settings.diffraction.shapes, GRID, maskBuffer));
+    const b = state.settings.diffraction;
+    if (sv) sv.setMask(RS.buildMask(b.shapes, GRID, maskBuffer, b.reflections === 'reduced' ? ABSORB_DEPTH : 0));
     updateBoundaryMeshes();
     return;
   }
@@ -1133,7 +1141,9 @@ function buildBarrierControls() {
     }));
   }
   controlsEl.append(card('Demonstrations', null, null, choiceRow('', demos, 'presets'),
-    note(`Waves spread out as they pass a gap or an edge. The spreading is greatest when the gap is about one wavelength wide. The frequency is kept low enough that waves stay at least ${MIN_SOLVER_WAVELENGTH} cm long, the shortest the tank shows accurately.`)));
+    choiceRow('Reflections', segmented([{ value: 'reduced', label: 'Reduced' }, { value: 'full', label: 'Full' }], b.reflections,
+      (v) => { b.reflections = v; changed(); }, 'Reflections off the barriers')),
+    note(`Waves spread out as they pass a gap or an edge. The spreading is greatest when the gap is about one wavelength wide. Reduced reflections line the barriers with a wave-absorbing strip, like the foam in a real tank. The frequency is kept low enough that waves stay at least ${MIN_SOLVER_WAVELENGTH} cm long, the shortest the tank shows accurately.`)));
 }
 
 function buildLegend() {

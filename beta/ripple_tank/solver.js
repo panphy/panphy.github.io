@@ -49,7 +49,8 @@ const stepFragment = `
 
     float edge = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
     float d = 1.0 - smoothstep(0.0, uSponge, edge);
-    float keep = 1.0 - 0.07 * d * d;
+    float soak = mask.b; // the absorbing strip in front of barriers
+    float keep = (1.0 - 0.07 * d * d) * (1.0 - 0.07 * soak * soak);
     next *= keep;
     u *= keep;
 
@@ -69,11 +70,15 @@ export function createSolver(renderer, size) {
   const floatOk = renderer.extensions.has('EXT_color_buffer_float');
   const halfOk = floatOk || renderer.extensions.has('EXT_color_buffer_half_float');
   if (!renderer.capabilities.isWebGL2 || !halfOk) return null;
+  // The screen blends between grid cells so the water looks smooth. Full-precision
+  // textures can only be blended where the device allows it; otherwise use half precision.
+  const useFloat = floatOk && renderer.extensions.has('OES_texture_float_linear');
   const options = {
-    type: floatOk ? THREE.FloatType : THREE.HalfFloatType,
+    type: useFloat ? THREE.FloatType : THREE.HalfFloatType,
     format: THREE.RGBAFormat,
-    minFilter: THREE.NearestFilter,
-    magFilter: THREE.NearestFilter,
+    // The solver only reads cell centers, where blended and unblended values agree.
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
     wrapS: THREE.ClampToEdgeWrapping,
     wrapT: THREE.ClampToEdgeWrapping,
     depthBuffer: false,
@@ -150,6 +155,6 @@ export function createSolver(renderer, size) {
     clear,
     step,
     setMask,
-    precision: floatOk ? 'float' : 'half'
+    precision: useFloat ? 'float' : 'half'
   };
 }
