@@ -263,6 +263,8 @@
 							<option value="Gaussian">Gaussian</option>
 						</select>
 						<div id="advanced-fit-general-equation" class="general-equation">\( y = A e^{bx} \sin(kx - \phi) + c \)</div>
+						<details id="advanced-fit-parameters" class="custom-fit-bounds advanced-fit-parameters">
+						<summary>Initial parameters (automatic guesses)</summary>
 						<p class="table-prompt">Automatic guesses are ready. Adjust them if needed.</p>
 
 						<div id="Sinusoidal-parameters" class="parameter-section active">
@@ -314,6 +316,7 @@
 								<input type="number" id="initial-c-gaussian" value="0" step="any" />
 							</div>
 						</div>
+						</details>
 
 						<div class="neo-fit-actions">
 							<button class="fit-button" onclick="fitAdvancedCurve()" title="Fit an advanced curve using the chosen parameters"><svg class="neo-icon neo-fit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19.5C10 18.5 15 13 20.5 4.5"/><circle cx="5.8" cy="15.3" r="1.5"/><circle cx="14.7" cy="17.3" r="1.5"/><circle cx="14.5" cy="7.2" r="1.5"/></svg><span>Fit Curve</span></button>
