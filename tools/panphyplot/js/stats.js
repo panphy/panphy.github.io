@@ -146,11 +146,13 @@
 	}
 
 	// Rewrites every fitted number in an equation's TeX to the given decimal places. Whole-number
-	// powers and subscripts (x^{2}, 10^{-5}, a_{1}) are structure, not fitted values, and stay.
-	const EQUATION_NUMBER = /(\^\{?|_\{?)?(\d+(?:\.\d+)?)(?:\s*(?:\\times|\\cdot)\s*10\^\{(-?\d+)\}|e([+-]?\d+))?/g;
+	// powers and subscripts (x^{2}, 10^{-5}, a_{1}) are structure, not fitted values, and stay, as
+	// does a number marked with an empty group, such as the {}2 of 2σ² (TeX ignores the {}).
+	const EQUATION_NUMBER = /(\{\})?(\^\{?|_\{?)?(\d+(?:\.\d+)?)(?:\s*(?:\\times|\\cdot)\s*10\^\{(-?\d+)\}|e([+-]?\d+))?/g;
 
 	function roundEquationDecimals(latex, decimals) {
-		return String(latex || '').replace(EQUATION_NUMBER, (match, prefix, digits, texExponent, eExponent) => {
+		return String(latex || '').replace(EQUATION_NUMBER, (match, marker, prefix, digits, texExponent, eExponent) => {
+			if (marker) return match;
 			const exponent = texExponent ?? eExponent;
 			if (prefix && exponent === undefined && !digits.includes('.')) return match;
 			const value = Number(digits) * 10 ** (exponent === undefined ? 0 : Number(exponent));

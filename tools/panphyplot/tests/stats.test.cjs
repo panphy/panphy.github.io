@@ -64,6 +64,8 @@ test('equation numbers round to the chosen decimal places, leaving powers alone'
 	assert.equal(round('y = 4.5\\cdot10^{-7}x', 2), 'y = 4.50\\times 10^{-7}x');
 	assert.equal(round('y = 1.2e-5 e^{0.5x}', 1), 'y = 1.2\\times 10^{-5} e^{0.5x}');
 	assert.equal(round('y = 3.9733886x', 0), 'y = 4x');
+	// The {}2 of a Gaussian's 2σ² is part of the formula and stays 2.
+	assert.equal(round('y = 1.5 e^{-\\frac{(x + 1445.1912)^2}{{}2(38.4)^2}}', 2), 'y = 1.50 e^{-\\frac{(x + 1445.19)^2}{{}2(38.40)^2}}');
 });
 
 test('the parameter covariance carries the uncertainties through a change of variable', () => {

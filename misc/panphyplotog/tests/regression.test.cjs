@@ -99,6 +99,7 @@ test('small coefficients stay nonzero in basic equations and the numerical core'
 	assert.doesNotMatch(h.run('datasetFitResults[0].equation'), /0\.000x/);
 	near(h.run('fittedCurves[0].y[1]'),1e-5);
 	assert.match(h.core.buildGaussianEquation({A:1e-9,mu:0,sigma:1e-9,c:0}), /10\^\{-9\}/);
+	assert.match(h.core.buildGaussianEquation({A:1,mu:-2.5,sigma:1,c:0}), /\(x \+ 2\.5\)\^2/);
 	assert.ok(!h.core.buildFitDomainFromData([{x:0},{x:1e-15}],3).every(x=>x===0));
 });
 test('absolute uncertainty exports respect exponents and trailing zero precision', () => {
