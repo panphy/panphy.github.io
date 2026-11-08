@@ -479,17 +479,23 @@ function buildHeaderCell(sheet, column, index) {
 
 	const preview = document.createElement('div');
 	preview.className = 'neo-col-preview';
-	if (headerFolded) {
-		preview.tabIndex = 0;
-		preview.setAttribute('role', 'button');
-		preview.title = 'Edit the name and unit';
-		preview.addEventListener('click', () => unfoldHeaderAt(column.id));
-		preview.addEventListener('keydown', (event) => {
-			if (event.key !== 'Enter' && event.key !== ' ') return;
+	applyPreviewState(preview);
+	preview.addEventListener('click', () => unfoldHeaderAt(column.id));
+	preview.addEventListener('keydown', (event) => {
+		if (event.key !== 'Enter' && event.key !== ' ') return;
+		if (!headerFolded) return;
+		event.preventDefault();
+		unfoldHeaderAt(column.id);
+	});
+	// Enter finishes a quick edit: the row folds and the cursor stays on this column's label.
+	[name, unit].forEach((input) => {
+		input.addEventListener('keydown', (event) => {
+			if (event.key !== 'Enter' || event.isComposing || !headerOpen) return;
 			event.preventDefault();
-			unfoldHeaderAt(column.id);
+			setHeaderOpen(false);
+			th.querySelector('.neo-col-preview')?.focus();
 		});
-	}
+	});
 
 	const resizer = document.createElement('div');
 	resizer.className = 'neo-col-resize';
@@ -523,48 +529,147 @@ function renderHeaderPreview(th, sheet, column) {
 
 /* ---------- Folding the header row ---------- */
 
-const HEADER_FOLD_STORAGE_KEY = 'panphyplot-neo-header-folded';
-let headerFolded = readHeaderFolded();
+// Like a collapsed ribbon: the row stays folded, opens for a quick edit and folds again once the
+// pointer or focus leaves it (or Enter is pressed in a name or unit). Pinning keeps it open, and
+// the pin is remembered in this browser only, like the pane widths.
+const HEADER_PIN_STORAGE_KEY = 'panphyplot-neo-header-pinned';
+const LEGACY_HEADER_FOLD_STORAGE_KEY = 'panphyplot-neo-header-folded';
+let headerPinned = readHeaderPinned();
+let headerOpen = false;
+let headerFolded = !headerPinned;
+let headerPointerOutside = false;
 
-function readHeaderFolded() {
+function readHeaderPinned() {
 	try {
-		return localStorage.getItem(HEADER_FOLD_STORAGE_KEY) !== '0';
+		const pinned = localStorage.getItem(HEADER_PIN_STORAGE_KEY);
+		// An earlier version remembered an unfolded row as '0' under the old key.
+		return pinned === null ? localStorage.getItem(LEGACY_HEADER_FOLD_STORAGE_KEY) === '0' : pinned === '1';
 	} catch (error) {
-		return true;
+		return false;
 	}
 }
 
-// Folded until opened; the choice is remembered in this browser only, like the pane widths.
-function setHeaderFolded(folded) {
-	headerFolded = folded;
+function setHeaderPinned(pinned) {
+	headerPinned = pinned;
+	headerOpen = false;
 	try {
-		localStorage.setItem(HEADER_FOLD_STORAGE_KEY, folded ? '1' : '0');
+		localStorage.setItem(HEADER_PIN_STORAGE_KEY, pinned ? '1' : '0');
+		localStorage.removeItem(LEGACY_HEADER_FOLD_STORAGE_KEY);
 	} catch (error) {
 		// A private window may refuse; the choice then lasts for this visit only.
 	}
-	renderTable();
+	applyHeaderFoldState();
+}
+
+function setHeaderOpen(open) {
+	if (headerPinned || headerOpen === open) return;
+	headerOpen = open;
+	applyHeaderFoldState();
+}
+
+// Updates the row in place, so a cell that was just clicked keeps its focus.
+function applyHeaderFoldState() {
+	headerFolded = !headerPinned && !headerOpen;
+	const head = document.getElementById('neo-table-head');
+	if (!head) return;
+	head.closest('table').classList.toggle('is-header-folded', headerFolded);
+	const button = head.querySelector('.neo-header-fold');
+	if (button) updateHeaderFoldButton(button);
+	const sheet = getActiveSheet();
+	head.querySelectorAll('.neo-col-head').forEach((th) => {
+		const column = sheet.columns.find(entry => entry.id === th.dataset.columnId);
+		const preview = th.querySelector('.neo-col-preview');
+		if (preview) applyPreviewState(preview);
+		if (column) renderHeaderPreview(th, sheet, column);
+	});
+}
+
+function applyPreviewState(preview) {
+	if (headerFolded) {
+		preview.tabIndex = 0;
+		preview.setAttribute('role', 'button');
+		preview.title = 'Edit the name and unit';
+	} else {
+		preview.removeAttribute('tabindex');
+		preview.removeAttribute('role');
+		preview.removeAttribute('title');
+	}
+}
+
+const HEADER_ICON_OPEN = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const HEADER_ICON_FOLD = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const HEADER_ICON_PIN = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M6 2.5h4M6.6 2.5l-.6 4.2L4 9h8l-2-2.3-.6-4.2M8 9v4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function updateHeaderFoldButton(button) {
+	const state = headerPinned ? 'pinned' : headerOpen ? 'open' : 'folded';
+	const labels = {
+		folded: 'Show the name and unit boxes',
+		open: 'Pin the name and unit boxes open',
+		pinned: 'Unpin and fold the name and unit boxes'
+	};
+	button.dataset.state = state;
+	button.setAttribute('aria-label', labels[state]);
+	button.title = labels[state];
+	button.setAttribute('aria-pressed', String(headerPinned));
+	button.innerHTML = state === 'folded' ? HEADER_ICON_OPEN : state === 'open' ? HEADER_ICON_PIN : HEADER_ICON_FOLD;
 }
 
 function buildHeaderFoldButton() {
 	const button = document.createElement('button');
 	button.type = 'button';
 	button.className = 'neo-header-fold';
-	button.setAttribute('aria-expanded', String(!headerFolded));
-	const label = headerFolded ? 'Show the name and unit boxes' : 'Hide the name and unit boxes';
-	button.setAttribute('aria-label', label);
-	button.title = label;
-	button.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+	updateHeaderFoldButton(button);
 	button.addEventListener('click', () => {
-		setHeaderFolded(!headerFolded);
-		document.querySelector('#neo-table-head .neo-header-fold')?.focus();
+		if (headerPinned) setHeaderPinned(false);
+		else if (headerOpen) setHeaderPinned(true);
+		else setHeaderOpen(true);
 	});
+	bindHeaderAutoFold();
 	return button;
+}
+
+// The column menu, dialogs opened from the row and toasts count as part of it.
+function isInHeaderZone(node) {
+	if (!(node instanceof Element)) return false;
+	return !!node.closest('#neo-table-head, #neo-menu, dialog[open], .toast-notification');
+}
+
+let headerAutoFoldBound = false;
+
+function bindHeaderAutoFold() {
+	if (headerAutoFoldBound) return;
+	headerAutoFoldBound = true;
+	// A click elsewhere folds the row once the pointer is released, so the click lands where aimed.
+	document.addEventListener('pointerdown', (event) => {
+		if (!headerOpen || isInHeaderZone(event.target)) return;
+		headerPointerOutside = true;
+		const finish = () => {
+			window.removeEventListener('pointerup', finish, true);
+			window.removeEventListener('pointercancel', finish, true);
+			headerPointerOutside = false;
+			setHeaderOpen(false);
+		};
+		window.addEventListener('pointerup', finish, true);
+		window.addEventListener('pointercancel', finish, true);
+	}, true);
+	// Tabbing out of the row folds it straight away.
+	document.addEventListener('focusin', (event) => {
+		if (!headerOpen || headerPointerOutside || isInHeaderZone(event.target)) return;
+		setHeaderOpen(false);
+	});
+	document.addEventListener('keydown', (event) => {
+		if (event.key !== 'Escape' || !headerOpen || !event.target.closest?.('#neo-table-head')) return;
+		if (document.getElementById('neo-menu')?.hidden === false) return;
+		const th = event.target.closest('.neo-col-head');
+		setHeaderOpen(false);
+		(th?.querySelector('.neo-col-preview') || document.querySelector('#neo-table-head .neo-header-fold'))?.focus();
+	});
 }
 
 // In a folded row, the label opens the row and puts the cursor in that column's name.
 function unfoldHeaderAt(columnId) {
 	if (!headerFolded) return;
-	setHeaderFolded(false);
+	setHeaderOpen(true);
 	const name = document.querySelector(`#neo-table-head .neo-col-head[data-column-id="${columnId}"] .neo-col-name`);
 	if (name) {
 		name.focus();

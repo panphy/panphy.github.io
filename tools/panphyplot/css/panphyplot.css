@@ -1149,7 +1149,7 @@ input[type="number"]:focus {
 	display: none;
 }
 
-/* The corner button folds the header row down to the role line and the label. */
+/* The corner button opens the folded header row for a quick edit, pins it open, or unpins it. */
 .neo-table thead .neo-corner .neo-header-fold {
 	display: flex;
 	align-items: center;
@@ -1158,12 +1158,8 @@ input[type="number"]:focus {
 	border-radius: 6px;
 }
 
-.neo-header-fold svg {
-	transition: transform 0.15s ease;
-}
-
-.neo-table.is-header-folded .neo-header-fold svg {
-	transform: rotate(180deg);
+.neo-table thead .neo-corner .neo-header-fold[data-state="open"] {
+	color: var(--accent);
 }
 
 .neo-table.is-header-folded .neo-col-name,
