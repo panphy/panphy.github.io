@@ -348,6 +348,57 @@
             text-align: right;
         }
 
+        /* Wave direction */
+        .speed-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .direction-toggle {
+            display: inline-flex;
+            border: 1px solid var(--line-strong);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .direction-btn {
+            min-width: 30px;
+            height: 22px;
+            padding: 0 6px;
+            border: 0;
+            background: var(--surface);
+            color: var(--ink-2);
+            font: inherit;
+            font-size: 0.85rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .direction-btn + .direction-btn {
+            border-left: 1px solid var(--line-strong);
+        }
+
+        .direction-btn:hover {
+            background: var(--surface-3);
+        }
+
+        .direction-btn[aria-pressed="true"] {
+            background: var(--brand-primary);
+            color: var(--accent-ink);
+        }
+
+        .direction-btn:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: -2px;
+        }
+
+        @media (pointer: coarse) {
+            .direction-btn {
+                min-width: 48px;
+            }
+        }
+
         /* Toggle Switch */
         .toggle-switch {
             position: relative;
@@ -783,9 +834,15 @@
                 <div class="slider-control">
                     <div class="slider-header">
                         <label for="speed1">Wave Speed</label>
-                        <span class="slider-value"><span id="speed1Value">200</span> px/s</span>
+                        <span class="speed-meta">
+                            <span class="direction-toggle" role="group" aria-label="Wave 1 direction">
+                                <button type="button" class="direction-btn" id="dir1Left" data-wave="1" data-dir="-1" aria-pressed="false" aria-label="Wave 1 moves left" title="Move left">&larr;</button>
+                                <button type="button" class="direction-btn" id="dir1Right" data-wave="1" data-dir="1" aria-pressed="true" aria-label="Wave 1 moves right" title="Move right">&rarr;</button>
+                            </span>
+                            <span class="slider-value"><span id="speed1Value">200</span> px/s</span>
+                        </span>
                     </div>
-                    <input type="range" id="speed1" min="-500" max="500" step="10" value="200" aria-label="Wave 1 Speed">
+                    <input type="range" id="speed1" min="50" max="500" step="10" value="200" aria-label="Wave 1 Speed">
                 </div>
             </div>
 
@@ -809,9 +866,15 @@
                 <div class="slider-control">
                     <div class="slider-header">
                         <label for="speed2">Wave Speed</label>
-                        <span class="slider-value"><span id="speed2Value">-200</span> px/s</span>
+                        <span class="speed-meta">
+                            <span class="direction-toggle" role="group" aria-label="Wave 2 direction">
+                                <button type="button" class="direction-btn" id="dir2Left" data-wave="2" data-dir="-1" aria-pressed="true" aria-label="Wave 2 moves left" title="Move left">&larr;</button>
+                                <button type="button" class="direction-btn" id="dir2Right" data-wave="2" data-dir="1" aria-pressed="false" aria-label="Wave 2 moves right" title="Move right">&rarr;</button>
+                            </span>
+                            <span class="slider-value"><span id="speed2Value">200</span> px/s</span>
+                        </span>
                     </div>
-                    <input type="range" id="speed2" min="-500" max="500" step="10" value="-200" aria-label="Wave 2 Speed">
+                    <input type="range" id="speed2" min="50" max="500" step="10" value="200" aria-label="Wave 2 Speed">
                 </div>
             </div>
 
@@ -923,11 +986,13 @@
 
         let amplitude1 = parseFloat(amplitude1Slider.value);
         let frequency1 = parseFloat(frequency1Slider.value);
-        let speed1 = parseFloat(speed1Slider.value);
+        // Speed is a magnitude (never 0, so the wavelength v/f stays visible); direction is separate.
+        const direction = { 1: 1, 2: -1 };
+        let speed1 = direction[1] * parseFloat(speed1Slider.value);
 
         let amplitude2 = parseFloat(amplitude2Slider.value);
         let frequency2 = parseFloat(frequency2Slider.value);
-        let speed2 = parseFloat(speed2Slider.value);
+        let speed2 = direction[2] * parseFloat(speed2Slider.value);
 
         let timeZoom = parseFloat(timeZoomSlider.value);
         let timeMotion = parseFloat(timeMotionSlider.value);
@@ -935,11 +1000,11 @@
         function updateSliderValues() {
             amplitude1Value.textContent = amplitude1.toFixed(0);
             frequency1Value.textContent = frequency1.toFixed(1);
-            speed1Value.textContent = speed1.toFixed(0);
+            speed1Value.textContent = Math.abs(speed1).toFixed(0);
 
             amplitude2Value.textContent = amplitude2.toFixed(0);
             frequency2Value.textContent = frequency2.toFixed(1);
-            speed2Value.textContent = speed2.toFixed(0);
+            speed2Value.textContent = Math.abs(speed2).toFixed(0);
 
             timeZoomValue.textContent = timeZoom.toFixed(1);
             timeMotionValue.textContent = timeMotion.toFixed(2);
@@ -957,7 +1022,7 @@
             drawWaves();
         });
         speed1Slider.addEventListener('input', () => {
-            speed1 = parseFloat(speed1Slider.value);
+            speed1 = direction[1] * parseFloat(speed1Slider.value);
             updateSliderValues();
             drawWaves();
         });
@@ -973,7 +1038,7 @@
             drawWaves();
         });
         speed2Slider.addEventListener('input', () => {
-            speed2 = parseFloat(speed2Slider.value);
+            speed2 = direction[2] * parseFloat(speed2Slider.value);
             updateSliderValues();
             drawWaves();
         });
@@ -987,6 +1052,20 @@
             timeMotion = parseFloat(timeMotionSlider.value);
             updateSliderValues();
             drawWaves();
+        });
+
+        document.querySelectorAll('.direction-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const wave = Number(btn.dataset.wave);
+                direction[wave] = Number(btn.dataset.dir);
+                document.querySelectorAll(`.direction-btn[data-wave="${wave}"]`).forEach((b) => {
+                    b.setAttribute('aria-pressed', String(b === btn));
+                });
+                if (wave === 1) speed1 = direction[1] * parseFloat(speed1Slider.value);
+                else speed2 = direction[2] * parseFloat(speed2Slider.value);
+                updateSliderValues();
+                drawWaves();
+            });
         });
 
         toggleWave1.addEventListener('change', () => { drawWaves(); });
@@ -1082,7 +1161,7 @@
 
             function evaluateWave(amplitude, omega, speed, xVirtual, t) {
                 const direction = speed < 0 ? -1 : 1;
-                const speedMagnitude = Math.max(Math.abs(speed), 1e-6);
+                const speedMagnitude = Math.abs(speed);
                 const k = omega / speedMagnitude;
                 return amplitude * Math.sin((k * xVirtual) - (direction * omega * t));
             }
