@@ -89,6 +89,12 @@
 
   function onKey(event) {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (thumbs.contains(event.target) && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      event.preventDefault();
+      const index = state.index + (event.key === 'ArrowDown' ? 1 : -1);
+      if (index >= 0 && index < state.slides.length) show(index);
+      return;
+    }
     if (event.target.closest('a, button') && (event.key === 'Enter' || event.key === ' ')) return;
     switch (event.key) {
       case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': case 'Enter':
@@ -122,10 +128,10 @@
       const holder = button.querySelector('.thumb-slide');
       holder.appendChild(copy);
       holder.inert = true;
-      button.addEventListener('click', event => {
+      button.addEventListener('click', () => {
+        // Focus explicitly: Safari does not focus buttons on pointer clicks.
+        button.focus({ preventScroll: true });
         show(i);
-        // Mouse and touch clicks drop focus so arrow keys later do not reveal a focus ring here.
-        if (event.detail) button.blur();
       });
       thumbs.appendChild(button);
     });

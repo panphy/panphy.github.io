@@ -70,6 +70,8 @@ Terracotta (`--hl`, with `--hl-text` where it is text on paper) means higher lev
 
 ## Editing a deck
 
+Click or focus a thumbnail, then use Up/Down to select the previous/next slide directly. Left/Right still hide/reveal slide steps before changing slides.
+
 The decks are landscape only: a portrait phone shows the whole 16:9 slide, scaled, and a landscape phone (up to 500px tall) hides the banner and fills the screen with the slide, with slim navigation and Note controls in the side margins (`deck.css` and `fit()` in `deck.js`). There is no portrait layout; design and check slides at 16:9 only.
 
 Use clear English for international students. Prefer “tripled” to “trebled”, “zero” to “nought”, and direct wording to idioms such as “rule of thumb”. Express numerical comparisons explicitly, for example “four times the original force” rather than “four times larger”. Keep standard physics terms.
