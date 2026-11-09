@@ -25,4 +25,6 @@ All four decks use `/assets/theme.js` with `data-theme-scope="gcsephy"`, so thei
 
 `assets/companion-deck.css` and `companion-deck.js` provide the Year 9/10 layouts and navigation. Year 11 retains its own `deck.css` and `deck.js`; its history slides have a distinct background to mark non-exam enrichment. `assets/deck-notes.js` and `deck-notes.css` provide the Note panel (N).
 
+Click or focus a thumbnail, then use Up/Down to select the previous/next slide directly. Left/Right still hide/reveal slide steps before changing slides.
+
 The decks are network-only and load `/gcsephy/sw-register.js` for freshness notifications. They are outside the root catalogue and offline cache.
