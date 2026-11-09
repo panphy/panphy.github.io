@@ -1715,9 +1715,37 @@
             toggleBtn.classList.add('btn-start');
         };
 
+        /* ------------ Keep the screen awake while a timer runs ------------ */
+        // Without this a laptop or tablet can dim or lock part-way through an exam. Browsers that
+        // lack the Screen Wake Lock API, or refuse the request, simply carry on as before.
+        let screenWakeLock = null;
+        async function holdScreenAwake() {
+            if (!('wakeLock' in navigator) || screenWakeLock || document.visibilityState !== 'visible') return;
+            try {
+                const lock = await navigator.wakeLock.request('screen');
+                lock.addEventListener('release', () => {
+                    if (screenWakeLock === lock) screenWakeLock = null;
+                });
+                // The timer may have stopped while the request was pending.
+                if (timerInterval) screenWakeLock = lock;
+                else lock.release().catch(() => {});
+            } catch (err) { }
+        }
+        function releaseScreen() {
+            if (!screenWakeLock) return;
+            const lock = screenWakeLock;
+            screenWakeLock = null;
+            lock.release().catch(() => {});
+        }
+        // The browser drops the lock when the page is hidden, so ask again when it comes back.
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && timerInterval) holdScreenAwake();
+        });
+
         /* ------------ Timestamp-based timer tick ------------ */
         function startTimerTick() {
             stopTimerTick();
+            holdScreenAwake();
 
             timerInterval = setInterval(() => {
                 const now = Date.now();
@@ -1772,6 +1800,7 @@
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
+            releaseScreen();
         }
 
         function startTimer() {

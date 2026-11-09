@@ -120,12 +120,6 @@ a:hover {
   color: var(--ink);
 }
 
-/* Apps keep a plain title; the spectrum is a thin line under the banner instead. */
-.banner-title.gradient-text {
-  color: var(--ink);
-  background: none;
-  -webkit-text-fill-color: currentColor;
-}
 
 #titleBanner::after {
   content: '';

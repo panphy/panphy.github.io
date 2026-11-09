@@ -283,6 +283,10 @@
 			height: 30px;
 		}
 
+		h1.cv-wordmark {
+			margin: 0;
+		}
+
 		.cv-wordmark {
 			font-family: var(--font-display);
 			font-size: 1.02rem;
@@ -1114,7 +1118,7 @@
 	<header class="cv-appbar">
 		<div class="cv-brand">
 			<a href="https://panphy.app/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo" /></a>
-			<span class="cv-wordmark">Camera Visualizer</span>
+			<h1 class="cv-wordmark">Camera Visualizer</h1>
 		</div>
 		<div class="cv-appbar-actions">
 			<button id="theme-button" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
@@ -2424,13 +2428,17 @@
 					btn.className = 'dotBtn';
 					btn.style.setProperty('--dot', sz + 'px');
 					btn.style.setProperty('--dot-color', getColor());
+					btn.setAttribute('aria-label', 'Size ' + sz + ' pixels');
+					btn.title = sz + ' px';
+					btn.setAttribute('aria-pressed', String(currentSize === sz));
 					if (currentSize === sz) btn.classList.add('active');
 					const dot = document.createElement('span');
 					dot.className = 'dot';
 					btn.appendChild(dot);
 					btn.addEventListener('click', () => {
-						[].slice.call(container.children).forEach(c => c.classList.remove('active'));
+						[].slice.call(container.children).forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
 						btn.classList.add('active');
+						btn.setAttribute('aria-pressed', 'true');
 						onPick(sz);
 					});
 					container.appendChild(btn);

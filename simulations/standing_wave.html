@@ -170,6 +170,7 @@
         }
 
         .banner-title {
+            margin: 0;
             font-family: var(--font-display);
             font-size: 1.15rem;
             font-weight: 600;
@@ -177,12 +178,6 @@
             flex: 1;
             letter-spacing: -0.03em;
             color: var(--ink);
-        }
-
-        .banner-title.gradient-text {
-            color: var(--ink);
-            background: none;
-            -webkit-text-fill-color: currentColor;
         }
 
         .banner-actions {
@@ -387,6 +382,54 @@
             text-align: right;
         }
 
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-row input[type="range"] {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .step-btn {
+            flex: none;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--select-border);
+            border-radius: 8px;
+            background: var(--select-bg);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .step-btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        @media (pointer: coarse) {
+            .step-btn {
+                width: 44px;
+                height: 44px;
+            }
+
+            .toggle-btn {
+                min-height: 44px;
+            }
+        }
+
+        .wave-note {
+            margin: 8px 0 0;
+            font-size: 0.76rem;
+            line-height: 1.45;
+            color: var(--text-secondary);
+        }
+
         .omega-detail {
             font-size: 0.72rem;
             color: var(--text-secondary);
@@ -523,9 +566,11 @@
             color: #ef4444;
         }
 
-        .particle-dot.green {
-            background: #22c55e;
-            color: #22c55e;
+        .particle-dot.blue {
+            background: #2563eb;
+            color: #2563eb;
+            border-radius: 1px;
+            transform: rotate(45deg);
         }
 
         .particle-header label {
@@ -876,7 +921,7 @@
                 <img src="/assets/panphy.png" alt="PanPhy logo">
             </a>
         </div>
-        <div class="banner-title">Standing Wave</div>
+        <h1 class="banner-title">Standing Wave</h1>
         <div class="banner-actions">
             <div class="theme-toggle">
                 <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
@@ -919,9 +964,13 @@
                 <div class="slider-control">
                     <div class="slider-header">
                         <label for="modeSlider">Harmonic</label>
-                        <span class="slider-value" id="harmonicValue">Mode 1 (1st harmonic)</span>
+                        <span class="slider-value" id="harmonicValue">1st harmonic</span>
                     </div>
-                    <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Mode">
+                    <div class="slider-row">
+                        <button class="step-btn" type="button" data-step-for="modeSlider" data-step="-1" aria-label="Previous harmonic">&minus;</button>
+                        <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic">
+                        <button class="step-btn" type="button" data-step-for="modeSlider" data-step="1" aria-label="Next harmonic">+</button>
+                    </div>
                     <div class="info-row">
                         <span class="info-badge">Nodes: <strong id="nodeCount">2</strong></span>
                         <span class="info-badge">Antinodes: <strong id="antinodeCount">1</strong></span>
@@ -936,10 +985,19 @@
                 </div>
                 <div class="slider-control">
                     <div class="slider-header">
-                        <label for="omegaSlider">Frequency</label>
-                        <span class="slider-value"><span id="frequencyValue">1.00</span> Hz <span class="omega-detail">(&#969; = <span id="omegaValue">6.28</span> rad/s)</span></span>
+                        <label for="speedSlider">Wave speed</label>
+                        <span class="slider-value"><span id="speedValue">1.0</span> m/s</span>
                     </div>
-                    <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28" aria-label="Angular Frequency">
+                    <div class="slider-row">
+                        <button class="step-btn" type="button" data-step-for="speedSlider" data-step="-1" aria-label="Decrease wave speed by 0.1 meters per second">&minus;</button>
+                        <input type="range" id="speedSlider" min="0.2" max="2" step="0.1" value="1" aria-label="Wave speed in meters per second">
+                        <button class="step-btn" type="button" data-step-for="speedSlider" data-step="1" aria-label="Increase wave speed by 0.1 meters per second">+</button>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-badge">Wavelength: <strong><span id="wavelengthValue">2.00</span> m</strong></span>
+                        <span class="info-badge">Frequency: <strong><span id="frequencyValue">0.50</span> Hz</strong></span>
+                    </div>
+                    <p class="wave-note">The string is 1.00 m long. The harmonic sets the wavelength, and frequency = wave speed &divide; wavelength, so a higher harmonic on the same string has a higher frequency <span class="omega-detail">(&#969; = <span id="omegaValue">3.14</span> rad/s)</span>.</p>
                 </div>
             </div>
 
@@ -953,7 +1011,7 @@
                     </label>
                 </div>
                 <div class="particle-controls-content hidden" id="particleControlsContent">
-                    <p class="particle-position-help" id="particlePositionHelp">Position is a fraction of string length: 0 = left end, 1 = right end.</p>
+                    <p class="particle-position-help" id="particlePositionHelp">Position along the 1.00 m string: 0 = left end, 1 = right end.</p>
                     <div class="particle-control">
                         <div class="particle-header">
                             <span class="particle-dot red"></span>
@@ -967,12 +1025,12 @@
                     </div>
                     <div class="particle-control">
                         <div class="particle-header">
-                            <span class="particle-dot green"></span>
-                            <label for="greenPositionSlider">Green Particle</label>
+                            <span class="particle-dot blue"></span>
+                            <label for="greenPositionSlider">Blue Particle</label>
                             <span class="particle-amp">Amp: <strong id="greenParticleAmplitude">0.00</strong></span>
                         </div>
                         <div class="slider-with-value">
-                            <input type="range" id="greenPositionSlider" disabled min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position" aria-describedby="particlePositionHelp">
+                            <input type="range" id="greenPositionSlider" disabled min="0" max="1" step="0.01" value="0.8" aria-label="Blue Particle Position" aria-describedby="particlePositionHelp">
                             <span class="slider-readout">Position: <span id="greenPositionValue">0.80</span></span>
                         </div>
                     </div>
@@ -1019,7 +1077,7 @@
 
         const amplitudeSlider = document.getElementById("amplitudeSlider");
         const modeSlider = document.getElementById("modeSlider");
-        const omegaSlider = document.getElementById("omegaSlider");
+        const speedSlider = document.getElementById("speedSlider");
 
         const leftBoundaryToggle = document.getElementById("leftBoundaryToggle");
         const rightBoundaryToggle = document.getElementById("rightBoundaryToggle");
@@ -1027,6 +1085,8 @@
         const amplitudeValueDisplay = document.getElementById("amplitudeValue");
         const harmonicValueDisplay = document.getElementById("harmonicValue");
         const omegaValueDisplay = document.getElementById("omegaValue");
+        const speedValueDisplay = document.getElementById("speedValue");
+        const wavelengthValueDisplay = document.getElementById("wavelengthValue");
         const frequencyValueDisplay = document.getElementById("frequencyValue");
         const nodeCountDisplay = document.getElementById("nodeCount");
         const antinodeCountDisplay = document.getElementById("antinodeCount");
@@ -1039,14 +1099,15 @@
         let modeIndex = parseInt(modeSlider.value);
         let xRed = parseFloat(positionSlider.value);
         let xGreen = parseFloat(greenPositionSlider.value);
-        let omega = parseFloat(omegaSlider.value);
+        // The string has a fixed length and the wave speed is set by the slider, so the harmonic
+        // decides the wavelength and with it the frequency: f = v / wavelength.
+        const STRING_LENGTH = 1;
+        let waveSpeed = parseFloat(speedSlider.value);
+        let omega = 0;
         let leftBoundary = 'fixed';
         let rightBoundary = 'fixed';
 
         amplitudeValueDisplay.textContent = A.toFixed(1);
-        omegaValueDisplay.textContent = omega.toFixed(2);
-        frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
-        harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
 
         const showParticlesToggle = document.getElementById('showParticlesToggle');
         const particleControlsContent = document.getElementById('particleControlsContent');
@@ -1059,8 +1120,9 @@
             greenPositionSlider.disabled = !showParticles;
         });
 
-        let isPaused = false;
-        let time = 0;
+        // Start paused for people who have asked their device for less motion.
+        let isPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let phase = 0;
         let lastTimestamp = null;
         let allowedHarmonics = [];
         let waveCache = [];
@@ -1090,8 +1152,46 @@
 
         function getModeHarmonicLabel(mode) {
             const harmonicNumber = getHarmonicNumber(mode);
-            return `Mode ${mode} (${getOrdinal(harmonicNumber)} harmonic)`;
+            return `${getOrdinal(harmonicNumber)} harmonic`;
         }
+
+        function endsAreAlike() {
+            return leftBoundary === rightBoundary;
+        }
+
+        // Ends of the same kind fit whole half-wavelengths; one fixed and one free end fit an odd
+        // number of quarter-wavelengths.
+        function getWavelength() {
+            const harmonicNumber = getHarmonicNumber(modeIndex);
+            return (endsAreAlike() ? 2 : 4) * STRING_LENGTH / harmonicNumber;
+        }
+
+        function updateFrequency() {
+            const wavelength = getWavelength();
+            const frequency = waveSpeed / wavelength;
+            omega = 2 * Math.PI * frequency;
+            speedValueDisplay.textContent = waveSpeed.toFixed(1);
+            wavelengthValueDisplay.textContent = wavelength.toFixed(2);
+            frequencyValueDisplay.textContent = frequency.toFixed(2);
+            omegaValueDisplay.textContent = omega.toFixed(2);
+            syncStepButtons();
+        }
+
+        function syncStepButtons() {
+            document.querySelectorAll('.step-btn').forEach((button) => {
+                const slider = document.getElementById(button.dataset.stepFor);
+                const next = parseFloat(slider.value) + Number(button.dataset.step) * parseFloat(slider.step);
+                button.disabled = next < parseFloat(slider.min) - 1e-9 || next > parseFloat(slider.max) + 1e-9;
+            });
+        }
+
+        document.querySelectorAll('.step-btn').forEach((button) => {
+            button.addEventListener('click', () => {
+                const slider = document.getElementById(button.dataset.stepFor);
+                if (Number(button.dataset.step) > 0) slider.stepUp(); else slider.stepDown();
+                slider.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+        });
 
         function updateAllowedHarmonics() {
             allowedHarmonics = getAllowedHarmonics();
@@ -1103,6 +1203,7 @@
             updateNodeAntinodeDisplay();
             updateWaveCache();
             updateAmplitudes();
+            updateFrequency();
         }
 
         function updateAmplitudes() {
@@ -1151,6 +1252,7 @@
             updateNodeAntinodeDisplay();
             updateWaveCache();
             updateAmplitudes();
+            updateFrequency();
         }
 
         // Slider event listeners
@@ -1162,16 +1264,12 @@
 
         modeSlider.addEventListener("input", () => {
             modeIndex = parseInt(modeSlider.value);
-            harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
-            updateNodeAntinodeDisplay();
-            updateWaveCache();
-            updateAmplitudes();
+            updateHarmonicSlider();
         });
 
-        omegaSlider.addEventListener("input", () => {
-            omega = parseFloat(omegaSlider.value);
-            omegaValueDisplay.textContent = omega.toFixed(2);
-            frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
+        speedSlider.addEventListener("input", () => {
+            waveSpeed = parseFloat(speedSlider.value);
+            updateFrequency();
         });
 
         positionSlider.addEventListener("input", () => {
@@ -1322,7 +1420,7 @@
                 for (let i = 0; i <= canvasWidth; i++) {
                     const normalizedX = i / canvasWidth;
                     const waveFunc = getCachedWaveValue(normalizedX);
-                    const y = A * Math.cos(omega * time) * waveFunc;
+                    const y = A * Math.cos(phase) * waveFunc;
                     const screenY = canvasHeight / 2 - y * amplitudeScale;
                     if (i === 0) {
                         ctx.moveTo(i, screenY);
@@ -1337,23 +1435,34 @@
                 // Particles
                 if (showParticles) {
                     const redX = xRed * canvasWidth;
-                    const redY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xRed) * amplitudeScale;
+                    const redY = canvasHeight / 2 - A * Math.cos(phase) * getCachedWaveValue(xRed) * amplitudeScale;
                     drawParticle(redX, redY, "#ef4444");
 
                     const greenX = xGreen * canvasWidth;
-                    const greenY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xGreen) * amplitudeScale;
-                    drawParticle(greenX, greenY, "#22c55e");
+                    const greenY = canvasHeight / 2 - A * Math.cos(phase) * getCachedWaveValue(xGreen) * amplitudeScale;
+                    drawParticle(greenX, greenY, "#2563eb", true);
                 }
 
-                if (!isPaused) time += deltaTime;
+                // The phase is added up step by step, so a change of frequency never makes the string jump.
+                if (!isPaused) phase += omega * Math.min(deltaTime, 0.1);
             }
             requestAnimationFrame(draw);
         }
 
-        function drawParticle(x, y, color) {
+        // The second particle is a diamond, so the two can be told apart without relying on color.
+        function drawParticle(x, y, color, diamond = false) {
             const particleRadius = Math.min(canvasWidth, canvasHeight) * 0.018;
             ctx.beginPath();
-            ctx.arc(x, y, particleRadius, 0, 2 * Math.PI);
+            if (diamond) {
+                const r = particleRadius * 1.25;
+                ctx.moveTo(x, y - r);
+                ctx.lineTo(x + r, y);
+                ctx.lineTo(x, y + r);
+                ctx.lineTo(x - r, y);
+                ctx.closePath();
+            } else {
+                ctx.arc(x, y, particleRadius, 0, 2 * Math.PI);
+            }
             ctx.fillStyle = color;
             ctx.fill();
             ctx.strokeStyle = "#ffffff";
@@ -1363,6 +1472,7 @@
 
         window.addEventListener("load", () => {
             resizeCanvas();
+            syncPlayPauseButton();
             updateAllowedHarmonics();
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateNodeAntinodeDisplay();
@@ -1376,13 +1486,6 @@
         window.addEventListener("resize", () => {
             resizeCanvas();
         });
-    </script>
-    <script>
-        // Gradient text: skip on Brave iOS where background-clip:text is broken
-        (function() {
-            if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-            document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
-        })();
     </script>
 </body>
 

@@ -190,6 +190,7 @@
         }
 
         .banner-title {
+            margin: 0;
             font-family: var(--font-display);
             font-size: 1.15rem;
             font-weight: 600;
@@ -197,12 +198,6 @@
             flex: 1;
             letter-spacing: -0.03em;
             color: var(--ink);
-        }
-
-        .banner-title.gradient-text {
-            color: var(--ink);
-            background: none;
-            -webkit-text-fill-color: currentColor;
         }
 
         .banner-actions {
@@ -932,7 +927,7 @@
                 <img src="/assets/panphy.png" alt="PanPhy logo">
             </a>
         </div>
-        <div class="banner-title">Lorentz Transformation</div>
+        <h1 class="banner-title">Lorentz Transformation</h1>
         <div class="banner-actions">
             <a href="/simulations/lorentz_learn.html" class="banner-button" title="Learn the physics">Learn</a>
             <div class="theme-toggle">
@@ -2237,13 +2232,6 @@
             syncControlPanelHeight();
             draw();
         });
-    </script>
-    <script>
-        // Gradient text: skip on Brave iOS where background-clip:text is broken
-        (function() {
-            if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-            document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
-        })();
     </script>
 </body>
 

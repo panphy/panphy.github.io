@@ -55,10 +55,12 @@ const DEFAULT_SHOW = { antinodal: false, nodal: false, probe: false, normal: fal
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state = {
   mode: 'interference',
   t: 0,
-  playing: true,
+  // An experiment starts paused for people who have asked their device for less motion.
+  playing: !REDUCED_MOTION,
   rate: 1,
   view: '3d',
   show: { ...DEFAULT_SHOW },
@@ -1212,7 +1214,7 @@ function reset() {
   state.rate = 1;
   rateGroup.querySelectorAll('.seg-btn').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.value) === 1)));
   state.t = 0;
-  state.playing = true;
+  state.playing = !REDUCED_MOTION;
   updatePlayButton();
   setView('3d');
   buildLegend();
@@ -1235,7 +1237,7 @@ function setMode(mode, { fromHash = false } = {}) {
   if (mode === 'diffraction') { ensureSolver(); clearRipples(); }
   $('stepBackBtn').disabled = mode === 'diffraction';
   $('stepBackBtn').title = mode === 'diffraction' ? 'Step back (not available here)' : 'Step back';
-  state.playing = true;
+  state.playing = !REDUCED_MOTION;
   updatePlayButton();
   buildLegend();
   buildControls();

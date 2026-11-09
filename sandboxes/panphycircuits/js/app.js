@@ -905,7 +905,7 @@
       else if (a === 'png') app.exportImage('png');
       else if (a === 'panphymd') app.exportPanPhyMD();
     });
-    // iPhone and iPad grey out files whose extension they do not recognize, so
+    // iPhone and iPad gray out files whose extension they do not recognize, so
     // the picker there is left unfiltered; the contents are validated anyway.
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) $('file-input').removeAttribute('accept');
     $('file-input').addEventListener('change', (e) => { app.importFile(e.target.files[0]); e.target.value = ''; });

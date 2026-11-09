@@ -299,7 +299,7 @@
 		return equation;
 	}
 
-	// A negative centre reads x + 5, not x - -5. The {} before the 2 of 2σ² marks it as part of the
+	// A negative center reads x + 5, not x - -5. The {} before the 2 of 2σ² marks it as part of the
 	// formula, so rounding the equation to fixed decimal places leaves it as 2.
 	function buildGaussianEquation(params) {
 		const mu = Number(params.mu);

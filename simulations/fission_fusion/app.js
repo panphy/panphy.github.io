@@ -1605,7 +1605,7 @@ canvasHit($('bea-canvas'), (x, y) => {
   if (!best) return;
   const { marker } = best.hit;
   binding.marked = marker.name;
-  setMath(readout, `${marker.name.toUpperCase()} · Binding energy per nucleon ${marker.y.toFixed(2)} MeV, so about ${(marker.y * marker.A).toFixed(0)} MeV holds its ${marker.A} nucleons together.${marker.name === 'Fe-56' ? ' This is the most tightly bound region: no energy can be released from it by fission or fusion.' : ''}`);
+  setMath(readout, `${marker.name.toUpperCase()} · Binding energy per nucleon ${marker.y.toFixed(2)} MeV, so about ${(marker.y * marker.A).toFixed(0)} MeV holds its ${marker.A} nucleons together.${marker.name === 'Fe-56' ? ' This is the most tightly bound region: no energy can be released from it by fission or fusion.' : ''}${marker.name === 'Kr-92' || marker.name === 'Ba-141' ? ' It sits just below the curve because it has too many neutrons to be stable, so it goes on to beta decay.' : ''}`);
   drawBinding();
 });
 function canvasHit(canvas, handler) {

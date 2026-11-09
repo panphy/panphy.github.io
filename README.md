@@ -23,7 +23,7 @@ Here are a few places to start. The [homepage](https://panphy.app/) has the full
 I also keep my course resources here: teaching decks, workbooks, revision material, and lesson starters. These have their own hubs, separate from the homepage app catalog. You're welcome to use them in your lessons or for your own study; see [License](#license) for the details.
 
 - **[GCSE Physics](https://panphy.app/gcsephy/):** course summaries of AQA Physics 8463 and the physics in Combined Science: Trilogy 8464, AO1 starters and revision resources, then teaching decks and workbook hubs for Years 9 to 11. Each unit folder, `gcsephy/course-summary/` and `gcsephy/do-now/` has its own README; [teaching deck styles and controls](gcsephy/decks/README.md) are documented separately.
-- **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025). See the [folder overview](ibdpphy/README.md).
+- **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025, updated for exams from 2028). See the [folder overview](ibdpphy/README.md).
 
 ## Offline use
 

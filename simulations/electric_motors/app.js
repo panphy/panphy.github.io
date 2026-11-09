@@ -1800,7 +1800,7 @@ $('power').addEventListener('click', () => {
   setMath(readout, POWER_MESSAGES[state.mode](state.powered) + (pushed ? ' The coil was resting at vertical, where it cannot start, so it was given a small push.' : ''));
 });
 const POWER_MESSAGES = {
-  force: on => on ? 'CURRENT ON · The rod is pushed along the rails. Use Fleming’s left-hand rule on the three arrows: Field, Current, Motion.' : 'CURRENT OFF · No current, so no force. The rod rolls to a stop.',
+  force: on => on ? 'CURRENT ON · The rod is pushed along the rails. Use Fleming’s left-hand rule on the three arrows: force, field, current.' : 'CURRENT OFF · No current, so no force. The rod rolls to a stop.',
   dc: on => on ? (state.commutator ? 'MOTOR ON · Watch the force arrows: up on one side, down on the other. The split ring reverses the current every half turn.' : 'MOTOR ON, NO COMMUTATOR · The current never reverses, so the coil turns until it is vertical and then gets pulled back.') : 'MOTOR OFF · No current, so no forces. The coil coasts to a stop.',
   ac: on => on ? 'SUPPLY ON · The coil is brought up to speed and runs in step with the supply: one turn per cycle. The current reverses every half cycle, at the same point in every turn, so the coil keeps turning one way.' : 'SUPPLY OFF · The coil coasts to a stop.',
 };

@@ -1650,7 +1650,7 @@ function updateTrailRibbon(sphere, onLight) {
     if (onLight) {
         ribbonHead.multiplyScalar(0.78);
     }
-    // On dark backgrounds the tail keeps the ball's hue; fading it towards white turns it grey.
+    // On dark backgrounds the tail keeps the ball's hue; fading it towards white turns it gray.
     ribbonTail.copy(ribbonHead).lerp(ribbonWhite, onLight ? 0.3 : 0.12);
 
     const points = sphere.trailPositions;

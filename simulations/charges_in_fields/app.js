@@ -27,6 +27,8 @@ const SELECTOR_GAP = 0.02;
 const SLIT_X = 0.065;
 const SLIT_HALF = 0.0015;
 const SCREEN_X = 0.12;
+// A particle this close to a plate has hit it: the same limit ends the track and sets the prediction.
+const PLATE_HIT_MARGIN = 0.0012;
 const DEE_RADIUS = 0.5;
 const DEE_GAP = 0.03;
 // Scene units per meter: centimeters for the bench experiments, tens of centimeters for the cyclotron.
@@ -363,7 +365,7 @@ function cyclotronFrequency(key = state.particle.cyclotron) {
 function makeTracer({ key, pos, vel, color, realPerDisplay, maxStep, trailSize = 6000, dots = true, dotInterval = 0.12 }) {
   const data = PARTICLES[key];
   const scale = SCALE[state.mode];
-  const size = state.mode === 'cyclotron' ? 0.16 : 0.16;
+  const size = 0.16;
   const mesh = part(new THREE.Mesh(new THREE.SphereGeometry(size, 24, 16), material(color, { emissive: color, emissiveIntensity: 0.35, roughness: 0.3 })), 'particle');
   mesh.add(glow(color, size * 5));
   const positions = new Float32Array(trailSize * 3);
@@ -441,7 +443,7 @@ function checkBounds(tracer) {
   const { x, y, z } = tracer.pos;
   if (state.mode === 'efield') {
     const d = state.values.separation / 100;
-    if (Math.abs(x) <= PLATE_LENGTH / 2 && Math.abs(y) >= d / 2 - 0.0012) {
+    if (Math.abs(x) <= PLATE_LENGTH / 2 && Math.abs(y) >= d / 2 - PLATE_HIT_MARGIN) {
       finish(tracer, y > 0 ? 'top' : 'bottom');
     } else if (x >= SCREEN_X) {
       finish(tracer, 'screen');
@@ -865,7 +867,7 @@ function onFinish(tracer, outcome) {
     } else if (outcome === 'top' || outcome === 'bottom') {
       const plusOnTop = !state.swap;
       const hitPlus = (outcome === 'top') === plusOnTop;
-      setMath(readout, `${tracer.data.name.toUpperCase()} · Hit the ${hitPlus ? 'positive' : 'negative'} plate: the deflection was too big. Try a lower voltage, wider plates or a faster particle.`);
+      setMath(readout, `${tracer.data.name.toUpperCase()} · Hit the ${hitPlus ? 'positive' : 'negative'} plate: the deflection was too big. Try a lower voltage, plates further apart or a faster particle.`);
     }
   } else if (state.mode === 'bfield' && outcome === 'left') {
     setMath(readout, `${tracer.data.name.toUpperCase()} · Left the field region. ${state.values.angle < 90 ? 'Its velocity along the field carried it away in a helix.' : 'Its circle was too big to fit inside the field.'}`);
@@ -938,12 +940,16 @@ function updateEquation() {
     const speed = v.speed * data.speed.unit;
     const time = PLATE_LENGTH / speed;
     const deflection = 0.5 * accel * time * time;
+    // Beyond the plates there is no field, so the particle carries on in a straight line to the screen.
+    const onScreen = deflection + accel * time * (SCREEN_X - PLATE_LENGTH / 2) / speed;
+    const clears = deflection < d / 2 - PLATE_HIT_MARGIN;
     html = `<div class="formula">${mathHtml(String.raw`\(E = \dfrac{V}{d}\) · \(F = qE\) · \(a = \dfrac{F}{m}\)`, 'E = V/d · F = qE · a = F/m')}</div>`
       + row(mathHtml(String.raw`Field \(E\)`, 'Field E'), `${sci(field)} V/m`)
       + row(mathHtml(String.raw`Force \(F\)`, 'Force F'), `${sci(q * field)} N`)
       + row(mathHtml(String.raw`Acceleration \(a\)`, 'Acceleration a'), `${sci(accel)} m/s²`)
       + row('Time between plates', `${sci(time)} s`)
-      + row(mathHtml(String.raw`Deflection \(\dfrac{1}{2}at^2\)`, 'Deflection ½at²'), deflection < d / 2 ? `<b>${(deflection * 100).toFixed(2)} cm</b>` : `<b>hits the plate</b>`);
+      + row(mathHtml(String.raw`Deflection at the end of the plates, \(\dfrac{1}{2}at^2\)`, 'Deflection at the end of the plates, ½at²'), clears ? `<b>${(deflection * 100).toFixed(2)} cm</b>` : `<b>hits the plate</b>`)
+      + (clears ? row('Position on the screen', `${(onScreen * 100).toFixed(2)} cm from the center`) : '');
   } else if (state.mode === 'bfield') {
     const field = v.field / 1000;
     const speed = v.speed * data.speed.unit;

@@ -3112,3 +3112,8 @@ input[type="number"]:focus {
 	opacity: 0.8;
 	pointer-events: none;
 }
+
+/* The app name is the page heading; it keeps the wordmark look. */
+h1.neo-wordmark {
+  margin: 0;
+}

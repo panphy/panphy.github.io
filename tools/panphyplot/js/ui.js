@@ -1716,7 +1716,8 @@ function renderFitParameters() {
 		const ratio = result.chi2 / result.dof;
 		const chip = document.createElement('span');
 		chip.className = `neo-chi ${ratio > 2 ? 'is-high' : ratio < 0.5 ? 'is-low' : 'is-good'}`;
-		chip.textContent = ratio > 2 ? 'Scatter is larger than the uncertainties'
+		// A weighted fit takes its ± from the entered uncertainties, so too-small ones give too-small ±.
+		chip.textContent = ratio > 2 ? (result.weighted ? 'Scatter is larger than the uncertainties, so the ± values are probably too small' : 'Scatter is larger than the uncertainties')
 			: ratio < 0.5 ? 'The uncertainties look generous'
 				: 'Scatter matches the uncertainties';
 		nodes.push(chip);
