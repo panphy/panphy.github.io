@@ -192,11 +192,12 @@ body.show-thumbs .thumbs { display: flex; }
 body.show-thumbs .stage { left: calc(var(--thumb-w) + 68px); }
 body.show-thumbs .controls { left: calc(50% + (var(--thumb-w) + 68px) / 2); }
 .thumb { display: flex; gap: 8px; align-items: flex-start; padding: 0; border: 0; background: none; text-align: left; }
+.thumb:focus-visible { outline: none; }
 .thumb-num { width: 20px; flex: none; padding-top: 2px; font: 600 12px var(--font-mono); color: var(--text-secondary); text-align: right; }
 .thumb-frame { position: relative; width: var(--thumb-w); height: calc(var(--thumb-w) * 9 / 16); flex: none; overflow: hidden; border: 2px solid var(--card-border); border-radius: 10px; background: var(--bg-color); transition: border-color .15s; }
 .thumb:hover .thumb-frame { border-color: var(--brand-accent); }
-.thumb[aria-current="true"] .thumb-frame { border-color: var(--brand-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary), transparent 75%); }
-.thumb[aria-current="true"] .thumb-num { color: var(--brand-primary); }
+.thumb:is([aria-current="true"], :focus-visible) .thumb-frame { border-color: var(--brand-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary), transparent 75%); }
+.thumb:is([aria-current="true"], :focus-visible) .thumb-num { color: var(--brand-primary); }
 .thumb-slide { position: absolute; top: 0; left: 0; width: 1600px; height: 900px; transform-origin: 0 0; pointer-events: none; background-image: radial-gradient(var(--bg-pattern) 1.5px, transparent 1.5px); background-size: 36px 36px; }
 .thumb-slide .slide { visibility: visible; opacity: 1; transition: none; }
 .thumb-slide .step { opacity: 1; transform: none; transition: none; }
