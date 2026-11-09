@@ -173,9 +173,16 @@ const vertexShader = `
   }
 
   // Diffraction: the solver's water height, with barriers standing up out of it.
+  // Fade only the drawn surface at the tank rim. Damping a plane wave's
+  // height along its sides in the solver would bend the wavefronts again.
+  float waterHeight(vec2 uv) {
+    vec2 edge = min(uv, 1.0 - uv) * (2.0 * HALF_SIZE);
+    return texture2D(uHeight, uv).r * smoothstep(0.0, EDGE_WIDTH, min(edge.x, edge.y));
+  }
+
   float surface(vec2 uv) {
     float wall = texture2D(uMask, uv).r;
-    float water = texture2D(uHeight, uv).r * (1.0 - wall);
+    float water = waterHeight(uv) * (1.0 - wall);
     return uTopView > 0.5 ? water : mix(water, ${WALL_HEIGHT.toFixed(2)}, wall);
   }
 
@@ -188,7 +195,7 @@ const vertexShader = `
       float sz = -(surface(uv + vec2(0.0, uTexel.y)) - surface(uv - vec2(0.0, uTexel.y))) / (2.0 * uCell);
       bool wall = texture2D(uMask, uv).r > 0.5;
       pos.y = here;
-      vH1 = wall ? 0.0 : texture2D(uHeight, uv).r;
+      vH1 = wall ? 0.0 : waterHeight(uv);
       vH2 = 0.0;
       vNormal = normalize(vec3(-sx, 1.0, -sz));
       vWorldPos = (modelMatrix * vec4(pos, 1.0)).xyz;
@@ -486,17 +493,18 @@ function advance(simDt) {
   const omega = 2 * Math.PI * b.frequency;
   const sourceCell = tankUv(b.point).multiplyScalar(GRID);
   const lineColumn = Math.floor((LINE_SOURCE_X / TANK + 0.5) * GRID);
-  // A line source adding f each step makes straight waves of amplitude f·dx / (2·v·ω·dt²).
+  // The staggered solver adds height directly: a line drive of 2·A·v·dt/dx
+  // sends waves of amplitude A in each direction.
   // A point source's waves scale as 1/v² rather than 1/v, so its gain also grows with v;
   // POINT_SOURCE_GAIN was measured at 4 cm/s.
-  const lineGain = (2 * b.amplitude * b.speed * omega * dt * dt) / dx;
+  const lineGain = (2 * b.amplitude * b.speed * dt) / dx;
   const gain = b.source === 'point' ? lineGain * POINT_SOURCE_GAIN * (b.speed / 4) : lineGain;
   for (let i = 0; i < steps; i++) {
     state.t += dt;
     let drive;
     if (b.waveform === 'pulse') {
       // One smooth crest, a period long: the water at the source rises and falls once.
-      drive = state.t * b.frequency <= 1 ? 0.5 * gain * Math.sin(omega * state.t) : 0;
+      drive = state.t * b.frequency <= 1 ? 0.5 * gain * (1 - Math.cos(omega * state.t)) : 0;
     } else {
       const rampUp = Math.min(1, state.t * b.frequency); // start gently over the first cycle
       drive = gain * rampUp * Math.cos(omega * state.t);

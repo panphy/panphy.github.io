@@ -1,11 +1,10 @@
 // Step-by-step water waves on a grid, run on the graphics card, for the
-// Diffraction tank. Each texel holds the water height now (red) and one
-// step earlier (green); every step applies the wave equation
-//   u_next = 2u − u_prev + (v·dt/dx)² ∇²u
-// The step length dt never changes between steps, which keeps the method
-// stable. Barrier cells stay still, and their
-// neighbors see a mirror, so waves reflect off them as off a wall. A wide,
-// gradual damping strip round the edge soaks up waves so the tank walls do not echo.
+// Diffraction tank. Each texel stores total height, the x-directed height
+// contribution, and staggered x/y velocities. Splitting the wave equation
+// by direction gives the edge sponge a matched absorbing layer: damping at
+// the top/bottom acts only on y motion, leaving an incoming x-directed plane
+// wave straight. Heights and velocities advance together with a fixed step.
+// Barrier faces have zero normal velocity; a gradual sponge cuts their echoes.
 import * as THREE from 'three';
 
 const quadVertex = `
@@ -29,45 +28,61 @@ const stepFragment = `
   uniform float uLineColumn;
   uniform float uSponge;
 
-  // Cells are read whole (texelFetch), never blended, so every step uses exact neighbor values.
-  float neighbor(ivec2 p, float here, int n) {
-    if (p.x < 0 || p.y < 0 || p.x >= n || p.y >= n) return here;
-    if (texelFetch(uMask, p, 0).r > 0.5) return here;
-    return texelFetch(uState, p, 0).r;
+  bool outside(ivec2 p) {
+    int n = int(uSize);
+    return p.x < 0 || p.y < 0 || p.x >= n || p.y >= n;
+  }
+
+  // Each direction damps its own height/velocity pair, preserving impedance
+  // through the sponge instead of scattering a plane wave off its side edges.
+  vec2 retention(vec2 cell, float soak) {
+    vec2 uv = cell / uSize;
+    vec2 edge = min(uv, 1.0 - uv);
+    vec2 d = 1.0 - smoothstep(vec2(0.0), vec2(uSponge), edge);
+    return (1.0 - 0.06 * d * d * d) * (1.0 - 0.07 * soak * soak);
+  }
+
+  // Velocity lives halfway between neighboring height cells. Compute the
+  // new value here and at the two preceding faces, so a single render pass
+  // advances the staggered leapfrog scheme without another texture target.
+  float velocity(ivec2 p, ivec2 axis) {
+    ivec2 q = p + axis;
+    if (outside(p) || outside(q)) return 0.0;
+    vec4 a = texelFetch(uMask, p, 0);
+    vec4 b = texelFetch(uMask, q, 0);
+    if (a.r > 0.5 || b.r > 0.5) return 0.0;
+    vec4 s = texelFetch(uState, p, 0);
+    float h = texelFetch(uState, q, 0).r;
+    vec2 keep = retention(vec2(p) + 0.5 + 0.5 * vec2(axis), 0.5 * (a.b + b.b));
+    float damping = axis.x == 1 ? keep.x : keep.y;
+    float before = axis.x == 1 ? s.b : s.a;
+    float c = sqrt(a.g > 0.5 ? uK2 : uK1);
+    return damping * before - sqrt(damping) * c * (h - s.r);
   }
 
   void main() {
-    int n = int(uSize);
     ivec2 p = ivec2(gl_FragCoord.xy);
     vec4 mask = texelFetch(uMask, p, 0);
-    if (mask.r > 0.5) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
+    if (mask.r > 0.5) { gl_FragColor = vec4(0.0); return; }
     vec2 s = texelFetch(uState, p, 0).rg;
-    float u = s.r;
-    float before = s.g;
-    float lap = neighbor(p + ivec2(1, 0), u, n) + neighbor(p - ivec2(1, 0), u, n)
-              + neighbor(p + ivec2(0, 1), u, n) + neighbor(p - ivec2(0, 1), u, n) - 4.0 * u;
-    float k = mask.g > 0.5 ? uK2 : uK1;
-    float next = 2.0 * u - before + k * lap;
-
-    vec2 uv = (vec2(p) + 0.5) / uSize;
-    float edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
-    float d = 1.0 - smoothstep(0.0, uSponge, edge);
-    float soak = mask.b; // the absorbing strip in front of barriers
-    // Both strips ramp up gradually: a gentle ramp soaks up waves without reflecting them.
-    float keep = (1.0 - 0.06 * d * d * d) * (1.0 - 0.07 * soak * soak);
-    next *= keep;
-    u *= keep;
+    float vx = velocity(p, ivec2(1, 0));
+    float vy = velocity(p, ivec2(0, 1));
+    vec2 divergence = vec2(vx - velocity(p - ivec2(1, 0), ivec2(1, 0)),
+                           vy - velocity(p - ivec2(0, 1), ivec2(0, 1)));
+    vec2 keep = retention(vec2(p) + 0.5, mask.b);
+    float c = sqrt(mask.g > 0.5 ? uK2 : uK1);
+    vec2 height = keep * vec2(s.g, s.r - s.g) - sqrt(keep) * c * divergence;
 
     // A soft source: it pushes the water without holding it, so waves coming
     // back pass straight through it instead of reflecting.
     if (uSource < 0.5) {
-      if (p.x == int(uLineColumn)) next += uDrive;
+      if (p.x == int(uLineColumn)) height.x += uDrive;
     } else if (distance(vec2(p) + 0.5, uSourceCell) < uSourceR) {
-      next += uDrive;
+      height += 0.5 * uDrive;
     }
     // A safety limit: real waves here never come near it.
-    next = clamp(next, -4.0, 4.0);
-    gl_FragColor = vec4(next, u, 0.0, 1.0);
+    height = clamp(height, -4.0, 4.0);
+    gl_FragColor = vec4(height.x + height.y, height.x, vx, vy);
   }
 `;
 
@@ -133,7 +148,7 @@ export function createSolver(renderer, size) {
     renderer.setClearColor(color, alpha);
   }
 
-  // One time step. k1, k2: (v·dt/dx)² (the same unless the water depth varies); drive: what the source adds this step.
+  // One time step. k1, k2: (v·dt/dx)²; drive: the height added by the source.
   function step({ k1, k2, drive, source, sourceCell, lineColumn }) {
     uniforms.uState.value = read.texture;
     uniforms.uK1.value = k1;
