@@ -433,7 +433,7 @@
 					color: single
 						? PUBLICATION_FIT_CONTRAST[slot % PUBLICATION_FIT_CONTRAST.length]
 						: mixHex(color, '#000000', PUBLICATION_FIT_DARKEN),
-					width: 2,
+					width: 1.5,
 					simplify: false
 				}
 			};
