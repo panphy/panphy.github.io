@@ -38,7 +38,7 @@ export const MODES = {
     heading: 'A proton turns into a neutron.',
     description: 'In beta-plus decay a proton in the nucleus changes into a neutron and a fast positron. A positron is the antiparticle of an electron: the same mass, but a +1 charge. The mass number stays the same; the atomic number goes down by 1. Fluorine-18 becomes oxygen-18.',
     look: 'Press “Decay this nucleus”. One red proton glows, then becomes a gray neutron as an amber positron leaves. Count the protons before and after: 9 becomes 8, so fluorine becomes oxygen. The faint particle leaving in another direction is a neutrino. Beta-plus decay is not needed for GCSE.',
-    evidence: 'Positrons are small and fast like electrons, so they also travel several meters in air and are stopped by a few millimeters of aluminum. When a positron meets an electron, both are annihilated and two gamma rays leave in opposite directions: PET scanners detect these to image the body.',
+    evidence: 'Positrons are small and fast like electrons, so they also travel up to a few meters in air and are stopped by a few millimeters of aluminum. When a positron meets an electron, both are annihilated and two gamma rays leave in opposite directions: PET scanners detect these to image the body.',
     parent: { symbol: 'F', name: 'fluorine-18', A: 18, Z: 9 },
     daughter: { symbol: 'O', name: 'oxygen-18', A: 18, Z: 8 },
     emitted: { symbol: 'e', A: 0, Z: 1, zText: '+1', label: 'beta-plus particle (positron)' },

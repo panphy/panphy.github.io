@@ -38,5 +38,7 @@ jobs:
             tools/motion_tracker/tests/regression.test.cjs \
             sandboxes/panphycircuits/tests/*.test.cjs \
             sandboxes/panphymech/tests/*.test.cjs \
-            fun/spellwave/tests/prompt-utils.test.mjs \
-            fun/spellwave/tests/difficulty.test.mjs
+            simulations/states/tests/physics.test.mjs \
+            simulations/star_life_cycle/tests/physics.test.mjs \
+            simulations/superposition/tests/physics.test.cjs \
+            fun/spellwave/tests/*.test.mjs

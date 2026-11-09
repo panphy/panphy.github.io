@@ -16,7 +16,7 @@ export const MODES = {
     title: 'CHAIN REACTION',
     date: 'CHAIN · A BLOCK OF FUEL',
     heading: 'One fission can cause many more.',
-    description: 'Each fission releases 2 or 3 neutrons. If, on average, more than one of them goes on to cause another fission, the reaction grows very fast: a chain reaction. Only uranium-235 splits. Uranium-238 (most of natural uranium) absorbs neutrons without splitting, and control rods absorb them too. Fuel nuclei are drawn as plain spheres here; each one splits as in the Fission tab.',
+    description: 'Each fission releases 2 or 3 neutrons. If, on average, more than one of them goes on to cause another fission, the reaction grows very fast: a chain reaction. Only uranium-235 splits. Uranium-238 (most of natural uranium) almost always absorbs neutrons without splitting, and control rods absorb them too. Fuel nuclei are drawn as plain spheres here; each one splits as in the Fission tab.',
     look: 'Press “Start chain reaction” to fire a burst of neutrons at the block. Watch the fission rate in the graph, then push control rods in one at a time to hold the reaction steady. Try less enriched fuel and see the reaction die away.',
     evidence: 'In a reactor the control rods are set so that, on average, exactly 1 neutron from each fission causes another fission: steady power. In a bomb nothing absorbs the neutrons, and the number of fissions doubles many times in a fraction of a second. Neutrons that escape through the surface are lost, which is why a small lump of fuel cannot sustain a chain reaction.',
   },
@@ -58,11 +58,13 @@ export const NUCLIDES = {
   U236: { name: 'U-236', label: 'uranium-236', A: 236, B: 1790.3 }
 };
 
-// Binding energy per nucleon (MeV) against mass number, for well-known nuclei.
+// Binding energy per nucleon (MeV) against mass number, for stable or long-lived nuclei, so the line
+// is smooth. The neutron-rich fission fragments (Kr-92, Ba-141) lie a little below it and are drawn as
+// markers only.
 export const CURVE = [
   [1, 0], [2, 1.112], [3, 2.827], [4, 7.074], [6, 5.332], [7, 5.606], [9, 6.463], [12, 7.680], [14, 7.476],
   [16, 7.976], [20, 8.032], [24, 8.261], [28, 8.448], [32, 8.493], [40, 8.551], [48, 8.723], [56, 8.790],
-  [62, 8.795], [72, 8.731], [90, 8.710], [92, 8.512], [120, 8.505], [141, 8.327], [160, 8.184], [184, 7.936],
+  [62, 8.795], [72, 8.731], [90, 8.710], [92, 8.693], [120, 8.505], [141, 8.354], [160, 8.184], [184, 7.936],
   [208, 7.867], [236, 7.586]
 ];
 

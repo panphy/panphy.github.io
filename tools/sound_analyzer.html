@@ -574,7 +574,7 @@
     <div class="info-bar">
       <div id="peak-frequency" class="info-card">
         <span>Peak Frequency</span>
-        <strong id="peak-frequency-value">-- Hz</strong>
+        <strong id="peak-frequency-value" title="The strongest frequency, to about 1 Hz for a steady tone">-- Hz</strong>
       </div>
       <div id="time-delta" class="info-card">
         <span>Marker Delta</span>
@@ -667,6 +667,12 @@
   let isStarting = false;
   let sampleRate;
   const fftSize = 2048;
+  // The peak readout has its own, longer analysis: one bin of the 2048-point display spectrum is
+  // over 20 Hz wide, too coarse to tell two tuning forks apart.
+  const PEAK_FFT_SIZE = 16384;
+  const PEAK_MIN_FREQUENCY = 20;
+  let peakAnalyzer, peakData;
+  let lastPeakFrequency = null;
   const AUDIO_RESUME_TIMEOUT_MS = 1000;
   const MICROPHONE_CONSTRAINTS = {
     audio: {
@@ -953,6 +959,8 @@
         try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
         audioContext = null;
         analyzer = null;
+        peakAnalyzer = null;
+        peakData = null;
         source = null;
         dataArray = null;
         timeDomainData = null;
@@ -1039,6 +1047,10 @@
         analyzer.fftSize = fftSize;
         dataArray = new Uint8Array(analyzer.frequencyBinCount);
         timeDomainData = new Float32Array(analyzer.fftSize);
+        peakAnalyzer = audioContext.createAnalyser();
+        peakAnalyzer.fftSize = PEAK_FFT_SIZE;
+        peakAnalyzer.smoothingTimeConstant = 0.5;
+        peakData = new Float32Array(peakAnalyzer.frequencyBinCount);
       }
 
       if (source) {
@@ -1048,6 +1060,7 @@
 
       source = audioContext.createMediaStreamSource(microphoneStream);
       source.connect(analyzer);
+      if (peakAnalyzer) source.connect(peakAnalyzer);
 
       if (!contextRunning) {
         // Audio is blocked until a user gesture: stay ready so the next
@@ -1089,6 +1102,9 @@
 
     audioContext = null;
     analyzer = null;
+    peakAnalyzer = null;
+    peakData = null;
+    lastPeakFrequency = null;
     source = null;
     microphoneStream = null;
     sampleRate = null;
@@ -1285,16 +1301,16 @@
       dataArray.set(lastFreqFrame);
     }
 
-    // Peak freq
-    let peakIndex = 0, peakValue = -1;
+    // Peak frequency: silence is judged from the display spectrum, the value from the longer one.
+    let peakValue = 0;
     for (let i = 0; i < dataArray.length; i++) {
-      if (dataArray[i] > peakValue) {
-        peakValue = dataArray[i];
-        peakIndex = i;
-      }
+      if (dataArray[i] > peakValue) peakValue = dataArray[i];
     }
-    const peakFreq = indexToFrequency(peakIndex);
-    peakFreqDisplay.textContent = peakValue > 0 ? `${peakFreq.toFixed(1)} Hz` : '-- Hz';
+    if (isRunning && peakAnalyzer && peakData) {
+      peakAnalyzer.getFloatFrequencyData(peakData);
+      lastPeakFrequency = peakValue > 0 ? findPeakFrequency(peakData, sampleRate, PEAK_FFT_SIZE, PEAK_MIN_FREQUENCY) : null;
+    }
+    peakFreqDisplay.textContent = lastPeakFrequency === null ? '-- Hz' : `${Math.round(lastPeakFrequency)} Hz`;
 
     const { startIndex, endIndex, startFreq, endFreq } = getFrequencyZoomRange();
 
@@ -1631,6 +1647,32 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // The strongest frequency in a spectrum of decibel values, or null if there is none. The true peak
+  // of a steady tone usually falls between two bins, so a parabola through the largest bin and its
+  // two neighbors places it: to about 1 Hz here, where the largest bin alone is good to about 3 Hz.
+  function findPeakFrequency(spectrumDb, rate, size, minFrequency = 0) {
+    if (!spectrumDb || !rate || !size) return null;
+    const binWidth = rate / size;
+    const first = Math.max(1, Math.ceil(minFrequency / binWidth));
+    let peakIndex = -1;
+    let peakLevel = -Infinity;
+    for (let i = first; i < spectrumDb.length - 1; i++) {
+      if (spectrumDb[i] > peakLevel) {
+        peakLevel = spectrumDb[i];
+        peakIndex = i;
+      }
+    }
+    if (peakIndex < 0 || !Number.isFinite(peakLevel)) return null;
+    const left = spectrumDb[peakIndex - 1];
+    const right = spectrumDb[peakIndex + 1];
+    const curvature = left - 2 * peakLevel + right;
+    let shift = 0;
+    if (Number.isFinite(left) && Number.isFinite(right) && curvature < 0) {
+      shift = Math.max(-0.5, Math.min(0.5, 0.5 * (left - right) / curvature));
+    }
+    return (peakIndex + shift) * binWidth;
   }
 
   // ------------------ Utility: bin <-> frequency conversion ------------------

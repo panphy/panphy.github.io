@@ -2852,3 +2852,8 @@ mjx-container.copy-failed::after {
   border: 0;
   cursor: pointer;
 }
+
+/* The app name is the page heading; it keeps the wordmark look. */
+h1.md-wordmark {
+  margin: 0;
+}

@@ -1879,3 +1879,8 @@ body.modal-open {
     min-height: 48px;
   }
 }
+
+/* The app name is the page heading; it keeps the wordmark look. */
+h1.mt-wordmark {
+  margin: 0;
+}

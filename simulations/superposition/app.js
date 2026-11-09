@@ -38,7 +38,8 @@
   const state = {
     mode: 'pulses',
     t: 0,
-    playing: true,
+    // Start paused for people who have asked their device for less motion.
+    playing: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     rate: 1,
     show: { ...DEFAULT_SHOW },
     settings: clone(DEFAULTS),

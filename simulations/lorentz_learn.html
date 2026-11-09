@@ -171,12 +171,6 @@
       color: var(--ink);
     }
 
-    .banner-title.gradient-text {
-      color: var(--ink);
-      background: none;
-      -webkit-text-fill-color: currentColor;
-    }
-
     .banner-buttons {
       display: flex;
       justify-content: flex-end;
@@ -248,13 +242,6 @@
       margin: 0 0 1.5rem 0;
       letter-spacing: -0.03em;
       color: var(--ink);
-    }
-
-    /* The page title stays plain: spectrum-colored title text is for the homepage only. */
-    h1.gradient-text {
-      color: var(--ink);
-      background: none;
-      -webkit-text-fill-color: currentColor;
     }
 
     h2 {
@@ -964,13 +951,6 @@
   <script>
     // Theme Toggle
     window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
-  </script>
-  <script>
-    // Gradient text: skip on Brave iOS where background-clip:text is broken
-    (function() {
-      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-      document.querySelectorAll('.banner-title, h1').forEach(function(el) { el.classList.add('gradient-text'); });
-    })();
   </script>
 </body>
 

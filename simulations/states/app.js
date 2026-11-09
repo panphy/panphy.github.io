@@ -80,7 +80,8 @@ const legends = Array.from(document.querySelectorAll('[data-legend]'));
 const sim = Physics.createSim();
 
 const state = {
-  playing: true,
+  // Start paused for people who have asked their device for less motion.
+  playing: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   fastForwardEnabled: true,
   rampTarget: kelvinToReduced(PRESET_K.solid),
   activePreset: 'solid',
@@ -518,10 +519,14 @@ function resetSimulation() {
   if (!state.playing) togglePlay();
 }
 
-function togglePlay() {
-  state.playing = !state.playing;
+function syncPlayButton() {
   playPauseBtn.textContent = state.playing ? 'Pause' : 'Play';
   playPauseBtn.className = state.playing ? 'btn btn-primary' : 'btn btn-secondary';
+}
+
+function togglePlay() {
+  state.playing = !state.playing;
+  syncPlayButton();
 }
 
 function isFastForwarding() {
@@ -588,6 +593,7 @@ colorModeButtons.forEach((button, index) => {
 });
 
 playPauseBtn.addEventListener('click', togglePlay);
+syncPlayButton();
 resetBtn.addEventListener('click', resetSimulation);
 
 const INTERACTIVE = 'button, input, select, textarea, a, label, [role="radio"], [contenteditable]';

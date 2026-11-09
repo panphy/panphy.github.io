@@ -745,31 +745,31 @@ button.cl-preset:hover:not(:disabled) {
     font-weight: 500;
 }
 
-/* Hover labels (mouse only). */
-[data-tooltip]::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    z-index: 40;
-    transform: translateX(-50%);
-    padding: 4px 8px;
-    font-size: 0.74rem;
-    font-weight: 600;
-    white-space: nowrap;
-    color: var(--surface);
-    background: var(--ink);
-    border-radius: 6px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.12s ease;
-}
-
+/* Hover labels (mouse only). A label exists only while its control is hovered: a hidden label
+   still takes up room, and the ones at the right-hand edge made a phone page scroll sideways. */
 @media (hover: hover) and (pointer: fine) {
     [data-tooltip]:not([aria-expanded="true"]):hover::after {
-        opacity: 1;
-        transition-delay: 0.35s;
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        z-index: 40;
+        transform: translateX(-50%);
+        padding: 4px 8px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        white-space: nowrap;
+        color: var(--surface);
+        background: var(--ink);
+        border-radius: 6px;
+        pointer-events: none;
+        animation: cl-tooltip-in 0.12s ease 0.35s both;
     }
+}
+
+@keyframes cl-tooltip-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ---------- Settings drawer ---------- */
@@ -1662,4 +1662,9 @@ button.stepper-btn:hover:not(:disabled) {
     .cl-spinner {
         animation-duration: 3s;
     }
+}
+
+/* The app name is the page heading; it keeps the wordmark look. */
+h1.cl-wordmark {
+  margin: 0;
 }

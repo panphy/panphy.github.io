@@ -92,3 +92,43 @@ test('start, pause and resume preserve snapshots and microphone stream', async (
   assert.equal(app.run('track.readyState'), 'ended');
   assert.equal(app.run('lastWaveFrame'), null);
 });
+
+// The Blackman-windowed spectrum of a steady tone, in decibels, as an AnalyserNode reports it.
+function toneSpectrumDb(frequency, sampleRate, size) {
+  const re = new Float64Array(size / 2);
+  const out = new Float32Array(size / 2);
+  const center = Math.round(frequency / (sampleRate / size));
+  for (let k = Math.max(1, center - 6); k <= Math.min(size / 2 - 1, center + 6); k++) {
+    let real = 0, imag = 0;
+    for (let n = 0; n < size; n++) {
+      const window = 0.42 - 0.5 * Math.cos(2 * Math.PI * n / size) + 0.08 * Math.cos(4 * Math.PI * n / size);
+      const sample = window * Math.sin(2 * Math.PI * frequency * n / sampleRate);
+      const angle = 2 * Math.PI * k * n / size;
+      real += sample * Math.cos(angle);
+      imag -= sample * Math.sin(angle);
+    }
+    re[k] = Math.hypot(real, imag) / size;
+  }
+  for (let k = 0; k < out.length; k++) out[k] = re[k] > 0 ? 20 * Math.log10(re[k]) : -160;
+  return out;
+}
+
+test('peak frequency is placed between bins, to within 1 Hz', () => {
+  const app = loadAnalyzer();
+  for (const frequency of [256, 261.6, 440, 445, 1000.7]) {
+    for (const rate of [44100, 48000]) {
+      app.run(`var spectrum = new Float32Array(${JSON.stringify([...toneSpectrumDb(frequency, rate, 16384)])});`);
+      const found = app.run(`findPeakFrequency(spectrum, ${rate}, 16384, 20)`);
+      assert.ok(Math.abs(found - frequency) < 1, `${frequency} Hz at ${rate} Hz read as ${found}`);
+    }
+  }
+});
+
+test('peak frequency ignores the lowest bins and reports silence as no peak', () => {
+  const app = loadAnalyzer();
+  app.run('var spectrum = new Float32Array(8192).fill(-120); spectrum[0] = -5; spectrum[1] = -6; spectrum[150] = -30; spectrum[149] = -40; spectrum[151] = -40;');
+  const found = app.run('findPeakFrequency(spectrum, 48000, 16384, 20)');
+  assert.ok(Math.abs(found - 150 * 48000 / 16384) < 0.01);
+  app.run('var silent = new Float32Array(8192).fill(-Infinity);');
+  assert.equal(app.run('findPeakFrequency(silent, 48000, 16384, 20)'), null);
+});
