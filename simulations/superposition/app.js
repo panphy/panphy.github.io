@@ -918,4 +918,16 @@
   const startMode = location.hash.slice(1);
   setMode(MODES.includes(startMode) ? startMode : 'pulses', { fromHash: true });
   requestAnimationFrame(tick);
+
+  // The notes on the model close when you click elsewhere or press Escape.
+  const modelNote = document.getElementById('modelNote');
+  document.addEventListener('pointerdown', (event) => {
+    if (modelNote.open && !modelNote.contains(event.target)) modelNote.open = false;
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modelNote.open) {
+      modelNote.open = false;
+      modelNote.querySelector('summary').focus();
+    }
+  });
 })();

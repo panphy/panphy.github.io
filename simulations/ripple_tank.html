@@ -99,7 +99,7 @@
       </div>
 
       <div class="canvas-wrap" id="canvasWrap">
-        <canvas id="tankCanvas" aria-label="Ripple tank. Drag to turn the view; drag the probe or the boundary to move them."></canvas>
+        <canvas id="tankCanvas" tabindex="0" aria-label="Ripple tank. Drag or use the arrow keys to turn the view; scroll, pinch or use the plus and minus keys to zoom. Drag the probe or the boundary to move them."></canvas>
         <canvas id="overlayCanvas" aria-hidden="true"></canvas>
         <div class="view-toggle" id="viewToggle"></div>
       </div>
@@ -152,7 +152,14 @@
   </main>
 
   <footer class="panphy-footer">
-    <span class="panphy-footer-status"><kbd>Space</kbd> play / pause &nbsp; <kbd>R</kbd> reset</span>
+    <span class="panphy-footer-status"><kbd>Space</kbd> play / pause &nbsp; <kbd>R</kbd> reset
+      <details class="model-note" id="modelNote">
+        <summary>About this model</summary>
+        <div class="model-note-body">
+        <p>The tank shows a 16 cm &times; 16 cm patch of water. Interference and Refraction draw waves from formulas, so they already fill the tank. Diffraction works the waves out step by step from still water, so its pattern takes a moment to build up.</p>
+        <p><strong>What the model leaves out.</strong> The water behaves as an ideal wave: waves simply add, and every frequency travels at the speed you set. In a real ripple tank the speed depends on the depth and a little on the frequency, friction makes the ripples die away, and reflections from the sides blur the pattern. The edges here absorb the waves. Heights are drawn much larger than to scale.</p>
+        </div>
+      </details></span>
     <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
       <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
   </footer>

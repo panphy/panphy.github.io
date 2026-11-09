@@ -26,6 +26,7 @@ const PLATE_LENGTH = 0.10;
 const SELECTOR_GAP = 0.02;
 const SLIT_X = 0.065;
 const SLIT_HALF = 0.0015;
+const LIGHT_SPEED = 2.998e8;
 const SCREEN_X = 0.12;
 // A particle this close to a plate has hit it: the same limit ends the track and sets the prediction.
 const PLATE_HIT_MARGIN = 0.0012;
@@ -982,6 +983,9 @@ function updateEquation() {
     const energy = tracer ? 0.5 * tracer.m * tracer.vel.lengthSq() / 1.602177e-13 : 0;
     const radius = tracer ? Math.hypot(tracer.pos.x, tracer.pos.z) : 0;
     const maxEnergy = (q * v.cycField * DEE_RADIUS) ** 2 / (2 * data.m) / 1.602177e-13;
+    // Shown as a fraction of the speed of light: this model ignores relativity, which starts to
+    // matter (a 1% longer orbit time) at about 0.14c.
+    const edgeSpeed = q * v.cycField * DEE_RADIUS / data.m;
     const tuned = Math.abs(v.frequency * 1e6 - fc) / fc < 0.002;
     html = `<div class="formula">${mathHtml(String.raw`\(f = \dfrac{qB}{2\pi m}\) · \(E_{\mathrm{k}} = \dfrac{q^2B^2R^2}{2m}\)`, 'f = qB/2πm · Eₖ = q²B²R²/2m')}</div>`
       + row(mathHtml(String.raw`Cyclotron \(f\)`, 'Cyclotron f'), `${(fc / 1e6).toFixed(2)} MHz`)
@@ -989,7 +993,9 @@ function updateEquation() {
       + row('Kinetic energy', `<b>${energy.toFixed(2)} MeV</b>`)
       + row('Radius · turns', `${(radius * 100).toFixed(1)} cm · ${Math.floor(lab.crossings / 2)}`)
       + row(mathHtml(String.raw`Maximum \(E_{\mathrm{k}}\) (\(R = 50\) cm)`, 'Maximum Eₖ (R = 50 cm)'), `${maxEnergy.toFixed(2)} MeV`)
-      + `<div class="status ${tuned ? 'good' : 'warn'}">${tuned ? '✓ Tuned: in step with the particle.' : 'Not tuned: the particle will drift out of step.'}</div>`;
+      + row(mathHtml(String.raw`Speed at the edge, \(\dfrac{qBR}{m}\)`, 'Speed at the edge, qBR/m'), `${sci(edgeSpeed)} m/s = ${(edgeSpeed / LIGHT_SPEED).toFixed(2)}c`)
+      + `<div class="status ${tuned ? 'good' : 'warn'}">${tuned ? '✓ Tuned: in step with the particle.' : 'Not tuned: the particle will drift out of step.'}</div>`
+      + (edgeSpeed / LIGHT_SPEED > 0.14 ? `<div class="status warn">At this speed a real particle’s orbit time grows by more than 1%, so a real cyclotron would fall out of step. This model leaves relativity out.</div>` : '');
   }
   box.innerHTML = html;
 }

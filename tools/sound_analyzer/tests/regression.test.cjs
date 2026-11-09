@@ -132,3 +132,12 @@ test('peak frequency ignores the lowest bins and reports silence as no peak', ()
   app.run('var silent = new Float32Array(8192).fill(-Infinity);');
   assert.equal(app.run('findPeakFrequency(silent, 48000, 16384, 20)'), null);
 });
+
+test('multiples of the peak stop at the count and at the highest frequency shown', () => {
+  const app = loadAnalyzer();
+  assert.deepEqual(JSON.parse(app.run('JSON.stringify(harmonicMultiples(440, 24000, 5))')),
+    [1, 2, 3, 4, 5].map((n) => ({ n, frequency: 440 * n })));
+  assert.deepEqual(JSON.parse(app.run('JSON.stringify(harmonicMultiples(9000, 24000, 5))')),
+    [{ n: 1, frequency: 9000 }, { n: 2, frequency: 18000 }]);
+  assert.equal(app.run('harmonicMultiples(0, 24000).length'), 0);
+});

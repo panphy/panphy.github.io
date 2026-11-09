@@ -183,6 +183,11 @@ a:hover {
   -webkit-user-select: none;
 }
 
+#simCanvas:focus-visible {
+  outline: 3px solid var(--focus, #5aa7ff);
+  outline-offset: -3px;
+}
+
 #simCanvas:active {
   cursor: grabbing;
 }
