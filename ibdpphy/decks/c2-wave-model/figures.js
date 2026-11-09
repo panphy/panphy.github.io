@@ -90,7 +90,7 @@ window.DeckFigures.add(P => {
       const above = { visible: 84, ultraviolet: 132 };
       let s = bands.map(([name, a, b, color]) => { const mid = f((X(a) + X(b)) / 2); return `<rect x="${f(X(a))}" y="150" width="${f(X(b) - X(a))}" height="90" style="fill:var(--${color});opacity:.8"/>` + (above[name] ? `<line x1="${mid}" y1="150" x2="${mid}" y2="${above[name] + 10}" class="tick"/>` + text(name === 'ultraviolet' ? mid + 8 : mid, above[name], name, 'lbl strong', name === 'ultraviolet' ? 'start' : 'end') : text(mid, 206, name === 'gamma rays' ? 'gamma' : name, 'lbl strong', 'middle', 'style="fill:#fff"')); }).join('');
       s += [3, 0, -3, -6, -9, -12].map(p => `<line x1="${X(p)}" y1="240" x2="${X(p)}" y2="256" class="tick"/>` + text(X(p), 290, p === 0 ? '1 m' : `10<tspan dy="-12" font-size="20">${String(p).replace('-', '−')}</tspan><tspan dy="12"> m</tspan>`, 'lbl mono')).join('');
-      s += arrow(300, 344, 100, 344, 'text-secondary', 3) + text(320, 354, 'longer wavelength', 'lbl', 'start') + arrow(690, 344, 890, 344, 'text-secondary', 3) + text(670, 354, 'shorter wavelength', 'lbl', 'end');
+      s += arrow(400, 344, 100, 344, 'text-secondary', 3) + text(250, 326, 'longer wavelength', 'lbl') + arrow(590, 344, 890, 344, 'text-secondary', 3) + text(740, 326, 'shorter wavelength', 'lbl');
       return svg('40 60 900 310', s, 'The electromagnetic spectrum on a scale of wavelength, from radio waves longer than a meter, through microwaves, infrared, the narrow band of visible light near 5 times 10 to the minus 7 meters, ultraviolet and X-rays, to gamma rays shorter than 10 to the minus 11 meters');
     }
   };
