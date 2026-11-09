@@ -734,3 +734,37 @@ footer.panphy-footer kbd {
 
 .icon-btn:disabled { opacity: 0.3; cursor: default; }
 .icon-btn:disabled:hover { background: transparent; color: var(--ink-2); }
+
+/* ---------- Notes on the model: open over the page, so they take no room from the view ---------- */
+
+.model-note { position: relative; display: inline-block; margin-left: 12px; text-align: left; }
+.model-note summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  color: var(--brand);
+  font-weight: 600;
+  cursor: pointer;
+}
+.model-note-body {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 60;
+  width: min(560px, calc(100vw - 28px));
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-2, 0 12px 32px rgba(0, 0, 0, 0.25));
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.model-note-body p { margin: 0; }
+.model-note-body p + p { margin-top: 8px; }
+@media (pointer: coarse) { .model-note summary { min-height: 44px; } }
+@media (max-width: 640px) {
+  .model-note { margin-left: 0; }
+  .model-note-body { position: fixed; left: 14px; right: 14px; bottom: 64px; width: auto; max-height: 60vh; overflow-y: auto; }
+}

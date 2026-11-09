@@ -613,12 +613,12 @@
 	<div id="controls">
 		<div class="control-group resolution-control">
 			<span class="control-label">Resolution</span>
-			<input type="range" id="resolutionRange" min="2" max="14" value="8" />
+			<input type="range" id="resolutionRange" min="2" max="14" value="8" aria-label="Resolution" />
 		</div>
 
 		<div class="control-group toggle-wrapper">
 			<span class="control-label">Mirror</span>
-			<input type="checkbox" id="mirrorToggle" checked />
+			<input type="checkbox" id="mirrorToggle" checked aria-label="Mirror" />
 		</div>
 
 		<label class="control-group toggle-wrapper">
@@ -628,7 +628,7 @@
 
 		<div class="control-group">
 			<span class="control-label">Camera</span>
-			<select id="cameraSelect" disabled>
+			<select id="cameraSelect" disabled aria-label="Camera">
 				<option>Loading…</option>
 			</select>
 		</div>

@@ -496,6 +496,8 @@
     .info-card { min-width: 0; }
     .info-card span { display: block; font-size: .6rem; text-transform: uppercase; letter-spacing: .07em; color: var(--text-secondary); margin-bottom: 6px; }
     .info-card strong { font: 500 .9rem var(--font-mono); white-space: nowrap; }
+    .info-card-wide { grid-column: 1 / -1; flex-basis: 100%; }
+    .info-card-wide strong { display: block; white-space: normal; font-size: .8rem; line-height: 1.5; }
     .controls-panel { display: flex; flex-direction: column; margin: 0; overflow-y: auto; }
     .controls-panel > * { flex-shrink: 0; }
     .control-section { padding: 12px; }
@@ -579,6 +581,10 @@
       <div id="time-delta" class="info-card">
         <span>Marker Delta</span>
         <strong id="time-delta-value">-- ms</strong>
+      </div>
+      <div id="peak-multiples" class="info-card info-card-wide" title="Whole-number multiples of the peak frequency, marked on the spectrum. A musical note has peaks at these frequencies if the strongest one is its first harmonic.">
+        <span>Multiples of the peak</span>
+        <strong id="peak-multiples-value">--</strong>
       </div>
     </div>
 
@@ -715,6 +721,7 @@
 
   const tooltip = document.getElementById('tooltip');
   const peakFreqDisplay = document.getElementById('peak-frequency-value');
+  const peakMultiplesDisplay = document.getElementById('peak-multiples-value');
   const timeDeltaDisplay = document.getElementById('time-delta-value');
   const spectrumPanel = document.getElementById('spectrum-panel');
   const resetZoomBtn = document.getElementById('resetZoomBtn');
@@ -1120,6 +1127,7 @@
     exportSpectrumBtn.disabled = true;
     exportWaveformBtn.disabled = true;
     peakFreqDisplay.textContent = '-- Hz';
+    peakMultiplesDisplay.textContent = '--';
     timeDeltaDisplay.textContent = '-- ms';
     resetFrequencyZoom();
   }
@@ -1290,6 +1298,7 @@
 
     if (!analyzer || !dataArray || !timeDomainData) {
       peakFreqDisplay.textContent = '-- Hz';
+      peakMultiplesDisplay.textContent = '--';
       updateGridLegend(0);
       return;
     }
@@ -1311,6 +1320,11 @@
       lastPeakFrequency = peakValue > 0 ? findPeakFrequency(peakData, sampleRate, PEAK_FFT_SIZE, PEAK_MIN_FREQUENCY) : null;
     }
     peakFreqDisplay.textContent = lastPeakFrequency === null ? '-- Hz' : `${Math.round(lastPeakFrequency)} Hz`;
+    const multiples = lastPeakFrequency === null ? [] : harmonicMultiples(lastPeakFrequency, sampleRate / 2, 5);
+    const multiplesText = multiples.length > 1
+      ? multiples.slice(1).map((m) => `${m.n}× ${Math.round(m.frequency)} Hz`).join(', ')
+      : '--';
+    if (peakMultiplesDisplay.textContent !== multiplesText) peakMultiplesDisplay.textContent = multiplesText;
 
     const { startIndex, endIndex, startFreq, endFreq } = getFrequencyZoomRange();
 
@@ -1323,6 +1337,30 @@
       const y = freqCanvasSize.height - barHeight;
       freqCtx.fillStyle = `rgb(${barHeight + 50}, 50, 50)`;
       freqCtx.fillRect(x, y, barWidth, barHeight);
+    }
+
+    // Markers at the peak and its whole-number multiples: where the harmonics of a note would be.
+    if (multiples.length && endFreq > startFreq) {
+      const binWidth = sampleRate / fftSize;
+      freqCtx.save();
+      freqCtx.font = "600 11px 'IBM Plex Mono', monospace";
+      freqCtx.textAlign = 'center';
+      freqCtx.textBaseline = 'top';
+      freqCtx.lineWidth = 1;
+      freqCtx.setLineDash([4, 4]);
+      freqCtx.strokeStyle = getCssVar('--brand-accent');
+      freqCtx.fillStyle = getCssVar('--brand-accent');
+      for (const multiple of multiples) {
+        const x = (multiple.frequency / binWidth - startIndex + 0.5) * barWidth;
+        if (x < 0 || x > freqCanvasSize.width) continue;
+        freqCtx.globalAlpha = multiple.n === 1 ? 0.9 : 0.55;
+        freqCtx.beginPath();
+        freqCtx.moveTo(x, 16);
+        freqCtx.lineTo(x, freqCanvasSize.height);
+        freqCtx.stroke();
+        freqCtx.fillText(multiple.n === 1 ? 'peak' : `${multiple.n}×`, Math.min(Math.max(x, 16), freqCanvasSize.width - 16), 3);
+      }
+      freqCtx.restore();
     }
 
     // Frequency axis
@@ -1673,6 +1711,14 @@
       shift = Math.max(-0.5, Math.min(0.5, 0.5 * (left - right) / curvature));
     }
     return (peakIndex + shift) * binWidth;
+  }
+
+  // The peak frequency and its whole-number multiples up to a limit: n = 1 is the peak itself.
+  function harmonicMultiples(frequency, maxFrequency, count = 5) {
+    const multiples = [];
+    if (!(frequency > 0)) return multiples;
+    for (let n = 1; n <= count && n * frequency <= maxFrequency; n++) multiples.push({ n, frequency: n * frequency });
+    return multiples;
   }
 
   // ------------------ Utility: bin <-> frequency conversion ------------------

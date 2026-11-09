@@ -576,6 +576,36 @@ function fitCamera() {
   controls.update();
 }
 
+// Keyboard control of the view, for people who cannot drag: arrow keys turn the tank (in the 3D
+// view), plus and minus zoom.
+function nudgeCamera(dTheta, dPhi, zoom = 1) {
+  const spherical = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+  if (state.view !== 'top') {
+    spherical.theta += dTheta;
+    spherical.phi = THREE.MathUtils.clamp(spherical.phi + dPhi, Math.max(controls.minPolarAngle, 0.05), controls.maxPolarAngle);
+  }
+  spherical.radius = THREE.MathUtils.clamp(spherical.radius * zoom, controls.minDistance, controls.maxDistance);
+  camera.position.setFromSpherical(spherical).add(controls.target);
+  controls.update();
+}
+canvas.addEventListener('keydown', (event) => {
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
+  const step = 0.12;
+  const actions = {
+    ArrowLeft: () => nudgeCamera(-step, 0),
+    ArrowRight: () => nudgeCamera(step, 0),
+    ArrowUp: () => nudgeCamera(0, -step),
+    ArrowDown: () => nudgeCamera(0, step),
+    '+': () => nudgeCamera(0, 0, 0.88),
+    '=': () => nudgeCamera(0, 0, 0.88),
+    '-': () => nudgeCamera(0, 0, 1.14),
+    _: () => nudgeCamera(0, 0, 1.14)
+  };
+  if (!actions[event.key]) return;
+  event.preventDefault();
+  actions[event.key]();
+});
+
 function updateHint() {
   const turn = state.view === 'top' ? 'Scroll or pinch to zoom' : 'Drag the tank to turn it';
   if (state.mode === 'interference') hint.textContent = state.show.probe ? `${turn} · drag P to move the probe` : turn;
@@ -1408,3 +1438,15 @@ function animate(now) {
   drawOverlay();
 }
 requestAnimationFrame(animate);
+
+// The notes on the model close when you click elsewhere or press Escape.
+const modelNote = document.getElementById('modelNote');
+document.addEventListener('pointerdown', (event) => {
+  if (modelNote.open && !modelNote.contains(event.target)) modelNote.open = false;
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && modelNote.open) {
+    modelNote.open = false;
+    modelNote.querySelector('summary').focus();
+  }
+});

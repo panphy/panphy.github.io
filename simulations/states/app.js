@@ -596,6 +596,35 @@ playPauseBtn.addEventListener('click', togglePlay);
 syncPlayButton();
 resetBtn.addEventListener('click', resetSimulation);
 
+// Keyboard control of the view, for people who cannot drag: arrow keys turn it, plus and minus zoom.
+function nudgeCamera(dTheta, dPhi, zoom = 1) {
+  const spherical = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+  spherical.theta += dTheta;
+  spherical.phi = clamp(spherical.phi + dPhi, 0.1, Math.PI - 0.1);
+  spherical.radius = clamp(spherical.radius * zoom, controls.minDistance, controls.maxDistance);
+  camera.position.setFromSpherical(spherical).add(controls.target);
+  // Counts as a touch, so the automatic framing keeps the chosen zoom.
+  state.lastInteraction = performance.now();
+  controls.update();
+}
+canvas.addEventListener('keydown', (event) => {
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
+  const step = 0.12;
+  const actions = {
+    ArrowLeft: () => nudgeCamera(-step, 0),
+    ArrowRight: () => nudgeCamera(step, 0),
+    ArrowUp: () => nudgeCamera(0, -step),
+    ArrowDown: () => nudgeCamera(0, step),
+    '+': () => nudgeCamera(0, 0, 0.88),
+    '=': () => nudgeCamera(0, 0, 0.88),
+    '-': () => nudgeCamera(0, 0, 1.14),
+    _: () => nudgeCamera(0, 0, 1.14)
+  };
+  if (!actions[event.key]) return;
+  event.preventDefault();
+  actions[event.key]();
+});
+
 const INTERACTIVE = 'button, input, select, textarea, a, label, [role="radio"], [contenteditable]';
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;

@@ -42,3 +42,5 @@ jobs:
             simulations/star_life_cycle/tests/physics.test.mjs \
             simulations/superposition/tests/physics.test.cjs \
             fun/spellwave/tests/*.test.mjs
+      - name: Accessibility smoke check
+        run: node .github/scripts/a11y-smoke.mjs
