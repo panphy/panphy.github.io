@@ -234,12 +234,25 @@ const fragmentShader = `
   uniform vec3 uWall;
   uniform vec3 uWallEdge;
   uniform vec2 uTexel;
+  uniform float uTwoRegions;
+  uniform vec2 uBoundaryNormal;
+  uniform float uBoundaryOffset;
+  uniform vec3 uRegionA;
+  uniform vec3 uRegionB;
 
   varying vec3 vWorldPos;
   varying vec3 vNormal;
   varying float vH1;
   varying float vH2;
   varying vec2 vUv;
+
+  // Refraction: tint each region of water. Drawn here, not as a sheet over the water,
+  // so the tint never depends on the draw order, which changes as the tank turns.
+  vec3 regionTint(vec3 c) {
+    if (uTwoRegions < 0.5 || uMode < 0.5 || uMode > 1.5) return c;
+    float side = dot(vWorldPos.xz, uBoundaryNormal) - uBoundaryOffset;
+    return side > 0.0 ? mix(c, uRegionB, 0.1) : mix(c, uRegionA, 0.12);
+  }
 
   void main() {
     float totalH = vH1 + vH2;
@@ -267,7 +280,7 @@ const fragmentShader = `
       vec3 top = mix(uTrough, uCrest, k);
       top = mix(top, uWallEdge, rim);
       top = mix(top, uWall, wall);
-      gl_FragColor = vec4(top, 1.0);
+      gl_FragColor = vec4(regionTint(top), 1.0);
       return;
     }
 
@@ -291,7 +304,7 @@ const fragmentShader = `
     color *= diffuse;
     color += vec3(1.0) * spec * (1.0 - wall * 0.7);
     color += vec3(0.06) * pow(1.0 - max(dot(N, V), 0.0), 3.0);
-    gl_FragColor = vec4(color, 0.96);
+    gl_FragColor = vec4(regionTint(color), 0.96);
   }
 `;
 
@@ -371,7 +384,9 @@ const uniforms = {
   uTexel: { value: new THREE.Vector2(1 / GRID, 1 / GRID) },
   uCell: { value: TANK / GRID },
   uWall: { value: theme().wall.clone() },
-  uWallEdge: { value: theme().wallEdge.clone() }
+  uWallEdge: { value: theme().wallEdge.clone() },
+  uRegionA: { value: new THREE.Color(theme().regionA) },
+  uRegionB: { value: new THREE.Color(theme().regionB) }
 };
 
 const geometry = new THREE.PlaneGeometry(TANK, TANK, SEGMENTS, SEGMENTS);
@@ -383,17 +398,6 @@ const edgeMat = new THREE.LineBasicMaterial({ color: theme().edge, transparent: 
 const tankEdge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(TANK + 0.1, 0.4, TANK + 0.1)), edgeMat);
 tankEdge.position.y = -0.2;
 scene.add(tankEdge);
-
-// Region tints; the boundary and its handles are drawn on the overlay.
-const boundaryGroup = new THREE.Group();
-scene.add(boundaryGroup);
-const regionAMat = new THREE.MeshBasicMaterial({ color: theme().regionA, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide });
-const regionBMat = new THREE.MeshBasicMaterial({ color: theme().regionB, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide });
-const regionAMesh = new THREE.Mesh(new THREE.BufferGeometry(), regionAMat);
-const regionBMesh = new THREE.Mesh(new THREE.BufferGeometry(), regionBMat);
-regionAMesh.position.y = 0.012;
-regionBMesh.position.y = 0.014;
-boundaryGroup.add(regionAMesh, regionBMesh);
 
 function boundaryNormal(r = current()) {
   const a = THREE.MathUtils.degToRad(r.incidence);
@@ -417,41 +421,6 @@ function boundaryEnds(r = current()) {
     new THREE.Vector2(THREE.MathUtils.clamp((r.offset + n.y * HALF) / nx, -HALF, HALF), -HALF),
     new THREE.Vector2(THREE.MathUtils.clamp((r.offset - n.y * HALF) / nx, -HALF, HALF), HALF)
   ];
-}
-
-function clipTank(keepPositive, r) {
-  const n = boundaryNormal(r);
-  const poly = [new THREE.Vector2(-HALF, -HALF), new THREE.Vector2(HALF, -HALF), new THREE.Vector2(HALF, HALF), new THREE.Vector2(-HALF, HALF)];
-  const signed = (p) => p.dot(n) - r.offset;
-  const inside = (p) => (keepPositive ? signed(p) >= -1e-4 : signed(p) <= 1e-4);
-  const out = [];
-  for (let i = 0; i < poly.length; i++) {
-    const cur = poly[i];
-    const prev = poly[(i + poly.length - 1) % poly.length];
-    const denom = signed(prev) - signed(cur);
-    if (inside(cur) !== inside(prev) && Math.abs(denom) > 1e-4) out.push(prev.clone().lerp(cur, signed(prev) / denom));
-    if (inside(cur)) out.push(cur);
-  }
-  return out;
-}
-
-function polygonGeometry(points) {
-  const g = new THREE.BufferGeometry();
-  if (points.length < 3) return g;
-  const v = [];
-  for (let i = 1; i < points.length - 1; i++) v.push(points[0].x, 0, points[0].y, points[i].x, 0, points[i].y, points[i + 1].x, 0, points[i + 1].y);
-  g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
-  return g;
-}
-
-function updateBoundaryMeshes() {
-  const r = state.settings.refraction;
-  boundaryGroup.visible = state.mode === 'refraction' && r.twoRegions;
-  if (!boundaryGroup.visible) return;
-  regionAMesh.geometry.dispose();
-  regionBMesh.geometry.dispose();
-  regionAMesh.geometry = polygonGeometry(clipTank(false, r));
-  regionBMesh.geometry = polygonGeometry(clipTank(true, r));
 }
 
 // ---------- Barriers & blocks: the wave solver ----------
@@ -517,7 +486,6 @@ function advance(simDt) {
 const maxSolverFrequency = (b) => Math.floor((b.speed / MIN_SOLVER_WAVELENGTH) * 10) / 10;
 function capFrequency(b) { b.frequency = Math.min(b.frequency, maxSolverFrequency(b)); }
 
-
 // Copy the settings into the shader.
 function syncScene() {
   const u = uniforms;
@@ -526,7 +494,6 @@ function syncScene() {
     const sv = ensureSolver();
     const b = state.settings.diffraction;
     if (sv) sv.setMask(RS.buildMask(b.shapes, GRID, maskBuffer, ABSORB_DEPTH));
-    updateBoundaryMeshes();
     return;
   }
   if (state.mode === 'interference') {
@@ -551,7 +518,6 @@ function syncScene() {
     u.uSpeedA.value = r.speed1;
     u.uSpeedB.value = r.speed2;
   }
-  updateBoundaryMeshes();
 }
 
 function applyTheme() {
@@ -566,8 +532,8 @@ function applyTheme() {
   uniforms.uWall.value.copy(c.wall);
   uniforms.uWallEdge.value.copy(c.wallEdge);
   edgeMat.color.set(c.edge);
-  regionAMat.color.set(c.regionA);
-  regionBMat.color.set(c.regionB);
+  uniforms.uRegionA.value.set(c.regionA);
+  uniforms.uRegionB.value.set(c.regionB);
   readCssColors();
 }
 
