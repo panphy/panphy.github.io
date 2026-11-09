@@ -234,9 +234,15 @@ window.DeckFigures.add(P => {
       return svg('40 30 800 440', s, 'Energy level diagram for an alpha decay. The parent nucleus can decay to the ground state of the daughter nucleus, giving an alpha particle of higher energy, or to an excited state, giving an alpha particle of lower energy. The excited daughter then drops to its ground state by emitting a gamma photon whose energy equals the difference');
     },
 
-    // The energies of beta particles from one nuclide: a continuous spread up to a maximum.
+    // The energies of beta-minus particles from one nuclide: a continuous spread up to a maximum.
+    // Allowed beta-minus shape for a 1 MeV decay to a heavy daughter (Z = 84), with the Coulomb
+    // correction: the positive nucleus slows the escaping electrons, so the curve starts well above
+    // zero, peaks at about a quarter of E_max and meets the axis tangentially at E_max.
     'e3-beta-spectrum': () => {
-      const at = t => [110 + 560 * t, 420 - 1900 * t * (1 - t) ** 2.2 * (0.35 + t)];
+      const at = t => {
+        const k = Math.max(t, 1e-4), e = k + 0.511, p = Math.sqrt(e * e - 0.511 ** 2), x = 2 * Math.PI * 84 / 137 * e / p;
+        return [110 + 560 * t, 420 - 147 * x / (1 - Math.exp(-x)) * p * e * (1 - k) ** 2];
+      };
       let s = arrow(110, 420, 110, 40, 'text-secondary', 2.5) + arrow(110, 420, 780, 420, 'text-secondary', 2.5) + text(126, 456, 'kinetic energy', 'lbl mono', 'start') + text(126, 54, 'number of beta particles', 'lbl mono', 'start');
       s += `<path d="${sampled(at, 100)} L110,420 Z" style="fill:var(--electron);opacity:.16"/><path d="${sampled(at, 100)}" class="curve" style="stroke:var(--electron)"/>`;
       s += `<line x1="670" y1="420" x2="670" y2="150" style="stroke:var(--hl);stroke-width:4;stroke-dasharray:10 7"/>` + text(660, 136, 'expected:', 'lbl', 'end') + text(660, 168, 'one energy', 'lbl strong', 'end', 'style="fill:var(--hl-text)"') + text(700, 460, sub('E', 'max'), 'lbl display') + text(150, 120, 'observed:', 'lbl', 'start') + text(150, 152, 'a continuous spread', 'lbl strong', 'start', 'style="fill:var(--electron)"');
