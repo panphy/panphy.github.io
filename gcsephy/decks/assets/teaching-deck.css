@@ -123,10 +123,11 @@ body {
 .progress { height: 4px; }
 .progress span { background: var(--brand-primary); }
 .thumbs { background: var(--nav-bg); border-right: 1px solid var(--nav-border); scrollbar-color: var(--input-border) transparent; }
+.thumb:focus-visible { outline: none; }
 .thumb-num { color: var(--text-secondary); font-family: var(--font-mono); }
 .thumb-frame { border: 2px solid var(--card-border); border-radius: 10px; background: var(--bg-color); }
-.thumb:hover .thumb-frame, .thumb[aria-current="true"] .thumb-frame { border-color: var(--brand-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary) 25%, transparent); }
-.thumb[aria-current="true"] .thumb-num { color: var(--brand-primary); }
+.thumb:hover .thumb-frame, .thumb:is([aria-current="true"], :focus-visible) .thumb-frame { border-color: var(--brand-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary) 25%, transparent); }
+.thumb:is([aria-current="true"], :focus-visible) .thumb-num { color: var(--brand-primary); }
 .thumb-slide { background: var(--bg-color); }
 .deck { border: 1px solid var(--card-border); border-radius: 26px; background: var(--bg-color); box-shadow: var(--soft-shadow); }
 .slide, .slide.dark, .slide.history {
