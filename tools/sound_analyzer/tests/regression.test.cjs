@@ -23,7 +23,8 @@ function loadAnalyzer() {
     window: { addEventListener() {} },
     navigator: {}, localStorage: { getItem: () => null },
     ResizeObserver: class { observe() {} },
-    requestAnimationFrame() {}, console, setTimeout, clearTimeout
+    requestAnimationFrame() {}, console, setTimeout, clearTimeout,
+    alert(message) { throw new Error(message); }
   });
   vm.runInContext(script, context);
   return { run: (code) => vm.runInContext(code, context), element };
@@ -58,24 +59,39 @@ test('Space leaves focused controls and held-key repeats alone', () => {
   assert.equal(app.run('toggleCount'), 1);
 });
 
-test('start, pause and resume preserve snapshots and microphone stream', async () => {
-  const app = loadAnalyzer();
+function mockAudio(app) {
   app.run(`
     var requestCount = 0;
-    var track = { readyState: 'live', addEventListener() {}, stop() { this.readyState = 'ended'; } };
+    var suspendCount = 0;
+    var resumeCount = 0;
+    var contexts = [];
+    var makeStream = () => {
+      const track = { readyState: 'live', addEventListener() {}, stop() { this.readyState = 'ended'; } };
+      return { getAudioTracks: () => [track], getTracks: () => [track] };
+    };
     navigator.mediaDevices = {
-      getUserMedia: async () => { requestCount++; return { getAudioTracks: () => [track], getTracks: () => [track] }; }
+      getUserMedia: async () => { requestCount++; return makeStream(); }
     };
     window.AudioContext = class {
-      constructor() { this.state = 'running'; this.sampleRate = 48000; }
+      constructor() { this.state = 'running'; this.sampleRate = 48000; contexts.push(this); }
       addEventListener() {} removeEventListener() {}
-      createAnalyser() { return { fftSize: 2048, frequencyBinCount: 1024 }; }
-      createMediaStreamSource() { return { connect() {}, disconnect() {} }; }
-      async suspend() { this.state = 'suspended'; }
-      async resume() { this.state = 'running'; }
+      createAnalyser() { return { context: this, fftSize: 2048, frequencyBinCount: 1024 }; }
+      createMediaStreamSource(stream) {
+        return { context: this, stream, connections: [], connect(node) {
+          if (node.context !== this.context) throw new Error('Nodes belong to different contexts');
+          this.connections.push(node);
+        }, disconnect() { this.connections = []; } };
+      }
+      async suspend() { suspendCount++; this.state = 'suspended'; }
+      async resume() { resumeCount++; this.state = 'running'; }
       async close() { this.state = 'closed'; }
     };
   `);
+}
+
+test('start, pause and resume preserve snapshots and live microphone processing', async () => {
+  const app = loadAnalyzer();
+  mockAudio(app);
   await app.run('startSpectrum()');
   assert.equal(app.run('isRunning'), true);
   assert.match(app.element('toggleBtn').innerHTML, /<svg.*aria-hidden="true"/);
@@ -85,12 +101,128 @@ test('start, pause and resume preserve snapshots and microphone stream', async (
   assert.equal(app.element('exportSpectrumBtn').disabled, false);
   assert.equal(app.run('lastFreqFrame[10]'), 200);
   assert.equal(app.run('lastWaveFrame[0]'), 0.5);
+  assert.equal(app.run('audioContext.state'), 'running');
+  assert.equal(app.run('suspendCount'), 0);
   await app.run('toggleRunPause()');
   assert.equal(app.run('isRunning'), true);
   assert.equal(app.run('requestCount'), 1);
+  assert.equal(app.run('source.connections.includes(analyzer) && source.connections.includes(peakAnalyzer)'), true);
   await app.run('resetAudioSession()');
-  assert.equal(app.run('track.readyState'), 'ended');
+  assert.equal(app.run('contexts[0].state'), 'closed');
   assert.equal(app.run('lastWaveFrame'), null);
+});
+
+for (const state of ['interrupted', 'closed']) {
+  test(`resume rebuilds the audio graph after a context is ${state}`, async () => {
+    const app = loadAnalyzer();
+    mockAudio(app);
+    await app.run('startSpectrum()');
+    app.run(`pauseSpectrum(); var oldSource = source; audioContext.state = '${state}';`);
+    await app.run('toggleRunPause()');
+    assert.equal(app.run('isRunning'), true);
+    assert.equal(app.run('contexts.length'), 2);
+    assert.equal(app.run('analyzer !== null && peakAnalyzer !== null && source !== null'), true);
+    assert.equal(app.run('source.context === audioContext'), true);
+    assert.equal(app.run('source.connections.includes(analyzer) && source.connections.includes(peakAnalyzer)'), true);
+    assert.equal(app.run('requestCount'), 1);
+    assert.equal(app.run('oldSource.connections.length'), 0);
+    assert.equal(app.run('contexts[0].state'), 'closed');
+  });
+}
+
+test('resume replaces an ended microphone track', async () => {
+  const app = loadAnalyzer();
+  mockAudio(app);
+  await app.run('startSpectrum()');
+  app.run("pauseSpectrum(); microphoneStream.getAudioTracks()[0].readyState = 'ended';");
+  await app.run('toggleRunPause()');
+  assert.equal(app.run('isRunning'), true);
+  assert.equal(app.run('requestCount'), 2);
+  assert.equal(app.run('source.stream.getAudioTracks()[0].readyState'), 'live');
+});
+
+test('resume unlocks audio in the tap handler and ignores repeated taps while starting', async () => {
+  const app = loadAnalyzer();
+  mockAudio(app);
+  await app.run('startSpectrum()');
+  app.run(`
+    pauseSpectrum(); audioContext.state = 'suspended';
+    var finishResume;
+    audioContext.resume = () => {
+      resumeCount++;
+      return new Promise(resolve => { finishResume = () => { audioContext.state = 'running'; resolve(); }; });
+    };
+  `);
+  const starting = app.run('toggleRunPause()');
+  assert.equal(app.run('resumeCount'), 1);
+  assert.equal(app.run('isStarting'), true);
+  await app.run('toggleRunPause()');
+  assert.equal(app.run('resumeCount'), 1);
+  app.run('finishResume()');
+  await starting;
+  assert.equal(app.run('isRunning'), true);
+  assert.equal(app.run('isStarting'), false);
+  assert.equal(app.element('toggleBtn').disabled, false);
+});
+
+test('a cold start resumes audio before waiting for microphone permission', async () => {
+  const app = loadAnalyzer();
+  mockAudio(app);
+  app.run(`
+    var BaseAudioContext = window.AudioContext;
+    window.AudioContext = class extends BaseAudioContext {
+      constructor() { super(); this.state = 'suspended'; }
+    };
+    navigator.mediaDevices.getUserMedia = async () => {
+      if (resumeCount !== 1) throw new Error('User activation was lost before audio resumed');
+      requestCount++;
+      return makeStream();
+    };
+  `);
+  const starting = app.run('toggleRunPause()');
+  assert.equal(app.run('resumeCount'), 1);
+  await starting;
+  assert.equal(app.run('isRunning'), true);
+  assert.equal(app.run('requestCount'), 1);
+});
+
+test('a blocked resume stays stopped and can be retried', async () => {
+  const app = loadAnalyzer();
+  mockAudio(app);
+  await app.run('startSpectrum()');
+  app.run(`
+    pauseSpectrum(); audioContext.state = 'suspended';
+    var realResume = audioContext.resume;
+    audioContext.resume = () => new Promise(() => {});
+    setTimeout = callback => { callback(); return 0; };
+  `);
+  await app.run('toggleRunPause()');
+  assert.equal(app.run('isRunning'), false);
+  assert.equal(app.run('isStarting'), false);
+  assert.equal(app.element('toggleBtn').disabled, false);
+  assert.equal(app.element('exportSpectrumBtn').disabled, false);
+  app.run('audioContext.resume = realResume');
+  await app.run('toggleRunPause()');
+  assert.equal(app.run('isRunning'), true);
+  assert.equal(app.run('requestCount'), 1);
+});
+
+test('an interruption during microphone permission does not report running', async () => {
+  const app = loadAnalyzer();
+  mockAudio(app);
+  app.run(`
+    navigator.mediaDevices.getUserMedia = async () => {
+      audioContext.state = 'interrupted';
+      return makeStream();
+    };
+  `);
+  await app.run('toggleRunPause()');
+  assert.equal(app.run('isRunning'), false);
+  assert.equal(app.run('isStarting'), false);
+  assert.equal(app.element('toggleBtn').disabled, false);
+  await app.run('toggleRunPause()');
+  assert.equal(app.run('isRunning'), true);
+  assert.equal(app.run('source.context === audioContext'), true);
 });
 
 // The Blackman-windowed spectrum of a steady tone, in decibels, as an AnalyserNode reports it.

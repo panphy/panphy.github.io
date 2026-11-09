@@ -964,6 +964,8 @@
       const state = audioContext.state;
       if (state === 'closed' || state === 'interrupted') {
         try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
+        if (source) { try { source.disconnect(); } catch {} }
+        if (state !== 'closed') audioContext.close().catch(() => {});
         audioContext = null;
         analyzer = null;
         peakAnalyzer = null;
@@ -983,10 +985,15 @@
     if (audioContext.state !== 'running') {
       // Without a user gesture, some browsers (e.g. Brave) leave resume()
       // pending indefinitely, so don't wait on it forever.
-      await Promise.race([
-        audioContext.resume().catch(() => {}),
-        new Promise((resolve) => setTimeout(resolve, AUDIO_RESUME_TIMEOUT_MS))
-      ]);
+      let resumeTimeout;
+      try {
+        await Promise.race([
+          audioContext.resume().catch(() => {}),
+          new Promise((resolve) => { resumeTimeout = setTimeout(resolve, AUDIO_RESUME_TIMEOUT_MS); })
+        ]);
+      } finally {
+        clearTimeout(resumeTimeout);
+      }
     }
     return audioContext.state === 'running';
   }
@@ -1033,6 +1040,9 @@
         throw new Error('This browser does not support microphone access.');
       }
 
+      // Unlock audio directly in the Start/Resume gesture, before awaiting mic permission.
+      await ensureAudioContextRunning();
+
       // Discard the existing stream if its tracks have ended (hub disconnect, etc.)
       if (microphoneStream) {
         const tracks = microphoneStream.getAudioTracks();
@@ -1042,12 +1052,10 @@
       }
 
       const stream = await requestMicrophoneStream();
-      microphoneStream = stream;
 
       // Watch for the track ending (e.g. device unplugged while running)
-      setupTrackEndedListeners(stream);
-
-      const contextRunning = await ensureAudioContextRunning();
+      if (microphoneStream !== stream) setupTrackEndedListeners(stream);
+      microphoneStream = stream;
 
       if (!analyzer) {
         analyzer = audioContext.createAnalyser();
@@ -1069,9 +1077,9 @@
       source.connect(analyzer);
       if (peakAnalyzer) source.connect(peakAnalyzer);
 
-      if (!contextRunning) {
+      if (audioContext.state !== 'running') {
         // Audio is blocked until a user gesture: stay ready so the next
-        // Start (or Space) press resumes the context via the fast path.
+        // Start (or Space) press can retry.
         return;
       }
 
@@ -1147,19 +1155,9 @@
     if (isStarting) return;
     if (isRunning) {
       pauseSpectrum();
-    } else if (analyzer && source && microphoneStream) {
-      // Fast resume: mic stream is still alive, just unpause
-      if (!(await ensureAudioContextRunning())) {
-        alert('Audio is blocked by the browser. Please allow audio/autoplay for this site and tap Start again.');
-        return;
-      }
-      isRunning = true;
-      setAudioButton(toggleBtn, 'Pause', 'pause');
-      exportSpectrumBtn.disabled = true;
-      exportWaveformBtn.disabled = true;
     } else {
-      // Cold start: no mic stream yet
-      startSpectrum();
+      // Reuse a live mic, but validate tracks and rebuild the graph if iOS interrupted it.
+      await startSpectrum();
     }
   }
 
@@ -1172,11 +1170,8 @@
     if (dataArray) lastFreqFrame = dataArray.slice();
     if (timeDomainData) lastWaveFrame = timeDomainData.slice();
 
-    // Suspend the AudioContext to save CPU, but keep the mic stream alive
-    // so resume is instant (no getUserMedia round-trip).
-    if (audioContext && audioContext.state === 'running') {
-      audioContext.suspend();
-    }
+    // Freeze the displayed data while keeping live capture processing. Suspending a
+    // microphone AudioContext can leave Safari/iPadOS capture frozen after resume().
   }
 
   function resetFrequencyZoom() {
