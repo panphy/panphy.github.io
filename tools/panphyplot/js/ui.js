@@ -431,7 +431,7 @@ function loadSampleData() {
 }
 
 // Bounce heights of four balls dropped from 1 m, three readings each.
-const BAR_SAMPLE = [['Tennis', ['54', '57', '55']], ['Golf', ['72', '75', '74']], ['Squash', ['18', '21', '19']], ['Basketball', ['60', '63', '62']]];
+const BAR_SAMPLE = [['Tennis', ['54', '57', '55']], ['Golf', ['73', '75', '74']], ['Squash', ['16', '21', '19']], ['Basketball', ['58', '66', '62']]];
 
 function loadBarSampleData(active) {
 	let sheet = active;
