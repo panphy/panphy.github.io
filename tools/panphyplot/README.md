@@ -47,6 +47,8 @@ A Y column's `style` holds its chosen `color`, `symbol` and `fitColor`; empty me
 
 The choices open in the shared `#neo-menu` panel (`openStylePopover` in `js/ui.js`), from a series' marker in the Series card or the column's ⋯ menu; `applyStyleChange` redraws the graph and the color keys and keeps the panel open. Each trace carries its print colors and chosen shape as `panphyStyle`, which `buildPublicationFigure` reads; shapes not chosen are shared out in order as before.
 
+Scatter legends in the main graph and All sheets show visible data and their fit lines, labeling stale fits as Outdated fit. Hidden and empty series have no legend entries. A lone series without a fit needs no legend. Clicking a data or fit entry hides that series and its fit; restore it from the Series card.
+
 ## Bar charts
 
 Each sheet has a `chartType`, `scatter` or `bar`, chosen in the toolbar. An empty sheet switches in place (`setChartType`). A sheet with data keeps its kind: `setSheetChartType` in `js/ui.js` opens a dialog that adds a blank sheet of the other kind or a copy made by `copySheetAs`, which carries column names and cell values only. On a bar sheet each column is a bar named by its column name, in column order, and rows are repeat readings. `getBars` in `js/model.js` gives each bar's mean and, with two or more readings, its uncertainty (half the spread). The Mean and Uncertainty rows are a table footer drawn by `renderBarSummary` in `js/ui.js` and are never stored, so formulas, row counts and CSV export see readings only; View Table adds a Mean row. The sheet's `valueAxis` (name and unit) and `categoryTitle` label the axes, since a column's own unit has no meaning on a shared value axis. The inspector is hidden by `[data-chart="bar"]` on `.neo-app`.
