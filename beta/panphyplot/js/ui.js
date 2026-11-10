@@ -941,8 +941,8 @@ function renderTableRows(requestedRow = null) {
 		tr.appendChild(document.createElement('td')); fragment.appendChild(tr);
 	}
 	spacer(sheet.rowCount - last);
-	// A bar sheet starts with three rows, so the row for adding another reading is always in view.
-	if (PlotModel.isBarSheet(sheet)) fragment.appendChild(buildAddRow(sheet));
+	// The row under the last one that adds another, like the + column at the right.
+	fragment.appendChild(buildAddRow(sheet));
 	body.replaceChildren(fragment);
 	tableWindow = { sheet, first, last, rowHeight };
 	if (savedFocus && savedFocus.row >= first && savedFocus.row < last) {
@@ -960,14 +960,14 @@ function buildAddRow(sheet) {
 	const button = document.createElement('button');
 	button.type = 'button';
 	button.textContent = '+';
-	button.title = 'Add a row for another reading';
+	button.title = PlotModel.isBarSheet(sheet) ? 'Add a row for another reading' : 'Add a row';
 	button.setAttribute('aria-label', 'Add row');
 	button.addEventListener('click', addRow);
 	head.appendChild(button);
 	const fill = document.createElement('td');
 	fill.className = 'neo-add-row-fill';
 	fill.colSpan = sheet.columns.length + 1;
-	fill.textContent = 'Add a reading';
+	fill.textContent = PlotModel.isBarSheet(sheet) ? 'Add a reading' : 'Add a row';
 	fill.setAttribute('aria-hidden', 'true');
 	fill.addEventListener('click', addRow);
 	tr.append(head, fill);
