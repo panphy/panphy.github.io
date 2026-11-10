@@ -382,3 +382,137 @@ test('a selected range copies as tab-separated rows and fills around calculated 
 	assert.equal(model.fillRange(sheet, { r0: 2, r1: 2, c0: 0, c1: 1 }, ''), 2);
 	assert.deepEqual([sheet.columns[0].cells[2], sheet.columns[1].cells[2]], ['', '']);
 });
+
+/* ---------- Bar charts ---------- */
+
+function barSheet(state, name, columns) {
+	const ids = model.createIdSource(state);
+	const sheet = model.createSheet(ids, name);
+	const rows = Math.max(...columns.map(([, cells]) => cells.length));
+	sheet.columns = columns.map(([label, cells]) => model.createColumn(ids.next('c'), { name: label, cells }, rows));
+	model.setRowCount(sheet, rows);
+	sheet.chartType = 'bar';
+	return sheet;
+}
+
+test('a bar is the mean of its column, with half the spread as its uncertainty', () => {
+	const state = model.createState();
+	const sheet = barSheet(state, '', [['Tennis', ['50', '54', '52']], ['Golf', ['70', '', 'oops']], ['Squash', ['', '', '']], ['', ['1e1', '30']]]);
+	const bars = model.getBars(sheet);
+	assert.deepEqual(bars.map(bar => bar.label), ['Tennis', 'Golf', 'Squash', 'D']);
+	assert.deepEqual(bars.map(bar => bar.count), [3, 1, 0, 2]);
+	assert.deepEqual(bars.map(bar => bar.mean), [52, 70, null, 20]);
+	// One reading has no spread, so it has no uncertainty; an empty column draws no bar.
+	assert.deepEqual(bars.map(bar => bar.uncertainty), [2, null, null, 10]);
+	assert.equal(model.hasBars(sheet), true);
+});
+
+test('switching to a bar chart keeps the data and roles, and trims blank rows down to three', () => {
+	const state = model.createState();
+	const sheet = state.sheets[0];
+	assert.equal(model.setChartType(sheet, 'bar'), true);
+	assert.equal(sheet.rowCount, model.BAR_START_ROWS);
+	// An untouched sheet swaps its x and y headings for unnamed bars, and back.
+	assert.deepEqual(sheet.columns.map(column => column.name), ['', '']);
+	assert.deepEqual(sheet.columns.map(column => column.role), ['X', 'Y']);
+	assert.equal(model.setChartType(sheet, 'bar'), false);
+	model.setChartType(sheet, 'scatter');
+	assert.deepEqual(sheet.columns.map(column => column.name), ['x', 'y']);
+	assert.equal(sheet.rowCount, model.DEFAULT_ROWS);
+
+	sheet.columns[0].cells[4] = '3';
+	sheet.columns[1].name = 'T';
+	sheet.graphView = { xaxis: [0, 1] };
+	model.setChartType(sheet, 'bar');
+	assert.equal(sheet.rowCount, 5);
+	assert.deepEqual(sheet.columns.map(column => column.name), ['x', 'T']);
+	assert.deepEqual(sheet.graphView, {});
+	model.setChartType(sheet, 'scatter');
+	assert.equal(sheet.rowCount, model.DEFAULT_ROWS);
+	assert.equal(sheet.columns[0].cells[4], '3');
+	assert.deepEqual(sheet.columns.map(column => column.role), ['X', 'Y']);
+});
+
+test('bar settings survive saving, and malformed ones are repaired', () => {
+	const state = model.createState();
+	Object.assign(state.sheets[0], { chartType: 'bar', valueAxis: { name: 'Rainfall', unit: 'mm' }, categoryTitle: 'Month', errorBars: true });
+	state.combinedGroupBy = 'sheets';
+	const loaded = model.normalizeState(JSON.parse(JSON.stringify(state)));
+	assert.equal(loaded.sheets[0].chartType, 'bar');
+	assert.deepEqual(loaded.sheets[0].valueAxis, { name: 'Rainfall', unit: 'mm' });
+	assert.equal(loaded.sheets[0].categoryTitle, 'Month');
+	assert.equal(loaded.sheets[0].errorBars, true);
+	assert.equal(loaded.combinedGroupBy, 'sheets');
+	const repaired = model.normalizeState({ sheets: [{ columns: [], chartType: 'pie', valueAxis: 3, errorBars: 'yes' }], combinedGroupBy: 'rows' });
+	assert.equal(repaired.sheets[0].chartType, 'scatter');
+	assert.deepEqual(repaired.sheets[0].valueAxis, { name: '', unit: '' });
+	assert.equal(repaired.sheets[0].errorBars, false);
+	assert.equal(repaired.combinedGroupBy, 'columns');
+});
+
+test('clearing or resetting a bar sheet leaves a bar sheet with three rows', () => {
+	const state = model.createState();
+	const sheet = barSheet(state, 'Balls', [['Tennis', ['50', '54', '52', '51', '53']]]);
+	sheet.valueAxis = { name: 'Height', unit: 'cm' };
+	model.clearSheetData(sheet);
+	assert.equal(sheet.rowCount, 3);
+	assert.equal(sheet.columns[0].name, 'Tennis');
+	assert.equal(sheet.valueAxis.name, 'Height');
+	model.resetSheet(sheet, model.createIdSource(state));
+	assert.equal(sheet.chartType, 'bar');
+	assert.equal(sheet.rowCount, 3);
+	assert.deepEqual(sheet.columns.map(column => column.name), ['', '']);
+	assert.deepEqual(sheet.valueAxis, { name: '', unit: '' });
+});
+
+test('All sheets is a scatter graph or a bar chart, and never a mix', () => {
+	const state = model.createState();
+	const blank = state.sheets[0];
+	const scatter = model.createSheet(model.createIdSource(state), 'S');
+	scatter.columns[0].cells[0] = '1';
+	const bar = barSheet(state, 'B', [['a', ['1']]]);
+	assert.equal(model.getCombinedMode([blank]), 'scatter');
+	assert.equal(model.getCombinedMode([blank, scatter]), 'scatter');
+	// A blank sheet does not count, whichever kind it is.
+	assert.equal(model.getCombinedMode([blank, bar]), 'bar');
+	assert.equal(model.getCombinedMode([scatter, bar]), 'mixed');
+	blank.chartType = 'bar';
+	assert.equal(model.getCombinedMode([blank]), 'bar');
+});
+
+test('All sheets matches bars by name across sheets', () => {
+	const state = model.createState();
+	const first = barSheet(state, '2023', [['Jan', ['10', '14']], ['Feb', ['20']], ['', ['5']]]);
+	const second = barSheet(state, '2024', [[' feb ', ['30']], ['JAN', ['40']], ['Mar', ['50']], ['Apr', ['']]]);
+	const third = barSheet(state, 'empty', [['Jan', ['']]]);
+	const scatter = model.createSheet(model.createIdSource(state), 'S');
+	scatter.columns[0].cells[0] = '1';
+	const grid = model.getCombinedBars([first, second, third, scatter]);
+	// The first sheet sets the order; names only in later sheets follow. Unnamed bars match by letter.
+	assert.deepEqual(grid.columns.map(column => column.label), ['Jan', 'Feb', 'C', 'Mar']);
+	assert.deepEqual(grid.sheets.map(sheet => sheet.name), ['2023', '2024']);
+	assert.deepEqual(grid.cells.map(row => row.map(bar => (bar ? bar.mean : null))), [[12, 20, 5, null], [40, 30, null, 50]]);
+	assert.equal(grid.cells[0][0].uncertainty, 2);
+});
+
+test('a repeated bar name matches by its order of appearance', () => {
+	const state = model.createState();
+	const first = barSheet(state, 'A', [['Run', ['1']], ['Run', ['2']]]);
+	const second = barSheet(state, 'B', [['Run', ['3']], ['Run', ['4']]]);
+	const grid = model.getCombinedBars([first, second]);
+	assert.deepEqual(grid.columns.map(column => column.label), ['Run', 'Run']);
+	assert.deepEqual(grid.cells.map(row => row.map(bar => bar.mean)), [[1, 2], [3, 4]]);
+});
+
+test('a bar sheet exports and imports names without units', () => {
+	const state = model.createState();
+	const sheet = barSheet(state, '', [['Tennis / fuzzy', ['50', '54']], ['Golf', ['70', '']]]);
+	sheet.columns[0].unit = 'cm';
+	assert.equal(model.buildCsv(sheet), 'Tennis / fuzzy,Golf\r\n50,70\r\n54,\r\n');
+	const target = model.createSheet(model.createIdSource(state), '');
+	model.importRows(target, model.parseCsv(model.buildCsv(sheet)), { headers: true, roles: [], bar: true }, model.createIdSource(state));
+	assert.equal(target.chartType, 'bar');
+	assert.equal(target.rowCount, 3);
+	assert.deepEqual(target.columns.map(column => [column.name, column.unit]), [['Tennis / fuzzy', ''], ['Golf', '']]);
+	assert.deepEqual(model.getBars(target).map(bar => bar.mean), [52, 70]);
+});

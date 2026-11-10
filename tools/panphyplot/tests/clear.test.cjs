@@ -23,7 +23,7 @@ for (const reset of [false, true]) {
 			stores.forEach(store => { store[key] = { value: 'old' }; store['other:series'] = { value: 'keep' }; });
 			let parameterResets = 0;
 			clearAdvancedFitParameters = () => { parameterResets += 1; };
-			closeDialog = renderSheetTabs = renderTable = syncTitleInput = showToast = () => {};
+			closeDialog = renderSheetTabs = applyChartMode = renderTable = syncTitleInput = showToast = () => {};
 			afterDataChange = () => refreshActiveFitKey();
 		`, context);
 		context.applyClear(reset);
@@ -44,7 +44,7 @@ test('an empty sheet with changed dimensions can reset to the default rows and c
 	}
 	vm.runInContext(`
 		const sheet = getActiveSheet();
-		closeDialog = renderSheetTabs = renderTable = syncTitleInput = showToast = clearAdvancedFitParameters = () => {};
+		closeDialog = renderSheetTabs = applyChartMode = renderTable = syncTitleInput = showToast = clearAdvancedFitParameters = () => {};
 		afterDataChange = () => refreshActiveFitKey();
 	`, context);
 	for (const rows of [1, 25, 250]) {

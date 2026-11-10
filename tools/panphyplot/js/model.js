@@ -4,6 +4,12 @@
 	const ROLES = ['X', 'Y', 'xErr', 'yErr', 'none'];
 	const ERROR_TYPES = ['absolute', 'percentage'];
 	const DEFAULT_ROWS = 10;
+	// A sheet draws a scatter graph from column roles, or a bar chart with one bar per column.
+	const CHART_TYPES = ['scatter', 'bar'];
+	// A bar sheet starts with room for three repeat readings.
+	const BAR_START_ROWS = 3;
+	// The All sheets bar chart groups its bars by column name or by sheet.
+	const GROUP_MODES = ['columns', 'sheets'];
 	// Column widths in pixels; null means the default width.
 	const COLUMN_WIDTH_MIN = 72;
 	const COLUMN_WIDTH_MAX = 420;
@@ -91,7 +97,11 @@
 			title: { text: '', automatic: true },
 			fitSeries: null,
 			graphView: {},
-			hiddenSeries: []
+			hiddenSeries: [],
+			chartType: 'scatter',
+			valueAxis: { name: '', unit: '' },
+			categoryTitle: '',
+			errorBars: false
 		};
 	}
 
@@ -106,7 +116,7 @@
 	}
 
 	function createState() {
-		const state = { version: 1, nextId: 0, activeSheet: 0, latexMode: false, equationDecimals: EQUATION_DECIMALS_DEFAULT, sheets: [], fits: {}, curves: {}, customFits: {}, extents: {} };
+		const state = { version: 1, nextId: 0, activeSheet: 0, latexMode: false, equationDecimals: EQUATION_DECIMALS_DEFAULT, combinedGroupBy: 'columns', sheets: [], fits: {}, curves: {}, customFits: {}, extents: {} };
 		state.sheets.push(createSheet(createIdSource(state), ''));
 		return state;
 	}
@@ -199,16 +209,131 @@
 		return cleanUnit ? `${cleanName}\\ /\\ \\mathrm{${formatUnitForLatex(cleanUnit)}}` : cleanName;
 	}
 
+	/* ---------- Bar charts ---------- */
+
+	function isBarSheet(sheet) {
+		return sheet?.chartType === 'bar';
+	}
+
+	function isDefaultColumns(sheet, names) {
+		return sheet.columns.length === 2 && sheet.columns[0].role === 'X' && sheet.columns[1].role === 'Y'
+			&& sheet.columns.every((column, index) => column.name === names[index] && !column.unit && !column.formula);
+	}
+
+	// Switching keeps every cell, role, formula and fit, so switching back restores the other graph.
+	// A bar sheet drops its blank rows at the end, down to three; an untouched new sheet swaps
+	// its x and y headings for unnamed bars, and back.
+	function setChartType(sheet, type) {
+		const next = CHART_TYPES.includes(type) ? type : 'scatter';
+		if ((sheet.chartType || 'scatter') === next) return false;
+		const empty = isSheetEmpty(sheet);
+		sheet.chartType = next;
+		sheet.graphView = {};
+		if (next === 'bar') {
+			if (empty && isDefaultColumns(sheet, ['x', 'y'])) sheet.columns.forEach((column) => { column.name = ''; });
+			let last = -1;
+			sheet.columns.forEach((column) => {
+				column.cells.forEach((value, row) => { if (!isBlank(value) && row > last) last = row; });
+			});
+			setRowCount(sheet, Math.max(BAR_START_ROWS, last + 1));
+		} else {
+			if (empty && isDefaultColumns(sheet, ['', ''])) {
+				sheet.columns[0].name = 'x';
+				sheet.columns[1].name = 'y';
+			}
+			// Back as a scatter sheet, it has at least a new sheet's rows again.
+			setRowCount(sheet, Math.max(sheet.rowCount, DEFAULT_ROWS));
+		}
+		return true;
+	}
+
+	// One bar per column, in column order. Its height is the mean of the column's numbers; blank
+	// and invalid cells are left out, as mean() leaves them out of a formula. With two or more
+	// readings the uncertainty is half the spread between the largest and the smallest.
+	function getBars(sheet) {
+		return sheet.columns.map((column) => {
+			const values = [];
+			for (let row = 0; row < sheet.rowCount; row++) {
+				const number = parseNumber(column.cells[row]);
+				if (Number.isFinite(number)) values.push(number);
+			}
+			const count = values.length;
+			return {
+				id: column.id,
+				column,
+				label: getColumnLabel(sheet, column),
+				count,
+				mean: count ? values.reduce((sum, value) => sum + value, 0) / count : null,
+				uncertainty: count > 1 ? (Math.max(...values) - Math.min(...values)) / 2 : null
+			};
+		});
+	}
+
+	function hasBars(sheet) {
+		return getBars(sheet).some(bar => bar.mean !== null);
+	}
+
+	// What All sheets can draw: 'scatter' or 'bar' when every sheet with data is of that kind,
+	// 'mixed' otherwise. Sheets without data do not count, so a spare blank sheet never blocks it.
+	function getCombinedMode(sheets) {
+		const withData = sheets.filter(sheet => !isSheetEmpty(sheet));
+		const kinds = new Set((withData.length ? withData : sheets).map(sheet => (isBarSheet(sheet) ? 'bar' : 'scatter')));
+		return kinds.size > 1 ? 'mixed' : (kinds.values().next().value || 'scatter');
+	}
+
+	// Bars of the same name belong together across sheets. Names match without regard to case or
+	// outer spaces; a repeated name within one sheet matches by its order of appearance.
+	function barMatchKeys(sheet) {
+		const seen = new Map();
+		return getBars(sheet).map((bar) => {
+			const base = bar.label.trim().toLowerCase();
+			const turn = (seen.get(base) || 0) + 1;
+			seen.set(base, turn);
+			return { bar, key: turn > 1 ? `${base}\u0000${turn}` : base };
+		});
+	}
+
+	// The All sheets bar chart as a grid: columns[i] and sheets[j] name the two directions, and
+	// cells[j][i] holds sheet j's bar for column i, or null where that sheet has no such bar.
+	// The first sheet sets the column order; names found only in later sheets follow.
+	function getCombinedBars(sheets) {
+		const columns = [];
+		const index = new Map();
+		const rows = sheets.filter(sheet => isBarSheet(sheet) && hasBars(sheet)).map((sheet) => {
+			const bars = new Map();
+			barMatchKeys(sheet).forEach(({ bar, key }) => {
+				if (bar.mean === null) return;
+				if (!index.has(key)) {
+					index.set(key, columns.length);
+					columns.push({ key, label: bar.label });
+				}
+				bars.set(key, bar);
+			});
+			return { sheet, bars };
+		});
+		return {
+			columns,
+			sheets: rows.map(row => row.sheet),
+			cells: rows.map(row => columns.map(column => row.bars.get(column.key) || null))
+		};
+	}
+
 	// Empties every cell but keeps the columns: names, units, roles and formulas.
 	function clearSheetData(sheet) {
 		sheet.columns.forEach((column) => { column.cells = column.cells.map(() => ''); });
-		setRowCount(sheet, DEFAULT_ROWS);
+		setRowCount(sheet, isBarSheet(sheet) ? BAR_START_ROWS : DEFAULT_ROWS);
 		sheet.graphView = {};
 	}
 
-	// Back to a new sheet: two columns, x (X) and y (Y), and no name. Only the sheet's id is kept.
+	// Back to a new sheet: two columns, x (X) and y (Y), and no name. Only the sheet's id is kept,
+	// and a bar sheet stays a bar sheet: two unnamed bars and three rows.
 	function resetSheet(sheet, ids) {
 		const fresh = createSheet(ids, '');
+		if (isBarSheet(sheet)) setChartType(fresh, 'bar');
+		sheet.chartType = fresh.chartType;
+		sheet.valueAxis = fresh.valueAxis;
+		sheet.categoryTitle = fresh.categoryTitle;
+		sheet.errorBars = fresh.errorBars;
 		sheet.name = fresh.name;
 		sheet.rowCount = fresh.rowCount;
 		sheet.columns = fresh.columns;
@@ -408,6 +533,7 @@
 			extents: saved.extents && typeof saved.extents === 'object' ? saved.extents : {},
 			weightFits: saved.weightFits === true,
 			showResiduals: saved.showResiduals === true,
+			combinedGroupBy: GROUP_MODES.includes(saved.combinedGroupBy) ? saved.combinedGroupBy : 'columns',
 			equationDecimals: Number.isInteger(saved.equationDecimals)
 				? Math.min(Math.max(saved.equationDecimals, 0), EQUATION_DECIMALS_MAX)
 				: EQUATION_DECIMALS_DEFAULT
@@ -437,7 +563,14 @@
 				},
 				fitSeries: typeof savedSheet.fitSeries === 'string' ? savedSheet.fitSeries : null,
 				graphView: normalizeGraphView(savedSheet.graphView),
-				hiddenSeries: Array.isArray(savedSheet.hiddenSeries) ? savedSheet.hiddenSeries.filter(id => typeof id === 'string') : []
+				hiddenSeries: Array.isArray(savedSheet.hiddenSeries) ? savedSheet.hiddenSeries.filter(id => typeof id === 'string') : [],
+				chartType: CHART_TYPES.includes(savedSheet.chartType) ? savedSheet.chartType : 'scatter',
+				valueAxis: {
+					name: typeof savedSheet.valueAxis?.name === 'string' ? savedSheet.valueAxis.name.slice(0, NAME_MAX_LENGTH) : '',
+					unit: typeof savedSheet.valueAxis?.unit === 'string' ? savedSheet.valueAxis.unit.slice(0, NAME_MAX_LENGTH) : ''
+				},
+				categoryTitle: typeof savedSheet.categoryTitle === 'string' ? savedSheet.categoryTitle.slice(0, NAME_MAX_LENGTH) : '',
+				errorBars: savedSheet.errorBars === true
 			};
 			setRowCount(sheet, sheet.rowCount);
 			state.sheets.push(sheet);
@@ -884,7 +1017,8 @@
 		sheet.columns.forEach((column) => {
 			column.cells.forEach((value, row) => { if (!isBlank(value) && row > lastRow) lastRow = row; });
 		});
-		const lines = [sheet.columns.map(column => escapeCsvCell(formatAxisLabel(getColumnLabel(sheet, column), column.unit)))];
+		// A bar sheet's columns have no units of their own: the value axis carries the unit.
+		const lines = [sheet.columns.map(column => escapeCsvCell(formatAxisLabel(getColumnLabel(sheet, column), isBarSheet(sheet) ? '' : column.unit)))];
 		for (let row = 0; row <= lastRow; row++) {
 			lines.push(sheet.columns.map(column => escapeCsvCell(column.cells[row] ?? '')));
 		}
@@ -924,12 +1058,14 @@
 		const width = Math.max(0, ...rows.map(row => row.length));
 		const headers = options.headers ? rows[0] || [] : [];
 		const data = options.headers ? rows.slice(1) : rows;
-		const rowCount = Math.max(DEFAULT_ROWS, data.length + 1);
+		// A bar sheet takes each column as a bar: the whole heading is its name, and no row is spare.
+		const bar = options.bar === true;
+		const rowCount = bar ? Math.max(BAR_START_ROWS, data.length) : Math.max(DEFAULT_ROWS, data.length + 1);
 		sheet.columns = Array.from({ length: width }, (_, index) => {
-			const { name, unit } = splitHeader(headers[index] || '');
-			const role = options.roles[index] || { role: 'Y', errorType: 'absolute' };
+			const { name, unit } = bar ? { name: String(headers[index] || '').trim(), unit: '' } : splitHeader(headers[index] || '');
+			const role = options.roles[index] || { role: index === 0 && bar ? 'X' : 'Y', errorType: 'absolute' };
 			return createColumn(ids.next('c'), {
-				name: name || (index === 0 ? 'x' : ''),
+				name: (name || (index === 0 && !bar ? 'x' : '')).slice(0, NAME_MAX_LENGTH),
 				unit,
 				role: role.role,
 				errorType: role.errorType,
@@ -940,11 +1076,22 @@
 		setRowCount(sheet, rowCount);
 		sheet.fitSeries = null;
 		sheet.hiddenSeries = [];
+		sheet.graphView = {};
+		if (bar) sheet.chartType = 'bar';
 		return sheet;
 	}
 
 	const api = {
 		ROLES,
+		CHART_TYPES,
+		BAR_START_ROWS,
+		GROUP_MODES,
+		isBarSheet,
+		setChartType,
+		getBars,
+		hasBars,
+		getCombinedMode,
+		getCombinedBars,
 		DEFAULT_ROWS,
 		COLUMN_WIDTH_MIN,
 		COLUMN_WIDTH_MAX,

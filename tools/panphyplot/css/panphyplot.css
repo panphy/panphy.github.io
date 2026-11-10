@@ -3117,3 +3117,234 @@ input[type="number"]:focus {
 h1.neo-wordmark {
   margin: 0;
 }
+
+/* ---------- Bar charts ---------- */
+
+/* The Scatter and Bar choice, and the grouping choice in the All sheets window. */
+.neo-segment {
+	display: inline-flex;
+	flex: none;
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+}
+
+.neo-segment .neo-tool {
+	min-height: 32px;
+	padding: 4px 10px;
+}
+
+.neo-segment .neo-tool[aria-pressed="true"] {
+	background: var(--accent-soft);
+	color: var(--accent);
+	border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.neo-segment .neo-tool[aria-pressed="false"] .neo-icon {
+	color: var(--ink-3);
+}
+
+.neo-tool[aria-disabled="true"] {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.neo-tool[aria-disabled="true"]:hover {
+	background: none;
+}
+
+/* A bar sheet has no roles, series or fits: the data and the graph share the workspace. */
+.neo-app[data-chart="bar"] .neo-pane-inspector,
+.neo-app[data-chart="bar"] #divider-inspector,
+.neo-app[data-chart="bar"] .neo-residuals {
+	display: none;
+}
+
+/* A maximized section keeps its own single-column layout (see Maximized section). */
+@media (min-width: 1280px) {
+	.neo-app[data-chart="bar"]:not([data-maximized]) .neo-workspace {
+		grid-template-columns: minmax(300px, var(--data-fr, 1fr)) 12px minmax(420px, var(--rest-fr, 1.6fr));
+	}
+}
+
+@media (min-width: 1000px) and (max-width: 1279px) {
+	.neo-app[data-chart="bar"]:not([data-maximized]) .neo-pane-graph {
+		flex: 1;
+		height: auto;
+		min-height: 420px;
+	}
+}
+
+/* The value axis, the bars axis and the error bars switch, between the pane's head and its table. */
+.neo-bar-settings {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 8px 12px;
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--line);
+	background: var(--surface-2);
+}
+
+.neo-bar-settings[hidden],
+.neo-hint[hidden],
+.neo-check[hidden],
+.neo-dialog-pair > div[hidden],
+.neo-csv-unit[hidden],
+.neo-role-select[hidden],
+.control-row-horizontal[hidden] {
+	display: none;
+}
+
+.neo-bar-field {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	flex: 1 1 130px;
+	min-width: 0;
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--ink-2);
+}
+
+.neo-bar-field-unit {
+	flex: 0 1 84px;
+}
+
+.neo-bar-field input {
+	width: 100%;
+	min-height: 36px;
+	padding: 5px 9px;
+	font-size: 0.88rem;
+}
+
+.neo-bar-settings .neo-switch {
+	flex: none;
+	min-height: 36px;
+}
+
+.neo-col-head.role-bar {
+	--series-color: var(--brand);
+}
+
+.neo-col-spacer {
+	flex: 1;
+}
+
+/* The Mean row (and the Uncertainty row) stay in view under the readings. */
+.neo-table tfoot {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
+}
+
+.neo-table tfoot th,
+.neo-table tfoot td {
+	border-top: 2px solid var(--accent);
+	background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;
+}
+
+.neo-table tfoot tr + tr th,
+.neo-table tfoot tr + tr td {
+	border-top: none;
+}
+
+.neo-table tfoot .neo-summary-head {
+	width: auto;
+	padding: 0 8px;
+	font-family: var(--font-body);
+	font-size: 0.74rem;
+	font-weight: 700;
+	color: var(--accent);
+	text-align: left;
+	white-space: nowrap;
+}
+
+.neo-summary-cell {
+	text-align: right;
+	height: 36px;
+	padding: 0 9px !important;
+	font-family: var(--font-mono);
+	font-size: 0.86rem;
+	font-weight: 600;
+	color: var(--ink);
+	white-space: nowrap;
+}
+
+.neo-summary-uncertainty .neo-summary-cell {
+	font-weight: 500;
+	color: var(--ink-2);
+}
+
+/* The row under the last one that adds another, like the + column at the right. */
+.neo-table .neo-add-row th,
+.neo-table .neo-add-row td {
+	background: var(--surface) !important;
+}
+
+.neo-table .neo-add-row .neo-row-head button {
+	width: 28px;
+	height: 28px;
+	min-height: 28px;
+	margin: 4px auto;
+	display: block;
+	border-radius: 50%;
+	border: 1px dashed var(--line-strong);
+	color: var(--ink-2);
+	font-family: var(--font-body);
+	font-size: 1.05rem;
+	line-height: 1;
+}
+
+.neo-table .neo-add-row .neo-row-head button:hover {
+	border-style: solid;
+	border-color: var(--accent);
+	color: var(--accent);
+	background: var(--accent-soft);
+}
+
+.neo-add-row-fill {
+	padding: 0 10px !important;
+	font-size: 0.78rem;
+	color: var(--ink-3);
+	cursor: pointer;
+}
+
+.neo-empty-art-bar,
+.neo-app[data-chart="bar"] .neo-empty-art-scatter {
+	display: none;
+}
+
+.neo-app[data-chart="bar"] .neo-empty-art-bar {
+	display: block;
+}
+
+.neo-empty-art-bar rect {
+	fill: color-mix(in srgb, var(--accent) 30%, transparent);
+	stroke: var(--accent);
+	stroke-width: 1.5;
+}
+
+#combined-group-row {
+	grid-column: 1 / -1;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--ink-2);
+}
+
+@media (pointer: coarse) {
+	.neo-segment .neo-tool {
+		min-height: 40px;
+	}
+
+	.neo-bar-field input,
+	.neo-summary-cell {
+		min-height: 44px;
+		height: 44px;
+	}
+}

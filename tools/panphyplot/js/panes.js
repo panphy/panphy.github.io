@@ -249,6 +249,8 @@ function initializePaneDividers() {
 		window.matchMedia(query).addEventListener('change', apply);
 	});
 	window.addEventListener('resize', debounce(apply, 80));
+	// A bar sheet hides the inspector, so the shares are worked out again when the kind of graph changes.
+	window.refreshPaneLayout = apply;
 	apply();
 }
 

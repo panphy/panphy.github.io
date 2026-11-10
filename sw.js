@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-10T08:25:42Z';
+const BUILD_ID = '2026-11-10T12:32:38Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -108,6 +108,12 @@ const ASSETS_TO_CACHE = [
   '/tools/panphyplot/manual.html',
   '/tools/panphyplot/manual/manual.css',
   '/tools/panphyplot/manual/manual.js',
+  '/tools/panphyplot/manual/bar-compare-dark.webp',
+  '/tools/panphyplot/manual/bar-compare-light.webp',
+  '/tools/panphyplot/manual/bar-data-dark.webp',
+  '/tools/panphyplot/manual/bar-data-light.webp',
+  '/tools/panphyplot/manual/bar-workspace-dark.webp',
+  '/tools/panphyplot/manual/bar-workspace-light.webp',
   '/tools/panphyplot/manual/clear-dark.webp',
   '/tools/panphyplot/manual/clear-light.webp',
   '/tools/panphyplot/manual/columns-dark.webp',
