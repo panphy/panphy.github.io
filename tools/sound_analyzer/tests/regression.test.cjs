@@ -14,6 +14,7 @@ function loadAnalyzer() {
     if (!elements.has(id)) elements.set(id, {
       textContent: '', disabled: false, style: {}, value: '', classList: { toggle() {} },
       getContext: () => ({}), addEventListener() {}, removeAttribute() {},
+      setAttribute(name, value) { this[name] = value; },
       getBoundingClientRect: () => ({ width: 900, height: 300 })
     });
     return elements.get(id);
@@ -272,4 +273,42 @@ test('multiples of the peak stop at the count and at the highest frequency shown
   assert.deepEqual(JSON.parse(app.run('JSON.stringify(harmonicMultiples(9000, 24000, 5))')),
     [{ n: 1, frequency: 9000 }, { n: 2, frequency: 18000 }]);
   assert.equal(app.run('harmonicMultiples(0, 24000).length'), 0);
+});
+
+test('spectrum range fits the sound and ticks fall on round frequencies', () => {
+  const app = loadAnalyzer();
+  const binWidth = 48000 / 2048;
+  // A note at about 300 Hz with harmonics up to about 900 Hz, over a quiet floor.
+  app.run('var levels = new Uint8Array(1024).fill(10); levels[13] = 170; levels[26] = 120; levels[38] = 90;');
+  const end = app.run(`autoSpectrumEndFrequency(levels, ${binWidth}, 24000)`);
+  assert.equal(end, 1200);
+  assert.equal(app.run(`autoSpectrumEndFrequency(new Uint8Array(1024), ${binWidth}, 24000)`), null);
+  assert.equal(app.run(`autoSpectrumEndFrequency(levels.map((v, i) => i === 2 ? 200 : 0), ${binWidth}, 24000)`), 500);
+  assert.deepEqual([...app.run('frequencyTicks(0, 1200, 5)')], [0, 250, 500, 750, 1000]);
+  assert.equal(app.run('formatFrequencyTick(2500)'), '2.5 kHz');
+  assert.equal(app.run('formatFrequencyTick(250)'), '250 Hz');
+});
+
+test('auto range widens at once and narrows only after a delay', () => {
+  const app = loadAnalyzer();
+  app.run('sampleRate = 48000; dataArray = new Uint8Array(1024);');
+  app.run('dataArray[100] = 200; updateAutoRange(0);');
+  assert.equal(app.run('autoRangeEndFrequency'), 3000);
+  app.run('dataArray[100] = 0; dataArray[13] = 200; updateAutoRange(100); updateAutoRange(1000);');
+  assert.equal(app.run('autoRangeEndFrequency'), 3000);
+  app.run('updateAutoRange(1700);');
+  assert.equal(app.run('autoRangeEndFrequency'), 500);
+});
+
+test('Full range shows every bin and turning it off returns to the fitted range', () => {
+  const app = loadAnalyzer();
+  app.run('sampleRate = 48000; analyzer = { frequencyBinCount: 1024 }; autoRangeEndFrequency = 1200;');
+  assert.equal(app.run('getFrequencyZoomRange().endIndex'), 52);
+  app.run('setFullRange(true)');
+  assert.equal(app.run('getFrequencyZoomRange().endIndex'), 1023);
+  assert.equal(app.element('fullRangeBtn')['aria-pressed'], 'true');
+  app.run('setFrequencyZoom(5, 30)');
+  assert.equal(app.run('getFrequencyZoomRange().endIndex'), 30);
+  app.run('resetFrequencyZoom(); setFullRange(false)');
+  assert.equal(app.run('getFrequencyZoomRange().endIndex'), 52);
 });

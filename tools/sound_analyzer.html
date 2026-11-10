@@ -165,11 +165,21 @@
       position: relative;
     }
 
-    .spectrum-reset {
+    .spectrum-actions {
       position: absolute;
       top: 8px;
       right: 12px;
-      padding: 6px 14px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    /* A compact pill over the plot; the ::before area keeps a 48px touch target. */
+    .spectrum-reset {
+      position: relative;
+      min-height: 0;
+      height: 30px;
+      padding: 0 12px;
       font-size: 0.72rem;
       font-weight: 500;
       font-family: var(--font-sans);
@@ -180,13 +190,23 @@
       cursor: pointer;
       box-shadow: none;
       transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 2;
+    }
+
+    .spectrum-reset::before {
+      content: '';
+      position: absolute;
+      inset: -9px -4px;
     }
 
     .spectrum-reset.is-hidden {
-      visibility: hidden;
-      opacity: 0;
-      pointer-events: none;
+      display: none;
+    }
+
+    .spectrum-reset[aria-pressed="true"],
+    .spectrum-reset[aria-pressed="true"]:hover {
+      border-color: var(--brand-accent);
+      background: var(--brand-accent);
+      color: var(--accent-ink);
     }
 
     .spectrum-reset:hover {
@@ -549,11 +569,14 @@
     <details class="simulation-area" id="spectrum-panel" open>
       <summary>Spectrum</summary>
       <div id="visualizer-container" class="panel-body">
-        <button id="resetZoomBtn" class="spectrum-reset is-hidden" type="button"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>Reset zoom</span></button>
+        <div class="spectrum-actions">
+          <button id="resetZoomBtn" class="spectrum-reset is-hidden" type="button"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>Reset zoom</span></button>
+          <button id="fullRangeBtn" class="spectrum-reset" type="button" aria-pressed="false" title="Show every frequency up to half the sample rate instead of fitting the axis to the sound"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg><span>Full range</span></button>
+        </div>
         <canvas id="visualizer" width="800" height="200"></canvas>
         <div id="tooltip"></div>
       </div>
-    <p class="plot-hint">Drag across the spectrum to zoom into a frequency range.</p>
+    <p class="plot-hint">The frequency axis fits the sound unless Full range is on. Drag across the spectrum to zoom into a frequency range.</p>
     </details>
 
     <!-- Oscilloscope Panel -->
@@ -725,6 +748,7 @@
   const timeDeltaDisplay = document.getElementById('time-delta-value');
   const spectrumPanel = document.getElementById('spectrum-panel');
   const resetZoomBtn = document.getElementById('resetZoomBtn');
+  const fullRangeBtn = document.getElementById('fullRangeBtn');
 
   const toggleBtn = document.getElementById('toggleBtn');
   const exportSpectrumBtn = document.getElementById('exportSpectrumBtn');
@@ -758,6 +782,17 @@
   let freqCanvasSize = { width: 0, height: 0 };
   let waveCanvasSize = { width: 0, height: 0 };
   let freqZoomRange = null;
+  // Without a drag zoom, the spectrum runs from 0 Hz to just past the highest frequency in the sound.
+  // It widens at once but narrows only after the sound has stayed narrower for a while.
+  const AUTO_RANGE_MIN_FREQUENCY = 500;
+  const AUTO_RANGE_LEVEL_DROP = 90; // byte levels below the strongest bin (about 32 dB)
+  const AUTO_RANGE_MIN_LEVEL = 30;
+  const AUTO_RANGE_HEADROOM = 1.15;
+  const AUTO_RANGE_SHRINK_DELAY_MS = 1500;
+  let autoRangeEndFrequency = null;
+  let autoRangeShrinkSince = null;
+  const FULL_RANGE_KEY = 'sound-analyzer-full-range';
+  let showFullRange = false;
   let isSelectingFreq = false;
   let freqSelectStartX = 0;
   let freqSelectCurrentX = 0;
@@ -922,6 +957,16 @@
     xScaleValue.textContent = formatScale(waveTimeScale);
   });
   resetZoomBtn.addEventListener('click', resetFrequencyZoom);
+
+  function setFullRange(on) {
+    showFullRange = on;
+    fullRangeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  try { setFullRange(localStorage.getItem(FULL_RANGE_KEY) === 'true'); } catch {}
+  fullRangeBtn.addEventListener('click', () => {
+    setFullRange(!showFullRange);
+    try { localStorage.setItem(FULL_RANGE_KEY, showFullRange); } catch {}
+  });
 
   // ------------------ Audio Recovery Helpers ------------------
 
@@ -1137,6 +1182,8 @@
     peakFreqDisplay.textContent = '-- Hz';
     peakMultiplesDisplay.textContent = '--';
     timeDeltaDisplay.textContent = '-- ms';
+    autoRangeEndFrequency = null;
+    autoRangeShrinkSince = null;
     resetFrequencyZoom();
   }
 
@@ -1197,11 +1244,53 @@
     updateResetZoomButton();
   }
 
+  // A tidy upper limit just above the highest bin within reach of the strongest one, or null in silence.
+  function autoSpectrumEndFrequency(levels, binWidth, maxFrequency) {
+    if (!levels || !(binWidth > 0)) return null;
+    let peakLevel = 0;
+    for (let i = 1; i < levels.length; i++) if (levels[i] > peakLevel) peakLevel = levels[i];
+    if (peakLevel < AUTO_RANGE_MIN_LEVEL) return null;
+    const threshold = Math.max(AUTO_RANGE_MIN_LEVEL, peakLevel - AUTO_RANGE_LEVEL_DROP);
+    let highest = 1;
+    for (let i = levels.length - 1; i >= 1; i--) {
+      if (levels[i] >= threshold) { highest = i; break; }
+    }
+    const wanted = Math.max(AUTO_RANGE_MIN_FREQUENCY, (highest + 1) * binWidth * AUTO_RANGE_HEADROOM);
+    return Math.min(maxFrequency, roundUpToNice(wanted));
+  }
+
+  // The smallest of 1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6 or 8 times a power of ten that is at least the value.
+  function roundUpToNice(value) {
+    const power = Math.pow(10, Math.floor(Math.log10(value)));
+    for (const step of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) {
+      if (step * power >= value - 1e-9) return step * power;
+    }
+    return 10 * power;
+  }
+
+  function updateAutoRange(now) {
+    if (!sampleRate || !dataArray) return;
+    const target = autoSpectrumEndFrequency(dataArray, sampleRate / fftSize, sampleRate / 2);
+    if (target === null) return;
+    if (autoRangeEndFrequency === null || target >= autoRangeEndFrequency) {
+      autoRangeEndFrequency = target;
+      autoRangeShrinkSince = null;
+    } else if (autoRangeShrinkSince === null) {
+      autoRangeShrinkSince = now;
+    } else if (now - autoRangeShrinkSince >= AUTO_RANGE_SHRINK_DELAY_MS) {
+      autoRangeEndFrequency = target;
+      autoRangeShrinkSince = null;
+    }
+  }
+
   function getFrequencyZoomRange() {
     if (!analyzer) return { startIndex: 0, endIndex: 0, startFreq: 0, endFreq: 0 };
     const binCount = analyzer.frequencyBinCount;
+    const autoEndIndex = showFullRange || autoRangeEndFrequency === null
+      ? binCount - 1
+      : Math.min(binCount - 1, Math.ceil(autoRangeEndFrequency / (sampleRate / fftSize)));
     const startIndex = freqZoomRange ? freqZoomRange.startIndex : 0;
-    const endIndex = freqZoomRange ? freqZoomRange.endIndex : binCount - 1;
+    const endIndex = freqZoomRange ? freqZoomRange.endIndex : autoEndIndex;
     return {
       startIndex,
       endIndex,
@@ -1321,6 +1410,7 @@
       : '--';
     if (peakMultiplesDisplay.textContent !== multiplesText) peakMultiplesDisplay.textContent = multiplesText;
 
+    if (isRunning) updateAutoRange(performance.now());
     const { startIndex, endIndex, startFreq, endFreq } = getFrequencyZoomRange();
 
     // Frequency bars
@@ -1359,7 +1449,7 @@
     }
 
     // Frequency axis
-    drawFrequencyAxis(freqCtx, freqCanvasSize.width, freqCanvasSize.height, startFreq, endFreq);
+    drawFrequencyAxis(freqCtx, freqCanvasSize.width, freqCanvasSize.height, startIndex, endIndex);
 
     if (isSelectingFreq) {
       const selectionX = Math.min(freqSelectStartX, freqSelectCurrentX);
@@ -1407,33 +1497,50 @@
   }
 
   // ------------------ Draw the Frequency Axis ------------------
-  function drawFrequencyAxis(ctx, width, height, startFreq, endFreq) {
+  // Ticks at round frequencies, placed where the bars put them: bin i is centered at i + 0.5 bar widths.
+  function drawFrequencyAxis(ctx, width, height, startIndex, endIndex) {
     if (!sampleRate || !analyzer) return;
 
     ctx.fillStyle = getCssVar('--axis-color');
+    ctx.strokeStyle = getCssVar('--axis-color');
     ctx.font = '12px "IBM Plex Mono", monospace';
 
-    const numTicks = 5;
-    const minFreq = startFreq ?? 0;
-    const maxFreq = endFreq ?? (sampleRate / 2);
+    const binWidth = sampleRate / fftSize;
+    const barWidth = width / Math.max(1, endIndex - startIndex + 1);
+    const minFreq = (startIndex - 0.5) * binWidth;
+    const maxFreq = (endIndex + 0.5) * binWidth;
+    const ticks = frequencyTicks(Math.max(0, minFreq), maxFreq, 5);
 
-    for (let i = 0; i <= numTicks; i++) {
-      const freq = minFreq + ((maxFreq - minFreq) / numTicks) * i;
-      const bin = frequencyToIndex(freq);
-      const x = binIndexToX(bin);
-
+    for (const freq of ticks) {
+      const x = (freq / binWidth - startIndex + 0.5) * barWidth;
+      if (x < 0 || x > width) continue;
       ctx.beginPath();
       ctx.moveTo(x, height - 5);
       ctx.lineTo(x, height);
-      ctx.strokeStyle = getCssVar('--axis-color');
       ctx.stroke();
 
-      let label;
-      if (freq >= 1000) label = (freq / 1000).toFixed(1) + ' kHz';
-      else label = freq.toFixed(0) + ' Hz';
-
-      ctx.fillText(label, x + 2, height - 6);
+      const label = formatFrequencyTick(freq);
+      if (x + 2 + ctx.measureText(label).width <= width) ctx.fillText(label, x + 2, height - 6);
     }
+  }
+
+  // About `count` round tick frequencies (steps of 1, 2, 2.5 or 5 times a power of ten) from min to max.
+  function frequencyTicks(minFreq, maxFreq, count) {
+    const span = maxFreq - minFreq;
+    if (!(span > 0)) return [];
+    const rough = span / count;
+    const power = Math.pow(10, Math.floor(Math.log10(rough)));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * power).find((s) => s >= rough);
+    const ticks = [];
+    for (let f = Math.ceil(minFreq / step) * step; f <= maxFreq + 1e-9; f += step) {
+      ticks.push(Math.round(f * 1000) / 1000);
+    }
+    return ticks;
+  }
+
+  function formatFrequencyTick(freq) {
+    if (freq < 1000) return `${Math.round(freq * 10) / 10} Hz`;
+    return `${parseFloat((freq / 1000).toFixed(3))} kHz`;
   }
 
   // ------------------ Square Grid & Time Axis ------------------
