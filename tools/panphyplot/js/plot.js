@@ -35,16 +35,50 @@
 		return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
 	}
 
+	// The swatches a series, fit line or bar can take (PlotModel.STYLE_COLORS, in the same order).
+	// light and dark are the points and bars on screen: muted but distinct on white (Tableau 10),
+	// brighter on the dark surface. fitLight and fitDark are the automatic fit line of points in
+	// that color, a different hue rather than a change of brightness. print is the swatch in a
+	// Publication download (Okabe–Ito where it has the hue), and printFit the contrasting fit
+	// line of a lone series there.
+	const SWATCHES = {
+		blue: { label: 'Blue', light: '#4e79a7', dark: '#7cb5ec', fitLight: '#b45309', fitDark: '#ffc078', print: '#0072b2', printFit: '#d55e00' },
+		red: { label: 'Red', light: '#e15759', dark: '#f48183', fitLight: '#1d4ed8', fitDark: '#80cfff', print: '#d55e00', printFit: '#0072b2' },
+		green: { label: 'Green', light: '#59a14f', dark: '#8bcf86', fitLight: '#9333a8', fitDark: '#e5adff', print: '#009e73', printFit: '#d55e00' },
+		orange: { label: 'Orange', light: '#f28e2b', dark: '#f9b06a', fitLight: '#0e7490', fitDark: '#82ded5', print: '#e69f00', printFit: '#0072b2' },
+		purple: { label: 'Purple', light: '#b07aa1', dark: '#d1a4c5', fitLight: '#3f6212', fitDark: '#d1e884', print: '#cc79a7', printFit: '#009e73' },
+		teal: { label: 'Teal', light: '#76b7b2', dark: '#a2dad6', fitLight: '#be123c', fitDark: '#ff9db8', print: '#56b4e9', printFit: '#d55e00' },
+		brown: { label: 'Brown', light: '#9c755f', dark: '#c9a58f', fitLight: '#1d4ed8', fitDark: '#80cfff', print: '#8c510a', printFit: '#0072b2' },
+		pink: { label: 'Pink', light: '#d37295', dark: '#f4a6c0', fitLight: '#0e7490', fitDark: '#82ded5', print: '#ee6677', printFit: '#0072b2' },
+		gray: { label: 'Gray', light: '#6b7076', dark: '#aab0b7', fitLight: '#be123c', fitDark: '#ff9db8', print: '#555555', printFit: '#d55e00' }
+	};
+	const AUTO_SWATCHES = PlotModel.STYLE_COLORS.slice(0, 6);
+	const SYMBOL_LABELS = { circle: 'Circle', square: 'Square', diamond: 'Diamond', 'triangle-up': 'Triangle', 'triangle-down': 'Inverted triangle', star: 'Star', cross: 'Cross' };
+
+	function isDarkTheme() {
+		return document.documentElement.getAttribute('data-theme') === 'dark';
+	}
+
+	// A swatch as points or bars in the current theme.
+	function swatchColor(key) {
+		const swatch = SWATCHES[key] || SWATCHES.blue;
+		return isDarkTheme() ? swatch.dark : swatch.light;
+	}
+
+	// A swatch chosen for a fit line: a little darker on white, where the muted colors are thin as a line.
+	function swatchLineColor(key) {
+		const swatch = SWATCHES[key] || SWATCHES.blue;
+		return isDarkTheme() ? swatch.dark : mixHex(swatch.light, '#000000', 0.2);
+	}
+
 	function getPlotThemeSettings(themeName) {
 		const theme = themeName || document.documentElement.getAttribute('data-theme') || 'light';
 		if (theme !== 'dark') {
 			// Light theme – distinct data colors with contrasting fit hues
 			return {
 				errorColor: '#5b5b5b',
-				// Data point colors: muted but distinct (Tableau 10 first six)
-				datasetColors: ['#4e79a7', '#e15759', '#59a14f', '#f28e2b', '#b07aa1', '#76b7b2'],
-				// Fit hues differ from their corresponding points, rather than just changing brightness
-				fitColors: ['#b45309', '#1d4ed8', '#9333a8', '#0e7490', '#3f6212', '#be123c'],
+				datasetColors: AUTO_SWATCHES.map(key => SWATCHES[key].light),
+				fitColors: AUTO_SWATCHES.map(key => SWATCHES[key].fitLight),
 				layout: {
 					xaxis: {
 						zerolinecolor: '#1f2937'
@@ -59,10 +93,8 @@
 		// Dark theme – brighter points and contrasting fit hues
 		return {
 			errorColor: '#9aa0a6',
-			// Data point colors: bright, clear on dark background
-			datasetColors: ['#7cb5ec', '#f48183', '#8bcf86', '#f9b06a', '#d1a4c5', '#a2dad6'],
-			// Preserve the contrasting fit hue families on the dark surface
-			fitColors: ['#ffc078', '#80cfff', '#e5adff', '#82ded5', '#d1e884', '#ff9db8'],
+			datasetColors: AUTO_SWATCHES.map(key => SWATCHES[key].dark),
+			fitColors: AUTO_SWATCHES.map(key => SWATCHES[key].fitDark),
 			layout: {
 				paper_bgcolor: '#1A1A19',
 				plot_bgcolor: '#1A1A19',
@@ -252,9 +284,9 @@
 	const PUBLICATION_PNG_SCALE = 4;
 	const PUBLICATION_FONT = 'Arial, Helvetica, sans-serif';
 	// Okabe–Ito colors: vivid on white and distinguishable with color blindness and in grayscale.
+	// All sheets' bars take them in order; a series or a sheet's own bars print in their swatch's
+	// print color (SWATCHES), and a lone series' fit in that swatch's contrasting printFit.
 	const PUBLICATION_COLORS = ['#0072b2', '#e69f00', '#009e73', '#d55e00', '#cc79a7', '#56b4e9'];
-	// A lone series' fit uses a contrasting Okabe–Ito color, chosen per points color.
-	const PUBLICATION_FIT_CONTRAST = ['#d55e00', '#0072b2', '#d55e00', '#0072b2', '#009e73', '#d55e00'];
 	// With several series each fit stays in its own hue, this far toward black.
 	const PUBLICATION_FIT_DARKEN = 0.55;
 	const PUBLICATION_SYMBOLS =['square', 'circle', 'triangle-up', 'diamond', 'triangle-down', 'star'];
@@ -393,7 +425,7 @@
 			...trace,
 			visible: true,
 			showlegend: shown.length > 1,
-			marker: { color: shadedColor(PUBLICATION_COLORS, index, '#000000'), line: { color: '#000000', width: 1 } },
+			marker: { color: trace.panphyStyle?.print || shadedColor(PUBLICATION_COLORS, index, '#000000'), line: { color: '#000000', width: 1 } },
 			error_y: trace.error_y ? { ...trace.error_y, color: '#000000', thickness: 1.2, width: 5 } : trace.error_y
 		}));
 		const source = gd.layout?.xaxis || {};
@@ -438,19 +470,22 @@
 		const pointNames = {};
 		shown.filter(isPointsTrace).forEach((trace) => { pointNames[trace.legendgroup] = trace.name; });
 		const errorBars = (bars) => bars ? { ...bars, color: '#000000', thickness: 1.2, width: 4 } : bars;
-		// Each series keeps its palette slot, found from its color in the current theme. A single
-		// series' fit gets a contrasting color; with several series each fit is a much darker shade
-		// of its own points, so the fit stands apart yet still pairs with its points.
-		const screenColors = getPlotThemeSettings().datasetColors;
-		const slots = {};
-		shown.filter(isPointsTrace).forEach((trace, order) => {
-			const slot = screenColors.indexOf(trace.marker?.color);
-			slots[trace.legendgroup] = slot >= 0 ? slot : order;
+		// Each series prints in its swatch's print color, and in its chosen shape and fit color if
+		// it has them. Otherwise the shapes are shared out in order, leaving out the chosen ones; a
+		// single series' fit gets a contrasting color, and with several series each fit is a much
+		// darker shade of its own points, so the fit stands apart yet still pairs with its points.
+		const chosenSymbols = shown.filter(isPointsTrace).map(trace => trace.panphyStyle?.symbol).filter(Boolean);
+		const spareSymbols = PUBLICATION_SYMBOLS.filter(symbol => !chosenSymbols.includes(symbol));
+		const symbolPool = spareSymbols.length ? spareSymbols : PUBLICATION_SYMBOLS;
+		const symbols = {};
+		let nextSymbol = 0;
+		shown.filter(isPointsTrace).forEach((trace) => {
+			symbols[trace.legendgroup] = trace.panphyStyle?.symbol || symbolPool[nextSymbol++ % symbolPool.length];
 		});
 		const data = shown.map((trace) => {
 			const index = Math.max(0, groups.indexOf(trace.legendgroup));
-			const slot = slots[trace.legendgroup] ?? index;
-			const color = PUBLICATION_COLORS[slot % PUBLICATION_COLORS.length];
+			const style = trace.panphyStyle || {};
+			const color = style.print || PUBLICATION_COLORS[index % PUBLICATION_COLORS.length];
 			if (isPointsTrace(trace)) {
 				const count = Array.isArray(trace.x) ? trace.x.length : 0;
 				return {
@@ -459,7 +494,7 @@
 					showlegend: true,
 					marker: {
 						color,
-						symbol: PUBLICATION_SYMBOLS[index % PUBLICATION_SYMBOLS.length],
+						symbol: symbols[trace.legendgroup] || PUBLICATION_SYMBOLS[index % PUBLICATION_SYMBOLS.length],
 						size: count > 400 ? 3.5 : count > 150 ? 4.5 : 6.5,
 						opacity: 1,
 						line: { color: '#000000', width: count > 400 ? 0.4 : count > 150 ? 0.6 : 0.8 }
@@ -479,9 +514,8 @@
 				name: publicationFitName(pointNames[trace.legendgroup], stale, single),
 				line: {
 					...(trace.line || {}),
-					color: single
-						? PUBLICATION_FIT_CONTRAST[slot % PUBLICATION_FIT_CONTRAST.length]
-						: mixHex(color, '#000000', PUBLICATION_FIT_DARKEN),
+					color: style.printFit
+						|| (single ? style.printFitContrast || '#d55e00' : mixHex(color, '#000000', PUBLICATION_FIT_DARKEN)),
 					width: 1.5,
 					simplify: false
 				}
@@ -907,9 +941,27 @@
 		return `#${a.map((v, i) => Math.round(v + (b[i] - v) * amount).toString(16).padStart(2, '0')).join('')}`;
 	}
 
-	function seriesTraces(sheet, series, colorIndex, themeSettings, options = {}) {
-		const color = themeSettings.datasetColors[colorIndex % themeSettings.datasetColors.length];
-		const fitColor = themeSettings.fitColors[colorIndex % themeSettings.fitColors.length];
+	// How a series is drawn: `assigned` is its entry from PlotModel.assignSeriesColors. `print`
+	// travels on the traces as panphyStyle, for the Publication download.
+	function seriesLook(column, assigned) {
+		const swatch = SWATCHES[assigned?.color] || SWATCHES.blue;
+		const style = PlotModel.normalizeStyle(column?.style);
+		return {
+			color: isDarkTheme() ? swatch.dark : swatch.light,
+			symbol: style.symbol || 'circle',
+			fitColor: style.fitColor ? swatchLineColor(style.fitColor) : isDarkTheme() ? swatch.fitDark : swatch.fitLight,
+			print: {
+				print: swatch.print,
+				symbol: style.symbol,
+				printFit: style.fitColor ? SWATCHES[style.fitColor].print : '',
+				printFitContrast: swatch.printFit
+			}
+		};
+	}
+
+	function seriesTraces(sheet, series, assigned, themeSettings, options = {}) {
+		const look = seriesLook(series.yCol, assigned);
+		const { color, fitColor } = look;
 		const points = PlotModel.getSeriesPoints(sheet, series);
 		const hidden = sheet.hiddenSeries.includes(series.id);
 		const key = makeFitKey(sheet, series.id);
@@ -925,7 +977,8 @@
 			legendgroup: key,
 			hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
 			visible: hidden ? 'legendonly' : true,
-			marker: { color, symbol: 'circle', size: markerSize(points.length), opacity: 0.9, line: { color: mixHex(color, '#000000', 0.35), width: points.length > 150 ? 0 : 0.75 } },
+			panphyStyle: look.print,
+			marker: { color, symbol: look.symbol, size: markerSize(points.length), opacity: 0.9, line: { color: mixHex(color, '#000000', 0.35), width: points.length > 150 ? 0 : 0.75 } },
 			error_x: { type: 'data', array: points.map(point => point.xError), visible: !!series.xErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 },
 			error_y: { type: 'data', array: points.map(point => point.yError), visible: !!series.yErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 }
 		}];
@@ -942,6 +995,7 @@
 				mode: 'lines',
 				name: stale ? `Outdated fit: ${prefix}${yLabel}` : `Fit: ${prefix}${yLabel}`,
 				meta: key,
+				panphyStyle: look.print,
 				legendgroup: key,
 				showlegend: false,
 				hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
@@ -954,8 +1008,10 @@
 
 	/* ---------- Bar charts ---------- */
 
-	function getBarColor() {
-		return getPlotThemeSettings().datasetColors[0];
+	// A bar's color in its own sheet's chart, as its column heading wears it.
+	function getBarColor(sheet, columnId) {
+		const index = sheet ? sheet.columns.findIndex(column => column.id === columnId) : -1;
+		return swatchColor(index >= 0 ? PlotModel.assignBarColors(sheet)[index].color : AUTO_SWATCHES[0]);
 	}
 
 	// Past the end of a palette, later series take a shade of the same hues, towards `towards`.
@@ -995,7 +1051,8 @@
 			name: options.name || '',
 			customdata: entries.map(entry => (drawn(entry) ? describe(entry) : '')),
 			hovertemplate: '%{customdata}<extra></extra>',
-			marker: { color, line: { color: mixHex(color, '#000000', 0.35), width: 0.75 } },
+			marker: { color, line: { color: Array.isArray(color) ? color.map(entry => mixHex(entry, '#000000', 0.35)) : mixHex(color, '#000000', 0.35), width: 0.75 } },
+			...(options.print ? { panphyStyle: { print: options.print } } : {}),
 			error_y: {
 				type: 'data',
 				array: entries.map(entry => (drawn(entry) && entry.errors && entry.bar.uncertainty !== null ? entry.bar.uncertainty : 0)),
@@ -1069,7 +1126,10 @@
 
 	function plotBarGraph(sheet, themeSettings) {
 		const bars = PlotModel.getBars(sheet);
-		const data = [barTrace(bars.map(bar => ({ bar, errors: sheet.errorBars })), getBarColor(), themeSettings)];
+		// Each bar has its own color: the sheet's shared one, or one chosen for it.
+		const colors = PlotModel.assignBarColors(sheet).map(entry => entry.color);
+		const data = [barTrace(bars.map(bar => ({ bar, errors: sheet.errorBars })), colors.map(swatchColor), themeSettings,
+			{ print: colors.map(key => SWATCHES[key].print) })];
 		const layout = applyThemeLayout(buildBarLayout(getSheetTitle(sheet), barCategoryAxisText(sheet), barValueAxisText(sheet),
 			bars.map(bar => barLabel(bar.label)), { showlegend: false }), themeSettings);
 		// An auto-scaled value axis is remembered with the sheet, as a scatter graph's zoom is.
@@ -1231,7 +1291,8 @@
 		}
 		const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
 		const xView = PlotModel.normalizeGraphView(sheet.graphView).xaxis || null;
-		const data = pointsBeforeFits(series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings, { xView })));
+		const assigned = PlotModel.assignSeriesColors(series.map(entry => entry.yCol));
+		const data = pointsBeforeFits(series.flatMap((entry, index) => seriesTraces(sheet, entry, assigned[index], themeSettings, { xView })));
 		const titles = getAxisTitles(sheet);
 		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 1 }), themeSettings);
 		const element = document.getElementById('plot');
@@ -1269,8 +1330,7 @@
 		document.getElementById('residual-plot').hidden = !open;
 		if (!open) return;
 		const themeSettings = getPlotThemeSettings();
-		const index = PlotModel.getSeries(target.sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === target.series.id);
-		const color = themeSettings.datasetColors[Math.max(index, 0) % themeSettings.datasetColors.length];
+		const color = getSeriesColor(target.sheet, target.series.id) || themeSettings.datasetColors[0];
 		const yTitle = latexMode ? `\\text{residual } ${columnAxisText(target.sheet, target.series.yCol)}` : `residual ${columnAxisText(target.sheet, target.series.yCol)}`;
 		const layout = applyThemeLayout(buildLayout('', columnAxisText(target.sheet, target.series.xCol), yTitle, { showlegend: false }), themeSettings);
 		layout.margin = { t: 16, b: 60, l: 85, r: 30 };
@@ -1304,14 +1364,17 @@
 		}
 		const multiple = plotState.sheets.length > 1;
 		const data = [];
-		let colorIndex = 0;
 		const xColumns = [];
 		const yColumns = [];
+		// Empty series (such as a new sheet's blank columns) would only clutter the legend and labels.
+		const plotted = plotState.sheets.map(sheet => PlotModel.getSeries(sheet).filter(entry => entry.xCol && PlotModel.getSeriesPoints(sheet, entry).length));
+		// Chosen colors and shapes follow their series here; the rest share the palette across every sheet.
+		const assigned = PlotModel.assignSeriesColors(plotted.flat().map(entry => entry.yCol));
+		let order = 0;
 		plotState.sheets.forEach((sheet, sheetIndex) => {
-			// Empty series (such as a new sheet's blank columns) would only clutter the legend and labels.
-			PlotModel.getSeries(sheet).filter(entry => entry.xCol && PlotModel.getSeriesPoints(sheet, entry).length).forEach((entry) => {
+			plotted[sheetIndex].forEach((entry) => {
 				const prefix = multiple ? `${getSheetDisplayName(sheetIndex)}: ` : '';
-				data.push(...seriesTraces(sheet, entry, colorIndex++, themeSettings, { prefix }));
+				data.push(...seriesTraces(sheet, entry, assigned[order++], themeSettings, { prefix }));
 				if (!sheet.hiddenSeries.includes(entry.id)) {
 					xColumns.push({ sheet, column: entry.xCol });
 					yColumns.push({ sheet, column: entry.yCol });
@@ -1341,10 +1404,15 @@
 
 	// The plotted series of a sheet share the palette in order, so a Y column's color is stable.
 	function getSeriesColor(sheet, seriesId) {
-		const index = PlotModel.getSeries(sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === seriesId);
+		return getSeriesLook(sheet, seriesId)?.color || null;
+	}
+
+	// A plotted series' colors and shape as drawn on its own sheet's graph, or null if it is not plotted.
+	function getSeriesLook(sheet, seriesId) {
+		const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
+		const index = series.findIndex(entry => entry.id === seriesId);
 		if (index < 0) return null;
-		const colors = getPlotThemeSettings().datasetColors;
-		return colors[index % colors.length];
+		return seriesLook(series[index].yCol, PlotModel.assignSeriesColors(series.map(entry => entry.yCol))[index]);
 	}
 
 	// The Download button in the graph pane's header opens the Download graph dialog.
@@ -1363,7 +1431,12 @@
 
 	Object.assign(window, {
 		getSeriesColor,
+		getSeriesLook,
 		getBarColor,
+		swatchColor,
+		swatchLineColor,
+		SWATCH_LABELS: Object.fromEntries(Object.entries(SWATCHES).map(([key, swatch]) => [key, swatch.label])),
+		SYMBOL_LABELS,
 		sanitizeFilename,
 		saveBlobWithFallback,
 		processLabel,

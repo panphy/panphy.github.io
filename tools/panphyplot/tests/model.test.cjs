@@ -547,3 +547,58 @@ test('copying a sheet as the other kind carries names and values to a new sheet 
 	assert.deepEqual(scatter.columns.map(column => column.role), ['X', 'Y']);
 	assert.equal(scatter.columns[1].cells[6], '0.9');
 });
+
+test('a column keeps only known colors and shapes', () => {
+	const sheet = sheetWith([['X', ['1']], ['Y', ['2'], { style: { color: 'red', symbol: 'square', fitColor: '#ff0000' } }], ['Y', ['3'], { style: { color: 'crimson', symbol: 'hexagon' } }]]);
+	assert.deepEqual(sheet.columns[1].style, { color: 'red', symbol: 'square', fitColor: '' });
+	assert.deepEqual(sheet.columns[2].style, { color: '', symbol: '', fitColor: '' });
+	assert.equal(model.hasStyle(sheet.columns[1]), true);
+	assert.equal(model.hasStyle(sheet.columns[2]), false);
+});
+
+test('automatic series colors keep their order and leave out chosen colors', () => {
+	const plain = sheetWith([['X', ['1']], ['Y', ['2']], ['Y', ['3']], ['Y', ['4']]]);
+	assert.deepEqual(model.assignSeriesColors(plain.columns.slice(1)), [
+		{ color: 'blue', custom: false }, { color: 'red', custom: false }, { color: 'green', custom: false }
+	]);
+	plain.columns[1].style.color = 'red';
+	assert.deepEqual(model.assignSeriesColors(plain.columns.slice(1)).map(entry => entry.color), ['red', 'blue', 'green']);
+	// A color outside the automatic six takes nothing from the others.
+	plain.columns[1].style.color = 'gray';
+	assert.deepEqual(model.assignSeriesColors(plain.columns.slice(1)).map(entry => entry.color), ['gray', 'blue', 'red']);
+	// More series than automatic colors go round again.
+	const many = sheetWith([['X', ['1']], ...Array.from({ length: 8 }, () => ['Y', ['2']])]);
+	assert.deepEqual(model.assignSeriesColors(many.columns.slice(1)).map(entry => entry.color),
+		['blue', 'red', 'green', 'orange', 'purple', 'teal', 'blue', 'red']);
+});
+
+test('bars share one color until the sheet colors each differently', () => {
+	const sheet = sheetWith([['Y', ['1']], ['Y', ['2']], ['Y', ['3']], ['Y', ['4']]]);
+	model.setChartType(sheet, 'bar');
+	sheet.columns[1].style.color = 'orange';
+	assert.deepEqual(model.assignBarColors(sheet).map(entry => entry.color), ['blue', 'orange', 'blue', 'blue']);
+	sheet.variedBars = true;
+	assert.deepEqual(model.assignBarColors(sheet).map(entry => entry.color), ['blue', 'orange', 'red', 'green']);
+});
+
+test('styles survive saving, and a copy as the other kind drops them', () => {
+	const state = model.createState();
+	const ids = model.createIdSource(state);
+	const sheet = state.sheets[0];
+	sheet.columns[1].style = { color: 'teal', symbol: 'diamond', fitColor: 'pink' };
+	sheet.columns[1].cells[0] = '1';
+	sheet.variedBars = true;
+	const restored = model.normalizeState(JSON.parse(JSON.stringify(state)));
+	assert.deepEqual(restored.sheets[0].columns[1].style, { color: 'teal', symbol: 'diamond', fitColor: 'pink' });
+	assert.equal(restored.sheets[0].variedBars, true);
+	// A project saved before styles existed opens with automatic colors.
+	const old = JSON.parse(JSON.stringify(state));
+	old.sheets[0].columns.forEach((column) => { delete column.style; });
+	delete old.sheets[0].variedBars;
+	const opened = model.normalizeState(old);
+	assert.deepEqual(opened.sheets[0].columns[1].style, { color: '', symbol: '', fitColor: '' });
+	assert.equal(opened.sheets[0].variedBars, false);
+	const bar = model.copySheetAs(sheet, ids, 'bar', 'Copy');
+	assert.equal(bar.columns.some(model.hasStyle), false);
+	assert.equal(bar.variedBars, false);
+});

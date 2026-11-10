@@ -67,6 +67,55 @@
 		});
 	}
 
+	// Graph styles. A color is the name of a swatch, never a hex value: plot.js holds each swatch's
+	// light, dark and print colors, so a choice stays readable in both themes and in a download.
+	// An empty value means automatic. The first AUTO_COLOR_COUNT swatches are the automatic palette.
+	const STYLE_COLORS = ['blue', 'red', 'green', 'orange', 'purple', 'teal', 'brown', 'pink', 'gray'];
+	const AUTO_COLOR_COUNT = 6;
+	const STYLE_SYMBOLS = ['circle', 'square', 'diamond', 'triangle-up', 'triangle-down', 'star', 'cross'];
+
+	function normalizeStyle(saved) {
+		return {
+			color: STYLE_COLORS.includes(saved?.color) ? saved.color : '',
+			symbol: STYLE_SYMBOLS.includes(saved?.symbol) ? saved.symbol : '',
+			fitColor: STYLE_COLORS.includes(saved?.fitColor) ? saved.fitColor : ''
+		};
+	}
+
+	function hasStyle(column) {
+		const style = column?.style;
+		return !!(style && (style.color || style.symbol || style.fitColor));
+	}
+
+	// The color of each column, in order, from `palette`. A chosen color is kept; the others take
+	// the palette in order, leaving out the colors already chosen, so that choosing one color
+	// never leaves it the same as an automatic neighbor.
+	function shareColors(columns, palette) {
+		const chosen = new Set(columns.map(column => column.style?.color).filter(Boolean));
+		const free = palette.filter(color => !chosen.has(color));
+		const pool = free.length ? free : palette;
+		let next = 0;
+		return columns.map((column) => {
+			const color = column.style?.color;
+			return color ? { color, custom: true } : { color: pool[next++ % pool.length], custom: false };
+		});
+	}
+
+	// The points color of each plotted Y column, in order: its chosen color, or the automatic palette.
+	function assignSeriesColors(columns) {
+		return shareColors(columns, STYLE_COLORS.slice(0, AUTO_COLOR_COUNT));
+	}
+
+	// The color of each bar of a bar sheet, in column order. Bars share the first color unless
+	// the sheet colors every bar differently, from every swatch; a bar's own chosen color always wins.
+	function assignBarColors(sheet) {
+		if (sheet.variedBars) return shareColors(sheet.columns, STYLE_COLORS);
+		return sheet.columns.map((column) => {
+			const color = column.style?.color;
+			return color ? { color, custom: true } : { color: STYLE_COLORS[0], custom: false };
+		});
+	}
+
 	function createColumn(id, options = {}, rowCount = DEFAULT_ROWS) {
 		const cells = Array.isArray(options.cells) ? options.cells.map(cell => String(cell ?? '')) : [];
 		while (cells.length < rowCount) cells.push('');
@@ -80,6 +129,7 @@
 			width: Number.isFinite(options.width) ? Math.round(Math.min(Math.max(options.width, COLUMN_WIDTH_MIN), COLUMN_WIDTH_MAX)) : null,
 			formula: typeof options.formula === 'string' ? options.formula : '',
 			propagateFrom: typeof options.propagateFrom === 'string' ? options.propagateFrom : '',
+			style: normalizeStyle(options.style),
 			cells
 		};
 	}
@@ -101,7 +151,8 @@
 			chartType: 'scatter',
 			valueAxis: { name: '', unit: '' },
 			categoryTitle: '',
-			errorBars: false
+			errorBars: false,
+			variedBars: false
 		};
 	}
 
@@ -355,6 +406,7 @@
 		sheet.valueAxis = fresh.valueAxis;
 		sheet.categoryTitle = fresh.categoryTitle;
 		sheet.errorBars = fresh.errorBars;
+		sheet.variedBars = fresh.variedBars;
 		sheet.name = fresh.name;
 		sheet.rowCount = fresh.rowCount;
 		sheet.columns = fresh.columns;
@@ -591,7 +643,8 @@
 					unit: typeof savedSheet.valueAxis?.unit === 'string' ? savedSheet.valueAxis.unit.slice(0, NAME_MAX_LENGTH) : ''
 				},
 				categoryTitle: typeof savedSheet.categoryTitle === 'string' ? savedSheet.categoryTitle.slice(0, NAME_MAX_LENGTH) : '',
-				errorBars: savedSheet.errorBars === true
+				errorBars: savedSheet.errorBars === true,
+				variedBars: savedSheet.variedBars === true
 			};
 			setRowCount(sheet, sheet.rowCount);
 			state.sheets.push(sheet);
@@ -1127,6 +1180,12 @@
 		isFitSymbol,
 		getFitSymbol,
 		formatFitSymbols,
+		STYLE_COLORS,
+		STYLE_SYMBOLS,
+		normalizeStyle,
+		hasStyle,
+		assignSeriesColors,
+		assignBarColors,
 		createColumn,
 		createSheet,
 		createIdSource,
