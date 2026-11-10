@@ -324,7 +324,7 @@
 	}
 
 	// The fit's legend entry, in the same notation as its points' entry.
-	function publicationFitName(pointsName, stale, single) {
+	function fitLegendName(pointsName, stale, single) {
 		const word = stale ? 'Outdated fit' : 'Fit';
 		if (single) return word;
 		const name = String(pointsName || '');
@@ -511,7 +511,7 @@
 				y: dense.y,
 				visible: true,
 				showlegend: true,
-				name: publicationFitName(pointNames[trace.legendgroup], stale, single),
+				name: fitLegendName(pointNames[trace.legendgroup], stale, single),
 				line: {
 					...(trace.line || {}),
 					color: style.printFit
@@ -976,7 +976,7 @@
 			meta: key,
 			legendgroup: key,
 			hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
-			visible: hidden ? 'legendonly' : true,
+			visible: !hidden && points.length > 0,
 			panphyStyle: look.print,
 			marker: { color, symbol: look.symbol, size: markerSize(points.length), opacity: 0.9, line: { color: mixHex(color, '#000000', 0.35), width: points.length > 150 ? 0 : 0.75 } },
 			error_x: { type: 'data', array: points.map(point => point.xError), visible: !!series.xErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 },
@@ -993,13 +993,13 @@
 				x: line.x,
 				y: line.y,
 				mode: 'lines',
-				name: stale ? `Outdated fit: ${prefix}${yLabel}` : `Fit: ${prefix}${yLabel}`,
+				name: fitLegendName(name, stale, false),
 				meta: key,
 				panphyStyle: look.print,
 				legendgroup: key,
-				showlegend: false,
+				showlegend: true,
 				hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
-				visible: hidden ? 'legendonly' : true,
+				visible: !hidden && points.length > 0 && line.x.length > 0,
 				line: { color: fitColor, width: 1.75, dash: stale ? 'dash' : 'solid', simplify: false }
 			});
 		}
@@ -1233,7 +1233,7 @@
 		Object.keys(lastPlotKeys).forEach(key => delete lastPlotKeys[key]);
 	}
 
-	// Tapping a legend entry hides or shows that series (and its fit) and remembers it per sheet.
+	// Tapping a data or fit legend entry hides its series and fit; the Series card restores them.
 	function bindLegendToggle(targetId) {
 		const element = document.getElementById(targetId);
 		if (!element || element.dataset.legendBound === 'true' || typeof element.on !== 'function') return;
@@ -1294,7 +1294,7 @@
 		const assigned = PlotModel.assignSeriesColors(series.map(entry => entry.yCol));
 		const data = pointsBeforeFits(series.flatMap((entry, index) => seriesTraces(sheet, entry, assigned[index], themeSettings, { xView })));
 		const titles = getAxisTitles(sheet);
-		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 1 }), themeSettings);
+		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: data.filter(isShownTrace).length > 1 }), themeSettings);
 		const element = document.getElementById('plot');
 		Object.entries(PlotModel.normalizeGraphView(sheet.graphView)).forEach(([axis, range]) => {
 			layout[axis].autorange = false;
@@ -1389,7 +1389,7 @@
 		if (inputs.title.dataset.edited !== 'true') inputs.title.value = '';
 		if (inputs.x.dataset.edited !== 'true') inputs.x.value = describe(xColumns);
 		if (inputs.y.dataset.edited !== 'true') inputs.y.value = describe(yColumns);
-		const layout = applyThemeLayout(buildLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim(), { showTitle: true }), themeSettings);
+		const layout = applyThemeLayout(buildLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim(), { showTitle: true, showlegend: data.filter(isShownTrace).length > 1 }), themeSettings);
 		reactIfChanged('popup-plot', pointsBeforeFits(data), layout, createDownloadImageConfig('combined_plot'));
 		bindLegendToggle('popup-plot');
 	}
