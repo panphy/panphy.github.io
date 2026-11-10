@@ -3,6 +3,8 @@ name: Checks
 on:
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1' # every Monday: all tests and pages, to catch anything a narrower run missed
 
 permissions:
   contents: read
@@ -13,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # the BUILD_ID check compares with the base branch
+          fetch-depth: 0 # the BUILD_ID check and the choice of tests compare with the base branch
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -26,21 +28,24 @@ jobs:
           else
             node .github/scripts/check.mjs
           fi
-      - name: App tests
+      # Pull requests run only the tests and pages their changes can affect; other runs check everything.
+      - name: Choose tests and pages
+        id: pick
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          node --test \
-            assets/tests/theme.test.cjs \
-            assets/tests/three-textures.test.cjs \
-            tools/panphymd/tests/*.test.cjs \
-            tools/sound_analyzer/tests/regression.test.cjs \
-            tools/panphyplot/tests/*.test.cjs \
-            misc/panphyplotog/tests/regression.test.cjs \
-            tools/motion_tracker/tests/regression.test.cjs \
-            sandboxes/panphycircuits/tests/*.test.cjs \
-            sandboxes/panphymech/tests/*.test.cjs \
-            simulations/states/tests/physics.test.mjs \
-            simulations/star_life_cycle/tests/physics.test.mjs \
-            simulations/superposition/tests/physics.test.cjs \
-            fun/spellwave/tests/*.test.mjs
+          if [ -n "$BASE_REF" ]; then
+            node .github/scripts/affected.mjs --base "origin/$BASE_REF"
+          else
+            node .github/scripts/affected.mjs --all
+          fi
+      - name: App tests
+        if: steps.pick.outputs.tests != ''
+        env:
+          TESTS: ${{ steps.pick.outputs.tests }}
+        run: node --test $TESTS
       - name: Accessibility smoke check
-        run: node .github/scripts/a11y-smoke.mjs
+        if: steps.pick.outputs.a11y != 'none'
+        env:
+          PAGES: ${{ steps.pick.outputs.pages }}
+        run: node .github/scripts/a11y-smoke.mjs $PAGES
