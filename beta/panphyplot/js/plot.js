@@ -1008,7 +1008,10 @@
 		};
 	}
 
-	// Bars are measured from zero and their axis is a list of names, so only the value axis zooms.
+	// A bar chart has nothing to zoom into: bars are measured from zero and their axis is a list of
+	// names. Both axes are fixed and the graph's buttons are hidden (BAR_CONFIG); hovering still works.
+	const BAR_CONFIG = { responsive: true, displayModeBar: false, displaylogo: false };
+
 	function buildBarLayout(titleText, xTitle, yTitle, labels, options = {}) {
 		const layout = buildLayout(titleText, xTitle, yTitle, options);
 		layout.xaxis = {
@@ -1024,6 +1027,7 @@
 			range: [-0.5, Math.max(labels.length, 1) - 0.5],
 			fixedrange: true
 		};
+		layout.yaxis.fixedrange = true;
 		layout.bargap = 0.28;
 		layout.bargroupgap = 0.06;
 		if (options.grouped) layout.barmode = 'group';
@@ -1035,15 +1039,10 @@
 		const data = [barTrace(bars.map(bar => ({ bar, errors: sheet.errorBars })), getBarColor(), themeSettings)];
 		const layout = applyThemeLayout(buildBarLayout(getSheetTitle(sheet), barCategoryAxisText(sheet), barValueAxisText(sheet),
 			bars.map(bar => barLabel(bar.label)), { showlegend: false }), themeSettings);
-		const view = PlotModel.normalizeGraphView(sheet.graphView).yaxis;
-		if (view) {
-			layout.yaxis.autorange = false;
-			layout.yaxis.range = view;
-		}
 		const element = document.getElementById('plot');
 		element.dataset.viewSheet = sheet.id;
 		element.dataset.exportTitle = processLabel(getSheetTitle(sheet) || '');
-		reactIfChanged('plot', data, layout, createDownloadImageConfig(sheet.name || 'bar_chart'));
+		reactIfChanged('plot', data, layout, BAR_CONFIG);
 		bindLegendToggle('plot');
 		bindGraphView(element);
 		const empty = document.getElementById('graph-empty');
@@ -1079,7 +1078,7 @@
 		if (inputs.y.dataset.edited !== 'true') inputs.y.value = first ? barValueAxisText(first) : '';
 		const layout = applyThemeLayout(buildBarLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim(), groups,
 			{ showTitle: true, showlegend: series.length > 1, grouped: true }), themeSettings);
-		reactIfChanged('popup-plot', data, layout, createDownloadImageConfig('combined_plot'));
+		reactIfChanged('popup-plot', data, layout, BAR_CONFIG);
 		bindLegendToggle('popup-plot');
 	}
 
