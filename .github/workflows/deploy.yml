@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+# Replaces GitHub's built-in "pages build and deployment" workflow, which ran an
+# unneeded Jekyll build and gave up when copying the site to GitHub's servers took
+# more than 10 minutes. This one uploads the repository as it is, waits longer and
+# tries once more by itself. The repository's Pages source must stay set to
+# "GitHub Actions" (Settings, Pages).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. A newer push waits for the running deployment instead
+# of cancelling it part-way; of several waiting pushes only the newest is deployed.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    environment:
+      name: github-pages
+      url: ${{ steps.retry.outputs.page_url || steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # Dot files and folders (.git, .github, .gitignore) are left out of the site.
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+        with:
+          timeout: 1800000 # 30 minutes
+      # A timed-out deployment is cancelled first; give that a moment to finish.
+      - name: Wait before trying again
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 60
+      - name: Deploy (second try)
+        id: retry
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+        with:
+          timeout: 1800000

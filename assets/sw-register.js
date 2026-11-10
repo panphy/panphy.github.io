@@ -24,7 +24,7 @@
 
   const currentAppGroup = getAppGroup(window.location.pathname);
 
-  const getWorkerVersions = (worker) => {
+  const askWorker = (worker, message, timeoutMs) => {
     return new Promise((resolve) => {
       if (!worker) {
         resolve(null);
@@ -34,10 +34,12 @@
       channel.port1.onmessage = (event) => {
         resolve(event.data);
       };
-      worker.postMessage({ type: 'GET_VERSION_MAP' }, [channel.port2]);
-      setTimeout(() => resolve(null), 3000);
+      worker.postMessage(message, [channel.port2]);
+      setTimeout(() => resolve(null), timeoutMs);
     });
   };
+
+  const getWorkerVersions = (worker) => askWorker(worker, { type: 'GET_VERSION_MAP' }, 3000);
 
   let waitingBuild = '';
 
@@ -249,6 +251,34 @@
     });
   };
 
+  // A worker that installed while a deployment was still reaching GitHub's servers
+  // can hold old copies of this app's files under the new build, and then no
+  // update is ever offered. Ask the newest worker to compare its copies with the
+  // server (it decides how often); if it replaced any, offer the update.
+  const verifyFreshness = async (registration) => {
+    if (!navigator.serviceWorker.controller || registration.installing || updateBanner || refreshing) {
+      return;
+    }
+    const waitingWorker = registration.waiting;
+    const result = await askWorker(
+      waitingWorker || registration.active,
+      { type: 'VERIFY_APP', group: currentAppGroup },
+      120000
+    );
+    if (!result || !result.updated || updateBanner || refreshing) {
+      return;
+    }
+    console.info(`[PanPhy Labs] Replaced ${result.updated} outdated cached file(s) for app: ${currentAppGroup}`);
+    if (waitingWorker) {
+      // Its versions now differ from the active worker's, so the usual prompt applies.
+      handleUpdate(waitingWorker);
+      return;
+    }
+    // The active worker's cache is already corrected; Update only reloads the page.
+    updateNeeded = true;
+    showUpdateBanner(null, '');
+  };
+
   const registerServiceWorker = async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
@@ -278,13 +308,14 @@
       });
 
       // Check for updates while the page is open: every few minutes while it is
-      // visible, and whenever it is shown, focused or back online. Each check only
-      // fetches sw.js, and checks less than a minute apart are skipped.
+      // visible, and whenever it is shown, focused or back online. Each check
+      // fetches sw.js, then lets the worker decide whether its cached copies of this
+      // app are due for a comparison; checks less than a minute apart are skipped.
       let lastUpdateCheck = 0;
       const update = () => {
         if (document.visibilityState !== 'visible' || Date.now() - lastUpdateCheck < UPDATE_CHECK_MIN_GAP_MS) return;
         lastUpdateCheck = Date.now();
-        registration.update().catch(() => { });
+        registration.update().catch(() => { }).then(() => verifyFreshness(registration));
       };
       update();
       setInterval(update, UPDATE_CHECK_INTERVAL_MS);
