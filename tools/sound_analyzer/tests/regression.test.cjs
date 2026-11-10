@@ -12,7 +12,7 @@ function loadAnalyzer() {
   const elements = new Map();
   const element = (id) => {
     if (!elements.has(id)) elements.set(id, {
-      textContent: '', disabled: false, style: {}, value: '', classList: { toggle() {} },
+      textContent: '', disabled: false, style: {}, value: '', classList: { toggle() {} }, children: [],
       getContext: () => ({}), addEventListener() {}, removeAttribute() {},
       setAttribute(name, value) { this[name] = value; },
       getBoundingClientRect: () => ({ width: 900, height: 300 })
