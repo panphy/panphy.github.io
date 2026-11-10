@@ -3162,14 +3162,15 @@ h1.neo-wordmark {
 	display: none;
 }
 
+/* A maximized section keeps its own single-column layout (see Maximized section). */
 @media (min-width: 1280px) {
-	.neo-app[data-chart="bar"] .neo-workspace {
+	.neo-app[data-chart="bar"]:not([data-maximized]) .neo-workspace {
 		grid-template-columns: minmax(300px, var(--data-fr, 1fr)) 12px minmax(420px, var(--rest-fr, 1.6fr));
 	}
 }
 
 @media (min-width: 1000px) and (max-width: 1279px) {
-	.neo-app[data-chart="bar"] .neo-pane-graph {
+	.neo-app[data-chart="bar"]:not([data-maximized]) .neo-pane-graph {
 		flex: 1;
 		height: auto;
 		min-height: 420px;
@@ -3275,6 +3276,40 @@ h1.neo-wordmark {
 .neo-summary-uncertainty .neo-summary-cell {
 	font-weight: 500;
 	color: var(--ink-2);
+}
+
+/* The row under the last reading that adds another, like the + column at the right. */
+.neo-table .neo-add-row th,
+.neo-table .neo-add-row td {
+	background: var(--surface) !important;
+}
+
+.neo-table .neo-add-row .neo-row-head button {
+	width: 28px;
+	height: 28px;
+	min-height: 28px;
+	margin: 4px auto;
+	display: block;
+	border-radius: 50%;
+	border: 1px dashed var(--line-strong);
+	color: var(--ink-2);
+	font-family: var(--font-body);
+	font-size: 1.05rem;
+	line-height: 1;
+}
+
+.neo-table .neo-add-row .neo-row-head button:hover {
+	border-style: solid;
+	border-color: var(--accent);
+	color: var(--accent);
+	background: var(--accent-soft);
+}
+
+.neo-add-row-fill {
+	padding: 0 10px !important;
+	font-size: 0.78rem;
+	color: var(--ink-3);
+	cursor: pointer;
 }
 
 .neo-empty-art-bar,
