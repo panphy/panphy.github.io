@@ -470,7 +470,7 @@
 <summary>Entering data</summary>
 <div class="reference-body">
 <h3>Typing</h3>
-		<p>Tap a cell and type a number such as <code>1.25</code>, <code>-0.4</code> or <code>3e-5</code>. Arrow keys and <kbd>Enter</kbd> move between cells, and <kbd>Enter</kbd> on the last row adds a row. Commas and units in a cell are not numbers: the cell turns red, is kept, and is left out of the graph.</p>
+		<p>Tap a cell and type a number such as <code>1.25</code>, <code>-0.4</code> or <code>3e-5</code>. Arrow keys and <kbd>Enter</kbd> move between cells. The <kbd>+</kbd> under the last row adds a row, as does <strong>Row</strong> in the toolbar or <kbd>Enter</kbd> on the last row. Commas and units in a cell are not numbers: the cell turns red, is kept, and is left out of the graph.</p>
 		<p>To give every reading the same uncertainty, such as ±0.05 s, add a ±ΔY column and use <strong>Fill with one value…</strong> from its <kbd>⋯</kbd> menu. It fills only the rows that have a reading in the column the uncertainty belongs to, and says how many before it does; rows without a reading stay empty. If you add readings later, fill the column again. For a column that is not an uncertainty, it fills the rows that have any data.</p>
 		<h3>Pasting from a spreadsheet</h3>
 		<p>Copy a block of cells in a spreadsheet, tap the cell where it should start and paste. Rows and columns are added as needed. If you paste into the top row and the first row of the block is text, such as <code>L / m</code> or <code>T (s)</code>, it becomes the column names and units.</p>
@@ -636,7 +636,7 @@
 			<li>One bar is drawn for each column, as tall as its mean, in the order of the columns.</li>
 			<li>The value axis is titled <em>name / unit</em> from <strong>Value axis</strong> and <strong>Unit</strong>, and the bars axis from <strong>Bars axis</strong>.</li>
 			<li>The title follows those names until you type your own; clear it to return to the automatic title.</li>
-			<li>The value axis starts from zero when it scales itself. The toolbar above the graph zooms and pans the value axis only; Reset axes, the last button, returns to the automatic view.</li>
+			<li>The value axis starts from zero and scales itself to the tallest bar. <strong>Auto-scale</strong>, the one button above the graph, fits the axis closely to the bars instead, which separates bars of similar height; press it again to start from zero. A bar chart does not zoom or pan.</li>
 			<li>Hover over or tap a bar to read its mean, its uncertainty and how many readings it comes from.</li>
 			<li><strong>LaTeX mode</strong> typesets bar names, axis titles and the graph title: a unit of <code>m s^{-1}</code> reads as m s⁻¹.</li>
 		</ul>

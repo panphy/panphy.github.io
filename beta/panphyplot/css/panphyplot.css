@@ -3278,7 +3278,7 @@ h1.neo-wordmark {
 	color: var(--ink-2);
 }
 
-/* The row under the last reading that adds another, like the + column at the right. */
+/* The row under the last one that adds another, like the + column at the right. */
 .neo-table .neo-add-row th,
 .neo-table .neo-add-row td {
 	background: var(--surface) !important;

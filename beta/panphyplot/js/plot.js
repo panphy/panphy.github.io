@@ -1008,7 +1008,43 @@
 		};
 	}
 
-	// Bars are measured from zero and their axis is a list of names, so only the value axis zooms.
+	// A bar chart does not zoom or pan: its bars axis is a list of names, and both axes are fixed.
+	// Its one button, Auto-scale, fits the value axis closely to the bars (and their error bars) so
+	// that bars of similar height can be told apart; pressing it again starts the axis from zero.
+	function scaleBarsToData(gd) {
+		if (gd.layout?.yaxis?.autorange === false) {
+			Plotly.relayout(gd, { 'yaxis.autorange': true });
+			return;
+		}
+		let min = Infinity;
+		let max = -Infinity;
+		(Array.isArray(gd.data) ? gd.data : []).forEach((trace) => {
+			if (trace.type !== 'bar' || trace.visible === false || trace.visible === 'legendonly') return;
+			trace.y.forEach((value, index) => {
+				if (!Number.isFinite(value)) return;
+				const error = trace.error_y?.visible ? Number(trace.error_y.array?.[index]) || 0 : 0;
+				min = Math.min(min, value - error);
+				max = Math.max(max, value + error);
+			});
+		});
+		if (!Number.isFinite(min) || !Number.isFinite(max)) return;
+		const padding = max > min ? (max - min) * 0.08 : Math.abs(max) * 0.05 || 1;
+		Plotly.relayout(gd, { 'yaxis.autorange': false, 'yaxis.range': [min - padding, max + padding] });
+	}
+
+	function barConfig() {
+		return {
+			responsive: true,
+			displayModeBar: true,
+			displaylogo: false,
+			modeBarButtons: [[{
+				name: 'Auto-scale to the bars, or back to zero',
+				icon: Plotly.Icons.autoscale,
+				click: scaleBarsToData
+			}]]
+		};
+	}
+
 	function buildBarLayout(titleText, xTitle, yTitle, labels, options = {}) {
 		const layout = buildLayout(titleText, xTitle, yTitle, options);
 		layout.xaxis = {
@@ -1024,6 +1060,7 @@
 			range: [-0.5, Math.max(labels.length, 1) - 0.5],
 			fixedrange: true
 		};
+		layout.yaxis.fixedrange = true;
 		layout.bargap = 0.28;
 		layout.bargroupgap = 0.06;
 		if (options.grouped) layout.barmode = 'group';
@@ -1035,6 +1072,7 @@
 		const data = [barTrace(bars.map(bar => ({ bar, errors: sheet.errorBars })), getBarColor(), themeSettings)];
 		const layout = applyThemeLayout(buildBarLayout(getSheetTitle(sheet), barCategoryAxisText(sheet), barValueAxisText(sheet),
 			bars.map(bar => barLabel(bar.label)), { showlegend: false }), themeSettings);
+		// An auto-scaled value axis is remembered with the sheet, as a scatter graph's zoom is.
 		const view = PlotModel.normalizeGraphView(sheet.graphView).yaxis;
 		if (view) {
 			layout.yaxis.autorange = false;
@@ -1043,7 +1081,7 @@
 		const element = document.getElementById('plot');
 		element.dataset.viewSheet = sheet.id;
 		element.dataset.exportTitle = processLabel(getSheetTitle(sheet) || '');
-		reactIfChanged('plot', data, layout, createDownloadImageConfig(sheet.name || 'bar_chart'));
+		reactIfChanged('plot', data, layout, barConfig());
 		bindLegendToggle('plot');
 		bindGraphView(element);
 		const empty = document.getElementById('graph-empty');
@@ -1079,7 +1117,7 @@
 		if (inputs.y.dataset.edited !== 'true') inputs.y.value = first ? barValueAxisText(first) : '';
 		const layout = applyThemeLayout(buildBarLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim(), groups,
 			{ showTitle: true, showlegend: series.length > 1, grouped: true }), themeSettings);
-		reactIfChanged('popup-plot', data, layout, createDownloadImageConfig('combined_plot'));
+		reactIfChanged('popup-plot', data, layout, barConfig());
 		bindLegendToggle('popup-plot');
 	}
 
