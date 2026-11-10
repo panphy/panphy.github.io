@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 	window.addEventListener('panphy:theme-change', () => {
+		// An open colors popover shows the other theme's swatches.
+		closeMenu();
 		forceReplot();
 		plotGraph();
 		// Series colors differ between the themes' palettes.

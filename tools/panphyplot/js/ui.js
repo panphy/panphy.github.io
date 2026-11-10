@@ -296,7 +296,7 @@ function renderSeriesList() {
 	const series = PlotModel.getSeries(sheet);
 	// Typing in a cell refreshes this card on every keystroke; rebuild (and re-typeset) only on change.
 	const signature = JSON.stringify([latexMode, sheet.id, sheet.hiddenSeries, series.map(entry => [
-		describeSeries(sheet, entry), getSeriesColor(sheet, entry.id), PlotModel.getSeriesPoints(sheet, entry).length,
+		describeSeries(sheet, entry), getSeriesLook(sheet, entry.id), PlotModel.getSeriesPoints(sheet, entry).length,
 		datasetFitResults[makeFitKey(sheet, entry.id)]?.stale ?? null
 	])]);
 	if (list.dataset.signature === signature) return;
@@ -316,10 +316,22 @@ function renderSeriesList() {
 		const visible = !sheet.hiddenSeries.includes(entry.id);
 		button.setAttribute('aria-pressed', String(visible));
 		button.title = visible ? 'Hide this series on the graph' : 'Show this series on the graph';
-		const color = getSeriesColor(sheet, entry.id);
-		const swatch = document.createElement('span');
-		swatch.className = 'neo-series-swatch';
-		swatch.style.setProperty('--series-color', color || 'var(--line-strong)');
+		item.className = 'neo-series-row';
+		item.classList.toggle('is-hidden', !visible);
+		// The swatch is the series' color and shape, and opens their choices.
+		const look = getSeriesLook(sheet, entry.id);
+		const swatch = document.createElement('button');
+		swatch.type = 'button';
+		swatch.className = 'neo-series-style';
+		swatch.dataset.seriesId = entry.id;
+		swatch.style.setProperty('--series-color', look?.color || 'var(--line-strong)');
+		swatch.title = 'Choose the color and shape';
+		swatch.setAttribute('aria-label', `Color and shape of ${describeSeries(sheet, entry)}`);
+		swatch.setAttribute('aria-haspopup', 'dialog');
+		swatch.setAttribute('aria-expanded', 'false');
+		swatch.disabled = !entry.xCol;
+		swatch.appendChild(symbolIcon(look?.symbol || 'circle'));
+		swatch.addEventListener('click', () => openStylePopover(swatch, sheet, entry.yCol));
 		const name = document.createElement('span');
 		name.className = 'neo-series-name';
 		setSeriesText(name, sheet, entry);
@@ -328,7 +340,7 @@ function renderSeriesList() {
 		meta.className = 'neo-series-meta';
 		const count = PlotModel.getSeriesPoints(sheet, entry).length;
 		meta.textContent = `${count} ${count === 1 ? 'pt' : 'pts'}`;
-		button.append(swatch, name);
+		button.append(name);
 		const result = datasetFitResults[makeFitKey(sheet, entry.id)];
 		if (result) {
 			const badge = document.createElement('span');
@@ -345,7 +357,7 @@ function renderSeriesList() {
 			else hidden.push(entry.id);
 			onSeriesVisibilityChange(sheet);
 		});
-		item.appendChild(button);
+		item.append(swatch, button);
 		return item;
 	}));
 }
@@ -578,7 +590,7 @@ function buildHeaderCell(sheet, column, index) {
 	th.className = `neo-col-head role-${bar ? 'bar' : column.role}`;
 	th.dataset.columnId = column.id;
 	// A Y column's head wears its series color from the graph.
-	const seriesColor = bar ? getBarColor() : column.role === 'Y' ? getSeriesColor(sheet, column.id) : null;
+	const seriesColor = bar ? getBarColor(sheet, column.id) : column.role === 'Y' ? getSeriesColor(sheet, column.id) : null;
 	if (seriesColor) th.style.setProperty('--series-color', seriesColor);
 
 	const top = document.createElement('div');
@@ -1317,6 +1329,10 @@ function closeMenu() {
 	if (!menu || menu.hidden) return;
 	menu.hidden = true;
 	menu.replaceChildren();
+	menu.classList.remove('neo-style-pop');
+	menu.setAttribute('role', 'menu');
+	menu.removeAttribute('aria-label');
+	stylePopover = null;
 	if (menuOpener && menuOpener.hasAttribute('aria-expanded')) menuOpener.setAttribute('aria-expanded', 'false');
 	if (menuOpener && menuOpener.isConnected) menuOpener.focus();
 	menuOpener = null;
@@ -1350,6 +1366,13 @@ function openMenu(opener, items) {
 		});
 		menu.appendChild(button);
 	});
+	showMenu(menu, opener);
+	const first = menu.querySelector('button:not(:disabled)');
+	if (first) first.focus();
+}
+
+// Shows the filled menu under its opener, or above it where there is no room below.
+function showMenu(menu, opener) {
 	menuOpener = opener;
 	if (opener.hasAttribute('aria-expanded')) opener.setAttribute('aria-expanded', 'true');
 	menu.hidden = false;
@@ -1361,8 +1384,176 @@ function openMenu(opener, items) {
 	const top = below + height > window.innerHeight - 8 ? Math.max(8, rect.top - height - 4) : below;
 	menu.style.left = `${left}px`;
 	menu.style.top = `${top}px`;
-	const first = menu.querySelector('button:not(:disabled)');
-	if (first) first.focus();
+}
+
+/* ---------- Colors and shapes ---------- */
+
+// The popover that is open, so that a choice can redraw it in place: { sheet, column }.
+let stylePopover = null;
+
+const SYMBOL_PATHS = {
+	circle: 'M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2Z',
+	square: 'M2.75 2.75h10.5v10.5H2.75Z',
+	diamond: 'M8 1.25 14.75 8 8 14.75 1.25 8Z',
+	'triangle-up': 'M8 2 14.75 13.5H1.25Z',
+	'triangle-down': 'M8 14 1.25 2.5h13.5Z',
+	star: 'M8 1.2l2 4.5 4.9.5-3.7 3.3 1.1 4.8L8 11.8l-4.3 2.5 1.1-4.8L1.1 6.2l4.9-.5Z',
+	cross: 'M6 1.5h4V6h4.5v4H10v4.5H6V10H1.5V6H6Z'
+};
+
+// A marker shape as a small icon, in the current text color.
+function symbolIcon(symbol) {
+	const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+	svg.setAttribute('viewBox', '0 0 16 16');
+	svg.setAttribute('aria-hidden', 'true');
+	svg.classList.add('neo-symbol-icon');
+	const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+	path.setAttribute('d', SYMBOL_PATHS[symbol] || SYMBOL_PATHS.circle);
+	svg.appendChild(path);
+	return svg;
+}
+
+// A row of choices: each is { key, label, color (a swatch) or symbol (a shape) or text, pressed }.
+function styleRow(title, choices, onChoose, options = {}) {
+	const row = document.createElement('div');
+	row.className = 'neo-style-row';
+	row.setAttribute('role', 'group');
+	row.setAttribute('aria-label', title);
+	const heading = document.createElement('span');
+	heading.className = 'neo-style-label';
+	heading.textContent = title;
+	const list = document.createElement('div');
+	list.className = 'neo-style-choices';
+	choices.forEach((choice) => {
+		const button = document.createElement('button');
+		button.type = 'button';
+		button.className = 'neo-style-choice';
+		button.dataset.choice = `${options.id}:${choice.key}`;
+		button.title = choice.label;
+		button.setAttribute('aria-label', choice.label);
+		button.setAttribute('aria-pressed', String(!!choice.pressed));
+		button.disabled = !!options.disabled;
+		if (choice.color) {
+			button.classList.add('is-swatch');
+			button.style.setProperty('--swatch', choice.color);
+		} else if (choice.symbol) {
+			button.appendChild(symbolIcon(choice.symbol));
+		} else {
+			button.classList.add('is-text');
+			button.textContent = choice.text;
+		}
+		button.addEventListener('click', () => onChoose(choice.key));
+		list.appendChild(button);
+	});
+	row.append(heading, list);
+	if (options.note) {
+		const note = document.createElement('span');
+		note.className = 'neo-style-note';
+		note.textContent = options.note;
+		row.appendChild(note);
+	}
+	return row;
+}
+
+// After a color or shape changes: the graph, the color keys and the open popover follow, and
+// the table keeps its cells (only its headings' colors change).
+function applyStyleChange(change) {
+	const focused = document.activeElement?.dataset?.choice || null;
+	change();
+	const sheet = getActiveSheet();
+	document.querySelectorAll('#neo-table-head .neo-col-head[data-column-id]').forEach((th) => {
+		const column = sheet.columns.find(entry => entry.id === th.dataset.columnId);
+		if (!column) return;
+		const color = PlotModel.isBarSheet(sheet) ? getBarColor(sheet, column.id) : column.role === 'Y' ? getSeriesColor(sheet, column.id) : null;
+		if (color) th.style.setProperty('--series-color', color);
+		else th.style.removeProperty('--series-color');
+	});
+	plotGraph();
+	refreshWorkspaceChrome();
+	const popup = document.getElementById('popup-container');
+	if (popup && popup.style.display === 'block') plotAllSheets();
+	scheduleSaveState();
+	if (!stylePopover) return;
+	// The Series card was redrawn, so a popover opened from it belongs to a new swatch button.
+	if (menuOpener && !menuOpener.isConnected && menuOpener.dataset.seriesId) {
+		menuOpener = document.querySelector(`.neo-series-style[data-series-id="${menuOpener.dataset.seriesId}"]`);
+		if (menuOpener) menuOpener.setAttribute('aria-expanded', 'true');
+	}
+	fillStylePopover();
+	const menu = document.getElementById('neo-menu');
+	const again = focused ? [...menu.querySelectorAll('[data-choice]')].find(button => button.dataset.choice === focused && !button.disabled) : null;
+	(again || menu.querySelector('button:not(:disabled)'))?.focus();
+}
+
+function fillStylePopover() {
+	const menu = document.getElementById('neo-menu');
+	const { sheet, column } = stylePopover;
+	const bar = PlotModel.isBarSheet(sheet);
+	const style = column.style;
+	const colors = PlotModel.STYLE_COLORS;
+	const label = PlotModel.getColumnLabel(sheet, column);
+	menu.setAttribute('aria-label', bar ? `Color of bar ${label}` : `Color and shape of ${label}`);
+	const rows = [];
+	const reset = document.createElement('button');
+	reset.type = 'button';
+	reset.className = 'neo-style-reset';
+	reset.dataset.choice = 'reset';
+	if (bar) {
+		const current = PlotModel.assignBarColors(sheet)[sheet.columns.indexOf(column)].color;
+		rows.push(styleRow('Bar', colors.map(key => ({ key, label: SWATCH_LABELS[key], color: swatchColor(key), pressed: key === current })),
+			key => applyStyleChange(() => { style.color = key; }), { id: 'color' }));
+		const varied = document.createElement('button');
+		varied.type = 'button';
+		varied.className = 'neo-style-toggle';
+		varied.dataset.choice = 'varied';
+		varied.setAttribute('aria-pressed', String(!!sheet.variedBars));
+		varied.textContent = 'Color every bar differently';
+		varied.title = 'Give each bar of this sheet its own color';
+		varied.addEventListener('click', () => applyStyleChange(() => { sheet.variedBars = !sheet.variedBars; }));
+		rows.push(varied);
+		reset.textContent = 'Reset this bar';
+		reset.disabled = !style.color;
+		reset.addEventListener('click', () => applyStyleChange(() => { style.color = ''; }));
+	} else {
+		const look = getSeriesLook(sheet, column.id);
+		const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
+		const current = PlotModel.assignSeriesColors(series.map(entry => entry.yCol))[series.findIndex(entry => entry.id === column.id)]?.color;
+		const fitted = !!fittedCurves[makeFitKey(sheet, column.id)];
+		rows.push(styleRow('Points', colors.map(key => ({ key, label: SWATCH_LABELS[key], color: swatchColor(key), pressed: key === current })),
+			key => applyStyleChange(() => { style.color = key; }), { id: 'color' }));
+		rows.push(styleRow('Shape', PlotModel.STYLE_SYMBOLS.map(key => ({ key, label: SYMBOL_LABELS[key], symbol: key, pressed: key === look?.symbol })),
+			key => applyStyleChange(() => { style.symbol = key; }), { id: 'symbol' }));
+		rows.push(styleRow('Fit line', [{ key: '', label: 'Automatic: a color that contrasts with the points', text: 'Auto', pressed: !style.fitColor }]
+			.concat(colors.map(key => ({ key, label: SWATCH_LABELS[key], color: swatchLineColor(key), pressed: key === style.fitColor }))),
+			key => applyStyleChange(() => { style.fitColor = key; }),
+			{ id: 'fit', disabled: !fitted, note: fitted ? '' : 'Fit this series to choose its line color.' }));
+		reset.textContent = 'Reset';
+		reset.disabled = !PlotModel.hasStyle(column);
+		reset.addEventListener('click', () => applyStyleChange(() => { column.style = PlotModel.normalizeStyle(); }));
+	}
+	reset.title = 'Back to the automatic colors';
+	const foot = document.createElement('div');
+	foot.className = 'neo-style-foot';
+	foot.appendChild(reset);
+	menu.replaceChildren(...rows, foot);
+}
+
+// The color (and for a scatter series the shape and fit line color) of one Y column or bar.
+function openStylePopover(opener, sheet, column) {
+	const menu = document.getElementById('neo-menu');
+	if (!menu) return;
+	if (!menu.hidden && menuOpener === opener) {
+		closeMenu();
+		return;
+	}
+	closeMenu();
+	column.style = PlotModel.normalizeStyle(column.style);
+	stylePopover = { sheet, column };
+	menu.classList.add('neo-style-pop');
+	menu.setAttribute('role', 'dialog');
+	fillStylePopover();
+	showMenu(menu, opener);
+	(menu.querySelector('[aria-pressed="true"]:not(:disabled)') || menu.querySelector('button:not(:disabled)'))?.focus();
 }
 
 function openColumnMenu(opener, sheet, column) {
@@ -1372,6 +1563,11 @@ function openColumnMenu(opener, sheet, column) {
 		{ label: 'Move left', disabled: index === 0, action: () => moveColumn(sheet, column, -1) },
 		{ label: 'Move right', disabled: index === sheet.columns.length - 1, action: () => moveColumn(sheet, column, 1) },
 		{ label: 'Insert column to the right', action: () => insertColumnAfter(sheet, column) },
+		...(PlotModel.isBarSheet(sheet)
+			? [{ label: 'Bar color…', action: () => openStylePopover(opener, sheet, column) }]
+			: column.role === 'Y' && PlotModel.findSeries(sheet, column.id)?.xCol
+				? [{ label: 'Color and shape…', action: () => openStylePopover(opener, sheet, column) }]
+				: []),
 		...(PlotModel.isPropagatedColumn(column)
 			? [{ label: 'Edit its formula…', disabled: !getFormulaSource(column, sheet), action: () => openFormulaDialog(getFormulaSource(column, sheet)) }]
 			: [{ label: PlotModel.isFormulaColumn(column) ? 'Edit formula…' : 'Set formula…', action: () => openFormulaDialog(column) }]),
@@ -2342,11 +2538,13 @@ function initializeInterface() {
 		}
 	});
 	document.getElementById('neo-menu').addEventListener('keydown', (event) => {
-		if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+		// In the colors and shapes popover the choices lie in rows, so Left and Right move too.
+		const sideways = event.currentTarget.classList.contains('neo-style-pop') && (event.key === 'ArrowLeft' || event.key === 'ArrowRight');
+		if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && !sideways) return;
 		event.preventDefault();
 		const items = [...event.currentTarget.querySelectorAll('button:not(:disabled)')];
 		const index = items.indexOf(document.activeElement);
-		const next = items[(index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length];
+		const next = items[(index + (event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1) + items.length) % items.length];
 		if (next) next.focus();
 	});
 	window.addEventListener('resize', closeMenu);

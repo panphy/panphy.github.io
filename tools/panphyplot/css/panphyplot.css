@@ -1671,18 +1671,53 @@ input[type="number"]:focus {
 	opacity: 0.9;
 }
 
-.neo-series-swatch {
-	width: 14px;
-	height: 14px;
-	flex: none;
-	border-radius: 50%;
-	border: 2px solid var(--series-color);
-	background: var(--series-color);
-	transition: background-color 0.15s ease;
+.neo-series-row {
+	display: flex;
+	align-items: center;
+	gap: 2px;
 }
 
-.neo-series-item[aria-pressed="false"] .neo-series-swatch {
-	background: transparent;
+.neo-series-row .neo-series-item {
+	flex: 1;
+	width: auto;
+	min-width: 0;
+}
+
+/* The swatch: the series' color and shape, and the button that opens their choices. */
+.neo-series-style {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: none;
+	border-radius: 8px;
+	background: none;
+	color: var(--series-color);
+	cursor: pointer;
+}
+
+.neo-series-style:hover:not(:disabled),
+.neo-series-style[aria-expanded="true"] {
+	background: var(--surface-3);
+}
+
+.neo-series-style:disabled {
+	cursor: default;
+}
+
+.neo-symbol-icon {
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
+	stroke: currentColor;
+	stroke-width: 1.5;
+	stroke-linejoin: round;
+}
+
+.neo-series-row.is-hidden .neo-series-style .neo-symbol-icon {
+	fill: transparent;
 }
 
 .neo-series-item[aria-pressed="false"] .neo-series-name {
@@ -2254,6 +2289,113 @@ input[type="number"]:focus {
 	height: 1px;
 	margin: 4px 6px;
 	background: var(--line);
+}
+
+/* Colors and shapes: the same floating panel as a menu, holding rows of choices. */
+.neo-menu.neo-style-pop {
+	gap: 10px;
+	width: min(400px, calc(100vw - 16px));
+	padding: 12px;
+}
+
+.neo-style-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.neo-style-label {
+	color: var(--ink-2);
+	font-size: 0.74rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.neo-style-note {
+	color: var(--ink-3);
+	font-size: 0.76rem;
+}
+
+.neo-style-choices {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+}
+
+.neo-menu.neo-style-pop .neo-style-choice {
+	display: grid;
+	place-items: center;
+	width: 32px;
+	min-height: 34px;
+	padding: 0;
+	border: 2px solid transparent;
+	border-radius: 10px;
+	color: var(--ink);
+	text-align: center;
+}
+
+.neo-menu.neo-style-pop .neo-style-choice.is-text {
+	width: auto;
+	padding: 0 8px;
+	font-size: 0.8rem;
+	font-weight: 600;
+}
+
+.neo-style-choice.is-swatch::before {
+	content: "";
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: var(--swatch);
+}
+
+.neo-menu.neo-style-pop .neo-style-choice[aria-pressed="true"] {
+	border-color: var(--accent);
+	background: var(--accent-soft);
+}
+
+.neo-menu.neo-style-pop .neo-style-choice:disabled {
+	opacity: 0.4;
+}
+
+.neo-menu.neo-style-pop .neo-style-toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+}
+
+.neo-style-toggle::before {
+	content: "";
+	flex: none;
+	width: 16px;
+	height: 16px;
+	border: 2px solid var(--line-strong);
+	border-radius: 4px;
+}
+
+.neo-style-toggle[aria-pressed="true"]::before {
+	border-color: var(--accent);
+	background: var(--accent);
+	box-shadow: inset 0 0 0 2px var(--surface);
+}
+
+.neo-style-foot {
+	display: flex;
+	justify-content: flex-end;
+	padding-top: 6px;
+	border-top: 1px solid var(--line);
+}
+
+.neo-menu.neo-style-pop .neo-style-reset {
+	min-height: 34px;
+	padding: 4px 12px;
+	color: var(--ink-2);
+	font-size: 0.84rem;
+}
+
+.neo-menu.neo-style-pop .neo-style-reset:disabled {
+	opacity: 0.45;
 }
 
 /* ---------- Dialogs ---------- */
@@ -2897,6 +3039,24 @@ input[type="number"]:focus {
 	.tablink,
 	.neo-series-item,
 	.neo-menu button {
+		min-height: 44px;
+	}
+
+	.neo-series-style {
+		width: 44px;
+		height: 44px;
+	}
+
+	.neo-menu.neo-style-pop {
+		width: min(440px, calc(100vw - 16px));
+	}
+
+	.neo-menu.neo-style-pop .neo-style-choice {
+		width: 44px;
+		min-height: 44px;
+	}
+
+	.neo-menu.neo-style-pop .neo-style-reset {
 		min-height: 44px;
 	}
 
