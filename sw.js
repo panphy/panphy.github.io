@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-10T20:18:25Z';
+const BUILD_ID = '2026-11-10T21:08:12Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -20,6 +20,11 @@ const STABLE_ASSETS = [
 const STABLE_ASSET_SET = new Set(STABLE_ASSETS);
 // Per-app content versions, stored in the precache so they survive worker restarts.
 const APP_VERSIONS_KEY = '/__app-versions__';
+// When this precache was filled and when each app's files were last compared
+// with the server (see verifyAppFiles).
+const PRECACHE_META_KEY = '/__precache-meta__';
+const VERIFY_SETTLE_MS = 15 * 60 * 1000;
+const VERIFY_INTERVAL_MS = 60 * 60 * 1000;
 const CORS_REQUIRED_ASSETS = new Set([
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
@@ -479,6 +484,83 @@ async function getAppVersions() {
   return storeAppVersions();
 }
 
+async function readPrecacheMeta(cache) {
+  try {
+    const stored = await cache.match(PRECACHE_META_KEY);
+    if (stored) return { installedAt: 0, verified: {}, ...(await stored.json()) };
+  } catch (error) {
+    // Start again below.
+  }
+  return { installedAt: 0, verified: {} };
+}
+
+function writePrecacheMeta(cache, meta) {
+  return cache.put(PRECACHE_META_KEY, new Response(JSON.stringify(meta), {
+    headers: { 'Content-Type': 'application/json' }
+  }));
+}
+
+// A deployment reaches GitHub's servers one at a time, so a worker installing
+// during one can receive the new sw.js but old copies of other files. Those would
+// stay in the precache, unnoticed, until the next build. To recover, compare one
+// app's precached files (and the shared ones) with the server and replace any that
+// differ. The page then offers a reload. Runs at most once an hour per app, and not
+// until the deployment that installed this worker has had time to finish.
+async function verifyAppFilesNow(group) {
+  const cache = await caches.open(PRECACHE_NAME);
+  const meta = await readPrecacheMeta(cache);
+  const now = Date.now();
+  if (now - meta.installedAt < VERIFY_SETTLE_MS || now - (meta.verified[group] || 0) < VERIFY_INTERVAL_MS) {
+    return { checked: false, updated: 0 };
+  }
+
+  const urls = ASSETS_TO_CACHE
+    .filter((url) => !STABLE_ASSET_SET.has(url))
+    .map((url) => new URL(url, self.location.origin))
+    .filter((url) => url.origin === self.location.origin)
+    .filter((url) => [group, 'shared'].includes(getAssetGroup(url.pathname)));
+
+  let fresh;
+  try {
+    fresh = await Promise.all(urls.map(async (url) => {
+      const res = await fetch(new Request(url.href, { cache: 'no-cache' }));
+      const isPage = url.pathname.endsWith('/') || url.pathname.endsWith('.html');
+      // Never replace a file with an error page or a network login page.
+      if (!res.ok || (!isPage && (res.headers.get('Content-Type') || '').includes('text/html'))) {
+        throw new Error(`Unexpected response for ${url.pathname}`);
+      }
+      const cached = await cache.match(url.href);
+      const [freshHash, cachedHash] = await Promise.all([
+        sha256Hex(await res.clone().arrayBuffer()),
+        cached ? sha256Hex(await cached.arrayBuffer()) : ''
+      ]);
+      return freshHash === cachedHash ? null : { href: url.href, res };
+    }));
+  } catch (error) {
+    // Offline or a partial answer: change nothing and try again next time.
+    return { checked: false, updated: 0 };
+  }
+
+  const changed = fresh.filter(Boolean);
+  await Promise.all(changed.map(({ href, res }) => cache.put(href, res)));
+  if (changed.length) {
+    await storeAppVersions();
+  }
+  const latestMeta = await readPrecacheMeta(cache);
+  latestMeta.verified[group] = now;
+  await writePrecacheMeta(cache, latestMeta);
+  return { checked: true, updated: changed.length };
+}
+
+const verifyPromises = new Map();
+
+function verifyAppFiles(group) {
+  if (!verifyPromises.has(group)) {
+    verifyPromises.set(group, verifyAppFilesNow(group).finally(() => verifyPromises.delete(group)));
+  }
+  return verifyPromises.get(group);
+}
+
 let precacheRepairPromise = null;
 
 function repairPrecache() {
@@ -501,6 +583,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     await cachePrecacheAssets();
     await storeAppVersions();
+    await writePrecacheMeta(await caches.open(PRECACHE_NAME), { installedAt: Date.now(), verified: {} });
   })());
 });
 
@@ -524,6 +607,18 @@ self.addEventListener('message', (event) => {
             }
           })
       );
+    } else if (event.data.type === 'VERIFY_APP') {
+      const replyPort = event.ports && event.ports[0];
+      if (replyPort && typeof event.data.group === 'string') {
+        event.waitUntil(
+          verifyAppFiles(event.data.group)
+            .catch((error) => {
+              console.warn('Freshness check failed:', error);
+              return { checked: false, updated: 0 };
+            })
+            .then((result) => replyPort.postMessage(result))
+        );
+      }
     } else if (event.data.type === 'GET_VERSION_MAP') {
       const replyPort = event.ports && event.ports[0];
       if (replyPort) {
