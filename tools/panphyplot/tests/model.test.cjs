@@ -516,3 +516,34 @@ test('a bar sheet exports and imports names without units', () => {
 	assert.deepEqual(target.columns.map(column => [column.name, column.unit]), [['Tennis / fuzzy', ''], ['Golf', '']]);
 	assert.deepEqual(model.getBars(target).map(bar => bar.mean), [52, 70]);
 });
+
+test('copying a sheet as the other kind carries names and values to a new sheet and leaves the original', () => {
+	const state = model.createState();
+	const ids = model.createIdSource(state);
+	const sheet = state.sheets[0];
+	sheet.name = 'Pendulum';
+	sheet.columns[0].name = 'L';
+	sheet.columns[0].unit = 'm';
+	sheet.columns[0].cells[0] = '0.2';
+	sheet.columns[1].name = 'T';
+	sheet.columns[1].formula = 'L*2';
+	sheet.columns[1].cells[6] = '0.9';
+	const before = JSON.stringify(sheet);
+
+	const bar = model.copySheetAs(sheet, ids, 'bar', 'Pendulum bar');
+	assert.equal(JSON.stringify(sheet), before);
+	assert.equal(model.isBarSheet(bar), true);
+	assert.notEqual(bar.id, sheet.id);
+	assert.equal(bar.name, 'Pendulum bar');
+	assert.equal(bar.rowCount, 7);
+	assert.deepEqual(bar.columns.map(column => [column.name, column.unit, column.formula]), [['L', '', ''], ['T', '', '']]);
+	assert.equal(bar.columns[0].cells[0], '0.2');
+	assert.equal(bar.columns[1].cells[6], '0.9');
+	assert.equal(bar.columns.every(column => !sheet.columns.some(entry => entry.id === column.id)), true);
+
+	const scatter = model.copySheetAs(bar, ids, 'scatter', '');
+	assert.equal(model.isBarSheet(scatter), false);
+	assert.equal(scatter.rowCount, model.DEFAULT_ROWS);
+	assert.deepEqual(scatter.columns.map(column => column.role), ['X', 'Y']);
+	assert.equal(scatter.columns[1].cells[6], '0.9');
+});

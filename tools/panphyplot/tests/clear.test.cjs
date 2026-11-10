@@ -61,3 +61,34 @@ test('an empty sheet with changed dimensions can reset to the default rows and c
 	assert.equal(vm.runInContext('sheet.columns.length', context), 2);
 	assert.equal(vm.runInContext('isBlankNewSheet(sheet)', context), true);
 });
+
+test('Scatter or Bar switches an empty sheet in place and offers a new sheet once there is data', () => {
+	const context = { window: { PanPhyPlotModel: model, addEventListener() {} }, document: { addEventListener() {} }, console };
+	vm.createContext(context);
+	for (const file of ['state.js', 'ui.js', 'dialogs.js']) {
+		vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), context);
+	}
+	vm.runInContext(`
+		let asked = null;
+		openChartTypeDialog = (type) => { asked = type; pendingChartType = type; };
+		closeMenu = closeDialog = applyChartMode = renderTable = forceReplot = syncTitleInput = showToast = afterDataChange = () => {};
+		switchSheet = (index) => { plotState.activeSheet = index; };
+	`, context);
+	context.setSheetChartType('bar');
+	assert.equal(vm.runInContext('asked', context), null);
+	assert.equal(vm.runInContext('PlotModel.isBarSheet(getActiveSheet())', context), true);
+
+	vm.runInContext(`getActiveSheet().columns[0].name = 'Tennis'; getActiveSheet().columns[0].cells[0] = '54';`, context);
+	context.setSheetChartType('scatter');
+	assert.equal(vm.runInContext('asked', context), 'scatter');
+	assert.equal(vm.runInContext('plotState.sheets.length === 1 && PlotModel.isBarSheet(plotState.sheets[0])', context), true);
+
+	context.applyChartTypeChoice(true);
+	assert.equal(vm.runInContext('plotState.sheets.length', context), 2);
+	assert.equal(vm.runInContext('PlotModel.isBarSheet(plotState.sheets[0]) && plotState.sheets[0].columns[0].cells[0] === "54"', context), true);
+	assert.equal(vm.runInContext('!PlotModel.isBarSheet(plotState.sheets[1]) && plotState.sheets[1].columns[0].cells[0] === "54" && plotState.activeSheet === 1', context), true);
+
+	vm.runInContext(`plotState.activeSheet = 0; pendingChartType = 'scatter';`, context);
+	context.applyChartTypeChoice(false);
+	assert.equal(vm.runInContext('plotState.sheets.length === 3 && PlotModel.isSheetEmpty(plotState.sheets[2]) && !PlotModel.isBarSheet(plotState.sheets[2])', context), true);
+});

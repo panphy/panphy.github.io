@@ -241,6 +241,51 @@ function applyFormula() {
 	}
 }
 
+/* ---------- Scatter or Bar on a sheet with data ---------- */
+
+let pendingChartType = null;
+
+function openChartTypeDialog(type) {
+	const bar = type === 'bar';
+	const name = getSheetDisplayName(plotState.activeSheet);
+	pendingChartType = type;
+	document.getElementById('chart-type-dialog-title').textContent = bar ? 'Start a bar chart' : 'Start a scatter graph';
+	document.getElementById('chart-type-dialog-note').textContent = bar
+		? `"${name}" is a scatter sheet with data, so it stays a scatter graph. A bar chart goes on a new sheet.`
+		: `"${name}" is a bar sheet with data, so it stays a bar chart. A scatter graph goes on a new sheet.`;
+	document.getElementById('chart-type-blank-title').textContent = bar ? 'New blank bar sheet' : 'New blank scatter sheet';
+	document.getElementById('chart-type-blank-note').textContent = bar
+		? 'An empty table in which each column is a bar.'
+		: 'An empty table with columns x and y.';
+	document.getElementById('chart-type-copy-title').textContent = bar ? 'Copy this data to a new bar sheet' : 'Copy this data to a new scatter sheet';
+	document.getElementById('chart-type-copy-note').textContent = bar
+		? 'Each column becomes a bar, as tall as the mean of its values. Units, formulas and fits are not copied.'
+		: 'The first column becomes X and the others become Y. The axis titles are not copied.';
+	openDialog('chart-type-dialog');
+	document.getElementById('chart-type-blank').focus();
+}
+
+function applyChartTypeChoice(copy) {
+	const type = pendingChartType === 'bar' ? 'bar' : 'scatter';
+	const ids = PlotModel.createIdSource(plotState);
+	let sheet;
+	if (copy) {
+		const source = getActiveSheet();
+		const name = String(source.name || '').trim();
+		sheet = PlotModel.copySheetAs(source, ids, type, name ? `${name} ${type}` : '');
+	} else {
+		sheet = PlotModel.createSheet(ids, '');
+		PlotModel.setChartType(sheet, type);
+	}
+	pendingChartType = null;
+	plotState.sheets.push(sheet);
+	closeDialog('chart-type-dialog');
+	switchSheet(plotState.sheets.length - 1);
+	afterDataChange({ structure: true });
+	const kind = type === 'bar' ? 'bar' : 'scatter';
+	showToast(copy ? `Data copied to a new ${kind} sheet. The original sheet is unchanged.` : `New ${kind} sheet added. The original sheet is unchanged.`);
+}
+
 /* ---------- Clear ---------- */
 
 function isBlankNewSheet(sheet) {
@@ -587,6 +632,8 @@ function initializeDialogs() {
 			}
 		});
 	});
+	document.getElementById('chart-type-blank').addEventListener('click', () => applyChartTypeChoice(false));
+	document.getElementById('chart-type-copy').addEventListener('click', () => applyChartTypeChoice(true));
 	document.getElementById('clear-keep-columns').addEventListener('click', () => applyClear(false));
 	document.getElementById('clear-reset').addEventListener('click', () => applyClear(true));
 	document.getElementById('fill-apply').addEventListener('click', applyFill);

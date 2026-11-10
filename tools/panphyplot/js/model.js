@@ -220,7 +220,8 @@
 			&& sheet.columns.every((column, index) => column.name === names[index] && !column.unit && !column.formula);
 	}
 
-	// Switching keeps every cell, role, formula and fit, so switching back restores the other graph.
+	// The app switches a sheet in place only while its cells are empty (ui.js); a sheet with data
+	// keeps its kind, and copySheetAs makes the other kind on a new sheet.
 	// A bar sheet drops its blank rows at the end, down to three; an untouched new sheet swaps
 	// its x and y headings for unnamed bars, and back.
 	function setChartType(sheet, type) {
@@ -250,6 +251,26 @@
 	// One bar per column, in column order. Its height is the mean of the column's numbers; blank
 	// and invalid cells are left out, as mean() leaves them out of a formula. With two or more
 	// readings the uncertainty is half the spread between the largest and the smallest.
+	// A new sheet of the other kind holding this sheet's column names and cell values. Formulas
+	// become their values, and units, roles, uncertainty pairings and fits stay behind: a scatter
+	// copy reads the first column as X and the others as Y.
+	function copySheetAs(sheet, ids, type, name) {
+		const copy = createSheet(ids, name);
+		copy.chartType = CHART_TYPES.includes(type) ? type : 'scatter';
+		let last = -1;
+		sheet.columns.forEach((column) => {
+			column.cells.forEach((value, row) => { if (!isBlank(value) && row > last) last = row; });
+		});
+		const rowCount = Math.max(isBarSheet(copy) ? BAR_START_ROWS : DEFAULT_ROWS, last + 1);
+		copy.columns = sheet.columns.map((column, index) => createColumn(ids.next('c'), {
+			name: column.name,
+			role: index === 0 ? 'X' : 'Y',
+			cells: column.cells.slice(0, rowCount)
+		}, rowCount));
+		setRowCount(copy, rowCount);
+		return copy;
+	}
+
 	function getBars(sheet) {
 		return sheet.columns.map((column) => {
 			const values = [];
@@ -1088,6 +1109,7 @@
 		GROUP_MODES,
 		isBarSheet,
 		setChartType,
+		copySheetAs,
 		getBars,
 		hasBars,
 		getCombinedMode,
