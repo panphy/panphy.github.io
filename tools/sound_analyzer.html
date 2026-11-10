@@ -518,6 +518,9 @@
     .info-card strong { font: 500 .9rem var(--font-mono); white-space: nowrap; }
     .info-card-wide { grid-column: 1 / -1; flex-basis: 100%; }
     .info-card-wide strong { display: block; white-space: normal; font-size: .8rem; line-height: 1.5; }
+    /* Always two rows of two, so the panel never changes height as the values come and go. */
+    .info-card .multiples-grid { display: grid; grid-template-columns: repeat(2, max-content); grid-template-rows: repeat(2, 1.5em); column-gap: 2em; }
+    .info-card .multiples-grid span { display: inline; margin: 0; font: inherit; letter-spacing: normal; text-transform: none; color: inherit; white-space: nowrap; }
     .controls-panel { display: flex; flex-direction: column; margin: 0; overflow-y: auto; }
     .controls-panel > * { flex-shrink: 0; }
     .control-section { padding: 12px; }
@@ -607,7 +610,7 @@
       </div>
       <div id="peak-multiples" class="info-card info-card-wide" title="Whole-number multiples of the peak frequency, marked on the spectrum. A musical note has peaks at these frequencies if the strongest one is its first harmonic.">
         <span>Multiples of the peak</span>
-        <strong id="peak-multiples-value">--</strong>
+        <strong id="peak-multiples-value" class="multiples-grid"><span>--</span><span></span><span></span><span></span></strong>
       </div>
     </div>
 
@@ -745,6 +748,15 @@
   const tooltip = document.getElementById('tooltip');
   const peakFreqDisplay = document.getElementById('peak-frequency-value');
   const peakMultiplesDisplay = document.getElementById('peak-multiples-value');
+  // The 2× to 5× multiples, one per cell; '--' in the first cell when there are none.
+  function showMultiples(multiples) {
+    const cells = peakMultiplesDisplay.children;
+    const texts = multiples.length > 1 ? multiples.slice(1).map((m) => `${m.n}× ${Math.round(m.frequency)} Hz`) : ['--'];
+    for (let i = 0; i < cells.length; i++) {
+      const text = texts[i] || '';
+      if (cells[i].textContent !== text) cells[i].textContent = text;
+    }
+  }
   const timeDeltaDisplay = document.getElementById('time-delta-value');
   const spectrumPanel = document.getElementById('spectrum-panel');
   const resetZoomBtn = document.getElementById('resetZoomBtn');
@@ -1180,7 +1192,7 @@
     exportSpectrumBtn.disabled = true;
     exportWaveformBtn.disabled = true;
     peakFreqDisplay.textContent = '-- Hz';
-    peakMultiplesDisplay.textContent = '--';
+    showMultiples([]);
     timeDeltaDisplay.textContent = '-- ms';
     autoRangeEndFrequency = null;
     autoRangeShrinkSince = null;
@@ -1382,7 +1394,7 @@
 
     if (!analyzer || !dataArray || !timeDomainData) {
       peakFreqDisplay.textContent = '-- Hz';
-      peakMultiplesDisplay.textContent = '--';
+      showMultiples([]);
       updateGridLegend(0);
       return;
     }
@@ -1405,10 +1417,7 @@
     }
     peakFreqDisplay.textContent = lastPeakFrequency === null ? '-- Hz' : `${Math.round(lastPeakFrequency)} Hz`;
     const multiples = lastPeakFrequency === null ? [] : harmonicMultiples(lastPeakFrequency, sampleRate / 2, 5);
-    const multiplesText = multiples.length > 1
-      ? multiples.slice(1).map((m) => `${m.n}× ${Math.round(m.frequency)} Hz`).join(', ')
-      : '--';
-    if (peakMultiplesDisplay.textContent !== multiplesText) peakMultiplesDisplay.textContent = multiplesText;
+    showMultiples(multiples);
 
     if (isRunning) updateAutoRange(performance.now());
     const { startIndex, endIndex, startFreq, endFreq } = getFrequencyZoomRange();

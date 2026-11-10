@@ -11,6 +11,8 @@
   let currentRegistration = null;
   let updateFallbackTimer = 0;
   let updateNeeded = false;
+  const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+  const UPDATE_CHECK_MIN_GAP_MS = 60 * 1000;
 
   // Keep in step with getAssetGroup in sw.js, which versions each app's files.
   const getAppGroup = (pathname) => {
@@ -218,23 +220,32 @@
     document.body.appendChild(updateBanner);
   };
 
+  // Once installed, a new worker waits; prompt if there is an existing controller.
+  // With no controller this is the very first install, so there is nothing to update.
+  const watchedWorkers = new WeakSet();
+  const watchInstalling = (registration, installingWorker) => {
+    if (watchedWorkers.has(installingWorker)) return;
+    watchedWorkers.add(installingWorker);
+    installingWorker.addEventListener('statechange', () => {
+      if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+        handleUpdate(registration.waiting || installingWorker);
+      }
+    });
+  };
+
   const listenForUpdates = (registration) => {
     // If a worker is already waiting, it's ready to take over
     if (registration.waiting) {
       handleUpdate(registration.waiting);
     }
+    // The browser checks for a new worker as the page loads, so one may already be
+    // installing: its updatefound event fired before this script could listen.
+    if (registration.installing) {
+      watchInstalling(registration, registration.installing);
+    }
 
     registration.addEventListener('updatefound', () => {
-      const installingWorker = registration.installing;
-      if (!installingWorker) return;
-
-      installingWorker.addEventListener('statechange', () => {
-        // Once installed, check if there's an existing controller.
-        // If there's no controller, this is the very first install, so we don't need to prompt.
-        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          handleUpdate(registration.waiting || installingWorker);
-        }
-      });
+      if (registration.installing) watchInstalling(registration, registration.installing);
     });
   };
 
@@ -266,15 +277,20 @@
         }
       });
 
-      // Periodically check for updates
-      const update = () => registration.update().catch(() => { });
+      // Check for updates while the page is open: every few minutes while it is
+      // visible, and whenever it is shown, focused or back online. Each check only
+      // fetches sw.js, and checks less than a minute apart are skipped.
+      let lastUpdateCheck = 0;
+      const update = () => {
+        if (document.visibilityState !== 'visible' || Date.now() - lastUpdateCheck < UPDATE_CHECK_MIN_GAP_MS) return;
+        lastUpdateCheck = Date.now();
+        registration.update().catch(() => { });
+      };
       update();
-      setInterval(update, 60 * 60 * 1000);
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          update();
-        }
-      });
+      setInterval(update, UPDATE_CHECK_INTERVAL_MS);
+      document.addEventListener('visibilitychange', update);
+      window.addEventListener('focus', update);
+      window.addEventListener('online', update);
     } catch (err) {
       console.warn('Service Worker registration failed', err);
     }
