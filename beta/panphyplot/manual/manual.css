@@ -170,3 +170,15 @@ dialog { inset: var(--standalone-top, 0px) 0 0; }
   .column-check th, .column-check td { padding: 8px 6px; font-size: 0.85rem; }
   .example { font-size: 0.75rem; }
 }
+
+/* Scatter and Bar guides: content marked for one mode is hidden in the other. */
+[data-manual-mode="scatter"] [data-mode="bar"],
+[data-manual-mode="bar"] [data-mode="scatter"] { display: none !important; }
+.mode-switch { display: inline-flex; gap: 2px; padding: 2px; margin-right: 4px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); }
+.mode-switch button { min-height: 40px; padding: 4px 14px; border: 1px solid transparent; border-radius: calc(var(--radius-sm) - 2px); background: none; color: var(--ink-2); font-weight: 600; }
+.mode-switch button:hover { background: var(--surface-3); color: var(--ink); }
+.mode-switch button[aria-pressed="true"] { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); color: var(--accent); }
+.manual-title { font-family: var(--font-display); font-weight: 500; line-height: 1.3; letter-spacing: -0.02em; font-size: clamp(1.5rem, 4vw, 1.95rem); margin: 10px 0; }
+@media (max-width: 520px) {
+  .mode-switch button { padding: 4px 9px; }
+}

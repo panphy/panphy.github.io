@@ -10,7 +10,7 @@ Promote only when asked. The copy differs from a published build in five places:
 2. `beta/panphyplot.html`: remove the `noindex` meta and restore `<script src="/assets/sw-register.js" defer></script>` (both are marked `Beta:`).
 3. `js/state.js`: set `STORAGE_KEY` to `panphyplot-neo-state-v1` and remove the first-visit copy in `loadState` (both marked `Beta:`). The tests in `tests/import.test.cjs` and `tests/project.test.cjs` name the key too.
 4. Remove the entry in `beta/index.html` and these two sections, then update `sitemap.xml`'s `<lastmod>` and `BUILD_ID` in `sw.js`.
-5. The manual's Bar charts topic has no screenshots yet.
+5. The manual's Bar guide has no screenshots yet.
 
 Saved workspaces need no migration: bar charts only add fields (`chartType`, `valueAxis`, `categoryTitle` and `errorBars` on a sheet, `combinedGroupBy` on the workspace), which older saves lack and `normalizeState` fills in.
 
@@ -19,6 +19,10 @@ Saved workspaces need no migration: bar charts only add fields (`chartType`, `va
 Each sheet has a `chartType`, `scatter` or `bar`, chosen in the toolbar. Switching keeps every cell, role, formula and fit; a bar sheet only ignores them. On a bar sheet each column is a bar named by its column name, in column order, and rows are repeat readings. `getBars` in `js/model.js` gives each bar's mean and, with two or more readings, its uncertainty (half the spread). The Mean and Uncertainty rows are a table footer drawn by `renderBarSummary` in `js/ui.js` and are never stored, so formulas, row counts and CSV export see readings only; View Table adds a Mean row. The sheet's `valueAxis` (name and unit) and `categoryTitle` label the axes, since a column's own unit has no meaning on a shared value axis. The inspector is hidden by `[data-chart="bar"]` on `.neo-app`.
 
 Bars are drawn at whole-number positions with their names as tick labels (`barTrace` and `buildBarLayout` in `js/plot.js`), so two bars with the same name stay apart, and only the value axis zooms. All sheets draws scatter sheets together or bar sheets together: `getCombinedMode` returns `mixed` when sheets with data differ in kind, which switches the button off. For bar sheets `getCombinedBars` matches bars across sheets by name, and the window's Group bars by choice (`combinedGroupBy`) sets whether column names or sheets form the groups.
+
+A bar sheet's table ends with a `+` row (`buildAddRow`) that adds a reading, since it starts with three rows.
+
+The manual has two guides, Scatter and Bar, chosen by the switch in its top bar. Content marked `data-mode="scatter"` or `data-mode="bar"` shows in its own guide only; unmarked content, such as Saving and devices, shows in both. A standalone page keeps the choice as `?mode=bar`. Inside the app's overlay, `manual/manual.js` follows `data-chart` on the app, so the guide matches the open sheet, and leaves the address alone, because the overlay opens links with a different query in a new tab. A link to a topic of the other guide switches guides.
 
 # PanPhyPlot
 

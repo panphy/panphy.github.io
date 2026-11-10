@@ -190,6 +190,14 @@ function applyChartMode() {
 	const addColumnButton = document.getElementById('add-column-button');
 	addColumnButton.title = bar ? 'Add a bar at the right' : 'Add a Y column at the right';
 	setToolAvailable(document.getElementById('mean-button'), !bar, BAR_MEAN_MESSAGE);
+	// The manual has a guide for each kind of graph; inside the app it also follows data-chart (manual.js).
+	const manualLink = document.querySelector('a[data-manual-overlay]');
+	if (manualLink) {
+		const url = new URL(manualLink.href);
+		if (bar) url.searchParams.set('mode', 'bar');
+		else url.searchParams.delete('mode');
+		manualLink.href = url.href;
+	}
 	if (typeof refreshPaneLayout === 'function') refreshPaneLayout();
 }
 
@@ -933,6 +941,8 @@ function renderTableRows(requestedRow = null) {
 		tr.appendChild(document.createElement('td')); fragment.appendChild(tr);
 	}
 	spacer(sheet.rowCount - last);
+	// A bar sheet starts with three rows, so the row for adding another reading is always in view.
+	if (PlotModel.isBarSheet(sheet)) fragment.appendChild(buildAddRow(sheet));
 	body.replaceChildren(fragment);
 	tableWindow = { sheet, first, last, rowHeight };
 	if (savedFocus && savedFocus.row >= first && savedFocus.row < last) {
@@ -940,6 +950,28 @@ function renderTableRows(requestedRow = null) {
 		if (input) { input.focus({ preventScroll: true }); input.setSelectionRange(savedFocus.start, savedFocus.end); }
 	}
 	if (cellSelection) renderCellSelection();
+}
+
+function buildAddRow(sheet) {
+	const tr = document.createElement('tr');
+	tr.className = 'neo-add-row';
+	const head = document.createElement('th');
+	head.className = 'neo-row-head';
+	const button = document.createElement('button');
+	button.type = 'button';
+	button.textContent = '+';
+	button.title = 'Add a row for another reading';
+	button.setAttribute('aria-label', 'Add row');
+	button.addEventListener('click', addRow);
+	head.appendChild(button);
+	const fill = document.createElement('td');
+	fill.className = 'neo-add-row-fill';
+	fill.colSpan = sheet.columns.length + 1;
+	fill.textContent = 'Add a reading';
+	fill.setAttribute('aria-hidden', 'true');
+	fill.addEventListener('click', addRow);
+	tr.append(head, fill);
+	return tr;
 }
 
 function scheduleTableRows() {
