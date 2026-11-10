@@ -2,8 +2,8 @@ name: Deploy to GitHub Pages
 
 # Replaces GitHub's built-in "pages build and deployment" workflow, which ran an
 # unneeded Jekyll build and gave up when copying the site to GitHub's servers took
-# more than 10 minutes. This one uploads the repository as it is, waits longer and
-# tries once more by itself. The repository's Pages source must stay set to
+# more than 10 minutes. This one uploads the repository as it is and tries up to
+# three times by itself. The repository's Pages source must stay set to
 # "GitHub Actions" (Settings, Pages).
 
 on:
@@ -25,29 +25,35 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 45
     environment:
       name: github-pages
-      url: ${{ steps.retry.outputs.page_url || steps.deployment.outputs.page_url }}
+      url: ${{ steps.retry2.outputs.page_url || steps.retry.outputs.page_url || steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       # Dot files and folders (.git, .github, .gitignore) are left out of the site.
       - uses: actions/upload-pages-artifact@v5
         with:
           path: .
+      # deploy-pages waits 10 minutes at most for GitHub to copy the files (longer
+      # timeouts are refused), so a slow copy gets two more tries. A timed-out
+      # deployment is cancelled first; the pauses give that time to finish.
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5
         continue-on-error: true
-        with:
-          timeout: 1800000 # 30 minutes
-      # A timed-out deployment is cancelled first; give that a moment to finish.
-      - name: Wait before trying again
+      - name: Wait before the second try
         if: steps.deployment.outcome == 'failure'
         run: sleep 60
       - name: Deploy (second try)
         id: retry
         if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v5
-        with:
-          timeout: 1800000
+        continue-on-error: true
+      - name: Wait before the third try
+        if: steps.retry.outcome == 'failure'
+        run: sleep 120
+      - name: Deploy (third try)
+        id: retry2
+        if: steps.retry.outcome == 'failure'
+        uses: actions/deploy-pages@v5
