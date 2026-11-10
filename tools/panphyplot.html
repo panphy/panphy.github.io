@@ -11,25 +11,25 @@
 	<link rel="stylesheet" href="/assets/standalone-top.css">
 
 	<title>PanPhyPlot: Physics Graphing and Curve Fitting — PanPhy Labs</title>
-	<meta name="description" content="A free graph plotter for physics practicals: process data, plot graphs with error bars and uncertainties, and find the line of best fit.">
+	<meta name="description" content="A free graph plotter for physics practicals: process data, plot graphs and bar charts with error bars and uncertainties, and find the line of best fit.">
 	<link rel="canonical" href="https://panphy.app/tools/panphyplot.html">
 <!-- panphy-discovery -->
   <meta property="og:title" content="PanPhyPlot: Physics Graphing and Curve Fitting — PanPhy Labs">
-  <meta property="og:description" content="A free graph plotter for physics practicals: process data, plot graphs with error bars and uncertainties, and find the line of best fit.">
+  <meta property="og:description" content="A free graph plotter for physics practicals: process data, plot graphs and bar charts with error bars and uncertainties, and find the line of best fit.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://panphy.app/tools/panphyplot.html">
   <meta property="og:image" content="https://panphy.app/assets/og-default.png">
   <meta property="og:site_name" content="PanPhy Labs">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="PanPhyPlot: Physics Graphing and Curve Fitting — PanPhy Labs">
-  <meta name="twitter:description" content="A free graph plotter for physics practicals: process data, plot graphs with error bars and uncertainties, and find the line of best fit.">
+  <meta name="twitter:description" content="A free graph plotter for physics practicals: process data, plot graphs and bar charts with error bars and uncertainties, and find the line of best fit.">
   <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "PanPhyPlot",
-  "description": "A free graph plotter for physics practicals: process data, plot graphs with error bars and uncertainties, and find the line of best fit.",
+  "description": "A free graph plotter for physics practicals: process data, plot graphs and bar charts with error bars and uncertainties, and find the line of best fit.",
   "url": "https://panphy.app/tools/panphyplot.html",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Any",
@@ -134,6 +134,13 @@
 			<div class="neo-tool-group" role="group" aria-label="File">
 				<button type="button" class="neo-tool" id="file-menu-button" aria-haspopup="menu" aria-expanded="false" aria-controls="neo-menu" title="Open, save and export"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9V5.5h6l2 2h9v3M3.5 10.5h18l-3 10h-16z"/></svg><span>File</span><svg class="neo-icon neo-icon-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>
 			</div>
+			<div class="neo-tool-group" role="group" aria-label="Graph type of this sheet">
+				<span class="neo-tool-group-label" aria-hidden="true">Graph</span>
+				<div class="neo-segment" id="chart-type">
+					<button type="button" class="neo-tool" id="chart-type-scatter" data-chart-type="scatter" aria-pressed="true" title="Scatter graph: X and Y columns, with fits"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16"/><circle cx="8.5" cy="15.5" r="1.4"/><circle cx="11.5" cy="11" r="1.4"/><circle cx="15" cy="12.5" r="1.4"/><circle cx="18" cy="7" r="1.4"/></svg><span>Scatter</span></button>
+					<button type="button" class="neo-tool" id="chart-type-bar" data-chart-type="bar" aria-pressed="false" title="Bar chart: one bar for each column"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16"/><path d="M7 20v-6h3v6M12 20V8h3v12M17 20v-9h3v9"/></svg><span>Bar</span></button>
+				</div>
+			</div>
 			<div class="neo-tool-group" role="group" aria-label="Data">
 				<span class="neo-tool-group-label" aria-hidden="true">Data</span>
 				<button type="button" class="neo-tool" id="add-row-button" title="Add a row to this sheet"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="6" rx="1.5"/><path d="M3.5 14.5h9M3.5 19h9M17.5 13.5v6M14.5 16.5h6"/></svg><span>Row</span></button>
@@ -167,18 +174,29 @@
 			<section class="input-section neo-pane neo-pane-data" id="data-pane" aria-labelledby="data-pane-title">
 				<div class="neo-pane-head">
 					<h2 id="data-pane-title">Data</h2>
-					<p class="neo-pane-hint">Y plots against the nearest X to its left</p>
+					<p class="neo-pane-hint" id="data-pane-hint">Y plots against the nearest X to its left</p>
 					<button type="button" class="neo-tool neo-tool-quiet neo-pane-max" data-maximize="data" aria-pressed="false" aria-label="Maximize the data section" title="Maximize the data section"><svg class="neo-icon neo-max-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="neo-icon neo-restore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/></svg></button>
+				</div>
+				<div class="neo-bar-settings" id="bar-settings" role="group" aria-label="Bar chart axes" hidden>
+					<label class="neo-bar-field"><span>Value axis</span><input type="text" id="bar-value-name" maxlength="40" placeholder="Quantity" autocomplete="off" aria-label="Name of the value axis"></label>
+					<label class="neo-bar-field neo-bar-field-unit"><span>Unit</span><input type="text" id="bar-value-unit" maxlength="40" placeholder="Unit" autocomplete="off" aria-label="Unit of the value axis"></label>
+					<label class="neo-bar-field"><span>Bars axis</span><input type="text" id="bar-category-title" maxlength="40" placeholder="What the bars are" autocomplete="off" aria-label="Title of the bars axis"></label>
+					<label class="neo-switch" title="Add an Uncertainty row, half the spread of each bar's readings, and draw it as error bars">
+						<input type="checkbox" id="bar-error-bars" role="switch">
+						<span class="neo-switch-track" aria-hidden="true"></span>
+						<span>Error bars</span>
+					</label>
 				</div>
 				<div class="neo-table-wrap" id="neo-table-wrap">
 					<table class="neo-table" id="neo-table">
 						<thead id="neo-table-head"></thead>
 						<tbody id="neo-table-body"></tbody>
+						<tfoot id="neo-table-foot"></tfoot>
 					</table>
 				</div>
 				<div class="neo-pane-foot">
 					<p id="data-validation-message" class="validation-message" role="status"></p>
-					<p class="neo-hint">Paste a block from a spreadsheet into any cell. A heading row such as <code>L / m</code> becomes names and units.</p>
+					<p class="neo-hint" id="data-pane-foot-hint">Paste a block from a spreadsheet into any cell. A heading row such as <code>L / m</code> becomes names and units.</p>
 				</div>
 				<input type="file" id="open-file-input" accept=".ppplot,.csv,.txt,application/json,text/csv,text/plain" hidden>
 			</section>
@@ -198,13 +216,17 @@
 				<div class="neo-plot-area">
 					<div id="plot"></div>
 					<div class="neo-empty" id="graph-empty" hidden>
-						<svg class="neo-empty-art" viewBox="0 0 120 80" aria-hidden="true">
+						<svg class="neo-empty-art neo-empty-art-bar" viewBox="0 0 120 80" aria-hidden="true">
+							<rect x="24" y="38" width="16" height="30"/><rect x="48" y="20" width="16" height="48"/><rect x="72" y="46" width="16" height="22"/><rect x="96" y="30" width="10" height="38"/>
+							<path class="neo-empty-axis" d="M14 8v60h96"/>
+						</svg>
+						<svg class="neo-empty-art neo-empty-art-scatter" viewBox="0 0 120 80" aria-hidden="true">
 							<path class="neo-empty-axis" d="M14 8v60h96"/>
 							<path class="neo-empty-line" d="M18 62 104 16"/>
 							<circle cx="30" cy="54" r="3.5"/><circle cx="48" cy="47" r="3.5"/><circle cx="62" cy="36" r="3.5"/><circle cx="80" cy="30" r="3.5"/><circle cx="96" cy="19" r="3.5"/>
 						</svg>
 						<h3>Your graph appears here</h3>
-						<p>Type or paste readings into the table. Each Y column becomes a series.</p>
+						<p id="graph-empty-text">Type or paste readings into the table. Each Y column becomes a series.</p>
 						<button type="button" class="neo-button neo-button-primary" id="sample-data-button">Try sample data</button>
 					</div>
 				</div>
@@ -568,7 +590,7 @@
 			<h2 id="csv-dialog-title">Import CSV</h2>
 			<p id="csv-summary" class="neo-dialog-note"></p>
 			<label class="neo-check"><input type="checkbox" id="csv-headers"> The first row holds column names (such as <code>L / m</code>)</label>
-			<p class="neo-dialog-note">Choose a role for each column. Nothing is guessed silently: check the suggestions before importing.</p>
+			<p class="neo-dialog-note" id="csv-roles-note">Choose a role for each column. Nothing is guessed silently: check the suggestions before importing.</p>
 			<div class="neo-table-wrap neo-csv-preview">
 				<table class="neo-table" id="csv-preview"></table>
 			</div>
@@ -598,6 +620,13 @@
 				<div id="popup-plot"></div>
 			</div>
 			<div id="combined-plot-controls" class="combined-plot-controls">
+				<div class="control-row-horizontal" id="combined-group-row" hidden>
+					<span id="combined-group-label">Group bars by:</span>
+					<div class="neo-segment" role="group" aria-labelledby="combined-group-label">
+						<button type="button" class="neo-tool" data-group-by="columns" aria-pressed="true" title="One group for each column name, with a bar for each sheet">Columns</button>
+						<button type="button" class="neo-tool" data-group-by="sheets" aria-pressed="false" title="One group for each sheet, with a bar for each column">Sheets</button>
+					</div>
+				</div>
 				<div class="control-row-horizontal">
 					<label for="combined-title">Title:</label>
 					<input type="text" id="combined-title" placeholder="Enter a new Title here" />

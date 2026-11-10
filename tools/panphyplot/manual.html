@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-manual-mode="scatter">
 
 <head>
 	<meta charset="UTF-8">
@@ -60,6 +60,7 @@
 	<script src="/assets/theme-toggle.js"></script>
 	<link rel="stylesheet" href="/assets/fonts/fonts.css">
 	<link rel="stylesheet" href="/assets/design.css">
+	<script>if (new URLSearchParams(location.search).get('mode') === 'bar') document.documentElement.dataset.manualMode = 'bar';</script>
 	<link rel="stylesheet" href="/tools/panphyplot/manual/manual.css">
 	<script src="/tools/panphyplot/manual/manual.js" defer></script>
 	<script src="/assets/sw-register.js" defer></script>
@@ -70,6 +71,10 @@
 	<div class="top">
 		<div class="manual-brand"><a href="/tools/panphyplot.html" class="back-link" aria-label="Back to PanPhyPlot"><img src="/assets/panphy.png" alt="" width="30" height="30"><span>PanPhyPlot</span></a><span class="manual-badge">Manual</span></div>
 		<div class="top-actions">
+			<div class="mode-switch" role="group" aria-label="Guide for">
+				<button type="button" data-set-mode="scatter" aria-pressed="true" title="The guide to scatter graphs and fitting">Scatter</button>
+				<button type="button" data-set-mode="bar" aria-pressed="false" title="The guide to bar charts">Bar</button>
+			</div>
 			<button type="button" id="contents-button" aria-haspopup="dialog" aria-controls="contents-dialog">Contents</button>
 			<div class="theme-toggle"><button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button></div>
 		</div>
@@ -77,12 +82,21 @@
 	<main>
 		<header class="manual-intro">
 			<p class="eyebrow">PanPhyPlot · User guide</p>
+			<div data-mode="scatter">
 			<h1>From readings to a fitted graph</h1>
 			<p class="lead">Follow one pendulum experiment from repeat readings to a result you can save and share.</p>
 			<div class="intro-actions"><a class="primary-link" href="#step-sample">Start the walkthrough</a><a href="#reference">Browse the reference</a></div>
 			<p class="screen-note">Prefer to learn inside the app? <a href="/tools/panphyplot.html?tour=columns">Take the guided tour</a> using practice data.</p>
+			<p class="screen-note">Drawing a bar chart? Choose <strong>Bar</strong> at the top of this guide.</p>
+			</div>
+			<div data-mode="bar">
+			<p class="manual-title" role="heading" aria-level="1">From readings to a bar chart</p>
+			<p class="lead">Follow one experiment, the bounce heights of four balls, from repeat readings to a bar chart you can save and share.</p>
+			<div class="intro-actions"><a class="primary-link" href="#bar-step-mode">Start the walkthrough</a><a href="#reference">Browse the reference</a></div>
+			<p class="screen-note">Plotting points and fitting a line? Choose <strong>Scatter</strong> at the top of this guide.</p>
+			</div>
 		</header>
-		<section aria-labelledby="walkthrough">
+		<section aria-labelledby="walkthrough" data-mode="scatter">
 			<span id="quick-start" class="anchor-alias" aria-hidden="true"></span>
 			<h2 id="walkthrough" tabindex="-1">Your first graph</h2>
 			<p class="section-intro">Work through these six steps in order. Screenshots match your theme; select one to enlarge it here.</p>
@@ -328,10 +342,58 @@
 <nav class="step-nav" aria-label="Step 6 navigation"><a href="#step-result">← Previous step</a><a href="#reference">Explore the reference →</a></nav>
 </section>
 </section>
+		<section aria-labelledby="bar-walkthrough" data-mode="bar">
+			<span id="bar" class="anchor-alias" aria-hidden="true"></span>
+			<h2 id="bar-walkthrough" tabindex="-1">Your first bar chart</h2>
+			<p class="section-intro">Work through these six steps in order.</p>
+			<nav class="step-index" aria-label="Walkthrough steps"><a href="#bar-step-mode"><span>1</span>Choose Bar</a><a href="#bar-step-data"><span>2</span>Name the bars and enter readings</a><a href="#bar-step-axes"><span>3</span>Label the axes</a><a href="#bar-step-errors"><span>4</span>Show the uncertainty</a><a href="#bar-step-compare"><span>5</span>Compare sheets</a><a href="#bar-step-save"><span>6</span>Save or copy your work</a></nav>
+<section class="walkthrough-step" aria-labelledby="bar-step-mode">
+    <p class="eyebrow">Step 1 of 6</p>
+<h3 id="bar-step-mode" tabindex="-1">Choose Bar</h3>
+<p>Each sheet draws one kind of graph. In the toolbar&rsquo;s <strong>Graph</strong> group, choose <strong>Bar</strong>. The Data section now shows a table in which <strong>each column is a bar</strong>, and the graph fills the rest of the window.</p>
+<p>To follow along with ready-made readings, choose <strong>Try sample data</strong> on the empty graph. It loads three bounce heights for each of four balls.</p>
+<nav class="step-nav" aria-label="Step 1 navigation"><span></span><a href="#bar-step-data">Next: name the bars and enter readings →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="bar-step-data">
+    <p class="eyebrow">Step 2 of 6</p>
+<h3 id="bar-step-data" tabindex="-1">Name the bars and enter readings</h3>
+<p>Tap a column&rsquo;s label and type the bar&rsquo;s name, such as <em>Tennis</em>. Then type its readings down the column, one in each row. One reading is enough; several are treated as repeat readings.</p>
+<p>The highlighted <strong>Mean</strong> row under the readings shows the mean of each column. The bar is always drawn to that height.</p>
+<p>The <kbd>+</kbd> at the right of the headings adds a bar, and the <kbd>+</kbd> under the last reading adds a row.</p>
+<nav class="step-nav" aria-label="Step 2 navigation"><a href="#bar-step-mode">← Previous step</a><a href="#bar-step-axes">Next: label the axes →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="bar-step-axes">
+    <p class="eyebrow">Step 3 of 6</p>
+<h3 id="bar-step-axes" tabindex="-1">Label the axes</h3>
+<p>Above the table, <strong>Value axis</strong> and <strong>Unit</strong> name the quantity every bar measures, such as <em>Bounce height</em> in <em>cm</em>. <strong>Bars axis</strong> says what the bars are, such as <em>Ball</em>.</p>
+<p>The graph&rsquo;s title follows these names, here <em>Bounce height by Ball</em>, until you type your own above the graph.</p>
+<nav class="step-nav" aria-label="Step 3 navigation"><a href="#bar-step-data">← Previous step</a><a href="#bar-step-errors">Next: show the uncertainty →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="bar-step-errors">
+    <p class="eyebrow">Step 4 of 6</p>
+<h3 id="bar-step-errors" tabindex="-1">Show the uncertainty</h3>
+<p>Turn on <strong>Error bars</strong>. An <strong>Uncertainty</strong> row appears under the Mean row: half the spread between the largest and the smallest reading in each column. The same value is drawn on each bar as an error bar.</p>
+<p>A column with a single reading has no spread, so it has no error bar.</p>
+<nav class="step-nav" aria-label="Step 4 navigation"><a href="#bar-step-axes">← Previous step</a><a href="#bar-step-compare">Next: compare sheets →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="bar-step-compare">
+    <p class="eyebrow">Step 5 of 6</p>
+<h3 id="bar-step-compare" tabindex="-1">Compare sheets</h3>
+<p>To compare sets of bars, give each set its own bar sheet with the same bar names: a sheet for each year, class or trial. <strong>View → All sheets</strong> then draws them together as groups of bars.</p>
+<p><strong>Group bars by</strong> chooses how: by <strong>Columns</strong>, each bar name is a group with a bar for each sheet; by <strong>Sheets</strong>, each sheet is a group with a bar for each name. See <a href="#bar-compare">Several sheets together</a>.</p>
+<nav class="step-nav" aria-label="Step 5 navigation"><a href="#bar-step-errors">← Previous step</a><a href="#bar-step-save">Next: save or copy your work →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="bar-step-save">
+    <p class="eyebrow">Step 6 of 6</p>
+<h3 id="bar-step-save" tabindex="-1">Save or copy your work</h3>
+<p>Your sheets are saved in this browser as you work. <strong>Download</strong>, above the graph, saves the chart as an image; <strong>View → Table</strong> gives the readings and their means as a table to copy; and <strong>File → Save project</strong> keeps everything in one file.</p>
+<nav class="step-nav" aria-label="Step 6 navigation"><a href="#bar-step-compare">← Previous step</a><a href="#reference">Explore the reference →</a></nav>
+</section>
+		</section>
 <section class="reference" aria-labelledby="reference">
 <h2 id="reference" tabindex="-1">Reference</h2>
 <p>Open a topic when you need more detail. These sections cover other workflows, shortcuts and the physics behind the results.</p>
-<details class="reference-item" id="sheets">
+<details class="reference-item" id="sheets" data-mode="scatter">
 <summary>Sheets and columns</summary>
 <div class="reference-body">
 <p>Each tab in the top bar is a <strong>sheet</strong>: use one sheet for each experiment. Tap <kbd>+</kbd> to add a sheet, tap the open sheet's name to rename it, and tap <kbd>×</kbd> to remove it. An empty sheet offers <strong>Try sample data</strong>: a pendulum experiment to explore.</p>
@@ -356,7 +418,7 @@
 		</figure>
 </div>
 </details>
-<details class="reference-item" id="roles">
+<details class="reference-item" id="roles" data-mode="scatter">
 <summary>Column roles</summary>
 <div class="reference-body">
 <p>The colored chip at the top of each column sets its role:</p>
@@ -404,11 +466,11 @@
 		<p>A second X column further right starts a new group: the Y columns after it plot against it. To change the pairing, drag a column by its letter (<kbd>⠿ B</kbd>) and drop it where the line shows; the table scrolls if you drag to its edge. <strong>Move left</strong> and <strong>Move right</strong> in a column's <kbd>⋯</kbd> menu do the same one step at a time. Formulas that use column letters follow the columns they refer to.</p>
 </div>
 </details>
-<details class="reference-item" id="entering">
+<details class="reference-item" id="entering" data-mode="scatter">
 <summary>Entering data</summary>
 <div class="reference-body">
 <h3>Typing</h3>
-		<p>Tap a cell and type a number such as <code>1.25</code>, <code>-0.4</code> or <code>3e-5</code>. Arrow keys and <kbd>Enter</kbd> move between cells, and <kbd>Enter</kbd> on the last row adds a row. Commas and units in a cell are not numbers: the cell turns red, is kept, and is left out of the graph.</p>
+		<p>Tap a cell and type a number such as <code>1.25</code>, <code>-0.4</code> or <code>3e-5</code>. Arrow keys and <kbd>Enter</kbd> move between cells. The <kbd>+</kbd> under the last row adds a row, as does <strong>Row</strong> in the toolbar or <kbd>Enter</kbd> on the last row. Commas and units in a cell are not numbers: the cell turns red, is kept, and is left out of the graph.</p>
 		<p>To give every reading the same uncertainty, such as ±0.05 s, add a ±ΔY column and use <strong>Fill with one value…</strong> from its <kbd>⋯</kbd> menu. It fills only the rows that have a reading in the column the uncertainty belongs to, and says how many before it does; rows without a reading stay empty. If you add readings later, fill the column again. For a column that is not an uncertainty, it fills the rows that have any data.</p>
 		<h3>Pasting from a spreadsheet</h3>
 		<p>Copy a block of cells in a spreadsheet, tap the cell where it should start and paste. Rows and columns are added as needed. If you paste into the top row and the first row of the block is text, such as <code>L / m</code> or <code>T (s)</code>, it becomes the column names and units.</p>
@@ -419,7 +481,7 @@
 		<p><strong>From PanPhyTrack</strong>, Export to PanPhyPlot opens PanPhyPlot in a new tab with the data in a new sheet: <code>t</code>, <code>x</code> and <code>y</code>, then a second <code>t</code> column with the smoothed velocities <code>vx</code> and <code>vy</code>, which belong to the times midway between marks. The velocities start hidden; show them in the Series list.</p>
 </div>
 </details>
-<details class="reference-item" id="repeats">
+<details class="reference-item" id="repeats" data-mode="scatter">
 <summary>Repeat readings</summary>
 <div class="reference-body">
 <p>Put each set of repeats in its own Y column, such as T1, T2 and T3. <strong>Mean</strong> opens Mean of Repeats and then adds a formula column holding their mean, named after them (T). It can also:</p>
@@ -430,7 +492,7 @@
 		<p>A row with a missing reading takes the mean of the readings it has, and its half spread needs at least two. The formulas are <code>mean(B, C, D)</code> and <code>halfspread(B, C, D)</code>; in any formula, <code>mean</code>, <code>median</code>, <code>min</code>, <code>max</code> and <code>halfspread</code> leave out a blank reading among their inputs.</p>
 </div>
 </details>
-<details class="reference-item" id="formulas">
+<details class="reference-item" id="formulas" data-mode="scatter">
 <summary>Formula columns</summary>
 <div class="reference-body">
 <p><strong>Data → Formula</strong> adds a column calculated from others, row by row; <strong>Set formula…</strong> in a column's <kbd>⋯</kbd> menu turns an existing column into one. Its cells are shaded, cannot be typed into, and follow any change to the data.</p>
@@ -447,7 +509,7 @@
 		<div class="note">Column letters take priority. In a sheet with five or more columns, <code>E</code> means column E, not Euler's number: use <code>e</code> for that.</div>
 </div>
 </details>
-<details class="reference-item" id="uncertainties">
+<details class="reference-item" id="uncertainties" data-mode="scatter">
 <summary>Uncertainties</summary>
 <div class="reference-body">
 <p>Uncertainties live in ±ΔX and ±ΔY columns, absolute or as a percentage of each value, and appear as error bars.</p>
@@ -457,7 +519,7 @@
 		<p>For \(f = T^2\), \(\dfrac{\partial f}{\partial T} = 2T\), so \(\Delta(T^2) = 2T\,\Delta T\). The dialog writes out each derivative for your formula. This assumes the uncertainties are small and independent; inputs without a ±Δ column add nothing. Percentage uncertainties are turned into absolute ones first.</p>
 </div>
 </details>
-<details class="reference-item" id="graph">
+<details class="reference-item" id="graph" data-mode="scatter">
 <summary>The graph</summary>
 <div class="reference-body">
 <ul>
@@ -470,7 +532,7 @@
 		</ul>
 </div>
 </details>
-<details class="reference-item" id="fitting">
+<details class="reference-item" id="fitting" data-mode="scatter">
 <summary>Fitting</summary>
 <div class="reference-body">
 <p>In the <strong>Fit</strong> card, choose the <strong>Series to fit</strong>: the Y column to fit. It lists only the series shown on the graph; hiding the one being fitted moves the choice to a visible one, and a series with no data yet cannot be chosen. Each series keeps its own fit, so a hidden series's fit returns when it is shown again.</p>
@@ -505,7 +567,7 @@
 		<p>A fit becomes <em>Outdated</em>, drawn dashed, as soon as its data or ±ΔY change. Click <strong>Fit Curve</strong> again to update it.</p>
 </div>
 </details>
-<details class="reference-item" id="results">
+<details class="reference-item" id="results" data-mode="scatter">
 <summary>Reading a fit</summary>
 <div class="reference-body">
 <ul>
@@ -521,13 +583,85 @@
 		<p>Example: for a pendulum, \(T^2 = \dfrac{4\pi^2}{g}L\), so a straight-line fit of \(T^2\) against \(L\) gives \(g = \dfrac{4\pi^2}{m}\), with \(\dfrac{\Delta g}{g} = \dfrac{\Delta m}{m}\).</p>
 </div>
 </details>
-<details class="reference-item" id="sharing">
+<details class="reference-item" id="sharing" data-mode="scatter">
 <summary>Sharing your work</summary>
 <div class="reference-body">
 <ul>
 			<li><strong>View → Table</strong> shows the sheet with each value beside its own ± uncertainty, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX. Calculated values are rounded to the decimal place of their uncertainty; typed values appear as entered.</li>
 			<li><strong>File → Export this sheet as CSV</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that File → Open reads back. Formulas themselves are not saved in the file.</li>
 			<li>The Download button above the graph saves the graph as a PNG image or an SVG drawing. <strong>Publication</strong> style gives a report-ready figure: a black frame with inward ticks, no grid and black text on white, at 4:3, in either theme. <strong>Screen</strong> style saves the graph as it looks on screen.</li>
+		</ul>
+</div>
+</details>
+<details class="reference-item" id="bar-sheets" data-mode="bar">
+<summary>Sheets and bars</summary>
+<div class="reference-body">
+<p>Each tab in the top bar is a <strong>sheet</strong>. Tap <kbd>+</kbd> to add a sheet, tap the open sheet&rsquo;s name to rename it, and tap <kbd>×</kbd> to remove it. <strong>Scatter</strong> and <strong>Bar</strong> in the toolbar choose what the open sheet draws. Switching keeps every cell, so a sheet switched to Scatter and back shows the same bars.</p>
+<p>On a bar sheet <strong>each column is a bar</strong>. Its name is the bar&rsquo;s label, and the bars follow the order of the columns. To move a bar, drag its column by the letter at the top left of the heading, or use <strong>Move left</strong> and <strong>Move right</strong> in the column&rsquo;s <kbd>⋯</kbd> menu. The same menu inserts, fills, clears or deletes the column.</p>
+<p>The headings start folded to each bar&rsquo;s name. Tap a name, or the arrow in the top-left corner of the table, to edit it; press <kbd>Enter</kbd> or move on and the headings fold again. To keep them open, tap the pin that replaces the arrow.</p>
+<p>On a computer or a landscape tablet, drag the thin handle between the Data section and the graph to make one wider. The <svg class="manual-inline-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg> button at the top right of the Data section maximizes it. In the graph section, it fills the whole window with the graph, hiding the toolbar too. The same button, now pointing inwards, or <kbd>Esc</kbd> puts it back.</p>
+<p><strong>Clear</strong>, at the right of the toolbar, offers two choices. <strong>Clear data, keep columns</strong> empties every cell but keeps the bar names and axis titles, ready for new readings. <strong>Reset to a blank sheet</strong> goes back to a new bar sheet: two unnamed bars and three rows.</p>
+</div>
+</details>
+<details class="reference-item" id="bar-entering" data-mode="bar">
+<summary>Entering data</summary>
+<div class="reference-body">
+<h3>Typing</h3>
+		<p>Tap a cell and type a number such as <code>1.25</code>, <code>-0.4</code> or <code>3e-5</code>. Arrow keys and <kbd>Enter</kbd> move between cells. A new bar sheet has three rows: the <kbd>+</kbd> under the last reading adds a row, as does <strong>Row</strong> in the toolbar or <kbd>Enter</kbd> on the last row. The row number on the left inserts or deletes a row.</p>
+		<p>Commas and units in a cell are not numbers: the cell turns red, is kept, and is left out of the mean.</p>
+		<h3>Pasting from a spreadsheet</h3>
+		<p>Copy a block of cells in a spreadsheet, tap the cell where it should start and paste. Rows and columns are added as needed. If you paste into the top row and the first row of the block is text, it becomes the bar names. Each bar needs its readings in a column, so a table with the bars listed down the side must be turned round in the spreadsheet first (Paste Special → Transpose).</p>
+		<h3>Selecting, copying and clearing cells</h3>
+		<p>Drag across cells with a mouse or pen to select a block, or hold <kbd>Shift</kbd> and click, or use <kbd>Shift</kbd> with the arrow keys. Copy and cut work on the block, <kbd>Delete</kbd> or <kbd>Backspace</kbd> empties it and <kbd>Esc</kbd> cancels the selection.</p>
+		<h3>Importing a CSV file</h3>
+		<p>With a bar sheet open, <strong>File → Open project or CSV</strong> with a <code>.csv</code> file imports it as bars: each column of the file is a bar and its rows are repeat readings. Check whether the first row holds the bar names, then choose a new sheet or the current one.</p>
+</div>
+</details>
+<details class="reference-item" id="bar-mean" data-mode="bar">
+<summary>The Mean and Uncertainty rows</summary>
+<div class="reference-body">
+<ul>
+			<li>The <strong>Mean</strong> row is the mean of the numbers in each column. Blank and invalid cells are left out, so a column with one reading shows that reading, and a column with no number shows nothing and draws no bar.</li>
+			<li>With <strong>Error bars</strong> on, the <strong>Uncertainty</strong> row is half the spread: half the difference between the largest and the smallest reading in the column. It needs at least two readings.</li>
+			<li>Both rows stay in view at the bottom of the table while the readings scroll. They are worked out from the readings and cannot be typed in.</li>
+			<li>They show up to six significant figures; the bar and its error bar use every digit.</li>
+			<li><strong>Formula</strong> adds a column calculated from other columns, row by row. On a bar sheet it is a bar like any other.</li>
+		</ul>
+</div>
+</details>
+<details class="reference-item" id="bar-chart" data-mode="bar">
+<summary>The chart</summary>
+<div class="reference-body">
+<ul>
+			<li>One bar is drawn for each column, as tall as its mean, in the order of the columns.</li>
+			<li>The value axis is titled <em>name / unit</em> from <strong>Value axis</strong> and <strong>Unit</strong>, and the bars axis from <strong>Bars axis</strong>.</li>
+			<li>The title follows those names until you type your own; clear it to return to the automatic title.</li>
+			<li>The value axis starts from zero and scales itself to the tallest bar. <strong>Auto-scale</strong>, the one button above the graph, fits the axis closely to the bars instead, which separates bars of similar height; press it again to start from zero. A bar chart does not zoom or pan.</li>
+			<li>Hover over or tap a bar to read its mean, its uncertainty and how many readings it comes from.</li>
+			<li><strong>LaTeX mode</strong> typesets bar names, axis titles and the graph title: a unit of <code>m s^{-1}</code> reads as m s⁻¹.</li>
+		</ul>
+</div>
+</details>
+<details class="reference-item" id="bar-compare" data-mode="bar">
+<summary>Several sheets together</summary>
+<div class="reference-body">
+<p><strong>View → All sheets</strong> draws every bar sheet as groups of bars. Bars are matched across sheets by name; capital letters and outer spaces do not matter. <strong>Group bars by</strong> chooses the direction:</p>
+<ul>
+			<li><strong>Columns</strong>: one group for each bar name, with a bar for each sheet. With a sheet for each year and a bar for each month, this gives twelve groups, each comparing the years.</li>
+			<li><strong>Sheets</strong>: one group for each sheet, with a bar for each bar name. With a sheet for each class and a bar for each sport, this gives a group for each class.</li>
+		</ul>
+<p>The first sheet sets the order of the bar names; names found only in later sheets follow. Where a sheet has no bar of some name, that place is left empty. The legend names the sheets, or the bars, by color, and a tap on a legend entry hides or shows it. Each sheet&rsquo;s error bars are drawn if that sheet has them on.</p>
+<p>The title and both axis labels can be edited under the graph, and <strong>Download</strong> saves the combined chart.</p>
+<p>All sheets needs every sheet with data to be the same kind of graph. With scatter and bar sheets mixed it is switched off; blank sheets do not count.</p>
+</div>
+</details>
+<details class="reference-item" id="bar-sharing" data-mode="bar">
+<summary>Sharing your work</summary>
+<div class="reference-body">
+<ul>
+			<li><strong>View → Table</strong> shows the readings of each bar with a Mean row, which carries each ± uncertainty when error bars are on, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX.</li>
+			<li><strong>File → Export this sheet as CSV</strong> saves the readings under the bar names. The Mean and Uncertainty rows are left out, so the file can be imported again without counting them as readings.</li>
+			<li>The Download button above the graph saves the chart as a PNG image or an SVG drawing. <strong>Publication</strong> style gives a report-ready figure: a black frame, no grid and black text on white, at 4:3, in either theme. <strong>Screen</strong> style saves the chart as it looks on screen.</li>
 		</ul>
 </div>
 </details>
@@ -554,6 +688,7 @@
 <h2 id="contents-title">Contents</h2>
 <button type="button" data-close-dialog="contents-dialog" aria-label="Close contents">Close</button></div>
 <nav aria-label="Manual contents">
+<div data-mode="scatter">
 <h3>Walkthrough</h3>
 <ol>
 <li><a href="#step-sample">Load the sample data</a></li>
@@ -577,6 +712,28 @@
 <li><a href="#sharing">Sharing your work</a></li>
 <li><a href="#saving">Saving and devices</a></li>
 </ul>
+</div>
+<div data-mode="bar">
+<h3>Walkthrough</h3>
+<ol>
+<li><a href="#bar-step-mode">Choose Bar</a></li>
+<li><a href="#bar-step-data">Name the bars and enter readings</a></li>
+<li><a href="#bar-step-axes">Label the axes</a></li>
+<li><a href="#bar-step-errors">Show the uncertainty</a></li>
+<li><a href="#bar-step-compare">Compare sheets</a></li>
+<li><a href="#bar-step-save">Save or copy your work</a></li>
+</ol>
+<h3>Reference</h3>
+<ul>
+<li><a href="#bar-sheets">Sheets and bars</a></li>
+<li><a href="#bar-entering">Entering data</a></li>
+<li><a href="#bar-mean">The Mean and Uncertainty rows</a></li>
+<li><a href="#bar-chart">The chart</a></li>
+<li><a href="#bar-compare">Several sheets together</a></li>
+<li><a href="#bar-sharing">Sharing your work</a></li>
+<li><a href="#saving">Saving and devices</a></li>
+</ul>
+</div>
 </nav>
 </dialog>
 <dialog id="image-dialog" class="image-dialog" aria-labelledby="image-title">

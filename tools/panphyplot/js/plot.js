@@ -1,4 +1,4 @@
-// Plotting for PanPhyPlot: every Y series of a sheet, its fits and residuals.
+// Plotting for PanPhyPlot: every Y series of a sheet, its fits and residuals, or a bar sheet's bars.
 // Image export is adapted from /misc/panphyplotog/js/plotting.js.
 (function() {
 
@@ -181,6 +181,11 @@
 
 			function applyTrueAutoScale(gd) {
 				const traces = Array.isArray(gd?.data) ? gd.data : [];
+				// Bars are measured from zero, so their automatic scale always includes it.
+				if (traces.some(trace => trace?.type === 'bar')) {
+					Plotly.relayout(gd, { 'yaxis.autorange': true });
+					return;
+				}
 				let xBounds = computeFiniteBounds(collectAxisValues(traces, 'x', true));
 				let yBounds = computeFiniteBounds(collectAxisValues(traces, 'y', true));
 
@@ -381,9 +386,53 @@
 	// An Origin-like figure for print: black frame with inward major and minor ticks on all
 	// four sides, no grid, black Arial text, edged markers, capped error bars and a framed legend.
 	// It keeps the graph's current zoom, and leaves out hidden series.
+	// The same frame for a bar chart: edged bars in the print colors, black capped error bars,
+	// and for several series a legend above the frame, where it cannot cover a bar.
+	function buildPublicationBarFigure(gd, shown, full) {
+		const data = shown.map((trace, index) => ({
+			...trace,
+			visible: true,
+			showlegend: shown.length > 1,
+			marker: { color: shadedColor(PUBLICATION_COLORS, index, '#000000'), line: { color: '#000000', width: 1 } },
+			error_y: trace.error_y ? { ...trace.error_y, color: '#000000', thickness: 1.2, width: 5 } : trace.error_y
+		}));
+		const source = gd.layout?.xaxis || {};
+		const xaxis = {
+			...publicationAxis(source, full.xaxis),
+			tickmode: 'array',
+			tickvals: source.tickvals,
+			ticktext: source.ticktext,
+			ticks: '',
+			mirror: true,
+			minor: { ticks: '', showgrid: false }
+		};
+		const titleText = gd.dataset.exportTitle || gd.layout?.title?.text || '';
+		const legendRoom = shown.length > 1 ? 30 : 0;
+		return {
+			data,
+			layout: {
+				width: PUBLICATION_WIDTH,
+				height: PUBLICATION_HEIGHT,
+				paper_bgcolor: '#ffffff',
+				plot_bgcolor: '#ffffff',
+				font: { family: PUBLICATION_FONT, size: 14, color: '#000000' },
+				title: titleText ? { text: titleText, font: { family: PUBLICATION_FONT, size: 18, color: '#000000' } } : { text: '' },
+				barmode: gd.layout?.barmode,
+				bargap: gd.layout?.bargap,
+				bargroupgap: gd.layout?.bargroupgap,
+				showlegend: shown.length > 1,
+				legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.02, yanchor: 'bottom', font: { family: PUBLICATION_FONT, size: 14, color: '#000000' } },
+				xaxis,
+				yaxis: publicationAxis(gd.layout?.yaxis, full.yaxis),
+				margin: { t: (titleText ? 56 : 24) + legendRoom, b: 64, l: 76, r: 28 }
+			}
+		};
+	}
+
 	function buildPublicationFigure(gd) {
 		const full = gd._fullLayout || {};
 		const shown = (Array.isArray(gd.data) ? gd.data : []).filter(isShownTrace);
+		if (shown.some(trace => trace.type === 'bar')) return buildPublicationBarFigure(gd, shown, full);
 		const groups = shown.filter(isPointsTrace).map(trace => trace.legendgroup);
 		const single = groups.length === 1;
 		const pointNames = {};
@@ -691,6 +740,8 @@
 	// One axis label in the current mode, before the $...$ wrapping.
 	function columnAxisText(sheet, column) {
 		const name = PlotModel.getColumnLabel(sheet, column);
+		// A bar is labeled by its name alone; the value axis carries the unit.
+		if (PlotModel.isBarSheet(sheet)) return latexMode ? formatLabelForLatex(name) : name;
 		return latexMode
 			? PlotModel.formatAxisLabel(formatLabelForLatex(name), column.unit, true)
 			: PlotModel.formatAxisLabel(name, column.unit, false);
@@ -728,7 +779,30 @@
 		};
 	}
 
+	// The value axis of a bar sheet, "name / unit"; with a unit but no name it reads "Value / unit".
+	function barValueAxisText(sheet) {
+		const unit = String(sheet.valueAxis?.unit || '').trim();
+		const name = String(sheet.valueAxis?.name || '').trim() || (unit ? 'Value' : '');
+		return PlotModel.formatAxisLabel(latexMode ? formatLabelForLatex(name) : name, unit, latexMode);
+	}
+
+	function barCategoryAxisText(sheet) {
+		const title = String(sheet.categoryTitle || '').trim();
+		return latexMode ? formatLabelForLatex(title) : title;
+	}
+
+	function getAutomaticBarTitle(sheet) {
+		const value = String(sheet.valueAxis?.name || '').trim();
+		const category = String(sheet.categoryTitle || '').trim();
+		if (!value || !PlotModel.hasBars(sheet)) return '';
+		if (!category) return latexMode ? formatLabelForLatex(value) : value;
+		return latexMode
+			? `${formatLabelForLatex(value)}\\space \\text{ by }\\space ${formatLabelForLatex(category)}`
+			: `${value} by ${category}`;
+	}
+
 	function getAutomaticTitle(sheet) {
+		if (PlotModel.isBarSheet(sheet)) return getAutomaticBarTitle(sheet);
 		const plotted = getVisibleSeries(sheet);
 		if (!plotted.length) return '';
 		const name = (column) => {
@@ -878,6 +952,175 @@
 		return traces;
 	}
 
+	/* ---------- Bar charts ---------- */
+
+	function getBarColor() {
+		return getPlotThemeSettings().datasetColors[0];
+	}
+
+	// Past the end of a palette, later series take a shade of the same hues, towards `towards`.
+	function shadedColor(colors, index, towards) {
+		const round = Math.floor(index / colors.length);
+		const color = colors[index % colors.length];
+		return round ? mixHex(color, towards, Math.min(0.3 * round, 0.6)) : color;
+	}
+
+	function formatBarValue(value) {
+		return String(Number(value.toPrecision(6)));
+	}
+
+	// A legend entry or tick label that is a name, not mathematics (a sheet's name).
+	function plainLabel(text) {
+		return latexMode ? `$\\text{${String(text).replace(/[\\{}$%&#_^~]/g, ' ')}}$` : text;
+	}
+
+	function barLabel(text) {
+		return processLabel(latexMode ? formatLabelForLatex(text) : text);
+	}
+
+	// Bars sit at whole-number positions with their names as tick labels, so two bars with the
+	// same name stay apart. entries[i] is { bar, errors, prefix } or null where there is no bar to draw.
+	function barTrace(entries, color, themeSettings, options = {}) {
+		const drawn = entry => entry && entry.bar && entry.bar.mean !== null;
+		const describe = (entry) => {
+			const { bar } = entry;
+			const spread = entry.errors && bar.uncertainty !== null ? ` ± ${formatBarValue(bar.uncertainty)}` : '';
+			const count = bar.count > 1 ? ` (mean of ${bar.count})` : '';
+			return `${entry.prefix || ''}${bar.label}<br>${formatBarValue(bar.mean)}${spread}${count}`;
+		};
+		return {
+			type: 'bar',
+			x: entries.map((entry, index) => index),
+			y: entries.map(entry => (drawn(entry) ? entry.bar.mean : null)),
+			name: options.name || '',
+			customdata: entries.map(entry => (drawn(entry) ? describe(entry) : '')),
+			hovertemplate: '%{customdata}<extra></extra>',
+			marker: { color, line: { color: mixHex(color, '#000000', 0.35), width: 0.75 } },
+			error_y: {
+				type: 'data',
+				array: entries.map(entry => (drawn(entry) && entry.errors && entry.bar.uncertainty !== null ? entry.bar.uncertainty : 0)),
+				visible: entries.some(entry => drawn(entry) && entry.errors && entry.bar.uncertainty !== null),
+				// Half of each error bar lies over its bar, where the scatter graphs' gray would be lost.
+				color: readToken('--ink', '#17181a'),
+				thickness: 1.2,
+				width: 5
+			}
+		};
+	}
+
+	// A bar chart does not zoom or pan: its bars axis is a list of names, and both axes are fixed.
+	// Its one button, Auto-scale, fits the value axis closely to the bars (and their error bars) so
+	// that bars of similar height can be told apart; pressing it again starts the axis from zero.
+	function scaleBarsToData(gd) {
+		if (gd.layout?.yaxis?.autorange === false) {
+			Plotly.relayout(gd, { 'yaxis.autorange': true });
+			return;
+		}
+		let min = Infinity;
+		let max = -Infinity;
+		(Array.isArray(gd.data) ? gd.data : []).forEach((trace) => {
+			if (trace.type !== 'bar' || trace.visible === false || trace.visible === 'legendonly') return;
+			trace.y.forEach((value, index) => {
+				if (!Number.isFinite(value)) return;
+				const error = trace.error_y?.visible ? Number(trace.error_y.array?.[index]) || 0 : 0;
+				min = Math.min(min, value - error);
+				max = Math.max(max, value + error);
+			});
+		});
+		if (!Number.isFinite(min) || !Number.isFinite(max)) return;
+		const padding = max > min ? (max - min) * 0.08 : Math.abs(max) * 0.05 || 1;
+		Plotly.relayout(gd, { 'yaxis.autorange': false, 'yaxis.range': [min - padding, max + padding] });
+	}
+
+	function barConfig() {
+		return {
+			responsive: true,
+			displayModeBar: true,
+			displaylogo: false,
+			modeBarButtons: [[{
+				name: 'Auto-scale to the bars, or back to zero',
+				icon: Plotly.Icons.autoscale,
+				click: scaleBarsToData
+			}]]
+		};
+	}
+
+	function buildBarLayout(titleText, xTitle, yTitle, labels, options = {}) {
+		const layout = buildLayout(titleText, xTitle, yTitle, options);
+		layout.xaxis = {
+			...layout.xaxis,
+			rangemode: 'normal',
+			zeroline: false,
+			showgrid: false,
+			automargin: true,
+			tickmode: 'array',
+			tickvals: labels.map((label, index) => index),
+			ticktext: labels,
+			autorange: false,
+			range: [-0.5, Math.max(labels.length, 1) - 0.5],
+			fixedrange: true
+		};
+		layout.yaxis.fixedrange = true;
+		layout.bargap = 0.28;
+		layout.bargroupgap = 0.06;
+		if (options.grouped) layout.barmode = 'group';
+		return layout;
+	}
+
+	function plotBarGraph(sheet, themeSettings) {
+		const bars = PlotModel.getBars(sheet);
+		const data = [barTrace(bars.map(bar => ({ bar, errors: sheet.errorBars })), getBarColor(), themeSettings)];
+		const layout = applyThemeLayout(buildBarLayout(getSheetTitle(sheet), barCategoryAxisText(sheet), barValueAxisText(sheet),
+			bars.map(bar => barLabel(bar.label)), { showlegend: false }), themeSettings);
+		// An auto-scaled value axis is remembered with the sheet, as a scatter graph's zoom is.
+		const view = PlotModel.normalizeGraphView(sheet.graphView).yaxis;
+		if (view) {
+			layout.yaxis.autorange = false;
+			layout.yaxis.range = view;
+		}
+		const element = document.getElementById('plot');
+		element.dataset.viewSheet = sheet.id;
+		element.dataset.exportTitle = processLabel(getSheetTitle(sheet) || '');
+		reactIfChanged('plot', data, layout, barConfig());
+		bindLegendToggle('plot');
+		bindGraphView(element);
+		const empty = document.getElementById('graph-empty');
+		if (empty) empty.hidden = bars.some(bar => bar.mean !== null);
+		plotResiduals();
+	}
+
+	// Every bar sheet together, as groups of bars. Grouped by columns, each column name is a group
+	// with one bar for each sheet (months, a bar for each year); grouped by sheets, each sheet is a
+	// group with one bar for each column (classes, a bar for each sport).
+	function plotAllBars(themeSettings) {
+		const grid = PlotModel.getCombinedBars(plotState.sheets);
+		const bySheets = plotState.combinedGroupBy === 'sheets';
+		const sheetNames = grid.sheets.map(sheet => getSheetDisplayName(plotState.sheets.indexOf(sheet)));
+		const columnNames = grid.columns.map(column => column.label);
+		const groups = bySheets ? sheetNames.map(plainLabel) : columnNames.map(barLabel);
+		const series = bySheets ? columnNames : sheetNames;
+		const towards = document.documentElement.getAttribute('data-theme') === 'dark' ? '#ffffff' : '#000000';
+		const data = series.map((name, s) => {
+			const entries = groups.map((group, g) => {
+				const sheetIndex = bySheets ? g : s;
+				const bar = grid.cells[sheetIndex][bySheets ? s : g];
+				return bar ? { bar, errors: grid.sheets[sheetIndex].errorBars, prefix: `${sheetNames[sheetIndex]}: ` } : null;
+			});
+			return barTrace(entries, shadedColor(themeSettings.datasetColors, s, towards), themeSettings, {
+				name: bySheets ? barLabel(name) : plainLabel(name)
+			});
+		});
+		const first = grid.sheets[0];
+		const inputs = getCombinedInputs();
+		if (inputs.title.dataset.edited !== 'true') inputs.title.value = '';
+		if (inputs.x.dataset.edited !== 'true') inputs.x.value = first && !bySheets ? barCategoryAxisText(first) : '';
+		if (inputs.y.dataset.edited !== 'true') inputs.y.value = first ? barValueAxisText(first) : '';
+		const layout = applyThemeLayout(buildBarLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim(), groups,
+			{ showTitle: true, showlegend: series.length > 1, grouped: true }), themeSettings);
+		reactIfChanged('popup-plot', data, layout, barConfig());
+		bindLegendToggle('popup-plot');
+	}
+
 	// A fit line holds a fixed number of points across its whole length, so a zoomed-in view of a
 	// fast curve (such as a sinusoid over many cycles) would show straight segments. When zoomed,
 	// the line is redrawn from its fit function across the view, plus one view width on each side
@@ -936,6 +1179,8 @@
 		if (!element || element.dataset.legendBound === 'true' || typeof element.on !== 'function') return;
 		element.dataset.legendBound = 'true';
 		element.on('plotly_legendclick', (event) => {
+			// A bar series has no saved visibility: Plotly hides or shows it for this view.
+			if (event?.data?.[event.curveNumber]?.type === 'bar') return undefined;
 			const key = event?.data?.[event.curveNumber]?.meta;
 			const target = resolveFitKey(key);
 			if (!target) return false;
@@ -980,6 +1225,10 @@
 		installPlotTexCache();
 		const sheet = getActiveSheet();
 		const themeSettings = getPlotThemeSettings();
+		if (PlotModel.isBarSheet(sheet)) {
+			plotBarGraph(sheet, themeSettings);
+			return;
+		}
 		const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
 		const xView = PlotModel.normalizeGraphView(sheet.graphView).xaxis || null;
 		const data = pointsBeforeFits(series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings, { xView })));
@@ -1007,7 +1256,8 @@
 		const result = datasetFitResults[activeFitKey];
 		const target = resolveFitKey(activeFitKey);
 		const residuals = Array.isArray(result?.residuals) ? result.residuals : [];
-		if (!wrap || !target || !residuals.length) {
+		// A bar sheet keeps its scatter fits for when it is switched back, but shows none of them.
+		if (!wrap || !target || !residuals.length || PlotModel.isBarSheet(getActiveSheet())) {
 			if (wrap) wrap.hidden = true;
 			return;
 		}
@@ -1040,6 +1290,18 @@
 	function plotAllSheets() {
 		installPlotTexCache();
 		const themeSettings = getPlotThemeSettings();
+		const barMode = PlotModel.getCombinedMode(plotState.sheets) === 'bar';
+		const groupRow = document.getElementById('combined-group-row');
+		if (groupRow) {
+			groupRow.hidden = !barMode;
+			groupRow.querySelectorAll('[data-group-by]').forEach((button) => {
+				button.setAttribute('aria-pressed', String(button.dataset.groupBy === plotState.combinedGroupBy));
+			});
+		}
+		if (barMode) {
+			plotAllBars(themeSettings);
+			return;
+		}
 		const multiple = plotState.sheets.length > 1;
 		const data = [];
 		let colorIndex = 0;
@@ -1101,6 +1363,7 @@
 
 	Object.assign(window, {
 		getSeriesColor,
+		getBarColor,
 		sanitizeFilename,
 		saveBlobWithFallback,
 		processLabel,

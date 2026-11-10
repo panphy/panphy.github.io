@@ -88,7 +88,12 @@ function openFormulaDialog(column = null) {
 	document.getElementById('formula-unit').value = column ? column.unit : '';
 	renderFormulaChips(sheet);
 	renderFormulaLhs();
-	document.getElementById('formula-propagate').checked = !!(column && getPropagatedColumn(column));
+	const hasDelta = !!(column && getPropagatedColumn(column));
+	document.getElementById('formula-propagate').checked = hasDelta;
+	// A bar sheet's columns are all bars, so a new ±Δ column and a unit have no use there.
+	const bar = PlotModel.isBarSheet(sheet);
+	document.getElementById('formula-propagate').closest('label').hidden = bar && !hasDelta;
+	document.getElementById('formula-unit').closest('div').hidden = bar;
 	previewFormula();
 	openDialog('formula-dialog');
 	document.getElementById('formula-input').focus();
@@ -239,6 +244,10 @@ function applyFormula() {
 /* ---------- Clear ---------- */
 
 function isBlankNewSheet(sheet) {
+	if (PlotModel.isBarSheet(sheet)) {
+		return sheet.rowCount === PlotModel.BAR_START_ROWS && !String(sheet.name || '').trim() && PlotModel.isSheetEmpty(sheet) && sheet.columns.length === 2
+			&& sheet.columns.every(column => !column.name && !column.formula) && !sheet.valueAxis.name && !sheet.valueAxis.unit && !sheet.categoryTitle;
+	}
 	return sheet.rowCount === PlotModel.DEFAULT_ROWS && !String(sheet.name || '').trim() && PlotModel.isSheetEmpty(sheet) && sheet.columns.length === 2
 		&& sheet.columns[0].role === 'X' && sheet.columns[0].name === 'x' && !sheet.columns[0].unit
 		&& sheet.columns[1].role === 'Y' && sheet.columns[1].name === 'y' && !sheet.columns[1].unit;
@@ -257,7 +266,9 @@ function openClearDialog() {
 	keep.disabled = empty;
 	document.getElementById('clear-keep-note').textContent = empty
 		? 'The cells are already empty.'
-		: 'Empties every cell and removes this sheet\'s fits. Column names, units, roles and formulas stay, ready for new readings.';
+		: PlotModel.isBarSheet(sheet)
+			? 'Empties every cell. The bar names, axis titles and formulas stay, ready for new readings.'
+			: 'Empties every cell and removes this sheet\'s fits. Column names, units, roles and formulas stay, ready for new readings.';
 	openDialog('clear-dialog');
 	(empty ? document.getElementById('clear-reset') : keep).focus();
 }
@@ -270,10 +281,12 @@ function applyClear(reset) {
 	clearAdvancedFitParameters();
 	closeDialog('clear-dialog');
 	if (reset) renderSheetTabs();
+	applyChartMode();
 	renderTable();
 	afterDataChange({ structure: true });
 	syncTitleInput(true);
-	showToast(reset ? 'The sheet is blank again: columns x and y.' : 'Data cleared. The columns are ready for new readings.');
+	showToast(!reset ? 'Data cleared. The columns are ready for new readings.'
+		: PlotModel.isBarSheet(sheet) ? 'The sheet is blank again: two bars to name.' : 'The sheet is blank again: columns x and y.');
 }
 
 /* ---------- Fill with one value ---------- */
@@ -411,6 +424,11 @@ function getCsvHeaders() {
 
 function openCsvDialog() {
 	const { rows } = csvImport;
+	// From a bar sheet the file is imported as bars: every column is a bar, so there are no roles to choose.
+	csvImport.bar = PlotModel.isBarSheet(getActiveSheet());
+	document.getElementById('csv-roles-note').textContent = csvImport.bar
+		? 'This sheet is a bar chart, so each column is imported as a bar and its rows as repeat readings.'
+		: 'Choose a role for each column. Nothing is guessed silently: check the suggestions before importing.';
 	const width = Math.max(...rows.map(row => row.length));
 	const firstRowIsText = rows.length > 1 && rows[0].some(cell => cell !== '' && !Number.isFinite(PlotModel.parseNumber(cell)));
 	document.getElementById('csv-headers').checked = firstRowIsText;
@@ -448,8 +466,9 @@ function renderCsvPreview() {
 	const headRow = document.createElement('tr');
 	for (let index = 0; index < csvImport.width; index++) {
 		const th = document.createElement('th');
-		th.className = `neo-col-head role-${csvImport.roles[index].role}`;
+		th.className = `neo-col-head role-${csvImport.bar ? 'bar' : csvImport.roles[index].role}`;
 		const select = document.createElement('select');
+		select.hidden = csvImport.bar;
 		select.className = 'neo-role-select';
 		select.setAttribute('aria-label', `Role of imported column ${PlotModel.columnLetter(index)}`);
 		ROLE_OPTIONS.forEach((option) => {
@@ -464,13 +483,14 @@ function renderCsvPreview() {
 			csvImport.roles[index] = { role: option.role, errorType: option.errorType };
 			th.className = `neo-col-head role-${option.role}`;
 		});
-		const { name, unit } = PlotModel.splitHeader(headers[index] || '');
+		const { name, unit } = csvImport.bar ? { name: String(headers[index] || '').trim(), unit: '' } : PlotModel.splitHeader(headers[index] || '');
 		const title = document.createElement('div');
 		title.className = 'neo-csv-name';
 		title.textContent = name || PlotModel.columnLetter(index);
 		const unitLine = document.createElement('div');
 		unitLine.className = 'neo-csv-unit';
 		unitLine.textContent = unit || '—';
+		unitLine.hidden = csvImport.bar;
 		th.append(select, title, unitLine);
 		headRow.appendChild(th);
 	}
@@ -493,7 +513,7 @@ function renderCsvPreview() {
 
 function applyCsvImport() {
 	if (!csvImport) return;
-	if (!csvImport.roles.some(entry => entry.role === 'X')) {
+	if (!csvImport.bar && !csvImport.roles.some(entry => entry.role === 'X')) {
 		setDialogMessage('csv-message', 'Choose an X column: Y columns plot against the nearest X column to their left.');
 		return;
 	}
@@ -507,7 +527,7 @@ function applyCsvImport() {
 	} else if (!sheet.name) {
 		sheet.name = csvImport.baseName;
 	}
-	PlotModel.importRows(sheet, csvImport.rows, { headers: document.getElementById('csv-headers').checked, roles: csvImport.roles }, PlotModel.createIdSource(plotState));
+	PlotModel.importRows(sheet, csvImport.rows, { headers: document.getElementById('csv-headers').checked, roles: csvImport.roles, bar: csvImport.bar }, PlotModel.createIdSource(plotState));
 	sheet.title = { text: '', automatic: true };
 	closeDialog('csv-dialog');
 	csvImport = null;
@@ -576,7 +596,10 @@ function initializeDialogs() {
 			applyFill();
 		}
 	});
-	document.getElementById('mean-button').addEventListener('click', openMeanDialog);
+	document.getElementById('mean-button').addEventListener('click', () => {
+		if (PlotModel.isBarSheet(getActiveSheet())) showToast(BAR_MEAN_MESSAGE, 5000);
+		else openMeanDialog();
+	});
 	document.getElementById('mean-apply').addEventListener('click', applyMean);
 	document.getElementById('csv-headers').addEventListener('change', () => {
 		resetCsvRoles();

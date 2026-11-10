@@ -42,10 +42,54 @@
     });
   });
 
+  // The guide has two modes, Scatter and Bar: content marked data-mode shows in its own mode only
+  // (manual.css). A standalone page keeps the choice in its address as ?mode=bar; inside the app's
+  // overlay the address stays as it is, and the guide follows the kind of sheet that is open.
+  const root = document.documentElement;
+  const embedded = window.parent !== window;
+
+  function setMode(mode, keepAddress = false) {
+    const next = mode === 'bar' ? 'bar' : 'scatter';
+    root.dataset.manualMode = next;
+    document.querySelectorAll('[data-set-mode]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.setMode === next));
+    });
+    if (embedded || keepAddress) return;
+    const url = new URL(location.href);
+    if (next === 'bar') url.searchParams.set('mode', 'bar');
+    else url.searchParams.delete('mode');
+    history.replaceState(null, '', url);
+  }
+
+  document.querySelectorAll('[data-set-mode]').forEach(button => {
+    button.addEventListener('click', () => {
+      // A link into the other guide would be hidden now, so the address drops it.
+      if (location.hash && !embedded) history.replaceState(null, '', location.pathname + location.search);
+      setMode(button.dataset.setMode);
+      window.scrollTo(0, 0);
+    });
+  });
+  setMode(root.dataset.manualMode, true);
+
+  if (embedded) {
+    try {
+      const app = window.parent.document.querySelector('.neo-app');
+      if (app) {
+        const follow = () => setMode(app.dataset.chart);
+        follow();
+        new MutationObserver(follow).observe(app, { attributes: true, attributeFilter: ['data-chart'] });
+      }
+    } catch (error) {
+      // Another site's frame cannot read the app; the guide then keeps its own choice.
+    }
+  }
+
   function revealHashTarget() {
     const id = location.hash.slice(1);
     const target = document.getElementById(id === 'quick-start' ? 'walkthrough' : id);
     if (!target) return;
+    const owner = target.closest('[data-mode]');
+    if (owner && owner.dataset.mode !== root.dataset.manualMode) setMode(owner.dataset.mode);
     for (let parent = target; parent; parent = parent.parentElement) {
       if (parent instanceof HTMLDetailsElement) parent.open = true;
     }

@@ -118,6 +118,7 @@ function createNewColumn(options = {}) {
 // Every change to the data runs through here: stale fits, validation, graph and saving.
 function afterDataChange(options = {}) {
 	recalculateFormulas();
+	renderBarSummary();
 	if (options.structure) {
 		pruneOrphanFits();
 		refreshActiveFitKey();
@@ -139,6 +140,145 @@ function afterDataChange(options = {}) {
 function refreshWorkspaceChrome() {
 	renderSeriesList();
 	renderStatus();
+	syncCombinedButton();
+}
+
+/* ---------- Scatter graph or bar chart ---------- */
+
+// Toolbar buttons that cannot act stay focusable and say why when pressed.
+function setToolAvailable(button, available, title) {
+	if (!button) return;
+	if (!button.dataset.title) button.dataset.title = button.title;
+	if (available) button.removeAttribute('aria-disabled');
+	else button.setAttribute('aria-disabled', 'true');
+	button.title = available ? button.dataset.title : title;
+}
+
+const COMBINED_MIXED_MESSAGE = 'All sheets needs every sheet with data to be the same kind of graph: all scatter or all bar.';
+const BAR_MEAN_MESSAGE = 'In a bar chart the Mean row already gives the mean of each column\'s readings.';
+
+// All sheets draws scatter graphs together or bar charts together, never a mix of the two.
+function syncCombinedButton() {
+	setToolAvailable(document.getElementById('plot-all-button'), PlotModel.getCombinedMode(plotState.sheets) !== 'mixed', COMBINED_MIXED_MESSAGE);
+}
+
+// Shows the active sheet's kind of graph: the toolbar choice, the bar settings and the layout.
+// A bar sheet has no roles, fits or series list, so the inspector is hidden (panphyplot.css).
+function applyChartMode() {
+	const sheet = getActiveSheet();
+	const bar = PlotModel.isBarSheet(sheet);
+	const app = document.querySelector('.neo-app');
+	if (!app || !sheet) return;
+	app.dataset.chart = bar ? 'bar' : 'scatter';
+	document.querySelectorAll('#chart-type [data-chart-type]').forEach((button) => {
+		button.setAttribute('aria-pressed', String(button.dataset.chartType === (bar ? 'bar' : 'scatter')));
+	});
+	document.getElementById('bar-settings').hidden = !bar;
+	const fields = { 'bar-value-name': sheet.valueAxis.name, 'bar-value-unit': sheet.valueAxis.unit, 'bar-category-title': sheet.categoryTitle };
+	Object.entries(fields).forEach(([id, value]) => {
+		const input = document.getElementById(id);
+		if (input.value !== value) input.value = value;
+	});
+	document.getElementById('bar-error-bars').checked = sheet.errorBars;
+	document.getElementById('data-pane-hint').textContent = bar
+		? 'Each column is a bar; its rows are repeat readings'
+		: 'Y plots against the nearest X to its left';
+	document.getElementById('data-pane-foot-hint').hidden = bar;
+	document.getElementById('graph-empty-text').textContent = bar
+		? 'Type a name and a reading in each column. Each column becomes a bar, as tall as the mean of its readings.'
+		: 'Type or paste readings into the table. Each Y column becomes a series.';
+	const addColumnButton = document.getElementById('add-column-button');
+	addColumnButton.title = bar ? 'Add a bar at the right' : 'Add a Y column at the right';
+	setToolAvailable(document.getElementById('mean-button'), !bar, BAR_MEAN_MESSAGE);
+	// The manual has a guide for each kind of graph; inside the app it also follows data-chart (manual.js).
+	const manualLink = document.querySelector('a[data-manual-overlay]');
+	if (manualLink) {
+		const url = new URL(manualLink.href);
+		if (bar) url.searchParams.set('mode', 'bar');
+		else url.searchParams.delete('mode');
+		manualLink.href = url.href;
+	}
+	if (typeof refreshPaneLayout === 'function') refreshPaneLayout();
+}
+
+function setSheetChartType(type) {
+	const sheet = getActiveSheet();
+	if (!PlotModel.setChartType(sheet, type)) return;
+	closeMenu();
+	cellSelection = null;
+	applyChartMode();
+	renderTable();
+	forceReplot();
+	afterDataChange({ structure: true });
+	syncTitleInput(true);
+}
+
+function handleBarSettingInput(event) {
+	const sheet = getActiveSheet();
+	if (!PlotModel.isBarSheet(sheet)) return;
+	const value = event.target.value;
+	if (event.target.id === 'bar-value-name') sheet.valueAxis.name = value;
+	else if (event.target.id === 'bar-value-unit') sheet.valueAxis.unit = value;
+	else sheet.categoryTitle = value;
+	debouncedPlot();
+	syncTitleInput();
+	scheduleSaveState();
+}
+
+function formatBarNumber(value) {
+	return value === null ? '' : String(Number(value.toPrecision(6)));
+}
+
+// The highlighted rows under a bar sheet's readings: the mean of each column, which is the
+// height of its bar, and with error bars on, its uncertainty. They are worked out from the
+// cells and never stored, so the sheet's rows, formulas and exports hold readings only.
+function renderBarSummary() {
+	const foot = document.getElementById('neo-table-foot');
+	const sheet = getActiveSheet();
+	if (!foot || !sheet) return;
+	if (!PlotModel.isBarSheet(sheet)) {
+		delete foot.dataset.signature;
+		if (foot.childElementCount) foot.replaceChildren();
+		return;
+	}
+	const bars = PlotModel.getBars(sheet);
+	const rows = [{
+		name: 'Mean',
+		title: 'The mean of each column\'s readings, which is the height of its bar',
+		text: bar => formatBarNumber(bar.mean),
+		describe: bar => (bar.mean === null ? 'no readings' : formatBarNumber(bar.mean))
+	}];
+	if (sheet.errorBars) {
+		rows.push({
+			name: 'Uncertainty',
+			title: 'Half the spread between the largest and the smallest reading, drawn as the error bar',
+			text: bar => (bar.uncertainty === null ? '' : `± ${formatBarNumber(bar.uncertainty)}`),
+			describe: bar => (bar.uncertainty === null ? 'needs two readings' : `plus or minus ${formatBarNumber(bar.uncertainty)}`)
+		});
+	}
+	const signature = JSON.stringify([sheet.id, bars.map(bar => [bar.id, bar.label, ...rows.map(row => row.text(bar))])]);
+	if (foot.dataset.signature === signature) return;
+	foot.dataset.signature = signature;
+	foot.replaceChildren(...rows.map((row) => {
+		const tr = document.createElement('tr');
+		tr.className = `neo-summary-row neo-summary-${row.name.toLowerCase()}`;
+		const head = document.createElement('th');
+		head.className = 'neo-row-head neo-summary-head';
+		head.scope = 'row';
+		head.textContent = row.name;
+		head.title = row.title;
+		tr.appendChild(head);
+		bars.forEach((bar) => {
+			const td = document.createElement('td');
+			td.className = 'neo-summary-cell';
+			td.textContent = row.text(bar);
+			td.setAttribute('aria-label', `${row.name} of ${bar.label}: ${row.describe(bar)}`);
+			if (bar.uncertainty === null && row.name === 'Uncertainty' && bar.count === 1) td.title = 'One reading has no spread';
+			tr.appendChild(td);
+		});
+		tr.appendChild(document.createElement('td'));
+		return tr;
+	}));
 }
 
 // The inspector's Series card: the graph's color key, with a tap to hide or show each series.
@@ -208,6 +348,7 @@ function renderStatus() {
 	const sheet = getActiveSheet();
 	if (!status || !sheet) return;
 	const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
+	const bars = PlotModel.isBarSheet(sheet) ? PlotModel.getBars(sheet).filter(bar => bar.mean !== null).length : null;
 	let rows = 0;
 	for (let row = 0; row < sheet.rowCount; row++) {
 		if (sheet.columns.some(column => !PlotModel.isBlank(column.cells[row]))) rows++;
@@ -220,7 +361,7 @@ function renderStatus() {
 	const range = typeof getSelectedRange === 'function' ? getSelectedRange() : null;
 	const selected = range ? ` · ${range.r1 - range.r0 + 1} × ${range.c1 - range.c0 + 1} cells selected` : '';
 	status.replaceChildren(
-		`${getSheetDisplayName(plotState.activeSheet)} · ${series.length} ${series.length === 1 ? 'series' : 'series'} · ${rows} ${rows === 1 ? 'row' : 'rows'}${selected} · `,
+		`${getSheetDisplayName(plotState.activeSheet)} · ${bars === null ? `${series.length} series` : `${bars} ${bars === 1 ? 'bar' : 'bars'}`} · ${rows} ${rows === 1 ? 'row' : 'rows'}${selected} · `,
 		saved
 	);
 }
@@ -246,6 +387,10 @@ function resolveTabConflict(keep) {
 // Fills an empty sheet (or a new one) with the pendulum readings the tour uses.
 function loadSampleData() {
 	let sheet = getActiveSheet();
+	if (PlotModel.isBarSheet(sheet)) {
+		loadBarSampleData(sheet);
+		return;
+	}
 	if (!PlotModel.isSheetEmpty(sheet)) {
 		sheet = PlotModel.createSheet(PlotModel.createIdSource(plotState), 'Pendulum');
 		plotState.sheets.push(sheet);
@@ -264,6 +409,33 @@ function loadSampleData() {
 	switchSheet(plotState.sheets.indexOf(sheet));
 	afterDataChange({ structure: true });
 	showToast('Sample pendulum data loaded: three repeat readings of the period T.');
+}
+
+// Bounce heights of four balls dropped from 1 m, three readings each.
+const BAR_SAMPLE = [['Tennis', ['54', '57', '55']], ['Golf', ['72', '75', '74']], ['Squash', ['18', '21', '19']], ['Basketball', ['60', '63', '62']]];
+
+function loadBarSampleData(active) {
+	let sheet = active;
+	if (!PlotModel.isSheetEmpty(sheet)) {
+		sheet = PlotModel.createSheet(PlotModel.createIdSource(plotState), 'Bounce');
+		PlotModel.setChartType(sheet, 'bar');
+		plotState.sheets.push(sheet);
+	} else if (!sheet.name) {
+		sheet.name = 'Bounce';
+	}
+	const ids = PlotModel.createIdSource(plotState);
+	sheet.columns = BAR_SAMPLE.map(([name, cells]) => PlotModel.createColumn(ids.next('c'), { name, cells }, PlotModel.BAR_START_ROWS));
+	PlotModel.setRowCount(sheet, PlotModel.BAR_START_ROWS);
+	sheet.valueAxis = { name: 'Bounce height', unit: 'cm' };
+	sheet.categoryTitle = 'Ball';
+	sheet.errorBars = true;
+	sheet.title = { text: '', automatic: true };
+	sheet.hiddenSeries = [];
+	sheet.fitSeries = null;
+	pruneOrphanFits();
+	switchSheet(plotState.sheets.indexOf(sheet));
+	afterDataChange({ structure: true });
+	showToast('Sample data loaded: three bounce heights for each of four balls.');
 }
 
 // Data sent by another PanPhy app (PanPhyTrack) in the link's hash, #import=<JSON>: a sheet name and
@@ -394,10 +566,12 @@ function getPropagatedColumn(column, sheet = getActiveSheet()) {
 
 function buildHeaderCell(sheet, column, index) {
 	const th = document.createElement('th');
-	th.className = `neo-col-head role-${column.role}`;
+	// On a bar sheet roles are kept but unused: every column is a bar, in the bars' color.
+	const bar = PlotModel.isBarSheet(sheet);
+	th.className = `neo-col-head role-${bar ? 'bar' : column.role}`;
 	th.dataset.columnId = column.id;
 	// A Y column's head wears its series color from the graph.
-	const seriesColor = column.role === 'Y' ? getSeriesColor(sheet, column.id) : null;
+	const seriesColor = bar ? getBarColor() : column.role === 'Y' ? getSeriesColor(sheet, column.id) : null;
 	if (seriesColor) th.style.setProperty('--series-color', seriesColor);
 
 	const top = document.createElement('div');
@@ -436,14 +610,20 @@ function buildHeaderCell(sheet, column, index) {
 	menuButton.textContent = '⋯';
 	menuButton.addEventListener('click', () => openColumnMenu(menuButton, sheet, column));
 
-	top.append(letter, role, menuButton);
+	if (bar) {
+		const spacer = document.createElement('span');
+		spacer.className = 'neo-col-spacer';
+		top.append(letter, spacer, menuButton);
+	} else {
+		top.append(letter, role, menuButton);
+	}
 
 	const name = document.createElement('input');
 	name.type = 'text';
 	name.className = 'neo-col-name';
 	name.value = column.name;
 	name.maxLength = PlotModel.NAME_MAX_LENGTH;
-	name.placeholder = 'Name';
+	name.placeholder = bar ? 'Bar name' : 'Name';
 	name.setAttribute('aria-label', `Name of column ${PlotModel.columnLetter(index)}`);
 	name.addEventListener('input', () => {
 		const previousSymbols = PlotModel.getFormulaSymbols(sheet);
@@ -509,7 +689,8 @@ function buildHeaderCell(sheet, column, index) {
 	});
 	applyColumnWidth(th, column);
 
-	th.append(top, name, unit, preview, resizer);
+	// A bar has a name only: the value axis carries the quantity and its unit.
+	th.append(top, name, ...(bar ? [] : [unit]), preview, resizer);
 	renderFormulaLine(th, column, sheet);
 	renderHeaderPreview(th, sheet, column);
 	return th;
@@ -588,7 +769,7 @@ function applyPreviewState(preview) {
 	if (headerFolded) {
 		preview.tabIndex = 0;
 		preview.setAttribute('role', 'button');
-		preview.title = 'Edit the name and unit';
+		preview.title = PlotModel.isBarSheet(getActiveSheet()) ? 'Edit the name' : 'Edit the name and unit';
 	} else {
 		preview.removeAttribute('tabindex');
 		preview.removeAttribute('role');
@@ -697,8 +878,14 @@ function buildDataCell(sheet, column, row) {
 	return td;
 }
 
+// On a bar sheet every column holds readings, whatever role it had as a scatter column.
+function isCellInvalid(sheet, column, value) {
+	if (!PlotModel.isBarSheet(sheet)) return PlotModel.isCellInvalid(column, value);
+	return !PlotModel.isBlank(value) && !Number.isFinite(PlotModel.parseNumber(value));
+}
+
 function markCellValidity(input, column) {
-	const invalid = PlotModel.isCellInvalid(column, input.value);
+	const invalid = isCellInvalid(getActiveSheet(), column, input.value);
 	input.classList.toggle('invalid-input', invalid);
 	input.setAttribute('aria-invalid', String(invalid));
 }
@@ -754,6 +941,8 @@ function renderTableRows(requestedRow = null) {
 		tr.appendChild(document.createElement('td')); fragment.appendChild(tr);
 	}
 	spacer(sheet.rowCount - last);
+	// The row under the last one that adds another, like the + column at the right.
+	fragment.appendChild(buildAddRow(sheet));
 	body.replaceChildren(fragment);
 	tableWindow = { sheet, first, last, rowHeight };
 	if (savedFocus && savedFocus.row >= first && savedFocus.row < last) {
@@ -761,6 +950,28 @@ function renderTableRows(requestedRow = null) {
 		if (input) { input.focus({ preventScroll: true }); input.setSelectionRange(savedFocus.start, savedFocus.end); }
 	}
 	if (cellSelection) renderCellSelection();
+}
+
+function buildAddRow(sheet) {
+	const tr = document.createElement('tr');
+	tr.className = 'neo-add-row';
+	const head = document.createElement('th');
+	head.className = 'neo-row-head';
+	const button = document.createElement('button');
+	button.type = 'button';
+	button.textContent = '+';
+	button.title = PlotModel.isBarSheet(sheet) ? 'Add a row for another reading' : 'Add a row';
+	button.setAttribute('aria-label', 'Add row');
+	button.addEventListener('click', addRow);
+	head.appendChild(button);
+	const fill = document.createElement('td');
+	fill.className = 'neo-add-row-fill';
+	fill.colSpan = sheet.columns.length + 1;
+	fill.textContent = PlotModel.isBarSheet(sheet) ? 'Add a reading' : 'Add a row';
+	fill.setAttribute('aria-hidden', 'true');
+	fill.addEventListener('click', addRow);
+	tr.append(head, fill);
+	return tr;
 }
 
 function scheduleTableRows() {
@@ -786,8 +997,8 @@ function renderTable() {
 	const addButton = document.createElement('button');
 	addButton.type = 'button';
 	addButton.textContent = '+';
-	addButton.title = 'Add a Y column';
-	addButton.setAttribute('aria-label', 'Add column');
+	addButton.title = PlotModel.isBarSheet(sheet) ? 'Add a bar' : 'Add a Y column';
+	addButton.setAttribute('aria-label', PlotModel.isBarSheet(sheet) ? 'Add bar' : 'Add column');
 	addButton.addEventListener('click', addColumn);
 	addCell.appendChild(addButton);
 	headRow.appendChild(addCell);
@@ -798,6 +1009,7 @@ function renderTable() {
 	table.setAttribute('aria-rowcount', String(sheet.rowCount + 1));
 	tableWindow = null;
 	renderTableRows();
+	renderBarSummary();
 	updateValidationMessage();
 	if (cellSelection) {
 		const clamp = point => ({ row: Math.min(point.row, sheet.rowCount - 1), col: Math.min(point.col, sheet.columns.length - 1) });
@@ -811,14 +1023,17 @@ function updateValidationMessage() {
 	let invalid = 0;
 	sheet.columns.forEach((column) => {
 		column.cells.forEach((value) => {
-			if (PlotModel.isCellInvalid(column, value)) invalid++;
+			if (isCellInvalid(sheet, column, value)) invalid++;
 		});
 	});
 	const messages = [];
+	const bar = PlotModel.isBarSheet(sheet);
 	if (invalid) {
-		messages.push(`${invalid} invalid ${invalid === 1 ? 'cell' : 'cells'}. Use numbers such as -1.25 or 1e-5, without commas. Uncertainties must be non-negative (percentages greater than zero). Invalid cells are kept but left out of the graph.`);
+		messages.push(bar
+			? `${invalid} invalid ${invalid === 1 ? 'cell' : 'cells'}. Use numbers such as -1.25 or 1e-5, without commas. Invalid cells are kept but left out of the mean.`
+			: `${invalid} invalid ${invalid === 1 ? 'cell' : 'cells'}. Use numbers such as -1.25 or 1e-5, without commas. Uncertainties must be non-negative (percentages greater than zero). Invalid cells are kept but left out of the graph.`);
 	}
-	const orphans = PlotModel.getSeries(sheet).filter(series => !series.xCol);
+	const orphans = bar ? [] : PlotModel.getSeries(sheet).filter(series => !series.xCol);
 	if (orphans.length) {
 		const names = orphans.map(series => PlotModel.getColumnLabel(sheet, series.yCol)).join(', ');
 		messages.push(`${names}: a Y column needs an X column to its left before it can be plotted.`);
@@ -1447,6 +1662,7 @@ function switchSheet(index) {
 	plotState.activeSheet = index;
 	refreshActiveFitKey();
 	setInitialParameters(getCurrentAdvancedFitMethod(), { onlyIfVisible: true });
+	applyChartMode();
 	renderSheetTabs();
 	renderTable();
 	renderFitSeriesSelect();
@@ -2004,6 +2220,10 @@ function openTab(event, tabName) {
 let popupOpener = null;
 
 function openPlotAll() {
+	if (PlotModel.getCombinedMode(plotState.sheets) === 'mixed') {
+		showToast(COMBINED_MIXED_MESSAGE, 5000);
+		return;
+	}
 	popupOpener = document.activeElement;
 	document.getElementById('popup-background').style.display = 'block';
 	document.getElementById('popup-container').style.display = 'block';
@@ -2036,6 +2256,27 @@ function initializeInterface() {
 	});
 
 	document.getElementById('add-row-button').addEventListener('click', addRow);
+	document.querySelectorAll('#chart-type [data-chart-type]').forEach((button) => {
+		button.addEventListener('click', () => setSheetChartType(button.dataset.chartType));
+	});
+	['bar-value-name', 'bar-value-unit', 'bar-category-title'].forEach((id) => {
+		document.getElementById(id).addEventListener('input', handleBarSettingInput);
+	});
+	document.getElementById('bar-error-bars').addEventListener('change', (event) => {
+		const sheet = getActiveSheet();
+		sheet.errorBars = event.target.checked;
+		renderBarSummary();
+		plotGraph();
+		scheduleSaveState();
+	});
+	document.querySelectorAll('#combined-group-row [data-group-by]').forEach((button) => {
+		button.addEventListener('click', () => {
+			plotState.combinedGroupBy = button.dataset.groupBy;
+			plotAllSheets();
+			scheduleSaveState();
+		});
+	});
+	applyChartMode();
 	document.getElementById('sample-data-button').addEventListener('click', loadSampleData);
 	document.getElementById('residual-toggle').addEventListener('click', () => {
 		plotState.showResiduals = !plotState.showResiduals;

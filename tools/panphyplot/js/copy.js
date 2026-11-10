@@ -293,6 +293,7 @@ function prettifyPowers(text) {
 
 // Columns as a reader expects them: each value with its own ± uncertainty, and blank rows dropped.
 function buildTableView(sheet) {
+	if (PlotModel.isBarSheet(sheet)) return buildBarTableView(sheet);
 	const owners = PlotModel.getUncertaintyColumns(sheet);
 	const claimed = new Set([...owners.values()].map(column => column.id));
 	const columns = sheet.columns.filter(column => column.role !== 'none' && !claimed.has(column.id)).map(column => ({
@@ -318,6 +319,31 @@ function buildTableView(sheet) {
 			return { value, delta: delta ? `${delta}${error.errorType === 'percentage' ? '%' : ''}` : '' };
 		});
 		if (cells.some(cell => cell.value)) rows.push(cells);
+	}
+	return { columns, rows };
+}
+
+// A bar sheet as a results table: a column of row numbers, the readings of each bar, and a Mean
+// row, which carries each bar's ± uncertainty when error bars are on.
+function buildBarTableView(sheet) {
+	const bars = PlotModel.getBars(sheet);
+	const columns = [
+		{ column: null, error: null, name: String(sheet.categoryTitle || '').trim(), unit: '', label: true },
+		...bars.map(bar => ({ column: bar.column, error: null, name: bar.label, unit: '' }))
+	];
+	const rows = [];
+	for (let row = 0; row < sheet.rowCount; row++) {
+		const cells = bars.map(({ column }) => {
+			const value = String(column.cells[row] ?? '').trim();
+			if (!value || !PlotModel.isComputedColumn(column)) return { value, delta: '' };
+			return { value: roundCalculated(PlotModel.parseNumber(value), NaN).value, delta: '' };
+		});
+		if (cells.some(cell => cell.value)) rows.push([{ value: String(row + 1), delta: '' }, ...cells]);
+	}
+	if (rows.length) {
+		rows.push([{ value: 'Mean', delta: '', text: true }, ...bars.map(bar => (bar.mean === null
+			? { value: '', delta: '' }
+			: roundCalculated(bar.mean, sheet.errorBars && bar.uncertainty > 0 ? bar.uncertainty : NaN)))]);
 	}
 	return { columns, rows };
 }
@@ -361,12 +387,13 @@ function escapeLatexText(text) {
 
 function tableAsLatex(view) {
 	const header = view.columns.map((entry) => {
-		const name = latexMode ? `$${entry.name}$` : escapeLatexText(entry.name);
+		const name = latexMode && !entry.label ? `$${entry.name}$` : escapeLatexText(entry.name);
 		const unit = String(entry.unit || '').trim();
 		return unit ? `${name} / $\\mathrm{${unit.replace(/\s+/g, '\\,')}}$` : name;
 	});
 	const body = view.rows.map(row => row.map((cell) => {
 		if (!cell.value) return '';
+		if (cell.text) return escapeLatexText(cell.value);
 		const delta = cell.delta.endsWith('%') ? `${cell.delta.slice(0, -1)}\\%` : cell.delta;
 		return cell.delta ? `$${cell.value} \\pm ${delta}$` : `$${cell.value}$`;
 	}).join(' & '));
@@ -439,7 +466,7 @@ function openTableDialog() {
 	const headRow = document.createElement('tr');
 	view.columns.forEach((entry) => {
 		const th = document.createElement('th');
-		th.textContent = latexMode ? `\\(${columnAxisText(sheet, entry.column)}\\)` : plainHeader(entry);
+		th.textContent = entry.label ? entry.name : latexMode ? `\\(${columnAxisText(sheet, entry.column)}\\)` : plainHeader(entry);
 		headRow.appendChild(th);
 	});
 	const head = document.createElement('thead');
