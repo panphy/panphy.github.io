@@ -201,8 +201,15 @@ function applyChartMode() {
 	if (typeof refreshPaneLayout === 'function') refreshPaneLayout();
 }
 
+// A sheet with data keeps its kind of graph, because the same cells mean something else in the
+// other kind. Choosing the other kind then offers a new sheet (dialogs.js); an empty sheet switches.
 function setSheetChartType(type) {
 	const sheet = getActiveSheet();
+	if ((PlotModel.isBarSheet(sheet) ? 'bar' : 'scatter') === type) return;
+	if (!PlotModel.isSheetEmpty(sheet)) {
+		openChartTypeDialog(type);
+		return;
+	}
 	if (!PlotModel.setChartType(sheet, type)) return;
 	closeMenu();
 	cellSelection = null;
