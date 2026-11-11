@@ -9,6 +9,7 @@ import {
 	plotCompXYButton,
 	plotCompYButton,
 	plotPositionButton,
+	plotSpeedButton,
 	plotVelocityButton,
 	pointEditor,
 	positionChartCanvas,
@@ -20,30 +21,41 @@ import { closeTouchGraphCopyActions } from './copy.js';
 import { applyThemeToChart, getChartTheme } from './theme.js';
 import { highlightCurrentRow } from './points.js';
 
+// Speed has no components, so the component choice is kept for the return to position or velocity.
+let lastComponent = 'xy';
+
 function isVelocityMode() {
 	return state.currentPlotMode.startsWith('v');
+}
+
+function isSpeedMode() {
+	return state.currentPlotMode === 'speed';
 }
 
 function currentComponent() {
 	if (state.currentPlotMode === 'x' || state.currentPlotMode === 'vx') return 'x';
 	if (state.currentPlotMode === 'y' || state.currentPlotMode === 'vy') return 'y';
-	return 'xy';
+	return isSpeedMode() ? lastComponent : 'xy';
 }
 
 function updateActivePlotButton() {
 	const velocity = isVelocityMode();
+	const speed = isSpeedMode();
 	const component = currentComponent();
-	plotPositionButton.setAttribute('aria-pressed', String(!velocity));
+	plotPositionButton.setAttribute('aria-pressed', String(!velocity && !speed));
 	plotVelocityButton.setAttribute('aria-pressed', String(velocity));
-	plotCompXButton.setAttribute('aria-pressed', String(component === 'x'));
-	plotCompYButton.setAttribute('aria-pressed', String(component === 'y'));
-	plotCompXYButton.setAttribute('aria-pressed', String(component === 'xy'));
+	plotSpeedButton.setAttribute('aria-pressed', String(speed));
+	[[plotCompXButton, 'x'], [plotCompYButton, 'y'], [plotCompXYButton, 'xy']].forEach(([button, name]) => {
+		button.setAttribute('aria-pressed', String(!speed && component === name));
+		button.disabled = speed || plotPositionButton.disabled;
+	});
 	updateGraphEmpty();
 }
 
 // Covers the graph with a note while there is nothing to plot.
 function updateGraphEmpty() {
-	const velocity = isVelocityMode();
+	const speed = isSpeedMode();
+	const velocity = isVelocityMode() || speed;
 	const count = velocity ? getVelocityData().smoothed.length : state.frameData.length;
 	const hasData = state.videoReady && count > 0;
 	graphEmpty.hidden = hasData;
@@ -52,8 +64,8 @@ function updateGraphEmpty() {
 	let title = 'Your graph appears here';
 	let text = 'Import a video, then click the object.';
 	if (state.videoReady && velocity && state.frameData.length > 0) {
-		title = 'Velocity needs more marks';
-		text = `Mark at least four frames to plot smoothed velocity. You have ${state.frameData.length}.`;
+		title = speed ? 'Speed needs more marks' : 'Velocity needs more marks';
+		text = `Mark at least four frames to plot smoothed ${speed ? 'speed' : 'velocity'}. You have ${state.frameData.length}.`;
 	} else if (state.videoReady) {
 		title = 'No marks yet';
 		text = 'Click the object in the video to mark its position.';
@@ -69,12 +81,14 @@ function replotCurrentView() {
 		case 'vx': plotVelocity('x'); break;
 		case 'vy': plotVelocity('y'); break;
 		case 'vxy': plotVelocity('xy'); break;
+		case 'speed': plotSpeed(); break;
 		default: plotPosition('xy'); break;
 	}
 }
 
 function plotPosition(mode) {
 	mode = mode || 'xy';
+	lastComponent = mode;
 	state.currentPlotMode = mode === 'xy' ? 'pos' : mode;
 
 	const xData = state.frameData.map(p => getAnalysisTime(p.playbackTime));
@@ -128,6 +142,7 @@ function plotPosition(mode) {
 }
 
 function plotVelocity(mode) {
+	lastComponent = mode;
 	state.currentPlotMode = mode === 'xy' ? 'vxy' : (mode === 'x' ? 'vx' : 'vy');
 
 	const axes = mode === 'xy' ? ['x', 'y'] : [mode];
@@ -155,6 +170,25 @@ function plotVelocity(mode) {
 	updateActivePlotButton();
 }
 
+// The size of the velocity, from both smoothed components; it needs no direction, as kinetic energy does not.
+function plotSpeed() {
+	if (!isSpeedMode()) lastComponent = currentComponent();
+	state.currentPlotMode = 'speed';
+	if (!state.positionChart) return;
+	state.positionChart.data.datasets = [{
+		label: "speed",
+		data: getVelocityData().smoothed.map(p => ({ x: p.time, y: p.speed })),
+		borderColor: state.dataPointColors.speed,
+		backgroundColor: state.dataPointColors.speed,
+		showLine: false,
+		pointRadius: 4
+	}];
+	state.positionChart.options.scales.y.title.text = `Speed (${state.scaleUnit}/s)`;
+	state.positionChart.update();
+	applyThemeToChart();
+	updateActivePlotButton();
+}
+
 function setResultsView(view) {
 	const points = view === 'points';
 	graphView.hidden = points;
@@ -172,6 +206,8 @@ function initializePlot() {
 	plotPositionButton.addEventListener("click", () => plotPosition(currentComponent()));
 
 	plotVelocityButton.addEventListener("click", () => plotVelocity(currentComponent()));
+
+	plotSpeedButton.addEventListener("click", plotSpeed);
 
 	[[plotCompXButton, 'x'], [plotCompYButton, 'y'], [plotCompXYButton, 'xy']].forEach(([button, component]) => {
 		button.addEventListener("click", () => (isVelocityMode() ? plotVelocity : plotPosition)(component));

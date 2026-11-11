@@ -49,6 +49,7 @@ test('velocity graph and CSV share full precision values and midpoint times', ()
     assert.ok(output.includes('0.123456789'));
     assert.ok(output.includes('m,""test""'));
     assert.ok(output.includes('Smoothed velocity time'));
+    assert.ok(output.includes('Smoothed speed (m,""test""/s)'));
     assert.equal(exported, true);
 });
 test('normal analysis time preserves precision; slow motion scales time', () => {
@@ -72,6 +73,25 @@ test('insufficient velocity points produces empty velocity graph', () => {
     vm.runInContext("plotVelocity('x')",c);
     assert.equal(c.currentPlotMode,'vx'); assert.equal(c.positionChart.data.datasets[0].data.length,0);
     assert.equal(c.positionChart.options.scales.y.title.text,'Velocity (m/s)');
+});
+test('speed is the size of the smoothed velocity, on the graph and in both exports', () => {
+    const axis=()=>({title:{},grid:{},ticks:{}}), button=()=>({disabled:false,setAttribute(name,value){this[name]=value;}});
+    const c=context({currentPlotMode:'vx',frameData:[0,1,2,3,4].map(t=>({x:3*t,y:-4*t,playbackTime:t})),getAnalysisTime:t=>t,scaleFactor:1,scaleUnit:'m',originSet:false,videoReady:true,
+        document:{getElementById:()=>({})},dataPointColors:{speed:'green'},positionChart:{data:{datasets:[]},options:{scales:{x:axis(),y:axis()}},update(){}},applyThemeToChart(){},closeTouchGraphCopyActions(){},
+        graphEmpty:{},chartCanvasContainer:{classList:{toggle(){}}},plotPositionButton:button(),plotVelocityButton:button(),plotSpeedButton:button(),plotCompXButton:button(),plotCompYButton:button(),plotCompXYButton:button()});
+    load(c, 'analysis'); load(c, 'export'); load(c, 'plot');
+    vm.runInContext('plotSpeed()', c);
+    assert.equal(c.currentPlotMode, 'speed');
+    assert.deepEqual(JSON.parse(JSON.stringify(c.positionChart.data.datasets[0].data)), [{x:1.5,y:5},{x:2.5,y:5}]);
+    assert.equal(c.positionChart.options.scales.y.title.text, 'Speed (m/s)');
+    assert.equal(c.plotSpeedButton['aria-pressed'], 'true');
+    assert.equal(c.plotCompXButton.disabled, true);
+    // The component chosen before speed returns with velocity.
+    vm.runInContext('plotVelocity(currentComponent())', c);
+    assert.equal(c.currentPlotMode, 'vx');
+    assert.equal(c.plotCompXButton.disabled, false);
+    const payload = JSON.parse(decodeURIComponent(vm.runInContext('getPanPhyPlotUrl()', c).split('#import=')[1]));
+    assert.deepEqual(payload.columns.at(-1), {name:'v',unit:'m/s',role:'Y',hidden:true,cells:[5,5]});
 });
 
 // Auto-tracking: a shaded, anti-aliased disk on a textured background, as an RGBA image.

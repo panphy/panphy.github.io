@@ -184,7 +184,7 @@
 		<div class="mt-divider" id="paneDivider" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="videoPane graphPane" aria-label="Video pane width"
 			title="Drag to resize the panes; double-click to reset"></div>
 
-		<!-- Graph: position or velocity against time, and the table of marks. -->
+		<!-- Graph: position, velocity or speed against time, and the table of marks. -->
 		<section id="graphPane" class="mt-pane" aria-labelledby="graphPaneTitle">
 			<div class="pane-head">
 				<div class="pane-title">
@@ -201,6 +201,7 @@
 				<div class="mt-segmented" role="group" aria-label="Quantity">
 					<button type="button" id="plotPosition" class="mt-segment" aria-pressed="true" title="Plot position against time">Position</button>
 					<button type="button" id="plotVelocity" class="mt-segment" aria-pressed="false" title="Plot velocity against time">Velocity</button>
+					<button type="button" id="plotSpeed" class="mt-segment" aria-pressed="false" title="Plot speed, the size of the velocity, against time">Speed</button>
 				</div>
 				<div class="mt-segmented" role="group" aria-label="Component">
 					<button type="button" id="plotCompX" class="mt-segment" aria-pressed="false" title="Horizontal component only"><span class="series-dot series-dot-x" aria-hidden="true"></span>x</button>
@@ -211,8 +212,8 @@
 				<div class="mt-tool-spacer"></div>
 				<div class="mt-export-group" role="group" aria-label="Export">
 					<span class="mt-tool-group-label" aria-hidden="true">Export</span>
-					<button type="button" id="exportData" class="mt-tool" disabled aria-label="Export CSV" title="Save positions and velocities as a CSV file for a spreadsheet"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>CSV</span></button>
-					<button type="button" id="exportPanPhyPlot" class="mt-tool" disabled aria-label="Export to PanPhyPlot" title="Open positions and smoothed velocities in PanPhyPlot, in a new tab, to plot and fit them"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 4.5h6v6M19.5 4.5l-8 8M17.5 13.5v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h4"/></svg><span>PanPhyPlot</span></button>
+					<button type="button" id="exportData" class="mt-tool" disabled aria-label="Export CSV" title="Save positions, velocities and speeds as a CSV file for a spreadsheet"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>CSV</span></button>
+					<button type="button" id="exportPanPhyPlot" class="mt-tool" disabled aria-label="Export to PanPhyPlot" title="Open positions, smoothed velocities and speeds in PanPhyPlot, in a new tab, to plot and fit them"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 4.5h6v6M19.5 4.5l-8 8M17.5 13.5v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h4"/></svg><span>PanPhyPlot</span></button>
 				</div>
 			</div>
 			<div class="graph-body">

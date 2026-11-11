@@ -23,6 +23,7 @@
   /* Series colors: PanPhyPlot's first two data colors (x blue, y red), so exported data looks the same there. */
   --series-x: #4E79A7;
   --series-y: #E15759;
+  --series-speed: #59A14F;
 
   /* Read by the scripts for the graph and the video overlay, and by the shared
      theme and fullscreen buttons (--brand-primary, --brand-accent). */
@@ -45,6 +46,7 @@
 
   --series-x: #7CB5EC;
   --series-y: #F48183;
+  --series-speed: #8CD17D;
   --chart-grid: rgba(232, 235, 237, 0.1);
   --chart-axis: rgba(232, 235, 237, 0.7);
   --chart-text: rgba(232, 235, 237, 0.88);

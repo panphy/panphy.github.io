@@ -4,7 +4,7 @@ Manual and automatic video analysis at `tools/motion_tracker.html`. The existing
 
 - `state.js`: shared mutable analysis and interaction state. Marks retain video playback times so changing the filming rate recalculates analysis times.
 - `dom.js`: DOM elements and canvas contexts.
-- `analysis.js`: calibrated positions, analysis times, and raw and smoothed velocities. No DOM dependencies.
+- `analysis.js`: calibrated positions, analysis times, raw and smoothed velocities, and speed from the smoothed components. No DOM dependencies.
 - `tracking-core.js`: image matching, template updates, and position prediction. Independent of app state and the browser.
 - `tracking.js`: asynchronous tracking runs, decoded-frame seeking, cancellation tokens, and mark insertion. A whole run uses one undo snapshot.
 - `video.js`: imports and sample loading, playback, frame stepping, frame-rate detection, and filming-rate controls. Preserve callback cancellation and the saved first-frame image when changing video timing.

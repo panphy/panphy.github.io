@@ -29,6 +29,7 @@ const selectMarksButton = document.getElementById('selectMarks');
 const deleteSelectedButton = document.getElementById('deleteSelected');
 const plotPositionButton = document.getElementById('plotPosition');
 const plotVelocityButton = document.getElementById('plotVelocity');
+const plotSpeedButton = document.getElementById('plotSpeed');
 const plotCompXButton = document.getElementById('plotCompX');
 const plotCompYButton = document.getElementById('plotCompY');
 const plotCompXYButton = document.getElementById('plotCompXY');
@@ -107,6 +108,7 @@ export {
 	deleteSelectedButton,
 	plotPositionButton,
 	plotVelocityButton,
+	plotSpeedButton,
 	plotCompXButton,
 	plotCompYButton,
 	plotCompXYButton,

@@ -19,7 +19,7 @@ function getChartTheme() {
 function refreshSeriesColors() {
 	const x = getCssVar('--series-x') || '#4e79a7';
 	const y = getCssVar('--series-y') || '#e15759';
-	Object.assign(state.dataPointColors, { x, y, vx: x, vy: y });
+	Object.assign(state.dataPointColors, { x, y, vx: x, vy: y, speed: getCssVar('--series-speed') || '#59a14f' });
 }
 
 function applyThemeToChart() {

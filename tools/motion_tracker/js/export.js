@@ -13,10 +13,10 @@ function downloadFile(filename, text, type) {
 function exportCSV(filename) {
 	const { raw, smoothed } = getVelocityData();
 	const positions = getPositionData();
-	const rows = [[ 'Position time (s)', `x (${state.scaleUnit})`, `y (${state.scaleUnit})`, 'Raw velocity time (s)', `Raw vx (${state.scaleUnit}/s)`, `Raw vy (${state.scaleUnit}/s)`, 'Smoothed velocity time (s)', `Smoothed vx (${state.scaleUnit}/s)`, `Smoothed vy (${state.scaleUnit}/s)` ]];
+	const rows = [[ 'Position time (s)', `x (${state.scaleUnit})`, `y (${state.scaleUnit})`, 'Raw velocity time (s)', `Raw vx (${state.scaleUnit}/s)`, `Raw vy (${state.scaleUnit}/s)`, 'Smoothed velocity time (s)', `Smoothed vx (${state.scaleUnit}/s)`, `Smoothed vy (${state.scaleUnit}/s)`, `Smoothed speed (${state.scaleUnit}/s)` ]];
 	positions.forEach((p, i) => {
 		rows.push([p.time, p.x, p.y,
-			raw[i]?.time ?? '', raw[i]?.x ?? '', raw[i]?.y ?? '', smoothed[i]?.time ?? '', smoothed[i]?.x ?? '', smoothed[i]?.y ?? '']);
+			raw[i]?.time ?? '', raw[i]?.x ?? '', raw[i]?.y ?? '', smoothed[i]?.time ?? '', smoothed[i]?.x ?? '', smoothed[i]?.y ?? '', smoothed[i]?.speed ?? '']);
 	});
 	const escape = value => '"' + String(value).replaceAll('"', '""') + '"';
 	downloadFile(filename, rows.map(row => row.map(escape).join(',')).join('\n') + '\n', 'text/csv;charset=utf-8;');
@@ -25,7 +25,7 @@ function exportCSV(filename) {
 
 // PanPhyPlot reads the data from the link's hash, which never reaches the server; it works even where
 // the new tab has separate storage, as from a home-screen app. A Y column plots against the nearest X
-// column to its left, so the velocities, at midpoint times, get their own time column. They are the
+// column to its left, so the velocities and speed, at midpoint times, get their own time column. They are the
 // smoothed values the graph shows, and start hidden so that the first graph is position-time.
 function getPanPhyPlotUrl() {
 	const positions = getPositionData();
@@ -40,7 +40,8 @@ function getPanPhyPlotUrl() {
 			{ name: 'y', unit, role: 'Y', cells: positions.map(p => value(p.y)) },
 			{ name: 't', unit: 's', role: 'X', cells: smoothed.map(p => value(p.time)) },
 			{ name: 'vx', unit: `${unit}/s`, role: 'Y', hidden: true, cells: smoothed.map(p => value(p.x)) },
-			{ name: 'vy', unit: `${unit}/s`, role: 'Y', hidden: true, cells: smoothed.map(p => value(p.y)) }
+			{ name: 'vy', unit: `${unit}/s`, role: 'Y', hidden: true, cells: smoothed.map(p => value(p.y)) },
+			{ name: 'v', unit: `${unit}/s`, role: 'Y', hidden: true, cells: smoothed.map(p => value(p.speed)) }
 		]
 	};
 	return '/tools/panphyplot.html#import=' + encodeURIComponent(JSON.stringify(payload));
