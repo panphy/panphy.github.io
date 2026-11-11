@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-11T09:57:25Z';
+const BUILD_ID = '2026-11-11T10:05:21Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -536,7 +536,11 @@ async function verifyAppFilesNow(group) {
   let fresh;
   try {
     fresh = await Promise.all(urls.map(async (url) => {
-      const res = await fetch(new Request(url.href, { cache: 'no-cache' }));
+      // Cloudflare keeps scripts and stylesheets at its edge for hours, but not pages. A plain
+      // request could bring a new page with old scripts; a fresh query string reaches the server.
+      const fetchUrl = new URL(url.href);
+      fetchUrl.searchParams.set('v', `verify-${now}`);
+      const res = await fetch(new Request(fetchUrl.href, { cache: 'no-store' }));
       const isPage = url.pathname.endsWith('/') || url.pathname.endsWith('.html');
       // Never replace a file with an error page or a network login page.
       if (!res.ok || (!isPage && (res.headers.get('Content-Type') || '').includes('text/html'))) {
