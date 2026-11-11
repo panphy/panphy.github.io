@@ -34,7 +34,11 @@ export const state = {
 	previousCalibration: null,
 	scaleFactor: 1,
 	scaleUnit: "pixels",
-	isDrawingCalibration: false,
+	isDrawingLine: false, // Drawing the scale line or the ruler.
+	lineAnchored: false, // Its first end was clicked; the next click sets the other.
+	rulerMode: false,
+	rulerStart: null,
+	rulerEnd: null,
 	originMode: false,
 	originSet: false,
 	originPoint: { x: 0, y: 0 },
