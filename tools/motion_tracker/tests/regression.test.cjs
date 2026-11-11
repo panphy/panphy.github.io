@@ -61,10 +61,38 @@ test('normal analysis time preserves precision; slow motion scales time', () => 
 });
 test('starting calibration cancels origin selection', () => {
     let click;
-    const c = context({calibrateButton:{addEventListener:(_type,fn)=>click=fn},originMode:true,calibrationMode:false,calibrationStart:null,calibrationEnd:null,pauseVideo(){},showPickMode(){},cancelPickMode(){},overlayCanvas:{style:{}}});
+    const c = context({calibrateButton:{addEventListener:(_type,fn)=>click=fn},originMode:true,calibrationMode:false,calibrationStart:null,calibrationEnd:null,pauseVideo(){},showPickMode(){},cancelPickMode(){},drawOverlay(){},overlayCanvas:{style:{}}});
     load(c, 'overlay');
     click = c.handleCalibrationStart;
     click(); assert.equal(c.originMode,false); assert.equal(c.calibrationMode,true);
+});
+test('scale line and ruler accept a drag or a click on each end', () => {
+    let message = '', dialog = null;
+    const control = () => ({setAttribute(name, value) { this[name] = value; }, classList: {add() {}, remove() {}}, style: {}, focus() {}});
+    const c = context({calibrationMode: false, originMode: false, rulerMode: false, calibrationStart: null, calibrationEnd: null, rulerStart: null, rulerEnd: null,
+        previousCalibration: null, isDrawingLine: false, lineAnchored: false, scaleFactor: 0.5, scaleUnit: 'cm',
+        pauseVideo() {}, drawOverlay() {}, getVisualScale: () => 1, setSelectMarksMode() {}, setMessage: text => message = text, formatNumber: String,
+        isCalibrated: () => true, unitLabel: () => 'cm', openDialog: element => dialog = element, calibrationPrompt: {},
+        document: {getElementById: control}, actualLengthInput: control(), actualUnitInput: control(),
+        messageBar: control(), modeCancelButton: control(), calibrateButton: control(), setOriginButton: control(), rulerButton: control(), overlayCanvas: control()});
+    load(c, 'overlay');
+    const run = code => vm.runInContext(code, c);
+    // Two clicks: the first sets one end, the pointer drags the line out, the second sets the other.
+    run('handleCalibrationStart()');
+    run("startLineDraw('calibration', {x: 10, y: 10}); endLineDraw('calibration')");
+    assert.equal(c.lineAnchored, true); assert.equal(c.calibrationMode, true); assert.equal(dialog, null);
+    run("updateLineDraw('calibration', {x: 50, y: 10})");
+    run("startLineDraw('calibration', {x: 110, y: 10}); endLineDraw('calibration')");
+    assert.deepEqual(JSON.parse(JSON.stringify([c.calibrationStart, c.calibrationEnd])), [{x: 10, y: 10}, {x: 110, y: 10}]);
+    assert.equal(c.lineAnchored, false); assert.equal(c.calibrationMode, false); assert.equal(dialog, c.calibrationPrompt);
+    // A drag still works, and the ruler reports in the scale's unit without changing the scale line.
+    run('handleRulerToggle()');
+    assert.equal(c.rulerButton['aria-pressed'], 'true'); assert.equal(c.modeCancelButton.textContent, 'Done');
+    run("startLineDraw('ruler', {x: 0, y: 0}); updateLineDraw('ruler', {x: 30, y: 40}); endLineDraw('ruler')");
+    assert.equal(c.rulerMode, true); assert.ok(message.startsWith('Length: 25 cm.'));
+    assert.equal(c.calibrationEnd.x, 110);
+    run('cancelPickMode()');
+    assert.equal(c.rulerMode, false); assert.equal(c.rulerStart, null); assert.equal(c.calibrationStart.x, 10);
 });
 test('insufficient velocity points produces empty velocity graph', () => {
     const axis=()=>({title:{},grid:{},ticks:{}});

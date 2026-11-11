@@ -34,6 +34,7 @@ const plotCompXButton = document.getElementById('plotCompX');
 const plotCompYButton = document.getElementById('plotCompY');
 const plotCompXYButton = document.getElementById('plotCompXY');
 const hideCrossesToggle = document.getElementById('hideCrossesToggle');
+const rulerButton = document.getElementById('rulerToggle');
 const autoTrackToggle = document.getElementById('autoTrackToggle');
 const autoStopButton = document.getElementById('autoStop');
 const chartCanvasContainer = document.getElementById('chartCanvasContainer');
@@ -113,6 +114,7 @@ export {
 	plotCompYButton,
 	plotCompXYButton,
 	hideCrossesToggle,
+	rulerButton,
 	autoTrackToggle,
 	autoStopButton,
 	chartCanvasContainer,

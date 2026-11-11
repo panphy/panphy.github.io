@@ -12,6 +12,7 @@ import {
 	modeCancelButton,
 	overlayCanvas,
 	overlayCtx,
+	rulerButton,
 	setOriginButton
 } from './dom.js';
 import { renderPointRows, setSelectMarksMode } from './points.js';
@@ -27,7 +28,7 @@ import { state } from './state.js';
 import { replotCurrentView } from './plot.js';
 import { currentFrameIndex, fitVideoStage, pauseVideo } from './video.js';
 import { BODY_FONT, getCssVar } from './theme.js';
-import { isCalibrated } from './analysis.js';
+import { isCalibrated, unitLabel } from './analysis.js';
 
 function canvasYToCartesianY(y) { return frameCanvas.height - y; }
 
@@ -45,8 +46,11 @@ function showPickMode(text) {
 	messageBar.classList.add('is-mode');
 	modeCancelButton.hidden = false;
 	setMessage(text);
+	// The ruler changes nothing, so there is nothing to cancel: it is put away.
+	modeCancelButton.textContent = state.rulerMode ? 'Done' : 'Cancel';
 	calibrateButton.setAttribute('aria-pressed', String(state.calibrationMode));
 	setOriginButton.setAttribute('aria-pressed', String(state.originMode));
+	rulerButton.setAttribute('aria-pressed', String(state.rulerMode));
 }
 
 function hidePickMode() {
@@ -54,6 +58,31 @@ function hidePickMode() {
 	modeCancelButton.hidden = true;
 	calibrateButton.setAttribute('aria-pressed', 'false');
 	setOriginButton.setAttribute('aria-pressed', 'false');
+	rulerButton.setAttribute('aria-pressed', 'false');
+}
+
+// The scale line and the ruler are drawn the same way: drag from end to end, or click each end.
+function lineTool() {
+	return state.rulerMode ? 'ruler' : (state.calibrationMode ? 'calibration' : null);
+}
+
+function getLine(tool) {
+	return tool === 'ruler' ? [state.rulerStart, state.rulerEnd] : [state.calibrationStart, state.calibrationEnd];
+}
+
+function setLine(tool, start, end) {
+	if (tool === 'ruler') { state.rulerStart = start; state.rulerEnd = end; }
+	else { state.calibrationStart = start; state.calibrationEnd = end; }
+}
+
+function lineLength(start, end) {
+	return start && end ? Math.hypot(end.x - start.x, end.y - start.y) : 0;
+}
+
+function closeRuler() {
+	state.rulerMode = false;
+	state.rulerStart = null;
+	state.rulerEnd = null;
 }
 
 function restorePreviousCalibration() {
@@ -64,18 +93,20 @@ function restorePreviousCalibration() {
 }
 
 function cancelPickMode() {
-	if (!state.calibrationMode && !state.originMode) return;
-	const wasCalibrating = state.calibrationMode;
+	if (!state.calibrationMode && !state.originMode && !state.rulerMode) return;
+	const wasCalibrating = state.calibrationMode, wasMeasuring = state.rulerMode;
 	if (state.calibrationMode) restorePreviousCalibration();
+	closeRuler();
 	state.calibrationMode = false;
-	state.isDrawingCalibration = false;
+	state.isDrawingLine = false;
+	state.lineAnchored = false;
 	state.originMode = false;
 	state.originGuide = null;
 	state.originPointerDown = false;
 	overlayCanvas.style.pointerEvents = "none";
 	hidePickMode();
 	drawOverlay();
-	setMessage(wasCalibrating ? 'Scale unchanged.' : 'Origin unchanged.');
+	setMessage(wasMeasuring ? 'Ruler put away.' : (wasCalibrating ? 'Scale unchanged.' : 'Origin unchanged.'));
 }
 
 function finalizeOriginSelection(canvasX, canvasY) {
@@ -226,61 +257,76 @@ function drawOverlay() {
 		overlayCtx.fill();
 	}
 
-	if (state.calibrationStart && state.calibrationEnd) {
-		overlayCtx.save();
-		overlayCtx.lineWidth = 2 * s;
-		overlayCtx.strokeStyle = "orange";
-		overlayCtx.shadowColor = "black";
-		overlayCtx.shadowBlur = 2;
-		overlayCtx.setLineDash([5 * s, 5 * s]);
+	drawMeasureLine(state.calibrationStart, state.calibrationEnd, s, 'orange', true, state.calibrationMode,
+		isCalibrated() && !state.calibrationMode ? `${formatNumber(lineLength(state.calibrationStart, state.calibrationEnd) * state.scaleFactor)} ${state.scaleUnit}` : '');
+	drawMeasureLine(state.rulerStart, state.rulerEnd, s, '#a3e635', false, state.rulerMode,
+		`${formatNumber(lineLength(state.rulerStart, state.rulerEnd) * state.scaleFactor)} ${unitLabel()}`);
+}
+
+// A line with a tick across each end. While only the first end is placed, a dot marks it.
+function drawMeasureLine(start, end, s, color, dashed, active, label) {
+	if (!start || !end) return;
+	const length = lineLength(start, end);
+	overlayCtx.save();
+	overlayCtx.lineWidth = 2 * s;
+	overlayCtx.strokeStyle = color;
+	overlayCtx.fillStyle = color;
+	overlayCtx.shadowColor = "black";
+	overlayCtx.shadowBlur = 2;
+	if (length > 0) {
+		if (dashed) overlayCtx.setLineDash([5 * s, 5 * s]);
 		overlayCtx.beginPath();
-		overlayCtx.moveTo(state.calibrationStart.x, state.calibrationStart.y);
-		overlayCtx.lineTo(state.calibrationEnd.x, state.calibrationEnd.y);
+		overlayCtx.moveTo(start.x, start.y);
+		overlayCtx.lineTo(end.x, end.y);
 		overlayCtx.stroke();
 		overlayCtx.setLineDash([]);
-		// End ticks across the line
-		const length = Math.hypot(state.calibrationEnd.x - state.calibrationStart.x, state.calibrationEnd.y - state.calibrationStart.y);
-		if (length > 0) {
-			const nx = -(state.calibrationEnd.y - state.calibrationStart.y) / length * 6 * s;
-			const ny = (state.calibrationEnd.x - state.calibrationStart.x) / length * 6 * s;
-			overlayCtx.beginPath();
-			[state.calibrationStart, state.calibrationEnd].forEach(p => {
-				overlayCtx.moveTo(p.x - nx, p.y - ny);
-				overlayCtx.lineTo(p.x + nx, p.y + ny);
-			});
-			overlayCtx.stroke();
-		}
-		overlayCtx.restore();
-		if (length > 0 && isCalibrated() && !state.calibrationMode) {
-			drawOverlayLabel(`${formatNumber(length * state.scaleFactor)} ${state.scaleUnit}`,
-				(state.calibrationStart.x + state.calibrationEnd.x) / 2, Math.min(state.calibrationStart.y, state.calibrationEnd.y), s);
-		}
+		const nx = -(end.y - start.y) / length * 6 * s;
+		const ny = (end.x - start.x) / length * 6 * s;
+		overlayCtx.beginPath();
+		[start, end].forEach(p => {
+			overlayCtx.moveTo(p.x - nx, p.y - ny);
+			overlayCtx.lineTo(p.x + nx, p.y + ny);
+		});
+		overlayCtx.stroke();
 	}
-}
-
-function startCalibrationDraw(x, y) {
-	state.isDrawingCalibration = true;
-	state.calibrationStart = { x, y };
-	state.calibrationEnd = { x, y };
-}
-
-function updateCalibrationDraw(x, y) {
-	if (state.isDrawingCalibration) {
-		state.calibrationEnd = { x, y };
-		drawOverlay();
+	if (active && (length === 0 || state.lineAnchored)) {
+		overlayCtx.beginPath();
+		overlayCtx.arc(start.x, start.y, 4 * s, 0, 2 * Math.PI);
+		overlayCtx.fill();
 	}
+	overlayCtx.restore();
+	if (length > 0 && label) drawOverlayLabel(label, (start.x + end.x) / 2, Math.min(start.y, end.y), s);
 }
 
-function endCalibrationDraw() {
-	if (!state.isDrawingCalibration) return;
-	state.isDrawingCalibration = false;
-	const pxLen = Math.hypot(state.calibrationEnd.x - state.calibrationStart.x, state.calibrationEnd.y - state.calibrationStart.y);
-	// A tap rather than a drag: keep waiting for a line.
+// The first end follows the press; with one end already clicked, the press places the other.
+function startLineDraw(tool, p) {
+	state.isDrawingLine = true;
+	setLine(tool, state.lineAnchored ? getLine(tool)[0] : p, p);
+	drawOverlay();
+}
+
+function updateLineDraw(tool, p) {
+	setLine(tool, getLine(tool)[0], p);
+	drawOverlay();
+}
+
+function endLineDraw(tool) {
+	if (!state.isDrawingLine) return;
+	state.isDrawingLine = false;
+	const [start, end] = getLine(tool);
+	const pxLen = lineLength(start, end);
+	// A click rather than a drag: that end is set, and the next click sets the other.
 	if (pxLen < 4 * getVisualScale()) {
-		state.calibrationStart = state.previousCalibration ? state.previousCalibration.start : null;
-		state.calibrationEnd = state.previousCalibration ? state.previousCalibration.end : null;
+		state.lineAnchored = true;
+		setLine(tool, start, start);
 		drawOverlay();
-		setMessage("Drag from one end of the known length to the other.");
+		setMessage("First end set. Click the other end.");
+		return;
+	}
+	state.lineAnchored = false;
+	if (tool === 'ruler') {
+		drawOverlay();
+		setMessage(`Length: ${formatNumber(pxLen * state.scaleFactor)} ${unitLabel()}.${isCalibrated() ? '' : ' Set the scale to measure in real units.'} Measure again, or choose Done.`);
 		return;
 	}
 	state.calibrationMode = false;
@@ -315,12 +361,31 @@ function handleCalibrationStart() {
 	if (state.calibrationMode) { cancelPickMode(); return; }
 	state.originMode = false;
 	state.originGuide = null;
+	closeRuler();
 	pauseVideo();
 	state.previousCalibration = { start: state.calibrationStart, end: state.calibrationEnd };
 	state.calibrationMode = true;
-	state.isDrawingCalibration = false;
+	state.isDrawingLine = false;
+	state.lineAnchored = false;
 	overlayCanvas.style.pointerEvents = "auto";
-	showPickMode("Drag along something of known length, such as a meter rule.");
+	drawOverlay();
+	showPickMode("Drag along something of known length, such as a meter rule, or click one end and then the other.");
+}
+
+function handleRulerToggle() {
+	if (state.rulerMode) { cancelPickMode(); return; }
+	if (state.calibrationMode) restorePreviousCalibration();
+	state.calibrationMode = false;
+	state.originMode = false;
+	state.originGuide = null;
+	state.originPointerDown = false;
+	pauseVideo();
+	state.rulerMode = true;
+	state.isDrawingLine = false;
+	state.lineAnchored = false;
+	overlayCanvas.style.pointerEvents = "auto";
+	drawOverlay();
+	showPickMode(`Ruler: drag along a length, or click one end and then the other.${isCalibrated() ? '' : ' Lengths are in pixels until you set the scale.'}`);
 }
 
 function initializeOverlay() {
@@ -334,14 +399,17 @@ function initializeOverlay() {
 
 	calibrateButton.addEventListener('click', handleCalibrationStart);
 
+	rulerButton.addEventListener('click', handleRulerToggle);
+
 	overlayCanvas.addEventListener('pointerdown', (event) => {
-		if (!state.calibrationMode && !state.originMode) return;
+		const tool = lineTool();
+		if (!tool && !state.originMode) return;
 		if (event.button !== undefined && event.button > 0) return;
 		event.preventDefault();
 		overlayCanvas.setPointerCapture?.(event.pointerId);
 		const p = overlayPoint(event);
-		if (state.calibrationMode) {
-			startCalibrationDraw(p.x, p.y);
+		if (tool) {
+			startLineDraw(tool, p);
 		} else {
 			state.originPointerDown = true;
 			state.originGuide = p;
@@ -351,8 +419,10 @@ function initializeOverlay() {
 
 	overlayCanvas.addEventListener('pointermove', (event) => {
 		const p = overlayPoint(event);
-		if (state.calibrationMode && state.isDrawingCalibration) {
-			updateCalibrationDraw(p.x, p.y);
+		const tool = lineTool();
+		// With one end clicked, the line follows the pointer to the other.
+		if (tool && (state.isDrawingLine || state.lineAnchored)) {
+			updateLineDraw(tool, p);
 		} else if (state.originMode) {
 			state.originGuide = p;
 			drawOverlay();
@@ -360,8 +430,9 @@ function initializeOverlay() {
 	});
 
 	overlayCanvas.addEventListener('pointerup', (event) => {
-		if (state.calibrationMode) {
-			endCalibrationDraw();
+		const tool = lineTool();
+		if (tool) {
+			endLineDraw(tool);
 		} else if (state.originMode && state.originPointerDown) {
 			const p = overlayPoint(event);
 			finalizeOriginSelection(p.x, p.y);
@@ -369,17 +440,23 @@ function initializeOverlay() {
 	});
 
 	overlayCanvas.addEventListener('pointercancel', () => {
-		if (state.calibrationMode && state.isDrawingCalibration) {
-			state.isDrawingCalibration = false;
-			state.calibrationStart = state.previousCalibration ? state.previousCalibration.start : null;
-			state.calibrationEnd = state.previousCalibration ? state.previousCalibration.end : null;
+		const tool = lineTool();
+		if (tool && state.isDrawingLine) {
+			state.isDrawingLine = false;
+			state.lineAnchored = false;
+			if (tool === 'ruler') setLine(tool, null, null);
+			else setLine(tool, state.previousCalibration ? state.previousCalibration.start : null, state.previousCalibration ? state.previousCalibration.end : null);
 		}
 		state.originPointerDown = false;
 		drawOverlay();
 	});
 
 	overlayCanvas.addEventListener('pointerleave', () => {
-		if (state.originMode && !state.originPointerDown) {
+		const tool = lineTool();
+		if (tool && state.lineAnchored && !state.isDrawingLine) {
+			setLine(tool, getLine(tool)[0], getLine(tool)[0]);
+			drawOverlay();
+		} else if (state.originMode && !state.originPointerDown) {
 			state.originGuide = null;
 			drawOverlay();
 		}
@@ -411,7 +488,7 @@ function initializeOverlay() {
 	cancelCalibrationButton.addEventListener('click', () => {
 		closeDialog(calibrationPrompt);
 		state.calibrationMode = false;
-		state.isDrawingCalibration = false;
+		state.isDrawingLine = false;
 		restorePreviousCalibration();
 		drawOverlay();
 		drawFrame();
@@ -423,8 +500,10 @@ function initializeOverlay() {
 		if (state.calibrationMode) {
 			restorePreviousCalibration();
 			state.calibrationMode = false;
-			state.isDrawingCalibration = false;
 		}
+		closeRuler();
+		state.isDrawingLine = false;
+		state.lineAnchored = false;
 		pauseVideo();
 		state.originMode = true;
 		state.originGuide = null;

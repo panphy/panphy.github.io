@@ -22,6 +22,7 @@ import {
 	frameRatePrompt,
 	hiddenVideo,
 	hideCrossesToggle,
+	rulerButton,
 	messageEl,
 	openVideoButton,
 	overlayCanvas,
@@ -170,7 +171,11 @@ function resetApp() {
 	clearUnsavedChanges();
 	state.calibrationMode = false;
 	state.originMode = false;
-	state.isDrawingCalibration = false;
+	state.isDrawingLine = false;
+	state.lineAnchored = false;
+	state.rulerMode = false;
+	state.rulerStart = null;
+	state.rulerEnd = null;
 	state.skippingFrame = false;
 	state.isPlaying = false;
 	state.crossesVisible = true;
@@ -259,7 +264,7 @@ function handleKeyDown(e) {
 	if (e.key === 'Escape') {
 		closeTouchGraphCopyActions();
 		closeMenus();
-		if (state.calibrationMode || state.originMode) cancelPickMode();
+		if (state.calibrationMode || state.originMode || state.rulerMode) cancelPickMode();
 		if (state.selectMarksMode || state.selectedMarkTime !== null) {
 			setSelectMarksMode(false);
 			setMessage('Selection cleared.');
@@ -292,6 +297,9 @@ function handleKeyDown(e) {
 	if (e.key === 'h' || e.key === 'H') {
 		e.preventDefault();
 		toggleCrossesVisibility();
+	} else if (e.key === 'r' || e.key === 'R') {
+		e.preventDefault();
+		rulerButton.click();
 	} else if (e.key === 'ArrowRight') {
 		e.preventDefault();
 		stepOneFrame(state.frameStep);

@@ -184,7 +184,7 @@ function highlightCurrentRow(scroll = false) {
 
 function initializePoints() {
 	frameCanvas.addEventListener('click', (event) => {
-		if (state.videoReady && !hiddenVideo.seeking && !state.fpsDetectionPending && !state.calibrationMode && !state.originMode && !state.skippingFrame) {
+		if (state.videoReady && !hiddenVideo.seeking && !state.fpsDetectionPending && !state.calibrationMode && !state.originMode && !state.rulerMode && !state.skippingFrame) {
 			const rect = frameCanvas.getBoundingClientRect();
 			const scaleX = frameCanvas.width / rect.width;
 			const scaleY = frameCanvas.height / rect.height;
