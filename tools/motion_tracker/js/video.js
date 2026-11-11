@@ -26,6 +26,7 @@ import {
 	plotCompXYButton,
 	plotCompYButton,
 	plotPositionButton,
+	plotSpeedButton,
 	plotVelocityButton,
 	previousFrameButton,
 	setOriginButton,
@@ -291,12 +292,14 @@ function updateSliderDomain() {
 	}
 }
 
-function disableControls(state) {
+function disableControls(disabled) {
 	[previousFrameButton, nextFrameButton, playPauseButton, calibrateButton, setOriginButton, frameRateButton, frameRateHintButton,
 		hideCrossesToggle, autoTrackToggle, manualModeButton, setupButton, clearButton, frameStepSelect,
-		plotPositionButton, plotVelocityButton, plotCompXButton, plotCompYButton, plotCompXYButton]
-		.forEach(control => { control.disabled = state; });
-	slider.disabled = state;
+		plotPositionButton, plotVelocityButton, plotSpeedButton]
+		.forEach(control => { control.disabled = disabled; });
+	// Speed has no components to choose.
+	[plotCompXButton, plotCompYButton, plotCompXYButton].forEach(control => { control.disabled = disabled || state.currentPlotMode === 'speed'; });
+	slider.disabled = disabled;
 	updateStatusBar();
 }
 

@@ -5,7 +5,7 @@ export const state = {
 	detectedFps: null,
 	isSpecialRecording: false,
 	fpsDetectionPending: false,
-	dataPointColors: { x: '#4e79a7', y: '#e15759', vx: '#4e79a7', vy: '#e15759' },
+	dataPointColors: { x: '#4e79a7', y: '#e15759', vx: '#4e79a7', vy: '#e15759', speed: '#59a14f' },
 	// Marks use original canvas coordinates (Cartesian y) and video playback times.
 	frameData: [],
 	isPlaying: false,
