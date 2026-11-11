@@ -1415,7 +1415,7 @@ function updateBindingStats() {
   const reaction = REACTIONS[key];
   const n = reactionNumbers(key);
   const names = list => list.map(name => NUCLIDES[name].name).join(' + ');
-  $('bea-stats').innerHTML = `<div><span>${reaction.title}</span><b>${mathHtml(reaction.tex, reaction.equation)}</b></div>`
+  $('bea-stats').innerHTML = `<div class="bea-equation"><span>${reaction.title}</span><b>${mathHtml(reaction.tex, reaction.equation)}</b></div>`
     + `<div><span>Total binding energy before → after</span><b>${n.before.toFixed(0)} → ${n.after.toFixed(0)} MeV</b></div>`
     + `<div><span>Energy released per reaction</span><b class="big">${n.released.toFixed(1)} MeV</b></div>`
     + `<div><span>Per nucleon (${names(reaction.from)})</span><b>${n.perNucleon.toFixed(2)} MeV</b></div>`
@@ -1990,6 +1990,7 @@ const resizeObserver = new ResizeObserver(resize);
 resizeObserver.observe(viewer);
 resizeObserver.observe(renderer.domElement);
 resizeObserver.observe($('graph-canvas'));
+resizeObserver.observe($('bea-canvas'));
 resize();
 new IntersectionObserver(entries => { state.visible = entries[entries.length - 1].isIntersecting; }).observe(viewer);
 renderer.domElement.addEventListener('webglcontextlost', event => {

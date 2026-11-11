@@ -203,7 +203,7 @@ body.viewer-expanded { overflow: hidden; }
 .legend .decayed { background: var(--decayed); }
 .legend .u238 { background: var(--aluminum); }
 .legend .rod { background: var(--lead); border-radius: 3px; }
-.gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
+.gesture { margin: 0; color: var(--text-secondary); font-size: .74rem; }
 
 /* Nuclear equation */
 .equation { top: 8px; right: 8px; max-width: calc(100% - 16px); padding: 8px 12px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); font-family: var(--font-mono); font-size: .95rem; }
@@ -391,7 +391,9 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 /* Binding-energy panel fills the viewer */
 .bea { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--card-border); }
 .bea canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; cursor: pointer; }
-.bea-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px 14px; padding: 8px 10px; border-radius: 10px; background: var(--muted-bg); font-size: .72rem; line-height: 1.45; }
+.bea-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 6px 14px; padding: 8px 10px; border-radius: 10px; background: var(--muted-bg); font-size: .72rem; line-height: 1.45; }
+.bea-equation { grid-column: 1 / -1; overflow-wrap: anywhere; }
+.bea-equation mjx-container > svg { max-width: 100%; height: auto; }
 .bea-stats span { display: block; color: var(--text-secondary); }
 .bea-stats b { display: block; color: var(--text-main); font-size: .86rem; font-weight: 600; }
 .bea-stats b.big { color: var(--brand-primary); }

@@ -199,8 +199,8 @@ body.viewer-expanded { overflow: hidden; }
 .legend .antineutrino { background: var(--antineutrino); }
 .legend .undecayed { background: var(--undecayed); }
 .legend .decayed { background: var(--decayed); }
-.gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
-.beam-stats { top: 34px; left: 10px; padding: 8px 10px; border-radius: 10px; background: var(--overlay-bg); border: 1px solid var(--card-border); line-height: 1.5; }
+.gesture { margin: 0; color: var(--text-secondary); font-size: .74rem; }
+.beam-stats { top: 8px; left: 10px; padding: 8px 10px; border-radius: 10px; background: var(--overlay-bg); border: 1px solid var(--card-border); line-height: 1.5; }
 .beam-stats b, .beam-stats .aimed { color: var(--alpha); font-weight: 600; }
 .beam-stats .aimed { display: block; }
 
@@ -367,7 +367,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   #viewer { flex: none; height: 400px; min-height: 400px; }
   .viewer-heading { font-size: .68rem; }
   .gesture { display: none; }
-  .beam-stats { top: 8px; }
   .equation { left: 8px; font-size: .82rem; padding: 6px 8px; }
   .equation .eq { justify-content: center; }
   .equation .check { text-align: center; }
