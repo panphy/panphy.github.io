@@ -7,6 +7,8 @@ import {
 	clearButton,
 	clearCalibrationButton,
 	clearDataPointsButton,
+	clearRulersButton,
+	clearProtractorsButton,
 	clearMenu,
 	clearOriginButton,
 	clearVideoButton,
@@ -23,6 +25,7 @@ import {
 	hiddenVideo,
 	hideCrossesToggle,
 	rulerButton,
+	protractorButton,
 	messageEl,
 	openVideoButton,
 	overlayCanvas,
@@ -58,7 +61,7 @@ import {
 	updateFpsButtonText,
 	updateTimeDisplay
 } from './video.js';
-import { cancelPickMode, drawFrame, drawOverlay, hidePickMode, toggleCrossesVisibility } from './overlay.js';
+import { cancelPickMode, clearProtractors, clearRulers, deleteProtractor, deleteRuler, drawFrame, drawOverlay, hidePickMode, toggleCrossesVisibility } from './overlay.js';
 import { closeTouchGraphCopyActions, resetGraphCopyStatus } from './copy.js';
 import { replotCurrentView, updateActivePlotButton } from './plot.js';
 
@@ -111,6 +114,8 @@ function updateStatusBar() {
 		? `origin: (${Math.round(state.originPoint.x)}, ${Math.round(state.originPoint.y)}) px`
 		: 'origin: bottom-left';
 	clearDataPointsButton.disabled = !ready || count === 0;
+	clearRulersButton.disabled = !ready || state.rulers.length === 0;
+	clearProtractorsButton.disabled = !ready || state.protractors.length === 0;
 	clearCalibrationButton.disabled = !ready || !isCalibrated();
 	clearOriginButton.disabled = !ready || !state.originSet;
 	clearVideoButton.disabled = !ready;
@@ -176,6 +181,14 @@ function resetApp() {
 	state.rulerMode = false;
 	state.rulerStart = null;
 	state.rulerEnd = null;
+	state.rulers = [];
+	state.selectedRuler = null;
+	state.protractorMode = false;
+	state.protractorPoints = [];
+	state.protractorHover = null;
+	state.protractorPointerDown = false;
+	state.protractors = [];
+	state.selectedProtractor = null;
 	state.skippingFrame = false;
 	state.isPlaying = false;
 	state.crossesVisible = true;
@@ -264,8 +277,8 @@ function handleKeyDown(e) {
 	if (e.key === 'Escape') {
 		closeTouchGraphCopyActions();
 		closeMenus();
-		if (state.calibrationMode || state.originMode || state.rulerMode) cancelPickMode();
-		if (state.selectMarksMode || state.selectedMarkTime !== null) {
+		if (state.calibrationMode || state.originMode || state.rulerMode || state.protractorMode) cancelPickMode();
+		if (state.selectMarksMode || state.selectedMarkTime !== null || state.selectedRuler !== null || state.selectedProtractor !== null) {
 			setSelectMarksMode(false);
 			setMessage('Selection cleared.');
 		}
@@ -293,6 +306,16 @@ function handleKeyDown(e) {
 		deleteMark(state.selectedMarkTime);
 		return;
 	}
+	if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedRuler !== null) {
+		e.preventDefault();
+		deleteRuler(state.selectedRuler);
+		return;
+	}
+	if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedProtractor !== null) {
+		e.preventDefault();
+		deleteProtractor(state.selectedProtractor);
+		return;
+	}
 
 	if (e.key === 'h' || e.key === 'H') {
 		e.preventDefault();
@@ -300,6 +323,9 @@ function handleKeyDown(e) {
 	} else if (e.key === 'r' || e.key === 'R') {
 		e.preventDefault();
 		rulerButton.click();
+	} else if (e.key === 'p' || e.key === 'P') {
+		e.preventDefault();
+		protractorButton.click();
 	} else if (e.key === 'ArrowRight') {
 		e.preventDefault();
 		stepOneFrame(state.frameStep);
@@ -348,6 +374,10 @@ function initializeUi() {
 		drawOverlay();
 		setMessage("Marks cleared. Undo to restore.");
 	});
+
+	clearRulersButton.addEventListener("click", clearRulers);
+
+	clearProtractorsButton.addEventListener("click", clearProtractors);
 
 	clearCalibrationButton.addEventListener("click", () => {
 		state.scaleFactor = 1;

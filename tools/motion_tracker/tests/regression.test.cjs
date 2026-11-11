@@ -70,7 +70,9 @@ test('scale line and ruler accept a drag or a click on each end', () => {
     let message = '', dialog = null;
     const control = () => ({setAttribute(name, value) { this[name] = value; }, classList: {add() {}, remove() {}}, style: {}, focus() {}});
     const c = context({calibrationMode: false, originMode: false, rulerMode: false, calibrationStart: null, calibrationEnd: null, rulerStart: null, rulerEnd: null,
-        previousCalibration: null, isDrawingLine: false, lineAnchored: false, scaleFactor: 0.5, scaleUnit: 'cm',
+        previousCalibration: null, isDrawingLine: false, lineAnchored: false, rulers: [], selectedRuler: null, selectedMarkTime: null, scaleFactor: 0.5, scaleUnit: 'cm',
+        protractorMode: false, protractorPoints: [], protractorHover: null, protractors: [], selectedProtractor: null, protractorButton: control(),
+        updateStatusBar() {}, drawFrame() {}, replotCurrentView() {}, refreshGraphSelection() {}, stageDeleteButton: control(),
         pauseVideo() {}, drawOverlay() {}, getVisualScale: () => 1, setSelectMarksMode() {}, setMessage: text => message = text, formatNumber: String,
         isCalibrated: () => true, unitLabel: () => 'cm', openDialog: element => dialog = element, calibrationPrompt: {},
         document: {getElementById: control}, actualLengthInput: control(), actualUnitInput: control(),
@@ -91,8 +93,36 @@ test('scale line and ruler accept a drag or a click on each end', () => {
     run("startLineDraw('ruler', {x: 0, y: 0}); updateLineDraw('ruler', {x: 30, y: 40}); endLineDraw('ruler')");
     assert.equal(c.rulerMode, true); assert.ok(message.startsWith('Length: 25 cm.'));
     assert.equal(c.calibrationEnd.x, 110);
+    // A right-click abandons a part-drawn line; the finished ruler stays, also after the tool is put away.
+    run("startLineDraw('ruler', {x: 200, y: 200}); endLineDraw('ruler')");
+    assert.equal(c.lineAnchored, true);
+    run("cancelLineDraw('ruler')");
+    assert.equal(c.lineAnchored, false); assert.equal(c.rulerStart, null); assert.equal(c.rulers.length, 1);
+    // A click on a finished ruler selects it instead of starting a new one.
+    run("startLineDraw('ruler', {x: 15, y: 21}); endLineDraw('ruler')");
+    assert.equal(c.selectedRuler, 0); assert.equal(c.lineAnchored, false); assert.ok(message.startsWith('Selected ruler: 25 cm.'));
     run('cancelPickMode()');
-    assert.equal(c.rulerMode, false); assert.equal(c.rulerStart, null); assert.equal(c.calibrationStart.x, 10);
+    assert.equal(c.rulerMode, false); assert.equal(c.rulers.length, 1); assert.equal(c.selectedRuler, null); assert.equal(c.calibrationStart.x, 10);
+    assert.equal(run('findRulerAt(100, 100, 10)'), -1);
+    c.selectedRuler = 0; run('deleteRuler(0)');
+    assert.equal(c.rulers.length, 0); assert.equal(c.selectedRuler, null);
+    // The protractor takes three clicks, the vertex second, and gives the angle between the arms.
+    run('handleProtractorToggle()');
+    assert.equal(c.protractorButton['aria-pressed'], 'true'); assert.equal(c.modeCancelButton.textContent, 'Done');
+    run('placeProtractorPoint({x: 100, y: 0}); placeProtractorPoint({x: 0, y: 0})');
+    assert.equal(c.protractorPoints.length, 2);
+    run('cancelProtractorDraw()');
+    assert.equal(c.protractorPoints.length, 0); assert.equal(c.protractors.length, 0);
+    run('placeProtractorPoint({x: 100, y: 0}); placeProtractorPoint({x: 0, y: 0}); placeProtractorPoint({x: 50, y: 50})');
+    assert.equal(c.protractors.length, 1); assert.ok(message.startsWith('Angle: 45.0°.'));
+    assert.equal(run('protractorText({a: {x: 0, y: 5}, vertex: {x: 0, y: 0}, b: {x: 0, y: -5}})'), '180.0°');
+    // A click on an arm selects it; it stays after the tool is put away.
+    run('placeProtractorPoint({x: 60, y: 2})');
+    assert.equal(c.selectedProtractor, 0); assert.equal(c.protractorPoints.length, 0);
+    run('cancelPickMode()');
+    assert.equal(c.protractorMode, false); assert.equal(c.protractors.length, 1); assert.equal(c.selectedProtractor, null);
+    run('deleteProtractor(0)');
+    assert.equal(c.protractors.length, 0);
 });
 test('insufficient velocity points produces empty velocity graph', () => {
     const axis=()=>({title:{},grid:{},ticks:{}});
@@ -122,6 +152,24 @@ test('speed is the size of the smoothed velocity, on the graph and in both expor
     assert.deepEqual(payload.columns.at(-1), {name:'v',unit:'m/s',role:'Y',hidden:true,cells:[5,5]});
 });
 
+test('the selected mark is picked out on the position, velocity and speed graphs', () => {
+    const axis=()=>({title:{},grid:{},ticks:{}}), button=()=>({disabled:false,setAttribute(){}});
+    const c=context({currentPlotMode:'pos',frameData:[0,1,2,3,4,5].map(t=>({x:t,y:t,playbackTime:t})),selectedMarkTime:1,getAnalysisTime:t=>t,scaleFactor:1,scaleUnit:'m',originSet:false,videoReady:true,
+        document:{getElementById:()=>({})},dataPointColors:{x:'blue',y:'red',vx:'blue',vy:'red',speed:'green'},positionChart:{data:{datasets:[]},options:{scales:{x:axis(),y:axis()}},update(){}},applyThemeToChart(){},closeTouchGraphCopyActions(){},getChartTheme:()=>({textColor:'white'}),
+        graphEmpty:{},chartCanvasContainer:{classList:{toggle(){}}},plotPositionButton:button(),plotVelocityButton:button(),plotSpeedButton:button(),plotCompXButton:button(),plotCompYButton:button(),plotCompXYButton:button()});
+    load(c, 'analysis'); load(c, 'plot');
+    const picked = () => c.positionChart.data.datasets[0].data.map((_, dataIndex) => c.positionChart.data.datasets[0].pointRadius({dataIndex}) > 4);
+    vm.runInContext("plotPosition('x')", c);
+    assert.deepEqual([...picked()], [false, true, false, false, false, false]);
+    assert.equal(c.positionChart.data.datasets[0].pointBorderColor({dataIndex: 1}), 'white');
+    // Each smoothed value uses four marks: mark 1 is in the first two of the three.
+    vm.runInContext("plotVelocity('x')", c);
+    assert.deepEqual([...picked()], [true, true, false]);
+    vm.runInContext('plotSpeed()', c);
+    assert.deepEqual([...picked()], [true, true, false]);
+    c.selectedMarkTime = null; // The styles follow the selection without a replot.
+    assert.deepEqual([...picked()], [false, false, false]);
+});
 // Auto-tracking: a shaded, anti-aliased disk on a textured background, as an RGBA image.
 function diskImage(width, height, cx, cy, radius) {
     const data = new Uint8ClampedArray(width * height * 4);
@@ -249,7 +297,7 @@ test('rewinding redraws original pixels even if the video still exposes the dete
     const video = {readyState: 2, currentTime: 0, pixels: 'last FPS sampling frame'};
     let painted;
     const c = context({videoReady: true, hiddenVideo: video, startingFrame: firstFrame,
-        frameCanvas: {width: 1280, height: 720}, crossesVisible: false,
+        frameCanvas: {width: 1280, height: 720}, crossesVisible: false, stageDeleteButton: {},
         ctx: {clearRect() {}, drawImage: source => painted = source.pixels}});
     load(c, 'overlay');
     c.drawFrame();
@@ -378,7 +426,7 @@ test('Manual, Auto and Edit remain mutually exclusive, including repeated mode c
         manualModeButton: button(), autoTrackToggle: button(), selectMarksButton: button(),
         hideCrossesToggle: button(), frameCanvas: {classList: {toggle() {}}, setAttribute() {}},
         stopAutoTrack() {}, cancelPickMode() {}, pauseVideo() {}, highlightCurrentRow() {},
-        updateStatusBar() {}, drawFrame() {}, setMessage() {}});
+        updateStatusBar() {}, drawFrame() {}, drawOverlay() {}, refreshGraphSelection() {}, setMessage() {}});
     load(c, 'points');
     load(c, 'points');
     for (const mode of ['auto', 'edit', 'auto', 'auto', 'manual', 'edit', 'manual']) {
@@ -397,7 +445,7 @@ test('Delete appears only for a selected mark and stays unavailable during track
     const c = context({frameData: [{playbackTime: 1}], videoReady: true, fpsDetectionPending: false,
         trackRun: null, selectedMarkTime: null, undoHistory: [], redoHistory: [],
         document: {getElementById: control, querySelectorAll: () => []}, isCalibrated: () => false,
-        originSet: false, clearDataPointsButton: control(), clearCalibrationButton: control(),
+        originSet: false, rulers: [], protractors: [], clearRulersButton: control(), clearProtractorsButton: control(), clearDataPointsButton: control(), clearCalibrationButton: control(),
         clearOriginButton: control(), clearVideoButton: control(), exportDataButton: control(),
         exportPanPhyPlotButton: control(), undoPointButton: control(), redoPointButton: control(),
         selectMarksButton: control(), deleteSelectedButton: control()});
@@ -462,7 +510,7 @@ test('Auto is the initial tracking mode and resetting a video restores it from M
             hidePickMode() {}, setMessage() {}, resetGraphCopyStatus() {}, closeTouchGraphCopyActions() {},
             updateFpsButtonText() {}, renderPointRows() {}, closeAllDialogs() {}, closeMenus() {},
             disableControls() {}, updateActivePlotButton() {}, highlightCurrentRow() {},
-            updateStatusBar() {}, drawFrame() {}});
+            updateStatusBar() {}, drawFrame() {}, drawOverlay() {}, refreshGraphSelection() {}});
         load(c, 'points');
         load(c, 'ui');
         c.resetApp();

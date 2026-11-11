@@ -247,9 +247,10 @@
 <ul>
 	<li><strong>Auto</strong> (default): click the object once; marks continue frame by frame until the match is lost. Undo removes the whole run.</li>
 	<li><strong>Manual</strong>: mark one frame at a time; each click advances by the step. Clicking a frame that already has a mark replaces it.</li>
-	<li><strong>Edit</strong>: click a cross, then Delete to remove just that mark. For overlapping crosses, select the time in the Table or use the row’s delete button.</li>
-	<li>Undo and Redo step through changes. Esc exits selection, cancels setting the scale or origin, or puts the ruler away.</li>
-	<li><strong>Ruler</strong> measures a length on the video: drag along it, or click each end. It reads in the scale's units, or in pixels before a scale is set, and changes nothing in the data.</li>
+	<li><strong>Edit</strong>: click a cross, then the small cross beside it (or Delete) to remove just that mark. The graph rings the points that belong to the selected mark, so you can judge an outlier before removing it. For overlapping crosses, select the time in the Table or use the row’s delete button.</li>
+	<li>Undo and Redo step through changes. Esc exits selection, cancels setting the scale or origin, or puts the ruler or protractor away.</li>
+	<li><strong>Ruler</strong> measures a length on the video: drag along it, or click each end; right-click abandons a part-drawn line. It reads in the scale's units, or in pixels before a scale is set, and changes nothing in the data. Rulers stay on the video: click one, with the Ruler out or in Edit, then the small cross beside it (or Delete) to remove it. Clear → Clear rulers removes them all.</li>
+	<li><strong>Protractor</strong> measures an angle on the video from three clicks: the end of one arm, the vertex, then the end of the other arm. Right-click abandons a part-drawn angle. Protractors stay, and are selected, deleted and cleared like rulers.</li>
 </ul>
 </div>
 </details>
@@ -275,10 +276,11 @@
 		<tr><td><kbd>Space</kbd></td><td>Play or pause</td></tr>
 		<tr><td><kbd>H</kbd></td><td>Hide or show the marks</td></tr>
 		<tr><td><kbd>R</kbd></td><td>Take out or put away the ruler</td></tr>
+		<tr><td><kbd>P</kbd></td><td>Take out or put away the protractor</td></tr>
 		<tr><td><kbd>Ctrl</kbd> <kbd>Z</kbd></td><td>Undo (Cmd+Z on Mac)</td></tr>
 		<tr><td><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Y</kbd></td><td>Redo</td></tr>
-		<tr><td><kbd>Delete</kbd> / <kbd>Backspace</kbd></td><td>Delete the selected mark</td></tr>
-		<tr><td><kbd>Esc</kbd></td><td>Exit selection, cancel scale/origin or put the ruler away</td></tr>
+		<tr><td><kbd>Delete</kbd> / <kbd>Backspace</kbd></td><td>Delete the selected mark, ruler or protractor</td></tr>
+		<tr><td><kbd>Esc</kbd></td><td>Exit selection, cancel scale/origin or put the ruler or protractor away</td></tr>
 	</tbody>
 </table></div>
 </div>

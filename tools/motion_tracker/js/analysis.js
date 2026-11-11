@@ -19,13 +19,14 @@ function getVelocityData() {
 		const a = state.frameData[i - 1], b = state.frameData[i];
 		const t1 = getAnalysisTime(a.playbackTime), t2 = getAnalysisTime(b.playbackTime);
 		if (t2 <= t1) continue;
-		raw.push({ time: (t1 + t2) / 2, x: (b.x - a.x) * state.scaleFactor / (t2 - t1), y: (b.y - a.y) * state.scaleFactor / (t2 - t1) });
+		raw.push({ time: (t1 + t2) / 2, x: (b.x - a.x) * state.scaleFactor / (t2 - t1), y: (b.y - a.y) * state.scaleFactor / (t2 - t1), first: i - 1, last: i });
 	}
 	// Speed comes from the smoothed components: noise in a component always adds to the magnitude,
 	// so raw components would overstate the speed, most of all near a turning point.
 	const smoothed = raw.slice(2).map((p, i) => {
 		const x = (raw[i].x + raw[i + 1].x + p.x) / 3, y = (raw[i].y + raw[i + 1].y + p.y) / 3;
-		return { time: (raw[i].time + raw[i + 1].time + p.time) / 3, x, y, speed: Math.hypot(x, y) };
+		// first and last are the marks the value was worked out from, for showing a selected mark on the graph.
+		return { time: (raw[i].time + raw[i + 1].time + p.time) / 3, x, y, speed: Math.hypot(x, y), first: raw[i].first, last: p.last };
 	});
 	return { raw, smoothed };
 }

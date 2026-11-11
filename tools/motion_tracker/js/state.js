@@ -38,7 +38,15 @@ export const state = {
 	lineAnchored: false, // Its first end was clicked; the next click sets the other.
 	rulerMode: false,
 	rulerStart: null,
-	rulerEnd: null,
+	rulerEnd: null, // rulerStart and rulerEnd hold the line being drawn.
+	rulers: [], // Finished rulers, as { start, end } in canvas coordinates.
+	selectedRuler: null,
+	protractorMode: false,
+	protractorPoints: [], // Clicked so far for the one being drawn: an arm end, then the vertex.
+	protractorHover: null,
+	protractorPointerDown: false,
+	protractors: [], // Finished protractors, as { a, vertex, b } in canvas coordinates.
+	selectedProtractor: null,
 	originMode: false,
 	originSet: false,
 	originPoint: { x: 0, y: 0 },

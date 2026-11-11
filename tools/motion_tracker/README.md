@@ -9,7 +9,7 @@ Manual and automatic video analysis at `tools/motion_tracker.html`. The existing
 - `tracking.js`: asynchronous tracking runs, decoded-frame seeking, cancellation tokens, and mark insertion. A whole run uses one undo snapshot.
 - `video.js`: imports and sample loading, playback, frame stepping, frame-rate detection, and filming-rate controls. Preserve callback cancellation and the saved first-frame image when changing video timing.
 - `points.js`: manual marking, selection, table editing, tracking modes, and undo/redo.
-- `overlay.js`: canvas rendering, calibration, origin selection, and the ruler. The scale line and the ruler share one drawing routine (drag, or click each end).
+- `overlay.js`: canvas rendering, calibration, origin selection, the ruler and the protractor. The scale line and the ruler share one drawing routine (drag, or click each end). Finished rulers and protractors stay in `state.rulers` and `state.protractors`, outside the undo history; the cross beside a selected mark, ruler or protractor is one HTML button placed by `updateStageDelete`.
 - `plot.js` and `theme.js`: Chart.js plots and shared-theme updates.
 - `copy.js` and `export.js`: graph image copying, CSV downloads, and transfer to PanPhyPlot through the URL hash.
 - `ui.js` and `panes.js`: dialogs, menus, reset, keyboard shortcuts, status controls, and the pane divider.

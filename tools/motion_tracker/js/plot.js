@@ -74,6 +74,38 @@ function updateGraphEmpty() {
 	document.getElementById('graphEmptyText').textContent = text;
 }
 
+// Graph points that belong to the selected mark are larger and ringed. A velocity or speed
+// point is worked out from four marks, so a mark can pick out up to four of them.
+function selectedMarkIndex() {
+	if (state.selectedMarkTime === null || state.selectedMarkTime === undefined) return -1;
+	return state.frameData.findIndex(point => point.playbackTime === state.selectedMarkTime);
+}
+
+function usesSelectedMark(sample) {
+	const selected = selectedMarkIndex();
+	return !!sample && selected >= sample.first && selected <= sample.last;
+}
+
+// The styles read the selection when the graph is drawn, so a new selection needs no replot
+// (which would animate every point again).
+function refreshGraphSelection() {
+	if (state.positionChart) state.positionChart.update('none');
+}
+
+function pointStyle(color, isSelected) {
+	let ring;
+	const ringColor = () => ring ??= getChartTheme().textColor;
+	return {
+		borderColor: color,
+		backgroundColor: color,
+		showLine: false,
+		pointRadius: (c) => isSelected(c.dataIndex) ? 7 : 4,
+		pointHoverRadius: (c) => isSelected(c.dataIndex) ? 8 : 5,
+		pointBorderColor: (c) => isSelected(c.dataIndex) ? ringColor() : color,
+		pointBorderWidth: (c) => isSelected(c.dataIndex) ? 2.5 : 1
+	};
+}
+
 function replotCurrentView() {
 	switch (state.currentPlotMode) {
 		case 'x': plotPosition('x'); break;
@@ -94,14 +126,15 @@ function plotPosition(mode) {
 	const xData = state.frameData.map(p => getAnalysisTime(p.playbackTime));
 	const datasets = [];
 	const theme = getChartTheme();
+	const isSelected = index => index === selectedMarkIndex();
 
 	if (mode === 'x' || mode === 'xy') {
 		const yDataX = state.frameData.map(p => ((p.x - (state.originSet ? state.originPoint.x : 0)) * state.scaleFactor));
-		datasets.push({ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: state.dataPointColors.x, backgroundColor: state.dataPointColors.x, showLine: false, pointRadius: 4 });
+		datasets.push({ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), ...pointStyle(state.dataPointColors.x, isSelected) });
 	}
 	if (mode === 'y' || mode === 'xy') {
 		const yDataY = state.frameData.map(p => ((p.y - (state.originSet ? state.originPoint.y : 0)) * state.scaleFactor));
-		datasets.push({ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: state.dataPointColors.y, backgroundColor: state.dataPointColors.y, showLine: false, pointRadius: 4 });
+		datasets.push({ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), ...pointStyle(state.dataPointColors.y, isSelected) });
 	}
 
 	if (!state.positionChart) {
@@ -149,16 +182,14 @@ function plotVelocity(mode) {
 	const datasets = [];
 	const samples = getVelocityData().smoothed;
 	const times = samples.map(p => p.time);
+	const isSelected = index => usesSelectedMark(samples[index]);
 
 	for (const axis of axes) {
 		const smoothed = samples.map(p => p[axis]);
 		datasets.push({
 			label: axis === "x" ? "x-velocity" : "y-velocity",
 			data: times.map((t, i) => ({ x: t, y: smoothed[i] })),
-			borderColor: axis === "x" ? state.dataPointColors.vx : state.dataPointColors.vy,
-			backgroundColor: axis === "x" ? state.dataPointColors.vx : state.dataPointColors.vy,
-			showLine: false,
-			pointRadius: 4
+			...pointStyle(axis === "x" ? state.dataPointColors.vx : state.dataPointColors.vy, isSelected)
 		});
 	}
 
@@ -175,13 +206,11 @@ function plotSpeed() {
 	if (!isSpeedMode()) lastComponent = currentComponent();
 	state.currentPlotMode = 'speed';
 	if (!state.positionChart) return;
+	const samples = getVelocityData().smoothed;
 	state.positionChart.data.datasets = [{
 		label: "speed",
-		data: getVelocityData().smoothed.map(p => ({ x: p.time, y: p.speed })),
-		borderColor: state.dataPointColors.speed,
-		backgroundColor: state.dataPointColors.speed,
-		showLine: false,
-		pointRadius: 4
+		data: samples.map(p => ({ x: p.time, y: p.speed })),
+		...pointStyle(state.dataPointColors.speed, index => usesSelectedMark(samples[index]))
 	}];
 	state.positionChart.options.scales.y.title.text = `Speed (${state.scaleUnit}/s)`;
 	state.positionChart.update();
@@ -218,4 +247,4 @@ function initializePlot() {
 	showPointsTab.addEventListener('click', () => setResultsView('points'));
 }
 
-export { updateActivePlotButton, replotCurrentView, plotPosition, initializePlot };
+export { updateActivePlotButton, refreshGraphSelection, replotCurrentView, plotPosition, initializePlot };
