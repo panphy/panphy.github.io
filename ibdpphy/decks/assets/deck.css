@@ -371,7 +371,8 @@ body.is-fullscreen:has(#deck .slide.hl.active)::after { content: "HL only"; posi
 .hl-tag { background: var(--hl); color: var(--hl-ink); }
 .sl-tag { border: 2px solid var(--brand-primary); color: var(--brand-primary); }
 .thumb.hl .thumb-num::after { content: "HL"; display: block; margin-top: 4px; padding: 1px 0; border-radius: 4px; background: var(--hl); color: var(--hl-ink); font: 700 10px var(--font-mono); text-align: center; }
-.thumb.hl .thumb-frame { border-color: color-mix(in srgb, var(--hl) 55%, var(--card-border)); }
+/* Only at rest: hovered, focused or current, an HL thumbnail takes the same highlight as any other. */
+.thumb.hl:not(:hover, :focus-visible, [aria-current="true"]) .thumb-frame { border-color: color-mix(in srgb, var(--hl) 55%, var(--card-border)); }
 .card.hl { border-color: var(--hl); border-width: 2px; }
 .card.hl .eyebrow { color: var(--hl-text); }
 .term.hl { border-color: var(--hl); }
