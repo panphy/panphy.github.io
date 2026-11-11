@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-10T21:08:12Z';
+const BUILD_ID = '2026-11-11T09:33:36Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -428,6 +428,19 @@ async function sha256Hex(data) {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+// Cloudflare, which serves panphy.app, hides email addresses in pages behind a
+// code that is different on every request. Blank those codes before hashing a
+// page, or two copies of the same page would never match.
+async function contentHash(response, pathname) {
+  const data = await response.arrayBuffer();
+  if (!(pathname.endsWith('/') || pathname.endsWith('.html'))) {
+    return sha256Hex(data);
+  }
+  const text = new TextDecoder().decode(data)
+    .replace(/(email-protection#|data-cfemail=")[0-9a-f]+/g, '$1');
+  return sha256Hex(new TextEncoder().encode(text));
+}
+
 // One version per app, hashed from the precached bytes of its own files plus
 // the shared ones, so an update prompt appears only in apps whose files changed.
 // CDN files are left out: their URLs are version-pinned in same-origin files.
@@ -443,7 +456,7 @@ async function computeAppVersions() {
       hash = await stableCache.match(resolvedUrl.href) ? STABLE_CACHE_VERSION : 'missing';
     } else {
       const cached = await cache.match(resolvedUrl.href);
-      hash = cached ? await sha256Hex(await cached.arrayBuffer()) : 'missing';
+      hash = cached ? await contentHash(cached, resolvedUrl.pathname) : 'missing';
     }
     const group = getAssetGroup(resolvedUrl.pathname);
     (groups[group] = groups[group] || []).push(`${resolvedUrl.pathname}${resolvedUrl.search}=${hash}`);
@@ -531,8 +544,8 @@ async function verifyAppFilesNow(group) {
       }
       const cached = await cache.match(url.href);
       const [freshHash, cachedHash] = await Promise.all([
-        sha256Hex(await res.clone().arrayBuffer()),
-        cached ? sha256Hex(await cached.arrayBuffer()) : ''
+        contentHash(res.clone(), url.pathname),
+        cached ? contentHash(cached, url.pathname) : ''
       ]);
       return freshHash === cachedHash ? null : { href: url.href, res };
     }));
