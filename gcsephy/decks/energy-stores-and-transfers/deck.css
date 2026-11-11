@@ -136,6 +136,8 @@ mjx-container { line-height: 0; }
 .worked dt { padding: 8px 16px; font-size: 22px; }
 .worked dd { padding: 8px 16px; font-size: 28px; }
 .col { gap: 18px; }
+/* Leave room for the slide number below the two worked power examples. */
+.power-examples .worked :is(dt, dd) { padding-block: 3px; }
 .bounce-formula > span:first-child { margin-bottom: 22px; }
 .bounce-worked dl { grid-template-columns: 140px 1fr; }
 .bounce-worked dd { font-size: 26px; }
