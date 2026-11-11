@@ -18,6 +18,7 @@ import {
 	hiddenVideo,
 	hideCrossesToggle,
 	rulerButton,
+	protractorButton,
 	manualModeButton,
 	nextFrameButton,
 	openVideoButton,
@@ -295,7 +296,7 @@ function updateSliderDomain() {
 
 function disableControls(disabled) {
 	[previousFrameButton, nextFrameButton, playPauseButton, calibrateButton, setOriginButton, frameRateButton, frameRateHintButton,
-		hideCrossesToggle, rulerButton, autoTrackToggle, manualModeButton, setupButton, clearButton, frameStepSelect,
+		hideCrossesToggle, rulerButton, protractorButton, autoTrackToggle, manualModeButton, setupButton, clearButton, frameStepSelect,
 		plotPositionButton, plotVelocityButton, plotSpeedButton]
 		.forEach(control => { control.disabled = disabled; });
 	// Speed has no components to choose.

@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { formatNumber, markUnsavedChanges, setMessage, updateStatusBar } from './ui.js';
-import { replotCurrentView } from './plot.js';
-import { cancelPickMode, canvasYToCartesianY, drawFrame, getVisualScale } from './overlay.js';
+import { refreshGraphSelection, replotCurrentView } from './plot.js';
+import { cancelPickMode, canvasYToCartesianY, drawFrame, drawOverlay, findProtractorAt, findRulerAt, getVisualScale, selectProtractor, selectRuler } from './overlay.js';
 import {
 	autoTrackToggle,
 	deleteSelectedButton,
@@ -48,6 +48,8 @@ function redoPoint() {
 function setSelectMarksMode(enabled) {
 	state.selectMarksMode = enabled;
 	state.selectedMarkTime = null;
+	state.selectedRuler = null;
+	state.selectedProtractor = null;
 	if (enabled) state.autoTrackOn = false;
 	manualModeButton.setAttribute('aria-pressed', String(!state.autoTrackOn && !enabled));
 	autoTrackToggle.setAttribute('aria-pressed', String(state.autoTrackOn));
@@ -64,6 +66,8 @@ function setSelectMarksMode(enabled) {
 	highlightCurrentRow();
 	updateStatusBar();
 	drawFrame();
+	drawOverlay();
+	refreshGraphSelection();
 }
 
 // Distances are in canvas pixels; ties favor the frame being shown.
@@ -85,13 +89,18 @@ function selectMark(point) {
 	if (!state.videoReady || state.fpsDetectionPending || state.skippingFrame || state.trackRun) return;
 	if (point && !state.selectMarksMode) setSelectMarksMode(true);
 	state.selectedMarkTime = point ? point.playbackTime : null;
+	state.selectedRuler = null;
+	state.selectedProtractor = null;
 	if (point) seekToPlaybackTime(point.playbackTime);
 	highlightCurrentRow(true);
 	updateStatusBar();
 	drawFrame();
+	drawOverlay();
+	// The graph shows which point belongs to the mark.
+	refreshGraphSelection();
 	setMessage(point
-		? `Selected mark: ${getAnalysisTime(point.playbackTime).toFixed(4)} s.`
-		: 'No mark here. Click a cross to select it, or use the Table for overlapping marks.');
+		? `Selected mark: ${getAnalysisTime(point.playbackTime).toFixed(4)} s. Use the cross beside it, or Delete, to remove it.`
+		: 'Nothing here. Click a cross, a ruler or a protractor to select it, or use the Table for overlapping marks.');
 }
 
 function deleteMark(playbackTime) {
@@ -112,7 +121,7 @@ function setTrackingMode(mode) {
 	const messages = {
 		manual: 'Manual: click the object in each frame.',
 		auto: 'Auto: click the object to track it across frames.',
-		edit: 'Edit: select a cross to delete it. Use the Table for overlapping marks.'
+		edit: 'Edit: select a cross, a ruler or a protractor to delete it. Use the Table for overlapping marks.'
 	};
 	setMessage(messages[mode]);
 }
@@ -184,7 +193,7 @@ function highlightCurrentRow(scroll = false) {
 
 function initializePoints() {
 	frameCanvas.addEventListener('click', (event) => {
-		if (state.videoReady && !hiddenVideo.seeking && !state.fpsDetectionPending && !state.calibrationMode && !state.originMode && !state.rulerMode && !state.skippingFrame) {
+		if (state.videoReady && !hiddenVideo.seeking && !state.fpsDetectionPending && !state.calibrationMode && !state.originMode && !state.rulerMode && !state.protractorMode && !state.skippingFrame) {
 			const rect = frameCanvas.getBoundingClientRect();
 			const scaleX = frameCanvas.width / rect.width;
 			const scaleY = frameCanvas.height / rect.height;
@@ -193,7 +202,13 @@ function initializePoints() {
 			const cartesianY = canvasYToCartesianY(canvasY);
 
 			if (state.selectMarksMode) {
-				selectMark(findMarkAt(canvasX, cartesianY, (event.pointerType === 'touch' ? 24 : 12) * getVisualScale()));
+				const reach = (event.pointerType === 'touch' ? 24 : 12) * getVisualScale();
+				const mark = findMarkAt(canvasX, cartesianY, reach);
+				const ruler = mark ? -1 : findRulerAt(canvasX, canvasY, reach);
+				const protractor = mark || ruler >= 0 ? -1 : findProtractorAt(canvasX, canvasY, reach);
+				if (ruler >= 0) { selectMark(null); selectRuler(ruler); }
+				else if (protractor >= 0) { selectMark(null); selectProtractor(protractor); }
+				else selectMark(mark);
 				return;
 			}
 

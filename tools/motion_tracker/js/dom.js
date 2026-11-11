@@ -35,6 +35,10 @@ const plotCompYButton = document.getElementById('plotCompY');
 const plotCompXYButton = document.getElementById('plotCompXY');
 const hideCrossesToggle = document.getElementById('hideCrossesToggle');
 const rulerButton = document.getElementById('rulerToggle');
+const protractorButton = document.getElementById('protractorToggle');
+const clearProtractorsButton = document.getElementById('clearProtractors');
+const stageDeleteButton = document.getElementById('stageDelete');
+const clearRulersButton = document.getElementById('clearRulers');
 const autoTrackToggle = document.getElementById('autoTrackToggle');
 const autoStopButton = document.getElementById('autoStop');
 const chartCanvasContainer = document.getElementById('chartCanvasContainer');
@@ -115,6 +119,10 @@ export {
 	plotCompXYButton,
 	hideCrossesToggle,
 	rulerButton,
+	protractorButton,
+	clearProtractorsButton,
+	stageDeleteButton,
+	clearRulersButton,
 	autoTrackToggle,
 	autoStopButton,
 	chartCanvasContainer,

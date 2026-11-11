@@ -697,7 +697,8 @@ a.mt-tool { text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 40px;
+  /* Room for the Cancel or Done button, so the strip keeps its height when one appears. */
+  min-height: 45px;
   padding: 6px 10px 6px 14px;
   border-bottom: 1px solid var(--line);
   background: var(--surface-2);
@@ -794,6 +795,48 @@ a.mt-tool { text-decoration: none; }
   pointer-events: none;
   touch-action: none;
   cursor: crosshair;
+}
+
+/* The cross beside a selected mark or ruler. The script places it. */
+.stage-delete {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d92d20;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.stage-delete[hidden] {
+  display: none;
+}
+
+.stage-delete:hover:not(:disabled),
+.stage-delete:focus-visible {
+  background: #b42318;
+  color: #fff;
+}
+
+.stage-delete .mt-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 3;
+}
+
+@media (pointer: coarse) {
+  .stage-delete {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 /* Before a video is opened. */
@@ -1804,6 +1847,18 @@ body.modal-open {
   display: flex;
   align-items: center;
   flex: none;
+}
+
+/* With the ruler and protractor the toolbar is wider than a half-width pane, so Clear
+   drops its word there and keeps its icon rather than wrapping to a second row. */
+#videoPane {
+  container: video-pane / inline-size;
+}
+
+@container video-pane (max-width: 660px) {
+  #clearButton > span {
+    display: none;
+  }
 }
 
 .mt-tracking-modes .mt-segment {
