@@ -192,7 +192,15 @@
     return `<g ${extra}><line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" style="stroke:var(--${color})" stroke-width="${width}" stroke-linecap="round"/><path d="M-10,-8 L8,0 L-10,8 Z" transform="translate(${f(hx)} ${f(hy)}) rotate(${f(deg)})" style="fill:var(--${color})"/></g>`;
   }
 
-  const text = (x, y, content, cls = 'lbl', anchor = 'middle', extra = '') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}" ${extra}>${content}</text>`;
+  // Labels may be written with Unicode superscripts and subscripts (²³⁵U, 10⁻⁴, m s⁻¹, f₁). Figtree
+  // and IBM Plex Mono have only ¹ ² ³, so the rest would come from a fallback font and look out of
+  // place. text() draws each run as small ordinary characters in the label's own font, raised or
+  // lowered; the two tspans of a run share one size, so their em shifts cancel on the baseline.
+  const SCRIPT = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', '⁺': '+', '⁻': '−', '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', '₊': '+', '₋': '−' };
+  const scripts = content => String(content)
+    .replace(/[⁰¹²³⁴-⁹⁺⁻]+/g, run => `<tspan font-size="70%" dy="-0.55em">${[...run].map(c => SCRIPT[c]).join('')}</tspan><tspan font-size="70%" dy="0.55em">​</tspan>`)
+    .replace(/[₀-₉₊₋]+/g, run => `<tspan font-size="70%" dy="0.35em">${[...run].map(c => SCRIPT[c]).join('')}</tspan><tspan font-size="70%" dy="-0.35em">​</tspan>`);
+  const text = (x, y, content, cls = 'lbl', anchor = 'middle', extra = '') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}" ${extra}>${scripts(content)}</text>`;
 
   // An electron that the deck script moves around an (optionally tilted) ellipse.
   function orbitPoint(cx, cy, rx, ry, phase, tilt) {
