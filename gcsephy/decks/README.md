@@ -1,12 +1,13 @@
 # GCSE Physics teaching decks
 
-Four browser presentations, available by direct link from the GCSE hub:
+Five browser presentations, available by direct link from the GCSE hub:
 
 | Deck | Year | Slides | Accent |
 | --- | --- | ---: | --- |
 | `work-like-a-physicist/` | 9 | 57 | Light orange |
 | `energy-stores-and-transfers/` | 9 | 65 | Light orange |
 | `electric-circuits/` | 10 | 62 | Lime |
+| `particle-model/` | 10 | 52 | Lime |
 | `atoms-and-radiation/` | 11 | 56 | Light yellow |
 
 Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. Each point of a note opens with its question or heading on its own line, `<h3 class="rn-head">`, followed by the explanation in `<p>`; call-outs go in `<div class="rn-side">`. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
@@ -19,11 +20,11 @@ Maths is LaTeX between `\(` and `\)`, typeset by MathJax as in the IB decks; ÷ 
 
 Slide 1 ends with `<p class="slide-copyright">&copy; 2026 PanPhy Labs. All rights reserved.</p>` (styled in `teaching-deck.css`); other slides carry no copyright line. Slides 1 and 2 name both courses. Slide 2, the map, gives the AQA sections for Physics (8463) and Combined Science: Trilogy (8464), and each card and part divider gives its own sub-sections in `<p class="spec-ref">` (styled in `teaching-deck.css`): physics-only parts say "Not in Combined", and Work Like a Physicist cites the Working scientifically (WS) statements, numbered the same in both specifications. List only what the part teaches, checked against the AQA specification, and update the references when content moves.
 
-A slide examined only in GCSE Physics (8463), not Combined Science: Trilogy, takes the `triple` class, which adds a "Triple Science only" flag at the bottom edge (the top holds the year badge). Presenting fullscreen on a screen taller than 16:9, such as an iPad, the slide stays pinned to the top and the flag drops to the bottom of the screen. Mark a single item on a mixed slide with `<span class="triple-tag">Triple only</span>`. Check new content against the "(physics only)" headings and statements in the AQA specification. Content beyond both specifications carries no slide label (nor does Higher-tier-only content); instead its revision note has a `<p class="spec">` callout, headed "Beyond the specification", that quotes what the AQA specification actually requires, with its Physics and Combined Science references. A whole physics-only topic goes in its own flagged part after the deck's Key words slide (Electric Circuits Mission 9, static electricity; Atoms and Nuclear Radiation Part 4, hazards, uses, fission and fusion), so Combined Science classes stop at Key words and the slide numbers that workbooks cite do not move. The banner's Workbook button opens the unit's workbook hub.
+A slide examined only in GCSE Physics (8463), not Combined Science: Trilogy, takes the `triple` class, which adds a "Triple Science only" flag at the bottom edge (the top holds the year badge). Presenting fullscreen on a screen taller than 16:9, such as an iPad, the slide stays pinned to the top and the flag drops to the bottom of the screen. Mark a single item on a mixed slide with `<span class="triple-tag">Triple only</span>`. Check new content against the "(physics only)" headings and statements in the AQA specification. Content beyond both specifications carries no slide label (nor does Higher-tier-only content); instead its revision note has a `<p class="spec">` callout, headed "Beyond the specification", that quotes what the AQA specification actually requires, with its Physics and Combined Science references. A whole physics-only topic goes in its own flagged part after the deck's Key words slide (Electric Circuits Mission 9, static electricity; Particle Model of Matter slides 47–52, pressure and volume; Atoms and Nuclear Radiation Part 4, hazards, uses, fission and fusion), so Combined Science classes stop at Key words and the slide numbers that workbooks cite do not move. The banner's Workbook button opens the unit's workbook hub.
 
-All four decks use `/assets/theme.js` with `data-theme-scope="gcsephy"`, so their preference follows the GCSE hub and remains independent of the main site and IB section. Keep essential labels and outlines high contrast; pastel year colours belong to accents and soft fills. Check both themes, including labels drawn over coloured shapes and 3D models.
+All five decks use `/assets/theme.js` with `data-theme-scope="gcsephy"`, so their preference follows the GCSE hub and remains independent of the main site and IB section. Keep essential labels and outlines high contrast; pastel year colours belong to accents and soft fills. Check both themes, including labels drawn over coloured shapes and 3D models.
 
-`assets/companion-deck.css` and `companion-deck.js` provide the Year 9/10 layouts and navigation. Year 11 retains its own `deck.css` and `deck.js`; its history slides have a distinct background to mark non-exam enrichment. `assets/deck-notes.js` and `deck-notes.css` provide the Note panel (N).
+`assets/companion-deck.css` and `companion-deck.js` provide the Year 9/10 layouts and navigation. The Particle Model deck's drawings come from its workbook (`../year10phy/unit02/assets/figures.js`), and its own `figures.js` adds three live particle models, which run only while their slide is showing and stay still with reduced motion. Year 11 retains its own `deck.css` and `deck.js`; its history slides have a distinct background to mark non-exam enrichment. `assets/deck-notes.js` and `deck-notes.css` provide the Note panel (N).
 
 Click or focus a thumbnail, then use Up/Down to select the previous/next slide directly. Left/Right still hide/reveal slide steps before changing slides.
 

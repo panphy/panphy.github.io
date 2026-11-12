@@ -2,7 +2,7 @@
 
 Editable source for the A4 student workbook, printed in three parts (`../Work Like a Physicist - Year 9 Student Workbook - Part 1 - Lessons 1-2.pdf`, `Part 2 - Lessons 3-5`, `Part 3 - Lessons 6-8`), the Unit review, and an answer edition of each with the same page numbers. It uses the same engine and look as the Year 9 Energy workbook (`../../unit02/workbook/`): each lesson runs Do now → Learn it → Practical → Try it → Exam corner → Revise it, and each part ends with key words, a progress tracker, quick answers and the Physicist's toolkit.
 
-The student hub, `index.html`, uses `/gcsephy/assets/workbook-hub.css`, shared by all four workbook hubs. That stylesheet does not affect the printed workbooks.
+The student hub, `index.html`, uses `/gcsephy/assets/workbook-hub.css`, shared by all five workbook hubs. That stylesheet does not affect the printed workbooks.
 
 ## Files
 
