@@ -56,11 +56,14 @@
   // One box of particles. kind: solid, liquid, gas. opts: { n, tails, seed, cls }
   function particleBox(kind, x, y, w, h, r, opts) {
     const o = opts || {};
+    // pad keeps the particles clear of the outline (the cover); without it they touch the walls.
+    const pad = o.pad || 0, iw = w - 2 * pad, ih = h - 2 * pad;
     let ps, extra = "";
-    if (kind === "solid") ps = solidPos(w, h, r, o.rows || 5);
-    else if (kind === "liquid") ps = liquidPos(w, h, r, o.n || solidPos(w, h, r, o.rows || 5).length, o.seed);
-    else {
-      ps = gasPos(w, h, r, o.n || 7, o.seed);
+    if (kind === "solid") ps = solidPos(iw, ih, r, o.rows || 5);
+    else if (kind === "liquid") ps = liquidPos(iw, ih, r, o.n || solidPos(iw, ih, r, o.rows || 5).length, o.seed);
+    else ps = gasPos(iw, ih, r, o.n || 7, o.seed);
+    ps = ps.map(([a, b, d]) => [a + pad, b + pad, d]);
+    if (kind === "gas") {
       if (o.tails !== false) extra = ps.map(([a, b, d]) => { const L = o.fast ? 20 : 12; return arrow(x + a + (r + 1) * Math.cos(d), y + b + (r + 1) * Math.sin(d), x + a + (r + L) * Math.cos(d), y + b + (r + L) * Math.sin(d), "thin move", 4); }).join("");
     }
     return `<rect class="ink paper" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>${extra}${ps.map(([a, b]) => dot(x + a, y + b, r, o.cls || kind)).join("")}`;
@@ -241,7 +244,7 @@
 
   // Cover: a heating curve with a solid, a liquid and a gas box beside the section each belongs to.
   function coverArt() {
-    const box = (kind, x, y, n) => `<g transform="translate(${x} ${y})">${particleBox(kind, 0, 0, 62, 62, 4.2, { rows: 4, n, seed: 5, tails: false })}</g>`;
+    const box = (kind, x, y, n) => `<g transform="translate(${x} ${y})">${particleBox(kind, 0, 0, 62, 62, 4.2, { rows: 4, n, seed: 5, tails: false, pad: 3.5 })}</g>`;
     const b = `<path class="axis" d="M30 6 V210 H470"/><path class="curve" d="M30 196 L84 150 L190 150 L282 70 L400 70 L462 26"/>` +
       box("solid", 46, 66) + box("liquid", 262, 104) + box("gas", 396, 96, 6);
     return svg(480, 216, b, "A heating curve with particle diagrams of a solid, a liquid and a gas", "on-dark");

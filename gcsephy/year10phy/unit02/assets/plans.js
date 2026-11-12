@@ -19,11 +19,11 @@
     return `<section>
       <div class="eyebrow">Year 10 Physics, AQA GCSE Physics (8463) and Combined Science: Trilogy (8464)</div>
       <h1 class="page-title">Particle Model of Matter: Teacher guide</h1>
-      <p class="page-intro">Eight 50-minute lessons over four weeks, for AQA Physics 4.3 (with 4.1.1.3) and Combined Science 6.3 (with 6.1.1.3). Each lesson has its own booklet in the student workbook and its own section of the teaching deck.</p>
+      <p class="page-intro">Eight 50-minute lessons over four weeks, for AQA Physics 4.3 (with 4.1.1.3) and Combined Science 6.3 (with 6.1.1.3). The student workbook comes in three part booklets (Lessons 1–2, 3 and 5, 6–7) and a booklet for each required practical (Lessons 4 and 8); each lesson has its own section of the teaching deck.</p>
       <h4 class="sub">How the resources fit together</h4>
       <table class="compare"><thead><tr><th>Resource</th><th>Used for</th></tr></thead><tbody>
         <tr><th>Teaching deck</th><td>52 slides with revision notes (press N). Slides 3–46 are for every class. Slides 47–52, after the Key words slide, are flagged <strong>Triple Science only</strong>: pressure and volume (\\(p\\,V = \\text{constant}\\)) and doing work on a gas.</td></tr>
-        <tr><th>Student workbook</th><td>One booklet per lesson (12 pt text, wide writing lines), each with the toolkit so far, its key words and quick answers. Every lesson: Do now, explanations, the slide examples to fill in with “Your turn”, graded practice, practical records, exam questions and a revision box.</td></tr>
+        <tr><th>Student workbook</th><td>Five booklets (12 pt text, wide writing lines): Part 1 (Lessons 1–2), Part 2 (Lessons 3 and 5), Lesson 4, Part 3 (Lessons 6–7) and Lesson 8, each with the toolkit so far, its key words and quick answers. Every lesson: Do now, explanations, the slide examples to fill in with “Your turn”, graded practice, practical records, exam questions and a revision box.</td></tr>
         <tr><th>Answer edition</th><td>The same pages and page numbers as each booklet, with answers in blue. For marking, or for students to mark their own work.</td></tr>
         <tr><th>Unit review</th><td>${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks of mixed exam practice, a fix-it log, the toolkit, all the key words and a progress tracker. Its last pages are the Triple Science only extension, matching deck slides 47–52.</td></tr>
         <tr><th>Preps</th><td>Four one-page homework sheets, each out of 10, set after Lessons 2, 4, 6 and 8: three Do Now bank questions on earlier learning, then questions on the two latest lessons.</td></tr>

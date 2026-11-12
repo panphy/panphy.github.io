@@ -120,7 +120,7 @@
           ["A gas expands at constant temperature. Its pressure", ["increases", "decreases", "stays the same"], 1],
         ] },
         { p: "A diver's air bubble has a volume of 12 cm³ where the pressure is 300 kPa. It rises to the surface, where the pressure is 100 kPa. Calculate its volume at the surface. Assume the temperature is constant.", marks: 3, frame: frameRe, frameA: [R`\(p_1\,V_1 = p_2\,V_2\)`, R`\(V_2 = \dfrac{p_1\,V_1}{p_2}\) (1)`, R`\(V_2 = \dfrac{300 \times 12}{100}\) (1)`, "36 cm³ (1)"] },
-        { p: "Explain, in terms of particles, why the pressure of a gas decreases when its volume is increased at constant temperature.", marks: 3, lines: 4, a: "The molecules are more spread out (1), so they collide with the walls less often (1). The speed of the molecules has not changed (constant temperature), so the total force on each unit area of wall, the pressure, is smaller (1)." },
+        { p: "Explain, in terms of particles, why the pressure of a gas decreases when its volume is increased at constant temperature.", marks: 3, lines: 3, a: "The molecules are more spread out (1), so they collide with the walls less often (1). The speed of the molecules has not changed (constant temperature), so the total force on each unit area of wall, the pressure, is smaller (1)." },
       ],
     },
     {
