@@ -130,6 +130,10 @@ Students write one sentence that uses all of: dissipated, thermal store, surroun
 
 Complete the Eco House. Stretch: estimate which feature would save the most energy in your own home, and why.
 
+## Using the workbook
+
+The Quick check (slide 57) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 1. **"Energy is lost."** It is not lost; it is dissipated. Allow "wasted" as everyday shorthand, but make students say where it goes.

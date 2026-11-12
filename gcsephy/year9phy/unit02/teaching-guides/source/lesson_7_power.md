@@ -125,6 +125,12 @@ Workbook page: straight P = E ÷ t; finding E and t; unit conversions (kJ, kW, m
 
 Find the power rating on three appliances at home. Calculate the energy each transfers if it runs for 10 minutes.
 
+## Using the workbook
+
+The workbook prints the two worked examples on slide 48 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+
+The Quick check (slide 50) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 1. **Do not weigh students.** Using a standard 50 kg avoids embarrassment and safeguarding concerns; students who want to use their own mass can do so privately at home. If you use real masses, never share them aloud.

@@ -144,6 +144,12 @@ The last sentence is a preview of Lesson 8.
 
 For three activities at home (for example, stretching a rubber band, riding a bike downhill, bouncing a ball), write which store empties, which fills and the pathway.
 
+## Using the workbook
+
+The workbook prints the worked example on slide 7 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+
+The Quick check (slide 10) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 Common misconceptions:
