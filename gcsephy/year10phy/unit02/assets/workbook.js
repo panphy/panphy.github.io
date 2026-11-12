@@ -1,6 +1,7 @@
 /* Renders the Particle Model of Matter student workbook from window.UNIT (assets/reference.js).
-   workbook.html?lesson=N prints one lesson booklet; ?review prints the Unit review booklet; add
-   &answers for the answer edition, which has the same page numbers. With neither, the whole unit.
+   workbook.html?part=N prints one part booklet (PARTS); ?lesson=N prints one lesson (the required
+   practicals, Lessons 4 and 8, are booklets of their own); ?review prints the Unit review booklet.
+   Add &answers for the answer edition, which has the same page numbers. With none, the whole unit.
    Maths is LaTeX between \( and \), typeset by MathJax before printing.
    Print with Chrome: A4, default margins, no headers or footers. */
 (function () {
@@ -10,21 +11,28 @@
   const F = window.ParticleFigures;
   const params = new URLSearchParams(location.search);
   const answers = params.has("answers");
-  const ONE = U.lessons.find((l) => l.n === Number(params.get("lesson"))) || null;
-  const REVIEW = !ONE && params.has("review");
-  const LESSONS = ONE ? [ONE] : REVIEW ? [] : U.lessons;
-  const LAST = ONE ? ONE.n : U.lessons.length;
+  // Lessons 1-3 and 5-7 print in three parts; each required practical has its own booklet.
+  const PARTS = [[1, 2], [3, 5], [6, 7]];
+  const partNo = PARTS[Number(params.get("part")) - 1] ? Number(params.get("part")) : 0;
+  const ONE = partNo ? null : U.lessons.find((l) => l.n === Number(params.get("lesson"))) || null;
+  const SEL = partNo ? U.lessons.filter((l) => PARTS[partNo - 1].includes(l.n)) : ONE ? [ONE] : null;
+  const REVIEW = !SEL && params.has("review");
+  const LESSONS = SEL || (REVIEW ? [] : U.lessons);
+  const LAST = SEL ? SEL[SEL.length - 1].n : U.lessons.length;
+  const inSel = (n) => !!SEL && SEL.some((l) => l.n === n);
+  const nums = SEL ? SEL.map((l) => l.n).join(SEL.length === 2 && SEL[1].n - SEL[0].n > 1 ? " and " : "–") : "";
+  const lessonWord = SEL && SEL.length > 1 ? "Lessons" : "Lesson";
   const pad = (n) => String(n).padStart(2, "0");
   const DECK = "panphy.app/gcsephy/decks/particle-model";
-  const EQUATIONS = U.equations.filter((e) => (e.triple ? !ONE : e.lesson <= LAST));
+  const EQUATIONS = U.equations.filter((e) => (e.triple ? !SEL : e.lesson <= LAST));
   if (answers) document.body.classList.add("answers");
 
-  const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
+  const which = partNo ? `Part ${partNo}, ${lessonWord} ${nums}` : ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
   const footer = `Particle Model of Matter, Year 10 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
-  document.title = `Particle Model of Matter - Year 10 Workbook${ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
+  document.title = `Particle Model of Matter - Year 10 Workbook${partNo ? ` Part ${partNo} - ${lessonWord} ${nums.replace("–", "-")}` : ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
 
   // ---------- small helpers ----------
   const ans = (html) => (html ? `<span class="ans">${html}</span>` : "");
@@ -278,7 +286,10 @@
   // ---------- front and back matter ----------
   function cover() {
     let middle;
-    if (ONE) {
+    if (partNo) {
+      middle = `<div class="cover-part"><b>Part ${partNo} of ${PARTS.length}</b><span>${lessonWord} ${nums}</span></div>
+      <h2 class="cover-sub">In this booklet</h2><ul class="cover-lessons">${SEL.map((l) => `<li>Lesson ${l.n}: ${l.title}</li>`).join("")}</ul>`;
+    } else if (ONE) {
       middle = `<div class="cover-part"><b>Lesson ${pad(ONE.n)}</b><span>${ONE.title}</span></div>
       <p class="lede">${ONE.big}</p>
       <h2 class="cover-sub">In this lesson you will</h2><ul class="cover-lessons">${ONE.goals.map((g) => `<li>${g}</li>`).join("")}</ul>`;
@@ -289,7 +300,7 @@
       middle = `<p class="lede">What everything is made of, why ice floats, why a kettle takes so long, and where the energy goes when water boils: ${U.lessons.length} lessons, two of them required practicals.</p>
       <div class="cover-stats"><div><b>${U.lessons.length}</b>lessons</div><div><b>2</b>required practicals</div><div><b>3</b>equations</div></div>`;
     }
-    return `<section class="cover"><div class="eyebrow">Year 10 Physics, AQA GCSE, ${ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
+    return `<section class="cover"><div class="eyebrow">Year 10 Physics, AQA GCSE, ${partNo ? `Part ${partNo} of ${PARTS.length}` : ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
       <h1>Particle<br>Model <em>of<br>Matter</em></h1>
       ${middle}
       ${answers ? '<div class="edition">Answer edition for teachers and self-marking</div>' : ""}
@@ -302,8 +313,8 @@
   function howTo() {
     const items = [
       ["doNow", "Do now", "Quick questions from earlier lessons. Remembering again is what makes it stick."],
-      ["learn", "Learn it", "The explanation and diagrams. Fill in each example from the slides with your teacher, then try “Your turn” alone. Read this again when you revise."],
-      ["try", "Try it", "Practice that builds up: first with support, then on your own, then a challenge. Every second lesson ends with the Quick check from the slides."],
+      ["learn", "Learn it", "Explanations and diagrams. Fill in the slide examples with your teacher, then try “Your turn” alone."],
+      ["try", "Try it", "Practice that builds up, then a challenge. Every second lesson ends with the slides' Quick check."],
       ["lab", "Practical", "Record your measurements and work out results from them."],
       ["exam", "Exam corner", "AQA-style questions with a tip on how the marks are given."],
       ["revise", "Revise it", "Summary, cover-and-answer questions and an “I can” check to colour in."],
@@ -311,22 +322,22 @@
     const rows = U.lessons.map((l) => `<tr><td>${pad(l.n)}</td><td><strong>${l.title}</strong><br><span class="map-line">${l.mapLine}</span></td><td>${l.slides}</td></tr>`).join("");
     return `<section class="new-page" style="break-before:auto">
       <div class="eyebrow">Start here</div><h2 class="page-title">How this booklet works</h2>
-      <p class="page-intro">${ONE && ONE.n > 1 ? `This is the booklet for <strong>Lesson ${ONE.n}</strong> of the Particle Model of Matter unit. It builds on the lessons before it; the “Do now” questions and the quick answers at the back help you check what you remember.` : "Everything around you is made of tiny particles. This unit uses that one idea to explain density, melting and boiling, why some things are hard to heat up, and why a gas pushes on its container."} Keep the booklet: it is your classwork book <em>and</em> your revision guide.</p>
+      <p class="page-intro">${SEL && SEL[0].n > 1 ? `This is the booklet for <strong>${lessonWord} ${nums}</strong> of the Particle Model of Matter unit. It builds on the lessons before it; the “Do now” questions and the quick answers at the back help you check what you remember.` : "Everything around you is made of tiny particles. This unit uses that one idea to explain density, melting and boiling, why some things are hard to heat up, and why a gas pushes on its container."} Keep the booklet: it is your classwork book <em>and</em> your revision guide.</p>
       <div class="legend">${items.map(([k, name, text]) => `<div>${icon(k)}<div><b>${name}</b><p>${text}</p></div></div>`).join("")}</div>
       <div class="key">${marks(`<strong>Two kinds of question to know.</strong> When a sentence has a gap, the choices are printed straight after it, like this: The particles in a solid are [[close together|close together / far apart]]. When you see a box of choices, <strong>draw a ring around</strong> the correct one, as AQA exam papers ask. The unit of mass is {{the newton|the kilogram*|the joule}}.`)}</div>
-      <h4 class="sub">The route through the unit${ONE ? " (this lesson is highlighted)" : ""}</h4>
-      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.n === ONE.n ? `<span class="map-line">${l.mapLine} (slides ${l.slides})</span>` : ""}</span></li>`).join("")}</ol>`
+      <h4 class="sub">The route through the unit${SEL ? ` (${SEL.length > 1 ? "this booklet" : "this lesson"} highlighted)` : ""}</h4>
+      ${SEL ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${inSel(l.n) ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${inSel(l.n) ? `<span class="map-line">Slides ${l.slides}</span>` : ""}</span></li>`).join("")}</ol>`
         : `<table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Slides</th></tr></thead><tbody>${rows}</tbody></table>`}
-      <p class="page-intro" style="margin-top:3mm">The <strong>equation toolkit</strong> near the back has every equation ${ONE && LAST < U.lessons.length ? "you have met so far" : "in the unit"}, with formula triangles to help you rearrange. Teaching deck: <strong>${DECK}</strong></p>
+      <p class="page-intro" style="margin-top:3mm">The <strong>equation toolkit</strong> near the back has every equation ${SEL && LAST < U.lessons.length ? "you have met so far" : "in the unit"}, with formula triangles to help you rearrange. Teaching deck: <strong>${DECK}</strong></p>
     </section>`;
   }
 
   function glossary() {
-    const words = U.glossary.filter(([, , n]) => (ONE ? n === ONE.n : true));
+    const words = U.glossary.filter(([, , n]) => (SEL ? inSel(n) : true));
     if (!words.length) return "";
-    return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Reference</div><h2 class="page-title">Key words${ONE ? " from this lesson" : ""}</h2>
+    return `<section class="${SEL ? "tracker-flow" : "new-page"}"><div class="eyebrow">Reference</div><h2 class="page-title">Key words${SEL ? ` from this ${SEL.length > 1 ? "booklet" : "lesson"}` : ""}</h2>
       <p class="page-intro">Learn the meaning and the spelling. In exams, precise words earn marks: say “the particles vibrate about fixed positions”, not “the particles shake”.</p>
-      <div class="glossary${ONE ? " one" : ""}">${words.map(([k, v, n]) => `<p><strong>${k}</strong>${ONE ? "" : ` <span class="g-lesson">${n > U.lessons.length ? "Triple" : `L${n}`}</span>`}: ${v}</p>`).join("")}</div></section>`;
+      <div class="glossary${SEL ? " one" : ""}">${words.map(([k, v, n]) => `<p><strong>${k}</strong>${SEL && SEL.length === 1 ? "" : ` <span class="g-lesson">${n > U.lessons.length ? "Triple" : `L${n}`}</span>`}: ${v}</p>`).join("")}</div></section>`;
   }
 
   function tracker() {
@@ -339,9 +350,9 @@
 
   function quickAnswers() {
     const list = (arr) => `<ol>${arr.map(([, a]) => `<li>${a}</li>`).join("")}</ol>`;
-    return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Check yourself</div><h2 class="page-title">Quick answers</h2>
+    return `<section class="${SEL ? "tracker-flow" : "new-page"}"><div class="eyebrow">Check yourself</div><h2 class="page-title">Quick answers</h2>
       <p class="page-intro">Answers to the “Do now” and “Cover the page” questions, so you can check yourself when revising. Answers to the longer questions are in the answer edition.</p>
-      <div class="quick-answers${ONE ? " one" : ""}">${LESSONS.map((l) => `<div>${ONE ? "" : `<b>Lesson ${l.n}: ${l.title}</b>`}
+      <div class="quick-answers${SEL && SEL.length === 1 ? " one" : ""}">${LESSONS.map((l) => `<div>${SEL && SEL.length === 1 ? "" : `<b>Lesson ${l.n}: ${l.title}</b>`}
         <h4>Do now</h4>${list(l.doNow)}<h4>Cover the page</h4>${list(l.recall)}</div>`).join("")}</div></section>`;
   }
 
@@ -372,7 +383,7 @@
     const tools = EQUATIONS.map((e) => `<div class="tool${e.tri ? " has-tri" : ""}"><div class="eq">${e.eq}</div><span class="lesson-tag">${e.triple ? "Triple only" : `Lesson ${e.lesson}`}</span><div class="words">${e.words}</div><div class="units">${e.units}</div><div class="recall-cover">${e.re}</div>${e.tri ? `<div class="tool-tri">${triangleSvg(e.tri, "24mm")}</div>` : ""}</div>`).join("");
     if (!EQUATIONS.length) return "";
     return `<section class="new-page toolkit-page"><div class="eyebrow">Reference</div><h2 class="page-title">Equation toolkit</h2>
-      <p class="page-intro">Every equation ${ONE && LAST < U.lessons.length ? `from Lessons 1–${LAST}` : "in the unit"}. AQA prints all of them on the equation sheet in the exam, but you still need to know what each symbol means, its unit, and how to use it.</p>
+      <p class="page-intro">Every equation ${SEL && LAST < U.lessons.length ? `from Lessons 1–${LAST}` : "in the unit"}. AQA prints all of them on the equation sheet in the exam, but you still need to know what each symbol means, its unit, and how to use it.</p>
       <div class="tri-how"><div class="tri-steps"><p><b>1</b> Cover the quantity you want to find.</p><p><b>2</b> What is left side by side? <strong>Multiply</strong>.</p><p><b>3</b> One above the other? <strong>Divide</strong> the top by the bottom.</p></div>
       <p class="tri-note">Example: to find \\(V\\) from \\(\\rho = \\dfrac{m}{V}\\), cover \\(V\\). \\(m\\) is above \\(\\rho\\), so \\(V = \\dfrac{m}{\\rho}\\).</p></div>
       <div class="toolkit">${tools}</div>
@@ -383,12 +394,12 @@
   const book = document.createElement("main");
   book.className = "book";
   const link = (key, a) => `?${[key, a ? "answers" : ""].filter(Boolean).join("&")}`;
-  const here = ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
-  const nav = [["", "all"], ...U.lessons.map((l) => [`lesson=${l.n}`, String(l.n)]), ["review", "review"]]
+  const here = partNo ? `part=${partNo}` : ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
+  const nav = [["", "all"], ...PARTS.map((_, i) => [`part=${i + 1}`, `part ${i + 1}`]), ["lesson=4", "RP 4"], ["lesson=8", "RP 8"], ["review", "review"]]
     .map(([key, name]) => (key === here ? `<b>${name}</b>` : `<a href="${link(key, answers)}">${name}</a>`)).join(" ");
   const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
   const ext = U.extension.map(extension).join("");
-  book.innerHTML = bar + (ONE ? cover() + howTo() + lesson(ONE) + toolkit() + glossary() + quickAnswers()
+  book.innerHTML = bar + (SEL ? cover() + howTo() + LESSONS.map(lesson).join("") + toolkit() + glossary() + quickAnswers()
     : REVIEW ? cover() + toolkit() + review() + ext + glossary() + tracker()
     : cover() + howTo() + LESSONS.map(lesson).join("") + toolkit() + review() + ext + glossary() + tracker() + quickAnswers());
   document.body.appendChild(book);

@@ -1,6 +1,6 @@
 # Particle Model of Matter — Year 10 workbook, deck and Preps
 
-Eight 50-minute lessons over four weeks for AQA GCSE Physics 4.3 and Combined Science: Trilogy 6.3, with specific heat capacity and its required practical from 4.1.1.3 / 6.1.1.3 (the Year 9 Energy unit leaves them for this unit). The pack is a teaching deck, one workbook booklet per lesson, a Unit review, answer editions, a teacher guide and four Preps. There is no companion website.
+Eight 50-minute lessons over four weeks for AQA GCSE Physics 4.3 and Combined Science: Trilogy 6.3, with specific heat capacity and its required practical from 4.1.1.3 / 6.1.1.3 (the Year 9 Energy unit leaves them for this unit). The pack is a teaching deck, a workbook in five booklets (three parts and one for each required practical), a Unit review, answer editions, a teacher guide and four Preps. There is no companion website.
 
 **Address:** <https://panphy.app/gcsephy/year10phy/unit02/>
 
@@ -29,16 +29,16 @@ The Scheme of Work lists P3.1 particle model and motion in gases, P3.2 density a
 
 | Path | Use |
 |---|---|
-| `index.html` | Student page linking the nine booklets, their answer editions and the four Preps (not their answers). Its `BOOKLETS` list holds each booklet's page count: update it after a rebuild changes one |
-| `pdf/` | One booklet per lesson, the Unit review, an answer edition of each with the same page numbers, and `Particle Model of Matter - Year 10 Teacher Guide.pdf` (hosted but not linked from any page) |
-| `workbook.html` | PDF source: `?lesson=1`…`8` or `?review`, add `&answers`; with neither it previews the whole unit |
+| `index.html` | Student page linking the six booklets (in teaching order), their answer editions and the four Preps (not their answers). Its `BOOKLETS` list holds each booklet's page count: update it after a rebuild changes one |
+| `pdf/` | Part 1 (Lessons 1–2), Part 2 (Lessons 3 and 5), Part 3 (Lessons 6–7), one booklet for each required practical (Lessons 4 and 8), the Unit review, an answer edition of each with the same page numbers, and `Particle Model of Matter - Year 10 Teacher Guide.pdf` (hosted but not linked from any page) |
+| `workbook.html` | PDF source: `?part=1`…`3` (`PARTS` in `workbook.js`), `?lesson=4` or `8`, or `?review`, add `&answers`; with none it previews the whole unit. `?lesson=N` still previews any single lesson |
 | `teacher-guide.html` | Guide source (`?lesson=N` for one plan) |
 | `assets/lessons-1-4.js`, `lessons-5-8.js` | The lessons: all the words and questions |
 | `assets/reference.js` | Equation toolkit, key words, Unit review and the Triple Science only extension pages; builds `window.UNIT` |
 | `assets/plans-data.js`, `assets/plans.js` | Teacher notes for each lesson, and their renderer |
-| `assets/workbook.js`, `assets/workbook.css` | Renderer and print styles, adapted from the Year 9 Energy workbook (per-lesson booklets as in Year 11) |
+| `assets/workbook.js`, `assets/workbook.css` | Renderer and print styles, adapted from the Year 9 Energy workbook, which is also printed in parts |
 | `assets/figures.js`, `assets/figures.css` | Line drawings (`window.ParticleFigures`), shared with the Preps and the deck |
-| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome; name booklets (`3 7 review guide`) to rebuild only those |
+| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome; name booklets (`p1 p2 p3 4 8 review guide`) to rebuild only those |
 | `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. See [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 | [`../../decks/particle-model/`](../../decks/particle-model/) | 52-slide teaching deck; see [`../../decks/README.md`](../../decks/README.md) for shared styling and controls |
 
@@ -50,7 +50,7 @@ Each lesson's `slides` field (in the lesson files) and the Sequence table above 
 
 ## Rebuild
 
-Serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` here: it writes 19 PDFs to `pdf/`, one at a time. For the Preps, from the repository root run `sh gcsephy/assets/prep/build-pdfs.sh gcsephy/year10phy/unit02`. Check that each booklet and its answer edition have the same page count and that each Prep is one page.
+Serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` here: it writes 13 PDFs to `pdf/`, one at a time. For the Preps, from the repository root run `sh gcsephy/assets/prep/build-pdfs.sh gcsephy/year10phy/unit02`. Check that each booklet and its answer edition have the same page count and that each Prep is one page.
 
 ## Equation sheet
 

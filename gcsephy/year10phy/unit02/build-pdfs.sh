@@ -1,9 +1,10 @@
 #!/bin/sh
-# Rebuild the workbook PDFs (one booklet per lesson, the Unit review, their answer editions and
+# Rebuild the workbook PDFs (three part booklets for Lessons 1-3 and 5-7, one booklet for each
+# required practical, the Unit review, their answer editions and
 # the teacher guide) from workbook.html and teacher-guide.html with headless Chrome.
 # Serve the repository root first:  python3 -m http.server 8000
 # Then run from this folder:        sh build-pdfs.sh
-# To rebuild only some booklets, name them: sh build-pdfs.sh 3 7 review guide
+# To rebuild only some booklets, name them: sh build-pdfs.sh p1 4 review guide (p1-p3 are the parts)
 # MathJax is fetched from a CDN, so the build needs a network connection.
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year10phy/unit02}"
@@ -52,14 +53,15 @@ lesson() { # number, title for the file name
   booklet "$1" "$NAME Workbook - Lesson $(printf %02d "$1") - $2" "lesson=$1" "Lesson $(printf %02d "$1")"
 }
 
+part() { # number, lessons for the file name (as PARTS in assets/workbook.js)
+  booklet "p$1" "$NAME Workbook - Part $1 - $2" "part=$1" "Part $1"
+}
+
 ONLY="$*"
-lesson 1 "Solids, liquids and gases"
-lesson 2 "Gas particles and pressure"
-lesson 3 "Density"
+part 1 "Lessons 1-2"
+part 2 "Lessons 3 and 5"
+part 3 "Lessons 6-7"
 lesson 4 "Measuring density (RP)"
-lesson 5 "Internal energy and heating curves"
-lesson 6 "Specific latent heat"
-lesson 7 "Specific heat capacity"
 lesson 8 "Measuring specific heat capacity (RP)"
 booklet review "$NAME Workbook - Unit review" "review" "Unit review"
 wanted guide && pdf "$OUT/$NAME Teacher Guide.pdf" "$BASE/teacher-guide.html" "Teacher Guide"
