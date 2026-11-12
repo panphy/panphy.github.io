@@ -205,7 +205,7 @@ window.DeckSvgTex = {
     let at = 0, wall = FULL;
     fig.classList.add('pm-live', 'stack');
     fig.innerHTML = `<svg class="pf" viewBox="0 0 400 110" role="img" aria-label="Gas particles trapped in a syringe by a piston"><rect class="ink paper" x="12" y="20" width="${FULL + 20}" height="${H}" rx="3"/><g transform="translate(12 20)" data-gas></g>` +
-      `<g data-piston><rect class="ink mid" x="12" y="22" width="14" height="${H - 4}"/><path class="ink bold" d="M26 55 H100"/><path class="ink bold" d="M100 36 V74"/></g></svg>` +
+      `<g data-piston><rect class="ink mid" x="12" y="22" width="14" height="${H - 4}"/><path class="ink bold" d="M28.5 55 H100"/><path class="ink bold" d="M100 36 V74"/></g></svg>` +
       `<div class="pm-side">${readout([['v', 'Volume'], ['p', 'Pressure'], ['pv', 'Pressure × volume']])}${controls('Move the piston', [['up', 'Squeeze'], ['down', 'Release']])}<p class="pm-note">Squeezed slowly: the temperature stays the same, so the particles keep the same average speed.</p></div>`;
     const m = gasModel(16, FULL, H, r, 110, 41);
     const els = circles(fig.querySelector('[data-gas]'), m.ps.length, r, 'gas');
