@@ -108,6 +108,12 @@
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 22px 24px; align-content: start; }
 
     .unit { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+    /* About note: plain text in a ruled box, no card colours. */
+    .about-note { max-width: 46rem; padding: 22px 24px; border: 2px solid var(--ink); border-radius: 4px; background: var(--paper); }
+    .about-note h3 { margin: 0 0 10px; font: 900 1.15rem/1.2 var(--display); letter-spacing: -.01em; }
+    .about-note p { margin: 0 0 12px; line-height: 1.6; }
+    .about-note p:last-child { margin-bottom: 0; }
     .unit .card { flex: 1; }
     .workbook-link {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -344,6 +350,18 @@
           </a>
           <a class="workbook-link" href="year11phy/unit01/" aria-label="Atoms and Nuclear Radiation Unit Workbook">Unit Workbook <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
+      </div>
+    </section>
+
+    <section class="band" id="about" aria-labelledby="about-title">
+      <div class="rail">
+        <p>About this hub</p>
+        <h2 class="word" id="about-title" aria-label="About this hub">Note</h2>
+      </div>
+      <div class="about-note">
+        <h3>Written for one school</h3>
+        <p>This GCSE hub is designed for my own school&rsquo;s physics curriculum, from Year 9 to Year 11. It follows the AQA specifications, but the units, their order and the resources are planned around our classes.</p>
+        <p>The Year 9 materials in particular are adapted for our Year 9 students: the language and the maths are pitched to suit them, so some wording and calculations are simpler than you would expect in a standard GCSE resource.</p>
       </div>
     </section>
 
