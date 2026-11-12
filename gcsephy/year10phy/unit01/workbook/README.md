@@ -1,6 +1,6 @@
 # Electric Circuits — Year 10 workbook and teacher guide
 
-Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCSE Physics, sections 6.2.1–6.2.4 / 4.2.1–4.2.4, for students with no prior knowledge of electricity. The booklets are self-contained and do not refer to the unit website ([`../`](../)); students reach [`index.html`](index.html) here from the GCSE landing page or the unit home's Resources section.
+Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCSE Physics, sections 6.2.1–6.2.4 / 4.2.1–4.2.4, for students with no prior knowledge of electricity. The booklets are self-contained; students reach [`index.html`](index.html) here from the GCSE landing page.
 
 The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all five workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
 
@@ -9,16 +9,16 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all five work
 | File | Use |
 |---|---|
 | `pdf/` | 12 lesson booklets (9–13 pages), a 14-page Unit review, an answer edition of each with the same page numbers, and `Electric Circuits - Year 10 Teacher Guide.pdf` (hosted but not linked from any page) |
-| `index.html` | Student page linking the thirteen booklets, the booklets' answer editions and the six Preps (`../prep/`, not their answers); it does not link the unit website |
+| `index.html` | Student page linking the thirteen booklets, the booklets' answer editions and the six Preps (`../prep/`, not their answers) |
 | `workbook.html` | PDF source: `?lesson=1`…`12` or `?review`, add `&answers`; `?labs` is the virtual labs booklet |
 | `teacher-guide.html` | Guide source (`?lesson=N` for one plan) |
 | `assets/content.js`, `assets/plans-data.js` | All workbook content; teacher notes per lesson |
 | `assets/labs-content.js` | Virtual labs booklet: three labs and their answer key, printed at the back |
 | `assets/workbook.js`, `assets/plans.js` | Renderers |
-| `assets/workbook.css`, `assets/diagrams-print.css` | Print styles; the latter copies the site's diagram styles, so keep it in step with `../assets/styles.css` |
+| `assets/workbook.css`, `assets/diagrams-print.css` | Print styles; the latter holds the diagram styles for `../assets/diagrams.js` |
 | `build-pdfs.sh` | Rebuilds all PDFs with headless Chrome; name booklets (`3 7 review labs guide`) to rebuild only those |
 
-Diagrams use the site's `../assets/diagrams.js`. Each booklet is self-contained: cover, how-to page, lesson, toolkit so far, key words and quick answers. The Unit review adds static electricity (Triple Science only), the full toolkit, all key words and a progress tracker. Every page after the cover prints 1.2× larger (12 pt body text, 1.45 line spacing, ~9.6 mm writing lines) for students with additional learning needs; graph paper is scaled back to keep 2 mm and 1 cm squares, and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Check body text is still 12 pt after changing a layout.
+Diagrams use `../assets/diagrams.js`. Each booklet is self-contained: cover, how-to page, lesson, toolkit so far, key words and quick answers. The Unit review adds static electricity (Triple Science only), the full toolkit, all key words and a progress tracker. Every page after the cover prints 1.2× larger (12 pt body text, 1.45 line spacing, ~9.6 mm writing lines) for students with additional learning needs; graph paper is scaled back to keep 2 mm and 1 cm squares, and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Check body text is still 12 pt after changing a layout.
 
 ## Sequence
 

@@ -1,7 +1,7 @@
 @import url('/gcsephy/assets/fonts/archivo-black.css');
 
-/* Slide decks that match the unit companion sites (year9phy/unit01 and
-   year10phy/unit01): navy and paper, Arial Black headings, 2px ink borders
+/* The Year 9 and Year 10 companion-style decks (Work Like a Physicist and
+   Electric Circuits, and the later Year 9 and 10 decks): navy and paper, Arial Black headings, 2px ink borders
    and hard offset shadows in the mission colours. The Year 9 palette is the
    default; <html class="deck-y10"> switches to the Year 10 electric palette. */
 :root {
@@ -293,7 +293,7 @@ ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; 
 .row.three { grid-template-columns: repeat(3, 1fr); }
 .row.four { grid-template-columns: repeat(4, 1fr); }
 
-/* Figure frame, as .circuit-figure on the companion sites */
+/* Figure frame */
 .panel {
   position: relative;
   display: flex;
@@ -373,7 +373,7 @@ ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; 
 .mistake .right { font-weight: 700; }
 .mistake .right::before { content: "Say this"; color: var(--right); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 8.5l3.5 3.5 7.5-8' fill='none' stroke='%2315803d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
-/* Tables, as .data-table on the companion sites */
+/* Tables */
 table.data { width: 100%; border-collapse: collapse; background: #fff; font-size: 29px; }
 .data caption { padding: 10px 16px; border: 2px solid var(--ink); border-bottom: 0; background: var(--accent); font-weight: 900; text-align: left; font-size: 24px; }
 .data th, .data td { padding: 11px 14px; border: 2px solid var(--ink); text-align: center; }

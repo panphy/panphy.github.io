@@ -1,7 +1,7 @@
 @import url('/gcsephy/assets/fonts/archivo-black.css');
 
 /* A4 print styles for the Electric Circuits student workbook and teacher guide.
-   The look follows the companion site (navy, spark yellow, cyan, copper; Arial Black
+   The look follows the teaching deck (navy, spark yellow, cyan, copper; Arial Black
    display type; ink outlines) but stays readable when photocopied in greyscale. */
 @page {
   size: A4;
