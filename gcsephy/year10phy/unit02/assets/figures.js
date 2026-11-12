@@ -199,9 +199,10 @@
   }
 
   // Latent heat of fusion: heater in a funnel of ice, with a control funnel beside it.
+  // The ice cubes are placed row by row inside the sloping sides of the funnel.
   function iceFunnels() {
     const funnel = (x, heater) => `<path class="ink ice" d="M${x} 50 H${x + 90} L${x + 53} 108 V126 H${x + 37} V108 Z"/>` +
-      [[18, 62], [40, 60], [62, 63], [30, 78], [54, 80], [42, 96]].map(([a, c]) => `<rect class="ink thin paper" x="${x + a}" y="${c}" width="13" height="11" rx="2"/>`).join("") +
+      [[16, 54], [38.5, 53], [61, 54], [25, 70], [52, 70], [38.5, 86]].map(([a, c]) => `<rect class="ink thin paper" x="${x + a}" y="${c}" width="13" height="11" rx="2"/>`).join("") +
       (heater ? `<rect class="ink heater" x="${x + 39}" y="26" width="12" height="62" rx="3"/><path class="ink thin" d="M${x + 42} 26 V10 M${x + 48} 26 V10"/>` : "") +
       `<path class="drop" d="M${x + 45} 132 q4 8 0 11 q-4 -3 0 -11 Z"/><path class="water" d="M${x + 23} ${heater ? 158 : 172} H${x + 67} V180 H${x + 23} Z"/><path class="ink" d="M${x + 23} 146 V180 H${x + 67} V146"/>` +
       balance(x - 1, 184, heater ? "42.0 g" : "6.0 g") + t(x + 45, 228, heater ? "heater on" : "control: no heater", "sm");
@@ -214,7 +215,7 @@
     const one = (y, v, p, big) => {
       const x0 = 40, len = big;
       return `<rect class="ink paper" x="${x0}" y="${y}" width="230" height="34" rx="3"/>` + gasPos(len - 6, 30, 3.4, 9, 31 + big, 2.6).map(([a, c]) => dot(x0 + 3 + a, y + 2 + c, 3.4, "gas")).join("") +
-        `<rect class="ink mid" x="${x0 + len}" y="${y + 2}" width="10" height="30"/><path class="ink bold" d="M${x0 + len + 10} ${y + 17} H${x0 + 250}"/><path class="ink bold" d="M${x0 + 250} ${y + 6} V${y + 28}"/>` +
+        `<rect class="ink mid" x="${x0 + len}" y="${y + 2}" width="10" height="30"/><path class="ink bold" d="M${x0 + len + 12.5} ${y + 17} H${x0 + 250}"/><path class="ink bold" d="M${x0 + 250} ${y + 6} V${y + 28}"/>` +
         t(304, y + 14, v, "b", "start") + t(304, y + 30, p, "b", "start");
     };
     return svg(420, 150, one(8, "V = 60 cm³", "p = 100 kPa", 180) + one(56, "V = 30 cm³", "p = 200 kPa", 90) + one(104, "V = 20 cm³", "p = 300 kPa", 60),
@@ -233,7 +234,7 @@
   // Triple only: a bicycle pump with a blocked outlet.
   function pump() {
     const b = `<rect class="ink paper" x="60" y="52" width="210" height="46" rx="4"/>` + gasPos(96, 40, 4, 10, 17).map(([a, c]) => dot(64 + a, 55 + c, 4, "gas")).join("") +
-      `<rect class="ink mid" x="164" y="55" width="12" height="40"/><path class="ink bold" d="M176 75 H330"/><path class="ink bold" d="M330 56 V94"/>` +
+      `<rect class="ink mid" x="164" y="55" width="12" height="40"/><path class="ink bold" d="M178.5 75 H330"/><path class="ink bold" d="M330 56 V94"/>` +
       `<path class="ink solid" d="M52 68 h8 v14 h-8 Z"/>` + arrow(318, 30, 262, 30, "s-force", 7) + t(290, 20, "force", "b") + t(110, 44, "trapped air", "sm") + t(48, 112, "outlet blocked", "sm", "start") + t(250, 118, "work is done on the gas", "b");
     return svg(350, 128, b, "A bicycle pump with its outlet blocked: a force pushes the piston in and squashes the trapped air");
   }
