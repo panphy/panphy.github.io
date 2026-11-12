@@ -111,8 +111,8 @@
         { t: "p", h: "The temperature is constant, so the molecules move at the same average speed. In a <strong>smaller</strong> volume they are closer together, so they hit each square centimetre of wall <strong>more often</strong>: the pressure is bigger. In a <strong>bigger</strong> volume the molecules are more spread out and hit the walls less often: the pressure is smaller." },
         { t: "eq", eq: R`\(p\,V = \text{constant}\)`, words: "pressure × volume = constant", units: R`\(p\) in Pa, \(V\) in m³. For a fixed mass of gas at constant temperature.`, re: R`Use it as \(p_1\,V_1 = p_2\,V_2\): before and after. Any units will do if they are the same on both sides.` },
         { t: "split", cls: "narrow-fig", left: [{ t: "p", h: "Halve the volume and the pressure doubles. Three times the volume gives a third of the pressure. Pressure is <strong>inversely proportional</strong> to volume, so a graph of pressure against volume is a curve." }], right: [{ t: "fig", h: F.pvGraph() }] },
-        { t: "worked", q: "A gas has a volume of 60 cm³ at a pressure of 100 kPa. It is squashed to 20 cm³ at constant temperature. Calculate the new pressure.", steps: [["Know", R`\(p_1 = 100\) kPa, \(V_1 = 60\) cm³, \(V_2 = 20\) cm³`], ["Equation", R`\(p_1\,V_1 = p_2\,V_2\)`], ["Rearrange", R`\(p_2 = \dfrac{p_1\,V_1}{V_2}\)`], ["Substitute", R`\(p_2 = \dfrac{100 \times 60}{20}\)`], ["Answer", R`\(p_2 = 300\) kPa`]],
-          yt: { q: "A gas has a volume of 0.50 m³ at a pressure of 200 kPa. It expands to 2.0 m³ at constant temperature. Calculate the new pressure.", steps: [["Know", R`\(p_1 = 200\) kPa, \(V_1 = 0.50\) m³, \(V_2 = 2.0\) m³`], ["Equation", R`\(p_1\,V_1 = p_2\,V_2\)`], ["Rearrange", R`\(p_2 = \dfrac{p_1\,V_1}{V_2}\)`], ["Substitute", R`\(p_2 = \dfrac{200 \times 0.50}{2.0}\)`], ["Answer", R`\(p_2 = 50\) kPa`]] } },
+        { t: "follow", slide: 49, q: "A gas has a volume of 60 cm³ at a pressure of 100 kPa. It is squashed to 20 cm³ at constant temperature. Calculate the new pressure.", steps: [["Equation", R`\(p_1\,V_1 = p_2\,V_2\)`], ["Rearrange", R`\(p_2 = \dfrac{p_1\,V_1}{V_2}\)`], ["Substitute", R`\(p_2 = \dfrac{100 \times 60}{20}\)`], ["Answer", R`\(p_2 = 300\) kPa`]],
+          yt: { q: "A gas has a volume of 40 cm³ at a pressure of 120 kPa. It expands to 80 cm³ at constant temperature. Calculate the new pressure.", steps: [["Equation", R`\(p_1\,V_1 = p_2\,V_2\)`], ["Rearrange", R`\(p_2 = \dfrac{p_1\,V_1}{V_2}\)`], ["Substitute", R`\(p_2 = \dfrac{120 \times 40}{80}\)`], ["Answer", R`\(p_2 = 60\) kPa`]] } },
       ],
       questions: [
         { p: "Draw a ring around the correct answer in each box.", ring: [
@@ -138,6 +138,14 @@
         { p: "Complete the sentences.", fill: ["Work is the transfer of [[energy|energy / force / pressure]] by a [[force|force / current / temperature]].", "When work is done on a gas, its internal energy [[increases|increases / decreases / stays the same]]."] },
         { p: "A cyclist pumps up a tyre. Explain why the end of the pump becomes warm.", marks: 3, lines: 4, a: "The cyclist does work on the air in the pump (a force compresses it) (1). This transfers energy to the air, increasing its internal energy (1), so the temperature of the air (and then the pump) increases (1)." },
       ],
+      quick: { slide: 52, covers: "Triple Science pressure and volume", items: [
+        ["In which direction does the force of a gas on a wall act?", "At right angles to the wall."],
+        ["The volume of a gas is doubled at constant temperature. What happens to its pressure?", "It halves."],
+        ["A gas at 200 kPa and 0.50 m³ expands to 2.0 m³ at constant temperature. Calculate the new pressure.", String.raw`\(p_2 = \dfrac{200 \times 0.50}{2.0} = 50\) kPa`],
+        [String.raw`Name the two conditions needed for \(p\,V = \text{constant}\).`, "A fixed mass of gas at a constant temperature."],
+        ["What is work?", "The transfer of energy by a force."],
+        ["Work is done on a gas. What happens to its internal energy?", "It increases, so the gas can get hotter."],
+      ] },
     },
   ];
 

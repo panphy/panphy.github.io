@@ -37,15 +37,15 @@
     // [number, title, pages, what it covers]; the PDFs are built by build-pdfs.sh.
     const BOOKLETS = [
       [1, 'Solids, liquids and gases', 10, 'Particle diagrams, how particles are arranged and move, changes of state, mass is conserved'],
-      [2, 'Gas particles and pressure', 8, 'Random motion, temperature and kinetic energy, why heating a sealed gas raises its pressure'],
-      [3, 'Density', 10, 'Density = mass ÷ volume, units, explaining density with particles'],
-      [4, 'Measuring density (RP)', 10, 'Required practical: regular solids, irregular solids by displacement, liquids'],
+      [2, 'Gas particles and pressure', 10, 'Random motion, temperature and kinetic energy, why heating a sealed gas raises its pressure'],
+      [3, 'Density', 11, 'Density = mass ÷ volume, units, explaining density with particles'],
+      [4, 'Measuring density (RP)', 12, 'Required practical: regular solids, irregular solids by displacement, liquids'],
       [5, 'Internal energy and heating curves', 11, 'Kinetic and potential energy of particles, heating and cooling graphs, a cooling curve practical'],
-      [6, 'Specific latent heat', 11, 'Energy for a change of state, E = m L, fusion and vaporisation, melting ice'],
+      [6, 'Specific latent heat', 12, 'Energy for a change of state, E = m L, fusion and vaporisation, melting ice'],
       [7, 'Specific heat capacity', 11, 'What a temperature rise depends on, ΔE = m c Δθ, heat capacity or latent heat?'],
-      [8, 'Measuring specific heat capacity (RP)', 11, 'Required practical: heating a metal block, E = V I t or a joulemeter, the graph method'],
+      [8, 'Measuring specific heat capacity (RP)', 12, 'Required practical: heating a metal block, E = V I t or a joulemeter, the graph method'],
     ];
-    const REVIEW_PAGES = 14;
+    const REVIEW_PAGES = 15;
     const base = 'pdf/' + encodeURIComponent('Particle Model of Matter - Year 10 Workbook - ');
     const file = (name, answers) => `${base}${encodeURIComponent(name + (answers ? ' (Answers)' : ''))}.pdf`;
     const card = (label, title, text, name, review) => `<article class="card${review ? ' review' : ''}"><strong><a href="${file(name)}">${title}</a></strong><span class="meta">${label}</span><span>${text}</span>
