@@ -164,6 +164,10 @@ Students write a short evaluation of their investigation, including:
 3. One possible random error.
 4. One improvement they would make next time.
 
+## Using the workbook
+
+The Quick check (slide 49) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 This lesson can be used as a light-touch assessment of the whole unit. Students who are less confident may need a scaffolded results table, while more confident students can design their own table and choose their own wing lengths.

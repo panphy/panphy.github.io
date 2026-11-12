@@ -145,6 +145,10 @@ Then ask them to add:
 
 Students are given a results table from a similar categoric investigation and must draw a bar chart.
 
+## Using the workbook
+
+The Quick check (slide 27) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 The aim is not perfect data. The aim is for students to experience repeated readings, variation between trials, averages, and the logic of using a bar chart for categoric data.

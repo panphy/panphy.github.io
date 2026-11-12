@@ -75,7 +75,7 @@
           { t: "checks", title: "Check your bar chart", head: ["✓"], items: ["Title says what against what", "Material on the x-axis", "y-axis labelled with the unit, starting at 0", "Scale goes up in equal steps and uses most of the space", "Bars all the same width, with equal gaps", "Bar heights match the means, not trial 1"] },
         ] },
       ] },
-      flow: ["doNow", "learn", "lab", "lab2", "try", "exam", "revise"],
+      flow: ["doNow", "learn", "lab", "lab2", "try", "check", "exam", "revise"],
       tryTitle: "What the data says",
       try: [
         { t: "q", p: "Which material was the best shock absorber? Quote numbers from your results to back it up.", lines: 2, a: "Sample: sponge, with the lowest mean bounce, 13 cm, compared with 38 cm for the rubber mat." },
@@ -92,8 +92,9 @@
         { p: "Which surface absorbs the most energy from the ball? Give a reason.", marks: 2, lines: 2, a: "Carpet (1); it has the lowest mean bounce height (1)." },
         { p: "The student judged the bounce height by eye. Suggest <strong>one</strong> improvement to the method.", marks: 1, lines: 1, a: "Film the bounce against the ruler and read the height from the paused video (1)." },
       ],
+      quick: { slide: 27, items: [["16 cm, 21 cm, 17 cm. Calculate the mean.", "54 ÷ 3 = 18 cm"], ["A: mean 12 cm; B: mean 38 cm. Which is the better shock absorber?", "A: it has the lower bounce."], ["Why is a bar chart used here?", "The material is categoric."], ["Name two control variables.", "The drop height and the same ball (or how it is released, the same ruler)."], ["What does each bar show?", "The mean, not trial 1."], ["Give one random error in this test.", "Judging the top of the bounce by eye."]] },
       summary: ["A categoric independent variable (material) → bar chart.", "Three trials for each value; mean = total ÷ number of trials.", "Units go in the table headings: “Trial 1 / cm”.", "Bar chart: equal bars, equal gaps, y-axis from 0, bar = the mean.", "Name the error and match the fix; never just “human error”."],
-      recall: [["16 cm, 21 cm, 17 cm. What is the mean?", "54 ÷ 3 = 18 cm"], ["Does the best shock absorber give the highest or lowest bounce?", "The lowest."], ["Why is the drop test shown on a bar chart?", "Material is categoric."], ["What does the height of each bar show?", "The mean, not one trial."]],
+      recall: [["14 cm, 19 cm, 15 cm. What is the mean?", "48 ÷ 3 = 16 cm"], ["Does the best shock absorber give the highest or lowest bounce?", "The lowest."], ["Why is the drop test shown on a bar chart?", "Material is categoric."], ["What does the height of each bar show?", "The mean, not one trial."]],
       cando: ["calculate a mean from three trials", "draw a results table with units in the headings", "draw a bar chart a marker would accept", "name a random and a systematic error and how to reduce each"],
     },
 
@@ -107,7 +108,7 @@
       keywords: ["continuous", "line graph", "scale", "axis", "plot"],
       story: { title: "Nobody guesses a stunt jump", text: "A stunt team does not find the right speed by trying the real jump. They run the car at several speeds, measure where it lands each time and plot the results. A line through the points gives the speed for a distance nobody has tested. One measurement on its own is not a pattern.", punch: "Five points and a line tell you about the gaps in between." },
       doNow: [
-        ["Calculate the mean of 51 cm, 53 cm and 58 cm.", "162 ÷ 3 = 54 cm"],
+        ["Calculate the mean of 47 cm, 52 cm and 54 cm.", "153 ÷ 3 = 51 cm"],
         ["Material is [[categoric|continuous / categoric]], so the drop test needs a bar chart.", "categoric"],
         ["Each bar in a bar chart shows [[the mean|trial 1 / the mean / the largest reading]].", "the mean"],
       ],
@@ -119,8 +120,8 @@
         { t: "key", h: "<strong>Why five heights?</strong> Two points can always be joined by a straight line, so two tell you nothing about the shape of the pattern. Five evenly spaced heights, 5 cm to 25 cm, show whether it is straight or curved. The <strong>range</strong> of ramp heights is from 5 cm to 25 cm." },
         { t: "sub", h: "Choose the scale first" },
         { t: "steps", items: ["Find the largest value that has to fit on the axis.", "Count the big squares along that axis.", "Divide, then round <strong>up</strong> to 1, 2, 5, 10, 20 or 50 per big square.", "Check that the largest value still fits."] },
-        { t: "worked", q: "Largest mean: 80 cm. There are 9 big squares up the y-axis.", steps: [["Divide", "80 ÷ 9 ≈ 8.9 cm per big square"], ["Round up", "10 cm per big square"], ["Check", "9 × 10 = 90 cm, more than 80 cm ✓"]],
-          yt: { q: "Largest value: 45 cm. There are 10 big squares along the axis.", steps: [["Divide", "45 ÷ 10 = 4.5 cm per big square"], ["Round up", "5 cm per big square"], ["Check", "10 × 5 = 50 cm, more than 45 cm ✓"]] } },
+        { t: "follow", slide: 32, q: "Largest mean: 80 cm. There are 9 big squares up the y-axis. Choose the scale.", steps: [["Divide", "80 ÷ 9 ≈ 8.9 cm per big square"], ["Round up", "10 cm per big square"], ["Check", "9 × 10 = 90 cm, more than 80 cm ✓"]],
+          yt: { q: "Largest value: 35 s. There are 8 big squares along the axis. Choose the scale.", steps: [["Divide", "35 ÷ 8 ≈ 4.4 s per big square"], ["Round up", "5 s per big square"], ["Check", "8 × 5 = 40 s, more than 35 s ✓"]] } },
         { t: "fig", h: F.scales() },
         { t: "key", h: "<strong>Why 1, 2, 5 or 10?</strong> A big square is ten small squares. If a big square is worth 10, each small square is worth 1; if it is worth 5, each is 0.5. If a big square is worth 3, each small square is 0.3, and plotting 7 means counting 23⅓ small squares. Fill the grid: on a bigger graph, a small slip of the pencil is a smaller error." },
         { t: "sub", h: "Plot precisely" },
@@ -150,7 +151,7 @@
           { t: "q", p: "One thing my partner's graph does better than mine:", lines: 1, a: "Open, e.g. “their scale fills the whole grid”." },
         ] },
       ] },
-      flow: ["doNow", "learn", "lab", "lab2", "try", "exam", "revise"],
+      flow: ["doNow", "learn", "lab", "lab2", "try", "check", "exam", "revise"],
       tryTitle: "Scales and axes",
       try: [
         { t: "q", p: "Draw a ring around the correct answer in each row.", ring: [
@@ -174,8 +175,9 @@
         { p: "Explain why the temperature is plotted on the x-axis.", marks: 1, lines: 1, a: "It is the independent variable (the one the student changes) (1)." },
         { p: "Why is a line graph the right choice for these results?", marks: 1, lines: 1, a: "Temperature is continuous (1)." },
       ],
+      quick: { slide: 34, items: [["What goes on the x-axis?", "Ramp height / cm"], ["What goes on the y-axis?", "Mean distance / cm"], ["51 cm, 53 cm, 58 cm. Calculate the mean.", "162 ÷ 3 = 54 cm"], ["Why is a line graph used?", "Ramp height is continuous."], ["The largest value is 45, with 10 big squares. What is the step?", "4.5 → round up to 5 per square."], ["The trolley turns sideways. What type of error?", "Random; use a marked lane."]] },
       summary: ["Continuous independent variable (ramp height) → line graph.", "Five values, evenly spaced, show the shape of a pattern.", "Scale: largest value ÷ big squares, rounded up to 1, 2, 5, 10, 20 or 50.", "Independent on the x-axis, dependent on the y-axis, units on both.", "Plot the means as small crosses; no dot-to-dot."],
-      recall: [["What goes on the x-axis?", "The independent variable (ramp height / cm)."], ["Largest value 45 cm, 10 big squares. Value of each square?", "4.5 → round up to 5 cm."], ["Why plot crosses, not blobs?", "The centre of a cross is an exact point."], ["The trolley veers sideways on some runs. What kind of error?", "Random; use a marked lane."]],
+      recall: [["What goes on the x-axis?", "The independent variable (ramp height / cm)."], ["Largest value 70 cm, 8 big squares. Value of each square?", "8.75 → round up to 10 cm."], ["Why plot crosses, not blobs?", "The centre of a cross is an exact point."], ["The trolley veers sideways on some runs. What kind of error?", "Random; use a marked lane."]],
       cando: ["choose a scale that fills the grid", "label axes with quantity and unit", "plot means accurately as small crosses", "explain why ramp height needs a line graph"],
     },
 
@@ -252,7 +254,7 @@
           { t: "vars", rows: [["Reviewed by", ""], ["Strongest thing about this graph", ""], ["One specific improvement", "", "e.g. “your x-axis goes up in 3s: use 5s”"]] },
         ] },
       ] },
-      flow: ["doNow", "learn", "try", "lab", "exam", "home", "revise"],
+      flow: ["doNow", "learn", "try", "lab", "check", "exam", "home", "revise"],
       exam: [
         { tip: "A best-fit line shows the trend; it does not have to pass through any point.", p: "A student's best-fit line passes through none of the plotted points. A friend says the line must be wrong. Is the friend right? Explain.", marks: 2, lines: 2, a: "No: a best-fit line shows the overall trend (1); the points should be balanced on either side, and it need not touch any of them (1)." },
         { p: "Give <strong>two</strong> reasons why an anomalous result should not simply be deleted.", marks: 2, lines: 2, a: "It might be a real effect (1); it should be checked and repeated first / deleting inconvenient data is dishonest (1)." },
@@ -260,6 +262,7 @@
       home: { title: "Take it home", blocks: [{ t: "q", p: "Find a graph outside school: a news site, a sports app or an advert. Run it through the graph checklist on the last page.", after: [
         { t: "vars", cls: "tall", rows: [["Where it came from, and what it shows", ""], ["Two things it does well", ""], ["One thing that would lose marks in Year 9", "", "e.g. no units; a y-axis that does not start at zero; uneven scale"]] },
       ] }] },
+      quick: { slide: 42, items: [["What is a best-fit line?", "One smooth line showing the overall trend of the data."], ["Why should you not join the dots?", "It claims every reading is exact."], ["What is an anomalous result?", "A result that does not fit the pattern."], ["What is the first step with an anomalous result?", "Check the recording and plotting, then repeat it."], ["Must a best-fit line touch the points?", "No: balance the points above and below it."], ["What makes a conclusion strong?", "It describes the relationship between the variables, with values and units."]] },
       summary: ["A best-fit line shows the trend: one smooth line, straight or curved, points balanced either side.", "Dot-to-dot claims every reading is exact: never use it for measured data.", "Anomalous result: check, repeat, then correct it or keep and circle it. Never silently delete.", "A conclusion names both variables, the direction, and quotes values with units."],
       recall: [["What is a best-fit line?", "One smooth line showing the overall trend of the data."], ["Why avoid dot-to-dot?", "It claims every reading is exact."], ["What is an anomalous result?", "A result that does not fit the pattern."], ["What is the first step with an anomalous result?", "Check the recording and plotting, then repeat it."]],
       cando: ["draw a best-fit line, straight or curved", "spot an anomalous result and say what to do about it", "write a conclusion with numbers as evidence"],

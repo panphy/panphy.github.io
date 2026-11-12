@@ -14,7 +14,7 @@ window.LESSONS = [
     revision: {
       workbookPart: 1,
       pageStart: 3,
-      pageRange: "3–13",
+      pageRange: "3–14",
       summary:
         "Measurements are evidence only when you can explain their spread, their limits and the errors that may have shifted them.",
       sections: [
@@ -129,8 +129,8 @@ window.LESSONS = [
     keyRule: "Continuous independent variable → line graph. Categoric independent variable → bar chart.",
     revision: {
       workbookPart: 1,
-      pageStart: 14,
-      pageRange: "14–21",
+      pageStart: 15,
+      pageRange: "15–23",
       summary:
         "A fair investigation changes one thing, measures one thing and keeps every other important factor as constant as possible.",
       sections: [
@@ -242,7 +242,7 @@ window.LESSONS = [
     revision: {
       workbookPart: 2,
       pageStart: 3,
-      pageRange: "3–11",
+      pageRange: "3–12",
       summary:
         "The drop test turns a categoric comparison into trustworthy evidence by controlling the drop, repeating each material and plotting the mean.",
       sections: [
@@ -354,8 +354,8 @@ window.LESSONS = [
     keyRule: "Independent variable on x. Dependent variable on y. Units on both.",
     revision: {
       workbookPart: 2,
-      pageStart: 12,
-      pageRange: "12–20",
+      pageStart: 13,
+      pageRange: "13–22",
       summary:
         "A line graph makes a pattern visible when the independent variable is continuous, but only if the table, scale and plotting are accurate.",
       sections: [
@@ -468,8 +468,8 @@ window.LESSONS = [
     keyRule: "Check or repeat an anomalous result before deciding what to do with it.",
     revision: {
       workbookPart: 2,
-      pageStart: 21,
-      pageRange: "21–29",
+      pageStart: 23,
+      pageRange: "23–32",
       summary:
         "Experimental data is rarely perfect. A best-fit line shows the overall pattern, while an honest scientist investigates points that do not fit.",
       sections: [

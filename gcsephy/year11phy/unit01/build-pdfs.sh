@@ -2,7 +2,7 @@
 # Rebuild the workbook PDFs from workbook.html with headless Chrome.
 # Serve the repository root first:  python3 -m http.server 8000
 # Then run from this folder:        sh build-pdfs.sh
-# To rebuild only some booklets, name them: sh build-pdfs.sh 3 7 review
+# To rebuild only some booklets, name them: sh build-pdfs.sh p1 p3 review (p1-p4 are the four parts)
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year11phy/unit01}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
@@ -47,19 +47,13 @@ booklet() { # key (lesson number or "review"), file name, query, expected title 
   pdf "$OUT/$2 (Answers).pdf" "$BASE/workbook.html?$3&answers" "$4.*Answers"
 }
 
-lesson() { # number, title for the file name
-  booklet "$1" "Atoms and Nuclear Radiation - Year 11 Workbook - Lesson $(printf %02d "$1") - $2" "lesson=$1" "Lesson $(printf %02d "$1")"
+part() { # number, lessons for the file name (as PARTS in assets/workbook.js)
+  booklet "p$1" "Atoms and Nuclear Radiation - Year 11 Workbook - Part $1 - $2" "part=$1" "Part $1"
 }
 
 ONLY="$*"
-lesson 1 "Inside the atom"
-lesson 2 "Isotopes and ions"
-lesson 3 "From plum pudding to the nucleus"
-lesson 4 "Energy levels and the nucleus"
-lesson 5 "Radioactive decay"
-lesson 6 "Nuclear equations"
-lesson 7 "Properties and uses of radiation"
-lesson 8 "Half-life and random decay"
-lesson 9 "Half-life calculations"
-lesson 10 "Contamination and irradiation"
+part 1 "Lessons 1-2"
+part 2 "Lessons 3-4"
+part 3 "Lessons 5-7"
+part 4 "Lessons 8-10"
 booklet review "Atoms and Nuclear Radiation - Year 11 Workbook - Unit review" "review" "Unit review"

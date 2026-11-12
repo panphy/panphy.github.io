@@ -131,6 +131,7 @@ strong, b { font-weight: 800; }
 .sec.try { --c: var(--positive); }
 .sec.lab { --c: var(--object); }
 .sec.exam { --c: var(--photon); }
+.sec.check { --c: var(--electron); }
 .sec.revise { --c: var(--teal-s); }
 .sub { margin: 4mm 0 2mm; font: 700 10.4pt/1.25 var(--font-body); break-after: avoid; }
 .sub::before { content: ""; display: inline-block; width: 2.6mm; height: 2.6mm; margin-right: 2mm; border-radius: 50%; background: var(--accent); vertical-align: .15mm; }
@@ -186,7 +187,11 @@ strong, b { font-weight: 800; }
 .step > span:last-child { padding-bottom: .8mm; }
 .step:last-child { border-bottom: 0; }
 .step.final > span:last-child { font-weight: 800; }
-.worked .yt .step > span:last-child { color: var(--ans); font-weight: 700; }
+.worked .yt .step > span:last-child, .worked .with .step > span:last-child { color: var(--ans); font-weight: 700; }
+/* slide examples to fill in: taller rows to write on, and the slide number */
+.worked.solo { grid-template-columns: minmax(0, 1fr); }
+.follow .step { grid-template-columns: 21mm minmax(0, 1fr); min-height: 9.5mm; }
+.slide-tag { display: inline-block; margin-left: 2mm; padding: .2mm 1.6mm; border: 1.2px solid var(--ink); border-radius: 1.5mm; background: var(--accent-t); color: var(--ink); font: 600 7pt/1.5 var(--font-mono); letter-spacing: .06em; vertical-align: .2mm; }
 .worked .data { margin: 0 0 1.5mm; }
 .worked .data th, .worked .data td { height: 6.2mm; padding: .8mm 2mm; }
 .worked .data td { white-space: nowrap; }

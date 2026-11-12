@@ -42,6 +42,7 @@
     try: '<path d="M4 20l4-1L19 8l-3-3L5 16l-1 4ZM14 7l3 3"/>',
     lab: '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4A1.5 1.5 0 0 0 19 19l-5-10V3M7.5 15h9"/>',
     exam: '<path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.8Z"/>',
+    check: '<path d="M4 12.5l5 5L20 6.5"/>',
     revise: '<path d="M20 11a8 8 0 0 0-14.3-4.9M4 5v4h4M4 13a8 8 0 0 0 14.3 4.9M20 19v-4h-4"/>',
   };
   const icon = (key, sm) => `<span class="ico${sm ? " sm" : ""}"><svg viewBox="0 0 24 24">${ICONS[key]}</svg></span>`;
@@ -50,6 +51,7 @@
     learn: ["learn", "Learn it", "Explain"],
     try: ["try", "Try it", "Practise"],
     lab: ["lab", "Lab", "Investigate"],
+    check: ["check", "Quick check", "Checkpoint"],
     exam: ["exam", "Exam corner", "AQA-style"],
     revise: ["revise", "Revise it", "Review later"],
   };
@@ -184,6 +186,7 @@
       case "symbank": return symbolBank(b);
       case "compare": return compareTable(b);
       case "worked": return worked(b);
+      case "follow": return follow(b);
       case "steps": return `<ol class="steps">${b.items.map((s) => `<li>${s}</li>`).join("")}</ol>`;
       case "safety": return `<div class="safety"><h4>Stay safe</h4><ul>${b.items.map((s) => `<li>${s}</li>`).join("")}</ul></div>`;
       case "vars": return `<table class="vars">${b.rows.map(([k, given, a]) => `<tr><th>${k}</th><td>${given || ans(a)}</td></tr>`).join("")}</table>`;
@@ -213,6 +216,20 @@
     const steps = (arr, blank) => arr.map(([k, v], i) => `<div class="step${i === arr.length - 1 ? " final" : ""}"><span>${k}</span><span>${blank ? ans(v) : v}</span></div>`).join("");
     return `<div class="worked"><div><h4>Worked example</h4><div class="q">${b.q}</div>${steps(b.steps)}</div>` +
       `<div class="yt"><h4>Your turn</h4><div class="q">${b.yt.q}</div>${steps(b.yt.steps, true)}</div></div>`;
+  }
+
+  /* A worked example from a deck slide, printed blank so that students fill it in while the
+     teacher models it; the answer edition fills it in. yt: a parallel question to try alone. */
+  function follow(b) {
+    const steps = (arr) => arr.map(([k, v], i) => `<div class="step${i === arr.length - 1 ? " final" : ""}"><span>${k}</span><span>${ans(v)}</span></div>`).join("");
+    const col = (cls, head, x) => `<div class="${cls}"><h4>${head}</h4><div class="q">${x.q}</div>${steps(x.steps)}</div>`;
+    return `<div class="worked follow${b.yt ? "" : " solo"}">${col("with", `With your teacher<span class="slide-tag">Slide ${b.slide}</span>`, b)}${b.yt ? col("yt", "Your turn", b.yt) : ""}</div>`;
+  }
+
+  // The deck's Quick check slides, numbered on their own so that lesson question numbers do not move.
+  function quickCheck(qc) {
+    return keep(secHead("check", "Quick check", `Slide ${qc.slide}, ${qc.covers}. Answer each question, then check it as your teacher reveals the answer.`) +
+      `<div class="do-now-box quick-box">${qc.items.map(([q, a], i) => `<div><b>${i + 1}</b>${q}${lines(2, a)}</div>`).join("")}</div>`);
   }
 
   function question(b) {
@@ -279,6 +296,7 @@
       learn: section("learn", l.learnTitle, l.learnAside, l.learn),
       try: l.try ? section("try", l.tryTitle, l.tryAside, l.try) : "",
       lab: l.lab ? section("lab", l.lab.title, l.lab.aside, l.lab.blocks) : "",
+      check: l.quick ? [].concat(l.quick).map(quickCheck).join("") : "",
       exam: keep(secHead("exam", "Exam corner", "Write in full sentences. Show every step of a calculation.") +
         `<div class="exam-card">${l.exam.map((e) => (e.tip ? `<div class="tip">${e.tip}</div>` : "") + question(e)).join("")}</div>`),
       revise: keep(secHead("revise", "Revise it", "Use this box after the lesson and before tests.") +
@@ -286,7 +304,7 @@
         <div class="recall"><h4>Cover the page and answer</h4>${l.recall.map(([q], i) => `<p><b>${i + 1}</b>${q}</p>`).join("")}</div></div>
         <div><h4>I can…</h4><ul class="cando">${l.cando.map((c) => `<li><span>${c}</span><span class="rag"><i></i><i></i><i></i></span></li>`).join("")}</ul></div></div>`),
     };
-    const order = l.order || ["doNow", "learn", "try", "lab", "exam", "revise"];
+    const order = l.order || ["doNow", "learn", "try", "lab", "check", "exam", "revise"];
     return `<section class="lesson" style="--accent:var(--${l.accent});--accent-t:var(--${l.accent}-t)">${opener}${order.map((k) => parts[k]).join("")}</section>`;
   }
 
@@ -330,8 +348,8 @@
   function howTo() {
     const items = [
       ["doNow", "Do now", "Quick questions from earlier lessons. Remembering again is what makes it stick."],
-      ["learn", "Learn it", "The explanation, diagrams and worked examples. Read this again when you revise."],
-      ["try", "Try it", "Practice that builds up: first with support, then on your own."],
+      ["learn", "Learn it", "Explanations and diagrams. Fill in the slide examples with your teacher, then try “Your turn” alone."],
+      ["try", "Try it", "Practice that builds up: first with support, then on your own. Quick checks from the slides follow some lessons."],
       ["lab", "Lab", "Record measurements from a virtual lab or a required practical."],
       ["exam", "Exam corner", "An AQA-style question with a tip on how the marks are given."],
       ["revise", "Revise it", "Summary, cover-and-answer questions and an “I can” check to colour in."],

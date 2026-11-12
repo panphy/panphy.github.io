@@ -30,7 +30,7 @@
       ${list([
         "<strong>Concrete before abstract.</strong> Lesson 1 builds real circuits and teaches symbols and drawing rules before any quantity is measured. The voltmeter appears only when students know what p.d. is (Lesson 3).",
         "<strong>One new idea at a time.</strong> Current, p.d. and resistance get a lesson each, each with a model (bike chain, delivery vans, collisions) and its limitation. Common misconceptions appear as student claims (Mia, Leo, Ava) to correct.",
-        "<strong>Worked example → your turn → faded practice.</strong> Calculation questions go from a full frame (Equation, Substitute, Answer) to no frame to a challenge.",
+        "<strong>Follow along → your turn → faded practice.</strong> Every worked example on a slide is printed blank at the same point in the workbook, tagged with its slide number, so students fill it in while you model it; a parallel ‘Your turn’ with new numbers sits beside it, and the answers are only in the answer edition. Each Quick check slide has its own box before the Exam corner (after Lessons 2, 5, 7, 10 and 12). Calculation questions go from a full frame (Equation, Substitute, Answer) to no frame to a challenge.",
         "<strong>Retrieval every lesson.</strong> ‘Do now’ questions revisit earlier lessons; ‘Revise it’ gives cover-and-answer questions with quick answers at the back.",
         "<strong>Equations are still learned.</strong> AQA provides the full Physics Equations Sheet in every paper, confirmed for 2027 and from 2028 onwards. It does not include R<sub>total</sub> = R₁ + R₂, and students who know the equations work faster, so the booklet still teaches recall.",
       ])}

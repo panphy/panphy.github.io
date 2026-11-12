@@ -160,6 +160,10 @@ Ask students to answer:
 
 Students are given a printed line graph with mistakes. They must identify and correct the errors, for example missing units, poor scale, dot-to-dot line, and unrecognised anomalous result.
 
+## Using the workbook
+
+The Quick check (slide 42) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 This lesson is a good opportunity to emphasise scientific judgement. Students often want a simple rule such as “ignore the weird result.” Encourage them to say, “repeat it first if possible.”
