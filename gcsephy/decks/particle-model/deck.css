@@ -9,6 +9,7 @@
 .pf .p { stroke: #1b1b1b; }
 .pf text { font-family: var(--font-body, Arial, sans-serif); }
 .pf text.ans { display: none; }
+.pf .trail { fill: none; stroke: var(--pf-gas); stroke-width: 7; stroke-linecap: round; opacity: .38; }
 [data-theme="dark"] .pf { --pf-soft: #283039; --pf-mid: #4a545f; --pf-cool-t: #173d49; --pf-hot-t: #512d25; --pf-water: #1d4657; --pf-metal: #3a424c; --pf-insul: #4b3c20; }
 [data-theme="dark"] .pf .blank-box { fill: var(--card-bg); }
 .fig > svg.pf { padding: 6px; }
