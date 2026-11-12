@@ -1,6 +1,6 @@
-/* Electric Circuits deck: diagram rules copied from the Year 10 companion
-   stylesheet (gcsephy/year10phy/unit01/assets/styles.css) so the shared
-   Diagrams helpers draw identically, with sizes adjusted for 1600 × 900 slides. */
+/* Electric Circuits deck: diagram rules for the shared Diagrams helpers
+   (gcsephy/year10phy/unit01/assets/diagrams.js), sized for 1600 × 900 slides.
+   The workbook's diagrams-print.css holds the same rules for print. */
 
 .cd { stroke: var(--ink); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .cd .mask { fill: var(--diagram-bg); stroke: none; }
@@ -125,7 +125,7 @@
 .grid-band-tag { display: block; margin: 0 4px 12px 86px; font-size: 22px; font-weight: 700; color: #0f5f85; line-height: 1.2; }
 .grid-band-tag strong { margin-right: 6px; font-size: 22px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--navy); }
 
-/* Hero circuit card (companion home page) */
+/* Hero circuit card */
 .machine { position: relative; display: grid; place-items: center; height: 640px; }
 .circuit-card { width: 540px; padding: 26px; background: var(--paper); color: var(--ink); transform: rotate(2deg); box-shadow: 18px 18px 0 var(--cyan); }
 .circuit-card .plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 22px Arial, sans-serif; letter-spacing: .2em; }
@@ -211,8 +211,8 @@
 .prop { display: inline-block; width: .9em; height: .56em; vertical-align: .02em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 h2 .prop { stroke-width: 3.4; }
 
-/* Photo slides. Component pictures are shared with the companion site
-   (year10phy/unit01/assets/components/); the others are in images/, each with a credit
+/* Photo slides. Component pictures are in year10phy/unit01/assets/components/;
+   the others are in images/, each with a credit
    that links to its source. */
 .components { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; gap: 26px 30px; }
 .component { display: flex; flex-direction: column; min-height: 0; margin: 0; border: 2px solid var(--ink); background: #f9f7f2; box-shadow: 7px 7px 0 var(--accent); }

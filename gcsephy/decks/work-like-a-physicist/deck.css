@@ -1,5 +1,4 @@
-/* Work Like a Physicist deck: diagram classes and the hero plot card from the
-   Year 9 companion site (gcsephy/year9phy/unit01/assets/styles.css). */
+/* Work Like a Physicist deck: diagram classes and the hero plot card. */
 
 .wf { font-family: Arial, Helvetica, sans-serif; }
 .wf text { fill: var(--ink); stroke: none; }
@@ -74,7 +73,7 @@
 .data .set-b th, .points .set-b::before { background: #ff795e; }
 .data .set-c th, .points .set-c::before { background: #42cbe8; }
 
-/* Hero plot card (companion home page) */
+/* Hero plot card */
 .machine { position: relative; display: grid; place-items: center; height: 640px; }
 .plot-card { width: 500px; padding: 26px; background: var(--paper); color: var(--ink); transform: rotate(2deg); box-shadow: 18px 18px 0 var(--cyan); }
 .plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 22px Arial, sans-serif; letter-spacing: .2em; }

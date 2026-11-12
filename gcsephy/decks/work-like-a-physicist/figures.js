@@ -1,5 +1,4 @@
-// SVG diagrams for the Work Like a Physicist deck, drawn in the style of the
-// Year 9 companion site (gcsephy/year9phy/unit01): navy ink, lime points,
+// SVG diagrams for the Work Like a Physicist deck: navy ink, lime points,
 // coral anomalous results, cyan trend lines and bold Arial labels. Each
 // <div data-fig="name"> is filled from FIGURES; colours come from deck CSS.
 // Diagram labels with maths, typeset by ../assets/deck-math.js (plain label: label with LaTeX).

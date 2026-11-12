@@ -1,5 +1,5 @@
 // Diagrams for the Electric Circuits deck. Circuits, graphs, the cable and the
-// National Grid come straight from the Year 10 companion site's own helpers
+// National Grid come from the unit's shared helpers
 // (gcsephy/year10phy/unit01/assets/diagrams.js and practical-diagrams.js), so
 // every symbol matches. A few extra pictures use the same .cd drawing style.
 // Diagram labels with maths, typeset by ../assets/deck-math.js (plain label: label with LaTeX).
@@ -47,7 +47,7 @@ window.DeckSvgTex = {
     return markup.replace(`<path d="${lastWire}"/>`, match => match + marks + cover);
   }
   const fall = x => 0.9 * Math.exp(-2.6 * x) + 0.05;
-  // The practical diagrams set label sizes inline for the companion pages;
+  // The practical diagrams set label sizes inline for small print;
   // enlarge them so they read from the back of a room.
   const bigger = (markup, k) => markup.replace(/(font:\s*\d+ )(\d+(?:\.\d+)?)px/g, (m, pre, px) => `${pre}${Math.round(px * k * 10) / 10}px`);
   // Lattice geometry for the slide 21 simulation (panel-local units).
