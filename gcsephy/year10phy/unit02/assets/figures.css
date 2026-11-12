@@ -1,0 +1,50 @@
+/* Line drawings for the Year 10 Particle Model workbook, Preps and deck (assets/figures.js).
+   Colours come from custom properties so the deck can restyle them for its dark theme. */
+.pf { display: block; width: 100%; height: auto; overflow: visible;
+  --pf-ink: #0a1326; --pf-paper: #fff; --pf-soft: #eef1f4; --pf-mid: #c9d0d8;
+  --pf-hot: #d9480f; --pf-hot-t: #ffd9c7; --pf-cool: #1479a8; --pf-cool-t: #d8eefa;
+  --pf-solid: #8fa3b8; --pf-liquid: #58b4dc; --pf-gas: #f2b33d; --pf-force: #7a3fc4;
+  --pf-water: #cfeaf7; --pf-metal: #dfe3e8; --pf-insul: #fff1c9; --pf-muted: #4b5563; }
+.pf .ink { stroke: var(--pf-ink); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.pf .thin { stroke-width: 1.3; }
+.pf .bold { stroke-width: 3.6; }
+.pf .dash { stroke-dasharray: 4 4; }
+.pf .paper { fill: var(--pf-paper); }
+.pf .soft { fill: var(--pf-soft); }
+.pf .mid { fill: var(--pf-mid); }
+.pf .solid.ink, .pf path.solid { fill: var(--pf-ink); }
+.pf .head { fill: var(--pf-ink); stroke: none; }
+.pf .s-hot { stroke: var(--pf-hot); }
+.pf .s-cool { stroke: var(--pf-cool); }
+.pf .s-force { stroke: var(--pf-force); }
+.pf .head.s-hot { fill: var(--pf-hot); }
+.pf .head.s-cool { fill: var(--pf-cool); }
+.pf .head.s-force { fill: var(--pf-force); }
+.pf .move { stroke: var(--pf-muted); }
+.pf .head.move { fill: var(--pf-muted); }
+.pf .p { stroke: var(--pf-ink); stroke-width: 1.3; fill: var(--pf-solid); }
+.pf .p.liquid { fill: var(--pf-liquid); }
+.pf .p.gas { fill: var(--pf-gas); }
+.pf .p.hotp { fill: var(--pf-hot); }
+.pf .water { fill: var(--pf-water); stroke: none; }
+.pf .drop { fill: var(--pf-liquid); stroke: var(--pf-ink); stroke-width: 1; }
+.pf .stone { fill: var(--pf-mid); }
+.pf .metal { fill: var(--pf-metal); }
+.pf .insul { fill: var(--pf-insul); }
+.pf .ice { fill: var(--pf-cool-t); }
+.pf .heater { fill: var(--pf-hot-t); }
+.pf .bulb, .pf .merc { fill: var(--pf-hot); stroke: var(--pf-hot); }
+.pf .merc { stroke-width: 2.4; fill: none; }
+.pf .axis { stroke: var(--pf-ink); stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.pf .curve { stroke: var(--pf-hot); stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.pf .pt { fill: var(--pf-gas); stroke: var(--pf-ink); stroke-width: 1.6; }
+.pf .blank-box { fill: var(--pf-paper); stroke: var(--pf-ink); stroke-width: 1.2; }
+.pf text { fill: var(--pf-ink); stroke: none; font: 600 11px/1 Arial, Helvetica, sans-serif; }
+.pf text.sm { font-size: 10.5px; fill: var(--pf-muted); }
+.pf text.b { font-size: 12px; font-weight: 700; }
+.pf text.lg { font-size: 15px; font-weight: 900; }
+.pf text.read { font: 700 10px/1 "Courier New", monospace; }
+.pf text.ans { font-size: 12px; font-weight: 700; fill: #1558b0; visibility: hidden; }
+.answers .pf text.ans { visibility: visible; }
+.pf.on-dark { --pf-ink: #fff; --pf-paper: rgba(255, 255, 255, .08); --pf-hot: #ffd23f; }
+.pf.on-dark .p { stroke: #0a1326; }

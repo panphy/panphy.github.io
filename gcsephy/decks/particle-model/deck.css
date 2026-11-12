@@ -1,0 +1,72 @@
+/* Particle Model of Matter deck. Layouts come from ../assets/companion-deck.css and the calm GCSE
+   style from ../assets/teaching-deck.css. This file restyles the workbook's drawings
+   (gcsephy/year10phy/unit02/assets/figures.css, class .pf) for 1600 × 900 slides and both
+   themes, and adds the live particle models, the toolkit and a few slide layouts. */
+
+/* ----- drawings shared with the workbook ----- */
+.pf { --pf-ink: var(--ink); --pf-paper: var(--diagram-bg); --pf-muted: var(--muted); --pf-hot: var(--hot); --pf-cool: var(--cyan); --pf-force: var(--violet);
+  --pf-solid: #9db0c4; --pf-liquid: #5fb8de; --pf-gas: #f2b33d; }
+.pf .p { stroke: #1b1b1b; }
+.pf text { font-family: var(--font-body, Arial, sans-serif); }
+.pf text.ans { display: none; }
+[data-theme="dark"] .pf { --pf-soft: #283039; --pf-mid: #4a545f; --pf-cool-t: #173d49; --pf-hot-t: #512d25; --pf-water: #1d4657; --pf-metal: #3a424c; --pf-insul: #4b3c20; }
+[data-theme="dark"] .pf .blank-box { fill: var(--card-bg); }
+.fig > svg.pf { padding: 6px; }
+
+/* Title slide: the heating curve on the dark hero */
+.case-card .fig { height: 330px; margin-top: 14px; }
+.case-card .fig.tall { height: 400px; }
+
+/* ----- live models: drawing on the left, readouts and exact-step buttons on the right ----- */
+.fig.pm-live { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 26px; align-items: center; }
+.fig.pm-live.stack { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+.fig.pm-live > svg { position: static; width: 100%; height: 100%; min-height: 0; }
+.pm-side { display: grid; gap: 14px; align-content: center; }
+.fig.pm-live.stack .pm-side { grid-template-columns: 1.5fr 1fr; align-items: center; }
+.fig.pm-live.stack .pm-note { grid-column: 1 / -1; }
+.pm-readout { display: grid; gap: 8px; }
+.pm-readout > div { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.pm-readout span { font-size: 23px; font-weight: 700; color: var(--muted); }
+.pm-readout b { font: 600 28px var(--font-mono, monospace); white-space: nowrap; }
+.pm-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pm-controls button { min-height: 56px; padding: 8px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); color: var(--ink); font: 800 25px var(--font-body, Arial, sans-serif); cursor: pointer; }
+.pm-controls button:hover:not(:disabled), .pm-controls button:focus-visible { background: var(--accent); color: #1b1b1b; }
+.pm-controls button:disabled { opacity: .4; cursor: default; }
+.pm-note { margin: 0; font-size: 21px; line-height: 1.3; color: var(--muted); }
+.thumb-slide .pm-side { visibility: hidden; }
+
+/* ----- equation toolkit ----- */
+.toolkit { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.tool { display: flex; flex-direction: column; gap: 6px; padding: 16px 24px; border: 2px solid var(--ink); background: var(--card); }
+.tool .eq { font: 900 40px/1.05 var(--display); }
+.tool .words { font-size: 25px; font-weight: 800; }
+.tool .units { font-size: 24px; color: var(--muted); line-height: 1.35; }
+.tool .where { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tool.wide { grid-column: 1 / -1; }
+
+/* ----- small layouts ----- */
+/* A table that compares states, or the two heating equations */
+.pm-table { width: 100%; border-collapse: collapse; font-size: 29px; line-height: 1.25; }
+.pm-table th, .pm-table td { padding: 13px 18px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.pm-table thead th { background: var(--navy); color: #fff; font-weight: 800; }
+.pm-table tbody th { width: 21%; background: var(--note); font-weight: 800; }
+.pm-table.tight { font-size: 27px; }
+.pm-table.tight th, .pm-table.tight td { padding: 9px 16px; }
+.pm-table td.num { font-family: var(--font-mono, monospace); white-space: nowrap; }
+/* A chain of reasoning: boxes joined by arrows */
+.chain { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: c; }
+.chain li { position: relative; padding: 13px 20px 13px 66px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); font-size: 30px; line-height: 1.22; counter-increment: c; }
+.chain li::before { content: counter(c); position: absolute; left: 14px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: #1b1b1b; font: 800 22px var(--font-mono, monospace); }
+.chain li:last-child { background: var(--formula); font-weight: 800; }
+/* Two figures side by side with a caption each */
+.pair { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+.pair > div { display: flex; flex-direction: column; min-height: 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--diagram-bg); }
+.pair > div > .fig { flex: 1; min-height: 0; }
+.pair > div > p { margin: 10px 0 0; font-size: 27px; font-weight: 700; line-height: 1.25; text-align: center; }
+.split.third { grid-template-columns: .85fr 1.25fr; }
+.split .col { display: grid; gap: 18px; align-content: start; }
+.split .col.center { align-content: center; }
+.values { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.values > div { padding: 14px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.values b { display: block; font: 600 34px var(--font-mono, monospace); }
+.values span { font-size: 24px; font-weight: 700; color: var(--muted); }

@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en" class="deck-y10 companion-deck" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for Year 10 AQA GCSE particle model of matter: solids, liquids and gases, gas pressure, density, internal energy, specific latent heat, specific heat capacity, both required practicals and, for GCSE Physics only, pressure and volume.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="gcsephy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Particle Model of Matter — Teaching deck</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="../assets/companion-deck.css">
+  <link rel="stylesheet" href="/gcsephy/year10phy/unit02/assets/figures.css">
+  <link rel="stylesheet" href="deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/gcsephy/sw-register.js" defer></script>
+  <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <script src="../assets/deck-math.js"></script>
+</head>
+<body data-deck-key="particle-model" data-deck-title="Particle Model of Matter">
+  <header class="banner">
+    <div class="banner-start">
+      <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+      <a class="nav-pill" aria-label="Open workbook resources" href="/gcsephy/year10phy/unit02/" target="_blank" rel="noopener"><span class="wide">Workbook</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+    </div>
+    <a class="banner-title" href="#1">Particle Model of Matter</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme"></button>
+    </div>
+  </header>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 Title -->
+      <section class="slide dark a-hi" data-title="Particle Model of Matter">
+        <div class="hero">
+          <div>
+            <p class="eyebrow course"><span class="on">Year 10 physics</span><span>AQA GCSE Physics &amp; Combined Science</span></p>
+            <h1>Tiny particles.<br><em>Big explanations.</em></h1>
+            <p class="lead">States of matter, gas pressure, density, internal energy, latent heat, heat capacity<br>Pressure and volume <span class="triple-tag">Triple only</span></p>
+            <div class="unlocks"><span>\(\rho = \dfrac{m}{V}\)</span><span>\(E = m\,L\)</span><span>\(\Delta E = m\,c\,\Delta\theta\)</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">THE WHOLE UNIT IN ONE PICTURE</div>
+            <h3>Heat it: hotter, or a new state</h3>
+            <div class="fig tall" data-fig="heatingPlain"></div>
+          </div>
+        </div>
+        <p class="slide-copyright">&copy; 2026 PanPhy Labs. All rights reserved.</p>
+      </section>
+
+      <!-- 2 Map -->
+      <section class="slide a-hi" data-title="The lessons">
+        <p class="eyebrow">AQA Physics 8463: 4.3, 4.1.1.3; Combined Science 8464: 6.3, 6.1.1.3</p>
+        <h2>Eight <em>lessons</em></h2>
+        <div class="missions fill" style="grid-template-columns: repeat(5, 1fr); grid-template-rows: 1fr 1fr;">
+          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">01</span><span class="lesson-icon" style="font-size: 15px;">SLG</span></div><h3>Solids, liquids, gases</h3><p>Particle diagrams, changes of state</p><p class="spec-ref"><span>Physics 4.3.1.1–2</span><span>Combined 6.3.1.1–2</span></p></div>
+          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">02</span><span class="lesson-icon">\(p\)</span></div><h3>Gas pressure</h3><p>Random motion, hotter means more pressure</p><p class="spec-ref"><span>Physics 4.3.3.1</span><span>Combined 6.3.3.1</span></p></div>
+          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">03</span><span class="lesson-icon">\(\rho\)</span></div><h3>Density</h3><p>\(\rho = \dfrac{m}{V}\)</p><p class="spec-ref"><span>Physics 4.3.1.1</span><span>Combined 6.3.1.1</span></p></div>
+          <div class="mission a-alt"><div class="mission-top"><span class="lesson-number">04</span><span class="lesson-icon">RP</span></div><h3>Measuring density</h3><p>Solids, displacement, liquids</p><p class="spec-ref"><span>Physics RP 5</span><span>Combined RP 17</span></p></div>
+          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">05</span><span class="lesson-icon">\(E\)</span></div><h3>Internal energy</h3><p>Heating and cooling graphs</p><p class="spec-ref"><span>Physics 4.3.2.1</span><span>Combined 6.3.2.1</span></p></div>
+          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">06</span><span class="lesson-icon">\(L\)</span></div><h3>Specific latent heat</h3><p>\(E = m\,L\)</p><p class="spec-ref"><span>Physics 4.3.2.3</span><span>Combined 6.3.2.3</span></p></div>
+          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">07</span><span class="lesson-icon">\(c\)</span></div><h3>Specific heat capacity</h3><p>\(\Delta E = m\,c\,\Delta\theta\)</p><p class="spec-ref"><span>Physics 4.3.2.2</span><span>Combined 6.3.2.2</span></p></div>
+          <div class="mission a-alt"><div class="mission-top"><span class="lesson-number">08</span><span class="lesson-icon">RP</span></div><h3>Measuring \(c\)</h3><p>Heater, block, thermometer</p><p class="spec-ref"><span>Physics RP 1</span><span>Combined RP 14</span></p></div>
+          <div class="mission a-violet" style="grid-column: span 2;"><div class="mission-top"><span class="lesson-number">+</span><span class="lesson-icon">\(pV\)</span></div><h3>Pressure and volume <span class="triple-tag">Triple only</span></h3><p>\(p\,V = \text{constant}\), doing work on a gas</p><p class="spec-ref"><span>Physics 4.3.3.2–3</span><span>Not in Combined</span></p></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Particle model of matter</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 1 ============ -->
+      <section class="slide dark a-cyan" data-title="Lesson 1: Solids, liquids and gases">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">01</span> Lesson 1: <span class="on">One model, three states</span></p>
+            <h1>Solids, liquids <em>&amp; gases</em></h1>
+            <div class="unlocks"><span>particle diagrams</span><span>arrangement and motion</span><span>changes of state</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.1.1, 4.3.1.2</span><span>Combined Science 6.3.1.1, 6.3.1.2</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Ice, a puddle, steam: all water. What is different?</h3>
+            <div class="fig" data-fig="states"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Solids, liquids and gases</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-cyan" data-title="Three states">
+        <p class="eyebrow"><span class="num">01</span> The particle model</p>
+        <h2>Same particles, <em>three states</em></h2>
+        <div class="panel fill"><div class="fig" data-fig="statesLive"></div></div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Solids, liquids and gases</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What is the same in all three boxes?</h3>
+            <p>The particles. A water molecule in ice is identical to one in steam: the same size, the same mass. Only two things differ, how the particles are arranged and how they move.</p>
+            <h3 class="rn-head">Why does a solid keep its shape?</h3>
+            <p>Strong forces hold each particle in its place. The particle can vibrate, but it cannot swap places with a neighbour, so the solid cannot flow.</p>
+            <h3 class="rn-head">Why can a liquid flow but not be squashed?</h3>
+            <p>Its particles can slide past each other, so it takes the shape of its container. But they are still touching, so there is no empty space to push them into.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">In a particle diagram of a liquid, the particles touch. If you draw gaps between them, you have drawn a gas.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Arrangement and motion">
+        <p class="eyebrow"><span class="num">01</span> Describe each state</p>
+        <h2>Arrangement <em>and motion</em></h2>
+        <table class="pm-table fill">
+          <thead><tr><th></th><th>Solid</th><th>Liquid</th><th>Gas</th></tr></thead>
+          <tbody>
+            <tr><th>Arrangement</th><td>Very close together, <b>regular pattern</b></td><td>Close together, <b>random</b></td><td><b>Far apart</b>, random</td></tr>
+            <tr><th>Motion</th><td><b>Vibrate</b> about fixed positions</td><td>Move around, <b>slide past</b> each other</td><td>Move <b>quickly</b> in all directions</td></tr>
+            <tr><th>Shape</th><td>Fixed</td><td>Takes the shape of its container</td><td>Fills its container</td></tr>
+            <tr><th>Squash it?</th><td>No</td><td>No</td><td class="step">Yes: empty space between particles</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span class="tag">Lesson 1: Solids, liquids and gases</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">How to earn full marks on a “describe the particles” question</h3>
+            <p>Give two things for each state: the arrangement and the motion. “The particles in a solid are close together” is half an answer. “They are close together in a regular pattern and vibrate about fixed positions” is a whole one.</p>
+            <h3 class="rn-head">Why “vibrate about fixed positions”?</h3>
+            <p>Particles in a solid are never still. They shake to and fro around one spot. “They do not move” loses the mark.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Seal a syringe of air and push: the plunger moves in. Fill it with water and push: it does not move. That is the evidence for the last row of the table.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Changes of state">
+        <p class="eyebrow"><span class="num">01</span> Orange arrows: heated. Blue arrows: cooled</p>
+        <h2>Changes <em>of state</em></h2>
+        <div class="panel fill"><div class="fig" data-fig="changes"></div></div>
+        <ul class="points small cols3" style="margin-top: 18px;">
+          <li><b>Boiling</b>: at the boiling point, all through the liquid</li>
+          <li><b>Evaporating</b>: at any temperature, from the surface</li>
+          <li><b>Sublimating</b>: solid straight to gas</li>
+        </ul>
+        <div class="slide-foot"><span class="tag">Lesson 1: Solids, liquids and gases</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does a puddle dry up at 10 °C?</h3>
+            <p>The particles in a liquid have a range of speeds. A few at the surface are moving fast enough to escape, even when the liquid is far below its boiling point. That is evaporation. Boiling is different: bubbles of gas form inside the liquid, and that happens only at the boiling point.</p>
+            <h3 class="rn-head">Where have you seen sublimation?</h3>
+            <p>Solid carbon dioxide (“dry ice”) at a concert or in a science show. It never makes a puddle: it turns straight into cold gas.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Mass is conserved">
+        <p class="eyebrow"><span class="num">01</span> A physical change</p>
+        <h2>Mass is <em>conserved</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <ul class="points">
+              <li>No particles <b>added</b>, none <b>taken away</b></li>
+              <li>Same particles, <b>rearranged</b></li>
+              <li class="step">50 g of ice → <b>50 g</b> of water → <b>50 g</b> of steam</li>
+            </ul>
+          </div>
+          <div class="col">
+            <div class="mistakes">
+              <div class="mistake"><p class="wrong">“A new substance is made.”</p><p class="right">Physical change: <b>no new substance</b>.</p></div>
+              <div class="mistake step"><p class="wrong">“It cannot be undone.”</p><p class="right">Reverse it and the material <b>recovers its original properties</b>.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Solids, liquids and gases</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Then why does a boiling pan lose mass?</h3>
+            <p>The pan is open, so particles leave it as steam. The mass is still conserved: the mass of the water left plus the mass of the steam in the room equals the mass you started with. In a sealed container the balance reading would not change.</p>
+            <h3 class="rn-head">How is this different from a chemical change?</h3>
+            <p>Burn a piece of wood and you get ash and gases, which are new substances, and cooling them does not give you the wood back. Melt wax and cool it, and you have wax again, with the same properties.</p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- ============ Lesson 2 ============ -->
+      <section class="slide dark a-hot" data-title="Lesson 2: Gas particles and pressure">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">02</span> Lesson 2: <span class="on">A gas never keeps still</span></p>
+            <h1>Gas particles <em>&amp; pressure</em></h1>
+            <div class="unlocks"><span>random motion</span><span>temperature and kinetic energy</span><span>collisions with the walls</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.3.1</span><span>Combined Science 6.3.3.1</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>“Do not expose to temperatures above 50 °C.” Why?</h3>
+            <div class="fig" data-fig="gasBox"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 2: Gas particles and pressure</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-hot" data-title="Random motion and temperature">
+        <p class="eyebrow"><span class="num">02</span> Try it: make the gas hotter</p>
+        <h2>Hotter means <em>faster</em></h2>
+        <div class="panel fill"><div class="fig" data-fig="gasLive"></div></div>
+        <div class="slide-foot"><span class="tag">Lesson 2: Gas particles and pressure</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What does “random” mean here?</h3>
+            <p>The molecules move in every direction, and at a range of speeds. At any moment some are fast and some are slow. That is why we talk about their <b>average</b> kinetic energy.</p>
+            <h3 class="rn-head">What is temperature, to a particle?</h3>
+            <p>The temperature of a gas is related to the average kinetic energy of its molecules. Heating the gas transfers energy to the molecules, so on average they move faster. Nothing else about them changes: they do not grow, and in a sealed box there are no more of them.</p>
+            <h3 class="rn-head">About the model</h3>
+            <p>Real molecules are far smaller and far faster than these. In the air around you they travel at about 500 m/s and collide with each other billions of times a second.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="What causes gas pressure">
+        <p class="eyebrow"><span class="num">02</span> Billions of tiny pushes</p>
+        <h2>What causes <em>pressure</em>?</h2>
+        <div class="split">
+          <ol class="steps">
+            <li>Molecules <b>collide</b> with the walls</li>
+            <li>Each collision gives the wall a small <b>force</b></li>
+            <li>Billions of collisions every second</li>
+            <li>Together: a steady force on each square metre, the <b>pressure</b></li>
+          </ol>
+          <div class="panel"><div class="fig" data-fig="gasBox"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 2: Gas particles and pressure</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why is the push steady, if each collision is a separate knock?</h3>
+            <p>Think of heavy rain on an umbrella. Each drop is a separate tap, but there are so many that you feel one steady push. A gas does the same to a wall, with billions of molecules every second.</p>
+            <h3 class="rn-head">Is there pressure on you now?</h3>
+            <p>Yes. The air presses on every square metre of your skin with a force of about 100 000 N. You are not crushed because the fluids inside your body push back with the same pressure.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Pressure on the walls comes from collisions <b>with the walls</b>. Collisions between molecules do not push on the container.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Heating a gas at constant volume">
+        <p class="eyebrow"><span class="num">02</span> A chain of reasoning</p>
+        <h2>Heat a <em>sealed</em> gas</h2>
+        <div class="split even">
+          <ol class="chain">
+            <li>Gas heated: molecules gain <b>kinetic energy</b>, move <b>faster</b></li>
+            <li class="step">They hit the walls <b>more often</b></li>
+            <li class="step">Each collision has a <b>bigger force</b></li>
+            <li class="step">The <b>pressure increases</b></li>
+          </ol>
+          <div class="panel"><div class="fig" data-fig="gasPair"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 2: Gas particles and pressure</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does “constant volume” matter?</h3>
+            <p>If the container could grow, like a balloon, the gas would spread out instead and the pressure would hardly change. A rigid, sealed container traps the same molecules in the same space, so faster molecules must mean more pressure.</p>
+            <h3 class="rn-head">So what about the aerosol can?</h3>
+            <p>The can is rigid and sealed. In a fire, or on a sunny windowsill, the pressure inside climbs until the can splits. The warning on the label is this slide in one sentence.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Three marks, three links: faster molecules, more frequent collisions, bigger force in each collision. Then state the result: the pressure increases.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Quick check: Lessons 1–2">
+        <p class="eyebrow"><span class="num">01–02</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>Particles close together, random arrangement. Which state?</p><div class="ans step">Liquid</div></div>
+          <div class="q"><p><span class="n">2</span>How do the particles in a solid move?</p><div class="ans step">They vibrate about fixed positions</div></div>
+          <div class="q"><p><span class="n">3</span>Gas to liquid: name the change.</p><div class="ans step">Condensing</div></div>
+          <div class="q"><p><span class="n">4</span>80 g of wax melts. Mass of liquid wax?</p><div class="ans step">80 g: same number of particles</div></div>
+          <div class="q"><p><span class="n">5</span>What causes gas pressure?</p><div class="ans step">Molecules colliding with the walls</div></div>
+          <div class="q"><p><span class="n">6</span>A sealed can of gas is cooled. Pressure?</p><div class="ans step">Decreases: slower molecules</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 3 ============ -->
+      <section class="slide dark a-hi" data-title="Lesson 3: Density">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">03</span> Lesson 3: <span class="on">How much mass is packed in?</span></p>
+            <h1>Density</h1>
+            <div class="unlocks"><span>\(\rho = \dfrac{m}{V}\)</span><span>kg/m³ and g/cm³</span><span>density and particles</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.1.1</span><span>Combined Science 6.3.1.1</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>A gold bar the size of a milk carton: 19 kg. Why?</h3>
+            <div class="fig" data-fig="cuboid"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Density</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-hi" data-title="Density equation">
+        <p class="eyebrow"><span class="num">03</span> Know and apply</p>
+        <h2>Mass per unit <em>volume</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(\rho = \dfrac{m}{V}\)</span><span class="eq-words">\(\text{density} = \dfrac{\text{mass}}{\text{volume}}\)</span><span class="eq-units">\(\rho\) in kg/m³, \(m\) in kg, \(V\) in m³</span></div>
+            <div class="remember">\(\rho\) is the Greek letter <b>rho</b></div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example</span>5400 kg of aluminium has a volume of 2.0 m³</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(\rho = \dfrac{m}{V}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(\rho = \dfrac{5400}{2.0}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(\rho = 2700\)&nbsp;kg/m³</span></dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What does 2700 kg/m³ tell you?</h3>
+            <p>Every cubic metre of aluminium has a mass of 2700 kg. Density is the mass of one unit of volume, so it lets you compare materials fairly, whatever the size of the piece.</p>
+            <h3 class="rn-head">Does a bigger piece have a bigger density?</h3>
+            <p>No. Cut the block in half and each half has half the mass <b>and</b> half the volume. The ratio is the same. Density belongs to the material, not to the object.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">“Dense” does not mean “heavy”. The air in a classroom has a mass of about 200 kg, far more than a gold ring, yet air is the least dense thing in the room.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Density and the particle model">
+        <p class="eyebrow"><span class="num">03</span> Explain it with particles</p>
+        <h2>Why gases are <em>so light</em></h2>
+        <div class="split third">
+          <div class="col">
+            <ul class="points small">
+              <li>Solid and liquid: particles <b>close together</b> → high density</li>
+              <li>Gas: particles <b>far apart</b> → very low density</li>
+              <li class="step">Water is about <b>800 times</b> denser than air</li>
+            </ul>
+          </div>
+          <div class="panel"><div class="fig" data-fig="states"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Count the particles</h3>
+            <p>Each box is the same size. The solid and the liquid boxes hold about the same number of particles, which is why a solid and its liquid have similar densities. The gas box holds only a few, so the same volume has far less mass.</p>
+            <h3 class="rn-head">Is a solid always denser than its liquid?</h3>
+            <p>Nearly always, and only slightly: the particles pack a little closer in the solid. Water is the odd one out. In ice the molecules lock into an open pattern that takes up more room, so ice is less dense than water.</p>
+          </div>
+          <div class="rn-side">
+            <p class="spec">AQA asks you to “explain the differences in density between the different states of matter in terms of the arrangement of atoms or molecules” (Physics 4.3.1.1, Combined Science 6.3.1.1). You do not need to explain why ice is less dense than water.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Two sets of units">
+        <p class="eyebrow"><span class="num">03</span> kg/m³ or g/cm³</p>
+        <h2>Two sets of <em>units</em></h2>
+        <div class="split even top">
+          <table class="pm-table tight">
+            <thead><tr><th>Material</th><th>g/cm³</th><th>kg/m³</th></tr></thead>
+            <tbody>
+              <tr><td>Air</td><td class="num">0.0012</td><td class="num">1.2</td></tr>
+              <tr><td>Ice</td><td class="num">0.92</td><td class="num">920</td></tr>
+              <tr><td>Water</td><td class="num">1.0</td><td class="num">1000</td></tr>
+              <tr><td>Aluminium</td><td class="num">2.7</td><td class="num">2700</td></tr>
+              <tr><td>Iron</td><td class="num">7.9</td><td class="num">7900</td></tr>
+              <tr><td>Gold</td><td class="num">19.3</td><td class="num">19 300</td></tr>
+            </tbody>
+          </table>
+          <div class="col">
+            <div class="remember">g/cm³ → kg/m³: <b>\(\times\,1000\)</b></div>
+            <div class="remember step">kg/m³ → g/cm³: <b>\(\div\,1000\)</b></div>
+            <div class="remember step">Water: <span class="equation-inline">1.0&nbsp;g/cm³ = 1000&nbsp;kg/m³</span></div>
+            <ul class="points small"><li>Grams with cm³, kilograms with m³. <b>Never mix.</b></li></ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why multiply by 1000, when a kilogram is 1000 grams?</h3>
+            <p>Two things change. A cubic metre is a cube 100 cm along each side, so it holds \(100 \times 100 \times 100 = 1\,000\,000\) cm³. One cubic metre of water is therefore a million grams, which is 1000 kg. So 1 g/cm³ is 1000 kg/m³.</p>
+            <h3 class="rn-head">A quick check on any answer</h3>
+            <p>Most solids and liquids are between 0.5 and 20 g/cm³, or 500 and 20 000 kg/m³. If your metal comes out at 0.0027, you divided where you should have multiplied.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Finding mass or volume">
+        <p class="eyebrow"><span class="num">03</span> Rearrange first</p>
+        <h2>Find the mass, <em>or the volume</em></h2>
+        <div class="split even top">
+          <div class="worked">
+            <div class="wq"><span>Example 1</span>0.020 m³ of iron. Density 7900 kg/m³. Mass?</div>
+            <dl>
+              <div class="step"><dt>Equation</dt><dd>\(\rho = \dfrac{m}{V}\)</dd></div>
+              <div class="step"><dt>Rearrange</dt><dd>\(m = \rho\,V\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(m = 7900 \times 0.020\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(m = 158\)&nbsp;kg</span></dd></div>
+            </dl>
+          </div>
+          <div class="worked">
+            <div class="wq"><span>Example 2</span>965 g of gold. Density 19.3 g/cm³. Volume?</div>
+            <dl>
+              <div class="step"><dt>Equation</dt><dd>\(\rho = \dfrac{m}{V}\)</dd></div>
+              <div class="step"><dt>Rearrange</dt><dd>\(V = \dfrac{m}{\rho}\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(V = \dfrac{965}{19.3}\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(V = 50\)&nbsp;cm³</span></dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">How to rearrange without a triangle</h3>
+            <p>Start from \(\rho = \dfrac{m}{V}\). Multiply both sides by \(V\) and you have \(m = \rho\,V\). Then divide both sides by \(\rho\) and you have \(V = \dfrac{m}{\rho}\). The same two moves work for every equation of this shape, including \(E = m\,L\) later in the unit.</p>
+            <h3 class="rn-head">Does the answer to Example 2 make sense?</h3>
+            <p>Nearly a kilogram of gold fits in 50 cm³, about a quarter of a mug. That is the meaning of a very high density: a lot of mass in a small space.</p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- ============ Lesson 4 ============ -->
+      <section class="slide dark a-alt" data-title="Lesson 4: Measuring density">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">04</span> Lesson 4: <span class="on">Required practical</span></p>
+            <h1>Measuring <em>density</em></h1>
+            <div class="unlocks"><span>regular solids</span><span>displacement</span><span>liquids</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.1.1, RP 5</span><span>Combined Science 6.3.1.1, RP 17</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>How do you find the volume of a stone?</h3>
+            <div class="fig" data-fig="displacement"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Density</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-alt" data-title="Density of a regular solid">
+        <p class="eyebrow"><span class="num">RP</span> Density: Part A</p>
+        <h2>A <em>regular</em> solid</h2>
+        <div class="split">
+          <ol class="steps">
+            <li>Measure <b>length, width, height</b>: ruler or vernier callipers</li>
+            <li><span class="equation-inline">volume = length × width × height</span></li>
+            <li>Measure the <b>mass</b>: balance</li>
+            <li class="step">\(\rho = \dfrac{m}{V} = \dfrac{64.8}{24} = 2.7\) g/cm³</li>
+          </ol>
+          <div class="panel"><div class="fig" data-fig="cuboid"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Ruler or callipers?</h3>
+            <p>A ruler reads to the nearest millimetre. On a side of 20 mm, being 1 mm out is a 5% error, and the volume uses three sides multiplied together, so the errors add up. Vernier callipers read to 0.1 mm, so they have a better resolution and the error is ten times smaller.</p>
+            <h3 class="rn-head">Why measure each side more than once?</h3>
+            <p>A real block is rarely a perfect cuboid. Measuring each side in two or three places and taking a mean evens out a slightly uneven face.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Density of an irregular solid">
+        <p class="eyebrow"><span class="num">RP</span> Density: Part B</p>
+        <h2>An <em>irregular</em> solid</h2>
+        <div class="pair">
+          <div><div class="fig" data-fig="displacement"></div><p>Volume of stone = rise in the water level</p></div>
+          <div><div class="fig" data-fig="eureka"></div><p>Too big for the cylinder: catch the water it pushes out</p></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does displacement work?</h3>
+            <p>Water cannot be squashed, and two things cannot be in the same place. When the stone goes under, it pushes aside exactly its own volume of water, which has nowhere to go but up the cylinder or out of the spout.</p>
+            <h3 class="rn-head">Which should be measured first, the mass or the volume?</h3>
+            <p>The mass. A wet stone carries drops of water, which would add to the balance reading and make the density too high.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Fill a displacement can until water runs from the spout, and wait for the last drip before you put the measuring cylinder under it.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Density of a liquid">
+        <p class="eyebrow"><span class="num">RP</span> Density: Part C</p>
+        <h2>A <em>liquid</em></h2>
+        <div class="split">
+          <ol class="steps">
+            <li>Mass of the <b>empty</b> cylinder</li>
+            <li>Pour in the liquid; read its <b>volume</b></li>
+            <li>Mass of cylinder <b>and liquid</b></li>
+            <li class="step"><span class="equation-inline">mass of liquid = 112.0 − 62.0 = 50.0&nbsp;g</span></li>
+            <li class="step">\(\rho = \dfrac{m}{V} = \dfrac{50.0}{50} = 1.0\) g/cm³</li>
+          </ol>
+          <div class="panel"><div class="fig" data-fig="liquidDensity"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why not pour the liquid out to weigh it?</h3>
+            <p>Some would stay behind, clinging to the glass. Weighing the cylinder empty and then full measures every drop that is in the cylinder when you read the volume.</p>
+            <h3 class="rn-head">Would a bigger volume give a better answer?</h3>
+            <p>Yes. The scale can be read to about 1 cm³. That is 10% of a 10 cm³ sample but only 1% of a 100 cm³ sample.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Accurate measurements">
+        <p class="eyebrow"><span class="num">RP</span> Evaluate</p>
+        <h2>Getting it <em>right</em></h2>
+        <div class="split even top">
+          <ul class="points small">
+            <li>Read at <b>eye level</b>, at the <b>bottom of the meniscus</b></li>
+            <li>Balance reads <b>zero</b> before you start</li>
+            <li>Mass <b>before</b> the object gets wet</li>
+            <li>No splashes; no <b>air bubbles</b> on the object</li>
+            <li><b>Narrow</b> cylinder: scale lines further apart</li>
+          </ul>
+          <div class="mistakes">
+            <div class="mistake"><p class="wrong">“The volume of the stone is 68 cm³.”</p><p class="right">It is the <b>change</b>: 68 − 50 = 18 cm³.</p></div>
+            <div class="mistake step"><p class="wrong">“Human error.”</p><p class="right">“An air bubble made the volume too big, so the density came out too small.”</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Density</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Which way does each error push the answer?</h3>
+            <p>Density is mass divided by volume. Anything that makes the <b>volume too big</b> (a bubble, reading the top of the meniscus on the second reading only) makes the density too <b>small</b>. Anything that makes the <b>mass too big</b> (a wet stone, a balance that did not start at zero) makes the density too <b>big</b>.</p>
+            <h3 class="rn-head">Why eye level?</h3>
+            <p>Looking down on the scale makes the level seem higher than it is; looking up makes it seem lower. This is called parallax error.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Quick check: Lessons 3–4">
+        <p class="eyebrow"><span class="num">03–04</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>150 g, 60 cm³. Density?</p><div class="ans step"><span class="equation-inline">\(\rho = \dfrac{150}{60} = 2.5\)&nbsp;g/cm³</span></div></div>
+          <div class="q"><p><span class="n">2</span>2.5 g/cm³ in kg/m³?</p><div class="ans step">2500 kg/m³</div></div>
+          <div class="q"><p><span class="n">3</span>Density 800 kg/m³, volume 0.50 m³. Mass?</p><div class="ans step"><span class="equation-inline">\(m = 800 \times 0.50 = 400\)&nbsp;kg</span></div></div>
+          <div class="q"><p><span class="n">4</span>Why is a gas much less dense than a liquid?</p><div class="ans step">Particles far apart: less mass in each cm³</div></div>
+          <div class="q"><p><span class="n">5</span>Water level 40 → 55 cm³. Volume of object?</p><div class="ans step">15 cm³</div></div>
+          <div class="q"><p><span class="n">6</span>Where do you read a meniscus?</p><div class="ans step">The bottom, at eye level</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 5 ============ -->
+      <section class="slide dark a-violet" data-title="Lesson 5: Internal energy">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">05</span> Lesson 5: <span class="on">The energy inside</span></p>
+            <h1>Internal <em>energy</em></h1>
+            <div class="unlocks"><span>kinetic + potential</span><span>hotter, or a new state</span><span>heating graphs</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.2.1, 4.3.2.3</span><span>Combined Science 6.3.2.1, 6.3.2.3</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Boiling water stays at 100 °C. Where does the energy go?</h3>
+            <div class="fig" data-fig="heatingPlain"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Internal energy</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-violet" data-title="Internal energy">
+        <p class="eyebrow"><span class="num">05</span> Definition</p>
+        <h2>Internal <em>energy</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq" style="font-size:46px">internal energy</span><span class="eq-words">total <b>kinetic</b> energy + total <b>potential</b> energy<br>of all the particles in the system</span></div>
+          </div>
+          <div class="col">
+            <ul class="points">
+              <li><b>Kinetic</b>: the particles are moving or vibrating</li>
+              <li><b>Potential</b>: depends on how far apart the particles are</li>
+              <li class="step">Heating → particles gain energy → internal energy <b>increases</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Internal energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why do particles have potential energy?</h3>
+            <p>Particles attract each other. To pull two of them apart you have to do work against that attraction, just as you do work to stretch a spring. The energy you supply is stored as potential energy. So particles that are further apart have more potential energy.</p>
+            <h3 class="rn-head">Is internal energy the same as temperature?</h3>
+            <p>No. Temperature tells you only about the average kinetic energy of the particles. Internal energy is the total of both kinds, for every particle. A bath of warm water has far more internal energy than a red-hot spark, because it has so many more particles.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Heating does one of two things">
+        <p class="eyebrow"><span class="num">05</span> Either, never both at once</p>
+        <h2>Heating does <em>one of two things</em></h2>
+        <table class="pm-table fill">
+          <thead><tr><th></th><th>The temperature rises</th><th>The state changes</th></tr></thead>
+          <tbody>
+            <tr><th>Particles</th><td>Move or vibrate <b>faster</b></td><td>Break away, move <b>further apart</b></td></tr>
+            <tr><th>Energy gained</th><td><b>Kinetic</b></td><td class="step"><b>Potential</b></td></tr>
+            <tr><th>Temperature</th><td>Increases</td><td class="step"><b>Stays constant</b></td></tr>
+            <tr><th>Equation</th><td class="step">\(\Delta E = m\,c\,\Delta\theta\) <small>Lesson 7</small></td><td class="step">\(E = m\,L\) <small>Lesson 6</small></td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span class="tag">Lesson 5: Internal energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why can it not do both at once?</h3>
+            <p>At the melting point, any energy supplied is taken up at once by particles breaking free of their fixed positions. Until every particle has broken free, none of the energy is left over to make them move faster. So the temperature waits until the change of state is complete.</p>
+            <h3 class="rn-head">And when cooling?</h3>
+            <p>The same, in reverse. As a liquid freezes, its particles move closer into fixed positions and their potential energy falls. That energy is transferred to the surroundings, and the temperature stays constant until all of it is solid.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="A heating graph">
+        <p class="eyebrow"><span class="num">05</span> Ice to steam, heated steadily</p>
+        <h2>Slopes and <em>flats</em></h2>
+        <div class="split third">
+          <div class="col">
+            <ul class="points small">
+              <li><b>Slope</b>: one state, getting hotter</li>
+              <li><b>Flat</b>: changing state</li>
+              <li class="step">First flat: <b>melting point</b></li>
+              <li class="step">Second flat: <b>boiling point</b></li>
+            </ul>
+            <div class="remember step">On a flat, the heater is <b>still on</b></div>
+          </div>
+          <div class="panel"><div class="fig" data-fig="heating"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Internal energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why is the second flat so much longer?</h3>
+            <p>The heater supplies energy at a steady rate, so a longer flat means more energy. Boiling needs far more energy than melting, because the particles must be pulled completely apart, not just freed to slide past each other.</p>
+            <h3 class="rn-head">Why are the slopes different?</h3>
+            <p>Ice, water and steam need different amounts of energy to warm by each degree. Water needs the most, so its section is the least steep. Lesson 7 gives this a name: specific heat capacity.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To find a melting or boiling point, read the temperature of the flat section from the vertical axis.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="A cooling graph">
+        <p class="eyebrow"><span class="num">05</span> The same story, backwards</p>
+        <h2>Cooling <em>curve</em></h2>
+        <div class="split third">
+          <div class="col">
+            <ul class="points small">
+              <li>Liquid cools: particles <b>slow down</b></li>
+              <li class="step">Flat: <b>freezing</b>. Potential energy falls</li>
+              <li class="step">Energy still leaves, temperature <b>constant</b></li>
+              <li class="step">Then the solid cools</li>
+            </ul>
+          </div>
+          <div class="panel"><div class="fig" data-fig="cooling"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Internal energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">The practical: stearic acid</h3>
+            <p>Melted stearic acid, a waxy solid, is left to cool in a tube while you read its temperature every minute. The temperature falls, holds steady at about 69 °C for several minutes, then falls again. The steady section is its freezing point, and it is the same temperature as its melting point.</p>
+            <h3 class="rn-head">Why does the curve get less steep at the end?</h3>
+            <p>A hot object loses energy quickly to a cool room. As it gets closer to room temperature it loses energy more slowly, so the last part of the curve flattens out.</p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- ============ Lesson 6 ============ -->
+      <section class="slide dark a-cyan" data-title="Lesson 6: Specific latent heat">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">06</span> Lesson 6: <span class="on">The hidden energy</span></p>
+            <h1>Specific <em>latent heat</em></h1>
+            <div class="unlocks"><span>\(E = m\,L\)</span><span>fusion</span><span>vaporisation</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.2.3</span><span>Combined Science 6.3.2.3</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Why is a steam scald worse than a hot-water scald?</h3>
+            <div class="fig" data-fig="ice"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Specific latent heat</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-cyan" data-title="Latent heat">
+        <p class="eyebrow"><span class="num">06</span> Definition</p>
+        <h2>Energy to <em>change state</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq" style="font-size:42px">specific latent heat</span><span class="eq-words">the energy needed to change the state of <b>1 kg</b> of a substance with <b>no change in temperature</b></span><span class="eq-units">Unit: J/kg</span></div>
+          </div>
+          <div class="col">
+            <ul class="points">
+              <li><b>Latent</b> means hidden</li>
+              <li>Energy goes in; a thermometer shows <b>no change</b></li>
+              <li class="step">Internal energy still <b>increases</b>: potential energy of the particles</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Specific latent heat</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why “specific”?</h3>
+            <p>In physics, “specific” means “for each kilogram”. Latent heat is the energy for whatever amount you have; specific latent heat is the energy for exactly 1 kg, which lets you compare one substance with another.</p>
+            <h3 class="rn-head">Where does the energy go, if not into temperature?</h3>
+            <p>Into pulling particles away from their neighbours. That raises their potential energy. Their kinetic energy, and so the temperature, stays the same.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A definition question is worth two marks: one for “energy to change the state of 1 kg”, one for “with no change in temperature”.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="E = m L">
+        <p class="eyebrow"><span class="num">06</span> Know and apply</p>
+        <h2>Energy for a <em>change of state</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(E = m\,L\)</span><span class="eq-words">\(\text{energy} = \text{mass} \times \text{specific latent heat}\)</span><span class="eq-units">\(E\) in J, \(m\) in kg, \(L\) in J/kg</span></div>
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>90 000 J melts wax. \(L = 150\,000\) J/kg. Mass?</div>
+              <dl>
+                <div class="step" data-step-order="2"><dt>Rearrange</dt><dd>\(E = m\,L\), so \(m = \dfrac{E}{L}\)</dd></div>
+                <div class="step" data-step-order="2"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(m = \dfrac{90\,000}{150\,000} = 0.60\)&nbsp;kg</span></dd></div>
+              </dl>
+            </div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 1</span>Melt 0.50 kg of ice. \(L = 334\,000\) J/kg</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(E = m\,L\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(E = 0.50 \times 334\,000\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(E = 167\,000\)&nbsp;J</span></dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Specific latent heat</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why is there no temperature in the equation?</h3>
+            <p>Because the temperature does not change during a change of state. All that matters is how much substance changes state (\(m\)) and how much energy each kilogram needs (\(L\)).</p>
+            <h3 class="rn-head">The equation is the definition, scaled up</h3>
+            <p>\(L\) is the energy for 1 kg. For 2 kg you need twice as much, for 0.5 kg half as much. Multiplying by the mass is all the equation does.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Masses are often given in grams. \(L\) is per kilogram, so convert first: 60 g is 0.060 kg.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Fusion and vaporisation">
+        <p class="eyebrow"><span class="num">06</span> Two kinds</p>
+        <h2>Fusion <em>and vaporisation</em></h2>
+        <table class="pm-table fill">
+          <thead><tr><th></th><th>Change of state</th><th>Water</th></tr></thead>
+          <tbody>
+            <tr><th>Specific latent heat of <b>fusion</b></th><td>Solid ⇄ liquid: melting, freezing</td><td class="num">334 000 J/kg</td></tr>
+            <tr><th>Specific latent heat of <b>vaporisation</b></th><td>Liquid ⇄ vapour: boiling, condensing</td><td class="num">2 260 000 J/kg</td></tr>
+            <tr class="step"><th>Reversed?</th><td colspan="2">Freezing and condensing <b>give out</b> the same energy</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span class="tag">Lesson 6: Specific latent heat</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why is vaporisation so much bigger?</h3>
+            <p>Melting only loosens the particles: they stay touching. Boiling pulls every particle away from all its neighbours and out into a gas. That takes nearly seven times as much energy for each kilogram of water.</p>
+            <h3 class="rn-head">The steam scald</h3>
+            <p>Steam at 100 °C that lands on your skin first condenses, giving out 2 260 000 J for every kilogram. Only then is it water at 100 °C, which goes on to cool and transfer more. Boiling water gives you only that second part.</p>
+            <h3 class="rn-head">Why does sweating cool you?</h3>
+            <p>To evaporate, sweat must take in latent heat, and it takes it from your skin.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Measuring the latent heat of fusion">
+        <p class="eyebrow"><span class="num">06</span> Practical: melting ice</p>
+        <h2>Measure \(L\) <em>for ice</em></h2>
+        <div class="split">
+          <div class="col">
+            <ol class="steps">
+              <li>Two funnels, <b>same mass</b> of ice. One has the heater</li>
+              <li>Heater and joulemeter on for 5 minutes</li>
+              <li><span class="equation-inline">mass melted by heater = 42.0 − 6.0 = 36.0&nbsp;g</span></li>
+              <li class="step">\(L = \dfrac{E}{m} = \dfrac{12\,000}{0.0360} = 333\,000\) J/kg</li>
+            </ol>
+          </div>
+          <div class="panel"><div class="fig" data-fig="ice"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Specific latent heat</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What is the second funnel for?</h3>
+            <p>It is a control. The room is warmer than the ice, so some ice melts with no heater at all. The control shows how much. Subtract it, and what is left is the ice melted by the energy the joulemeter measured.</p>
+            <h3 class="rn-head">Why must the ice be at 0 °C to begin with?</h3>
+            <p>Ice straight from a freezer is at about −18 °C. Some of the heater's energy would go into warming it to 0 °C before any melted, and \(L\) would come out too big. Ice that is already wet and melting is at 0 °C.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Quick check: Lessons 5–6">
+        <p class="eyebrow"><span class="num">05–06</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>Internal energy is the total of which two energies?</p><div class="ans step">Kinetic and potential energy of the particles</div></div>
+          <div class="q"><p><span class="n">2</span>What does a flat section of a heating graph show?</p><div class="ans step">A change of state</div></div>
+          <div class="q"><p><span class="n">3</span>Which energy increases while ice melts?</p><div class="ans step">Potential energy of the particles</div></div>
+          <div class="q"><p><span class="n">4</span>Unit of specific latent heat?</p><div class="ans step">J/kg</div></div>
+          <div class="q"><p><span class="n">5</span>Melt 2.0 kg of ice. \(L = 334\,000\) J/kg</p><div class="ans step"><span class="equation-inline">\(E = 2.0 \times 334\,000 = 668\,000\)&nbsp;J</span></div></div>
+          <div class="q"><p><span class="n">6</span>Liquid to vapour: fusion or vaporisation?</p><div class="ans step">Vaporisation</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 7 ============ -->
+      <section class="slide dark a-hot" data-title="Lesson 7: Specific heat capacity">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">07</span> Lesson 7: <span class="on">How hard is it to heat?</span></p>
+            <h1>Specific <em>heat capacity</em></h1>
+            <div class="unlocks"><span>\(\Delta E = m\,c\,\Delta\theta\)</span><span>temperature change</span><span>\(c\) or \(L\)?</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.2.2, 4.1.1.3</span><span>Combined Science 6.3.2.2, 6.1.1.3</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Same sunshine: hot sand, cold sea. Why?</h3>
+            <div class="values" style="margin-top:18px"><div><b>4200</b><span>water, J/kg °C</span></div><div><b>800</b><span>sand, J/kg °C</span></div></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Specific heat capacity</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-hot" data-title="What a temperature rise depends on">
+        <p class="eyebrow"><span class="num">07</span> Three things</p>
+        <h2>How much <em>hotter</em>?</h2>
+        <div class="split even top">
+          <div class="col">
+            <ul class="points">
+              <li><b>Energy</b> transferred: more energy, bigger rise</li>
+              <li><b>Mass</b>: more mass, smaller rise</li>
+              <li><b>Material</b>: some are harder to heat</li>
+            </ul>
+            <div class="eq-block step"><span class="eq" style="font-size:40px">specific heat capacity</span><span class="eq-words">the energy needed to raise the temperature of <b>1 kg</b> of a substance by <b>1 °C</b></span><span class="eq-units">Unit: J/kg °C</span></div>
+          </div>
+          <table class="pm-table tight">
+            <thead><tr><th>Material</th><th>\(c\) in J/kg °C</th></tr></thead>
+            <tbody>
+              <tr><td>Water</td><td class="num">4200</td></tr>
+              <tr><td>Cooking oil</td><td class="num">2000</td></tr>
+              <tr><td>Aluminium</td><td class="num">900</td></tr>
+              <tr><td>Iron</td><td class="num">450</td></tr>
+              <tr><td>Copper</td><td class="num">390</td></tr>
+              <tr><td>Lead</td><td class="num">130</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Specific heat capacity</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What does 4200 J/kg °C mean?</h3>
+            <p>It takes 4200 J to make 1 kg of water 1 °C hotter. The same 4200 J would make 1 kg of copper nearly 11 °C hotter. Water is hard to heat, and for the same reason it is slow to cool.</p>
+            <h3 class="rn-head">Why that matters</h3>
+            <p>Water carries a lot of energy for a small temperature change, so it is used in central heating and to cool car engines. The sea warms slowly in summer and cools slowly in winter, which keeps places near the coast mild.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">A high specific heat capacity does not mean “heats up quickly”. It means the opposite: more energy is needed for every degree.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="ΔE = m c Δθ">
+        <p class="eyebrow"><span class="num">07</span> Know and apply</p>
+        <h2>Change in <em>thermal energy</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(\Delta E = m\,c\,\Delta\theta\)</span><span class="eq-words">energy = mass × specific heat capacity × temperature change</span><span class="eq-units">\(\Delta E\) in J, \(m\) in kg, \(c\) in J/kg °C, \(\Delta\theta\) in °C</span></div>
+            <div class="remember">\(\Delta\theta\) = <b>change</b> in temperature. Work it out first</div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example</span>Heat 2.0 kg of water from 20 °C to 100 °C. \(c = 4200\) J/kg °C</div>
+              <dl>
+                <div class="step"><dt>Change</dt><dd><span class="equation-inline">\(\Delta\theta = 100 - 20 = 80\)&nbsp;°C</span></dd></div>
+                <div class="step"><dt>Equation</dt><dd>\(\Delta E = m\,c\,\Delta\theta\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(\Delta E = 2.0 \times 4200 \times 80\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(\Delta E = 672\,000\)&nbsp;J</span></dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Specific heat capacity</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Build the equation from the definition</h3>
+            <p>\(c\) is the energy for 1 kg and 1 °C. For 2.0 kg you need twice as much, so multiply by the mass. For 80 °C you need 80 times as much, so multiply by the temperature change. That is all \(m\,c\,\Delta\theta\) is.</p>
+            <h3 class="rn-head">What the symbols mean</h3>
+            <p>\(\Delta\) (delta) means “change in”. \(\theta\) (theta) is temperature. So \(\Delta\theta\) is the final temperature minus the starting temperature, and \(\Delta E\) is the change in the energy stored.</p>
+            <h3 class="rn-head">Is 672 000 J sensible?</h3>
+            <p>A 3000 W kettle supplies 3000 J each second, so this takes \(672\,000 \div 3000 = 224\) s: nearly four minutes for a full kettle. That is about right.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Rearranging">
+        <p class="eyebrow"><span class="num">07</span> Rearrange first</p>
+        <h2>Find \(\Delta\theta\), <em>or \(c\)</em></h2>
+        <div class="split even top">
+          <div class="worked">
+            <div class="wq"><span>Example 1</span>7800 J to 0.50 kg of copper. \(c = 390\) J/kg °C</div>
+            <dl>
+              <div class="step"><dt>Equation</dt><dd>\(\Delta E = m\,c\,\Delta\theta\)</dd></div>
+              <div class="step"><dt>Rearrange</dt><dd>\(\Delta\theta = \dfrac{\Delta E}{m\,c}\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(\Delta\theta = \dfrac{7800}{0.50 \times 390}\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(\Delta\theta = 40\)&nbsp;°C</span></dd></div>
+            </dl>
+          </div>
+          <div class="worked">
+            <div class="wq"><span>Example 2</span>27 000 J warms a 1.5 kg block by 20 °C</div>
+            <dl>
+              <div class="step"><dt>Equation</dt><dd>\(\Delta E = m\,c\,\Delta\theta\)</dd></div>
+              <div class="step"><dt>Rearrange</dt><dd>\(c = \dfrac{\Delta E}{m\,\Delta\theta}\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(c = \dfrac{27\,000}{1.5 \times 20}\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(c = 900\)&nbsp;J/kg °C</span></dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Specific heat capacity</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">One rule covers every rearrangement</h3>
+            <p>The three quantities on the right are multiplied together. To get one of them alone, divide \(\Delta E\) by the other two.</p>
+            <h3 class="rn-head">On the calculator</h3>
+            <p>Work out the bottom of the fraction first: \(0.50 \times 390 = 195\), then \(7800 \div 195\). Or put brackets round the bottom. Typing \(7800 \div 0.50 \times 390\) gives a wrong answer.</p>
+            <h3 class="rn-head">If the question asks for the final temperature</h3>
+            <p>\(\Delta\theta\) is only the rise. Copper that starts at 20 °C and rises by 40 °C ends at 60 °C.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Heat capacity or latent heat?">
+        <p class="eyebrow"><span class="num">07</span> Choose the right equation</p>
+        <h2>\(c\) <em>or \(L\)?</em></h2>
+        <table class="pm-table fill">
+          <thead><tr><th></th><th>Specific heat capacity</th><th>Specific latent heat</th></tr></thead>
+          <tbody>
+            <tr><th>What happens</th><td>The <b>temperature</b> changes</td><td>The <b>state</b> changes</td></tr>
+            <tr><th>Energy for</th><td>1 kg, by 1 °C</td><td>1 kg, at constant temperature</td></tr>
+            <tr><th>Equation</th><td>\(\Delta E = m\,c\,\Delta\theta\)</td><td>\(E = m\,L\)</td></tr>
+            <tr><th>Unit</th><td>J/kg °C</td><td>J/kg</td></tr>
+            <tr class="step"><th>On a heating graph</th><td>Sloping section</td><td>Flat section</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span class="tag">Lesson 7: Specific heat capacity</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">A two-step question</h3>
+            <p>A kettle heats 0.20 kg of water from 20 °C to 100 °C, then boils it all away. The first step is a temperature change: \(\Delta E = m\,c\,\Delta\theta = 0.20 \times 4200 \times 80 = 67\,200\) J. The second is a change of state: \(E = m\,L = 0.20 \times 2\,260\,000 = 452\,000\) J. Add them: 519 200 J.</p>
+            <h3 class="rn-head">What that shows</h3>
+            <p>Boiling the water away took nearly seven times as much energy as heating it from room temperature. That is why a kettle that fails to switch off wastes so much energy.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Look for a temperature change in the question. Two temperatures: use \(c\). “Melts”, “boils”, “freezes” or “condenses” at one temperature: use \(L\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- ============ Lesson 8 ============ -->
+      <section class="slide dark a-alt" data-title="Lesson 8: Measuring specific heat capacity">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">08</span> Lesson 8: <span class="on">Required practical</span></p>
+            <h1>Measuring <em>\(c\)</em></h1>
+            <div class="unlocks"><span>heater and block</span><span>\(E = V\,I\,t\)</span><span>why too high?</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.1.1.3, RP 1</span><span>Combined Science 6.1.1.3, RP 14</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Which metal is this block? Use a heater and a thermometer</h3>
+            <div class="fig" data-fig="shcJoule"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Specific heat capacity</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-alt" data-title="Required practical: method">
+        <p class="eyebrow"><span class="num">RP</span> Specific heat capacity: method</p>
+        <h2>Energy in, <em>temperature up</em></h2>
+        <div class="pair">
+          <div><div class="fig" data-fig="shcVI"></div><p>Ammeter, voltmeter, stopwatch: <span class="equation-inline">\(E = V\,I\,t\)</span></p></div>
+          <div><div class="fig" data-fig="shcJoule"></div><p>Or a joulemeter: read the energy directly</p></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Specific heat capacity</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">The method in order</h3>
+            <p>Measure the mass of the block on a balance. Wrap it in insulation, and put the heater and the thermometer in their holes. Record the starting temperature. Switch on for a measured time and find the energy supplied. Record the highest temperature reached. Then \(c = \dfrac{\Delta E}{m\,\Delta\theta}\).</p>
+            <h3 class="rn-head">Where does \(E = V\,I\,t\) come from?</h3>
+            <p>From Electric Circuits. Power is \(P = V\,I\), and energy is \(E = P\,t\). Put the first into the second: \(E = V\,I\,t\). A joulemeter does this multiplication for you.</p>
+            <h3 class="rn-head">Why an electric heater and not a Bunsen burner?</h3>
+            <p>You can measure the energy an electric heater supplies. Most of the energy from a flame goes into the air, and there is no simple way to measure how much reaches the block.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Required practical: results">
+        <p class="eyebrow"><span class="num">RP</span> Results</p>
+        <h2>From the <em>results</em></h2>
+        <div class="split third">
+          <div class="col">
+            <ul class="points small tight">
+              <li>1.00 kg of aluminium, 12.0 V, 4.0 A, 600 s</li>
+              <li><span class="equation-inline">\(E = V\,I\,t = 28\,800\)&nbsp;J</span></li>
+              <li><span class="equation-inline">\(\Delta\theta = 49.0 - 20.0 = 29.0\)&nbsp;°C</span></li>
+              <li class="step">\(c = \dfrac{\Delta E}{m\,\Delta\theta} = \dfrac{28\,800}{1.00 \times 29.0}\)</li>
+              <li class="step"><b>\(c = 993\) J/kg °C</b></li>
+            </ul>
+            <div class="remember step">Or: \(c = \dfrac{1}{m \times \text{gradient}}\)</div>
+          </div>
+          <div class="panel"><div class="fig" data-fig="shcGraph"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Specific heat capacity</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does the graph curve at the start?</h3>
+            <p>For the first minute the heater is warming itself up, and energy takes time to spread through the metal to the thermometer. After that, equal amounts of energy give equal temperature rises, and the graph is a straight line.</p>
+            <h3 class="rn-head">Why the gradient gives a better value</h3>
+            <p>The gradient of the straight part is the temperature rise for each joule: \(\dfrac{\Delta\theta}{\Delta E}\). Since \(c = \dfrac{\Delta E}{m\,\Delta\theta}\), that makes \(c = \dfrac{1}{m \times \text{gradient}}\). Here the gradient is 0.00106 °C/J, which gives 940 J/kg °C. The line uses every reading and leaves out the slow start, so it is closer to the accepted 900 J/kg °C than the 993 from the totals.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Required practical: evaluation">
+        <p class="eyebrow"><span class="num">RP</span> Evaluate</p>
+        <h2>Why is it <em>too high</em>?</h2>
+        <div class="split even top">
+          <ol class="chain">
+            <li>Some energy goes to the <b>surroundings</b>, not the block</li>
+            <li class="step">The temperature rise is <b>smaller</b> than it should be</li>
+            <li class="step">Dividing by a smaller \(\Delta\theta\) gives a <b>bigger</b> \(c\)</li>
+          </ol>
+          <div class="col">
+            <ul class="points small">
+              <li><b>Insulate</b> the block: sides, top, underneath</li>
+              <li>Drop of <b>oil</b> in the thermometer hole</li>
+              <li>Record the <b>highest</b> temperature after switching off</li>
+            </ul>
+            <div class="mistakes step"><div class="mistake"><p class="wrong">“The results were inaccurate.”</p><p class="right">“Energy was transferred to the surroundings, so \(\Delta\theta\) was too small.”</p></div></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Required practical: Specific heat capacity</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What kind of error is this?</h3>
+            <p>A systematic error: it pushes every result the same way, always too high. Repeating the experiment and taking a mean does not remove it. Only changing the method, with better insulation, makes it smaller.</p>
+            <h3 class="rn-head">What does the oil do?</h3>
+            <p>Air is a poor conductor. Without oil there is a layer of air between the block and the thermometer bulb, and the thermometer reads lower than the block. Oil fills the gap, so the thermometer reaches the temperature of the metal.</p>
+            <h3 class="rn-head">Why does the temperature keep rising after switching off?</h3>
+            <p>The heater and the metal next to it are hotter than the rest of the block. Energy carries on spreading outwards for a minute or so until the block is the same temperature all through.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Quick check: Lessons 7–8">
+        <p class="eyebrow"><span class="num">07–08</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>Unit of specific heat capacity?</p><div class="ans step">J/kg °C</div></div>
+          <div class="q"><p><span class="n">2</span>Water goes from 15 °C to 95 °C. \(\Delta\theta\)?</p><div class="ans step">80 °C</div></div>
+          <div class="q"><p><span class="n">3</span>3.0 kg of iron, \(c = 450\) J/kg °C, rise of 50 °C. Energy?</p><div class="ans step"><span class="equation-inline">\(3.0 \times 450 \times 50 = 67\,500\)&nbsp;J</span></div></div>
+          <div class="q"><p><span class="n">4</span>12 V, 3.0 A for 300 s. Energy supplied?</p><div class="ans step"><span class="equation-inline">\(E = V\,I\,t = 10\,800\)&nbsp;J</span></div></div>
+          <div class="q"><p><span class="n">5</span>Why insulate the block?</p><div class="ans step">Less energy transferred to the surroundings</div></div>
+          <div class="q"><p><span class="n">6</span>Ice melting at 0 °C: \(c\) or \(L\)?</p><div class="ans step">\(L\): the state changes, not the temperature</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-hi" data-title="Equation toolkit">
+        <p class="eyebrow">Learn to use these</p>
+        <h2>Equation <em>toolkit</em></h2>
+        <div class="toolkit fill">
+          <div class="tool"><span class="eq">\(\rho = \dfrac{m}{V}\)</span><span class="words">\(\text{density} = \dfrac{\text{mass}}{\text{volume}}\)</span><span class="units">\(\rho\) in kg/m³, \(m\) in kg, \(V\) in m³</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(E = m\,L\)</span><span class="words">\(\text{energy} = \text{mass} \times \text{specific latent heat}\)</span><span class="units">\(E\) in J, \(m\) in kg, \(L\) in J/kg</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(\Delta E = m\,c\,\Delta\theta\)</span><span class="words">energy = mass × specific heat capacity × temperature change</span><span class="units">\(\Delta E\) in J, \(m\) in kg, \(c\) in J/kg °C, \(\Delta\theta\) in °C</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(p\,V = \text{constant}\) <span class="triple-tag">Triple only</span></span><span class="words">\(\text{pressure} \times \text{volume} = \text{constant}\)</span><span class="units">\(p\) in Pa, \(V\) in m³; fixed mass, constant temperature</span><span class="where">On the sheet</span></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Particle model of matter</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">All of these are on the equation sheet</h3>
+            <p>AQA gives you the Physics Equations Sheet in every paper. It does not tell you what the symbols mean, which units to use, or which equation fits the question, so those are the things to learn.</p>
+            <h3 class="rn-head">Choosing between the two heating equations</h3>
+            <p>If the temperature changes, use \(\Delta E = m\,c\,\Delta\theta\). If the state changes, use \(E = m\,L\). If both happen, do them one after the other and add the energies.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words</h2>
+        <div class="terms fill">
+          <div class="term"><b>Density</b><span>Mass per unit volume (kg/m³)</span></div>
+          <div class="term"><b>Physical change</b><span>No new substance; reversible</span></div>
+          <div class="term"><b>Sublimating</b><span>Solid straight to gas</span></div>
+          <div class="term"><b>Gas pressure</b><span>Molecules colliding with the walls</span></div>
+          <div class="term"><b>Internal energy</b><span>Total kinetic + potential energy of the particles</span></div>
+          <div class="term"><b>Latent heat</b><span>Energy to change state, temperature constant</span></div>
+          <div class="term"><b>Specific latent heat</b><span>Energy to change the state of 1 kg (J/kg)</span></div>
+          <div class="term"><b>Fusion</b><span>Solid ⇄ liquid</span></div>
+          <div class="term"><b>Vaporisation</b><span>Liquid ⇄ vapour</span></div>
+          <div class="term"><b>Specific heat capacity</b><span>Energy to heat 1 kg by 1 °C (J/kg °C)</span></div>
+          <div class="term"><b>Displacement</b><span>Volume from the water pushed aside</span></div>
+          <div class="term"><b>Meniscus</b><span>Curved liquid surface: read the bottom</span></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Particle model of matter</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ GCSE Physics (8463) only, AQA 4.3.3.2 and 4.3.3.3 ============ -->
+      <section class="slide dark a-violet triple" data-title="Pressure and volume">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">+</span> Triple Science: <span class="on">Squeeze a gas</span></p>
+            <h1>Pressure <em>&amp; volume</em></h1>
+            <div class="unlocks"><span>\(p\,V = \text{constant}\)</span><span>force at right angles</span><span>doing work on a gas</span></div>
+            <p class="spec-ref"><span>AQA spec: Physics 4.3.3.2, 4.3.3.3</span><span>Not in Combined Science</span></p>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Why does a bubble grow as it rises through water?</h3>
+            <div class="fig" data-fig="pvGraph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Triple Science: Pressure and volume</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-violet triple" data-title="Squeezing a gas">
+        <p class="eyebrow"><span class="num">+</span> Try it: constant temperature</p>
+        <h2>Smaller volume, <em>bigger pressure</em></h2>
+        <div class="panel fill"><div class="fig" data-fig="syringeLive"></div></div>
+        <div class="slide-foot"><span class="tag">Triple Science: Pressure and volume</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does the pressure rise, if the molecules are no faster?</h3>
+            <p>The temperature is constant, so the average speed is the same. But the same molecules are now in a smaller space. Each one has less distance to travel between walls, so it hits them more often. More collisions each second on each square centimetre means a bigger pressure.</p>
+            <h3 class="rn-head">Which way does the gas push?</h3>
+            <p>At right angles to every surface it touches. Molecules arrive from all directions, so the sideways parts of their pushes cancel out and only the push straight into the wall is left. That is why a balloon is round.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Compare this with Lesson 2. There the gas was heated at constant volume: harder <b>and</b> more frequent collisions. Here it is squeezed at constant temperature: only more frequent.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet triple" data-title="p V = constant">
+        <p class="eyebrow"><span class="num">+</span> Know and apply</p>
+        <h2>Pressure × volume</h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(p\,V = \text{constant}\)</span><span class="eq-words">\(\text{pressure} \times \text{volume} = \text{constant}\)</span><span class="eq-units">\(p\) in Pa, \(V\) in m³. Fixed mass of gas, constant temperature</span></div>
+            <div class="remember">Before and after: \(p_1\,V_1 = p_2\,V_2\)</div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example</span>60 cm³ at 100 kPa is squeezed to 20 cm³</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(p_1\,V_1 = p_2\,V_2\)</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(p_2 = \dfrac{p_1\,V_1}{V_2}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(p_2 = \dfrac{100 \times 60}{20}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(p_2 = 300\)&nbsp;kPa</span></dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Triple Science: Pressure and volume</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What does “constant” mean?</h3>
+            <p>Multiply the pressure of the gas by its volume and you get a number. Squeeze or release the gas, and the pressure and volume both change, but their product is the same number as before. In the example it is \(100 \times 60 = 6000\) before and \(300 \times 20 = 6000\) after.</p>
+            <h3 class="rn-head">Do I have to use Pa and m³?</h3>
+            <p>Not when you compare before with after. Use the same unit for both pressures and the same unit for both volumes, and the answer comes out in those units.</p>
+            <h3 class="rn-head">The two conditions</h3>
+            <p>“Fixed mass” means no gas gets in or out. “Constant temperature” means the gas is squeezed slowly, so it stays at the temperature of the room. If either changes, the equation does not hold.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet triple" data-title="Pressure against volume">
+        <p class="eyebrow"><span class="num">+</span> Inversely proportional</p>
+        <h2>Halve one, <em>double the other</em></h2>
+        <div class="pair">
+          <div><div class="fig" data-fig="syringes"></div><p>Each time: <span class="equation-inline">\(p \times V = 6000\)</span></p></div>
+          <div><div class="fig" data-fig="pvGraph"></div><p>A curve, never a straight line</p></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Triple Science: Pressure and volume</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Inversely proportional</h3>
+            <p>Halve the volume and the pressure doubles. Make the volume three times bigger and the pressure falls to a third. Whatever you multiply one by, you divide the other by.</p>
+            <h3 class="rn-head">The rising bubble</h3>
+            <p>Deep under water the pressure on a bubble is high. As it rises, the pressure on it falls, so its volume grows. A bubble released where the pressure is 300 kPa has three times the volume when it reaches the surface, where the pressure is 100 kPa.</p>
+            <h3 class="rn-head">Will the curve ever touch an axis?</h3>
+            <p>No. However big the volume, the gas still has some pressure, and however great the pressure, the gas still takes up some space.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet triple" data-title="Doing work on a gas">
+        <p class="eyebrow"><span class="num">+</span> Squash it quickly</p>
+        <h2>Doing <em>work</em> on a gas</h2>
+        <div class="split even">
+          <ol class="chain">
+            <li>A <b>force</b> pushes the piston in: <b>work</b> is done on the gas</li>
+            <li class="step">Energy is transferred to the gas</li>
+            <li class="step">Its <b>internal energy</b> increases</li>
+            <li class="step">Its <b>temperature</b> rises</li>
+          </ol>
+          <div class="panel"><div class="fig" data-fig="pump"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Triple Science: Pressure and volume</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What is “work”?</h3>
+            <p>Work is the transfer of energy by a force. When your force moves the piston, energy is transferred from you to the trapped air.</p>
+            <h3 class="rn-head">How does that make the molecules faster?</h3>
+            <p>A molecule that hits a wall which is standing still bounces off at the same speed. A molecule that hits a piston moving towards it bounces off faster, like a tennis ball off a swinging racket. Every such collision adds a little kinetic energy, so the average kinetic energy, and the temperature, go up.</p>
+            <h3 class="rn-head">Why did the temperature stay constant on the earlier slides?</h3>
+            <p>There the gas was squeezed slowly, so the extra energy had time to escape through the walls to the room. Pump up a bicycle tyre quickly and there is no time: the end of the pump gets hot.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet triple" data-title="Quick check: Pressure and volume">
+        <p class="eyebrow"><span class="num">+</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>Direction of the force of a gas on a wall?</p><div class="ans step">At right angles to the wall</div></div>
+          <div class="q"><p><span class="n">2</span>Volume doubled at constant temperature. Pressure?</p><div class="ans step">Halved</div></div>
+          <div class="q"><p><span class="n">3</span>200 kPa, 0.50 m³ expands to 2.0 m³. Pressure?</p><div class="ans step"><span class="equation-inline">\(p_2 = \dfrac{200 \times 0.50}{2.0} = 50\)&nbsp;kPa</span></div></div>
+          <div class="q"><p><span class="n">4</span>Two conditions for \(p\,V = \text{constant}\)?</p><div class="ans step">Fixed mass, constant temperature</div></div>
+          <div class="q"><p><span class="n">5</span>What is work?</p><div class="ans step">Energy transferred by a force</div></div>
+          <div class="q"><p><span class="n">6</span>Work is done on a gas. Its internal energy?</p><div class="ans step">Increases, so it can get hotter</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="/gcsephy/year10phy/unit02/assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/teaching-deck.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/companion-deck.js"></script>
+</body>
+</html>
