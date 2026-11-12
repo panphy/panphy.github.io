@@ -240,6 +240,12 @@ Students are given three small data sets and must:
 4. Identify which data set is most precise.
 5. Suggest one possible random error and one possible systematic error.
 
+## Using the workbook
+
+The workbook prints the worked example on slide 7 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+
+The Quick check (slide 11) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 This lesson should stay practical and concrete. The aim is not to teach advanced uncertainty analysis, but to give students the language and habits they will need for the rest of the unit.

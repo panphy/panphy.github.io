@@ -43,8 +43,8 @@
         { t: "split", cls: "wide-fig", left: [{ t: "fig", h: deckFig("notation", "", "", 44) }], right: [
           { t: "html", h: "<ul><li>The <strong>atomic number</strong> (bottom) is the number of <strong>protons</strong>. It decides which element the atom is.</li><li>The <strong>mass number</strong> (top) is the number of <strong>protons + neutrons</strong>.</li><li>Number of neutrons = mass number − atomic number.</li><li>In an atom, number of electrons = number of protons.</li></ul>" },
         ] },
-        { t: "worked", q: `How many protons, neutrons and electrons are in an atom of ${N(23, 11, "Na")}?`, steps: [["Protons", "atomic number = 11"], ["Neutrons", "23 − 11 = 12"], ["Electrons", "same as protons = 11"], ["Answer", "11 p, 12 n, 11 e"]],
-          yt: { q: `How many protons, neutrons and electrons are in an atom of ${N(27, 13, "Al")}?`, steps: [["Protons", "13"], ["Neutrons", "27 − 13 = 14"], ["Electrons", "13"], ["Answer", "13 p, 14 n, 13 e"]] } },
+        { t: "follow", slide: 6, q: `How many protons, neutrons and electrons are in an atom of ${N(23, 11, "Na")}?`, steps: [["Protons", "atomic number = 11"], ["Neutrons", "23 − 11 = 12"], ["Electrons", "same as protons = 11"], ["Answer", "11 p, 12 n, 11 e"]],
+          yt: { q: `How many protons, neutrons and electrons are in an atom of ${N(27, 13, "Al")}?`, steps: [["Protons", "atomic number = 13"], ["Neutrons", "27 − 13 = 14"], ["Electrons", "same as protons = 13"], ["Answer", "13 p, 14 n, 13 e"]] } },
       ],
       try: [
         { t: "q", p: "Complete the sentences using the word bank.", fill: "At the centre of an atom is a tiny [[nucleus]]. It contains [[protons]] and [[neutrons]]. [[Electrons|30]] are arranged in energy levels around it. A proton has a relative charge of [[+1|14]] and an electron has a relative charge of [[−1|14]]. Almost all of the [[mass]] of the atom is in the nucleus.", bank: ["nucleus", "protons", "neutrons", "Electrons", "mass", "+1", "−1", "0", "charge"] },
@@ -223,11 +223,20 @@
         { t: "q", say: ["Leo", "Scientists keep changing the model of the atom because they get bored of the old one."], p: "Explain why scientists really change models.", lines: 3, a: "When new evidence (e.g. from an experiment) does not fit the old model, the model has to be changed or replaced so it explains all the evidence. The new model is checked by other scientists (peer review) before it is accepted." },
         { t: "q", type: "Challenge", p: "Protons were identified in 1919, but the neutron was not found until 1932. Suggest why the neutron was harder to find.", lines: 2, a: "A neutron has no charge, so it is not deflected by electric or magnetic fields and does not ionise atoms directly, so it does not show up easily in detectors." },
       ],
+      examSplit: true,
       exam: [
         { tip: "Use the key words: absorb/emit, higher/lower energy level, further from/closer to the nucleus.", p: "Describe how the arrangement of the electrons in an atom may change when the atom absorbs electromagnetic radiation.", marks: 2, lines: 2, a: "An electron moves to a higher energy level (1), further from the nucleus (1)." },
         { p: "Explain why Bohr's model of the atom was accepted by other scientists.", marks: 2, lines: 2, a: "His theoretical calculations agreed with experimental observations (1); it could be tested and checked by other scientists / explained evidence the nuclear model could not (1)." },
         { p: "Give the name of the scientist who provided the evidence for neutrons.", marks: 1, lines: 1, a: "James Chadwick." },
       ],
+      quick: { slide: 25, covers: "Lessons 1–4", items: [
+        ["What is in the nucleus?", "Protons and neutrons."],
+        [`How many neutrons are in ${N(37, 17, "Cl")}?`, "37 − 17 = 20"],
+        ["Why did most alpha particles pass straight through the foil?", "The atom is mostly empty space."],
+        ["Why did a very few alpha particles bounce back?", "The nucleus is tiny, dense and positive."],
+        ["An electron absorbs EM radiation. What happens to it?", "It moves to a higher energy level (further from the nucleus)."],
+        ["Who gave the evidence for the neutron?", "James Chadwick."],
+      ] },
       summary: ["Bohr (1913): electrons orbit at specific distances, called energy levels. His calculations agreed with experiments.", "Absorb EM radiation → electron moves to a higher level, further from the nucleus.", "Emit EM radiation → electron moves to a lower level, closer to the nucleus.", "Protons were identified later (1919); James Chadwick gave evidence for neutrons (1932).", "New evidence changes models; results are published and peer reviewed."],
       recall: [["What did Bohr add to the nuclear model?", "Electrons orbit at specific distances (energy levels)."], ["What happens when an electron emits EM radiation?", "It moves to a lower energy level, closer to the nucleus."], ["Who gave the evidence for the neutron?", "James Chadwick (1932)."], ["Why are scientific results published?", "So other scientists can check them (peer review)."]],
       cando: ["describe Bohr's model of the atom", "explain what happens when electrons absorb or emit EM radiation", "describe the discovery of protons and neutrons", "explain why models of the atom have changed"],

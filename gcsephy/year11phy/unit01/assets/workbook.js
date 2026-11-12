@@ -1,6 +1,6 @@
 /* Renders the Atoms and Nuclear Radiation student workbook from window.UNIT (assets/content.js).
-   workbook.html?lesson=N prints one lesson booklet; ?review prints the unit review booklet;
-   add &answers for the answer edition. Print to PDF from Chrome (A4, default margins,
+   workbook.html?part=N prints one part booklet (PARTS); ?lesson=N previews one lesson; ?review
+   prints the unit review booklet; add &answers for the answer edition. Print to PDF from Chrome (A4, default margins,
    no headers or footers). Diagrams come from the teaching deck (window.DeckFigures). */
 (function () {
   "use strict";
@@ -9,20 +9,26 @@
   const F = window.DeckFigures;
   const params = new URLSearchParams(location.search);
   const answers = params.has("answers");
-  const ONE = U.lessons.find((l) => l.n === Number(params.get("lesson"))) || null;
-  const REVIEW = !ONE && params.has("review");
-  const LESSONS = ONE ? [ONE] : REVIEW ? [] : U.lessons;
-  const LAST = ONE ? ONE.n : U.lessons[U.lessons.length - 1].n;
+  // The lessons print in four parts; ?lesson=N still previews a single lesson.
+  const PARTS = [[1, 2], [3, 4], [5, 6, 7], [8, 9, 10]];
+  const partNo = PARTS[Number(params.get("part")) - 1] ? Number(params.get("part")) : 0;
+  const ONE = partNo ? null : U.lessons.find((l) => l.n === Number(params.get("lesson"))) || null;
+  const SEL = partNo ? U.lessons.filter((l) => PARTS[partNo - 1].includes(l.n)) : ONE ? [ONE] : null;
+  const REVIEW = !SEL && params.has("review");
+  const LESSONS = SEL || (REVIEW ? [] : U.lessons);
+  const LAST = SEL ? SEL[SEL.length - 1].n : U.lessons[U.lessons.length - 1].n;
+  const inSel = (n) => !!SEL && SEL.some((l) => l.n === n);
+  const nums = SEL ? `${SEL[0].n}–${SEL[SEL.length - 1].n}` : "";
   const pad = (n) => String(n).padStart(2, "0");
   const DECK = "panphy.app/gcsephy/decks/atoms-and-radiation";
   if (answers) document.body.classList.add("answers");
 
-  const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
+  const which = partNo ? `Part ${partNo}, Lessons ${nums}` : ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
   const footer = `Atoms & Nuclear Radiation, Year 11 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
-  document.title = `Atoms and Nuclear Radiation - Year 11 Workbook${ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
+  document.title = `Atoms and Nuclear Radiation - Year 11 Workbook${partNo ? ` Part ${partNo} - Lessons ${nums.replace("–", "-")}` : ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
 
   // ---------- small helpers ----------
   const ans = (html) => (html ? `<span class="ans">${html}</span>` : "");
@@ -37,6 +43,7 @@
     try: '<path d="M4 20l4-1L19 8l-3-3L5 16l-1 4ZM14 7l3 3"/>',
     lab: '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4A1.5 1.5 0 0 0 19 19l-5-10V3M7.5 15h9"/>',
     exam: '<path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.8Z"/>',
+    check: '<path d="M4 12.5l5 5L20 6.5"/>',
     revise: '<path d="M20 11a8 8 0 0 0-14.3-4.9M4 5v4h4M4 13a8 8 0 0 0 14.3 4.9M20 19v-4h-4"/>',
   };
   const icon = (key) => `<span class="ico"><svg viewBox="0 0 24 24">${ICONS[key]}</svg></span>`;
@@ -45,6 +52,7 @@
     learn: ["learn", "Learn it", "Explain"],
     try: ["try", "Try it", "Practise"],
     lab: ["lab", "Lab", "Investigate"],
+    check: ["check", "Quick check", "Checkpoint"],
     exam: ["exam", "Exam corner", "AQA-style"],
     revise: ["revise", "Revise it", "Review later"],
   };
@@ -122,6 +130,7 @@
       case "figs": return `<div class="figs c${b.cols || b.items.length} ${b.cls || ""}">${b.items.map((h) => `<div>${h}</div>`).join("")}</div>`;
       case "compare": return compareTable(b);
       case "worked": return worked(b);
+      case "follow": return follow(b);
       case "steps": return `<ol class="steps">${b.items.map((s) => `<li>${s}</li>`).join("")}</ol>`;
       case "safety": return `<div class="safety"><h4>${b.title || "Stay safe"}</h4><ul>${b.items.map((s) => `<li>${s}</li>`).join("")}</ul></div>`;
       case "graph": return graphPaper(b);
@@ -146,6 +155,20 @@
     const given = (t) => (t ? dataTable(t) : "");
     return `<div class="worked"><div><h4>Worked example</h4><div class="q">${b.q}</div>${given(b.table)}${steps(b.steps)}</div>` +
       `<div class="yt"><h4>Your turn</h4><div class="q">${b.yt.q}</div>${given(b.yt.table)}${steps(b.yt.steps, true)}</div></div>`;
+  }
+
+  /* A worked example from a deck slide, printed blank so that students fill it in while the
+     teacher models it; the answer edition fills it in. yt: a parallel question to try alone. */
+  function follow(b) {
+    const steps = (arr) => arr.map(([k, v], i) => `<div class="step${i === arr.length - 1 ? " final" : ""}"><span>${k}</span><span>${ans(v)}</span></div>`).join("");
+    const col = (cls, head, x) => `<div class="${cls}"><h4>${head}</h4><div class="q">${x.q}</div>${x.table ? dataTable(x.table) : ""}${steps(x.steps)}</div>`;
+    return `<div class="worked follow${b.yt ? "" : " solo"}">${col("with", `With your teacher<span class="slide-tag">Slide ${b.slide}</span>`, b)}${b.yt ? col("yt", "Your turn", b.yt) : ""}</div>`;
+  }
+
+  // The deck's Quick check slide, numbered on its own so that lesson question numbers do not move.
+  function quickCheck(qc) {
+    return keep(secHead("check", "Quick check", `Slide ${qc.slide}${qc.covers ? `, ${qc.covers}` : ""}. Answer each question, then check it as your teacher reveals the answer.`) +
+      `<div class="do-now-box quick-box">${qc.items.map(([q, a], i) => `<div><b>${i + 1}</b>${q}${lines(2, a)}</div>`).join("")}</div>`);
   }
 
   function question(b) {
@@ -215,6 +238,7 @@
       learn: section("learn", l.learnTitle, l.learnAside, l.learn),
       try: l.try ? section("try", l.tryTitle, l.tryAside, l.try) : "",
       lab: l.lab ? section("lab", l.lab.title, l.lab.aside, l.lab.blocks) : "",
+      check: l.quick ? quickCheck(l.quick) : "",
       // examSplit gives each question its own card, so the section can break between questions
       // when it would otherwise jump to a new page whole.
       exam: (() => {
@@ -228,14 +252,17 @@
         <div class="recall"><h4>Cover the page and answer</h4>${l.recall.map(([q], i) => `<p><b>${i + 1}</b>${q}</p>`).join("")}</div></div>
         <div><h4>I can…</h4><ul class="cando">${l.cando.map((c) => `<li><span>${c}</span><span class="rag"><i></i><i></i><i></i></span></li>`).join("")}</ul></div></div>`),
     };
-    const order = l.order || ["doNow", "learn", "try", "lab", "exam", "revise"];
+    const order = l.order || ["doNow", "learn", "try", "lab", "check", "exam", "revise"];
     return `<section class="lesson" style="--accent:var(--${l.accent});--accent-t:var(--${l.accent}-t)">${opener}${order.map((k) => parts[k]).join("")}</section>`;
   }
 
   // ---------- front and back matter ----------
   function cover() {
     let middle;
-    if (ONE) {
+    if (partNo) {
+      middle = `<div class="cover-part"><b>Part ${partNo} of ${PARTS.length}</b>Lessons ${nums}</div>
+      <h2 class="cover-sub">In this booklet</h2><ul class="cover-lessons">${SEL.map((l) => `<li>Lesson ${l.n}: ${l.title}</li>`).join("")}</ul>`;
+    } else if (ONE) {
       middle = `<div class="cover-part"><b>Lesson ${pad(ONE.n)}</b>${ONE.title}</div>
       <p class="lede">${ONE.big}</p>
       <h2 class="cover-sub">In this lesson you will</h2><ul class="cover-lessons">${ONE.goals.map((g) => `<li>${g}</li>`).join("")}</ul>`;
@@ -246,7 +273,7 @@
       middle = `<p class="lede">What is inside an atom, how do we know, and what do unstable nuclei do? ${U.lessons.length} lessons: learn with it in class and revise from it at home.</p>
       <div class="cover-stats"><div><b>${U.lessons.length}</b>lessons</div><div><b>3</b>big questions</div><div><b>2</b>simulations</div></div>`;
     }
-    return `<section class="cover"><div class="eyebrow">Year 11 Physics, AQA GCSE, ${ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
+    return `<section class="cover"><div class="eyebrow">Year 11 Physics, AQA GCSE, ${partNo ? `Part ${partNo} of ${PARTS.length}` : ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
       <h1>Atoms &amp; Nuclear<br>Radiation<span class="dot">.</span></h1>
       ${middle}
       ${answers ? '<div class="edition">Answer edition for teachers and self-marking</div>' : ""}
@@ -259,8 +286,8 @@
   function howTo() {
     const items = [
       ["doNow", "Do now", "Quick questions from earlier lessons. Remembering again is what makes it stick."],
-      ["learn", "Learn it", "Explanations, diagrams and worked examples. Read this again when you revise."],
-      ["try", "Try it", "Practice that builds up: first with support, then on your own, then a challenge."],
+      ["learn", "Learn it", "Explanations and diagrams. Fill in the slide examples with your teacher, then try “Your turn” alone."],
+      ["try", "Try it", "Practice that builds up, then a challenge. Quick checks from the slides follow some lessons."],
       ["lab", "Lab", "Record what you find in a simulation or a model experiment."],
       ["exam", "Exam corner", "AQA-style questions with a tip on how the marks are given."],
       ["revise", "Revise it", "Summary, cover-and-answer questions and an “I can” check to colour in."],
@@ -268,11 +295,11 @@
     const rows = U.lessons.map((l) => `<tr><td>${pad(l.n)}</td><td><strong>${l.title}</strong><br><span class="map-line">${l.mapLine}</span></td><td>${l.deck.slides}</td></tr>`).join("");
     return `<section class="new-page" style="break-before:auto">
       <div class="eyebrow">Start here</div><h2 class="page-title">${titleDot("How this booklet works")}</h2>
-      <p class="page-intro">${ONE && ONE.n > 1 ? `This is the booklet for <strong>Lesson ${ONE.n}</strong> of the Atoms and Nuclear Radiation unit. It builds on the lessons before it; the “Do now” questions and the quick answers at the back help you check what you remember.` : "This unit starts from the atoms you met in Key Stage 3 and in chemistry, then asks how we know what is inside them and what happens when a nucleus is unstable."} Keep it: it is your classwork book <em>and</em> your revision guide.</p>
+      <p class="page-intro">${SEL && SEL[0].n > 1 ? `This is the booklet for <strong>${SEL.length > 1 ? `Lessons ${nums}` : `Lesson ${SEL[0].n}`}</strong> of the Atoms and Nuclear Radiation unit. It builds on the lessons before it; the “Do now” questions and the quick answers at the back help you check what you remember.` : "This unit starts from the atoms you met in Key Stage 3 and in chemistry, then asks how we know what is inside them and what happens when a nucleus is unstable."} Keep it: it is your classwork book <em>and</em> your revision guide.</p>
       <div class="legend">${items.map(([k, name, text]) => `<div>${icon(k)}<div><b>${name}</b><p>${text}</p></div></div>`).join("")}</div>
       <div class="key"><strong>Revising at home?</strong> (1) Read the Learn it pages. (2) Cover them and answer the “Cover the page” questions in Revise it. (3) Check with the quick answers at the back. (4) Go through the matching slides in the teaching deck, and try the simulations.</div>
-      <h4 class="sub">The route through the unit${ONE ? " (this lesson is highlighted)" : ""}</h4>
-      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.n === ONE.n ? `<span class="map-line">${l.mapLine} (slides ${l.deck.slides})</span>` : ""}</span></li>`).join("")}</ol>`
+      <h4 class="sub">The route through the unit${SEL ? ` (${SEL.length > 1 ? "this booklet" : "this lesson"} highlighted)` : ""}</h4>
+      ${SEL ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${inSel(l.n) ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${inSel(l.n) ? `<span class="map-line">Slides ${l.deck.slides}</span>` : ""}</span></li>`).join("")}</ol>`
         : `<table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Slides</th></tr></thead><tbody>${rows}</tbody></table>`}
       <p style="margin-top:3mm;font-size:8.8pt;color:#5F5954">Teaching deck: <strong>${DECK}</strong>. Simulations: <strong>panphy.app/simulations/atomic_models.html</strong> and <strong>panphy.app/simulations/nuclear_decay.html</strong></p>
     </section>`;
@@ -282,7 +309,7 @@
     const met = U.toolkit.filter((t) => t.lesson <= LAST);
     const tools = met.map((t) => `<div class="tool${t.wide ? " wide" : ""}"><span class="lesson-tag">Lesson ${t.lesson}</span><h4>${t.title}</h4>${t.h}</div>`).join("");
     return `<section class="new-page"><div class="eyebrow">Reference</div><h2 class="page-title">${titleDot("Toolkit")}</h2>
-      <p class="page-intro">${ONE && LAST < U.lessons.length ? "The facts and methods you have met so far. " : ""}Learn these: exam questions expect you to recall them without a data sheet.</p>
+      <p class="page-intro">${SEL && LAST < U.lessons.length ? "The facts and methods you have met so far. " : ""}Learn these: exam questions expect you to recall them without a data sheet.</p>
       <div class="toolkit">${tools}</div></section>`;
   }
 
@@ -303,15 +330,15 @@
     return `<section class="lesson" style="--accent:var(--teal);--accent-t:var(--teal-t)">
       <div class="eyebrow">${x.eyebrow}</div><h2 class="page-title">${titleDot(x.title)}</h2>
       <p class="page-intro">${x.intro}</p>
-      ${renderBlocks(x.learn)}${keep(secHead("try", "Check it", "Answers are in the answer edition.") + question(x.questions[0]))}${x.questions.slice(1).map((q) => question(q)).join("")}</section>`;
+      ${renderBlocks(x.learn)}${keep(secHead("try", "Check it", "Answers are in the answer edition.") + question(x.questions[0]))}${x.questions.slice(1).map((q) => question(q)).join("")}${x.quick ? quickCheck(x.quick) : ""}</section>`;
   }
 
   function glossary() {
-    const words = U.glossary.filter(([, , n]) => (ONE ? n === ONE.n : n <= LAST));
+    const words = U.glossary.filter(([, , n]) => (SEL ? inSel(n) : n <= LAST));
     if (!words.length) return "";
-    return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Reference</div><h2 class="page-title">${titleDot(`Key words${ONE ? " from this lesson" : ""}`)}</h2>
+    return `<section class="${SEL ? "tracker-flow" : "new-page"}"><div class="eyebrow">Reference</div><h2 class="page-title">${titleDot(`Key words${SEL ? ` from this ${SEL.length > 1 ? "booklet" : "lesson"}` : ""}`)}</h2>
       <p class="page-intro">Learn the meaning and spelling. In exams, precise words earn marks: say “nucleus”, not “middle”, and “unstable nucleus”, not “unstable atom”.</p>
-      <div class="glossary${ONE ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong>: ${v}</p>`).join("")}</div></section>`;
+      <div class="glossary${SEL ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong>: ${v}</p>`).join("")}</div></section>`;
   }
 
   function tracker() {
@@ -324,9 +351,9 @@
 
   function quickAnswers() {
     const list = (arr) => `<ol>${arr.map(([, a]) => `<li>${a}</li>`).join("")}</ol>`;
-    return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Check yourself</div><h2 class="page-title">${titleDot("Quick answers")}</h2>
+    return `<section class="${SEL ? "tracker-flow" : "new-page"}"><div class="eyebrow">Check yourself</div><h2 class="page-title">${titleDot("Quick answers")}</h2>
       <p class="page-intro">Answers to the “Do now” and “Cover the page” questions, so you can check yourself when revising. Answers to the longer questions are in the answer edition.</p>
-      <div class="quick-answers${ONE ? " one" : ""}">${LESSONS.map((l) => `<div>${ONE ? "" : `<b class="lesson-name">Lesson ${l.n}: ${l.title}</b>`}
+      <div class="quick-answers${SEL && SEL.length === 1 ? " one" : ""}">${LESSONS.map((l) => `<div>${SEL && SEL.length === 1 ? "" : `<b class="lesson-name">Lesson ${l.n}: ${l.title}</b>`}
         <h4>Do now</h4>${list(l.doNow)}<h4>Cover the page</h4>${list(l.recall)}</div>`).join("")}</div></section>`;
   }
 
@@ -334,11 +361,11 @@
   const book = document.createElement("main");
   book.className = "book";
   const link = (key, ans) => `?${[key, ans ? "answers" : ""].filter(Boolean).join("&")}`;
-  const here = ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
-  const nav = [["", "all"], ...U.lessons.map((l) => [`lesson=${l.n}`, String(l.n)]), ["review", "review"]]
+  const here = partNo ? `part=${partNo}` : ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
+  const nav = [["", "all"], ...PARTS.map((_, i) => [`part=${i + 1}`, `part ${i + 1}`]), ["review", "review"]]
     .map(([key, name]) => (key === here ? `<b>${name}</b>` : `<a href="${link(key, answers)}">${name}</a>`)).join(" ");
   const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
-  const body = ONE ? cover() + howTo() + lesson(ONE) + toolkit() + glossary() + quickAnswers()
+  const body = SEL ? cover() + howTo() + LESSONS.map(lesson).join("") + toolkit() + glossary() + quickAnswers()
     : REVIEW ? cover() + toolkit() + review() + U.extension.map(extension).join("") + glossary() + tracker()
     : cover() + howTo() + toolkit() + LESSONS.map(lesson).join("") + review() + U.extension.map(extension).join("") + glossary() + tracker() + quickAnswers();
   book.innerHTML = bar + body;

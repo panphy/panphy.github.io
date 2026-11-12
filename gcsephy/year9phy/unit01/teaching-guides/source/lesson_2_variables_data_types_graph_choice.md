@@ -130,6 +130,10 @@ Students answer:
 
 Students classify 10 investigation questions as requiring either a line graph or a bar chart. For each one, they must explain whether the independent variable is continuous or categoric.
 
+## Using the workbook
+
+The Quick check (slide 19) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 Common misconception:

@@ -8,7 +8,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all five work
 
 | File | Use |
 |---|---|
-| `pdf/` | 12 lesson booklets (8–12 pages), a 14-page Unit review, an answer edition of each with the same page numbers, and `Electric Circuits - Year 10 Teacher Guide.pdf` (hosted but not linked from any page) |
+| `pdf/` | 12 lesson booklets (9–13 pages), a 14-page Unit review, an answer edition of each with the same page numbers, and `Electric Circuits - Year 10 Teacher Guide.pdf` (hosted but not linked from any page) |
 | `index.html` | Student page linking the thirteen booklets, the booklets' answer editions and the six Preps (`../prep/`, not their answers); it does not link the unit website |
 | `workbook.html` | PDF source: `?lesson=1`…`12` or `?review`, add `&answers`; `?labs` is the virtual labs booklet |
 | `teacher-guide.html` | Guide source (`?lesson=N` for one plan) |
@@ -39,7 +39,9 @@ Diagrams use the site's `../assets/diagrams.js`. Each booklet is self-contained:
 
 After Lesson 12: the Unit review (41 marks). The teacher guide sets a Prep as homework after every second lesson.
 
-Each lesson runs: opener → Do now → Learn it (models, diagrams, worked example with "Your turn") → Try it (supported → independent → challenge) → Lab where relevant → Exam corner → Revise it.
+Each lesson runs: opener → Do now → Learn it (models, diagrams, slide examples to fill in and worked examples, each with "Your turn") → Try it (supported → independent → challenge) → Lab where relevant → Exam corner → Revise it.
+
+**Slides and workbook match.** Every worked example on a deck slide (slides 10, 15, 19, 30, 42, 43 and 46) is a `follow` block at the same point in Learn it (`slide` gives its number): the same question, printed blank with the slide's step labels for students to fill in as the teacher models it, beside a "Your turn" with numbers that appear on no slide. Each Quick check slide is a lesson's `quick` field, a box before the Exam corner, numbered on its own: slide 13 after Lesson 2, 25 after Lesson 5, 31 after Lesson 7, 40 after Lesson 10, and 47 and 53 after Lesson 12 (`quick` may be a list). Answers to both are in the answer editions only. When a slide example or Quick check changes, change its workbook copy, and keep practice questions from repeating their numbers. The other worked examples are not on a slide and stay printed (`worked`).
 
 ## Design notes
 
