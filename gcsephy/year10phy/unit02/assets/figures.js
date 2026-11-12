@@ -17,26 +17,28 @@
   const dot = (x, y, r, cls) => `<circle class="p ${cls || ""}" cx="${f(x)}" cy="${f(y)}" r="${r}"/>`;
 
   // ---------- particle arrangements (positions inside a box w × h, origin top left) ----------
-  function solidPos(w, h, r, rows) {
-    const out = [], dy = r * Math.sqrt(3), cols = Math.floor(w / (2 * r));
-    const left = (w - cols * 2 * r) / 2;
-    for (let j = 0; j < rows; j += 1) {
-      const n = j % 2 ? cols - 1 : cols;
-      for (let i = 0; i < n; i += 1) out.push([left + r + i * 2 * r + (j % 2 ? r : 0), h - r - j * dy]);
-    }
+  // A solid: neat rows and columns, touching, in a block that keeps its own shape (it does not
+  // spread to the walls of the box).
+  function solidPos(w, h, r, rows, cols) {
+    const out = [], n = cols || Math.floor(w / (2 * r)) - 2;
+    const left = (w - n * 2 * r) / 2;
+    for (let j = 0; j < rows; j += 1) for (let i = 0; i < n; i += 1) out.push([left + r + i * 2 * r, h - r - j * 2 * r]);
     return out;
   }
-  // Touching but irregular: drop the particles in and let them settle.
+  // A liquid: touching but in no pattern, spread across the bottom of its container. Each particle
+  // is dropped straight down at a random place and stops where it first touches (the lowest of a
+  // few tries, so the pile is dense but never falls into rows).
   function liquidPos(w, h, r, n, seed) {
     const rand = rng(seed || 7), ps = [];
-    for (let i = 0; i < n; i += 1) ps.push([r + rand() * (w - 2 * r), h * 0.25 + rand() * (h * 0.75 - r)]);
-    for (let k = 0; k < 400; k += 1) {
-      ps.forEach((p) => { p[1] += 0.6; });
-      for (let i = 0; i < n; i += 1) for (let j = i + 1; j < n; j += 1) {
-        const dx = ps[j][0] - ps[i][0], dy = ps[j][1] - ps[i][1], d = Math.hypot(dx, dy) || 0.01, min = 2 * r + 0.3;
-        if (d < min) { const push = (min - d) / 2, ux = dx / d, uy = dy / d; ps[i][0] -= ux * push; ps[i][1] -= uy * push; ps[j][0] += ux * push; ps[j][1] += uy * push; }
+    for (let i = 0; i < n; i += 1) {
+      let best = null;
+      for (let k = 0; k < 4; k += 1) {
+        const x = r + rand() * (w - 2 * r);
+        let y = h - r;
+        ps.forEach(([a, b]) => { const dx = Math.abs(a - x); if (dx < 2 * r) y = Math.min(y, b - Math.sqrt(4 * r * r - dx * dx)); });
+        if (!best || y > best[1]) best = [x, y];
       }
-      ps.forEach((p) => { p[0] = Math.min(w - r, Math.max(r, p[0])); p[1] = Math.min(h - r, Math.max(r, p[1])); });
+      ps.push(best);
     }
     return ps;
   }
@@ -56,7 +58,7 @@
     const o = opts || {};
     let ps, extra = "";
     if (kind === "solid") ps = solidPos(w, h, r, o.rows || 5);
-    else if (kind === "liquid") ps = liquidPos(w, h, r, o.n || 43, o.seed);
+    else if (kind === "liquid") ps = liquidPos(w, h, r, o.n || solidPos(w, h, r, o.rows || 5).length, o.seed);
     else {
       ps = gasPos(w, h, r, o.n || 7, o.seed);
       if (o.tails !== false) extra = ps.map(([a, b, d]) => { const L = o.fast ? 20 : 12; return arrow(x + a + (r + 1) * Math.cos(d), y + b + (r + 1) * Math.sin(d), x + a + (r + L) * Math.cos(d), y + b + (r + L) * Math.sin(d), "thin move", 4); }).join("");
@@ -73,19 +75,22 @@
   }
   const oneState = (kind) => svg(132, 132, particleBox(kind, 12, 12, 108, 108, 6), `Particle diagram of a ${kind}`);
 
-  // Changes of state: three state boxes joined by named arrows. opts.blank swaps the names for
-  // lettered answer boxes (the names show in the answer edition).
+  // Changes of state: the three states at the corners of a triangle, joined by named arrows.
+  // opts.blank swaps the names for lettered answer boxes (the names show in the answer edition).
   function changes(opts) {
     const o = opts || {};
     const name = (x, y, s, letter) => (o.blank
       ? `<rect class="blank-box" x="${x - 40}" y="${y - 13}" width="80" height="18"/>${t(x - 34, y, letter, "b", "start")}${t(x + 4, y, s.replace(" or evaporating", ""), "ans")}`
       : s.split(" or ").map((part, i, all) => t(x, y - (all.length - 1 - i) * 14, part + (i < all.length - 1 ? " or" : ""), "b")).join(""));
-    let b = particleBox("solid", 10, 70, 78, 78, 5, { rows: 4 }) + particleBox("liquid", 181, 70, 78, 78, 5, { n: 30, seed: 5 }) + particleBox("gas", 352, 70, 78, 78, 5, { n: 5, seed: 3, tails: false });
-    b += t(49, 166, "Solid", "lg") + t(220, 166, "Liquid", "lg") + t(391, 166, "Gas", "lg");
-    b += arrow(94, 96, 175, 96, "s-hot") + name(134, 88, "melting", "A") + arrow(175, 124, 94, 124, "s-cool") + name(134, 143, "freezing", "B");
-    b += arrow(265, 96, 346, 96, "s-hot") + name(305, 88, "boiling or evaporating", "C") + arrow(346, 124, 265, 124, "s-cool") + name(305, 143, "condensing", "D");
-    b += `<path class="ink s-hot" d="M49 64 C 90 2, 350 2, 386 58"/><path class="head s-hot" d="M0 0 L-10.5 -5 L-10.5 5 Z" transform="translate(391 65) rotate(54)"/>` + name(220, 12, "sublimating", "E");
-    return svg(440, 174, b, "Solid, liquid and gas boxes joined by arrows for the changes of state");
+    let b = particleBox("gas", 181, 8, 78, 78, 5, { n: 5, seed: 3, tails: false }) + particleBox("solid", 20, 196, 78, 78, 5, { rows: 4 }) + particleBox("liquid", 342, 196, 78, 78, 5, { seed: 5 });
+    b += t(220, 104, "Gas", "lg") + t(59, 292, "Solid", "lg") + t(381, 292, "Liquid", "lg");
+    // bottom side: solid and liquid
+    b += arrow(104, 222, 336, 222, "s-hot") + name(220, 214, "melting", "A") + arrow(336, 250, 104, 250, "s-cool") + name(220, 268, "freezing", "B");
+    // right side: liquid and gas
+    b += arrow(344, 185, 270, 90, "s-hot") + name(356, 122, "boiling or evaporating", "C") + arrow(257, 100, 331, 195, "s-cool") + name(258, 168, "condensing", "D");
+    // left side: solid straight to gas
+    b += arrow(76, 190, 176, 92, "s-hot") + name(80, 134, "sublimating", "E");
+    return svg(440, 300, b, "Solid, liquid and gas at the corners of a triangle, joined by arrows for the changes of state");
   }
 
   // A cuboid with its three dimensions written beside it.
@@ -152,13 +157,24 @@
     return svg(L + W + 14, B + (o.values ? 42 : 30), b, kind === "cool" ? "Cooling curve: the temperature falls, stays constant while the liquid freezes, then falls again" : "Heating curve: sloping sections where the temperature rises and two flat sections where the state changes");
   }
 
-  // A gas in a sealed box: particles with motion tails, and pushes on the walls.
+  // A gas in a sealed box: particles with motion tails, and purple arrows inside the box for the
+  // push of the gas on every wall (longer arrows for the hotter gas, which pushes harder).
   function gasBox(opts) {
-    const o = opts || {};
-    const one = (x, label, fast) => particleBox("gas", x, 18, 130, 110, 6, { n: fast ? 8 : 8, seed: fast ? 21 : 9, fast, cls: fast ? "gas hotp" : "gas" }) +
-      [0, 1].map((i) => arrow(x + 130 + 4, 52 + i * 44, x + 130 + (fast ? 30 : 18), 52 + i * 44, "s-force", 5)).join("") + t(x + 65, 146, label, "b");
-    const b = o.pair ? one(14, "cooler gas", false) + one(204, "hotter gas, same box", true) : one(14, o.label || "gas in a sealed box", false);
-    return svg(o.pair ? 380 : 190, 154, b, o.pair ? "Two sealed boxes of gas: in the hotter one the particles move faster and push harder on the walls" : "Gas particles moving in random directions inside a sealed box and hitting the walls");
+    const o = opts || {}, W = 150, H = 120, y0 = 14;
+    const one = (x, label, fast) => {
+      const L = fast ? 22 : 12, r = 6, inset = 26;
+      const ps = gasPos(W - 2 * inset, H - 2 * inset, r, 7, fast ? 21 : 9, 4);
+      let b = `<rect class="ink paper" x="${x}" y="${y0}" width="${W}" height="${H}" rx="3"/>`;
+      b += ps.map(([a, c, d]) => { const px = x + inset + a, py = y0 + inset + c, tail = fast ? 17 : 9; return arrow(px + (r + 1) * Math.cos(d), py + (r + 1) * Math.sin(d), px + (r + tail) * Math.cos(d), py + (r + tail) * Math.sin(d), "thin move", 4) + dot(px, py, r, "gas"); }).join("");
+      [0.3, 0.7].forEach((u) => {
+        b += arrow(x + L + 3, y0 + u * H, x + 2, y0 + u * H, "s-force", 5) + arrow(x + W - L - 3, y0 + u * H, x + W - 2, y0 + u * H, "s-force", 5) +
+          arrow(x + u * W, y0 + L + 3, x + u * W, y0 + 2, "s-force", 5) + arrow(x + u * W, y0 + H - L - 3, x + u * W, y0 + H - 2, "s-force", 5);
+      });
+      return b + t(x + W / 2, y0 + H + 18, label, "b");
+    };
+    const key = (x) => arrow(x, y0 + H + 36, x + 18, y0 + H + 36, "s-force", 5) + t(x + 24, y0 + H + 40, "push of the gas on the wall", "sm", "start");
+    const b = o.pair ? one(14, "cooler gas", false) + one(196, "hotter gas, same box", true) + key(104) : one(14, o.label || "gas in a sealed box", false) + key(10);
+    return svg(o.pair ? 360 : 178, y0 + H + 48, b, o.pair ? "Two sealed boxes of gas: in the hotter one the particles move faster and push harder on every wall" : "Gas particles moving in random directions inside a sealed box; arrows inside the box show the gas pushing outwards on every wall");
   }
 
   // Required practical: an insulated metal block with an immersion heater and a thermometer.
@@ -216,7 +232,7 @@
   }
   // Triple only: a bicycle pump with a blocked outlet.
   function pump() {
-    const b = `<rect class="ink paper" x="60" y="52" width="210" height="46" rx="4"/>` + gasPos(96, 40, 4, 10, 17).map(([a, c]) => dot(64 + a, 55 + c, 4, "gas hotp")).join("") +
+    const b = `<rect class="ink paper" x="60" y="52" width="210" height="46" rx="4"/>` + gasPos(96, 40, 4, 10, 17).map(([a, c]) => dot(64 + a, 55 + c, 4, "gas")).join("") +
       `<rect class="ink mid" x="164" y="55" width="12" height="40"/><path class="ink bold" d="M176 75 H330"/><path class="ink bold" d="M330 56 V94"/>` +
       `<path class="ink solid" d="M52 68 h8 v14 h-8 Z"/>` + arrow(318, 30, 262, 30, "s-force", 7) + t(290, 20, "force", "b") + t(110, 44, "trapped air", "sm") + t(48, 112, "outlet blocked", "sm", "start") + t(250, 118, "work is done on the gas", "b");
     return svg(350, 128, b, "A bicycle pump with its outlet blocked: a force pushes the piston in and squashes the trapped air");
@@ -224,7 +240,7 @@
 
   // Cover: a heating curve with a solid, a liquid and a gas box beside the section each belongs to.
   function coverArt() {
-    const box = (kind, x, y, n) => `<g transform="translate(${x} ${y})">${particleBox(kind, 0, 0, 62, 62, 4.2, { rows: 4, n: n || 30, seed: 5, tails: false })}</g>`;
+    const box = (kind, x, y, n) => `<g transform="translate(${x} ${y})">${particleBox(kind, 0, 0, 62, 62, 4.2, { rows: 4, n, seed: 5, tails: false })}</g>`;
     const b = `<path class="axis" d="M30 6 V210 H470"/><path class="curve" d="M30 196 L84 150 L190 150 L282 70 L400 70 L462 26"/>` +
       box("solid", 46, 66) + box("liquid", 262, 104) + box("gas", 396, 96, 6);
     return svg(480, 216, b, "A heating curve with particle diagrams of a solid, a liquid and a gas", "on-dark");
