@@ -96,8 +96,41 @@ window.DeckSvgTex = {
     return m;
   }
 
-  // Slide 4: a solid vibrating in its rows, a liquid whose particles wander past each other while
-  // staying in contact, and a gas flying about, side by side.
+  // A liquid: discs that push apart when they overlap and pull together when just apart, so they
+  // stay in contact; gravity keeps them at the bottom of the box; and a steady supply of random
+  // kicks (with matching drag) keeps them at one temperature, so they never settle into a still
+  // pile. Each particle keeps jostling and slowly changes its neighbours.
+  function liquidModel(start, w, h, r, seed) {
+    const rand = rng(seed), sig = 2 * r, REP = 2000, ATT = 110, G = 90, DRAG = 3, TEMP = 850, DT = 1 / 240;
+    const gauss = () => (rand() + rand() + rand() + rand() - 2) * 1.732;
+    const ps = start.map(([x, y]) => ({ x, y, vx: 0, vy: 0, ax: 0, ay: 0 }));
+    const one = () => {
+      ps.forEach(p => { p.ax = 0; p.ay = G; });
+      for (let i = 0; i < ps.length; i += 1) for (let j = i + 1; j < ps.length; j += 1) {
+        const a = ps[i], b = ps[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01;
+        if (d > 1.6 * sig) continue;
+        const F = d < sig ? REP * (sig - d) : -ATT * (d - sig) * (1.6 * sig - d) / (0.6 * sig);
+        const fx = F * dx / d, fy = F * dy / d;
+        a.ax -= fx; a.ay -= fy; b.ax += fx; b.ay += fy;
+      }
+      const kick = Math.sqrt(2 * DRAG * TEMP * DT);
+      ps.forEach(p => {
+        p.vx += (p.ax - DRAG * p.vx) * DT + kick * gauss(); p.vy += (p.ay - DRAG * p.vy) * DT + kick * gauss();
+        p.x += p.vx * DT; p.y += p.vy * DT;
+        if (p.x < r) { p.x = r; p.vx = Math.abs(p.vx); }
+        if (p.x > w - r) { p.x = w - r; p.vx = -Math.abs(p.vx); }
+        if (p.y > h - r) { p.y = h - r; p.vy = -Math.abs(p.vy); }
+        if (p.y < r) { p.y = r; p.vy = Math.abs(p.vy); }
+      });
+    };
+    let owed = 0;
+    const step = dt => { owed += dt; while (owed >= DT) { one(); owed -= DT; } };
+    step(3); // already settled and moving on the first frame, and in still pictures
+    return { ps, step };
+  }
+
+  // Slide 4: a solid vibrating in its rows, a liquid whose particles jostle and change places
+  // while staying in contact, and a gas flying about, side by side.
   function statesLive(fig) {
     const W = 108, H = 108, r = 6;
     fig.innerHTML = `<svg class="pf" viewBox="0 0 378 146" role="img" aria-label="Moving particle models of a solid, a liquid and a gas">${[0, 1, 2].map(i =>
@@ -105,74 +138,65 @@ window.DeckSvgTex = {
     const box = i => fig.querySelector(`[data-box="${i}"]`);
     const rand = rng(99);
     const sites = F.positions.solidPos(W, H, r, 5).map(([x, y]) => ({ x0: x, y0: y, x, y, a: rand() * 6.3, b: rand() * 6.3, k: 11 + rand() * 7 }));
-    // Each liquid particle heads in its own direction, which keeps drifting, so it threads its way
-    // between its neighbours. Gravity and the walls keep the liquid together at the bottom.
-    const liquid = F.positions.liquidPos(W, H, r, sites.length, 7).map(([x, y]) => ({ x, y, dir: rand() * 6.3 }));
+    const liquid = liquidModel(F.positions.liquidPos(W, H, r, sites.length, 7), W, H, r, 7);
     const gas = gasModel(7, W, H, r, 95, 11);
-    const els = [circles(box(0), sites.length, r, 'solid'), circles(box(1), liquid.length, r, 'liquid'), circles(box(2), gas.ps.length, r, 'gas')];
+    const els = [circles(box(0), sites.length, r, 'solid'), circles(box(1), liquid.ps.length, r, 'liquid'), circles(box(2), gas.ps.length, r, 'gas')];
     let t = 0;
-    const settle = () => {
-      for (let pass = 0; pass < 3; pass += 1) {
-        for (let i = 0; i < liquid.length; i += 1) for (let j = i + 1; j < liquid.length; j += 1) {
-          const a = liquid[i], b = liquid[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, min = 2 * r;
-          if (d < min) { const push = (min - d) / 2, ux = dx / d, uy = dy / d; a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push; }
-        }
-        liquid.forEach(p => { p.x = Math.min(W - r, Math.max(r, p.x)); p.y = Math.min(H - r, Math.max(r, p.y)); });
-      }
-    };
     const frame = dt => {
       t += dt;
       sites.forEach(s => { s.x = s.x0 + 0.8 * Math.sin(s.k * t + s.a); s.y = s.y0 + 0.8 * Math.cos(s.k * 1.13 * t + s.b); });
-      liquid.forEach(p => { p.dir += (rand() - 0.5) * 9 * dt; p.x += Math.cos(p.dir) * 15 * dt; p.y += (Math.sin(p.dir) * 15 + 48) * dt; });
-      settle();
+      liquid.step(dt);
       gas.step(dt);
     };
-    live(fig, frame, () => { place(els[0], sites); place(els[1], liquid); place(els[2], gas.ps); });
+    live(fig, frame, () => { place(els[0], sites); place(els[1], liquid.ps); place(els[2], gas.ps); });
   }
 
   const controls = (label, buttons) => `<div class="pm-controls" role="group" aria-label="${label}">${buttons.map(([act, text]) => `<button type="button" data-act="${act}">${text}</button>`).join('')}</div>`;
   const readout = items => `<div class="pm-readout">${items.map(([key, name]) => `<div><span>${name}</span><b data-out="${key}"></b></div>`).join('')}</div>`;
 
-  // Slide 9: a sealed box of gas with a thermometer in it. The temperature changes smoothly with
-  // the slider (or 10 °C at a time with the buttons); the particles keep their colour and only
-  // their speed changes.
+  // Slide 9: a sealed box of gas with a thermometer in it. The slider changes the temperature
+  // smoothly. The particles keep their colour; only their speed changes, in proportion to the
+  // square root of the kelvin temperature, and each carries a trail whose length shows its speed.
   function gasLive(fig) {
-    const W = 240, H = 150, r = 6, X0 = 12, Y0 = 132, MIN = -100, MAX = 300;
-    const tubeX = 216, yOf = T => 120 - ((T - MIN) / (MAX - MIN)) * 104; // scale: -100 °C at y 120, 300 °C at y 16
+    const W = 240, H = 150, r = 6, X0 = 12, Y0 = 132, MIN = -200, MAX = 600, BASE = 85, TRAIL = 0.16;
+    const tubeX = 216, yOf = T => 120 - ((T - MIN) / (MAX - MIN)) * 104; // scale: MIN at y 120, MAX at y 16
     let T = 20;
     fig.classList.add('pm-live');
-    const ticks = [-100, 0, 100, 200, 300].map(v => `<path class="ink thin" d="M${tubeX + 5} ${yOf(v)} h7"/><text class="sm" x="${tubeX + 15}" y="${yOf(v) + 4}" text-anchor="start">${v} °C</text>`).join('');
+    const ticks = [-200, 0, 200, 400, 600].map(v => `<path class="ink thin" d="M${tubeX + 5} ${yOf(v)} h7"/><text class="sm" x="${tubeX + 15}" y="${yOf(v) + 4}" text-anchor="start">${v} °C</text>`).join('');
     fig.innerHTML = `<svg class="pf" viewBox="0 0 284 294" role="img" aria-label="A sealed box of gas particles in random motion, with a thermometer in the gas">` +
-      `<rect class="ink paper" x="${X0}" y="${Y0}" width="${W}" height="${H}" rx="3"/><g transform="translate(${X0} ${Y0})" data-gas></g>` +
+      `<rect class="ink paper" x="${X0}" y="${Y0}" width="${W}" height="${H}" rx="3"/><g transform="translate(${X0} ${Y0})"><g data-trails></g><g data-gas></g></g>` +
       `<rect class="ink paper" x="${tubeX - 5}" y="8" width="10" height="${Y0 + 22}" rx="5"/><path class="merc" data-column d=""/><circle class="ink bulb" cx="${tubeX}" cy="${Y0 + 30}" r="8"/>${ticks}` +
       `<text class="sm" x="${X0}" y="${Y0 - 8}" text-anchor="start">sealed box of gas</text><text class="sm" x="${tubeX - 12}" y="16" text-anchor="end">thermometer</text></svg>` +
-      `<div class="pm-side">${readout([['temp', 'Temperature'], ['p', 'Pressure']])}` +
+      `<div class="pm-side">${readout([['temp', 'Temperature'], ['speed', 'Average speed'], ['p', 'Pressure']])}` +
       `<label class="pm-slider"><span>Change the temperature</span><input type="range" min="${MIN}" max="${MAX}" step="1" value="${T}" aria-label="Temperature of the gas in degrees Celsius"></label>` +
-      `${controls('Change the temperature in steps', [['down', '− 10 °C'], ['up', '+ 10 °C']])}<p class="pm-note">Sealed box: the volume and the number of particles stay the same. Only the speed of the particles changes.</p></div>`;
-    const m = gasModel(14, W, H, r, 70, 23);
+      `<p class="pm-note">Sealed box: the volume and the number of particles stay the same. Only the speed of the particles changes. Speeds are compared with the speed at 20 °C.</p></div>`;
+    const m = gasModel(14, W, H, r, BASE, 23);
     const els = circles(fig.querySelector('[data-gas]'), m.ps.length, r, 'gas');
+    const trailBox = fig.querySelector('[data-trails]');
+    trailBox.innerHTML = m.ps.map(() => '<path class="trail"/>').join('');
+    const trails = [...trailBox.children];
     const out = key => fig.querySelector(`[data-out="${key}"]`);
     const slider = fig.querySelector('input'), column = fig.querySelector('[data-column]');
     const set = value => {
       T = Math.max(MIN, Math.min(MAX, Math.round(value)));
-      const K = T + 273;
-      m.speed = 70 * Math.sqrt(K / 293);
+      const K = T + 273, ratio = Math.sqrt(K / 293);
+      m.speed = BASE * ratio;
       slider.value = T;
       column.setAttribute('d', `M${tubeX} ${Y0 + 26} V${f(yOf(T))}`);
       out('temp').textContent = `${T} °C`;
+      out('speed').textContent = `× ${ratio.toFixed(2)}`;
       out('p').textContent = `${Math.round(100 * K / 293)} kPa`;
-      fig.querySelector('[data-act="down"]').disabled = T <= MIN;
-      fig.querySelector('[data-act="up"]').disabled = T >= MAX;
     };
     slider.addEventListener('input', () => set(Number(slider.value)));
     // Arrow keys and swipes on the slider must not also turn the slide.
     ['keydown', 'keyup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'mousedown'].forEach(type => slider.addEventListener(type, event => event.stopPropagation()));
-    fig.addEventListener('click', event => {
-      const b = event.target.closest('[data-act]');
-      if (b) set(T + (b.dataset.act === 'up' ? 10 : -10));
-    });
+    const draw = () => {
+      place(els, m.ps);
+      // The trail is where the particle was a moment ago: a faster particle leaves a longer one.
+      m.ps.forEach((p, i) => trails[i].setAttribute('d', `M${f(p.x)} ${f(p.y)} L${f(Math.max(0, Math.min(W, p.x - p.vx * m.speed * TRAIL)))} ${f(Math.max(0, Math.min(H, p.y - p.vy * m.speed * TRAIL)))}`));
+    };
     set(T);
-    live(fig, dt => m.step(dt), () => place(els, m.ps));
+    live(fig, dt => m.step(dt), draw);
   }
 
   // Triple Science: a fixed mass of gas in a syringe; the piston moves in exact steps.
