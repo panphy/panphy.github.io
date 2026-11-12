@@ -164,6 +164,12 @@ Hold up two springs with different k. Ask: if I stretch both by 10 cm, which one
 
 Students finish both graphs and the spring constant if needed. Stretch: explain why a graph of length against force is a straight line but does not go through the origin.
 
+## Using the workbook
+
+The workbook prints the worked example on slide 27 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+
+The Quick check (slide 33) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 1. Keep each group's k. Lesson 5 uses it.

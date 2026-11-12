@@ -136,6 +136,12 @@ Students complete: "A device can never be more than 100% efficient, because …"
 
 Complete the Sankey diagram page. Stretch: a car engine is about 30% efficient. Draw its Sankey diagram, and suggest two ways to increase its efficiency.
 
+## Using the workbook
+
+The workbook prints the two worked examples on slide 59 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+
+The Quick check (slide 63) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 1. Students put the numbers upside down. Check every answer is at most 1.

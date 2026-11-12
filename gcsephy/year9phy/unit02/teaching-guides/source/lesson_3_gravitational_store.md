@@ -136,6 +136,12 @@ Show a photograph of a reservoir behind a dam. Ask: where is the energy stored, 
 
 Your school bag has a mass of about 5 kg. Calculate the energy transferred to its gravitational potential store when you carry it up one flight of stairs (about 3 m). Then calculate it for the whole school day's stair climbing.
 
+## Using the workbook
+
+The workbook prints the worked examples on slides 20, 21 and 22 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+
+The Quick check (slide 23) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+
 ## Teacher notes
 
 Common mistakes:
