@@ -25,6 +25,12 @@ I also keep my course resources here: teaching decks, workbooks, revision materi
 - **[GCSE Physics](https://panphy.app/gcsephy/):** course summaries of AQA Physics 8463 and the physics in Combined Science: Trilogy 8464, AO1 starters and revision resources, then teaching decks and workbook hubs for Years 9 to 11. Each unit folder, `gcsephy/course-summary/` and `gcsephy/do-now/` has its own README; [teaching deck styles and controls](gcsephy/decks/README.md) are documented separately.
 - **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025, updated for exams from 2028). See the [folder overview](ibdpphy/README.md).
 
+### GCSE resources: written for one school
+
+The GCSE hub is designed for my own school's physics curriculum, from Year 9 to Year 11. It follows the AQA specifications, but the units, their order, and the resources are planned around our classes.
+
+The Year 9 materials in particular are adapted for our Year 9 students: the language and the math are pitched to suit them, so some wording and calculations are simpler than you would expect in a standard GCSE resource.
+
 ## Offline use
 
 Most tools and simulations can come along even when the Wi-Fi doesn't. Visit online first and look for the **Offline ready** badge on each homepage card before relying on an app offline. When an app or its shared files change, it offers an update prompt.
