@@ -96,30 +96,35 @@ window.DeckSvgTex = {
     return m;
   }
 
-  // Slide 4: a solid vibrating, a liquid jostling and a gas flying about, side by side.
+  // Slide 4: a solid vibrating in its rows, a liquid whose particles wander past each other while
+  // staying in contact, and a gas flying about, side by side.
   function statesLive(fig) {
     const W = 108, H = 108, r = 6;
     fig.innerHTML = `<svg class="pf" viewBox="0 0 378 146" role="img" aria-label="Moving particle models of a solid, a liquid and a gas">${[0, 1, 2].map(i =>
       `<g transform="translate(${12 + i * 122} 10)"><rect class="ink paper" width="${W}" height="${H}" rx="3"/><g data-box="${i}"></g></g><text class="lg" x="${66 + i * 122}" y="137" text-anchor="middle">${['Solid', 'Liquid', 'Gas'][i]}</text>`).join('')}</svg>`;
     const box = i => fig.querySelector(`[data-box="${i}"]`);
     const rand = rng(99);
-    const sites = F.positions.solidPos(W, H, r, 5).map(([x, y]) => ({ x0: x, y0: y, x, y, a: rand() * 6.3, b: rand() * 6.3, k: 9 + rand() * 6 }));
-    const liquid = F.positions.liquidPos(W, H, r, sites.length, 7).map(([x, y]) => ({ x, y, vx: 0, vy: 0 }));
+    const sites = F.positions.solidPos(W, H, r, 5).map(([x, y]) => ({ x0: x, y0: y, x, y, a: rand() * 6.3, b: rand() * 6.3, k: 11 + rand() * 7 }));
+    // Each liquid particle heads in its own direction, which keeps drifting, so it threads its way
+    // between its neighbours. Gravity and the walls keep the liquid together at the bottom.
+    const liquid = F.positions.liquidPos(W, H, r, sites.length, 7).map(([x, y]) => ({ x, y, dir: rand() * 6.3 }));
     const gas = gasModel(7, W, H, r, 95, 11);
     const els = [circles(box(0), sites.length, r, 'solid'), circles(box(1), liquid.length, r, 'liquid'), circles(box(2), gas.ps.length, r, 'gas')];
     let t = 0;
-    const frame = dt => {
-      t += dt;
-      sites.forEach(s => { s.x = s.x0 + 1.1 * Math.sin(s.k * t + s.a); s.y = s.y0 + 1.1 * Math.cos(s.k * 1.13 * t + s.b); });
-      // Liquid: random kicks, gravity and soft repulsion, so the particles stay touching and keep changing places.
-      for (let sub = 0; sub < 2; sub += 1) {
-        liquid.forEach(p => { p.vx += (rand() - 0.5) * 520 * dt; p.vy += (rand() - 0.5) * 520 * dt + 60 * dt; p.vx *= 0.9; p.vy *= 0.9; p.x += p.vx * dt; p.y += p.vy * dt; });
+    const settle = () => {
+      for (let pass = 0; pass < 3; pass += 1) {
         for (let i = 0; i < liquid.length; i += 1) for (let j = i + 1; j < liquid.length; j += 1) {
-          const a = liquid[i], b = liquid[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, min = 2 * r + 0.3;
+          const a = liquid[i], b = liquid[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, min = 2 * r;
           if (d < min) { const push = (min - d) / 2, ux = dx / d, uy = dy / d; a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push; }
         }
         liquid.forEach(p => { p.x = Math.min(W - r, Math.max(r, p.x)); p.y = Math.min(H - r, Math.max(r, p.y)); });
       }
+    };
+    const frame = dt => {
+      t += dt;
+      sites.forEach(s => { s.x = s.x0 + 0.8 * Math.sin(s.k * t + s.a); s.y = s.y0 + 0.8 * Math.cos(s.k * 1.13 * t + s.b); });
+      liquid.forEach(p => { p.dir += (rand() - 0.5) * 9 * dt; p.x += Math.cos(p.dir) * 15 * dt; p.y += (Math.sin(p.dir) * 15 + 48) * dt; });
+      settle();
       gas.step(dt);
     };
     live(fig, frame, () => { place(els[0], sites); place(els[1], liquid); place(els[2], gas.ps); });
@@ -128,33 +133,45 @@ window.DeckSvgTex = {
   const controls = (label, buttons) => `<div class="pm-controls" role="group" aria-label="${label}">${buttons.map(([act, text]) => `<button type="button" data-act="${act}">${text}</button>`).join('')}</div>`;
   const readout = items => `<div class="pm-readout">${items.map(([key, name]) => `<div><span>${name}</span><b data-out="${key}"></b></div>`).join('')}</div>`;
 
-  // Slide 9: one sealed box of gas at a temperature the class steps up and down.
+  // Slide 9: a sealed box of gas with a thermometer in it. The temperature changes smoothly with
+  // the slider (or 10 °C at a time with the buttons); the particles keep their colour and only
+  // their speed changes.
   function gasLive(fig) {
-    const W = 240, H = 150, r = 6, TEMPS = [-73, 20, 127, 227, 327]; // 200 K to 600 K
-    let at = 1;
+    const W = 240, H = 150, r = 6, X0 = 12, Y0 = 132, MIN = -100, MAX = 300;
+    const tubeX = 216, yOf = T => 120 - ((T - MIN) / (MAX - MIN)) * 104; // scale: -100 °C at y 120, 300 °C at y 16
+    let T = 20;
     fig.classList.add('pm-live');
-    fig.innerHTML = `<svg class="pf" viewBox="0 0 264 174" role="img" aria-label="A sealed box of gas particles in random motion"><rect class="ink paper" x="12" y="12" width="${W}" height="${H}" rx="3"/><g transform="translate(12 12)" data-gas></g></svg>` +
-      `<div class="pm-side">${readout([['temp', 'Temperature'], ['speed', 'Average speed'], ['p', 'Pressure']])}${controls('Change the temperature', [['down', 'Cooler'], ['up', 'Hotter']])}<p class="pm-note">Sealed box: the volume and the number of particles stay the same.</p></div>`;
-    const m = gasModel(14, W, H, r, 60, 23);
+    const ticks = [-100, 0, 100, 200, 300].map(v => `<path class="ink thin" d="M${tubeX + 5} ${yOf(v)} h7"/><text class="sm" x="${tubeX + 15}" y="${yOf(v) + 4}" text-anchor="start">${v} °C</text>`).join('');
+    fig.innerHTML = `<svg class="pf" viewBox="0 0 284 294" role="img" aria-label="A sealed box of gas particles in random motion, with a thermometer in the gas">` +
+      `<rect class="ink paper" x="${X0}" y="${Y0}" width="${W}" height="${H}" rx="3"/><g transform="translate(${X0} ${Y0})" data-gas></g>` +
+      `<rect class="ink paper" x="${tubeX - 5}" y="8" width="10" height="${Y0 + 22}" rx="5"/><path class="merc" data-column d=""/><circle class="ink bulb" cx="${tubeX}" cy="${Y0 + 30}" r="8"/>${ticks}` +
+      `<text class="sm" x="${X0}" y="${Y0 - 8}" text-anchor="start">sealed box of gas</text><text class="sm" x="${tubeX - 12}" y="16" text-anchor="end">thermometer</text></svg>` +
+      `<div class="pm-side">${readout([['temp', 'Temperature'], ['p', 'Pressure']])}` +
+      `<label class="pm-slider"><span>Change the temperature</span><input type="range" min="${MIN}" max="${MAX}" step="1" value="${T}" aria-label="Temperature of the gas in degrees Celsius"></label>` +
+      `${controls('Change the temperature in steps', [['down', '− 10 °C'], ['up', '+ 10 °C']])}<p class="pm-note">Sealed box: the volume and the number of particles stay the same. Only the speed of the particles changes.</p></div>`;
+    const m = gasModel(14, W, H, r, 70, 23);
     const els = circles(fig.querySelector('[data-gas]'), m.ps.length, r, 'gas');
     const out = key => fig.querySelector(`[data-out="${key}"]`);
-    const set = () => {
-      const K = TEMPS[at] + 273;
+    const slider = fig.querySelector('input'), column = fig.querySelector('[data-column]');
+    const set = value => {
+      T = Math.max(MIN, Math.min(MAX, Math.round(value)));
+      const K = T + 273;
       m.speed = 70 * Math.sqrt(K / 293);
-      out('temp').textContent = `${TEMPS[at]} °C`;
-      out('speed').textContent = ['slow', 'medium', 'fast', 'faster', 'fastest'][at];
+      slider.value = T;
+      column.setAttribute('d', `M${tubeX} ${Y0 + 26} V${f(yOf(T))}`);
+      out('temp').textContent = `${T} °C`;
       out('p').textContent = `${Math.round(100 * K / 293)} kPa`;
-      els.forEach(el => el.classList.toggle('hotp', at >= 3));
-      fig.querySelector('[data-act="down"]').disabled = at === 0;
-      fig.querySelector('[data-act="up"]').disabled = at === TEMPS.length - 1;
+      fig.querySelector('[data-act="down"]').disabled = T <= MIN;
+      fig.querySelector('[data-act="up"]').disabled = T >= MAX;
     };
+    slider.addEventListener('input', () => set(Number(slider.value)));
+    // Arrow keys and swipes on the slider must not also turn the slide.
+    ['keydown', 'keyup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'mousedown'].forEach(type => slider.addEventListener(type, event => event.stopPropagation()));
     fig.addEventListener('click', event => {
       const b = event.target.closest('[data-act]');
-      if (!b) return;
-      at = Math.max(0, Math.min(TEMPS.length - 1, at + (b.dataset.act === 'up' ? 1 : -1)));
-      set();
+      if (b) set(T + (b.dataset.act === 'up' ? 10 : -10));
     });
-    set();
+    set(T);
     live(fig, dt => m.step(dt), () => place(els, m.ps));
   }
 
