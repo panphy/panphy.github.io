@@ -1,4 +1,4 @@
-// Why the mean intensity is S/4, in three dimensions, over the flat b2-quarter figure of slide 8:
+// Why the mean intensity is S/4, in three dimensions, over the flat b2-quarter figure of slide 9:
 // parallel sunlight of intensity S meets a planet of radius R. It intercepts the light crossing a
 // disk of area πR², and as the planet turns that power is shared over the whole sphere, 4πR².
 // Built, turned and zoomed by ../assets/model3d.js.
