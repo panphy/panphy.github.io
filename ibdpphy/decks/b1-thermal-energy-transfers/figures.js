@@ -2,7 +2,7 @@
 // ../assets/figures.js. Hot is red and cold is blue; particles are teal, energy transfers
 // apricot. Nothing here is terracotta, because B.1 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, through, sampled, labeled, seeded, track, anim, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, text, sub, through, sampled, labeled, animated, stepG, seeded, track, anim, twoState, PLAY, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const atom = (r, color = 'brand-primary') => `<circle r="${r}" style="fill:var(--${color})"/>`;
   const at = (x, y, body) => `<g transform="translate(${f(x)} ${f(y)})">${body}</g>`;
@@ -57,14 +57,15 @@ window.DeckFigures.add(P => {
     'b1-heating-curve': el => {
       // At a steady heating rate, ice and steam warm about twice as steeply as water. The melting plateau is to
       // scale with the water slope; the boiling plateau is drawn shorter than to scale, so that it fits.
-      const on = labeled(el), pts = [[120, 430], [156, 340], [276, 340], [426, 150], [756, 150], [788, 70]];
-      let s = arrow(120, 470, 120, 40, 'text-secondary', 2.5) + arrow(120, 470, 830, 470, 'text-secondary', 2.5) + line(through(pts), 'brand-primary', 6);
-      s += line(through(pts.slice(1, 3)), 'brand-accent', 8) + line(through(pts.slice(3, 5)), 'brand-accent', 8);
-      if (on) {
-        s += text(136, 54, 'temperature', 'lbl mono', 'start') + text(824, 506, 'energy supplied', 'lbl mono', 'end') + `<line x1="120" y1="340" x2="156" y2="340" class="guide"/><line x1="120" y1="150" x2="450" y2="150" class="guide"/>` + text(106, 350, '0 °C', 'lbl mono', 'end') + text(106, 160, '100 °C', 'lbl mono', 'end');
-        s += text(216, 320, 'melting', 'lbl strong halo') + text(591, 130, 'boiling', 'lbl strong halo') + text(168, 420, 'ice', 'lbl halo', 'start') + text(372, 270, 'water', 'lbl halo', 'start') + text(770, 130, 'steam', 'lbl halo', 'start');
-        s += text(591, 194, 'temperature constant', 'lbl small');
-      }
+      // With data-animate, each press of → draws the next stage: ice, melting, water, boiling, steam.
+      const on = labeled(el), go = animated(el), pts = [[120, 430], [156, 340], [276, 340], [426, 150], [756, 150], [788, 70]];
+      let s = arrow(120, 470, 120, 40, 'text-secondary', 2.5) + arrow(120, 470, 830, 470, 'text-secondary', 2.5);
+      if (on) s += text(136, 54, 'temperature', 'lbl mono', 'start') + text(824, 506, 'energy supplied', 'lbl mono', 'end') + `<line x1="120" y1="340" x2="156" y2="340" class="guide"/><line x1="120" y1="150" x2="450" y2="150" class="guide"/>` + text(106, 350, '0 °C', 'lbl mono', 'end') + text(106, 160, '100 °C', 'lbl mono', 'end');
+      const seg = k => line(through(pts.slice(k, k + 2)), k % 2 ? 'brand-accent' : 'brand-primary', k % 2 ? 8 : 6);
+      const labels = on ? [text(168, 420, 'ice', 'lbl halo', 'start'), text(216, 320, 'melting', 'lbl strong halo'), text(372, 270, 'water', 'lbl halo', 'start'), text(591, 130, 'boiling', 'lbl strong halo') + text(591, 194, 'temperature constant', 'lbl small'), text(770, 130, 'steam', 'lbl halo', 'start')] : ['', '', '', '', ''];
+      // Drawn in this order so the thicker plateaus sit on top of the slopes beside them.
+      const stage = k => seg(k) + labels[k];
+      s += go ? [0, 1, 2, 3, 4].map(k => stepG(true, k + 1, stage(k), 'wipe')).join('') : [0, 2, 4, 1, 3].map(stage).join('');
       return svg(on ? '0 20 850 500' : '90 40 760 450', s, 'A graph of temperature against energy supplied for ice heated at a steady rate. The temperature rises while the ice warms, stays constant at 0 degrees Celsius while it melts, rises again as water, stays constant at 100 degrees Celsius while it boils, then rises as steam. The flat part for boiling is much longer than the flat part for melting');
     },
 
