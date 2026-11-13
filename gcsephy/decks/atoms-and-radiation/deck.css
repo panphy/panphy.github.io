@@ -305,7 +305,7 @@ h1 span, h2 span { color: var(--brand-primary); }
 h2 { font-size: 64px; line-height: 1.05; letter-spacing: -.015em; margin: 10px 0 34px; }
 h3 { font-size: 34px; line-height: 1.15; }
 .mono { font-family: var(--font-mono); }
-.nocase { text-transform: none; }
+.nocase, .facts thead th.nocase { text-transform: none; }
 .lead { font-size: 30px; color: var(--text-secondary); margin: 0; }
 
 .points { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; align-content: start; }
