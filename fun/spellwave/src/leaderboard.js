@@ -15,14 +15,13 @@ const MIN_SCORE = 1;
 // Matches the server check (spellwave_score_range); the highest legitimate run is ~67.6k.
 const MAX_SCORE = 70000;
 const HIGHLIGHT_MS = 6000;
-// Obvious placeholders that fill empty places until enough real scores exist.
-// They never count towards qualifying, and every real score is always listed.
+// Benchmark scores compete for the same five places as submitted scores.
 const PLACEHOLDER_SCORES = [
-  { initials: 'AAA', score: 20000 },
-  { initials: 'BBB', score: 18000 },
-  { initials: 'CCC', score: 16000 },
-  { initials: 'DDD', score: 14000 },
-  { initials: 'EEE', score: 12000 },
+  { initials: 'AAA', score: 15000 },
+  { initials: 'BBB', score: 13000 },
+  { initials: 'CCC', score: 10000 },
+  { initials: 'DDD', score: 5000 },
+  { initials: 'EEE', score: 1000 },
 ];
 
 export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
@@ -139,8 +138,7 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
   }
 
   function isHighScore(score) {
-    if (topScores.length < BOARD_SIZE) return true;
-    return score > (topScores[topScores.length - 1]?.score ?? 0);
+    return score > rankedScores()[BOARD_SIZE - 1].score;
   }
 
   async function fetchTopScoresRest() {
@@ -227,18 +225,19 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
     }
   }
 
-  // Real scores, topped up to a full board with the highest placeholders.
-  function withPlaceholders(entries) {
-    const fill = PLACEHOLDER_SCORES.slice(0, Math.max(0, BOARD_SIZE - entries.length));
-    return [...entries, ...fill].sort((a, b) => b.score - a.score);
+  function rankedScores() {
+    // Keep the placeholder ahead of a submitted score on a tie.
+    return [...PLACEHOLDER_SCORES, ...topScores]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, BOARD_SIZE);
   }
 
   function renderTopScores() {
     if (!scoreList) return;
     scoreList.innerHTML = '';
-    withPlaceholders(topScores).forEach((entry) => {
+    rankedScores().forEach((entry) => {
       const li = document.createElement('li');
-      if (isRecentSubmission(entry)) li.classList.add('sw-highlight');
+      if (!PLACEHOLDER_SCORES.includes(entry) && isRecentSubmission(entry)) li.classList.add('sw-highlight');
       const initialsSpan = document.createElement('span');
       initialsSpan.className = 'sw-initials';
       initialsSpan.textContent = entry.initials;
