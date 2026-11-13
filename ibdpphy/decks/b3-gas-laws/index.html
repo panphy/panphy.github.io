@@ -136,13 +136,16 @@
       <section class="slide" data-title="The pressure of a gas">
         <p class="eyebrow">Where the force comes from</p>
         <h2>The pressure of a gas<span>.</span></h2>
-        <div class="split wide-fig">
+        <div class="split even">
+          <div class="stack">
+          <div class="q"><p>A gas pushes on every wall of its container. What is doing the pushing?</p><div class="ans step">Its molecules, hitting the walls</div></div>
           <ul class="points small">
-            <li>The molecules move <b>at random</b> and hit the walls</li>
+            <li class="step">The molecules move <b>at random</b> and hit the walls</li>
             <li class="step">Each collision changes a molecule’s <b>momentum</b></li>
             <li class="step">So the wall exerts a force on the molecule, and the molecule an equal and opposite force on the <b>wall</b></li>
             <li class="step">Force on each unit area: the <b>pressure</b></li>
           </ul>
+          </div>
           <div class="panel">
             <div class="panel-head"><span>A BOX OF GAS</span></div>
             <div class="fig" data-fig="b3-box"></div>
@@ -341,11 +344,11 @@
         <h2>Volume and temperature<span>.</span></h2>
         <div class="split wide-fig">
           <div class="stack">
-            <div class="equation small"><span>\(\dfrac{V}{T} = \text{constant}\)</span></div>
+            <div class="q"><p>Extend the line backwards. At what temperature would the volume reach zero?</p><div class="ans step">At −273 °C, whatever the gas: absolute zero</div></div>
+            <div class="equation small step"><span>\(\dfrac{V}{T} = \text{constant}\)</span></div>
             <ul class="points small">
-              <li>For a fixed mass of gas at <b>constant pressure</b></li>
+              <li class="step">For a fixed mass of gas at <b>constant pressure</b></li>
               <li class="step">\(V \propto T\), with \(T\) in <b>kelvin</b></li>
-              <li class="step">The same intercept: <b>−273 °C</b></li>
             </ul>
           </div>
           <div class="panel">
@@ -394,9 +397,10 @@
         <h2>Combining the three laws<span>.</span></h2>
         <div class="split even">
           <div class="stack">
-            <div class="equation"><span>\(\dfrac{PV}{T} = \text{constant}\)</span></div>
+            <div class="q"><p>Boyle’s law, the pressure law, Charles’s law: three laws, or one?</p><div class="ans step">One: the same relation, seen with one quantity held fixed</div></div>
+            <div class="equation step"><span>\(\dfrac{PV}{T} = \text{constant}\)</span></div>
             <ul class="points small">
-              <li class="frac">Between two states: \(\dfrac{P_{1} V_{1}}{T_{1}} = \dfrac{P_{2} V_{2}}{T_{2}}\)</li>
+              <li class="frac step">Between two states: \(\dfrac{P_{1} V_{1}}{T_{1}} = \dfrac{P_{2} V_{2}}{T_{2}}\)</li>
               <li class="step">Hold one quantity constant and it reduces to one of the three laws</li>
             </ul>
           </div>
@@ -418,6 +422,30 @@
           </div>
           <div class="rn-side">
             <p class="tip">Only \(T\) must be in a particular unit, the kelvin. \(P\) and \(V\) can be in any units, as long as they are the same on both sides.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Why launch it half full?">
+        <p class="eyebrow">The real thing</p>
+        <h2>Why launch it half full<span>?</span></h2>
+        <div class="story" style="--photo-h: 340px;">
+          <div class="story-photos">
+            <figure><img src="images/weather-balloon.jpg" width="1280" height="794" alt="A man on a grassy field releases a weather balloon carrying a small instrument box on a long string, beside a building topped by a white radar dome"><figcaption><b>Launching a weather balloon</b>, Topeka, Kansas, 1988</figcaption></figure>
+          </div>
+          <div class="stack">
+            <div class="q"><p>Weather balloons are launched only partly filled. Why?</p><div class="ans step">As it rises, the pressure falls far more than the kelvin temperature</div><div class="ans step">So its volume grows many times over, until it bursts, usually more than 20 km up</div></div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Wea01144_-_Flickr_-_NOAA_Photo_Library.jpg" target="_blank" rel="noopener">Stephen Corfidi, NOAA</a>, public domain.</p>
+        <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">How much it swells</h3>
+            <p>About 30 km up, the air pressure is roughly 1% of its value at the ground and the temperature about 230 K. For the same gas, \(V_{2} = V_{1} \times \dfrac{P_{1}}{P_{2}} \times \dfrac{T_{2}}{T_{1}} \approx V_{1} \times 100 \times \dfrac{230}{290} \approx 80 V_{1}\). The fall in pressure wins easily over the fall in temperature. A balloon filled tight at the ground would burst long before reaching the height the forecasters need.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The gas inside is a fixed mass, so \(\dfrac{PV}{T}\) stays constant as it rises: use kelvin for \(T\).</p>
           </div>
         </aside>
       </section>
@@ -549,8 +577,9 @@
       <section class="slide" data-title="The ideal gas model">
         <p class="eyebrow">The assumptions of the kinetic model</p>
         <h2>The ideal gas<span>.</span></h2>
+        <div class="q" style="margin-bottom: 18px;"><p>Wait: what exactly is an <b>ideal</b> gas?</p></div>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr); align-content: center;">
-          <div class="card"><p class="eyebrow">Many, and random</p><h3>A very large number of identical molecules in random motion</h3><p>So averages are reliable</p></div>
+          <div class="card step"><p class="eyebrow">Many, and random</p><h3>A very large number of identical molecules in random motion</h3><p>So averages are reliable</p></div>
           <div class="card step"><p class="eyebrow">Tiny</p><h3>The volume of the molecules is negligible</h3><p>Compared with the volume of the container</p></div>
           <div class="card step"><p class="eyebrow">No forces</p><h3>No forces between molecules except during collisions</h3><p>So no intermolecular potential energy</p></div>
           <div class="card step"><p class="eyebrow">Elastic</p><h3>All collisions are elastic</h3><p>No kinetic energy is lost</p></div>
