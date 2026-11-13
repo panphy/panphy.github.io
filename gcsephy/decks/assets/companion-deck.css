@@ -250,6 +250,8 @@ body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(
 .slide-foot .tag::before { content: ""; width: 16px; height: 16px; border: 2px solid var(--ink); border-radius: 50%; background: var(--accent); }
 
 /* Typography */
+/* Keeps a unit or symbol in its own case inside an uppercase label. */
+.nocase { text-transform: none; }
 .eyebrow { display: flex; align-items: center; gap: 14px; margin: 0; font: 900 24px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
 .eyebrow .num { white-space: nowrap; padding: 5px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); color: var(--ink); letter-spacing: .08em; }
 /* Keep a hyphenated word whole instead of breaking it at the hyphen. */
