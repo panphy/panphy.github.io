@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons and see how our picture of the atom changed.">
+  <meta name="description" content="Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons, measure where an electron is found and see how our picture of the atom changed.">
   <meta name="theme-color" content="#F5F6FA">
   <script src="/assets/theme.js" data-legacy-dark="atomic-models-dark" data-legacy-light="atomic-models-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <title>Atomic Models Simulation: Plum Pudding to Bohr in 3D — PanPhy Labs</title>
+  <title>Atomic Models Simulation: Plum Pudding to Electron Cloud in 3D — PanPhy Labs</title>
   <link rel="canonical" href="https://panphy.app/simulations/atomic_models.html">
 <!-- panphy-discovery -->
-  <meta property="og:title" content="Atomic Models Simulation: Plum Pudding to Bohr in 3D — PanPhy Labs">
-  <meta property="og:description" content="Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons and see how our picture of the atom changed.">
+  <meta property="og:title" content="Atomic Models Simulation: Plum Pudding to Electron Cloud in 3D — PanPhy Labs">
+  <meta property="og:description" content="Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons, measure where an electron is found and see how our picture of the atom changed.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://panphy.app/simulations/atomic_models.html">
   <meta property="og:image" content="https://panphy.app/assets/og-default.png">
   <meta property="og:site_name" content="PanPhy Labs">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Atomic Models Simulation: Plum Pudding to Bohr in 3D — PanPhy Labs">
-  <meta name="twitter:description" content="Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons and see how our picture of the atom changed.">
+  <meta name="twitter:title" content="Atomic Models Simulation: Plum Pudding to Electron Cloud in 3D — PanPhy Labs">
+  <meta name="twitter:description" content="Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons, measure where an electron is found and see how our picture of the atom changed.">
   <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Atomic Models",
-  "description": "Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons and see how our picture of the atom changed.",
+  "description": "Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons, measure where an electron is found and see how our picture of the atom changed.",
   "url": "https://panphy.app/simulations/atomic_models.html",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Any",
@@ -95,7 +95,11 @@
           <p id="load-status" role="status">Loading the 3D model…</p>
           <div class="legend overlay" aria-label="Legend">
             <span id="electron-legend"><i class="electron">−</i> Electron</span>
-            <span id="cloud-legend" hidden><i class="cloud-dot"></i> Electron cloud</span>
+            <span data-orbital-chip="1s" hidden><i class="orbital-dot" style="background:var(--orbital-1s)"></i> <span>1s</span></span>
+            <span data-orbital-chip="2s" hidden><i class="orbital-dot" style="background:var(--orbital-2s)"></i> <span>2s</span></span>
+            <span data-orbital-chip="2px" hidden><i class="orbital-dot" style="background:var(--orbital-2px)"></i> <span>2p<sub><i>x</i></sub></span></span>
+            <span data-orbital-chip="2py" hidden><i class="orbital-dot" style="background:var(--orbital-2py)"></i> <span>2p<sub><i>y</i></sub></span></span>
+            <span data-orbital-chip="2pz" hidden><i class="orbital-dot" style="background:var(--orbital-2pz)"></i> <span>2p<sub><i>z</i></sub> (empty)</span></span>
             <span><i class="positive">+</i> <span id="positive-label">Positive charge (spread)</span></span>
             <span id="neutron-legend" hidden><i class="neutron">0</i> Neutron</span>
             <span id="alpha-legend" hidden><i class="alpha">α</i> Alpha particle</span>
@@ -104,6 +108,7 @@
           </div>
           <p class="gesture overlay" aria-hidden="true">Drag to rotate · Click the model, then scroll to zoom</p>
           <div class="energy-diagram overlay" id="energy-diagram" hidden></div>
+          <div class="energy-diagram radial-graph overlay" id="radial-graph" hidden></div>
         </div>
         <div class="toolbar playback" aria-label="Playback controls">
           <button type="button" id="motion" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
@@ -113,12 +118,36 @@
       <div class="console" id="side-controls" role="group" aria-label="Experiment controls">
         <button type="button" id="alpha" class="fire" aria-pressed="false">Fire alpha particles</button>
         <button type="button" id="excite" class="fire" hidden>Excite an electron</button>
-        <button type="button" id="orbital" class="fire" hidden>Inspect the 1s orbital</button>
+        <button type="button" id="measure" class="fire" hidden>Measure the position</button>
         <p class="particle-readout" id="particle-readout" role="status">Tap a particle to discover its job.</p>
+        <div class="sample-controls" id="cloud-controls" hidden>
+          <div class="section">
+            <span class="section-title">Measure again <output id="measure-count" aria-live="off"></output></span>
+            <div class="choice-row">
+              <button type="button" data-measure="10" aria-label="Measure 10 more times">+10</button>
+              <button type="button" data-measure="100" aria-label="Measure 100 more times">+100</button>
+              <button type="button" data-measure="1000" aria-label="Measure 1000 more times">+1000</button>
+              <button type="button" id="full-cloud" disabled>Show full cloud</button>
+            </div>
+          </div>
+          <div class="section">
+            <span class="section-title" id="orbital-title">Orbital</span>
+            <div class="choice-row segmented orbitals" role="group" aria-labelledby="orbital-title">
+              <button type="button" data-orbital="all" aria-pressed="true">All</button>
+              <button type="button" data-orbital="1s" aria-pressed="false">1s</button>
+              <button type="button" data-orbital="2s" aria-pressed="false">2s</button>
+              <button type="button" data-orbital="2px" aria-pressed="false">2p<sub><i>x</i></sub></button>
+              <button type="button" data-orbital="2py" aria-pressed="false">2p<sub><i>y</i></sub></button>
+              <button type="button" data-orbital="2pz" aria-pressed="false">2p<sub><i>z</i></sub></button>
+            </div>
+          </div>
+        </div>
         <div class="section">
           <span class="section-title">Look closer</span>
           <div class="view-row">
             <button type="button" id="inspect">Inspect an electron</button>
+            <button type="button" id="slice" aria-pressed="false" hidden>Slice view</button>
+            <button type="button" id="rings" aria-pressed="false" hidden>Bohr’s orbits</button>
             <button type="button" id="nucleus">Explore the center</button>
           </div>
         </div>
@@ -134,7 +163,7 @@
         </div>
       </aside>
     </section>
-    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Colors, particle sizes and distances are chosen to help you see the ideas. The nucleus and electrons are enlarged to make them visible: a real nucleus is about 1/100 000 of the atom’s width. Particle sizes are illustrative: they do not represent a mass ratio or actual relative sizes. Motion is illustrative, not a simulation of real electron trajectories. Real atoms are mostly empty space, and electrons do not follow neat planetary paths.</p><p>The alpha beam arrives evenly across the atom, as in the real experiment, where the beam was millions of atoms wide. Alphas passing in front of or behind the nucleus are drawn fainter, so a bright path over the nucleus really does pass close to it. Because the nucleus is enlarged, bounce-backs are far more common here than in reality: in Geiger and Marsden’s experiment only about 1 in 8000 alpha particles bounced back. The electron cloud is drawn from hydrogen-like orbitals, a simplification for carbon.</p><p>These are simplified classroom versions of historical models. Each view uses six electrons for comparison; the Bohr view shows a carbon arrangement (2, 4). Rutherford’s nucleus is one positive region. Our Bohr view is a modern classroom adaptation: carbon-12 with six protons and six neutrons. Neutrons were discovered by James Chadwick in 1932, after Bohr’s 1913 model. <a href="https://www.nobelprize.org/laureate/41" target="_blank" rel="noopener noreferrer">The neutron discovery ↗</a></p></div></section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Colors, particle sizes and distances are chosen to help you see the ideas. The nucleus and electrons are enlarged to make them visible: a real nucleus is about 1/100 000 of the atom’s width. Particle sizes are illustrative: they do not represent a mass ratio or actual relative sizes. Motion is illustrative, not a simulation of real electron trajectories. Real atoms are mostly empty space, and electrons do not follow neat planetary paths.</p><p>The alpha beam arrives evenly across the atom, as in the real experiment, where the beam was millions of atoms wide. Alphas passing in front of or behind the nucleus are drawn fainter, so a bright path over the nucleus really does pass close to it. Because the nucleus is enlarged, bounce-backs are far more common here than in reality: in Geiger and Marsden’s experiment only about 1 in 8000 alpha particles bounced back. The electron cloud is drawn from hydrogen-like orbitals, a simplification for carbon: each energy level has its own effective nuclear charge, and the repulsion between electrons is otherwise ignored. The sign (phase) of each orbital is not shown, and the directions chosen for the x, y and z axes are arbitrary. Each measurement stands for one result on a freshly prepared atom.</p><p>These are simplified classroom versions of historical models. Each view uses six electrons for comparison; the Bohr view shows a carbon arrangement (2, 4). Rutherford’s nucleus is one positive region. Our Bohr view is a modern classroom adaptation: carbon-12 with six protons and six neutrons. Neutrons were discovered by James Chadwick in 1932, after Bohr’s 1913 model. <a href="https://www.nobelprize.org/laureate/41" target="_blank" rel="noopener noreferrer">The neutron discovery ↗</a></p></div></section>
   </main>
   <footer class="panphy-footer">
     <a href="https://edu.rsc.org/cpd/how-to-teach-atomic-structure-at-14-16/4020896.article" target="_blank" rel="noopener noreferrer">Teacher reading: Royal Society of Chemistry ↗</a>
