@@ -35,9 +35,9 @@ export const MODELS = {
     title: 'ELECTRON CLOUD MODEL',
     date: 'SCHRÖDINGER · 1926',
     heading: 'Electrons as clouds of probability.',
-    description: 'The modern quantum model keeps Bohr’s energy levels but drops fixed paths. It describes where an electron is likely to be found. Carbon’s six electrons fill the 1s, 2s and 2p orbitals.',
-    look: 'Each dot marks a place where an electron could be found; denser regions are more likely. The flicker shows that the position is not fixed. Use “Inspect an orbital” to pick out each shape.',
-    evidence: 'Bohr’s model worked for hydrogen but failed for atoms with more electrons. Quantum mechanics, which treats electrons as waves, predicted the spectra and chemistry of all atoms.',
+    description: 'The quantum model keeps Bohr’s energy levels but drops fixed paths. Each electron is described by a wavefunction \\(\\psi\\), and \\(|\\psi|^2\\) gives the probability of finding it at each place. Carbon’s six electrons fill the orbitals \\(\\mathrm{1s^2\\,2s^2\\,2p^2}\\).',
+    look: 'Press “Measure the position” a few times: each result is one dot, and no path joins them. Thousands of results build the cloud. Then pick an orbital, slice through it to find its nodes, and compare the graph of \\(P(r)\\) with Bohr’s orbits.',
+    evidence: 'Bohr’s model worked for hydrogen but failed for atoms with more electrons, and it could not say why only some orbits were allowed. Treating the electron as a standing wave explains the allowed energies, and quantum mechanics went on to predict the spectra and chemistry of all atoms.',
     positiveLabel: 'Proton (positive)'
   }
 };
@@ -57,7 +57,15 @@ export const PARTICLES = {
 };
 
 export const ORBITALS = {
-  '1s': '1s ORBITAL · 2 electrons · A sphere close to the nucleus: the lowest energy level (\\(n = 1\\)).',
-  '2s': '2s ORBITAL · 2 electrons · A larger sphere with an empty shell inside it (a node). Energy level \\(n = 2\\).',
-  '2p': '2p ORBITALS · 2 electrons · One in each of two dumbbell-shaped orbitals (teal and violet), at right angles. Also energy level \\(n = 2\\).'
+  all: 'CARBON · \\(\\mathrm{1s^2\\,2s^2\\,2p^2}\\) · Each dot is a place where one of the six electrons could be found. Press “Measure the position” to see where the cloud comes from, or pick an orbital to see its shape.',
+  '1s': '1s ORBITAL · \\(n = 1\\), \\(l = 0\\) · 2 electrons with opposite spins. A sphere. The dots are densest at the nucleus, yet the most likely distance is the peak of \\(P(r)\\), further out: a wider shell has more room.',
+  '2s': '2s ORBITAL · \\(n = 2\\), \\(l = 0\\) · 2 electrons. A larger sphere with a radial node: a spherical surface where the probability is zero, the gap in \\(P(r)\\). Use “Slice view” to find it in the cloud.',
+  '2px': '\\(\\mathrm{2p}_x\\) ORBITAL · \\(n = 2\\), \\(l = 1\\) · 1 electron. Two lobes along the x axis. The plane between them, through the nucleus, is a node: the electron is never found there.',
+  '2py': '\\(\\mathrm{2p}_y\\) ORBITAL · \\(n = 2\\), \\(l = 1\\) · 1 electron. The same shape and energy as \\(\\mathrm{2p}_x\\), along the y axis. Carbon’s two 2p electrons occupy different orbitals (Hund’s rule).',
+  '2pz': '\\(\\mathrm{2p}_z\\) ORBITAL · \\(n = 2\\), \\(l = 1\\) · Empty in carbon’s ground state, so there is nothing to measure. The gray dots show where an electron would be found if it were excited into this orbital.'
+};
+
+export const CLOUD_VIEWS = {
+  slice: 'SLICE VIEW · Only a thin slab through the nucleus is drawn, so you can see inside the cloud. It always faces you: rotate the atom to cut it another way. Look for nodes, the gaps where the probability is zero.',
+  rings: 'BOHR’S ORBITS · The rings are Bohr’s orbits for \\(n = 1\\) and \\(n = 2\\). Each lies at the most likely distance of an orbital (1s and 2p), a peak of \\(P(r)\\). But the electron is often found nearer or further away.'
 };

@@ -29,6 +29,11 @@
   --alpha: #B5179E;
   --alpha-deflected: #0E9F6E;
   --photon: #7C3AED;
+  --orbital-1s: #1675BB;
+  --orbital-2s: #B45309;
+  --orbital-2px: #0D9488;
+  --orbital-2py: #7C3AED;
+  --orbital-2pz: #657481;
 }
 
 [data-theme="dark"] {
@@ -41,6 +46,11 @@
   --alpha: #E879F9;
   --alpha-deflected: #34D399;
   --photon: #A78BFA;
+  --orbital-1s: #4BA3E3;
+  --orbital-2s: #FBBF24;
+  --orbital-2px: #5EEAD4;
+  --orbital-2py: #C4B5FD;
+  --orbital-2pz: #8C9AA6;
 }
 
 * { box-sizing: border-box; }
@@ -186,7 +196,8 @@ body[data-model=rutherford] .legend .positive { background: #D99A36; }
 .legend .alpha { background: var(--alpha); }
 .legend .deflected { background: var(--alpha-deflected); }
 .legend .photon { background: var(--photon); }
-.legend .cloud-dot { background: radial-gradient(circle, var(--electron) 0 2px, transparent 2.5px) 0 0 / 6px 6px, color-mix(in srgb, var(--electron), transparent 80%); }
+.legend .orbital-dot { width: 12px; height: 12px; margin-left: 4px; }
+.legend sub i { display: inline; width: auto; height: auto; font-style: italic; font-weight: inherit; font-size: inherit; color: inherit; }
 .gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
 .energy-diagram { top: 8px; right: 8px; width: 176px; padding: 6px 8px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .energy-diagram svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -196,6 +207,16 @@ body[data-model=rutherford] .legend .positive { background: #D99A36; }
 .energy-diagram .dot { fill: var(--electron); }
 .energy-diagram .transition { stroke: var(--photon); stroke-width: 2; fill: none; }
 .energy-diagram .transition-head { fill: var(--photon); }
+/* Electron cloud: radial probability, the theory as a curve and the measurements as bars. */
+.radial-graph { width: 250px; }
+.radial-graph text { font-size: 8.5px; }
+.radial-graph .symbol { font-style: italic; }
+.radial-graph .axis { stroke: var(--text-secondary); stroke-width: 1; }
+.radial-graph .curve { fill: none; stroke-width: 1.8; stroke-linejoin: round; }
+.radial-graph .part { fill: none; stroke-width: 1; opacity: .8; }
+.radial-graph .bar { opacity: .4; }
+.radial-graph .bohr { stroke: var(--text-secondary); stroke-width: 1; stroke-dasharray: 3 2; }
+.radial-graph .bohr-label { fill: var(--text-main); }
 
 
 /* Playback bar under the 3D view */
@@ -255,7 +276,9 @@ button:disabled { cursor: default; opacity: 0.9; }
 .action[hidden] { display: none; }
 .view-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
 .view-row button { min-height: 48px; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg); font-size: .85rem; font-weight: 700; }
-.view-row button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
+.view-row button:hover:not([aria-pressed=true]) { border-color: var(--brand-accent); background: var(--muted-bg); }
+.view-row button[aria-pressed=true] { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
+[data-theme="dark"] .view-row button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--accent-ink); }
 /* One message says what the model shows and what to try next. Room for five lines, so a longer message does not push the settings around. */
 .particle-readout { margin: 0; min-height: calc(7.75em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--muted-bg); color: var(--text-main); font-size: .84rem; line-height: 1.55; }
 
@@ -274,6 +297,11 @@ button:disabled { cursor: default; opacity: 0.9; }
 /* One-of-several choices are a segmented control: exactly one is lit. */
 .segmented { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 4px; padding: 4px; border-radius: 14px; background: var(--muted-bg); }
 .segmented button { border-color: transparent; background: none; padding: 6px 4px; line-height: 1.2; }
+.segmented.orbitals { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); }
+.segmented sub { font-size: .75em; }
+.section-title output { margin-left: 8px; color: var(--text-main); letter-spacing: 0; text-transform: none; }
+.choice-row button:disabled { opacity: .5; }
+#full-cloud { flex: 1 1 auto; }
 .segmented button[aria-pressed=true] { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
 [data-theme="dark"] .segmented button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--accent-ink); }
 
@@ -337,6 +365,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .viewer-heading { font-size: .68rem; }
   .gesture { display: none; }
   .energy-diagram { width: 124px; }
+  .radial-graph { width: 170px; }
   .console { padding: 16px 12px; }
   .particle-readout { min-height: 72px; }
   .toolbar { gap: 6px; }
