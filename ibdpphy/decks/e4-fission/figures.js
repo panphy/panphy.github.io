@@ -42,28 +42,38 @@ window.DeckFigures.add(P => {
       return svg('40 10 800 510', s, 'The curve of binding energy per nucleon against nucleon number. It rises steeply for light nuclei, peaks at about 8.8 MeV near nucleon number 60 and falls slowly to about 7.6 MeV for uranium. The two fragments of a fission lie higher on the curve than the uranium nucleus, at about 8.4 MeV: they are more tightly bound');
     },
 
-    // A chain reaction, as in the Year 11 deck: each fission gives out three neutrons; two go on to
-    // split more uranium-235 nuclei and one escapes. A whole sphere is uranium-235, a pair has just
-    // split. Each press of → adds a generation. Also drawn plain.
+    // A chain reaction drawn like the textbook picture. At each fission: the uranium-235 nucleus,
+    // a flash of released energy, and its two fragments, barium-141 and krypton-92, with every
+    // nucleon drawn. Three neutrons fly out of each fission: two split the next nuclei and the
+    // third, drawn faint, goes on without causing one here. Each press of → adds a generation.
+    // Also drawn plain.
     'e4-chain': el => {
-      const on = animated(el), named = labeled(el);
-      const whole = (x, y) => ball(x, y, 20, 'proton', '');
-      const split = (x, y) => `<circle cx="${x}" cy="${y}" r="40" fill="url(#g-glow)"/>` + ball(x - 9, y - 11, 14, 'proton', '') + ball(x + 9, y + 12, 12, 'proton', '');
-      const shot = (x1, y1, x2, y2, gap = 30) => {
-        const len = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / len, uy = (y2 - y1) / len;
-        return arrow(x1 + ux * 28, y1 + uy * 28, x2 - ux * gap, y2 - uy * gap, 'neutron', 2.5) + ball(x1 + ux * len * 0.5, y1 + uy * len * 0.5, 7, 'neutron');
+      const on = animated(el), named = labeled(el), r = 3.2;
+      const uranium = cluster(0, 0, 92, 143, r), barium = cluster(0, 0, 56, 85, r), krypton = cluster(0, 0, 36, 56, r);
+      const at = (x, y, body) => `<g transform="translate(${x} ${y})">${body}</g>`;
+      const burst = (x, y, R, turn) => `<polygon points="${Array.from({ length: 24 }, (_, i) => {
+        const a = turn + i * TAU / 24, k = i % 2 ? 0.45 : i % 4 ? 0.78 : 1;
+        return `${f(x + R * k * Math.cos(a))},${f(y + R * k * Math.sin(a))}`;
+      }).join(' ')}" style="fill:var(--gold);opacity:.8"/>`;
+      const fission = (x, y) => at(x, y, uranium) + burst(x + 44, y - 22, 19, 0.2) + burst(x + 44, y + 22, 19, 0.5) + at(x + 84, y - 46, barium) + at(x + 84, y + 48, krypton);
+      // A neutron leaving the fission at (x, y) towards (tx, ty): the ball, then a short arrow ahead of it.
+      const fly = (x, y, tx, ty, faint = false) => {
+        const len = Math.hypot(tx - x - 110, ty - y), ux = (tx - x - 110) / len, uy = (ty - y) / len;
+        const bx = x + 110 + ux * 50, by = y + uy * 50;
+        const s = ball(bx, by, 10, 'neutron') + arrow(bx + ux * 18, by + uy * 18, bx + ux * 52, by + uy * 52, 'neutron', 3);
+        return faint ? `<g opacity=".45">${s}</g>` : s;
       };
-      const escape = (x, y, dy) => `<g opacity=".55">${shot(x, y, x + 50, y + dy, 6)}</g>`;
-      const g0 = [[130, 260]], g1 = [[360, 140], [360, 380]], g2 = [[590, 80], [590, 200], [590, 320], [590, 440]];
-      const g3 = Array.from({ length: 8 }, (_, i) => [800, 50 + i * 60]);
-      const next = (from, to) => to.map((p, i) => shot(...from[Math.floor(i / 2)], ...p)).join('');
-      const label = (x, words) => named ? text(x, 512, words, 'lbl mono small') : '';
-      let s = ball(28, 260, 8, 'neutron') + arrow(38, 260, 98, 260, 'neutron', 2.5) + split(...g0[0]) + escape(130, 260, -70) + label(130, '1 splits');
-      const gen1 = next(g0, g1) + g1.map(p => split(...p) + escape(p[0], p[1], p[1] < 260 ? -60 : 60)).join('') + label(360, '2 split');
-      const gen2 = next(g1, g2) + g2.map(p => split(...p)).join('') + label(590, '4 split');
-      const gen3 = next(g2, g3) + g3.map(p => whole(...p)).join('') + label(800, '8 hit next');
+      const g0 = [[90, 280]], g1 = [[365, 140], [365, 420]], g2 = [[640, 70], [640, 210], [640, 350], [640, 490]];
+      // Fissions in `from` send two neutrons on to the nuclei in `to`; the third flies straight on.
+      const next = (from, to) => from.map(([x, y], i) => fly(x, y, ...to[2 * i]) + fly(x, y, ...to[2 * i + 1]) + fly(x, y, x + 300, y, true)).join('');
+      const label = (x, words) => named ? text(x, 600, words, 'lbl mono small') : '';
+      let s = ball(14, 280, 10, 'neutron') + arrow(32, 280, 58, 280, 'neutron', 3) + fission(...g0[0]) + label(130, '1 splits');
+      if (named) s += text(100, 384, 'uranium-235', 'lbl small');
+      const gen1 = next(g0, g1) + g1.map(p => fission(...p)).join('') + label(405, '2 split');
+      const gen2 = next(g1, g2) + g2.map(p => fission(...p)).join('') + label(680, '4 split');
+      const gen3 = g2.map(([x, y]) => [-0.5, 0, 0.5].map(k => fly(x, y, x + 400, y + 260 * k, !k)).join('')).join('') + label(820, '8 next');
       s += stepG(on, 1, gen1, 'wipe') + stepG(on, 2, gen2, 'wipe') + stepG(on, 3, gen3, 'wipe');
-      return svg(named ? '0 20 860 510' : '0 20 860 480', s, 'A chain reaction: one uranium-235 nucleus splits and gives out three neutrons. Two of them split two more nuclei, whose neutrons split four, then eight; the third neutron from each fission escapes');
+      return svg(named ? '0 0 880 620' : '0 0 880 565', s, 'A chain reaction. A neutron hits a uranium-235 nucleus, which splits into two fragments, barium-141 and krypton-92, releasing energy and three neutrons. Two of the neutrons split two more uranium-235 nuclei, whose neutrons split four more, and so on; the third neutron from each fission flies on');
     },
 
     // A fast neutron losing speed in collisions with the nuclei of the moderator.
