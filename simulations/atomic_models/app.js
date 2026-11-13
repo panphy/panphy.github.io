@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { radialTexture, rgbaTexture } from '../../assets/three-textures.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { MODELS, MODEL_ORDER, PARTICLES, ORBITALS, CLOUD_VIEWS } from './content.js';
+import { MODELS, MODEL_ORDER, PARTICLES, ORBITALS } from './content.js';
 const { setMath, mathHtml, onMathReady } = window.PanPhyMath;
 
 const $ = id => document.getElementById(id);
@@ -13,8 +13,6 @@ const state = {
   visible: true,
   inspectIndex: 0,
   orbital: 'all',
-  slice: false,
-  rings: false,
   exciteIndex: 0
 };
 
@@ -42,10 +40,8 @@ const ORBITAL_KEYS = ['1s', '2s', '2px', '2py', '2pz'];
 const SCALE_N1 = 0.32;
 const SCALE_N2 = 0.42;
 const CLOUD_RADIUS = 3.4; // Dots further out than this are not drawn.
-const CLOUD_CAPACITY = 12000; // Dots held for each orbital; the slice view draws them all.
+const CLOUD_CAPACITY = 12000; // The most measurements held for each orbital.
 const RADIAL_BINS = 34;
-const SLAB = 0.2; // Half the thickness of the slice.
-const SLICE_TIME = 0.7;
 const MEASURE_TIME = 1.2; // Seconds a batch of measurements takes to arrive.
 const EXCITE_PHASES = [['in', 1.4], ['up', 0.6], ['stay', 1.6], ['down', 0.5], ['out', 1.4]];
 
@@ -117,7 +113,6 @@ const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
 camera.position.set(0, 1.2, 9);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.localClippingEnabled = true; // The electron cloud's slice view.
 viewer.prepend(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xe7f4ff, 0x32415a, 2.3));
 const light = new THREE.DirectionalLight(0xffffff, 3);
@@ -150,7 +145,6 @@ let buildTextures = [];
 let positiveBody = null;
 let cloud = null;
 let cloudKeep = null;
-let cloudRings = [];
 let cloudFlash = null;
 let measure = null;
 let bohrRings = [];
@@ -338,7 +332,6 @@ function clearAtom() {
   zoomShadow();
   positiveBody = null;
   cloud = null;
-  cloudRings = [];
   cloudFlash = null;
 }
 
@@ -516,18 +509,12 @@ const ORBITAL_SPECS = {
   '2py': { name: '2py', electrons: 1, base: 1800, sample: () => sampleP(new THREE.Vector3(0, 1, 0)), radial: radial2p, peak: 4 * SCALE_N2 },
   '2pz': { name: '2pz', electrons: 0, base: 1800, sample: () => sampleP(new THREE.Vector3(0, 0, 1)), radial: radial2p, peak: 4 * SCALE_N2 }
 };
-// Bohr's orbit radii for the same two levels, n² a0/Z: the most likely distances for 1s and 2p.
-const CLOUD_BOHR_RADII = [SCALE_N1, 4 * SCALE_N2];
 function sampleOrbital(key) {
   for (;;) {
     const point = ORBITAL_SPECS[key].sample();
     if (point.length() < CLOUD_RADIUS) return point;
   }
 }
-// The slice view keeps a thin slab through the nucleus that always faces the camera. With the
-// slice off, the two planes sit outside the cloud and clip nothing.
-const slicePlanes = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 10), new THREE.Plane(new THREE.Vector3(0, 0, -1), 10)];
-const slice = { t: 0, target: 0 };
 function buildCloud() {
   // Smaller than in the Bohr view so the 1s cloud around it stays visible.
   buildNucleus(CLOUD_NUCLEUS_SCALE, 'cloudNucleus');
@@ -541,23 +528,11 @@ function buildCloud() {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(array, 3));
     geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), CLOUD_RADIUS);
-    const material = fade(new THREE.PointsMaterial({ color: palette.orbitals[key], map: dotTexture, size: 0.1, transparent: true, opacity: palette.dark ? 0.75 : 0.6, depthWrite: false, blending: palette.dark ? THREE.AdditiveBlending : THREE.NormalBlending, clippingPlanes: slicePlanes }));
+    const material = fade(new THREE.PointsMaterial({ color: palette.orbitals[key], map: dotTexture, size: 0.1, transparent: true, opacity: palette.dark ? 0.75 : 0.6, depthWrite: false, blending: palette.dark ? THREE.AdditiveBlending : THREE.NormalBlending }));
     const points = new THREE.Points(geometry, material);
     points.raycast = () => {};
     atom.add(points);
     return { key, points, array, measured: old ? old.measured : 0, bins: old ? old.bins : new Uint32Array(RADIAL_BINS) };
-  });
-  // Bohr's orbits for n = 1 and n = 2, to compare with the cloud.
-  CLOUD_BOHR_RADII.forEach((radius, level) => {
-    const line = ring(radius, palette.line, 0.85);
-    const label = labelSprite(`n = ${level + 1}`, palette.line);
-    label.scale.multiplyScalar(0.8);
-    // Lower left, clear of the graph in the top corner.
-    label.position.set(-(radius + 0.3) * Math.cos(0.95), -(radius + 0.3) * Math.sin(0.95), 0);
-    label.raycast = () => {};
-    fade(label.material);
-    atom.add(label);
-    cloudRings.push(line, label);
   });
   cloudFlash = glow(palette.line, 0.8);
   cloudFlash.visible = false;
@@ -575,17 +550,13 @@ function measuredCount() {
 function syncCloud() {
   if (!cloud) return;
   const shown = shownOrbitals();
-  const k = ease(slice.t);
-  slicePlanes[0].constant = slicePlanes[1].constant = THREE.MathUtils.lerp(CLOUD_RADIUS + 0.2, SLAB, k);
   const total = measure ? measuredCount() : 0;
   for (const item of cloud) {
     item.points.visible = shown.includes(item.key);
-    // The slice shows only a small part of the cloud, so it draws more dots.
-    item.points.geometry.setDrawRange(0, measure ? item.measured : Math.round(THREE.MathUtils.lerp(ORBITAL_SPECS[item.key].base, CLOUD_CAPACITY, k * k)));
+    item.points.geometry.setDrawRange(0, measure ? item.measured : ORBITAL_SPECS[item.key].base);
     // The first few results are drawn larger so that a single dot can be found.
     item.points.material.size = measure ? THREE.MathUtils.clamp(0.2 - 0.05 * Math.log10(Math.max(total, 1)), 0.1, 0.2) : 0.1;
   }
-  for (const object of cloudRings) object.visible = state.rings;
   const full = state.orbital === '2pz' || total + (measure ? measure.pending : 0) >= (state.orbital === 'all' ? 20000 : 10000);
   $('measure').disabled = full;
   document.querySelectorAll('[data-measure]').forEach(button => { button.disabled = full; });
@@ -593,8 +564,6 @@ function syncCloud() {
   $('measure-count').textContent = measure ? `N = ${total.toLocaleString('en-US')}` : '';
   document.querySelectorAll('[data-orbital]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.orbital === state.orbital)));
   document.querySelectorAll('[data-orbital-chip]').forEach(chip => { chip.hidden = !shown.includes(chip.dataset.orbitalChip); });
-  $('slice').setAttribute('aria-pressed', String(state.slice));
-  $('rings').setAttribute('aria-pressed', String(state.rings));
   renderRadialGraph();
 }
 // The graph of P(r): the theory as a curve and, while measuring, the results as bars.
@@ -625,11 +594,6 @@ function renderRadialGraph() {
       svg += `<rect class="bar" style="fill:${color}" x="${(left + i * width + 0.4).toFixed(1)}" y="${y.toFixed(1)}" width="${(width - 0.8).toFixed(1)}" height="${(base - y).toFixed(1)}"/>`;
     });
   }
-  if (state.rings) {
-    CLOUD_BOHR_RADII.forEach((radius, level) => {
-      svg += `<line class="bohr" x1="${px(radius).toFixed(1)}" x2="${px(radius).toFixed(1)}" y1="${top}" y2="${base}"/><text class="bohr-label" x="${(px(radius) + 2).toFixed(1)}" y="${top + 6}">n=${level + 1}</text>`;
-    });
-  }
   if (!single) {
     // The separate orbitals under the total; the two 2p curves are the same, so one is drawn.
     shown.forEach((key, i) => {
@@ -643,10 +607,9 @@ function renderRadialGraph() {
 }
 function measureText(total) {
   const count = total.toLocaleString('en-US');
-  const tail = state.slice ? ' Only results inside the slice are drawn.' : '';
-  if (total === 1) return `MEASUREMENT 1 · An electron was found here. The theory cannot say where the next result will be: only how likely each place is. Measure again.${tail}`;
-  if (total < 50) return `${count} MEASUREMENTS · Each dot is one result, each on a freshly prepared atom. No path joins them. Add more with +100 and +1000.${tail}`;
-  return `${count} MEASUREMENTS · Single results cannot be predicted, but the pattern can: the dots build the cloud, and the bars on the graph approach the curve \\(P(r)\\).${tail}`;
+  if (total === 1) return `MEASUREMENT 1 · An electron was found here. The theory cannot say where the next result will be: only how likely each place is. Measure again.`;
+  if (total < 50) return `${count} MEASUREMENTS · Each dot is one result, each on a freshly prepared atom. No path joins them. Add more with +100 and +1000.`;
+  return `${count} MEASUREMENTS · Single results cannot be predicted, but the pattern can: the dots build the cloud, and the bars on the graph approach the curve \\(P(r)\\).`;
 }
 function takeMeasurement() {
   const items = cloud.filter(item => shownOrbitals().includes(item.key) && item.measured < CLOUD_CAPACITY);
@@ -697,11 +660,6 @@ function showFullCloud() {
 }
 function stepCloud(delta) {
   if (!cloud) return;
-  if (slice.t !== slice.target) {
-    const step = reducedMotion ? 1 : delta / SLICE_TIME;
-    slice.t = slice.target > slice.t ? Math.min(slice.target, slice.t + step) : Math.max(slice.target, slice.t - step);
-    syncCloud();
-  }
   if (!measure) return;
   if (measure.pending > 0) {
     const batch = Math.min(measure.pending, Math.max(1, Math.round(measure.rate * delta)));
@@ -830,7 +788,7 @@ function advanceMotion(delta) {
       if (!points.visible) continue;
       const positions = points.geometry.attributes.position;
       const count = points.geometry.drawRange.count;
-      const swaps = Math.ceil(count * (state.slice ? 0.2 : 0.5) * delta);
+      const swaps = Math.ceil(count * 0.5 * delta);
       for (let i = 0; i < swaps; i++) {
         const index = Math.floor(Math.random() * count);
         const point = sampleOrbital(key);
@@ -1365,19 +1323,6 @@ document.querySelectorAll('[data-orbital]').forEach(button => button.addEventLis
 $('measure').addEventListener('click', () => addMeasurements(1));
 document.querySelectorAll('[data-measure]').forEach(button => button.addEventListener('click', () => addMeasurements(Number(button.dataset.measure))));
 $('full-cloud').addEventListener('click', showFullCloud);
-$('slice').addEventListener('click', () => {
-  state.slice = !state.slice;
-  slice.target = state.slice ? 1 : 0;
-  select(null);
-  setMath(readout, state.slice ? CLOUD_VIEWS.slice : ORBITALS[state.orbital]);
-  syncCloud();
-});
-$('rings').addEventListener('click', () => {
-  state.rings = !state.rings;
-  select(null);
-  setMath(readout, state.rings ? CLOUD_VIEWS.rings : ORBITALS[state.orbital]);
-  syncCloud();
-});
 $('inspect').addEventListener('click', () => {
   // Bring the Rutherford electrons back into view before inspecting one.
   if (beam && state.model === 'rutherford') stopBeam();
@@ -1393,9 +1338,6 @@ $('nucleus').addEventListener('click', () => {
   } else if (state.model === 'bohr') {
     select(positiveBody, PARTICLES.bohrNucleus);
     flyTo({ distance: 2.1 });
-  } else if (state.model === 'cloud') {
-    select(positiveBody, PARTICLES.cloudNucleus);
-    flyTo({ distance: 1.6 });
   } else {
     select(positiveBody, describe('nucleus'));
     flyTo({ distance: 2.2 });
@@ -1437,9 +1379,6 @@ function selectModel(model, animate = true) {
   stopBeam();
   endExcite();
   state.orbital = 'all';
-  state.slice = false;
-  state.rings = false;
-  slice.t = slice.target = 0;
   measure = null;
   state.inspectIndex = 0;
   $('positive-label').textContent = data.positiveLabel;
@@ -1451,8 +1390,8 @@ function selectModel(model, animate = true) {
   $('alpha').hidden = !['plum', 'rutherford'].includes(model);
   $('excite').hidden = model !== 'bohr';
   // The electron cloud has its own experiment and views in place of inspecting one electron.
-  for (const id of ['measure', 'cloud-controls', 'slice', 'rings', 'radial-graph']) $(id).hidden = model !== 'cloud';
-  $('inspect').hidden = model === 'cloud';
+  for (const id of ['measure', 'cloud-controls', 'radial-graph']) $(id).hidden = model !== 'cloud';
+  $('look-closer').hidden = model === 'cloud';
   setMath(readout, DEFAULT_READOUT[model]);
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-date': 'date', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-model]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.model === model)));
@@ -1527,11 +1466,6 @@ function frame(time) {
   stepCamera(delta);
   if (halo.parent) halo.material.opacity = 0.28 + 0.14 * Math.sin(time / 220);
   controls.update();
-  if (cloud) {
-    // Keep the slice facing the viewer.
-    slicePlanes[0].normal.copy(camera.position).sub(controls.target).normalize();
-    slicePlanes[1].normal.copy(slicePlanes[0].normal).negate();
-  }
   // Every frame, even when paused, since rotating the view changes what lies in front.
   if (beam) applyDepthFade();
   renderer.render(scene, camera);

@@ -215,8 +215,6 @@ body[data-model=rutherford] .legend .positive { background: #D99A36; }
 .radial-graph .curve { fill: none; stroke-width: 1.8; stroke-linejoin: round; }
 .radial-graph .part { fill: none; stroke-width: 1; opacity: .8; }
 .radial-graph .bar { opacity: .4; }
-.radial-graph .bohr { stroke: var(--text-secondary); stroke-width: 1; stroke-dasharray: 3 2; }
-.radial-graph .bohr-label { fill: var(--text-main); }
 
 
 /* Playback bar under the 3D view */
@@ -276,9 +274,7 @@ button:disabled { cursor: default; opacity: 0.9; }
 .action[hidden] { display: none; }
 .view-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
 .view-row button { min-height: 48px; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg); font-size: .85rem; font-weight: 700; }
-.view-row button:hover:not([aria-pressed=true]) { border-color: var(--brand-accent); background: var(--muted-bg); }
-.view-row button[aria-pressed=true] { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
-[data-theme="dark"] .view-row button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--accent-ink); }
+.view-row button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
 /* One message says what the model shows and what to try next. Room for five lines, so a longer message does not push the settings around. */
 .particle-readout { margin: 0; min-height: calc(7.75em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--muted-bg); color: var(--text-main); font-size: .84rem; line-height: 1.55; }
 
