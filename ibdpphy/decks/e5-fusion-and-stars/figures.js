@@ -3,7 +3,7 @@
 // luminosity is plotted upwards and temperature falls from left to right, both on logarithmic
 // scales. Gravity is slate and outward pressure apricot. Nothing here is terracotta.
 window.DeckFigures.add(P => {
-  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labeled, seeded, track, anim, twoState, PLAY, f, TAU } = P;
+  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labeled, animated, stepG, seeded, track, anim, twoState, PLAY, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const appear = (at, dur) => anim('opacity', [0, 0, 1, 1], dur, { loop: false, extra: `keyTimes="0;${at};${at + 0.01};1"` });
   const vanish = (at, dur) => anim('opacity', [1, 1, 0, 0], dur, { loop: false, extra: `keyTimes="0;${at};${at + 0.01};1"` });
@@ -107,6 +107,24 @@ window.DeckFigures.add(P => {
       const n = 48, ts = Array.from({ length: n + 1 }, (_, i) => i / n);
       const mover = `<line x2="${bg}" style="stroke:var(--brand-accent);stroke-width:2.5" x1="${sx + a}" y1="${cy}" y2="${cy}">${anim('x1', ts.map(t => f(earth(t)[0])), T)}${anim('y1', ts.map(t => f(earth(t)[1])), T)}${anim('y2', ts.map(t => f(seen(t))), T)}</line><g>${track(ts.map(earth), T)}${planet}</g><g>${track(ts.map(t => [bg, seen(t)]), T)}${disk(0, 0, 8, 'var(--brand-accent)')}</g>`;
       return svg('-40 0 940 530', s + twoState(still, mover), 'Stellar parallax, seen from above the plane of the Earth’s orbit. As the Earth moves round the Sun, a nearby star is seen from slightly different directions and appears to shift back and forth against the very distant stars behind it. The parallax angle p is the angle at the star between the Sun and the Earth when they are one astronomical unit apart across the line of sight');
+    },
+    // The teacher's analogy for the HR diagram: cars plotted by power against mass, heavy on the
+    // left as hot stars are, fall into groups. Each press of → adds a group: normal cars along a
+    // diagonal band like the main sequence, then racing cars, then economy cars.
+    'e5-cars': el => {
+      const on = animated(el), x0 = 120, y0 = 440;
+      const cross = (x, y) => `<path d="M${x - 9},${y - 9} L${x + 9},${y + 9} M${x + 9},${y - 9} L${x - 9},${y + 9}" style="fill:none;stroke:var(--text-main);stroke-width:3;stroke-linecap:round"/>`;
+      const group = (pts, color) => pts.map(([x, y]) => cross(x, y)).join('').replaceAll('var(--text-main)', `var(--${color})`);
+      let s = arrow(x0, y0, x0, 40, 'text-secondary', 2.5) + arrow(x0, y0, 790, y0, 'text-secondary', 2.5);
+      s += text(x0 - 16, 70, 'high', 'lbl small', 'end') + text(x0 - 16, y0, 'low', 'lbl small', 'end') + text(60, 260, 'power', 'lbl strong', 'middle', 'transform="rotate(-90 60 260)"');
+      s += text(x0 + 10, y0 + 44, 'heavy', 'lbl small', 'start') + text(780, y0 + 44, 'light', 'lbl small', 'end') + text(450, y0 + 44, 'mass', 'lbl strong');
+      const normal = [[190, 110], [225, 135], [262, 150], [300, 178], [335, 200], [372, 226], [410, 245], [452, 268], [495, 292], [540, 312], [585, 336], [630, 350], [675, 372]];
+      const racing = [[560, 95], [610, 80], [592, 130], [642, 118]], economy = [[180, 360], [228, 378], [275, 372], [318, 395]];
+      const g1 = group(normal, 'brand-primary') + text(700, 330, 'normal cars', 'lbl strong', 'start');
+      const g2 = group(racing, 'brand-accent') + text(700, 92, 'racing cars', 'lbl strong', 'start');
+      const g3 = group(economy, 'electron') + text(250, 330, 'economy cars', 'lbl strong');
+      s += stepG(on, 1, g1, 'wipe') + stepG(on, 2, g2, 'wipe') + stepG(on, 3, g3, 'wipe');
+      return svg('20 20 840 480', s, 'Cars plotted by power against mass, with heavy cars on the left. They are not spread everywhere: normal cars lie along a diagonal band from heavy and powerful to light and less powerful, racing cars sit in a group that is light and very powerful, and economy cars in a group that is heavy and less powerful');
     },
     // The parallax triangle on its own: Sun, Earth and star, with the right angle at the Sun.
     'e5-parallax-triangle': () => {
