@@ -57,16 +57,19 @@ window.DeckFigures.add(P => {
     'b1-heating-curve': el => {
       // At a steady heating rate, ice and steam warm about twice as steeply as water. The melting plateau is to
       // scale with the water slope; the boiling plateau is drawn shorter than to scale, so that it fits.
-      // With data-animate, each press of → draws the next stage: ice, melting, water, boiling, steam.
+      // With data-animate, each press of → draws the next stage: ice, melting, water, boiling, steam. The axis is
+      // in kelvin, and each dashed guide appears with the stage that first reaches its temperature.
       const on = labeled(el), go = animated(el), pts = [[120, 430], [156, 340], [276, 340], [426, 150], [756, 150], [788, 70]];
       let s = arrow(120, 470, 120, 40, 'text-secondary', 2.5) + arrow(120, 470, 830, 470, 'text-secondary', 2.5);
-      if (on) s += text(136, 54, 'temperature', 'lbl mono', 'start') + text(824, 506, 'energy supplied', 'lbl mono', 'end') + `<line x1="120" y1="340" x2="156" y2="340" class="guide"/><line x1="120" y1="150" x2="450" y2="150" class="guide"/>` + text(106, 350, '0 °C', 'lbl mono', 'end') + text(106, 160, '100 °C', 'lbl mono', 'end');
+      if (on) s += text(136, 54, 'temperature / K', 'lbl mono', 'start') + text(824, 506, 'energy supplied', 'lbl mono', 'end');
+      const guide = (x, y, value) => on ? `<line x1="120" y1="${y}" x2="${x}" y2="${y}" class="guide"/>` + text(106, y + 10, value, 'lbl mono', 'end') : '';
       const seg = k => line(through(pts.slice(k, k + 2)), k % 2 ? 'brand-accent' : 'brand-primary', k % 2 ? 8 : 6);
       const labels = on ? [text(168, 420, 'ice', 'lbl halo', 'start'), text(216, 320, 'melting', 'lbl strong halo'), text(372, 270, 'water', 'lbl halo', 'start'), text(591, 130, 'boiling', 'lbl strong halo') + text(591, 194, 'temperature constant', 'lbl small'), text(770, 130, 'steam', 'lbl halo', 'start')] : ['', '', '', '', ''];
+      const guides = [guide(156, 340, '273'), '', guide(426, 150, '373'), '', ''];
+      const stage = k => guides[k] + seg(k) + labels[k];
       // Drawn in this order so the thicker plateaus sit on top of the slopes beside them.
-      const stage = k => seg(k) + labels[k];
       s += go ? [0, 1, 2, 3, 4].map(k => stepG(true, k + 1, stage(k), 'wipe')).join('') : [0, 2, 4, 1, 3].map(stage).join('');
-      return svg(on ? '0 20 850 500' : '90 40 760 450', s, 'A graph of temperature against energy supplied for ice heated at a steady rate. The temperature rises while the ice warms, stays constant at 0 degrees Celsius while it melts, rises again as water, stays constant at 100 degrees Celsius while it boils, then rises as steam. The flat part for boiling is much longer than the flat part for melting');
+      return svg(on ? '0 20 850 500' : '90 40 760 450', s, 'A graph of temperature in kelvin against energy supplied for ice heated at a steady rate. The temperature rises while the ice warms, stays constant at 273 K while it melts, rises again as water, stays constant at 373 K while it boils, then rises as steam. The flat part for boiling is much longer than the flat part for melting');
     },
 
     // Measuring specific heat capacity with an electrical heater.
