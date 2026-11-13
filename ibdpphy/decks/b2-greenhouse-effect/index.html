@@ -133,9 +133,10 @@
         <h2>Emissivity<span>.</span></h2>
         <div class="split even">
           <div class="stack">
-            <div class="equation small"><span>\(\text{emissivity} = \dfrac{\text{power radiated per unit area}}{\sigma T^{4}}\)</span></div>
+            <div class="q"><p>\(\sigma T^{4}\) is for a perfect black body. Is the Earth one?</p><div class="ans step">No: real surfaces radiate less. Emissivity says how much less</div></div>
+            <div class="equation small step"><span>\(\text{emissivity} = \dfrac{\text{power radiated per unit area}}{\sigma T^{4}}\)</span></div>
             <ul class="points small">
-              <li>Compares a surface with a <b>black body</b> at the same temperature</li>
+              <li class="step">Compares a surface with a <b>black body</b> at the same temperature</li>
               <li class="step">A number from 0 to 1, with no unit</li>
               <li class="step frac">So the power radiated per unit area is \(\epsilon \sigma T^{4}\)</li>
             </ul>
@@ -171,9 +172,10 @@
         <h2>Albedo<span>.</span></h2>
         <div class="split even">
           <div class="stack">
-            <div class="equation small"><span>\(\text{albedo} = \dfrac{\text{total scattered power}}{\text{total incident power}}\)</span></div>
+            <div class="q"><p>What fraction of the sunlight reaching the Earth goes straight back into space?</p><div class="ans step">About 30%: clouds, ice and the ground reflect it</div></div>
+            <div class="equation small step"><span>\(\text{albedo} = \dfrac{\text{total scattered power}}{\text{total incident power}}\)</span></div>
             <ul class="points small">
-              <li>From 0 (absorbs everything) to 1 (reflects everything)</li>
+              <li class="step">From 0 (absorbs everything) to 1 (reflects everything)</li>
               <li class="step">The fraction <b>absorbed</b> is \(1 - \alpha\)</li>
               <li class="step">The Earth’s albedo varies <b>daily</b>, with <b>cloud</b> cover and with <b>latitude</b></li>
             </ul>
@@ -204,6 +206,35 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Albedo you can see">
+        <p class="eyebrow">The real thing</p>
+        <h2>Albedo you can see<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="q"><p>Which reflects more of the sunlight that reaches it: the Earth or Venus?</p></div>
+          <div class="story band" style="--photo-h: 250px;">
+            <div class="story-photos">
+              <figure class="step"><img src="images/blue-marble.jpg" width="1280" height="1281" alt="The whole Earth from space: white swirls of cloud, the white ice of Antarctica, brown Africa and dark blue ocean"><figcaption><b>The Earth, albedo 0.30</b>: white cloud and ice reflect, dark ocean absorbs</figcaption></figure>
+              <figure class="step"><img src="images/venus.jpg" width="1096" height="1096" alt="Venus from space: a pale cream disk covered completely in cloud"><figcaption><b>Venus, albedo 0.76</b>: covered completely in cloud</figcaption></figure>
+              <figure class="step"><img src="images/melt-ponds.jpg" width="1280" height="853" alt="White Arctic sea ice broken by pools of blue meltwater and dark open sea, with two scientists in red standing on the ice"><figcaption><b>Melting Arctic ice</b>: bright ice gives way to dark water, which absorbs more</figcaption></figure>
+            </div>
+          </div>
+          <div class="idea step">Less ice, darker surface, more absorbed: the start of a <b>feedback</b>.</div>
+        </div>
+        <p class="credits">Photographs: NASA, Apollo 17 crew (<a href="https://commons.wikimedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg" target="_blank" rel="noopener">The Blue Marble</a>, 1972), NASA/JPL-Caltech (<a href="https://commons.wikimedia.org/wiki/File:PIA23791-Venus-RealAndEnhancedContrastViews-20200608_(cropped).jpg" target="_blank" rel="noopener">Venus from Mariner 10</a>, 1974, processed 2020), NASA Goddard Space Flight Center (<a href="https://commons.wikimedia.org/wiki/File:Ponds_on_the_Ocean,_ICESCAPE.jpg" target="_blank" rel="noopener">melt ponds, ICESCAPE</a>, 2011); public domain.</p>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why the Earth’s albedo changes</h3>
+            <p>The Blue Marble shows where the Earth’s albedo comes from. Most of the reflected sunlight is reflected by clouds and the atmosphere, and much of the rest by ice, snow and deserts. The open ocean, which covers most of the planet, reflects only a few per cent. So the Earth’s albedo changes with the weather, the seasons and the amount of ice.</p>
+            <h3 class="rn-head">Venus: bright but hot</h3>
+            <p>Venus is wrapped in thick clouds of sulfuric acid droplets that reflect about three quarters of the sunlight. Less sunlight is absorbed than on the Earth, yet its surface is far hotter: its carbon dioxide atmosphere traps the infrared, as the worked example later in this deck shows.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A high albedo means little sunlight is absorbed. On its own it says nothing about how much infrared the atmosphere then traps.</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="The solar constant">
         <p class="eyebrow">What arrives from the Sun</p>
         <h2>The solar constant<span>.</span></h2>
@@ -215,6 +246,7 @@
               <li class="step">On a surface at <b>right angles</b> to the rays</li>
               <li class="step">It is the Sun’s apparent brightness from B.1</li>
             </ul>
+            <div class="q step"><p>Is it the same at the ground?</p><div class="ans step">No: reflection, scattering and absorption by the atmosphere can leave as little as half</div></div>
           </div>
           <div class="work step">
             <span class="say">For another planet: the inverse square law</span>
@@ -286,6 +318,7 @@
             <span class="step">\(T = \class{res}{255 \,\mathrm{K}}\)</span>
           </div>
           <div class="stack">
+            <div class="q"><p>Guess first: with no greenhouse effect, would the Earth be warmer or colder than now? By how much?</p></div>
             <ul class="points small">
               <li class="step">That is <b>−18 °C</b></li>
               <li class="step">The measured mean surface temperature is <b>288 K</b>, +15 °C</li>
@@ -660,6 +693,7 @@
             <span class="step">\(T = \class{res}{229 \,\mathrm{K}}\)</span>
           </div>
           <div class="stack">
+            <div class="q"><p>Guess first: Venus is closer to the Sun. With no greenhouse effect, is it hotter than the Earth?</p></div>
             <ul class="points small">
               <li class="step">Colder than the Earth’s 255 K, although Venus is closer to the Sun: its clouds reflect three quarters of the sunlight</li>
               <li class="step">The measured surface temperature is about <b>735 K</b></li>
