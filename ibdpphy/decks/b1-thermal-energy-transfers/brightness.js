@@ -1,4 +1,4 @@
-// The inverse square law in three dimensions, over the flat b1-inverse-square figure of slide 34:
+// The inverse square law in three dimensions, over the flat b1-inverse-square figure of slide 35:
 // the power of a source spreads over the whole of every sphere around it, of area 4πr². Built,
 // turned and zoomed by ../assets/model3d.js.
 import { model3d } from '../assets/model3d.js';
