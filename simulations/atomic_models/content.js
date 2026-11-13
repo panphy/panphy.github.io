@@ -56,10 +56,10 @@ export const PARTICLES = {
 };
 
 export const ORBITALS = {
-  all: 'CARBON · \\(\\mathrm{1s^2\\,2s^2\\,2p^2}\\) · Each dot is a place where one of the six electrons could be found. Press “Measure the position” to see where the cloud comes from, or pick an orbital to see its shape.',
+  all: 'CARBON · \\(\\mathrm{1s^2\\,2s^2\\,2p^2}\\) · Each dot is a place where one of the six electrons could be found. Press “Measure the position” to see where the cloud comes from, or pick one or more orbitals to see their shapes.',
   '1s': '1s ORBITAL · \\(n = 1\\), \\(l = 0\\) · 2 electrons with opposite spins. A sphere. The dots are densest at the nucleus, yet the most likely distance is the peak of \\(P(r)\\), further out: a wider shell has more room.',
   '2s': '2s ORBITAL · \\(n = 2\\), \\(l = 0\\) · 2 electrons. A larger sphere with a radial node: a spherical surface where the probability is zero, seen as the gap in \\(P(r)\\).',
   '2px': '\\(\\mathrm{2p}_x\\) ORBITAL · \\(n = 2\\), \\(l = 1\\) · 1 electron. Two lobes along the x axis. The plane between them, through the nucleus, is a node: the electron is never found there.',
   '2py': '\\(\\mathrm{2p}_y\\) ORBITAL · \\(n = 2\\), \\(l = 1\\) · 1 electron. The same shape and energy as \\(\\mathrm{2p}_x\\), along the y axis. Carbon’s two 2p electrons occupy different orbitals (Hund’s rule).',
-  '2pz': '\\(\\mathrm{2p}_z\\) ORBITAL · \\(n = 2\\), \\(l = 1\\) · Empty in carbon’s ground state, so there is nothing to measure. The gray dots show where an electron would be found if it were excited into this orbital.'
+  '2pz': '\\(\\mathrm{2p}_z\\) ORBITAL · \\(n = 2\\), \\(l = 1\\) · Empty in carbon’s ground state, so there is nothing to measure and no count. The gray dots show where an electron would be found if it were excited into this orbital.'
 };

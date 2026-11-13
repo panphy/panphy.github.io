@@ -12,7 +12,7 @@ const state = {
   time: 0,
   visible: true,
   inspectIndex: 0,
-  orbital: 'all',
+  orbitals: ['1s', '2s', '2px', '2py'],
   exciteIndex: 0
 };
 
@@ -540,8 +540,28 @@ function buildCloud() {
   pickables.push({ object: atom, kind: 'cloud', background: true, radius: 2.8 });
   syncCloud();
 }
+// The orbitals that hold electrons in ground-state carbon: the choice "All".
+const OCCUPIED_KEYS = ORBITAL_KEYS.filter(key => ORBITAL_SPECS[key].electrons);
 function shownOrbitals() {
-  return state.orbital === 'all' ? ORBITAL_KEYS.filter(key => ORBITAL_SPECS[key].electrons) : [state.orbital];
+  return state.orbitals;
+}
+function occupiedShown() {
+  return state.orbitals.filter(key => ORBITAL_SPECS[key].electrons);
+}
+// 'all', the key of a single orbital, or null for any other combination.
+function selectionName() {
+  const shown = state.orbitals;
+  if (shown.length === 1) return shown[0];
+  return shown.length === OCCUPIED_KEYS.length && !shown.includes('2pz') ? 'all' : null;
+}
+const ORBITAL_TEX = { '1s': '\\(\\mathrm{1s}\\)', '2s': '\\(\\mathrm{2s}\\)', '2px': '\\(\\mathrm{2p}_x\\)', '2py': '\\(\\mathrm{2p}_y\\)', '2pz': '\\(\\mathrm{2p}_z\\)' };
+function orbitalText() {
+  const name = selectionName();
+  if (name) return ORBITALS[name];
+  const shown = state.orbitals;
+  const electrons = shown.reduce((sum, key) => sum + ORBITAL_SPECS[key].electrons, 0);
+  const empty = shown.includes('2pz') ? ' The gray dots show the empty \\(\\mathrm{2p}_z\\) orbital: no electron is measured there.' : '';
+  return `${shown.map(key => ORBITAL_TEX[key]).join(' + ')} · ${electrons} electron${electrons === 1 ? '' : 's'} · Each color is one orbital. Compare their sizes and shapes. The graph adds their \\(P(r)\\) curves, weighted by the electrons in each.${empty}`;
 }
 function measuredCount() {
   return cloud.reduce((sum, item) => sum + (shownOrbitals().includes(item.key) ? item.measured : 0), 0);
@@ -550,26 +570,31 @@ function measuredCount() {
 function syncCloud() {
   if (!cloud) return;
   const shown = shownOrbitals();
+  const name = selectionName();
   const total = measure ? measuredCount() : 0;
   for (const item of cloud) {
     item.points.visible = shown.includes(item.key);
-    item.points.geometry.setDrawRange(0, measure ? item.measured : ORBITAL_SPECS[item.key].base);
+    // An empty orbital has nothing to measure, so its dots always show where an electron would be.
+    const measuring = measure && ORBITAL_SPECS[item.key].electrons > 0;
+    item.points.geometry.setDrawRange(0, measuring ? item.measured : ORBITAL_SPECS[item.key].base);
     // The first few results are drawn larger so that a single dot can be found.
-    item.points.material.size = measure ? THREE.MathUtils.clamp(0.2 - 0.05 * Math.log10(Math.max(total, 1)), 0.1, 0.2) : 0.1;
+    item.points.material.size = measuring ? THREE.MathUtils.clamp(0.2 - 0.05 * Math.log10(Math.max(total, 1)), 0.1, 0.2) : 0.1;
   }
-  const full = state.orbital === '2pz' || total + (measure ? measure.pending : 0) >= (state.orbital === 'all' ? 20000 : 10000);
+  const occupied = occupiedShown().length;
+  const full = !occupied || total + (measure ? measure.pending : 0) >= [10000, 15000, 20000][Math.min(occupied, 3) - 1];
   $('measure').disabled = full;
   document.querySelectorAll('[data-measure]').forEach(button => { button.disabled = full; });
   $('full-cloud').disabled = !measure;
-  $('measure-count').textContent = measure ? `N = ${total.toLocaleString('en-US')}` : '';
-  document.querySelectorAll('[data-orbital]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.orbital === state.orbital)));
+  $('measure-count').textContent = measure && occupied ? `N = ${total.toLocaleString('en-US')}` : '';
+  document.querySelectorAll('[data-orbital]').forEach(button => button.setAttribute('aria-pressed', String(name === 'all' ? button.dataset.orbital === 'all' : shown.includes(button.dataset.orbital))));
   document.querySelectorAll('[data-orbital-chip]').forEach(chip => { chip.hidden = !shown.includes(chip.dataset.orbitalChip); });
   renderRadialGraph();
 }
 // The graph of P(r): the theory as a curve and, while measuring, the results as bars.
 function renderRadialGraph() {
   const shown = shownOrbitals();
-  const weights = shown.map(key => ORBITAL_SPECS[key].electrons || 1);
+  // Curves are weighted by electrons; an empty orbital is drawn only when it is shown alone.
+  const weights = shown.map(key => ORBITAL_SPECS[key].electrons || (occupiedShown().length ? 0 : 1));
   const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
   const curve = r => shown.reduce((sum, key, i) => sum + weights[i] * ORBITAL_SPECS[key].radial(r), 0) / weightSum;
   const [left, right, base, top] = [8, 194, 104, 22];
@@ -581,7 +606,7 @@ function renderRadialGraph() {
   const path = list => list.map((value, i) => `${i ? 'L' : 'M'}${px(i / steps * CLOUD_RADIUS).toFixed(1)} ${py(value).toFixed(1)}`).join('');
   const single = shown.length === 1 ? shown[0] : null;
   const color = single ? `var(--orbital-${single})` : 'var(--text-main)';
-  const name = single ? `the ${ORBITAL_SPECS[single].name} orbital` : 'all six electrons';
+  const name = single ? `the ${ORBITAL_SPECS[single].name} orbital` : selectionName() === 'all' ? 'all six electrons' : `the ${occupiedShown().map(key => ORBITAL_SPECS[key].name).join(', ')} orbitals`;
   let svg = `<svg viewBox="0 0 200 122" role="img" aria-label="Graph of radial probability against distance from the nucleus, for ${name}"><text x="${left}" y="10">RADIAL PROBABILITY <tspan class="symbol">P</tspan>(<tspan class="symbol">r</tspan>)</text>`;
   const total = measure ? measuredCount() : 0;
   if (total) {
@@ -597,7 +622,7 @@ function renderRadialGraph() {
   if (!single) {
     // The separate orbitals under the total; the two 2p curves are the same, so one is drawn.
     shown.forEach((key, i) => {
-      if (key === '2py') return;
+      if (!weights[i] || (key === '2py' && shown.includes('2px'))) return;
       svg += `<path class="part" style="stroke:var(--orbital-${key})" d="${path(values.map((_, j) => weights[i] * ORBITAL_SPECS[key].radial(j / steps * CLOUD_RADIUS) / weightSum))}"/>`;
     });
   }
@@ -625,7 +650,7 @@ function takeMeasurement() {
   return { item, point };
 }
 function addMeasurements(count) {
-  if (!cloud || state.orbital === '2pz') return;
+  if (!cloud || !occupiedShown().length) return;
   if (!measure) {
     // Start from an empty atom: the cloud is what the results build.
     measure = { pending: 0, rate: 0, flash: 0 };
@@ -655,7 +680,7 @@ function showFullCloud() {
   if (!measure) return;
   measure = null;
   cloudFlash.visible = false;
-  setMath(readout, ORBITALS[state.orbital]);
+  setMath(readout, orbitalText());
   syncCloud();
 }
 function stepCloud(delta) {
@@ -885,7 +910,7 @@ function select(object, text) {
 function describe(kind) {
   switch (kind) {
     case 'electron': return state.model === 'plum' ? PARTICLES.plumElectron : PARTICLES.electron;
-    case 'cloud': return ORBITALS[state.orbital];
+    case 'cloud': return orbitalText();
     default: return PARTICLES[kind];
   }
 }
@@ -1310,13 +1335,23 @@ const ORBITAL_VIEWS = {
   '2py': [SIDE_VIEW, 3.3],
   '2pz': [new THREE.Vector3(1, 0.13, 0.25), 3.3]
 };
+// "All" shows carbon's electrons. From there, an orbital button shows that orbital alone; after
+// that, each button adds or removes its orbital, so several can be compared.
 function setOrbital(key) {
-  state.orbital = key;
+  const chosen = new Set(selectionName() === 'all' ? [] : state.orbitals);
+  if (key === 'all') chosen.clear();
+  else if (chosen.has(key)) chosen.delete(key);
+  else chosen.add(key);
+  state.orbitals = chosen.size ? ORBITAL_KEYS.filter(item => chosen.has(item)) : [...OCCUPIED_KEYS];
   select(null);
-  if (key === '2pz' && measure) measure.pending = 0;
-  setMath(readout, ORBITALS[key]);
-  const [direction, halfWidth] = ORBITAL_VIEWS[key];
-  flyTo({ direction, distance: Math.max(halfWidth * 2.75, fitDistance(halfWidth)) });
+  if (measure && !occupiedShown().length) measure.pending = 0;
+  setMath(readout, orbitalText());
+  // A single orbital, or the whole atom, turns to its best view; a mixture keeps the current one.
+  const name = selectionName();
+  if (name) {
+    const [direction, halfWidth] = ORBITAL_VIEWS[name];
+    flyTo({ direction, distance: Math.max(halfWidth * 2.75, fitDistance(halfWidth)) });
+  }
   syncCloud();
 }
 document.querySelectorAll('[data-orbital]').forEach(button => button.addEventListener('click', () => setOrbital(button.dataset.orbital)));
@@ -1378,7 +1413,7 @@ function selectModel(model, animate = true) {
   document.body.dataset.model = model;
   stopBeam();
   endExcite();
-  state.orbital = 'all';
+  state.orbitals = [...OCCUPIED_KEYS];
   measure = null;
   state.inspectIndex = 0;
   $('positive-label').textContent = data.positiveLabel;
