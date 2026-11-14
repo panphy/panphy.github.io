@@ -44,7 +44,7 @@
 .tool { display: flex; flex-direction: column; gap: 6px; padding: 16px 24px; border: 2px solid var(--ink); background: var(--card); }
 .tool .eq { font: 900 40px/1.05 var(--display); }
 .tool .words { font-size: 25px; font-weight: 800; }
-.tool .units { font-size: 24px; color: var(--muted); line-height: 1.35; }
+.tool .units { font-size: 24px; line-height: 1.35; }
 .tool .where { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .tool.wide { grid-column: 1 / -1; }
 
