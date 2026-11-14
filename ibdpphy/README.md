@@ -38,6 +38,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/e4-fission/` | E.4 teaching deck, 33 slides: SL and HL, with no additional HL content |
 | `decks/e5-fusion-and-stars/` | E.5 teaching deck, 37 slides: SL and HL, with no additional HL content |
 | `decks/assets/deck.css`, `deck.js`, `figures.js`, `deck-math.js` | Styles, slide engine, shared drawing helpers with the A.1, A.2, E.1 and E.2 diagrams, and MathJax setup |
+| `decks/assets/readable.css` | Large-room type, loaded after `deck.css` by the decks reworked for a 75" screen at the back of a 10 m lab (so far E.2): student-read text at least 28px on the 1600 × 900 slide, body text 34–40px, larger diagram labels and narrower side margins. A deck that adopts it needs its wording shortened and its slides checked for overflow |
 | `decks/<deck>/figures.js` | The diagrams of one deck (every deck except A.1, A.2, E.1 and E.2), loaded after the shared `figures.js` |
 | `decks/a4-rigid-body-mechanics/disks.js` | The two disks of slide 25, drawn with Three.js over the flat `a4-coupled` figure |
 | `decks/b1-thermal-energy-transfers/brightness.js` | The spheres of radius d and 2d on slide 35, drawn with Three.js over the flat `b1-inverse-square` figure |
