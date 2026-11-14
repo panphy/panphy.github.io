@@ -145,7 +145,7 @@ body {
 :root { --triple-bg: #d3e9ed; --triple-ink: #1f5966; --triple-edge: #2f7c8c; }
 :root[data-theme="dark"] { --triple-bg: #20434b; --triple-ink: #b4e2ea; --triple-edge: #6cbccb; }
 .slide.triple { box-shadow: inset 0 -10px 0 var(--triple-edge); }
-.triple-flag { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); padding: 10px 22px 8px; border-radius: 14px 14px 0 0; background: var(--triple-bg); color: var(--triple-ink); font: 800 24px var(--font-body); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.triple-flag { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); padding: 6px 16px 5px; border-radius: 10px 10px 0 0; background: var(--triple-bg); color: var(--triple-ink); font: 800 17px var(--font-body); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 /* Presenting on a screen taller than 16:9 (an iPad), the slide stays pinned to the top with its year bar and badge,
    and the flag and its edge drop to the bottom of the screen. */
 body.is-fullscreen .deck { overflow: visible; clip-path: inset(0 0 calc(-1 * var(--fs-extra, 0px)) 0); }
