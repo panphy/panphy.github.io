@@ -910,39 +910,51 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="Filament lamp and diode">
+      <section class="slide a-violet" data-title="Filament lamp">
         <p class="eyebrow"><span class="num">06</span> Non-ohmic</p>
-        <h2>Lamp <em>&amp;</em> diode</h2>
-        <div class="row two fill">
-          <div class="card sketch-card a-hi">
-            <p class="eyebrow">Filament lamp</p>
-            <div class="fig" data-fig="ivLamp"></div>
-            <ul class="points small tight">
+        <h2>Filament <em>lamp</em></h2>
+        <div class="split">
+          <div class="col">
+            <ul class="points">
               <li>More current → filament <b>hotter</b></li>
               <li>Hotter → <b>\(R\) increases</b></li>
               <li>Graph gets <b>less steep</b></li>
             </ul>
           </div>
-          <div class="card sketch-card a-cyan">
-            <p class="eyebrow">Diode (and LED)</p>
-            <div class="fig" data-fig="ivDiode"></div>
-            <ul class="points small tight">
-              <li>Current in <b>one direction</b> only</li>
-              <li><b>Very high \(R\)</b> in reverse</li>
-              <li>Forward: a diode conducts above ~0.6 V (an LED needs more)</li>
-            </ul>
-          </div>
+          <div class="panel"><div class="fig" data-fig="ivLamp"></div></div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">The lamp’s curve comes from electrons colliding with ions (Mission 4)</h3>
             <p>At low current the filament is cool, its resistance is low and the line is steep. As it heats up, each extra volt gives less extra current, so the line bends over.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A cold filament has a much lower resistance than a hot one, so the current is largest at switch-on. That is when old filament lamps usually failed.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Diode and LED">
+        <p class="eyebrow"><span class="num">06</span> Non-ohmic</p>
+        <h2>Diode <em>&amp;</em> LED</h2>
+        <div class="split">
+          <div class="col">
+            <ul class="points">
+              <li>Current in <b>one direction</b> only</li>
+              <li><b>Very high \(R\)</b> in reverse</li>
+              <li>Forward: a diode conducts above ~0.6&nbsp;V (an LED needs more)</li>
+            </ul>
+          </div>
+          <div class="panel"><div class="fig" data-fig="ivDiode"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
             <h3 class="rn-head">A diode is a one-way valve for charge</h3>
             <p>It is used to turn ac into dc, and to protect circuits from a battery connected the wrong way round.</p>
           </div>
           <div class="rn-side">
-            <p class="more">A cold filament has a much lower resistance than a hot one, so the current is largest at switch-on. That is when old filament lamps usually failed.</p>
             <p class="spec">The 0.6 V is a typical value for a silicon diode; you do not need to learn it. The AQA specification says: “The current through a diode flows in one direction only. The diode has a very high resistance in the reverse direction.” (Physics 4.2.1.4, Combined Science 6.2.1.4)</p>
           </div>
         </aside>

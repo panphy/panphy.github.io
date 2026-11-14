@@ -171,8 +171,8 @@
       prep: "Appliance rating plates (photos or real). Calculators.",
       timing: [
         [0, 6, "Do now", "Retrieval: E = Q V, Q = I t, V = I R."],
-        [6, 18, "Learn", "Power as J per s; appliance table; E = P t: slide 44 example in its workbook frame (unit conversions)."],
-        [18, 28, "More power equations", "P = V I and P = I² R: the slide 43 examples in their workbook frames; ‘square the current first’."],
+        [6, 18, "Learn", "Power as J per s; appliance table; E = P t: slide 45 example in its workbook frame (unit conversions)."],
+        [18, 28, "More power equations", "P = V I and P = I² R: the slide 44 examples in their workbook frames; ‘square the current first’."],
         [28, 44, "Try it", "Q1 is the big question; then Q2–Q6."],
         [44, 50, "Exam corner", "Question 7 (six marks)."],
       ],
