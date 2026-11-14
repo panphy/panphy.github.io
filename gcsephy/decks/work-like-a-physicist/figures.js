@@ -269,7 +269,7 @@ window.DeckSvgTex = {
       // slide the trolley itself ends up there (deck.css hides the outline).
       const ghost = `<g class="still-only"><rect x="678" y="380" width="86" height="30" class="ghost-box" rx="4"/><circle cx="696" cy="412" r="9" class="ghost"/><circle cx="746" cy="412" r="9" class="ghost"/></g>`;
       s += step(2, ghost + arrow(580, 466, 440, 466, 'arrow') + arrow(620, 466, 762, 466, 'arrow') + t(600, 474, 'd', 'big small-big') + t(600, 506, 'distance travelled after the ramp', 'body-t'));
-      s += arrow(16, 310, 16, 230, 'arrow') + arrow(16, 336, 16, 418, 'arrow') + t(16, 334, 'h', 'big small-big');
+      s += arrow(16, 298, 16, 230, 'arrow') + arrow(16, 346, 16, 418, 'arrow') + t(16, 334, 'h', 'big small-big');
       return svg(900, 520, s, 'A trolley released from a start line on a ramp of height h, propped on blocks, travels a distance d along the floor, measured with a tape');
     },
 
