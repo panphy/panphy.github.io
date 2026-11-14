@@ -785,7 +785,9 @@
     // Also the small picture for part 1, with data-plain. data-view crops it for a narrower panel.
     'fbd-block': el => {
       const on = labeled(el);
-      let s = `<line x1="90" y1="302" x2="710" y2="302" class="guide"/>` + box(380, 245, 170, 110);
+      // The floor line stays inside a cropped view: the figure's SVG is not clipped.
+      const [vx, , vw] = (el.dataset.view || '0 0 800 460').split(' ').map(Number);
+      let s = `<line x1="${Math.max(90, vx + 10)}" y1="302" x2="${Math.min(710, vx + vw - 10)}" y2="302" class="guide"/>` + box(380, 245, 170, 110);
       s += arrow(380, 245, 380, 412, 'brand-primary', 5) + arrow(412, 300, 412, 133, 'brand-primary', 5) + arrow(465, 245, 660, 245, 'brand-primary', 5) + arrow(348, 300, 196, 300, 'brand-primary', 5) + dot(380, 245);
       if (on) {
         s += text(430, 152, sub('F', 'N'), 'lbl display', 'start') + text(488, 150, 'normal force', 'lbl small', 'start');
