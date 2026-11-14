@@ -53,6 +53,27 @@ export function control({ label, name, min, max, step, value, format = String, o
   return row;
 }
 
+// A row of animation buttons: Play/Pause and Reset. onToggle(playing) runs on each press of the
+// first button and onReset() on the second; `row.set(playing)` updates the first button from code
+// (when a run ends, say). Keys and swipes on the buttons never turn the slide.
+export function playback({ onToggle, onReset }) {
+  const row = document.createElement('div');
+  row.className = 'sim-buttons';
+  row.innerHTML = '<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset"><span aria-hidden="true">↺</span> Reset</button>';
+  const play = row.querySelector('[data-k="play"]');
+  let playing = false;
+  const set = on => {
+    playing = on;
+    play.innerHTML = on ? '<span aria-hidden="true">❚❚</span> Pause' : '<span aria-hidden="true">▶</span> Play';
+  };
+  play.addEventListener('click', () => { set(!playing); onToggle?.(playing); });
+  row.querySelector('[data-k="reset"]').addEventListener('click', () => { set(false); onReset?.(); });
+  ['keydown', 'keyup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'wheel'].forEach(type => row.addEventListener(type, event => event.stopPropagation()));
+  row.set = set;
+  set(false);
+  return row;
+}
+
 // Typesets the math in an element once MathJax is ready; the slide's own math is done by then.
 export const typeset = el => Promise.resolve(window.MathJax?.startup?.promise).then(() => window.MathJax?.typesetPromise?.([el])).catch(() => {});
 
