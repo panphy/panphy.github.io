@@ -742,7 +742,7 @@ window.DeckSvgTex = {
       });
       after += text(900, 330, 'neutrons', 'lbl strong', 'end', 'style="fill:var(--neutron)"');
       const ray = wave(410, 190, 340, 76, { cycles: 4, amp: 7 });
-      after += (on ? `<g class="wipe late">${ray}</g>` : ray) + text(340, 56, 'gamma rays', 'lbl strong', 'middle', 'style="fill:var(--photon)"');
+      after += (on ? `<g class="wipe late up">${ray}</g>` : ray) + text(340, 56, 'gamma rays', 'lbl strong', 'middle', 'style="fill:var(--photon)"');
       after += text(480, 440, 'every product moves off fast: energy released', 'lbl italic');
       s += stepG(on, 1, after, 'after-absorb');
       return svg('0 0 960 460', s, 'Fission: uranium-235 absorbs a neutron and splits into barium-141 and krypton-92, giving out three neutrons and gamma rays');
@@ -801,15 +801,15 @@ window.DeckSvgTex = {
 
     fusion: el => {
       const on = animated(el);
-      // Data-animate: on the click copies of the two nuclei rush together, the originals fade and the products fly out of the meeting point.
+      // Data-animate: on the click copies of the two nuclei rush to where helium-4 is drawn, the originals fade, helium-4 appears there and the neutron flies out of it.
       const d = cluster(130, 170, 1, 1, 26), t = cluster(360, 170, 1, 2, 26);
-      let s = `<g class="launched">${d}</g>` + (on ? `<g class="meet" style="--fx:110px;--fy:0px">${d}</g>` : '') + text(130, 270, 'hydrogen-2', 'lbl display') + text(130, 298, '1 p, 1 n', 'lbl mono');
+      let s = `<g class="launched">${d}</g>` + (on ? `<g class="meet" style="--fx:520px;--fy:0px">${d}</g>` : '') + text(130, 270, 'hydrogen-2', 'lbl display') + text(130, 298, '1 p, 1 n', 'lbl mono');
       s += text(250, 182, '+', 'lbl display');
-      s += `<g class="launched">${t}</g>` + (on ? `<g class="meet" style="--fx:-120px;--fy:0px">${t}</g>` : '') + text(360, 270, 'hydrogen-3', 'lbl display') + text(360, 298, '1 p, 2 n', 'lbl mono');
+      s += `<g class="launched">${t}</g>` + (on ? `<g class="meet" style="--fx:290px;--fy:0px">${t}</g>` : '') + text(360, 270, 'hydrogen-3', 'lbl display') + text(360, 298, '1 p, 2 n', 'lbl mono');
       let after = arrow(462, 170, 536, 170, 'text-secondary', 3);
-      after += `<circle cx="650" cy="170" r="110" fill="url(#g-glow)" class="pulse"/>` + fly(on, -400, 0, cluster(650, 170, 2, 2, 26));
+      after += `<circle cx="650" cy="170" r="110" fill="url(#g-glow)" class="pulse"/>` + cluster(650, 170, 2, 2, 26);
       after += text(650, 270, 'helium-4', 'lbl display') + text(650, 298, '2 p, 2 n', 'lbl mono');
-      after += arrow(712, 170, 826, 170, 'neutron', 2.5) + fly(on, -610, 0, ball(860, 170, 26, 'neutron'));
+      after += arrow(712, 170, 826, 170, 'neutron', 2.5) + fly(on, -210, 0, ball(860, 170, 26, 'neutron'));
       after += text(860, 270, 'neutron', 'lbl display') + text(860, 298, '0 p, 1 n', 'lbl mono');
       after += text(650, 360, 'a little less mass: the rest becomes energy', 'lbl italic');
       s += stepG(on, 1, after, 'after-absorb');

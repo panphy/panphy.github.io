@@ -589,6 +589,8 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   #deck svg .wipe { clip-path: inset(-40px -40px -40px -40px); transition: opacity .4s ease, clip-path 1.1s ease-in-out; }
   #deck svg .wipe.late { transition-delay: .6s; }
   #deck svg .wipe.step:not(.shown), #deck svg .step:not(.shown) .wipe { clip-path: inset(-40px 100% -40px -40px); transition-delay: 0s; }
+  /* A ray drawn upwards, away from its source, sweeps in from the bottom instead. */
+  #deck svg .step:not(.shown) .wipe.up { clip-path: inset(100% -40px -40px -40px); }
   /* An electron waits at its old energy level until the step that moves it. */
   #deck .hop { transition: transform .9s ease-in-out; }
   #deck .fig:not(:has(.k2.shown)) .until-k2, #deck .fig:not(:has(.k3.shown)) .until-k3 { transform: translate(var(--fx), var(--fy)); }
