@@ -309,11 +309,6 @@ function openClearDialog() {
 	const empty = PlotModel.isSheetEmpty(sheet);
 	const keep = document.getElementById('clear-keep-columns');
 	keep.disabled = empty;
-	document.getElementById('clear-keep-note').textContent = empty
-		? 'The cells are already empty.'
-		: PlotModel.isBarSheet(sheet)
-			? 'Empties every cell. The bar names, axis titles and formulas stay, ready for new readings.'
-			: 'Empties every cell and removes this sheet\'s fits. Column names, units, roles and formulas stay, ready for new readings.';
 	openDialog('clear-dialog');
 	(empty ? document.getElementById('clear-reset') : keep).focus();
 }
