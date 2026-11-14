@@ -173,8 +173,7 @@
 		<main class="container neo-workspace">
 			<section class="input-section neo-pane neo-pane-data" id="data-pane" aria-labelledby="data-pane-title">
 				<div class="neo-pane-head">
-					<h2 id="data-pane-title">Data</h2>
-					<p class="neo-pane-hint" id="data-pane-hint">Y plots against the nearest X to its left</p>
+					<h2 id="data-pane-title" title="Y plots against the nearest X to its left. Paste a block from a spreadsheet into any cell: a heading row such as L / m becomes names and units.">Data</h2>
 					<button type="button" class="neo-tool neo-tool-quiet neo-pane-max" data-maximize="data" aria-pressed="false" aria-label="Maximize the data section" title="Maximize the data section"><svg class="neo-icon neo-max-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="neo-icon neo-restore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/></svg></button>
 				</div>
 				<div class="neo-bar-settings" id="bar-settings" role="group" aria-label="Bar chart axes" hidden>
@@ -196,7 +195,6 @@
 				</div>
 				<div class="neo-pane-foot">
 					<p id="data-validation-message" class="validation-message" role="status"></p>
-					<p class="neo-hint" id="data-pane-foot-hint">Paste a block from a spreadsheet into any cell. A heading row such as <code>L / m</code> becomes names and units.</p>
 				</div>
 				<input type="file" id="open-file-input" accept=".ppplot,.csv,.txt,application/json,text/csv,text/plain" hidden>
 			</section>
@@ -380,7 +378,7 @@
 						<label class="neo-switch neo-weight" title="Weights each point by 1/σ², using its ±ΔY and its ±ΔX through the slope">
 							<input type="checkbox" id="fit-weighted" role="switch">
 							<span class="neo-switch-track" aria-hidden="true"></span>
-							<span>Weight by uncertainties <small>±ΔY, and ±ΔX through the slope</small></span>
+							<span>Weight by uncertainties</span>
 						</label>
 					</div>
 				</section>
