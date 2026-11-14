@@ -187,9 +187,13 @@ ol.steps li::before { border: 0; color: var(--year-ink); font: 600 24px var(--fo
 .eq-block .flag { border-color: var(--input-border); color: var(--text-secondary); font: 700 24px var(--font-body); letter-spacing: .04em; }
 mjx-container { line-height: 0; }
 .eq-block .eq mjx-container { color: var(--text-main); }
+/* Word equations: the left side on one line; when space is short the right side moves to the next line,
+   breaking only before = or an operator. */
+.eq-block .eq-words.ew, .tool .words.ew { display: flex; flex-wrap: wrap; align-items: baseline; }
+.ew .ew-r { min-width: 0; }
 .worked { border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: none; overflow: hidden; }
 .worked .wq { border: 0; border-bottom: 1px solid var(--card-border); background: var(--formula); color: var(--text-main); font-weight: 600; }
-.worked .wq span, .worked dt { font: 800 24px/1.5 var(--font-body); letter-spacing: .06em; }
+.worked .wq > span:first-child, .worked dt { font: 800 24px/1.5 var(--font-body); letter-spacing: .06em; }
 /* The label column fits its longest label, now that the labels are larger. */
 .worked dl { grid-template-columns: max-content 1fr; }
 .worked dd { font-weight: 500; }
@@ -217,7 +221,7 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .term span { color: var(--text-secondary); }
 .lesson-number { font-family: var(--font-mono); font-size: 24px; border: 1px solid var(--input-border); }
 .lesson-icon { border: 0; color: var(--year-ink); font: 600 24px var(--font-mono); }
-.unlocks span, .unlocks a { border: 1px solid var(--card-border); border-radius: 999px; background: var(--formula); color: var(--text-main); box-shadow: none; font-weight: 600; }
+.unlocks > span, .unlocks a { border: 1px solid var(--card-border); border-radius: 999px; background: var(--formula); color: var(--text-main); box-shadow: none; font-weight: 600; }
 .case-card, .plot-card { transform: none; border: 1px solid var(--card-border); border-radius: 22px; background: var(--card-bg); box-shadow: none; }
 .case-card h3 { line-height: 1.15; }
 .plot-card p { font-family: var(--font-display); text-transform: none; font-weight: 400; line-height: 1.15; }
@@ -386,7 +390,7 @@ body.is-fullscreen .deck { border-radius: 0; }
 }
 .symbol-grid .cd { stroke-width: 2.5; }
 .symbol-grid .cd .body { stroke-width: inherit; }
-.equation-inline { white-space: nowrap; }
+.equation-inline { white-space: nowrap; text-transform: none; }
 .data tr.step:not(.shown), .data td.step:not(.shown), .data th.step:not(.shown) { opacity: 1; transform: none; }
 .data tr.step:not(.shown) > td > .cell-content,
 .data tr.step:not(.shown) > th > .cell-content,
