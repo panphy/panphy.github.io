@@ -1041,7 +1041,7 @@
       s += `<path d="M470,300 L700,154" class="curve" style="stroke:var(--text-secondary);stroke-width:3;stroke-dasharray:10 8"/>`;
       s += `<circle cx="300" cy="300" r="8" style="fill:var(--hl)"/>` + text(300, 344, 'f₀', 'lbl display', 'middle', 'style="fill:var(--hl)"') + text(300, 384, 'threshold', 'lbl mono small');
       s += `<circle cx="110" cy="420" r="8" style="fill:var(--hl)"/>` + text(96, 428, '−Φ', 'lbl display', 'end', 'style="fill:var(--hl)"');
-      s += `<path d="M430,218 H560 V135" class="guide accent"/>` + text(520, 132, 'gradient = h', 'lbl strong', 'end');
+      s += text(470, 150, 'gradient = h', 'lbl strong', 'end');
       s += text(596, 262, 'another metal:', 'lbl small', 'start') + text(596, 288, 'same gradient', 'lbl small', 'start');
       s += text(205, 280, 'no emission', 'lbl italic small');
       return svg('0 0 800 460', s, 'Graph of maximum kinetic energy against frequency: a straight line of gradient h that meets the frequency axis at the threshold frequency and, extended back, the energy axis at minus the work function');
