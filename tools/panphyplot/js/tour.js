@@ -162,6 +162,8 @@ const TOUR_CHAPTERS = {
 			{
 				title: 'Sheets',
 				target: '#sheet-tabs',
+				// The tab bar's own padding already rings the tabs.
+				pad: 0,
 				body: 'Each tab is a sheet: one experiment. Tap the open sheet\'s name to rename it, and + to add another.'
 			},
 			{
@@ -447,11 +449,14 @@ function layoutTour() {
 
 	if (target) {
 		const bounds = target.getBoundingClientRect();
-		const pad = 6;
-		let left = Math.max(bounds.left - pad, 0);
-		let top = Math.max(bounds.top - pad, 0);
-		let right = Math.min(bounds.right + pad, viewportWidth);
-		let bottom = Math.min(bounds.bottom + pad, viewportHeight);
+		const step = getTourStep();
+		const pad = step && typeof step.pad === 'number' ? step.pad : 6;
+		// Leave room for the 3px outline, which is drawn outside the box.
+		const edge = 3;
+		let left = Math.max(bounds.left - pad, edge);
+		let top = Math.max(bounds.top - pad, edge);
+		let right = Math.min(bounds.right + pad, viewportWidth - edge);
+		let bottom = Math.min(bounds.bottom + pad, viewportHeight - edge);
 		// Keep the highlight inside any scrolling panel that clips the target.
 		for (let parent = target.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
 			if (getComputedStyle(parent).overflowY === 'visible') continue;
