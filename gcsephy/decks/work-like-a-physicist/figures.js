@@ -247,15 +247,19 @@ window.DeckSvgTex = {
 
     // Trolley and ramp.
     ramp: () => {
-      // The board's underside rests on the top right corner of the blocks (150, 228) and
-      // its upper end overhangs the top a little; its lower end sits on the floor.
-      const B = [440, 420], over = 14, slope = (420 - 228) / (B[0] - 26 - 150);
-      const A = [150 - over, 228 - over * slope - 12];
+      // A rectangular board: its underside rests on the top right corner of the blocks C,
+      // its upper end overhangs the top a little and its lower bottom edge F sits on the floor.
+      const C = [150, 228], F = [434, 420], thick = 10, over = 14;
+      const run = Math.hypot(F[0] - C[0], F[1] - C[1]);
+      const dx = (F[0] - C[0]) / run, dy = (F[1] - C[1]) / run;
+      const U = [C[0] - dx * over, C[1] - dy * over];
+      // A and B are the ends of the top surface, which the trolley runs along.
+      const A = [U[0] + dy * thick, U[1] - dx * thick], B = [F[0] + dy * thick, F[1] - dx * thick];
       const ang = Math.atan2(B[1] - A[1], B[0] - A[0]);
       const at = (u, lift = 0) => [A[0] + (B[0] - A[0]) * u + Math.sin(ang) * lift, A[1] + (B[1] - A[1]) * u - Math.cos(ang) * lift];
       let s = line(10, 420, 890, 420, 'floor');
       [0, 1, 2].forEach(i => { s += rect(40, 356 - i * 64, 110, 64, 'f-alt box'); });
-      s += `<path class="board" d="M${A[0]} ${A[1]}L${B[0]} ${B[1]}L${B[0] - 26} ${B[1]}L${A[0]} ${A[1] + 12}Z"/>`;
+      s += `<path class="board" d="M${f(A[0])} ${f(A[1])}L${f(B[0])} ${f(B[1])}L${F[0]} ${F[1]}L${f(U[0])} ${f(U[1])}Z"/>`;
       const [tx, ty] = at(0.24);
       // First click on the live slide: the trolley runs down the ramp, levels out where the
       // ramp meets the floor and rolls to a stop. The second click marks the distance.
