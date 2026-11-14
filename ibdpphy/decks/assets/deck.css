@@ -55,6 +55,7 @@
   --object: #6E9F45;
   --hl: #CC5F41;
   --hl-ink: #fff;
+  --on-fill: #fff; /* labels drawn on a coloured fill */
   --hl-text: #B5492C;
   --spectrum-bg: #0B0B10;
   --thumb-w: 184px;
@@ -97,6 +98,7 @@
   --bar-slate: #456A7C;
   --hl: #E58A6C;
   --hl-ink: #2A0F08;
+  --on-fill: #14171A;
   --hl-text: #F0997C;
   --spectrum-bg: #000;
 }

@@ -129,7 +129,7 @@ window.DeckFigures.add(P => {
       s += `<path d="M340,120 V226 H460 V120 Z" style="fill:var(--proton);opacity:.55"/><path d="M364,334 V416 L340,416 L400,446 L460,416 L436,416 V334 Z" style="fill:var(--electron);opacity:.6"/>`;
       s += `<path d="M470,256 H600 V236 L650,280 L600,324 V304 H470 Z" style="fill:var(--brand-primary)"/>` + `<circle cx="400" cy="280" r="74" style="fill:var(--card-bg);stroke:var(--text-main);stroke-width:4"/>`;
       if (on) {
-        s += text(400, 92, 'hot reservoir', 'lbl strong', 'middle', 'style="fill:#fff"') + text(400, 492, 'cold reservoir', 'lbl strong', 'middle', 'style="fill:#fff"') + text(400, 290, 'engine', 'lbl strong');
+        s += text(400, 92, 'hot reservoir', 'lbl strong', 'middle', 'style="fill:var(--on-fill)"') + text(400, 492, 'cold reservoir', 'lbl strong', 'middle', 'style="fill:var(--on-fill)"') + text(400, 290, 'engine', 'lbl strong');
         s += text(236, 92, sub('T', 'h'), 'lbl display', 'end') + text(236, 492, sub('T', 'c'), 'lbl display', 'end') + text(320, 184, sub('Q', 'h'), 'lbl display', 'end') + text(320, 396, sub('Q', 'c'), 'lbl display', 'end') + text(664, 292, 'W', 'lbl display', 'start') + text(560, 360, 'useful work', 'lbl', 'middle');
       }
       return svg(on ? '150 20 620 520' : '220 20 460 520', s, 'A heat engine. Thermal energy Q h flows from a hot reservoir at temperature T h into the engine. The engine does useful work W and rejects a smaller amount of thermal energy Q c to a cold reservoir at temperature T c');

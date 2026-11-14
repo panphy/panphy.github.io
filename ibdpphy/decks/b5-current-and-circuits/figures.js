@@ -72,7 +72,7 @@ window.DeckFigures.add(P => {
     'b5-wire': el => {
       const on = labeled(el), rand = seeded(8), x1 = 110, x2 = 770, y1 = 170, y2 = 350;
       let s = `<rect x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" rx="14" style="fill:color-mix(in srgb, var(--brand-accent) 16%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:3"/>`;
-      s += Array.from({ length: 24 }, (_, i) => { const x = x1 + 55 + (i % 8) * 79, y = y1 + 32 + Math.floor(i / 8) * 58; return `<circle cx="${x}" cy="${y}" r="17" style="fill:var(--proton);opacity:.85"/>` + text(x, y + 9, '+', 'lbl strong', 'middle', 'style="fill:#fff;font-size:26px"'); }).join('');
+      s += Array.from({ length: 24 }, (_, i) => { const x = x1 + 55 + (i % 8) * 79, y = y1 + 32 + Math.floor(i / 8) * 58; return `<circle cx="${x}" cy="${y}" r="17" style="fill:var(--proton);opacity:.85"/>` + text(x, y + 9, '+', 'lbl strong', 'middle', 'style="fill:var(--on-fill);font-size:26px"'); }).join('');
       if (on) s += arrow(330, 110, 550, 110, 'brand-accent', 6) + text(440, 86, 'conventional current', 'lbl strong') + arrow(550, 410, 330, 410, 'electron', 6) + text(440, 456, 'electrons drift', 'lbl strong') + text(100, 150, 'fixed positive ions', 'lbl', 'start');
       const rows = Array.from({ length: 12 }, (_, k) => ({ y: y1 + 18 + (k % 4) * 49 + rand() * 12, start: rand(), wob: rand() * TAU }));
       const at = (e, t) => { const u = ((e.start - t) % 1 + 1) % 1; return [x1 - 20 + (x2 - x1 + 40) * u, e.y + 9 * Math.sin(e.wob + t * TAU * 9)]; };

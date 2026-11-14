@@ -117,7 +117,7 @@ window.DeckFigures.add(P => {
       const frame = plate(150, 650, 110, true) + plate(150, 650, 410, false) + signs(170, 630, 96, 7, '+') + signs(170, 630, 446, 7, '−');
       const lines = [220, 310, 400, 490, 580].map(x => fline(x, 118, x, 402, 'brand-primary', 2.5, 0.5, 'opacity=".45"')).join('');
       const forces = arrow(400, 268, 400, 172, 'brand-primary', 6) + arrow(400, 268, 400, 364, 'brand-primary', 6) + text(418, 184, 'qE', 'lbl display', 'start') + text(418, 364, 'mg', 'lbl display', 'start');
-      const drop = y => `<circle cx="400" cy="${y}" r="15" style="fill:var(--sand);stroke:var(--text-main);stroke-width:2"/>` + text(400, y + 8, '−', 'lbl strong');
+      const drop = y => `<circle cx="400" cy="${y}" r="15" style="fill:var(--sand);stroke:var(--text-main);stroke-width:2"/>` + text(400, y + 8, '−', 'lbl strong', 'middle', 'style="fill:var(--on-fill)"');
       const notes = text(680, 200, 'uniform field', 'lbl', 'start') + text(680, 234, 'E = V / d', 'lbl mono', 'start') + text(120, 276, 'oil drop', 'lbl', 'end');
       const fall = Array.from({ length: 21 }, (_, i) => [0, 150 + 118 * (1 - (1 - i / 20) ** 2)]);
       const mover = `<g opacity="0">${anim('opacity', [0, 0, 1], 2.6, { loop: false, extra: 'keyTimes="0;0.8;1"' })}${lines}${forces}</g><g transform="translate(0 150)">${track(fall, 2.2, { loop: false })}${drop(0)}</g>` + PLAY;
@@ -177,7 +177,7 @@ window.DeckFigures.add(P => {
       const poles = [{ x: 290, y: 260, q: 1, r: 8 }, { x: 510, y: 260, q: -1, r: 8 }];
       const out = linesFrom(poles, 0, [100, 125, 150, 180, 210, 235, 260, 75, 285, 52, 308], 'brand-accent-strong');
       let s = out.map(line => line.svg).join('') + linesFrom(poles, 1, out.filter(line => line.left).map(line => 180 - line.deg), 'brand-accent-strong', 0.4).map(line => line.svg).join('');
-      s += `<rect x="260" y="222" width="140" height="76" style="fill:var(--proton)"/><rect x="400" y="222" width="140" height="76" style="fill:var(--electron)"/>` + text(310, 272, 'N', 'lbl display', 'middle', 'style="fill:#fff"') + text(490, 272, 'S', 'lbl display', 'middle', 'style="fill:#fff"');
+      s += `<rect x="260" y="222" width="140" height="76" style="fill:var(--proton)"/><rect x="400" y="222" width="140" height="76" style="fill:var(--electron)"/>` + text(310, 272, 'N', 'lbl display', 'middle', 'style="fill:var(--on-fill)"') + text(490, 272, 'S', 'lbl display', 'middle', 'style="fill:var(--on-fill)"');
       return svg('0 0 800 520', s, 'The magnetic field of a bar magnet: field lines leave the north pole, curve round outside the magnet and enter the south pole. They are closest together near the poles');
     },
 

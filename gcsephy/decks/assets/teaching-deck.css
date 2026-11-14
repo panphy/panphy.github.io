@@ -311,7 +311,11 @@ body.is-fullscreen .deck { border-radius: 0; }
 [data-theme="dark"] .wf .heli-backdrop, [data-theme="dark"] .wf .f-muted { fill: #283039; }
 [data-theme="dark"] .dk .dk-ruler { fill: #4b3c20; }
 [data-theme="dark"] .dk .dk-mass, [data-theme="dark"] .dk .dk-wall, [data-theme="dark"] .dk .dk-pulley, [data-theme="dark"] .dk .dk-rod { fill: #37414a; }
-[data-theme="dark"] .dk .dk-ramp { fill: #3a4148; }
+[data-theme="dark"] .dk .dk-ramp, [data-theme="dark"] .dk .dk-steps { fill: #3a4148; }
+[data-theme="dark"] .dk .dk-hill { fill: #3b4a2c; }
+[data-theme="dark"] .dk .dk-sea { fill: #24414d; }
+[data-theme="dark"] .cd .lattice-panel.cool { fill: #1f3440; }
+[data-theme="dark"] .cd .lattice-panel.hot { fill: #45291f; }
 [data-theme="dark"] .dk .dk-bookbody, [data-theme="dark"] .dk .dk-ball { fill: #7e422b; }
 
 .slide.dark .eyebrow span.on { color: var(--brand-primary); }
