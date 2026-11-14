@@ -3,7 +3,7 @@
 //   data-photocell  slide 13  ultraviolet on zinc in a photocell: the wavelength, intensity and the
 //                             p.d. of the collector (negative slows the electrons, positive speeds
 //                             them up) can be set, and the microammeter reads the current
-//   data-compton    slide 30  a photon scattered by an electron at rest through an angle θ that can be
+//   data-compton    slide 28  a photon scattered by an electron at rest through an angle θ that can be
 //                             set: the scattered photon has a longer wavelength and the electron recoils
 import { control, typeset, drawn } from '../assets/sim-control.js';
 
@@ -138,7 +138,7 @@ function photocell(fig) {
   });
 }
 
-// ---- Slide 30: Compton scattering ----
+// ---- Slide 28: Compton scattering ----
 function compton(fig) {
   const LI = 71.0, SHIFT = 2.43;            // incoming wavelength and h / mc, in pm
   const EX = 400, EY = 235;                 // the electron, at rest

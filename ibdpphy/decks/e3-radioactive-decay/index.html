@@ -210,6 +210,9 @@
             <span class="say">Proton \(1.007276 \,\mathrm{u}\), neutron \(1.008665 \,\mathrm{u}\)</span>
             <span>\(\Delta m = m_\mathrm{He} - (2 m_\mathrm{p} + 2 m_\mathrm{n})\)</span>
             <span class="step">\(\Delta m = 4.001506 - 4.031882 = -0.030376 \,\mathrm{u}\)</span>
+            <span class="step">\(E_\mathrm{b} = -\Delta m\,c^{2} = -(-0.030376) \times 931.5\)</span>
+            <span class="step">&nbsp; \(= \class{res}{28.3 \,\mathrm{MeV}}\)</span>
+            <span class="step">Per nucleon: \(\dfrac{28.3}{4} = \class{res}{7.07 \,\mathrm{MeV}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
@@ -224,18 +227,6 @@
             <p class="trap">Rounding the masses early. The mass defect is a small difference between large numbers: keep every digit you are given until the subtraction is done.</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide" data-title="Binding energy">
-        <p class="eyebrow">Worked example, continued</p>
-        <h2>Nuclear binding energy<span>.</span></h2>
-        <div class="stack center" style="align-items: stretch;">
-          <div class="work">
-            <span class="step">\(E_\mathrm{b} = -\Delta m\,c^{2} = -(-0.030376) \times 931.5 = \class{res}{28.3 \,\mathrm{MeV}}\)</span>
-            <span class="step">Per nucleon: \(\dfrac{28.3}{4} = \class{res}{7.07 \,\mathrm{MeV}}\)</span>
-          </div>
-        </div>
-        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Binding energy per nucleon">
@@ -427,7 +418,7 @@
               <li class="step">\(A\) unchanged, \(Z\) rises by <b>1</b></li>
               <li class="step">Nuclei with <b>too many neutrons</b></li>
             </ul>
-            <div class="equation small step">\({}^{14}_{6}\mathrm{C}\)<span class="op">→</span>\({}^{14}_{7}\mathrm{N}\)<span class="op">+</span>\(\class{electron}{{}^{0}_{-1}\mathrm{e}}\)<span class="op">+</span><span>\(\bar{\nu}\)</span></div>
+            <div class="equation small step">\({}^{14}_{6}\mathrm{C}\)<span class="op">→</span>\({}^{14}_{7}\mathrm{N}\)<span class="op">+</span>\(\class{electron}{{}^{0}_{-1}\mathrm{e}}\)<span class="op">+</span><span>\(\bar{\nu}_{\mathrm{e}}\)</span></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>CARBON-14</span><span class="reveal-hint">PRESS → FOR EACH STAGE</span></div>
@@ -457,7 +448,7 @@
               <li class="step">\(A\) unchanged, \(Z\) falls by <b>1</b></li>
               <li class="step">Nuclei with <b>too few neutrons</b></li>
             </ul>
-            <div class="equation small step">\({}^{18}_{9}\mathrm{F}\)<span class="op">→</span>\({}^{18}_{8}\mathrm{O}\)<span class="op">+</span>\(\class{electron}{{}^{0}_{+1}\mathrm{e}}\)<span class="op">+</span><span>\(\nu\)</span></div>
+            <div class="equation small step">\({}^{18}_{9}\mathrm{F}\)<span class="op">→</span>\({}^{18}_{8}\mathrm{O}\)<span class="op">+</span>\(\class{electron}{{}^{0}_{+1}\mathrm{e}}\)<span class="op">+</span><span>\(\nu_{\mathrm{e}}\)</span></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>FLUORINE-18</span><span class="reveal-hint">PRESS → FOR EACH STAGE</span></div>
@@ -484,7 +475,7 @@
         <h2>Neutrinos and antineutrinos<span>.</span></h2>
         <div class="stack center" style="gap: 30px;">
           <ul class="points">
-            <li>Every beta decay also emits a <b>neutrino</b> \(\nu\) or an <b>antineutrino</b> \(\bar{\nu}\)</li>
+            <li>Every beta decay also emits a <b>neutrino</b> \(\nu_{\mathrm{e}}\) or an <b>antineutrino</b> \(\bar{\nu}_{\mathrm{e}}\)</li>
           </ul>
           <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
             <div class="card"><p class="eyebrow">Charge</p><h3>None</h3><p>Not affected by electric or magnetic fields</p></div>
@@ -544,8 +535,8 @@
             <thead><tr><th>Decay</th><th>Emitted</th><th>\(A\)</th><th>\(Z\)</th><th>Example</th></tr></thead>
             <tbody>
               <tr><td>Alpha</td><td>\(\class{alpha}{{}^{4}_{2}\mathrm{He}}\)</td><td>−4</td><td>−2</td><td>\({}^{238}_{92}\mathrm{U}\) → \({}^{234}_{90}\mathrm{Th}\) + \(\class{alpha}{{}^{4}_{2}\mathrm{He}}\)</td></tr>
-              <tr class="step"><td>Beta-minus</td><td>\(\class{electron}{{}^{0}_{-1}\mathrm{e}}\) + \(\bar{\nu}\)</td><td>0</td><td>+1</td><td>\({}^{90}_{38}\mathrm{Sr}\) → \({}^{90}_{39}\mathrm{Y}\) + \(\class{electron}{{}^{0}_{-1}\mathrm{e}}\) + \(\bar{\nu}\)</td></tr>
-              <tr class="step"><td>Beta-plus</td><td>\(\class{electron}{{}^{0}_{+1}\mathrm{e}}\) + \(\nu\)</td><td>0</td><td>−1</td><td>\({}^{22}_{11}\mathrm{Na}\) → \({}^{22}_{10}\mathrm{Ne}\) + \(\class{electron}{{}^{0}_{+1}\mathrm{e}}\) + \(\nu\)</td></tr>
+              <tr class="step"><td>Beta-minus</td><td>\(\class{electron}{{}^{0}_{-1}\mathrm{e}}\) + \(\bar{\nu}_{\mathrm{e}}\)</td><td>0</td><td>+1</td><td>\({}^{90}_{38}\mathrm{Sr}\) → \({}^{90}_{39}\mathrm{Y}\) + \(\class{electron}{{}^{0}_{-1}\mathrm{e}}\) + \(\bar{\nu}_{\mathrm{e}}\)</td></tr>
+              <tr class="step"><td>Beta-plus</td><td>\(\class{electron}{{}^{0}_{+1}\mathrm{e}}\) + \(\nu_{\mathrm{e}}\)</td><td>0</td><td>−1</td><td>\({}^{22}_{11}\mathrm{Na}\) → \({}^{22}_{10}\mathrm{Ne}\) + \(\class{electron}{{}^{0}_{+1}\mathrm{e}}\) + \(\nu_{\mathrm{e}}\)</td></tr>
               <tr class="step"><td>Gamma</td><td>\(\class{gamma}{\gamma}\)</td><td>0</td><td>0</td><td>\({}^{60}_{28}\mathrm{Ni}\)* → \({}^{60}_{28}\mathrm{Ni}\) + \(\class{gamma}{\gamma}\)</td></tr>
             </tbody>
           </table>
@@ -1234,7 +1225,7 @@
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Binding energy</p><h3>Mass defect × \(c^{2}\)</h3><p>\(1 \,\mathrm{u} = 931.5 \,\mathrm{MeV} \,c^{-2}\)<br>Per nucleon: greatest near iron-56</p></div>
           <div class="card step"><p class="eyebrow">Strong nuclear force</p><h3>Short range, attractive</h3><p>Between all nucleons<br>Balances the repulsion of the protons</p></div>
-          <div class="card step"><p class="eyebrow">Decay</p><h3>Random and spontaneous</h3><p>Alpha, <span class="nowrap">beta-minus</span> with \(\bar{\nu}\), <span class="nowrap">beta-plus</span> with \(\nu\), gamma<br>\(A\) and \(Z\) balance</p></div>
+          <div class="card step"><p class="eyebrow">Decay</p><h3>Random and spontaneous</h3><p>Alpha, <span class="nowrap">beta-minus</span> with \(\bar{\nu}_{\mathrm{e}}\), <span class="nowrap">beta-plus</span> with \(\nu_{\mathrm{e}}\), gamma<br>\(A\) and \(Z\) balance</p></div>
         </div>
         <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
       </section>

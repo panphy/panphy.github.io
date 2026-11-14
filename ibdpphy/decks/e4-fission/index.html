@@ -254,14 +254,23 @@
         <p class="eyebrow">Worked example: second method</p>
         <h2>Energy released, from masses<span>.</span></h2>
         <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
+          <div class="work cols">
             <span class="ask">Find the energy released in the same fission from the masses. \(1 \,\mathrm{u}\) is equivalent to \(931.5 \,\mathrm{MeV}\).</span>
-            <span class="say">Masses / u</span>
-            <span class="say">\({}^{235}\mathrm{U}\) 235.043930, n 1.008665</span>
-            <span class="say">\({}^{141}\mathrm{Ba}\) 140.914411, \({}^{92}\mathrm{Kr}\) 91.926156</span>
-            <span class="step">Before: \(235.043930 + 1.008665 = 236.052595\)</span>
-            <span class="step">After: \(140.914411 + 91.926156 + 3 \times 1.008665\)</span>
-            <span class="step">\(= 235.866562\)</span>
+            <div class="col">
+              <span class="say">Masses / u</span>
+              <span class="say">\({}^{235}\mathrm{U}\) 235.043930, n 1.008665</span>
+              <span class="say">\({}^{141}\mathrm{Ba}\) 140.914411, \({}^{92}\mathrm{Kr}\) 91.926156</span>
+              <span class="step">Before: \(235.043930 + 1.008665 = 236.052595\)</span>
+              <span class="step">After: \(140.914411 + 91.926156 + 3 \times 1.008665\)</span>
+              <span class="step">\(= 235.866562\)</span>
+            </div>
+            <div class="col">
+              <span class="step">\(\Delta m = 235.866562 - 236.052595\)</span>
+              <span class="step">\(\Delta m = -0.186033 \,\mathrm{u}\)</span>
+              <span class="step">\(E_\mathrm{released} = -\Delta m\,c^{2}\)</span>
+              <span class="step">\(E_\mathrm{released} = -(-0.186033) \times 931.5\)</span>
+                <span class="step">&nbsp; \(= \class{res}{173 \,\mathrm{MeV}}\)</span>
+            </div>
           </div>
         </div>
         <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
@@ -279,20 +288,6 @@
             <p class="trap">Forgetting that one neutron goes in and three come out. Count all the particles on both sides.</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide" data-title="Energy from the mass defect">
-        <p class="eyebrow">Worked example: second method, continued</p>
-        <h2>Energy released, from masses<span>.</span></h2>
-        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
-            <span>\(\Delta m = 235.866562 - 236.052595\)</span>
-            <span class="step">\(\Delta m = -0.186033 \,\mathrm{u}\)</span>
-            <span class="step">\(E_\mathrm{released} = -\Delta m\,c^{2}\)</span>
-            <span class="step">\(E_\mathrm{released} = -(-0.186033) \times 931.5 = \class{res}{173 \,\mathrm{MeV}}\)</span>
-          </div>
-        </div>
-        <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Energy from a kilogram of fuel">
@@ -634,13 +629,22 @@
         <p class="eyebrow">Worked example</p>
         <h2>The fuel used in a day<span>.</span></h2>
         <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
+          <div class="work cols">
             <span class="ask">What mass of uranium-235 does the station use in a day?</span>
-            <span class="say">1000 MW of electrical power, efficiency 33%</span>
-            <span class="say">173 MeV = <span class="equation-inline">\(2.77 \times 10^{-11}\) J</span> per fission</span>
-            <span class="step">\(P_\mathrm{in} = \dfrac{P_\mathrm{out}}{\eta} = \dfrac{1.0 \times 10^{9}}{0.33} = 3.0 \times 10^{9} \,\mathrm{W}\)</span>
-            <span class="step">Fissions per second \(= \dfrac{3.0 \times 10^{9}}{2.77 \times 10^{-11}}\)</span>
-            <span class="step">\(= 1.1 \times 10^{20} \,\mathrm{s}^{-1}\)</span>
+            <div class="col">
+              <span class="say">1000 MW of electrical power, efficiency 33%</span>
+              <span class="say">173 MeV = <span class="equation-inline">\(2.77 \times 10^{-11}\) J</span> per fission</span>
+              <span class="step">\(P_\mathrm{in} = \dfrac{P_\mathrm{out}}{\eta} = \dfrac{1.0 \times 10^{9}}{0.33} = 3.0 \times 10^{9} \,\mathrm{W}\)</span>
+              <span class="step">Fissions per second \(= \dfrac{3.0 \times 10^{9}}{2.77 \times 10^{-11}}\)</span>
+              <span class="step">\(= 1.1 \times 10^{20} \,\mathrm{s}^{-1}\)</span>
+            </div>
+            <div class="col">
+              <span class="say step">In one day: 86 400 s</span>
+              <span class="step">\(N = 1.1 \times 10^{20} \times 86\,400 = 9.5 \times 10^{24}\)</span>
+              <span class="step">\(m = N \times 235 \,\mathrm{u}\)</span>
+              <span class="step">\(m = 9.5 \times 10^{24} \times 235 \times 1.661 \times 10^{-27}\)</span>
+              <span class="step">\(m = \class{res}{3.7 \,\mathrm{kg}}\) of \({}^{235}\mathrm{U}\)</span>
+            </div>
           </div>
         </div>
         <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
@@ -655,21 +659,6 @@
             <p class="tip">The method: electrical power → thermal power (divide by the efficiency) → fissions per second (divide by the energy of one) → mass (multiply by the mass of one nucleus).</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide" data-title="Fuel used by a power station">
-        <p class="eyebrow">Worked example, continued</p>
-        <h2>The fuel used in a day<span>.</span></h2>
-        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
-            <span class="say">In one day: 86 400 s</span>
-            <span class="step">\(N = 1.1 \times 10^{20} \times 86\,400 = 9.5 \times 10^{24}\)</span>
-            <span class="step">\(m = N \times 235 \,\mathrm{u}\)</span>
-            <span class="step">\(m = 9.5 \times 10^{24} \times 235 \times 1.661 \times 10^{-27}\)</span>
-            <span class="step">\(m = \class{res}{3.7 \,\mathrm{kg}}\) of \({}^{235}\mathrm{U}\)</span>
-          </div>
-        </div>
-        <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Quick check: chain reactions and reactors">

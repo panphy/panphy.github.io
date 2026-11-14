@@ -629,12 +629,19 @@
         <p class="eyebrow">Worked example</p>
         <h2>The Earth’s field, on the ground and in orbit<span>.</span></h2>
         <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
+          <div class="work cols">
             <span class="ask">Find the gravitational field strength at the surface, and 400 km above it.</span>
-            <span class="say">\(M = 5.97 \times 10^{24} \,\mathrm{kg}\), radius \(R = 6.37 \times 10^{6} \,\mathrm{m}\)</span>
-            <span class="step">\(g = G \dfrac{M}{r^{2}}\)</span>
-            <span class="say step">At the surface: \(r = R\)</span>
-            <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.37 \times 10^{6})^{2}} = \class{res}{9.81 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
+            <div class="col">
+              <span class="say">\(M = 5.97 \times 10^{24} \,\mathrm{kg}\), radius \(R = 6.37 \times 10^{6} \,\mathrm{m}\)</span>
+              <span class="step">\(g = G \dfrac{M}{r^{2}}\)</span>
+              <span class="say step">At the surface: \(r = R\)</span>
+              <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.37 \times 10^{6})^{2}} = \class{res}{9.81 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
+            </div>
+            <div class="col">
+              <span class="say step">400 km up: \(r = R + h = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
+              <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.77 \times 10^{6})^{2}}\)</span>
+              <span class="step">\(g = \class{res}{8.69 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
+            </div>
           </div>
         </div>
         <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, SL + HL</span><span data-page></span></div>
@@ -649,19 +656,6 @@
             <p class="trap">Using the height \(h\) in place of \(r\). The distance is always from the center of the planet: add the radius.</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide" data-title="Field strength: at the surface and in orbit">
-        <p class="eyebrow">Worked example, continued</p>
-        <h2>The Earth’s field, on the ground and in orbit<span>.</span></h2>
-        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
-            <span class="say">400 km up: \(r = R + h = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
-            <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.77 \times 10^{6})^{2}}\)</span>
-            <span class="step">\(g = \class{res}{8.69 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
-          </div>
-        </div>
-        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="The resultant field of two bodies">
@@ -804,6 +798,8 @@
             <span class="say">From the surface, \(R = 6.37 \times 10^{6} \,\mathrm{m}\), to \(r = 2R\)</span>
             <span class="step">\(W = m \Delta V_\mathrm{g}\) &nbsp;with&nbsp; \(V_\mathrm{g} = -\dfrac{G M}{r}\)</span>
             <span class="step">\(V_\mathrm{surface} = -\dfrac{3.98 \times 10^{14}}{6.37 \times 10^{6}} = -6.25 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
+            <span class="step">\(V_{2R} = -3.13 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
+            <span class="step">\(W = 500 \times (-3.13 + 6.25) \times 10^{7} = \class{res}{1.56 \times 10^{10} \,\mathrm{J}}\)</span>
           </div>
           <div class="stack">
             <ul class="points small">
@@ -825,18 +821,6 @@
             <p class="tip">The sign tells you who does the work. Moving outwards, \(\Delta V_\mathrm{g}\) is positive and an engine must supply the energy. Moving inwards, it is negative and the field supplies it.</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide hl" data-title="HL: Work done in moving a mass">
-        <p class="eyebrow">Worked example, continued</p>
-        <h2>Lifting a 500 kg satellite<span>.</span></h2>
-        <div class="stack center" style="align-items: stretch;">
-          <div class="work">
-            <span class="step">\(V_{2R} = -3.13 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
-            <span class="step">\(W = 500 \times (-3.13 + 6.25) \times 10^{7} = \class{res}{1.56 \times 10^{10} \,\mathrm{J}}\)</span>
-          </div>
-        </div>
-        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
       </section>
 
       <section class="slide hl" data-title="HL: Field strength as the potential gradient">

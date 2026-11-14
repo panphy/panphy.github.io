@@ -638,6 +638,9 @@
             <span class="step">\(\dfrac{1}{R_\mathrm{p}} = \dfrac{1}{4.0} + \dfrac{1}{12} = \dfrac{4}{12}\) &nbsp;so&nbsp; \(R_\mathrm{p} = 3.0 \,\Omega\)</span>
             <span class="say step">The whole circuit</span>
             <span class="step">\(R = 6.0 + 3.0 = 9.0 \,\Omega\)</span>
+            <span class="step">\(I = \dfrac{V}{R} = \dfrac{9.0}{9.0} = \class{res}{1.0 \,\mathrm{A}}\)</span>
+            <span class="say step">Across the pair</span>
+            <span class="step">\(V_\mathrm{p} = I R_\mathrm{p} = 1.0 \times 3.0 = \class{res}{3.0 \,\mathrm{V}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>THREE RESISTORS</span></div>
@@ -658,23 +661,6 @@
             <p class="tip">Always finish with the two checks: currents at each junction add up, and potential differences round each loop add up to the emf.</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide" data-title="Series and parallel together">
-        <p class="eyebrow">Worked example, continued</p>
-        <h2>A combination<span>.</span></h2>
-        <div class="split" style="grid-template-columns: 720px minmax(0, 1fr);">
-          <div class="work">
-            <span class="step">\(I = \dfrac{V}{R} = \dfrac{9.0}{9.0} = \class{res}{1.0 \,\mathrm{A}}\)</span>
-            <span class="say step">Across the pair</span>
-            <span class="step">\(V_\mathrm{p} = I R_\mathrm{p} = 1.0 \times 3.0 = \class{res}{3.0 \,\mathrm{V}}\)</span>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>THREE RESISTORS</span></div>
-            <div class="fig" data-fig="b5-combine" data-kind="combo"></div>
-          </div>
-        </div>
-        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="The potential divider">
@@ -801,13 +787,21 @@
         <p class="eyebrow">Worked example</p>
         <h2>A cell and a lamp<span>.</span></h2>
         <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
+          <div class="work cols">
             <span class="ask">Find the current, the terminal potential difference and the lost volts. Where does the power from the cell go?</span>
-            <span class="say">\(\varepsilon = 1.5 \,\mathrm{V}\), \(r = 0.50 \,\Omega\), lamp \(R = 2.5 \,\Omega\)</span>
-            <span class="step">\(\varepsilon = I(R + r)\) &nbsp;so&nbsp; \(I = \dfrac{\varepsilon}{R + r}\)</span>
-            <span class="step">\(I = \dfrac{1.5}{2.5 + 0.50} = \class{res}{0.50 \,\mathrm{A}}\)</span>
-            <span class="step">\(V = IR = 0.50 \times 2.5 = \class{res}{1.25 \,\mathrm{V}}\)</span>
-            <span class="step">Lost volts \(= Ir = 0.50 \times 0.50 = 0.25 \,\mathrm{V}\)</span>
+            <div class="col">
+              <span class="say">\(\varepsilon = 1.5 \,\mathrm{V}\), \(r = 0.50 \,\Omega\), lamp \(R = 2.5 \,\Omega\)</span>
+              <span class="step">\(\varepsilon = I(R + r)\) &nbsp;so&nbsp; \(I = \dfrac{\varepsilon}{R + r}\)</span>
+              <span class="step">\(I = \dfrac{1.5}{2.5 + 0.50} = \class{res}{0.50 \,\mathrm{A}}\)</span>
+              <span class="step">\(V = IR = 0.50 \times 2.5 = \class{res}{1.25 \,\mathrm{V}}\)</span>
+              <span class="step">Lost volts \(= Ir = 0.50 \times 0.50 = 0.25 \,\mathrm{V}\)</span>
+            </div>
+            <div class="col">
+              <span class="say step">Where the power goes</span>
+              <span class="step">Cell supplies: \(\varepsilon I = 1.5 \times 0.50 = 0.75 \,\mathrm{W}\)</span>
+              <span class="step">Lamp: \(I^{2} R = 0.50^{2} \times 2.5 = 0.625 \,\mathrm{W}\)</span>
+              <span class="step">Inside the cell: \(I^{2} r = 0.50^{2} \times 0.50 = 0.125 \,\mathrm{W}\)</span>
+            </div>
           </div>
         </div>
         <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
@@ -822,20 +816,6 @@
             <p class="more">A source delivers the most power to a load whose resistance equals its internal resistance, but then half the energy is wasted inside the source.</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide" data-title="Internal resistance: a torch cell">
-        <p class="eyebrow">Worked example, continued</p>
-        <h2>A cell and a lamp<span>.</span></h2>
-        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
-          <div class="work">
-            <span class="say">Where the power goes</span>
-            <span class="step">Cell supplies: \(\varepsilon I = 1.5 \times 0.50 = 0.75 \,\mathrm{W}\)</span>
-            <span class="step">Lamp: \(I^{2} R = 0.50^{2} \times 2.5 = 0.625 \,\mathrm{W}\)</span>
-            <span class="step">Inside the cell: \(I^{2} r = 0.50^{2} \times 0.50 = 0.125 \,\mathrm{W}\)</span>
-          </div>
-        </div>
-        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Measuring emf and internal resistance">
@@ -904,12 +884,15 @@
       <section class="slide" data-title="A sensor circuit">
         <p class="eyebrow">Worked example</p>
         <h2>A thermistor in a potential divider<span>.</span></h2>
-        <div class="split">
+        <div class="split even">
           <div class="work">
             <span class="ask">Find \(V_\mathrm{out}\) when the thermistor is cold, \(R_{1} = 5.0 \,\mathrm{k}\Omega\), and when it is hot, \(R_{1} = 1.0 \,\mathrm{k}\Omega\).</span>
             <span class="say">\(V_\mathrm{in} = 6.0 \,\mathrm{V}\), \(R_{2} = 10 \,\mathrm{k}\Omega\), thermistor \(R_{1}\)</span>
             <span class="step">\(V_\mathrm{out} = \dfrac{R_{2}}{R_{1} + R_{2}} V_\mathrm{in}\)</span>
             <span class="say step">Cold: \(R_{1} = 5.0 \,\mathrm{k}\Omega\)</span>
+            <span class="step">\(V_\mathrm{out} = \dfrac{10}{5.0 + 10} \times 6.0 = \class{res}{4.0 \,\mathrm{V}}\)</span>
+            <span class="say step">Hot: \(R_{1} = 1.0 \,\mathrm{k}\Omega\)</span>
+            <span class="step">\(V_\mathrm{out} = \dfrac{10}{1.0 + 10} \times 6.0 = \class{res}{5.5 \,\mathrm{V}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>THERMISTOR ABOVE, FIXED RESISTOR BELOW</span></div>
@@ -930,23 +913,6 @@
             <p class="trap">Deciding which way the output moves by guessing. Ask first what happens to the sensor’s resistance, then to its share of the potential difference, then to the other component’s share.</p>
           </div>
         </aside>
-      </section>
-
-      <section class="slide" data-title="A sensor circuit">
-        <p class="eyebrow">Worked example, continued</p>
-        <h2>A thermistor in a potential divider<span>.</span></h2>
-        <div class="split">
-          <div class="work">
-            <span class="step">\(V_\mathrm{out} = \dfrac{10}{5.0 + 10} \times 6.0 = \class{res}{4.0 \,\mathrm{V}}\)</span>
-            <span class="say step">Hot: \(R_{1} = 1.0 \,\mathrm{k}\Omega\)</span>
-            <span class="step">\(V_\mathrm{out} = \dfrac{10}{1.0 + 10} \times 6.0 = \class{res}{5.5 \,\mathrm{V}}\)</span>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>THERMISTOR ABOVE, FIXED RESISTOR BELOW</span></div>
-            <div class="fig" data-fig="b5-divider" data-kind="thermistor"></div>
-          </div>
-        </div>
-        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="The potentiometer">
