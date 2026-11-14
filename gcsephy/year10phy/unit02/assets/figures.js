@@ -131,7 +131,7 @@
     return svg(270, 184, b, "A stone lowered into a displacement can; the water pushed out is caught in a measuring cylinder");
   }
   // Top-pan balance with something on it.
-  const balance = (x, y, reading) => `<path class="ink mid" d="M${x} ${y} h92 l8 26 h-108 Z"/><path class="ink paper" d="M${x + 6} ${y - 7} h80 v7 h-80 Z"/><rect class="ink paper" x="${x + 14}" y="${y + 7}" width="64" height="14" rx="2"/>${t(x + 46, y + 18.5, reading, "read")}`;
+  const balance = (x, y, reading) => `<path class="ink mid" d="M${x} ${y} h92 l8 26 h-108 Z"/><path class="ink paper" d="M${x + 6} ${y - 7} h80 v7 h-80 Z"/><rect class="ink paper" x="${x + 6}" y="${y + 6}" width="80" height="16" rx="2"/>${t(x + 46, y + 18.5, reading, "read")}`;
   function liquidDensity() {
     const cyl = (x, level, r) => { const top = 26, bot = 118, w = 34, yy = bot - level * (bot - top); return (level ? `<path class="water" d="M${x} ${f(yy)} H${x + w} V${bot} H${x} Z"/>` : "") + `<path class="ink" d="M${x} ${top - 6} V${bot} H${x + w} V${top - 6}"/>` + [1, 2, 3, 4, 5, 6, 7].map((i) => `<path class="ink thin" d="M${x} ${bot - i * 11.5} h${i % 2 ? 5 : 9}"/>`).join("") + (r ? t(x + w + 6, yy + 4, r, "b", "start") : ""); };
     const b = cyl(46, 0) + balance(17, 125, "62.0 g") + t(63, 170, "empty cylinder", "sm") + cyl(206, 0.62, "50 cm³") + balance(177, 125, "112.0 g") + t(223, 170, "cylinder + liquid", "sm");
