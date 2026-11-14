@@ -50,7 +50,8 @@ window.DeckSvgTex = {
     let b = `<path class="axis" d="M${L} ${T - 6} V${B} H${L + W + 8}"/>`;
     [0, 10000, 20000, 30000].forEach(e => { b += `<text class="sm" x="${f(X(e))}" y="${B + 15}" text-anchor="middle">${e ? e / 1000 + ' 000' : 0}</text>`; });
     [20, 30, 40, 50].forEach(c => { b += `<text class="sm" x="${L - 6}" y="${f(Y(c) + 4)}" text-anchor="end">${c}</text><path class="ink thin dash" d="M${L} ${f(Y(c))} H${L + W}"/>`; });
-    b += `<path class="curve" d="M${f(X(2000))} ${f(Y(20.6))} L${f(X(28800))} ${f(Y(49))}"/>` + pts.map(([e, c]) => `<circle class="pt" cx="${f(X(e))}" cy="${f(Y(c))}" r="4.5"/>`).join('');
+    // A curved start from (0, 20) that joins the straight part at 5760 J along its gradient, then the straight part.
+    b += `<path class="curve" d="M${f(X(0))} ${f(Y(20))} Q${f(X(2880))} ${f(Y(21.55))} ${f(X(5760))} ${f(Y(24.6))} L${f(X(28800))} ${f(Y(49))}"/>` + pts.map(([e, c]) => `<circle class="pt" cx="${f(X(e))}" cy="${f(Y(c))}" r="4.5"/>`).join('');
     b += `<text class="b" x="${L + W / 2}" y="${B + 32}" text-anchor="middle">Energy supplied / J</text><text class="b" text-anchor="middle" transform="translate(14 ${T + H / 2}) rotate(-90)">Temperature / °C</text>`;
     return `<svg class="pf" viewBox="0 0 ${L + W + 16} ${B + 40}" role="img" aria-label="Graph of temperature against energy supplied: a straight line after a curved start">${b}</svg>`;
   }
