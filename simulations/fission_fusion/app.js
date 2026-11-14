@@ -1943,7 +1943,7 @@ function selectMode(mode, animate = true) {
   $('motion').hidden = mode === 'energy';
   $('reset').hidden = mode === 'energy';
   if (mode !== 'energy') setMath(readout, DEFAULT_READOUT[mode]());
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
   viewer.setAttribute('aria-label', mode === 'energy'
     ? `${data.title}. ${data.description}`

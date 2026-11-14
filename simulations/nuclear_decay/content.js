@@ -7,7 +7,6 @@ export const MODE_ORDER = ['alpha', 'beta', 'gamma', 'halflife'];
 export const MODES = {
   alpha: {
     title: 'ALPHA DECAY',
-    date: '\\(\\alpha\\) · AMERICIUM-241',
     heading: 'The nucleus throws out a helium nucleus.',
     description: 'An alpha particle is two protons and two neutrons: a helium nucleus. The nucleus loses 4 from its mass number and 2 from its atomic number, so it becomes a different element. Americium-241 is the source inside many smoke alarms.',
     look: 'Press “Decay this nucleus”. Watch two protons and two neutrons group together and leave. Then read the equation: the top numbers and the bottom numbers both still add up. The new nucleus recoils a little the other way.',
@@ -19,7 +18,6 @@ export const MODES = {
   },
   beta: {
     title: 'BETA DECAY',
-    date: '\\(\\beta^{-}\\) · CARBON-14',
     heading: 'A neutron turns into a proton.',
     description: 'In beta-minus decay a neutron in the nucleus changes into a proton and a fast electron. The electron (the beta particle) is created in the nucleus and shoots out. The mass number stays the same; the atomic number goes up by 1. Carbon-14 becomes nitrogen-14.',
     look: 'Press “Decay this nucleus”. One gray neutron glows, then becomes a red proton as a blue electron leaves. Count the protons before and after: 6 becomes 7, so carbon becomes nitrogen. The faint particle leaving in another direction is an antineutrino: you do not need to know about antineutrinos for GCSE.',
@@ -34,7 +32,6 @@ export const MODES = {
   // Beta-plus is shown through the Beta decay tab's β⁻/β⁺ toggle, so it is not in MODE_ORDER.
   betaPlus: {
     title: 'BETA DECAY',
-    date: '\\(\\beta^{+}\\) · FLUORINE-18',
     heading: 'A proton turns into a neutron.',
     description: 'In beta-plus decay a proton in the nucleus changes into a neutron and a fast positron. A positron is the antiparticle of an electron: the same mass, but a +1 charge. The mass number stays the same; the atomic number goes down by 1. Fluorine-18 becomes oxygen-18.',
     look: 'Press “Decay this nucleus”. One red proton glows, then becomes a gray neutron as an amber positron leaves. Count the protons before and after: 9 becomes 8, so fluorine becomes oxygen. The faint particle leaving in another direction is a neutrino. Beta-plus decay is not needed for GCSE.',
@@ -47,7 +44,6 @@ export const MODES = {
   },
   gamma: {
     title: 'GAMMA EMISSION',
-    date: '\\(\\gamma\\) · TECHNETIUM-99m',
     heading: 'The nucleus sheds energy, not particles.',
     description: 'Gamma rays are electromagnetic waves emitted from the nucleus. A nucleus with extra energy (an excited, “m” state) gives it out as a gamma ray. No particles leave, so the mass number and the atomic number do not change. Technetium-99m is used as a medical tracer.',
     look: 'The glowing, jittery nucleus has extra energy. Press “Decay this nucleus” and watch a gamma ray leave. The nucleus calms down but keeps all 43 protons and 56 neutrons.',
@@ -59,7 +55,6 @@ export const MODES = {
   },
   halflife: {
     title: 'HALF-LIFE',
-    date: 'RANDOM · BUT PREDICTABLE',
     heading: 'Each nucleus is random. A sample is predictable.',
     description: 'You cannot predict when one nucleus will decay. But in a large sample, half of the unstable nuclei decay in a fixed time, whatever the starting number. That time is the half-life.',
     look: 'Press “Start” and watch the graph. After one half-life about half the nuclei remain; after two, about a quarter. Use “Run one half-life” to predict each step first. Try a sample of 100: the graph is much more ragged.',

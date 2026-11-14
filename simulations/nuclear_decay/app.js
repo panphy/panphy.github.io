@@ -1430,7 +1430,7 @@ function selectMode(mode, animate = true) {
 // Texts, legend and beta toggle for the current mode (and beta sign).
 function showModeText() {
   const data = modeData();
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[modeKey()].includes(item.dataset.legend); });
   document.querySelectorAll('#beta-sign [data-sign]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.sign === state.betaSign)));
   viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);

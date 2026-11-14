@@ -6,7 +6,6 @@ export const MODE_ORDER = ['force', 'dc', 'ac'];
 export const MODES = {
   force: {
     title: 'THE MOTOR EFFECT',
-    date: '\\(F = BIL\\) · A WIRE IN A MAGNETIC FIELD',
     level: 'GCSE · A LEVEL · IB DP',
     heading: 'A current in a magnetic field feels a force.',
     description: 'A copper rod rests on two metal rails between the poles of a strong magnet. When a current flows through the rod, the magnetic field of the current and the field of the magnet push on each other, so the rod is pushed along the rails. This is the motor effect. The force is biggest when the wire is at 90° to the field, and zero when the wire is parallel to it.',
@@ -17,7 +16,6 @@ export const MODES = {
   },
   dc: {
     title: 'DC MOTOR',
-    date: 'SPLIT-RING COMMUTATOR',
     level: 'GCSE · A LEVEL · IB DP',
     heading: 'Two forces turn a coil. A split ring keeps it turning.',
     description: 'A coil of wire sits between two magnetic poles. Current flows one way along one side of the coil and the opposite way along the other side, so the two sides are pushed in opposite directions: up on one side, down on the other. This pair of forces makes a turning effect (a moment) that spins the coil. Every half turn, the split-ring commutator swaps the connections, so the current in the coil reverses and the coil keeps turning the same way.',
@@ -28,7 +26,6 @@ export const MODES = {
   },
   ac: {
     title: 'AC MOTOR',
-    date: 'SLIP RINGS · SYNCHRONOUS MOTOR',
     level: 'GCSE EXTENSION · A LEVEL · IB DP',
     heading: 'Alternating current reverses by itself.',
     description: 'An alternating current changes direction many times a second. If it reverses at just the right moments, the coil keeps turning without a commutator. The coil is connected through two complete slip rings, so each end of the coil always touches the same brush. This kind of AC motor turns exactly once for every cycle of the supply: it runs in step (synchronous) with the supply.',

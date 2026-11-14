@@ -1160,7 +1160,7 @@ function drawHR(st) {
   g.beginPath(); g.rect(pad.l, pad.t, W - pad.l - pad.r, H - pad.t - pad.b); g.clip();
   // Lines of constant radius, from L = R²(T/T☉)⁴.
   g.setLineDash([4, 5]); g.strokeStyle = text; g.globalAlpha = 0.55; g.textAlign = 'left'; g.textBaseline = 'bottom';
-  [[0.01, '0.01 R'], [1, '1 R'], [100, '100 R']].forEach(([R, label]) => {
+  [[0.01, 'R = 0.01 R'], [1, 'R = 1 R'], [100, 'R = 100 R']].forEach(([R, label]) => {
     const L = T => R * R * (T / SUN_T) ** 4;
     g.beginPath(); g.moveTo(x(250000), y(L(250000))); g.lineTo(x(2000), y(L(2000))); g.stroke();
     const T = R === 100 ? 9000 : R === 1 ? 20000 : 60000;
