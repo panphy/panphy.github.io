@@ -57,7 +57,7 @@ function photocell(fig) {
     control({ label: 'Intensity', name: 'intensity', min: 0, max: 100, step: 5, value: state.intensity, format: v => `${v}%`, onChange: v => { state.intensity = v; update(); } }),
     control({ label: 'Reverse p.d.', name: 'reverse potential difference', min: 0, max: 2.5, step: 0.01, value: state.V, format: v => `${v.toFixed(2)} V`, onChange: v => { state.V = v; update(); } })
   ];
-  const svg = mount(fig, '0 -30 800 380', 'Photocell: ultraviolet light falls on a zinc plate in a vacuum tube and releases electrons, which cross towards a collector made negative by a variable supply. A microammeter reads the current', rows);
+  const svg = mount(fig, '0 -44 800 394', 'Photocell: ultraviolet light falls on a zinc plate in a vacuum tube and releases electrons, which cross towards a collector made negative by a variable supply. A microammeter reads the current', rows);
   fig.style.setProperty('--sim-label-w', '200px');
 
   let s = `<rect x="150" y="20" width="540" height="170" rx="85" class="inset"/>`;
@@ -67,7 +67,7 @@ function photocell(fig) {
   s += `<line x1="330" y1="266" x2="330" y2="314" class="tick" style="stroke-width:5"/><line x1="346" y1="276" x2="346" y2="304" class="tick"/><line x1="384" y1="266" x2="384" y2="314" class="tick" style="stroke-width:5"/><line x1="400" y1="276" x2="400" y2="304" class="tick"/><line x1="350" y1="290" x2="380" y2="290" class="guide"/>`;
   s += P.text(318, 256, '+', 'lbl strong') + P.text(412, 256, '−', 'lbl strong') + `<text data-out="V" x="365" y="346" class="lbl mono small" text-anchor="middle"></text>`;
   s += `<rect x="470" y="262" width="130" height="56" rx="12" class="node"/><text data-out="I" x="535" y="300" class="lbl mono strong" text-anchor="middle"></text>`;
-  s += `<g data-light></g><text data-out="hf" x="40" y="-6" class="lbl mono small" text-anchor="start" style="fill:var(--photon)"></text>`;
+  s += `<g data-light></g><text data-out="hf" x="40" y="-20" class="lbl mono small" text-anchor="start" style="fill:var(--photon)"></text>`;
   s += `<text data-out="none" x="439" y="112" class="lbl italic small" text-anchor="middle">no electrons emitted</text><g data-electrons></g>`;
   svg.innerHTML = s;
   const out = key => svg.querySelector(`[data-out="${key}"]`);
@@ -81,8 +81,13 @@ function photocell(fig) {
     out('I').textContent = `${I.toFixed(2)} μA`;
     out('none').style.display = E > 0 || !state.intensity ? 'none' : '';
     // Shorter wavelength, closer waves; more intensity, more of them.
-    const beams = state.intensity ? 1 + Math.round(state.intensity / 34) : 0, cycles = Math.round(1500 / state.lambda);
-    light.innerHTML = Array.from({ length: beams }, (_, k) => P.wave(60 + k * 46, 0, 222, 64 + k * 34, { cycles, amp: 8 })).join('');
+    const beams = state.intensity ? 1 + Math.round(state.intensity / 50) : 0, cycles = Math.round(1500 / state.lambda);
+    // Parallel beams, spread evenly down the face of the plate.
+    const DX = 128, DY = 79;
+    light.innerHTML = Array.from({ length: beams }, (_, k) => {
+      const y = 108 + (k - (beams - 1) / 2) * 40;
+      return P.wave(224 - DX, y - DY, 224, y, { cycles, amp: 8 });
+    }).join('');
   }
   update();
   if (reduce) return;
