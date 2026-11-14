@@ -127,9 +127,9 @@ Find the power rating on three appliances at home. Calculate the energy each tra
 
 ## Using the workbook
 
-The workbook prints the two worked examples on slides 52 and 53 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+The workbook prints the two worked examples on slides 55 and 56 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
 
-The Quick check (slide 55) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 59) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 
