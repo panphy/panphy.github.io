@@ -1,4 +1,4 @@
-// The electron diffraction tube of slide 23 in three dimensions, over the flat ediff-setup figure.
+// The electron diffraction tube of slide 21 in three dimensions, over the flat ediff-setup figure.
 // Electrons from the gun pass through thin graphite and spread along two cones onto the screen,
 // where they make two bright rings round a central spot. The accelerating p.d. can be set: a higher
 // p.d. gives the electrons more momentum, a shorter de Broglie wavelength and smaller rings, seen

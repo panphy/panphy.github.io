@@ -793,3 +793,9 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .equation-inline { white-space: nowrap; text-transform: none; }
 /* Keep a hyphenated word whole instead of breaking it at the hyphen. */
 .nowrap { white-space: nowrap; }
+
+/* Worked solution in two columns: a leading question spans both. */
+.work.cols { grid-template-columns: 1fr 1fr; column-gap: 56px; align-items: start; }
+.work.cols > .ask { grid-column: 1 / -1; }
+.work.cols > .col { display: grid; gap: inherit; align-content: start; }
+:where(.work.cols > .col > span) { display: block; white-space: nowrap; }

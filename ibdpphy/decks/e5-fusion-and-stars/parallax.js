@@ -1,4 +1,4 @@
-// Stellar parallax in three dimensions, over the flat e5-parallax figure of slide 32. The Earth
+// Stellar parallax in three dimensions, over the flat e5-parallax figure of slide 31. The Earth
 // goes round the Sun; the line of sight from the Earth through a nearby star lands on a wall of
 // very distant stars, and slides to and fro across it over the year. An inset shows the same
 // patch of sky as seen from the Earth. When the slide's "six months" step is shown, the Earth
