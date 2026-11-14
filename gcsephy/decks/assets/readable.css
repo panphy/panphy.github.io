@@ -6,10 +6,10 @@
    the footer, AQA spec references and the copyright line keep their sizes.
    Diagram labels are enlarged here, in the deck only: the drawings are shared with the
    printed workbooks, which keep their own label sizes. */
-.slide { padding-left: 72px; padding-right: 72px; }
-.slide-foot { left: 72px; right: 72px; }
+.slide { padding-left: 72px; padding-right: 72px; padding-bottom: 60px; }
+.slide-foot { left: 72px; right: 72px; bottom: 16px; }
 .year-badge { right: 72px; }
-.slide-copyright { right: 72px; }
+.slide-copyright { right: 72px; bottom: 16px; }
 
 .lead, .slide.dark .lead { font-size: 34px; }
 .unlocks > span { font-size: 28px; }

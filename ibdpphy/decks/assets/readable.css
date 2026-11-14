@@ -4,12 +4,12 @@
    34–40px. A slide whose content no longer fits is split into two or more slides rather than
    set smaller. Slide side margins are narrower to make room. Eyebrows, the footer, credits and the "not
    assessed" label keep their sizes: nobody reads them from the back. */
-.slide { padding: 60px 72px 70px; }
-.slide-foot { left: 72px; right: 72px; }
+.slide { padding: 60px 72px 58px; }
+.slide-foot { left: 72px; right: 72px; bottom: 16px; }
 .slide.hl::after { right: 72px; }
 .slide.hl .not-examined { right: 276px; }
 .not-examined { right: 72px; }
-.slide-copyright { right: 72px; }
+.slide-copyright { right: 72px; bottom: 16px; }
 
 .lead { font-size: 36px; }
 .points { gap: 20px; }
