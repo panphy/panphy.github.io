@@ -436,7 +436,7 @@ window.DeckSvgTex = {
     'carbon-nucleus': () => svg('0 0 460 420', shadow(230, 392, 150) + cluster(230, 200, 6, 6, 44), 'Carbon-12 nucleus: 6 protons and 6 neutrons'),
 
     cycle: () => {
-      const nodes = [[310, 60, 'Model'], [520, 230, 'Prediction'], [310, 400, 'Experiment'], [100, 230, 'New evidence']];
+      const nodes = [[310, 60, 'Model'], [500, 230, 'Prediction'], [310, 400, 'Experiment'], [120, 230, 'New evidence']];
       let s = '';
       const r = 175, cx = 310, cy = 230;
       [[-70, -20], [20, 70], [110, 160], [200, 250]].forEach(([a1, a2]) => {
@@ -445,10 +445,10 @@ window.DeckSvgTex = {
         s += `<path d="M${f(x1)},${f(y1)} A${r},${r} 0 0 1 ${f(x2)},${f(y2)}" class="flow" marker-end="url(#m-brand-accent)"/>`;
       });
       nodes.forEach(([x, y, label], i) => {
-        s += `<rect x="${x - 90}" y="${y - 28}" width="180" height="56" rx="16" class="node ${i === 3 ? 'hot' : ''}"/>`;
+        s += `<rect x="${x - 110}" y="${y - 28}" width="220" height="56" rx="16" class="node ${i === 3 ? 'hot' : ''}"/>`;
         s += text(x, y + 7, label, 'lbl strong node-text');
       });
-      s += text(310, 222, 'model kept', 'lbl mono') + text(310, 248, 'or changed', 'lbl mono');
+      s += text(310, 210, 'model', 'lbl mono') + text(310, 237, 'kept or', 'lbl mono') + text(310, 264, 'changed', 'lbl mono');
       return svg('0 0 620 460', s, 'Cycle: model, prediction, experiment, new evidence, back to the model');
     },
 
@@ -488,7 +488,7 @@ window.DeckSvgTex = {
       after += `<line x1="528" y1="120" x2="616" y2="78" class="trail" style="stroke:var(--electron)"/>` + fly(on, -112, 52, ball(640, 68, 14, 'electron')) + text(640, 30, 'beta particle', 'lbl strong');
       const afterLabels = text(430, 300, 'nitrogen-14', 'lbl display') + text(430, 328, '7 p, 7 n', 'lbl mono');
       let inside = `<rect x="120" y="356" width="480" height="96" rx="18" class="inset"/>` + text(150, 410, 'IN THE NUCLEUS', 'lbl mono small', 'start');
-      inside += ball(342, 404, 20, 'neutron') + arrow(368, 404, 404, 404, 'text-secondary', 2.5) + ball(432, 404, 20, 'proton') + text(480, 414, '+', 'lbl display') + ball(528, 404, 14, 'electron');
+      inside += ball(382, 404, 20, 'neutron') + arrow(408, 404, 444, 404, 'text-secondary', 2.5) + ball(472, 404, 20, 'proton') + text(516, 414, '+', 'lbl display') + ball(560, 404, 14, 'electron');
       // Deck build: what happens inside the nucleus first, then the new nucleus and the beta particle.
       s += on ? parentLabels + stepG(on, 1, inside) + stepG(on, 2, after + afterLabels) : after + parentLabels + afterLabels + inside;
       return svg('0 0 720 460', s, 'Beta decay: a neutron turns into a proton and a fast electron; carbon-14 becomes nitrogen-14');

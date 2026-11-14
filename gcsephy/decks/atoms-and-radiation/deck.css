@@ -556,6 +556,8 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .scatter-label { fill: var(--alpha); }
 .detector { fill: none; stroke: var(--brand-accent); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; opacity: .8; }
 .flow { fill: none; stroke: var(--brand-accent); stroke-width: 3; }
+/* On screen the pale year accent is too faint for the cycle's arrows, so they use the strong accent. */
+#deck .flow { stroke: var(--brand-accent-strong); stroke-width: 4; marker-end: url(#m-brand-accent-strong); }
 .node { fill: var(--card-bg); stroke: var(--card-border); stroke-width: 2; }
 .node.hot { stroke: var(--brand-primary); stroke-width: 3; }
 .cable { fill: none; stroke: var(--text-secondary); stroke-width: 3; }

@@ -104,6 +104,9 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 .deck-y11 .q .ans { font-size: 33px; }
 .deck-y11 .term b { font-size: 38px; }
 .deck-y11 .term span { font-size: 32px; }
+/* Year 11 key words are separate cards: keep room inside each one. */
+.deck-y11 .terms { gap: 24px; padding: 0; }
+.deck-y11 .term { padding: 26px 32px 28px; }
 .deck-y11 .story .points li { font-size: 36px; }
 .deck-y11 .story.band .points li { font-size: 32px; }
 .deck-y11 .story-photos figcaption { font-size: 28px; }
