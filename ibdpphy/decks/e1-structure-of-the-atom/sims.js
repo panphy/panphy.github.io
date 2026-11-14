@@ -40,7 +40,7 @@ function run(fig, step) {
 // ---- Slide 32: distance of closest approach ----
 function closestApproach(fig) {
   const START = 90, TURN = 430, Y = 210, GAP = START - TURN;   // the alpha's start and turning point (x)
-  const VMAX = 220, ARROW = 110;   // speed far away (px/s) and the length of its velocity arrow
+  const VMAX = 220;                // speed far away (px/s)
   // Not to scale: the start stands for "far away". The fraction of the energy that is still kinetic,
   // with g the distance still to go to the turning point, as a fraction of the whole run. The
   // repulsion barely acts at first and stops the alpha quickly near the nucleus, as 1/r does.
@@ -62,15 +62,11 @@ function closestApproach(fig) {
   s += `<line x1="${TURN}" y1="244" x2="${TURN}" y2="318" class="tick"/><line x1="740" y1="268" x2="740" y2="318" class="tick"/>`;
   s += P.arrow(445, 302, 728, 302, 'brand-accent', 3) + P.arrow(725, 302, 442, 302, 'brand-accent', 3);
   s += P.text(585, 346, 'distance of closest approach, r', 'lbl mono') + P.text(585, 376, 'all electric potential energy', 'lbl mono small');
-  s += `<g data-k="v"></g><g data-k="alpha">${P.ball(0, 0, 16, 'alpha')}</g>`;
+  s += `<g data-k="alpha">${P.ball(0, 0, 16, 'alpha')}</g>`;
   svg.innerHTML = s;
-  const alpha = svg.querySelector('[data-k="alpha"]'), velocity = svg.querySelector('[data-k="v"]');
+  const alpha = svg.querySelector('[data-k="alpha"]');
 
-  function draw() {
-    alpha.setAttribute('transform', `translate(${x.toFixed(1)} ${Y})`);
-    const len = ARROW * Math.sqrt(kinetic((x - TURN) / GAP));
-    velocity.innerHTML = len > 10 ? P.arrow(x + dir * 26, Y, x + dir * (26 + len), Y, 'alpha', 4) : '';
-  }
+  function draw() { alpha.setAttribute('transform', `translate(${x.toFixed(1)} ${Y})`); }
   function reset() { x = START; dir = 1; draw(); }
 
   reset();
