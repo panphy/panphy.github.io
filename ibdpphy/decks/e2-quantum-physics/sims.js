@@ -50,8 +50,12 @@ function photocell(fig) {
   const PHI = 4.30, I_FULL = 2.0;               // zinc's work function (eV); current at full intensity with every electron collected (μA)
   const X0 = 246, X1 = 632, L = X1 - X0;        // the faces of the metal and the collector
   const C = 560;                                // speed in px/s of a 1 eV electron
+  const DRIFT = 45;                             // largest sideways speed, px/s
   const state = { lambda: 250, intensity: 50, V: 0 };   // V: the collector's potential relative to the metal
   const eMax = () => HC / state.lambda - PHI;
+  // The fraction of the electrons able to reach the collector that do: about three quarters at 0 V,
+  // rising smoothly to all of them by about +1 V.
+  const collected = V => 1 - 0.35 / (1 + Math.exp((V - 0.15) / 0.18));
   const signed = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)} V`;
 
   const rows = [
@@ -85,9 +89,11 @@ function photocell(fig) {
     signs[0].textContent = forward ? '−' : '+';
     signs[1].textContent = forward ? '+' : '−';
     svg.querySelector('[data-signs]').style.display = state.V ? '' : 'none';
-    // A positive collector collects every electron; a negative one turns back those with less than eV.
+    // A negative collector turns back the electrons with less than e|V|. Of those that can reach it, not
+    // all do: electrons leave in all directions and some drift onto the glass. A positive collector pulls
+    // them across faster, so more arrive, until it collects them all (saturation).
     const reach = forward ? 1 : Math.max(0, 1 + state.V / E);
-    const I = E > 0 ? I_FULL * state.intensity / 100 * reach : 0;
+    const I = E > 0 ? I_FULL * state.intensity / 100 * reach * collected(state.V) : 0;
     out('I').textContent = `${I.toFixed(2)} μA`;
     out('none').style.display = E > 0 || !state.intensity ? 'none' : '';
     // Shorter wavelength, closer waves; more intensity, more of them.
@@ -102,8 +108,9 @@ function photocell(fig) {
   update();
   if (reduce) return;
 
-  // Each electron leaves with a kinetic energy between 0 and E max. A negative collector slows it, so
-  // one with exactly e|V| just reaches it; a positive collector speeds every electron across.
+  // Each electron leaves with a kinetic energy between 0 and E max and a little sideways speed. A negative
+  // collector slows it, so one with exactly e|V| just reaches it; a positive collector speeds every
+  // electron across, giving it less time to drift sideways onto the glass.
   const electrons = [];
   let due = 0;
   run(fig, dt => {
@@ -116,13 +123,15 @@ function photocell(fig) {
         el.setAttribute('r', '8');
         el.setAttribute('fill', 'url(#g-electron)');
         layer.appendChild(el);
-        electrons.push({ el, x: 0, y: 58 + Math.random() * 94, v: C * Math.sqrt(E * Math.random()), age: 0 });
+        electrons.push({ el, x: 0, y: 58 + Math.random() * 94, v: C * Math.sqrt(E * Math.random()), vy: (Math.random() * 2 - 1) * DRIFT, age: 0 });
       }
     } else due = 0;
     for (let i = electrons.length - 1; i >= 0; i--) {
       const e = electrons[i];
-      e.v -= a * dt; e.x += e.v * dt; e.age += dt;
-      if (e.x < 0 || e.x > L || e.age > 8) { e.el.remove(); electrons.splice(i, 1); continue; }
+      e.v -= a * dt; e.x += e.v * dt; e.y += e.vy * dt; e.age += dt;
+      // Back to the metal, onto the collector, onto the glass, or past the collector's edge.
+      const onCollector = e.x >= L && e.y > 50 && e.y < 160;
+      if (e.x < 0 || onCollector || e.y < 34 || e.y > 176 || e.x > L + 40 || e.age > 8) { e.el.remove(); electrons.splice(i, 1); continue; }
       e.el.setAttribute('cx', (X0 + 9 + e.x * (L - 18) / L).toFixed(1));
       e.el.setAttribute('cy', e.y.toFixed(1));
     }
