@@ -80,9 +80,9 @@ function build(THREE, fig, index) {
   holder.appendChild(caption);
   const STAGES = ['before', 'slip', 'after'];
   const words = {
-    before: '1. Lower disk alone at \\(\\omega_{1} = 12\\) rad s⁻¹',
+    before: '1. Lower disk alone at \\(\\omega_{1} = 12\\)&nbsp;rad&nbsp;s⁻¹',
     slip: '2. Dropped on: friction slows the lower disk<br>&nbsp;&nbsp;&nbsp;&nbsp;and speeds up the upper one',
-    after: '3. Turning together at \\(\\omega = 8.0\\) rad s⁻¹'
+    after: '3. Turning together at \\(\\omega = 8.0\\)&nbsp;rad&nbsp;s⁻¹'
   };
   const describe = phase => STAGES.slice(0, STAGES.indexOf(phase) + 1).map(p => `<div style="${p === phase ? 'color:var(--text-main);font-weight:700' : ''}">${words[p]}</div>`).join('');
 
