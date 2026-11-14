@@ -218,6 +218,25 @@ check("Canvas texture gradients");
   }
 }
 
+check("Deck units");
+{
+  // A compound unit (m s⁻², kg m², N m) and the number before it must not break across lines:
+  // join them with &nbsp;. Math, scripts, styles and tags are skipped.
+  const UNIT = "(?:mol|rad|rev|min|day|kWh|kW|MW|GW|kJ|MJ|GJ|keV|MeV|GeV|eV|kPa|Pa|kHz|MHz|GHz|Hz|kV|mV|mA|μA|kΩ|MΩ|Ω|Wb|Bq|Sv|Gy|cd|lx|ly|pc|AU|km|cm|mm|μm|nm|pm|fm|kg|mg|g|m|s|ms|μs|ns|h|J|N|W|K|C|T|V|A|F|L|yr|y|atm)[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]*";
+  const SEP = "(?: |&nbsp;| )";
+  const NUM = `(?:\\d{1,3}(?:${SEP}\\d{3})+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?)`;
+  const compound = new RegExp(`(?<![\\w\\\\{.])(?:${NUM}${SEP})?${UNIT}(?:${SEP}${UNIT})+(?![\\w⁻⁰¹²³⁴⁵⁶⁷⁸⁹])`, "g");
+  const skip = /<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]|<[^>]*>/g;
+  for (const file of git("ls-files", "-z", "ibdpphy/decks/*.html", "gcsephy/decks/*.html").split("\0").filter(Boolean)) {
+    for (const text of read(file).split(skip)) {
+      for (const [unit] of text.matchAll(compound)) {
+        const isUnit = /[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(unit) || /(?:^|[\s;])(?:N(?: |&nbsp;)[ms]|kW(?: |&nbsp;)h)$/.test(unit);
+        if (isUnit && unit.includes(" ")) fail(`${file}: "${unit}" can break across lines; join it with &nbsp;`);
+      }
+    }
+  }
+}
+
 check("Agent instructions");
 {
   const body = (file) => read(file).split("\n").slice(1).join("\n");
