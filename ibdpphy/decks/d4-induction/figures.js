@@ -9,7 +9,7 @@ window.DeckFigures.add(P => {
   const magnet = (x, y, w, h, north) => {
     const flat = w > h, first = north === 'left' || north === 'up', a = first ? 'proton' : 'electron', b = first ? 'electron' : 'proton', la = first ? 'N' : 'S', lb = first ? 'S' : 'N';
     const half = flat ? `<rect x="${x}" y="${y}" width="${w / 2}" height="${h}" style="fill:var(--${a})"/><rect x="${x + w / 2}" y="${y}" width="${w / 2}" height="${h}" style="fill:var(--${b})"/>` : `<rect x="${x}" y="${y}" width="${w}" height="${h / 2}" style="fill:var(--${a})"/><rect x="${x}" y="${y + h / 2}" width="${w}" height="${h / 2}" style="fill:var(--${b})"/>`;
-    const label = (lx, ly, s) => text(lx, ly + 11, s, 'lbl display', 'middle', 'style="fill:#fff;font-size:30px"');
+    const label = (lx, ly, s) => text(lx, ly + 11, s, 'lbl display', 'middle', 'style="fill:var(--on-fill);font-size:30px"');
     return half + (flat ? label(x + w / 4, y + h / 2, la) + label(x + 3 * w / 4, y + h / 2, lb) : label(x + w / 2, y + h / 4, la) + label(x + w / 2, y + 3 * h / 4, lb));
   };
   // A coil seen from the side: n turns between x1 and x2 round the axis y.
@@ -120,7 +120,7 @@ window.DeckFigures.add(P => {
     // A coil turning in a uniform field, seen end on, with the emf it produces. Also drawn small, with data-plain.
     'd4-generator': el => {
       const on = labeled(el), T = 4, n = 72, cx = 230, cy = 250;
-      let s = `<rect x="20" y="150" width="60" height="200" rx="6" style="fill:var(--proton)"/><rect x="380" y="150" width="60" height="200" rx="6" style="fill:var(--electron)"/>` + text(50, 262, 'N', 'lbl display', 'middle', 'style="fill:#fff"') + text(410, 262, 'S', 'lbl display', 'middle', 'style="fill:#fff"');
+      let s = `<rect x="20" y="150" width="60" height="200" rx="6" style="fill:var(--proton)"/><rect x="380" y="150" width="60" height="200" rx="6" style="fill:var(--electron)"/>` + text(50, 262, 'N', 'lbl display', 'middle', 'style="fill:var(--on-fill)"') + text(410, 262, 'S', 'lbl display', 'middle', 'style="fill:var(--on-fill)"');
       s += [180, 250, 320].map(y => fline(80, y, 380, y, 'brand-accent-strong', 3, 0.2, 'opacity=".5"')).join('');
       const blade = `<line x1="${cx}" y1="${cy - 96}" x2="${cx}" y2="${cy + 96}" style="stroke:var(--brand-accent);stroke-width:9;stroke-linecap:round"/><circle cx="${cx}" cy="${cy - 96}" r="13" style="fill:var(--brand-accent)"/><circle cx="${cx}" cy="${cy + 96}" r="13" style="fill:var(--brand-accent)"/>` + arrow(cx, cy, cx + 80, cy, 'hl', 4);
       const gx = t => 520 + 330 * t, gy = t => 250 - 110 * Math.sin(t * TAU);

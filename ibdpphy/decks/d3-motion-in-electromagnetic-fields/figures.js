@@ -106,7 +106,7 @@ window.DeckFigures.add(P => {
     // A wire carrying current out of the page between the poles of a magnet. Also drawn small, with data-plain.
     'd3-wire-force': el => {
       const on = labeled(el);
-      let s = `<rect x="80" y="150" width="150" height="220" rx="8" style="fill:var(--proton)"/><rect x="570" y="150" width="150" height="220" rx="8" style="fill:var(--electron)"/>` + text(155, 274, 'N', 'lbl display', 'middle', 'style="fill:#fff"') + text(645, 274, 'S', 'lbl display', 'middle', 'style="fill:#fff"');
+      let s = `<rect x="80" y="150" width="150" height="220" rx="8" style="fill:var(--proton)"/><rect x="570" y="150" width="150" height="220" rx="8" style="fill:var(--electron)"/>` + text(155, 274, 'N', 'lbl display', 'middle', 'style="fill:var(--on-fill)"') + text(645, 274, 'S', 'lbl display', 'middle', 'style="fill:var(--on-fill)"');
       s += [190, 260, 330].map(y => fline(230, y, 570, y, 'brand-accent-strong', 3, 0.3, 'opacity=".6"')).join('') + arrow(400, 238, 400, 96, 'brand-primary', 6) + wireEnd(400, 260, true, 22);
       if (on) s += text(424, 116, 'F', 'lbl display', 'start') + text(400, 420, 'current I out of the page', 'lbl') + text(310, 176, 'B', 'lbl display');
       return svg('60 70 680 370', s, 'A wire carrying a current out of the page sits between the north and south poles of a magnet, where the field points from left to right. The force on the wire is upwards, at right angles to both the current and the field');

@@ -63,7 +63,7 @@ window.DeckFigures.add(P => {
       const on = labeled(el), cx = 400, cy = 250, R = 150;
       let s = `<circle cx="${cx}" cy="${cy}" r="${R + 34}" style="fill:var(--sand);opacity:.25"/><circle cx="${cx}" cy="${cy}" r="${R}" style="fill:var(--sand);stroke:var(--brand-accent);stroke-width:4"/><circle cx="${cx}" cy="${cy}" r="46" style="fill:var(--brand-accent);opacity:.7"/>`;
       for (let k = 0; k < 8; k++) { const a = k * TAU / 8 + 0.2, c = Math.cos(a), sn = Math.sin(a); s += k % 2 ? arrow(cx + (R + 70) * c, cy + (R + 70) * sn, cx + (R - 20) * c, cy + (R - 20) * sn, 'brand-accent-strong', 6) : arrow(cx + 70 * c, cy + 70 * sn, cx + (R + 50) * c, cy + (R + 50) * sn, 'proton', 6); }
-      if (on) s += text(cx, cy + 10, 'fusion', 'lbl strong') + text(680, 150, 'gravity:', 'lbl strong', 'start') + text(680, 184, 'inwards', 'lbl', 'start') + text(680, 330, 'radiation and gas', 'lbl strong', 'start', 'style="fill:var(--proton)"') + text(680, 364, 'pressure: outwards', 'lbl', 'start');
+      if (on) s += text(cx, cy + 10, 'fusion', 'lbl strong', 'middle', 'style="fill:var(--on-fill)"') + text(680, 150, 'gravity:', 'lbl strong', 'start') + text(680, 184, 'inwards', 'lbl', 'start') + text(680, 330, 'radiation and gas', 'lbl strong', 'start', 'style="fill:var(--proton)"') + text(680, 364, 'pressure: outwards', 'lbl', 'start');
       return svg(on ? '150 20 800 460' : '170 20 460 460', s, 'A star in equilibrium. Gravity pulls every part of the star inwards. The pressure of the hot gas and of the radiation from fusion in the core pushes outwards. When the two balance, the star keeps a steady size');
     },
 
