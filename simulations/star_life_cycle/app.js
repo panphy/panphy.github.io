@@ -982,7 +982,7 @@ function renderLayers(st) {
   $('gas').hidden = !hole;
   $('gas').setAttribute('aria-pressed', String(state.gas));
   // Say why the switch is unavailable rather than leaving it grayed out without a reason.
-  $('cutaway-note').hidden = Boolean(layers) || hole;
+  cutaway.title = layers ? '' : 'This stage has no layers inside to cut away';
   cutaway.setAttribute('aria-pressed', String(state.cutaway && !!layers));
   cutaway.classList.toggle('nudge', st.stage.id === 'late' || (st.stage.id === 'sn' && st.p < SN_BREAKOUT));
   const names = layers ? layers.map(l => l.name).join('|') : 'none';

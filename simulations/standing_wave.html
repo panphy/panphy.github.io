@@ -1093,7 +1093,6 @@
                     </label>
                 </div>
                 <div class="particle-controls-content hidden" id="particleControlsContent">
-                    <p class="particle-position-help" id="particlePositionHelp">Position along the 1.00 m string: 0 = left end, 1 = right end.</p>
                     <div class="particle-control">
                         <div class="particle-header">
                             <span class="particle-dot red"></span>
@@ -1101,7 +1100,7 @@
                             <span class="particle-amp">Amp: <strong id="redParticleAmplitude">0.00</strong></span>
                         </div>
                         <div class="slider-with-value">
-                            <input type="range" id="positionSlider" disabled min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position" aria-describedby="particlePositionHelp">
+                            <input type="range" id="positionSlider" disabled min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position" title="Position along the 1.00 m string: 0 = left end, 1 = right end">
                             <span class="slider-readout">Position: <span id="positionValue">0.50</span></span>
                         </div>
                     </div>
@@ -1112,7 +1111,7 @@
                             <span class="particle-amp">Amp: <strong id="greenParticleAmplitude">0.00</strong></span>
                         </div>
                         <div class="slider-with-value">
-                            <input type="range" id="greenPositionSlider" disabled min="0" max="1" step="0.01" value="0.8" aria-label="Blue Particle Position" aria-describedby="particlePositionHelp">
+                            <input type="range" id="greenPositionSlider" disabled min="0" max="1" step="0.01" value="0.8" aria-label="Blue Particle Position" title="Position along the 1.00 m string: 0 = left end, 1 = right end">
                             <span class="slider-readout">Position: <span id="greenPositionValue">0.80</span></span>
                         </div>
                     </div>
@@ -1121,7 +1120,6 @@
         </div>
 
         <div class="hint-row">
-            <p class="hint-text"><kbd>Space</kbd> to play / pause</p>
             <details class="model-note" id="modelNote">
                 <summary>About this model</summary>
                 <div class="model-note-body">

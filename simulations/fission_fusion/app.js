@@ -1934,7 +1934,6 @@ function selectMode(mode, animate = true) {
   buildMode(animate && previous !== mode);
   document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[mode].includes(item.dataset.legend); });
   document.querySelector('.legend').hidden = !LEGEND[mode].length;
-  document.querySelector('.gesture').hidden = mode === 'energy';
   $('controls-chain').hidden = mode !== 'chain';
   $('controls-fusion').hidden = mode !== 'fusion';
   $('controls-energy').hidden = mode !== 'energy';

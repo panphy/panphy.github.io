@@ -181,7 +181,7 @@
       list.innerHTML = PART_GROUPS.map((g) => `<div class="lib-group"><h3 class="ds-label">${g.title}</h3><div class="lib-grid">${g.items.map((k) => {
         const label = S.BODY_KINDS[k] ? S.BODY_KINDS[k].label : S.LINK_KINDS[k].label;
         return `<button type="button" class="part" data-part="${k}" aria-pressed="false" title="${esc(PART_TITLES[k])}">${partSvg(k)}<span class="part-name">${label}</span></button>`;
-      }).join('')}</div></div>`).join('') + '<p class="lib-note">Fixed objects (hatched) never move. Any object can be fixed or freed in the inspector.</p>';
+      }).join('')}</div></div>`).join('');
       list.querySelectorAll('.part').forEach((btn) => {
         const kind = btn.dataset.part;
         const isBody = !!S.BODY_KINDS[kind];
@@ -462,9 +462,8 @@
       const toSlider = (v) => (opt.log ? Math.log10(Math.max(v, opt.slider[0])) : v);
       const fromSlider = (v) => (opt.log ? Math.pow(10, v) : v);
       const sl = opt.slider;
-      wrap.innerHTML = `<div class="field-row"><label for="${id}">${mathText(opt.label, opt.plain)}</label><span class="num"><input id="${id}" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"><span class="unit">${esc(opt.unit || '')}</span></span></div>`
-        + (sl ? `<input class="slider" type="range" aria-label="${esc(opt.plain || opt.label)}" min="${toSlider(sl[0])}" max="${toSlider(sl[1])}" step="${opt.log ? 0.001 : opt.step || 0.01}">` : '')
-        + (opt.help ? `<p class="field-help">${esc(opt.help)}</p>` : '');
+      wrap.innerHTML = `<div class="field-row"><label for="${id}"${opt.help ? ` title="${esc(opt.help)}"` : ''}>${mathText(opt.label, opt.plain)}</label><span class="num"><input id="${id}" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"><span class="unit">${esc(opt.unit || '')}</span></span></div>`
+        + (sl ? `<input class="slider" type="range" aria-label="${esc(opt.plain || opt.label)}" min="${toSlider(sl[0])}" max="${toSlider(sl[1])}" step="${opt.log ? 0.001 : opt.step || 0.01}">` : '');
       const input = wrap.querySelector('input[type="text"]');
       const slider = wrap.querySelector('.slider');
       const show = () => {
@@ -539,17 +538,16 @@
       el.appendChild(segment(isWorld ? 'World drag model' : 'Object drag model', 'dragModel', [
         ...(!isWorld ? [['world', 'World']] : []), ...Object.entries(S.DRAG_MODELS)
       ], model));
-      const note = document.createElement('p');
       if (isWorld) {
-        note.className = 'field-help';
-        note.textContent = 'Objects follow these settings unless they choose their own drag.';
+        head.querySelector('.choice-label').title = 'Objects follow these settings unless they choose their own drag.';
       } else {
+        const note = document.createElement('p');
         const message = S.dragOverrideNote(app.scene, get());
         note.className = message ? 'drag-override-note' : 'field-help';
         note.setAttribute('role', 'status');
         note.textContent = get().fixed ? 'Fixed objects do not experience drag.' : message || `Following World: ${S.DRAG_MODELS[S.worldDragModel(app.scene)]}. World changes apply to this object.`;
+        el.appendChild(note);
       }
-      el.appendChild(note);
       if (model === 'linear') {
         const row = document.createElement('div');
         row.className = 'choice-row drag-source';
@@ -893,10 +891,7 @@
         list.push({ icon: 'plus', label: 'Add a smaller ring', run: () => app.edit(() => { const x = b(); const top = Math.min(...[S.rimTeeth(x), ...(x.rings || [])]); x.rings = [...(x.rings || []), Math.max(S.LIMITS.teeth[0], Math.round(top / 3))]; }) });
       }
       if (rings) list.push({ icon: 'minus', label: 'Remove the last ring', run: () => app.edit(() => { const x = b(); x.rings = x.rings.slice(0, -1); S.gearsOf(app.scene, x.id).forEach((l) => { if (l.a === x.id && l.ra > x.rings.length) l.ra = 0; if (l.b === x.id && l.rb > x.rings.length) l.rb = 0; }); }) });
-      const note = document.createElement('p');
-      note.className = 'field-help';
-      note.textContent = 'Smaller rings are fixed to the same axle and turn with the rim: a compound gear. Choose which ring each gear meshes in the gear’s settings.';
-      c2.appendChild(note);
+      c2.querySelector('.icard-label').title = 'Smaller rings are fixed to the same axle and turn with the rim: a compound gear. Choose which ring each gear meshes in the gear’s settings.';
       if (list.length) c2.appendChild(actions(list));
       return c2;
     }
@@ -1085,18 +1080,12 @@
         if (replacement) replacement.focus();
       });
       accuracy.appendChild(group);
-      const accuracyHelp = document.createElement('p');
-      accuracyHelp.className = 'field-help';
-      accuracyHelp.textContent = `Time advances in steps of ${S.ACCURACY[current].text} or less. Finer steps resolve fast collisions better but need more computing time, so large scenes may run slower than real time.`;
-      accuracy.appendChild(accuracyHelp);
+      accuracy.querySelector('.icard-label').title = `Time advances in steps of ${S.ACCURACY[current].text} or less. Finer steps resolve fast collisions better but need more computing time, so large scenes may run slower than real time.`;
       const sys = readingsCard('System energy now', [
         { key: 'KE', label: 'Kinetic \\(E_\\mathrm{k}\\)', plain: 'Kinetic' }, { key: 'GPE', label: 'Gravitational \\(E_\\mathrm{p}\\)', plain: 'Gravitational' },
         { key: 'EPE', label: 'Elastic \\(E_\\mathrm{e}\\)', plain: 'Elastic' }, '-', { key: 'E', label: 'Total \\(E\\)', plain: 'Total' }
       ]);
-      const note = document.createElement('p');
-      note.className = 'icard-note';
-      note.textContent = 'Moving objects only.';
-      sys.appendChild(note);
+      sys.querySelector('.icard-label').title = 'Moving objects only';
       sys.appendChild(actions([{ icon: 'graph', label: 'Graph system', run: () => app.trackObject({ type: 'system' }, true), pressed: app.track.type === 'system' }]));
       ui.readings = { type: 'system' };
       const hint = document.createElement('p');
