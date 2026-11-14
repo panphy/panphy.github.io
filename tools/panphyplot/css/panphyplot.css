@@ -1910,7 +1910,6 @@ input[type="number"]:focus {
 	font-family: var(--font-mono);
 }
 
-.custom-fit-formula-note,
 .custom-fit-parameters-empty {
 	margin: 6px 0;
 	font-size: 0.78rem;
@@ -2169,17 +2168,12 @@ input[type="number"]:focus {
 .neo-chi.is-low { color: var(--accent); background: var(--accent-soft); }
 .neo-chi.is-high { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
 
-#fit-status,
-.fit-weighting-note {
+#fit-status {
 	margin: 8px 0 0;
 	font-size: 0.8rem;
 	line-height: 1.5;
 	color: var(--ink-2);
 	overflow-wrap: anywhere;
-}
-
-.fit-weighting-note {
-	color: var(--ink-3);
 }
 
 .fit-outdated {
