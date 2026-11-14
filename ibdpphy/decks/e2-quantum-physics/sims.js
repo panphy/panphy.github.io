@@ -185,15 +185,17 @@ function compton(fig) {
     const half = CYCLES * lam / 2;
     return P.wave(EX + (d - half) * c, EY - (d - half) * sn, EX + (d + half) * c, EY - (d + half) * sn, { cycles: CYCLES, amp: 13 });
   };
-  const ease = u => 1 - (1 - u) * (1 - u);
+  // Both photons travel at the same speed (c); the struck electron moves off in a straight line at a
+  // steady speed, slower than light and in proportion to its momentum, until it leaves the picture.
+  const C_PX = 160, E_PX = 70;           // px/s: photon, and electron per unit of momentum (p_e / p_i)
   function draw(time, still = false) {
     const t = theta * Math.PI / 180, lamF = LAM + STRETCH * (1 - Math.cos(t));
-    const dIn = 330 - Math.min(1, time / T_IN) * (330 - CYCLES * LAM / 2 - 22);
-    const after = Math.max(0, time - T_IN), u = Math.min(1, after / T_OUT);
+    const dIn = CYCLES * LAM / 2 + 22 + C_PX * Math.max(0, T_IN - time);
+    const after = Math.max(0, time - T_IN);
     const d = still ? CYCLES * LAM / 2 + 40 : dIn, half = CYCLES * LAM / 2;
     k('in').innerHTML = time < T_IN || still ? P.wave(EX - d - half, EY, EX - d + half, EY, { cycles: CYCLES, amp: 13 }) : '';
-    k('out').innerHTML = time >= T_IN ? packet(CYCLES * lamF / 2 + 30 + u * 260, Math.cos(t), Math.sin(t), lamF) : '';
-    const de = ease(u) * 190 * pe;
+    k('out').innerHTML = time >= T_IN ? packet(CYCLES * lamF / 2 + 30 + C_PX * after, Math.cos(t), Math.sin(t), lamF) : '';
+    const de = E_PX * pe * after;
     set(k('electron'), { transform: `translate(${(EX + de * Math.cos(phi)).toFixed(1)} ${(EY + de * Math.sin(phi)).toFixed(1)})` });
     set(k('e-label'), { x: EX + 150 * Math.cos(phi) + 34, y: Math.min(440, EY + 150 * Math.sin(phi) + 10), 'text-anchor': 'start' });
     k('e-label').style.display = time >= T_IN && pe > 0.02 ? '' : 'none';
