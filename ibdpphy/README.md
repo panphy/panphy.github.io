@@ -32,7 +32,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/d2-electric-and-magnetic-fields/` | D.2 teaching deck, 49 slides: SL and HL, then an additional HL part (slides 35 to 45) |
 | `decks/d3-motion-in-electromagnetic-fields/` | D.3 teaching deck, 36 slides: SL and HL, with no additional HL content |
 | `decks/d4-induction/` | D.4 teaching deck, 32 slides: HL only |
-| `decks/e1-structure-of-the-atom/` | E.1 teaching deck, 46 slides: SL and HL, then an additional HL part (slides 31 to 44) |
+| `decks/e1-structure-of-the-atom/` | E.1 teaching deck, 45 slides: SL and HL, then an additional HL part (slides 30 to 43) |
 | `decks/e2-quantum-physics/` | E.2 teaching deck, 36 slides: HL only |
 | `decks/e3-radioactive-decay/` | E.3 teaching deck, 53 slides: SL and HL, then an additional HL part (slides 37 to 49); the range of the strong force on slide 5 carries an `hl-tag` |
 | `decks/e4-fission/` | E.4 teaching deck, 36 slides: SL and HL, with no additional HL content |
