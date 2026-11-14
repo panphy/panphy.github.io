@@ -117,6 +117,14 @@ mjx-container { line-height: 0; }
 .news-photo figcaption { margin-top: 22px; font-size: 24px; font-weight: 700; line-height: 1.3; }
 .news-photo .credit { display: block; margin-top: 5px; font-size: 15px; font-weight: 600; color: var(--muted); text-decoration: none; }
 .news-photo .credit a { color: inherit; }
+/* Old drawings and diagrams are shown whole on paper, not cropped like photos. */
+.news-photo.document img { object-fit: contain; background: #fff; }
+/* A photo across the top of a lesson divider's question card. */
+.case-photo { margin: -28px -30px 20px; }
+.case-photo img { display: block; width: 100%; height: 200px; object-fit: cover; border-radius: 22px 22px 0 0; }
+.case-photo figcaption { margin: 6px 30px 0; }
+.case-photo .credit { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+.case-photo .credit a { color: inherit; }
 .story { display: flex; flex-direction: column; min-height: 0; }
 .story .kicker { align-self: flex-start; margin: 0; padding: 6px 13px; background: var(--ink); color: var(--paper); font: 900 20px Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
 .story h2 { margin: 18px 0 20px; font-size: 62px; }

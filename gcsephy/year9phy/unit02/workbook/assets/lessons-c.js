@@ -32,10 +32,10 @@
         { t: "sub", h: "A falling ball" },
         { t: "p", h: "As a ball falls, energy is transferred from its gravitational potential (G.P.E.) store to its kinetic store. If we ignore air resistance, all the energy that leaves the G.P.E. store arrives in the kinetic store. An <strong>energy bar chart</strong> shows this: the bars change, but the total stays the same." },
         { t: "figs", cols: 3, items: [F.barChart({ max: 20, step: 5, title: "released", values: [20, 0, 0] }), F.barChart({ max: 20, step: 5, title: "half-way down", values: [10, 10, 0] }), F.barChart({ max: 20, step: 5, title: "just before landing", values: [0, 20, 0] })] },
-        { t: "follow", slide: 45, q: "A 0.50 kg ball is dropped from 3.0 m. Calculate the energy in its kinetic store just before it lands. Ignore air resistance.", steps: [["Idea", R`energy gained by the kinetic store = energy lost from the G.P.E. store`], ["Equation", R`\(E_p = m\,g\,h\)`], ["Substitute", R`\(E_p = 0.50 \times 9.8 \times 3.0\)`], ["Answer", R`\(E_k = 14.7\) J`]],
+        { t: "follow", slide: 48, q: "A 0.50 kg ball is dropped from 3.0 m. Calculate the energy in its kinetic store just before it lands. Ignore air resistance.", steps: [["Idea", R`energy gained by the kinetic store = energy lost from the G.P.E. store`], ["Equation", R`\(E_p = m\,g\,h\)`], ["Substitute", R`\(E_p = 0.50 \times 9.8 \times 3.0\)`], ["Answer", R`\(E_k = 14.7\) J`]],
           yt: { q: "A 3.0 kg rock falls 4.0 m. Calculate the energy in its kinetic store just before it lands. Ignore air resistance.", steps: [["Idea", "energy gained by the kinetic store = energy lost from the G.P.E. store"], ["Equation", R`\(E_p = m\,g\,h\)`], ["Substitute", R`\(E_p = 3.0 \times 9.8 \times 4.0\)`], ["Answer", R`\(E_k = 117.6\) J`]] } },
         { t: "sub", h: "Finding a height" },
-        { t: "follow", slide: 45, q: "A 0.25 kg ball is thrown straight up with 20 J in its kinetic store. Calculate the greatest height it reaches. Ignore air resistance.", steps: [["Idea", R`at the top, all 20 J is in the G.P.E. store`], ["Rearrange", R`\(h = \dfrac{E_p}{m\,g}\)`], ["Substitute", R`\(h = \dfrac{20}{0.25 \times 9.8}\)`], ["Answer", "h = 8.2 m"]],
+        { t: "follow", slide: 48, q: "A 0.25 kg ball is thrown straight up with 20 J in its kinetic store. Calculate the greatest height it reaches. Ignore air resistance.", steps: [["Idea", R`at the top, all 20 J is in the G.P.E. store`], ["Rearrange", R`\(h = \dfrac{E_p}{m\,g}\)`], ["Substitute", R`\(h = \dfrac{20}{0.25 \times 9.8}\)`], ["Answer", "h = 8.2 m"]],
           yt: { q: "A 0.30 kg ball is thrown straight up with 8.82 J in its kinetic store. Calculate the greatest height it reaches. Ignore air resistance.", steps: [["Idea", R`at the top, all 8.82 J is in the G.P.E. store`], ["Rearrange", R`\(h = \dfrac{E_p}{m\,g}\)`], ["Substitute", R`\(h = \dfrac{8.82}{0.30 \times 9.8}\)`], ["Answer", "h = 3.0 m"]] } },
         { t: "sub", h: "Real systems: some energy is dissipated" },
         { t: "p", h: "In real life, air resistance and friction transfer some energy to the <strong>thermal store</strong> of the surroundings. This energy is not destroyed, but it is spread out and we cannot use it again. We say it is <strong>dissipated</strong>. That is why a pendulum swings a little lower each time, and why it will not hit your nose." },
@@ -63,7 +63,7 @@
         { p: "(b) The diver falls into the water. Ignoring air resistance, how much energy is in the diver's kinetic store just before they reach the water? Give a reason.", marks: 2, lines: 2, a: "5880 J (1). All the energy lost from the gravitational potential store is transferred to the kinetic store (1)." },
         { p: "(c) In real life, the energy in the kinetic store is a little less. Explain why.", marks: 2, lines: 2, a: "Air resistance acts on the diver (1), so some energy is transferred to the thermal store of the air / surroundings (1)." },
       ],
-      quick: { slide: 48, items: [
+      quick: { slide: 51, items: [
         ["State the principle of conservation of energy.", "Energy can be transferred, stored or dissipated, but never created or destroyed."],
         [R`A 2.0 kg rock falls 5.0 m, with no air resistance. Calculate \(E_k\) at the bottom.`, R`\(2.0 \times 9.8 \times 5.0 = 98\) J`],
         ["A 0.10 kg ball is thrown up with 4.9 J, with no air resistance. Calculate its greatest height.", R`\(\dfrac{4.9}{0.10 \times 9.8} = 5.0\) m`],
@@ -96,9 +96,9 @@
         { t: "eq", eq: R`\(P = \dfrac{E}{t}\)`, words: "power = energy transferred ÷ time", units: R`\(P\) in watts (W), \(E\) in joules (J), \(t\) in seconds (s)`, re: R`Rearranged: \(E = P\,t\) and \(t = \dfrac{E}{P}\)`, tri: { top: "E", bottom: ["P", "t"] } },
         { t: "key", h: "<strong>1 watt (W) = 1 joule per second.</strong> 1 kilowatt (kW) = 1000 W. A 60 W lamp transfers 60 J every second." },
         { t: "compare", head: ["", "Energy transferred", "Time", "Power"], rows: [["Motor A", "29.4 J", "2.0 s", "29.4 ÷ 2.0 = 14.7 W"], ["Motor B", "29.4 J", "6.0 s", "29.4 ÷ 6.0 = 4.9 W"]] },
-        { t: "follow", slide: 52, q: "A motor transfers 600 J in 4.0 s. Calculate its power.", steps: [["Equation", R`\(P = \dfrac{E}{t}\)`], ["Substitute", R`\(P = \dfrac{600}{4.0}\)`], ["Answer", "P = 150 W"]],
+        { t: "follow", slide: 55, q: "A motor transfers 600 J in 4.0 s. Calculate its power.", steps: [["Equation", R`\(P = \dfrac{E}{t}\)`], ["Substitute", R`\(P = \dfrac{600}{4.0}\)`], ["Answer", "P = 150 W"]],
           yt: { q: "A lamp transfers 900 J in 15 s. Calculate its power.", steps: [["Equation", R`\(P = \dfrac{E}{t}\)`], ["Substitute", R`\(P = \dfrac{900}{15}\)`], ["Answer", "P = 60 W"]] } },
-        { t: "follow", slide: 53, q: "A 2.0 kW kettle is switched on for 2.0 minutes. Calculate the energy transferred.", steps: [["Convert", "P = 2000 W, t = 120 s"], ["Equation", R`\(P = \dfrac{E}{t}\)`], ["Rearrange", R`\(E = P\,t\)`], ["Substitute", R`\(E = 2000 \times 120\)`], ["Answer", "E = 240 000 J"]],
+        { t: "follow", slide: 56, q: "A 2.0 kW kettle is switched on for 2.0 minutes. Calculate the energy transferred.", steps: [["Convert", "P = 2000 W, t = 120 s"], ["Equation", R`\(P = \dfrac{E}{t}\)`], ["Rearrange", R`\(E = P\,t\)`], ["Substitute", R`\(E = 2000 \times 120\)`], ["Answer", "E = 240 000 J"]],
           yt: { q: "A 1.5 kW heater is switched on for 3.0 minutes. Calculate the energy transferred.", steps: [["Convert", "P = 1500 W, t = 180 s"], ["Equation", R`\(P = \dfrac{E}{t}\)`], ["Rearrange", R`\(E = P\,t\)`], ["Substitute", R`\(E = 1500 \times 180\)`], ["Answer", "E = 270 000 J"]] } },
       ],
       lab: { title: "Practical: how powerful are you?", aside: "Everyone uses a mass of 50 kg, so nobody is weighed.", blocks: [
@@ -124,7 +124,7 @@
         { p: "(b) Calculate the useful power output of the motor.", marks: 2, frame: frame3, frameA: [R`\(P = \dfrac{E}{t}\)`, R`\(P = \dfrac{88\,200}{20}\) (1)`, "4410 W (1)"] },
         { p: "Motor A lifts a load in 5 s. Motor B lifts the same load through the same height in 10 s. Complete the sentence.", marks: 2, fill: R`Motor A transfers [[the same|more / less / the same]] energy as motor B, and has [[a greater|a greater / a smaller / the same]] power.` },
       ],
-      quick: { slide: 55, items: [
+      quick: { slide: 59, items: [
         ["What is power?", "The rate of energy transfer: joules per second."],
         ["600 J is transferred in 10 s. Calculate the power.", "60 W"],
         ["A 40 W fan runs for 5.0 minutes. Calculate the energy transferred.", R`\(40 \times 300 = 12\,000\) J`],
@@ -191,7 +191,7 @@
         { p: "Two houses have walls of the same thickness. The bricks of house A have a higher thermal conductivity than the bricks of house B. Which house cools faster? Explain.", marks: 2, lines: 2, a: "House A (1): a higher thermal conductivity means energy is transferred through the walls by conduction faster (1)." },
       ],
       order: ["doNow", "learn", "lab", "try", "check", "exam", "revise"],
-      quick: { slide: 62, items: [
+      quick: { slide: 67, items: [
         ["Where does dissipated energy end up?", "In the thermal store of the surroundings."],
         ["How does oil help a bike chain?", "It reduces friction, so less energy is dissipated."],
         ["Copper or glass: which conducts energy faster?", "Copper: it has a higher thermal conductivity."],
@@ -224,9 +224,9 @@
         { t: "eq", eq: R`\(\text{efficiency} = \dfrac{\text{useful output energy transfer}}{\text{total input energy transfer}}\)`, words: "Energy in joules (J). Efficiency has no unit.", units: R`Answer as a decimal (for example 0.80), or multiply by 100 for a percentage (80%).`, re: R`Rearranged: useful output = efficiency × total input, and \(\text{total input} = \dfrac{\text{useful output}}{\text{efficiency}}\)`, tri: { top: "useful", bottom: ["eff.", "total"] }, stack: true },
         { t: "eq", eq: R`\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)`, stack: true, words: "The same idea, using power in watts (W).", units: "Use whichever pair the question gives you: energies or powers." },
         { t: "key", h: "Efficiency is <strong>never more than 1</strong> (100%). If your answer is bigger than 1, you have divided the wrong way round. To use a percentage in a calculation, change it to a decimal first: 25% = 0.25." },
-        { t: "follow", slide: 64, q: "A motor is supplied with 500 J and transfers 400 J to the kinetic store of its load. Calculate its efficiency.", steps: [["Equation", R`\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)`], ["Substitute", R`\(\text{efficiency} = \dfrac{400}{500}\)`], ["Answer", "0.80, or 80%"]],
+        { t: "follow", slide: 69, q: "A motor is supplied with 500 J and transfers 400 J to the kinetic store of its load. Calculate its efficiency.", steps: [["Equation", R`\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)`], ["Substitute", R`\(\text{efficiency} = \dfrac{400}{500}\)`], ["Answer", "0.80, or 80%"]],
           yt: { q: "A fan is supplied with 300 J and transfers 210 J to the kinetic store of the air. Calculate its efficiency.", steps: [["Equation", R`\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)`], ["Substitute", R`\(\text{efficiency} = \dfrac{210}{300}\)`], ["Answer", "0.70, or 70%"]] } },
-        { t: "follow", slide: 65, q: "A 60 W lamp has an efficiency of 25%. Calculate its useful power output.", steps: [["Convert", "efficiency = 25% = 0.25"], ["Rearrange", "useful = efficiency × total"], ["Substitute", "useful = 0.25 × 60"], ["Answer", "15 W"]],
+        { t: "follow", slide: 70, q: "A 60 W lamp has an efficiency of 25%. Calculate its useful power output.", steps: [["Convert", "efficiency = 25% = 0.25"], ["Rearrange", "useful = efficiency × total"], ["Substitute", "useful = 0.25 × 60"], ["Answer", "15 W"]],
           yt: { q: "A 500 W motor has an efficiency of 40%. Calculate its useful power output.", steps: [["Convert", "efficiency = 40% = 0.40"], ["Rearrange", "useful = efficiency × total"], ["Substitute", "useful = 0.40 × 500"], ["Answer", "200 W"]] } },
         { t: "sub", h: "Sankey diagrams" },
         { t: "split", left: [{ t: "steps", items: ["The <strong>width</strong> of each arrow shows the amount of energy.", "Useful energy goes <strong>straight on</strong>. Wasted energy <strong>bends away</strong>, usually downwards.", "Input = useful + wasted. Here: 100 J = 20 J + 80 J.", "Efficiency = 20 ÷ 100 = 0.20 (20%)."] }], right: [{ t: "fig", h: F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.4, useLabel: "by light", wasteLabel: "heating the room" }), cap: "A lamp: 100 J in, 20 J by light." }] },
@@ -255,7 +255,7 @@
         { tip: "Check: is your efficiency less than 1 (100%)?", p: "A 1200 W hair dryer has a useful power output of 1080 W. Calculate its efficiency as a percentage.", marks: 3, frame: frame3, frameA: [R`\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)`, R`\(\dfrac{1080}{1200} = 0.90\) (1)(1)`, "90% (1)"] },
         { p: "Explain why an LED is more efficient than a filament lamp.", marks: 2, lines: 2, a: "An LED wastes less energy heating the surroundings (1), so a bigger fraction of the input energy is transferred usefully by light (1)." },
       ],
-      quick: { slide: 69, items: [
+      quick: { slide: 75, items: [
         ["A device transfers 300 J usefully from 1200 J. Calculate its efficiency.", "0.25 (25%)"],
         ["Can an efficiency be 1.4? Explain.", "No: that is more than 100%, so more energy would come out than goes in."],
         ["A 400 W motor is 75% efficient. Calculate its useful power.", R`\(0.75 \times 400 = 300\) W`],

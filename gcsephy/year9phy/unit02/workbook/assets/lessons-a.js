@@ -151,7 +151,7 @@
         { tip: "Write the equation, then substitute, then give the answer with its unit.", p: "A cyclist and bike have a total mass of 70 kg and move at 8.0 m/s. Calculate the energy in their kinetic store.", marks: 2, frame: frame3, frameA: [R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 70 \times 8.0^2\) (1)`, "2240 J (1)"] },
         { p: R`Car A and car B have the same mass. Car B moves twice as fast as car A. Complete the sentence.`, marks: 2, fill: R`Car B has [[4|2 / 4 / 8]] times as much energy in its kinetic store as car A, because in the equation the speed is {{halved|squared*|doubled}}.` },
       ],
-      quick: { slide: 16, items: [
+      quick: { slide: 17, items: [
         ["A 60 kg runner moves at 5.0 m/s. Calculate the energy in their kinetic store.", R`\(0.5 \times 60 \times 5.0^2 = 750\) J`],
         ["Convert 250 g to kilograms.", "0.250 kg"],
         ["The speed doubles. What happens to the kinetic energy?", R`It is multiplied by 4 (\(\times 4\)).`],
