@@ -12,7 +12,7 @@
 .slide-copyright { right: 72px; }
 
 .lead, .slide.dark .lead { font-size: 34px; }
-.unlocks span { font-size: 28px; }
+.unlocks > span { font-size: 28px; }
 .case-card h3 { font-size: 42px; line-height: 1.1; }
 
 .points { gap: 18px; }
@@ -36,7 +36,7 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 .eq-block .eq-words { font-size: 32px; }
 .eq-block .eq-units { font-size: 29px; }
 .worked .wq { font-size: 32px; }
-.worked .wq span, .worked dt { font-size: 28px; }
+.worked .wq > span:first-child, .worked dt { font-size: 28px; }
 .worked dd { font-size: 37px; padding: 10px 20px; }
 .worked dt { padding: 10px 20px; }
 
