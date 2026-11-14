@@ -144,8 +144,6 @@ h1 span { color: var(--brand-primary); }
 [data-theme="dark"] .models button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--accent-ink); }
 .models button[aria-pressed=true] > span, .models button[aria-pressed=true] small { color: inherit; opacity: .85; }
 
-.lab-strip { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; color: var(--text-secondary); font-size: .8rem; }
-.lab-strip b { margin-left: 12px; color: var(--text-main); }
 
 /* Workspace */
 .workspace {
@@ -362,7 +360,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .models button { min-height: 84px; padding: 12px; border-radius: 14px; }
   .models strong { font-size: .98rem; }
   .models small { font-size: .76rem; }
-  .lab-strip { flex-direction: column; align-items: flex-start; gap: 0; }
   .viewer-panel { padding: 12px; }
   #viewer { flex: none; height: 400px; min-height: 400px; }
   .viewer-heading { font-size: .68rem; }

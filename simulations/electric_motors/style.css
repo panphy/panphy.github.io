@@ -148,8 +148,6 @@ h1 span { color: var(--brand-primary); }
 [data-theme="dark"] .models button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--accent-ink); }
 .models button[aria-pressed=true] > span, .models button[aria-pressed=true] small { color: inherit; opacity: .85; }
 
-.lab-strip { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 8px; color: var(--text-secondary); font-size: .8rem; }
-.lab-strip b { margin-left: 12px; color: var(--text-main); }
 
 /* Workspace: the 3D view with its study panels on the left, and everything you operate on the right. */
 .workspace {
@@ -430,7 +428,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .models button > span { font-size: .62rem; letter-spacing: .04em; }
   .models strong { font-size: .9rem; }
   .models small { font-size: .68rem; line-height: 1.25; }
-  .lab-strip { flex-direction: column; align-items: flex-start; gap: 0; }
   .viewer-panel { padding: 8px 12px 12px; gap: 12px; }
   .viewer-heading { font-size: .7rem; }
   .scale { font-size: .56rem; padding: 2px 8px; }
