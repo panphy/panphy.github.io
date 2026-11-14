@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,25 +63,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="d2-charges" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="d2-charges" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01, SL + HL</p>
             <h3>Electric charge</h3>
             <p>Two types, Coulomb’s law, charging, Millikan</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d2-plates" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="d2-plates" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02, SL + HL</p>
             <h3>Electric fields</h3>
             <p>Field strength, field lines, parallel plates</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d2-bar-magnet" data-still style="height: 180px;"></div>
+            <div class="fig" data-fig="d2-bar-magnet" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 03, SL + HL</p>
             <h3>Magnetic fields</h3>
             <p>Magnets, wires, coils and solenoids</p>
           </div>
           <div class="card hl">
-            <div class="fig" data-fig="d2-equi-point" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="d2-equi-point" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04, HL only</p>
             <h3>Electric potential</h3>
             <p>Potential energy, potential and equipotentials</p>
@@ -420,15 +421,23 @@
       <section class="slide" data-title="Quick check: charge">
         <p class="eyebrow">Quick check</p>
         <h2>Electric charge<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A rod becomes positive when rubbed. What has it gained or lost?</p><div class="ans step">It has lost electrons</div></div>
-          <div class="q"><p><span class="n">02</span>Identical spheres with +8 nC and −2 nC touch. Charge on each afterwards?</p><div class="ans step">\(\frac{8 - 2}{2} = +3 \,\mathrm{nC}\)</div></div>
+          <div class="q"><p><span class="n">02</span>Identical spheres with +8 nC and −2 nC touch. Charge on each afterwards?</p><div class="ans step">\(\dfrac{8 - 2}{2} = +3 \,\mathrm{nC}\)</div></div>
           <div class="q"><p><span class="n">03</span>The distance between two charges is tripled. What happens to the force?</p><div class="ans step">It falls to one ninth</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: charge">
+        <p class="eyebrow">Quick check</p>
+        <h2>Electric charge<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A sphere is charged by induction with a negative rod. Its final charge?</p><div class="ans step">Positive</div></div>
           <div class="q"><p><span class="n">05</span>What did Millikan’s experiment show about charge?</p><div class="ans step">It is quantized: multiples of \(e\)</div></div>
           <div class="q"><p><span class="n">06</span>Could a drop carry \(4.0 \times 10^{-19} \,\mathrm{C}\)?</p><div class="ans step">No: that is 2.5\(e\)</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -627,7 +636,7 @@
       <section class="slide" data-title="Gravitational and electric fields compared">
         <h2>Gravitational and electric fields compared<span>.</span></h2>
         <div class="stack center">
-          <table class="facts big compare">
+          <table class="facts compare">
             <thead><tr><th></th><th>Gravitational</th><th>Electric</th></tr></thead>
             <tbody>
               <tr><td>Acts on</td><td>Mass</td><td>Charge</td></tr>
@@ -655,11 +664,19 @@
       <section class="slide" data-title="Quick check: electric fields">
         <p class="eyebrow">Quick check</p>
         <h2>Electric fields<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Define electric field strength.</p><div class="ans step">Force per unit charge on a small positive test charge</div></div>
-          <div class="q"><p><span class="n">02</span>A 2.0 μC charge feels a force of 0.010 N. Field strength?</p><div class="ans step">\(\frac{0.010}{2.0 \times 10^{-6}} = 5.0 \times 10^{3} \,\mathrm{N} \,\mathrm{C}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">02</span>A 2.0 μC charge feels a force of 0.010 N. Field strength?</p><div class="ans step">\(\dfrac{0.010}{2.0 \times 10^{-6}} = 5.0 \times 10^{3} \,\mathrm{N} \,\mathrm{C}^{-1}\)</div></div>
           <div class="q"><p><span class="n">03</span>Which way do field lines point near a negative charge?</p><div class="ans step">Towards it</div></div>
-          <div class="q"><p><span class="n">04</span>Plates 2.0 cm apart have 100 V across them. Field strength?</p><div class="ans step">\(\frac{100}{0.020} = 5.0 \times 10^{3} \,\mathrm{V} \,\mathrm{m}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: electric fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Electric fields<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>Plates 2.0 cm apart have 100 V across them. Field strength?</p><div class="ans step">\(\dfrac{100}{0.020} = 5.0 \times 10^{3} \,\mathrm{V} \,\mathrm{m}^{-1}\)</div></div>
           <div class="q"><p><span class="n">05</span>What is the field inside a charged conducting sphere?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">06</span>Where between parallel plates is the field not uniform?</p><div class="ans step">At the edges</div></div>
         </div>
@@ -720,11 +737,11 @@
           <div class="stack">
             <ul class="points">
               <li>Electricity and magnetism were thought to be <b>unrelated</b></li>
-              <li>In <b>1820</b> Ørsted reported that a current in a wire <b>deflects a compass needle</b> nearby</li>
-              <li>The needle set itself <b>across</b> the wire, not along it: the field circles the wire</li>
-              <li>Ampère soon showed that two currents exert forces on <b>each other</b></li>
+              <li><b>1820</b>: a current in a wire <b>deflects a compass needle</b></li>
+              <li>The needle sits <b>across</b> the wire: the field circles it</li>
+              <li>Ampère: two currents push or pull on <b>each other</b></li>
             </ul>
-            <div class="idea">A moving charge makes a <b>magnetic field</b>.</div>
+            <div class="idea">A moving charge makes a <b>magnetic field</b></div>
           </div>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:H._C._%C3%98rsted_(C._A._Jensen).jpg" target="_blank" rel="noopener">C. A. Jensen</a>, public domain. Engraving: <a href="https://commons.wikimedia.org/wiki/File:Oersted_experiment.png" target="_blank" rel="noopener">Augustin Privat-Deschanel, 1876</a>, public domain.</p>
@@ -821,10 +838,18 @@
       <section class="slide" data-title="Quick check: magnetic fields">
         <p class="eyebrow">Quick check</p>
         <h2>Magnetic fields<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Which way do field lines run outside a bar magnet?</p><div class="ans step">From the north pole to the south pole</div></div>
           <div class="q"><p><span class="n">02</span>What shape are the field lines round a long straight wire?</p><div class="ans step">Circles centered on the wire</div></div>
           <div class="q"><p><span class="n">03</span>A current flows into the page. Direction of the field?</p><div class="ans step">Clockwise</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: magnetic fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Magnetic fields<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Describe the field inside a solenoid.</p><div class="ans step">Strong and uniform, along the axis</div></div>
           <div class="q"><p><span class="n">05</span>How do magnetic field lines differ from electric ones?</p><div class="ans step">They are closed loops, with no start or end</div></div>
           <div class="q"><p><span class="n">06</span>The current in a wire is reversed. What happens to its field?</p><div class="ans step">It reverses direction</div></div>
@@ -1095,11 +1120,19 @@
       <section class="slide hl" data-title="HL quick check">
         <p class="eyebrow">Quick check, additional higher level</p>
         <h2>Electric potential<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Is electric potential a scalar or a vector?</p><div class="ans step">A scalar</div></div>
           <div class="q"><p><span class="n">02</span>Sign of the potential energy of a proton and an electron?</p><div class="ans step">Negative: they attract</div></div>
           <div class="q"><p><span class="n">03</span>A proton moves through a potential difference of 2000 V. Energy gained?</p><div class="ans step">2000 eV = \(3.2 \times 10^{-16} \,\mathrm{J}\)</div></div>
-          <div class="q"><p><span class="n">04</span>The potential falls by 50 V over 2.0 mm. Field strength?</p><div class="ans step">\(\frac{50}{2.0 \times 10^{-3}} = 2.5 \times 10^{4} \,\mathrm{V} \,\mathrm{m}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check, additional higher level</p>
+        <h2>Electric potential<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>The potential falls by 50 V over 2.0 mm. Field strength?</p><div class="ans step">\(\dfrac{50}{2.0 \times 10^{-3}} = 2.5 \times 10^{4} \,\mathrm{V} \,\mathrm{m}^{-1}\)</div></div>
           <div class="q"><p><span class="n">05</span>At what angle do field lines cross equipotentials?</p><div class="ans step">90°</div></div>
           <div class="q"><p><span class="n">06</span>The surface of a metal sphere is at 300 V. Potential at its center?</p><div class="ans step">300 V</div></div>
         </div>
@@ -1107,13 +1140,21 @@
       </section>
 
       <section class="slide" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>Electric and magnetic fields on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Electric and magnetic fields in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Charge</p><h3>Two types, conserved, quantized</h3><p>Friction, contact and induction move electrons<br>Millikan: \(q = ne\)</p></div>
           <div class="card step"><p class="eyebrow">Coulomb’s law</p><h3>An inverse square force</h3><p>\(F = k \frac{q_{1} q_{2}}{r^{2}}\) with \(k = \frac{1}{4 \pi \varepsilon_{0}}\)</p></div>
           <div class="card step"><p class="eyebrow">Electric field</p><h3>Force per unit charge</h3><p>\(E = \frac{F}{q}\). Uniform between plates: \(E = \frac{V}{d}\)<br>Zero inside a conductor</p></div>
-          <div class="card step"><p class="eyebrow">Magnetic field</p><h3>Closed loops</h3><p>Bar magnet, wire, coil, solenoid<br>Right-hand grip rule for the direction</p></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Electric and magnetic fields in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Magnetic field</p><h3>Closed loops</h3><p>Bar magnet, wire, coil, solenoid<br>Right-hand grip rule for the direction</p></div>
           <div class="card hl step"><p class="eyebrow">Potential, HL</p><h3>Energy per unit charge</h3><p>\(V_\mathrm{e} = \frac{kQ}{r}\), a scalar<br>\(W = q \Delta V_\mathrm{e}\), in J or eV</p></div>
           <div class="card hl step"><p class="eyebrow">Equipotentials, HL</p><h3>At right angles to the field</h3><p>\(E = -\frac{\Delta V_\mathrm{e}}{\Delta r}\)<br>A conductor is one equipotential</p></div>
         </div>
@@ -1121,7 +1162,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Conservation of charge</b><span>Total charge never changes</span></div>
@@ -1130,6 +1171,14 @@
           <div class="term"><b>Earthing</b><span>A path for electrons to the ground</span></div>
           <div class="term"><b>Permittivity</b><span>How a medium weakens the force</span></div>
           <div class="term"><b>Electric field strength</b><span>Force per unit positive charge</span></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Uniform field</b><span>Same strength and direction everywhere</span></div>
           <div class="term"><b>Solenoid</b><span>A long coil of many turns</span></div>
           <div class="term"><b>Right-hand grip rule</b><span>Thumb: current. Fingers: field</span></div>

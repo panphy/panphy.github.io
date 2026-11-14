@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -63,25 +64,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="e5-fusion" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="e5-fusion" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Fusion</h3>
             <p>The energy released, and the temperature and density it needs</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="e5-balance" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="e5-balance" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>The life of a star</h3>
             <p>Equilibrium, and how mass decides what happens</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="e5-hr" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="e5-hr" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>The HR diagram</h3>
             <p>Its regions, and lines of constant radius</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="e5-parallax" data-still style="height: 170px;"></div>
+            <div class="fig" data-fig="e5-parallax" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Measuring stars</h3>
             <p>Distance by parallax, and radius from luminosity and temperature</p>
@@ -167,7 +168,7 @@
       <section class="slide" data-title="Fusion: energy released">
         <p class="eyebrow">Worked examples</p>
         <h2>Energy released in fusion<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the energy released. \(1 \,\mathrm{u}\) is equivalent to \(931.5 \,\mathrm{MeV}\).</span>
             <span class="say">\({}^{2}\mathrm{H}\) + \({}^{3}\mathrm{H}\) → \({}^{4}\mathrm{He}\) + n, masses / u</span>
@@ -177,14 +178,6 @@
             <span class="step">After: \(4.002602 + 1.008665 = 5.011267\)</span>
             <span class="step">\(\Delta m = 5.011267 - 5.030151 = -0.018884 \,\mathrm{u}\)</span>
             <span class="step">\(E_\mathrm{released} = -(-0.018884) \times 931.5 = \class{res}{17.6 \,\mathrm{MeV}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="ask">Find the energy released by the overall reaction in the Sun.</span>
-            <span class="say">4 \({}^{1}\mathrm{H}\) → \({}^{4}\mathrm{He}\)</span>
-            <span class="say">\({}^{1}\mathrm{H}\) 1.007825 u</span>
-            <span class="step">\(\Delta m = 4.002602 - 4 \times 1.007825\)</span>
-            <span class="step">\(\Delta m = -0.028698 \,\mathrm{u}\)</span>
-            <span class="step">\(E_\mathrm{released} = -(-0.028698) \times 931.5 = \class{res}{26.7 \,\mathrm{MeV}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>E.5 FUSION AND STARS, SL + HL</span><span data-page></span></div>
@@ -201,6 +194,22 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Fusion: energy released">
+        <p class="eyebrow">Worked examples, continued</p>
+        <h2>Energy released in fusion<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="ask">Find the energy released by the overall reaction in the Sun.</span>
+            <span class="say">4 \({}^{1}\mathrm{H}\) → \({}^{4}\mathrm{He}\)</span>
+            <span class="say">\({}^{1}\mathrm{H}\) 1.007825 u</span>
+            <span class="step">\(\Delta m = 4.002602 - 4 \times 1.007825\)</span>
+            <span class="step">\(\Delta m = -0.028698 \,\mathrm{u}\)</span>
+            <span class="step">\(E_\mathrm{released} = -(-0.028698) \times 931.5 = \class{res}{26.7 \,\mathrm{MeV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="The conditions for fusion">
         <h2>The conditions for fusion<span>.</span></h2>
         <div class="split even">
@@ -208,10 +217,10 @@
             <div class="q"><p>Fusion is very hard to start. Why? And where does it happen by itself?</p></div>
             <ul class="points small">
               <li class="step">Nuclei are positive: they <b>repel</b></li>
-              <li class="step">The strong force acts only within about <span class="equation-inline">\(10^{-15}\) m</span></li>
-              <li class="step"><b>High temperature</b>: enough kinetic energy to get that close</li>
+              <li class="step">Strong force: only within \(\approx\) <span class="equation-inline">\(10^{-15}\) m</span></li>
+              <li class="step"><b>High temperature</b>: enough energy to get close</li>
               <li class="step"><b>High density</b>: enough collisions each second</li>
-              <li class="step">Where: in the <b>cores of stars</b>, at about <span class="equation-inline">\(10^{7}\) K</span></li>
+              <li class="step">Where: <b>stellar cores</b>, \(\approx\) <span class="equation-inline">\(10^{7}\) K</span></li>
             </ul>
           </div>
           <div class="panel">
@@ -297,15 +306,23 @@
       <section class="slide" data-title="Quick check: fusion">
         <p class="eyebrow">Quick check</p>
         <h2>Fusion<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is nuclear fusion?</p><div class="ans step">Light nuclei joining to make a heavier one</div></div>
           <div class="q"><p><span class="n">02</span>Why do nuclei have to be moving fast to fuse?</p><div class="ans step">To overcome their electric repulsion</div></div>
           <div class="q"><p><span class="n">03</span>Why is a high density needed?</p><div class="ans step">For a high rate of collisions</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: fusion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Fusion<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A mass defect of 0.0050 u. Energy released?</p><div class="ans step">\(0.0050 \times 931.5 = 4.7 \,\mathrm{MeV}\)</div></div>
           <div class="q"><p><span class="n">05</span>Up to which element does fusion release energy?</p><div class="ans step">Iron</div></div>
           <div class="q"><p><span class="n">06</span>\({}^{2}\mathrm{H}\) + \({}^{2}\mathrm{H}\) → \({}^{3}\mathrm{He}\) + ?</p><div class="ans step">A neutron</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -353,15 +370,15 @@
 
       <section class="slide" data-title="Mass decides">
         <h2>Mass decides<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: .85fr 1.15fr;">
           <ul class="points small">
-            <li>More mass: stronger gravity, so a <b>hotter, denser core</b></li>
-            <li class="step">Fusion runs <b>far faster</b>: much greater luminosity</li>
-            <li class="step">So the fuel is used up <b>sooner</b></li>
-            <li class="step">And the star <b>ends</b> differently</li>
+            <li>More mass \(\Rightarrow\) <b>hotter, denser core</b></li>
+            <li class="step">Fusion <b>far faster</b>: far more luminous</li>
+            <li class="step">Fuel runs out <b>sooner</b></li>
+            <li class="step">A different <b>ending</b></li>
           </ul>
           <table class="facts step">
-            <thead><tr><th>Starting mass (Sun = 1)</th><th>Luminosity (Sun = 1)</th><th>Time on the main sequence</th></tr></thead>
+            <thead><tr><th>Mass</th><th>Luminosity</th><th>Main sequence</th></tr></thead>
             <tbody>
               <tr><td>0.5</td><td class="num">about 0.1</td><td class="num">\(\sim 10^{11}\) years</td></tr>
               <tr><td>1</td><td class="num">1</td><td class="num">\(\sim 10^{10}\) years</td></tr>
@@ -442,10 +459,10 @@
         <h2>The life of a star, photographed<span>.</span></h2>
         <div class="story band" style="--photo-h: 255px;">
           <div class="story-photos">
-            <figure><img src="images/pillars.jpg" width="1280" height="1335" alt="Tall dark columns of dust and gas, lit from above, against a glowing blue-green background"><figcaption><b>Birth</b>: stars forming in clouds of gas and dust, the Pillars of Creation, about 5 ly tall</figcaption></figure>
-            <figure class="step"><img src="images/sun.jpg" width="1200" height="1200" alt="The Sun as a smooth orange-yellow disk, darker towards its edge, with a few small dark spots"><figcaption><b>Main sequence</b>: the Sun, fusing hydrogen in its core</figcaption></figure>
-            <figure class="step"><img src="images/helix.jpg" width="1280" height="1380" alt="A glowing ring of red and blue gas, like an eye, with a faint star at its center"><figcaption><b>A Sun-like star’s end</b>: the Helix Nebula, gas thrown off around a white dwarf</figcaption></figure>
-            <figure class="step"><img src="images/crab.jpg" width="1280" height="1280" alt="A tangled cloud of orange filaments around a bluish glow"><figcaption><b>A massive star’s end</b>: the Crab Nebula, left by a supernova seen in 1054, with a neutron star at its center</figcaption></figure>
+            <figure><img src="images/pillars.jpg" width="1280" height="1335" alt="Tall dark columns of dust and gas, lit from above, against a glowing blue-green background"><figcaption><b>Birth</b>: the Pillars of Creation</figcaption></figure>
+            <figure class="step"><img src="images/sun.jpg" width="1200" height="1200" alt="The Sun as a smooth orange-yellow disk, darker towards its edge, with a few small dark spots"><figcaption><b>Main sequence</b>: the Sun</figcaption></figure>
+            <figure class="step"><img src="images/helix.jpg" width="1280" height="1380" alt="A glowing ring of red and blue gas, like an eye, with a faint star at its center"><figcaption><b>Sun-like end</b>: the Helix Nebula</figcaption></figure>
+            <figure class="step"><img src="images/crab.jpg" width="1280" height="1280" alt="A tangled cloud of orange filaments around a bluish glow"><figcaption><b>Massive end</b>: the Crab Nebula, supernova of 1054</figcaption></figure>
           </div>
           <div class="idea step">Which end a star meets is set by its <b>mass</b>.</div>
         </div>
@@ -468,23 +485,15 @@
 
       <section class="slide" data-title="The Chandrasekhar and Oppenheimer–Volkoff limits">
         <h2>Two limits on the core<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="stack">
             <ul class="points small">
-              <li>When fusion ends, the <b>core</b> collapses. Only a pressure that needs no fusion can stop it</li>
-              <li class="step"><b>Chandrasekhar limit</b>, about \(1.4 \, M_{\odot}\): the largest mass of a white dwarf</li>
-              <li class="step"><b>Oppenheimer–Volkoff limit</b>, about \(3 \, M_{\odot}\): the largest mass of a neutron star</li>
+              <li>Fusion ends: the <b>core</b> collapses until a pressure stops it</li>
+              <li class="step"><b>Chandrasekhar</b>, \(1.4 \, M_{\odot}\): largest white dwarf</li>
+              <li class="step"><b>Oppenheimer–Volkoff</b>, \(\approx 3 \, M_{\odot}\): largest neutron star</li>
             </ul>
             <div class="idea step">The limits apply to the <b>core mass</b>, not the <b>starting mass</b>: a star that starts at \(15 \, M_{\odot}\) leaves a neutron star of about \(1.6 \, M_{\odot}\).</div>
           </div>
-          <table class="facts step">
-            <thead><tr><th>Core mass</th><th>What holds it up</th><th>Remnant</th></tr></thead>
-            <tbody>
-              <tr><td>Below \(1.4 \, M_{\odot}\)</td><td>Electron degeneracy pressure</td><td>White dwarf</td></tr>
-              <tr><td>\(1.4\) to about \(3 \, M_{\odot}\)</td><td>Neutron degeneracy pressure</td><td>Neutron star</td></tr>
-              <tr><td>Above about \(3 \, M_{\odot}\)</td><td>Nothing</td><td>Black hole</td></tr>
-            </tbody>
-          </table>
         </div>
         <div class="slide-foot"><span>E.5 FUSION AND STARS, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -499,6 +508,22 @@
             <p class="more">The Oppenheimer–Volkoff limit is less certain than the Chandrasekhar limit, because the behavior of matter at nuclear density is not fully known. Estimates lie between about 2 and \(3 \, M_{\odot}\).</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="The Chandrasekhar and Oppenheimer–Volkoff limits">
+        <p class="eyebrow">The remnants</p>
+        <h2>Two limits on the core<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <table class="facts">
+            <thead><tr><th>Core mass</th><th>What holds it up</th><th>Remnant</th></tr></thead>
+            <tbody>
+              <tr><td>Below \(1.4 \, M_{\odot}\)</td><td>Electron degeneracy pressure</td><td>White dwarf</td></tr>
+              <tr><td>\(1.4\) to about \(3 \, M_{\odot}\)</td><td>Neutron degeneracy pressure</td><td>Neutron star</td></tr>
+              <tr><td>Above about \(3 \, M_{\odot}\)</td><td>Nothing</td><td>Black hole</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide history" data-title="Story: Cecilia Payne">
@@ -522,10 +547,18 @@
       <section class="slide" data-title="Quick check: the life of a star">
         <p class="eyebrow">Quick check</p>
         <h2>The life of a star<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Which two things balance in a stable star?</p><div class="ans step">Gravity inwards; radiation (and gas) pressure outwards</div></div>
           <div class="q"><p><span class="n">02</span>What decides how a star’s life goes?</p><div class="ans step">Its mass</div></div>
           <div class="q"><p><span class="n">03</span>Which lives longer: a star with a starting mass of 0.5 or of 10 solar masses?</p><div class="ans step">The 0.5 solar mass star</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the life of a star">
+        <p class="eyebrow">Quick check</p>
+        <h2>The life of a star<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What does the Sun become after the red giant stage?</p><div class="ans step">A planetary nebula, then a white dwarf</div></div>
           <div class="q"><p><span class="n">05</span>Why does fusion stop at iron in a massive star?</p><div class="ans step">Iron is at the peak of the binding energy curve</div></div>
           <div class="q"><p><span class="n">06</span>A supernova leaves a core of \(2 \, M_{\odot}\). What does it become, and why?</p><div class="ans step">A neutron star: above the Chandrasekhar limit, below the Oppenheimer–Volkoff limit</div></div>
@@ -605,14 +638,14 @@
 
       <section class="slide" data-title="The regions of the HR diagram">
         <h2>The regions of the HR diagram<span>.</span></h2>
-        <table class="facts compare">
+        <table class="facts compare snug">
           <thead><tr><th>Region</th><th>Where on the diagram</th><th>What the stars are like</th></tr></thead>
           <tbody>
-            <tr><td><b>Main sequence</b></td><td>A band from upper left to lower right</td><td>Fusing hydrogen in the core. About 90% of stars</td></tr>
-            <tr class="step"><td><b>Red giants</b></td><td>Above the main sequence, on the right</td><td>Cool but luminous, so very large</td></tr>
-            <tr class="step"><td><b>Supergiants</b></td><td>Across the top</td><td>The most luminous and the largest</td></tr>
+            <tr><td><b>Main sequence</b></td><td>Upper left to lower right</td><td>Fusing hydrogen; about 90% of stars</td></tr>
+            <tr class="step"><td><b>Red giants</b></td><td>Above it, on the right</td><td>Cool but luminous, so very large</td></tr>
+            <tr class="step"><td><b>Supergiants</b></td><td>Across the top</td><td>Most luminous, largest</td></tr>
             <tr class="step"><td><b>White dwarfs</b></td><td>Lower left</td><td>Hot but faint, so very small</td></tr>
-            <tr class="step"><td><b>Instability strip</b></td><td>A narrow band crossing above the main sequence</td><td>Stars that pulsate, varying in brightness</td></tr>
+            <tr class="step"><td><b>Instability strip</b></td><td>A narrow band above the main sequence</td><td>Pulsating: brightness varies</td></tr>
           </tbody>
         </table>
         <div class="slide-foot"><span>E.5 FUSION AND STARS, SL + HL</span><span data-page></span></div>
@@ -752,12 +785,12 @@
 
       <section class="slide" data-title="The parallax triangle">
         <h2>The parallax triangle<span>.</span></h2>
-        <div class="split wide-fig">
+        <div class="split">
           <ul class="points small">
-            <li>The Sun, the Earth and the star make a <b class="nowrap">right-angled</b> triangle</li>
+            <li>Sun, Earth and star: a <b class="nowrap">right-angled</b> triangle</li>
             <li class="step">\(\tan p = \dfrac{1 \,\mathrm{AU}}{d}\)</li>
-            <li class="step">\(p\) is tiny, so \(\tan p \approx p\) in radians: \(d = \dfrac{1 \,\mathrm{AU}}{p}\)</li>
-            <li class="step">The <b>parsec</b> is the distance at which \(p\) is one arc-second, so \(d = \dfrac{1}{p}\)</li>
+            <li class="step">Tiny \(p\): \(\tan p \approx p\), so \(d = \dfrac{1 \,\mathrm{AU}}{p}\)</li>
+            <li class="step"><b>Parsec</b>: \(p = 1\) arc-second. So \(d = \dfrac{1}{p}\)</li>
           </ul>
           <div class="panel">
             <div class="panel-head"><span>NOT TO SCALE</span></div>
@@ -922,10 +955,18 @@
       <section class="slide" data-title="Quick check: measuring stars">
         <p class="eyebrow">Quick check</p>
         <h2>Measuring stars<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A star has a parallax of 0.20 arc-second. Distance?</p><div class="ans step">5.0 pc</div></div>
           <div class="q"><p><span class="n">02</span>Convert 10 pc to light years.</p><div class="ans step">32.6 ly</div></div>
           <div class="q"><p><span class="n">03</span>Why does parallax fail for very distant stars?</p><div class="ans step">The angle is too small to measure</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: measuring stars">
+        <p class="eyebrow">Quick check</p>
+        <h2>Measuring stars<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A star has the Sun’s temperature and 100 times its luminosity. Radius?</p><div class="ans step">10 solar radii</div></div>
           <div class="q"><p><span class="n">05</span>What two things does a star’s spectrum give?</p><div class="ans step">Surface temperature and composition</div></div>
           <div class="q"><p><span class="n">06</span>Which law gives the temperature from the peak wavelength?</p><div class="ans step">Wien’s displacement law</div></div>
@@ -934,13 +975,21 @@
       </section>
 
       <section class="slide" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>Fusion and stars on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Fusion and stars in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Fusion</p><h3>Light nuclei join</h3><p>\(E_\mathrm{released} = -\Delta m \, c^{2}\)<br>Needs high temperature and high density</p></div>
           <div class="card step"><p class="eyebrow">A stable star</p><h3>Gravity = pressure</h3><p>Inward gravity against outward radiation pressure</p></div>
           <div class="card step"><p class="eyebrow">Mass decides</p><h3>Heavier: brighter, shorter</h3><p>Core mass: white dwarf up to \(1.4 \, M_{\odot}\), neutron star up to about \(3 \, M_{\odot}\), then black hole</p></div>
-          <div class="card step"><p class="eyebrow">HR diagram</p><h3>\(L\) up, \(T\) falling to the right</h3><p>Main sequence, red giants, supergiants, white dwarfs, instability strip</p></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Fusion and stars in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">HR diagram</p><h3>\(L\) up, \(T\) falling to the right</h3><p>Main sequence, red giants, supergiants, white dwarfs, instability strip</p></div>
           <div class="card step"><p class="eyebrow">Distance</p><h3>\(d = \frac{1}{p}\)</h3><p>Parsecs and arc-seconds<br>1 pc = 3.26 ly</p></div>
           <div class="card step"><p class="eyebrow">Radius</p><h3>\(L = 4 \pi R^{2} \sigma T^{4}\)</h3><p>Lines of constant radius slope down to the right</p></div>
         </div>
@@ -948,7 +997,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="term"><b>Fusion</b><span>Light nuclei joining to make a heavier one</span></div>
@@ -957,6 +1006,14 @@
           <div class="term"><b>Red giant</b><span>Cool, luminous and very large</span></div>
           <div class="term"><b>White dwarf</b><span>Hot, faint and very small: a dead core</span></div>
           <div class="term"><b>Supernova</b><span>The explosion of a massive star</span></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="term"><b>Chandrasekhar limit</b><span>About \(1.4 \, M_{\odot}\): the largest white dwarf</span></div>
           <div class="term"><b>Oppenheimer–Volkoff limit</b><span>About \(3 \, M_{\odot}\): the largest neutron star</span></div>
           <div class="term"><b>HR diagram</b><span>Luminosity against surface temperature</span></div>

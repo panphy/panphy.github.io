@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,19 +63,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="c5-source" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="c5-source" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>The effect</h3>
             <p>Wavefront diagrams for a moving source and a moving observer</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="c5-lines" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="c5-lines" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Light</h3>
             <p>Red shift and blue shift, and what they reveal</p>
           </div>
           <div class="card hl">
-            <div class="fig" data-fig="c5-observer" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="c5-observer" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03, HL only</p>
             <h3>Equations for sound</h3>
             <p>The observed frequency for a moving source and for a moving observer</p>
@@ -210,15 +211,23 @@
       <section class="slide" data-title="Quick check: the effect">
         <p class="eyebrow">Quick check</p>
         <h2>The effect<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A source approaches an observer. The observed frequency is…?</p><div class="ans step">Higher than the emitted frequency</div></div>
           <div class="q"><p><span class="n">02</span>Does the frequency emitted by the source change?</p><div class="ans step">No</div></div>
           <div class="q"><p><span class="n">03</span>For a moving source, where are the wavefronts closest together?</p><div class="ans step">Ahead of the source</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the effect">
+        <p class="eyebrow">Quick check</p>
+        <h2>The effect<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>For a moving observer, does the wavelength in the medium change?</p><div class="ans step">No</div></div>
           <div class="q"><p><span class="n">05</span>A car circles you at a constant distance, sounding its horn. Is there a shift?</p><div class="ans step">No: it is not approaching or receding</div></div>
           <div class="q"><p><span class="n">06</span>In a moving-source diagram, where is the center of each circle?</p><div class="ans step">Where the source was when it was emitted</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -354,13 +363,13 @@
 
       <section class="slide" data-title="Radar and medicine">
         <h2>Radar and medicine<span>.</span></h2>
-        <div class="split wide-fig">
+        <div class="split">
           <div class="stack">
             <ul class="points small">
-              <li><b>Radar</b>: microwaves reflected from a moving car, aircraft or raindrop come back at a different frequency</li>
-              <li class="step"><b>Medicine</b>: ultrasound reflected from moving blood gives the speed of the flow</li>
+              <li><b>Radar</b>: microwaves reflected from a moving car or raindrop return at a new frequency</li>
+              <li class="step"><b>Medicine</b>: ultrasound reflected from moving blood \(\Rightarrow\) flow speed</li>
             </ul>
-            <div class="idea step">A wave sent out, reflected from something moving, and compared with what was sent.</div>
+            <div class="idea step">Send a wave, reflect it from something moving, compare</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>MEASURING A SPEED BY REFLECTION</span></div>
@@ -385,11 +394,19 @@
       <section class="slide" data-title="Quick check: light">
         <p class="eyebrow">Quick check</p>
         <h2>Light<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A star’s lines are shifted to shorter wavelengths. Which way is it moving?</p><div class="ans step">Towards us: a blue shift</div></div>
           <div class="q"><p><span class="n">02</span>When is \(\frac{\Delta \lambda}{\lambda} \approx \frac{v}{c}\) valid?</p><div class="ans step">When \(v\) is much less than \(c\)</div></div>
           <div class="q"><p><span class="n">03</span>A source recedes at 0.5% of \(c\). Change in a 600 nm line?</p><div class="ans step">+3 nm</div></div>
-          <div class="q"><p><span class="n">04</span>A line moves from 500.0 nm to 501.0 nm. Speed of the source?</p><div class="ans step">\(\frac{1.0}{500.0} \times 3.00 \times 10^{8} = 6.0 \times 10^{5} \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: light">
+        <p class="eyebrow">Quick check</p>
+        <h2>Light<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>A line moves from 500.0 nm to 501.0 nm. Speed of the source?</p><div class="ans step">\(\dfrac{1.0}{500.0} \times 3.00 \times 10^{8} = 6.0 \times 10^{5} \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
           <div class="q"><p><span class="n">05</span>What do the red shifts of distant galaxies show?</p><div class="ans step">The universe is expanding</div></div>
           <div class="q"><p><span class="n">06</span>Give one use of the Doppler effect in medicine.</p><div class="ans step">Measuring the speed of blood flow</div></div>
         </div>
@@ -546,25 +563,41 @@
       <section class="slide hl" data-title="HL quick check">
         <p class="eyebrow">Quick check, HL</p>
         <h2>Equations for sound<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Source approaching: plus or minus on the bottom?</p><div class="ans step">Minus</div></div>
           <div class="q"><p><span class="n">02</span>Observer approaching: plus or minus on the top?</p><div class="ans step">Plus</div></div>
           <div class="q"><p><span class="n">03</span>For which case does the wavelength in the air change?</p><div class="ans step">A moving source</div></div>
-          <div class="q"><p><span class="n">04</span>A 680 Hz source recedes at 34 m s⁻¹ (\(v\) = 340). Observed frequency?</p><div class="ans step">\(680 \times \frac{340}{374} = 618 \,\mathrm{Hz}\)</div></div>
-          <div class="q"><p><span class="n">05</span>An observer moves at 17 m s⁻¹ towards a 680 Hz source. Observed frequency?</p><div class="ans step">\(680 \times \frac{357}{340} = 714 \,\mathrm{Hz}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check, HL</p>
+        <h2>Equations for sound<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>A 680 Hz source recedes at 34 m s⁻¹ (\(v\) = 340). Observed frequency?</p><div class="ans step">\(680 \times \dfrac{340}{374} = 618 \,\mathrm{Hz}\)</div></div>
+          <div class="q"><p><span class="n">05</span>An observer moves at 17 m s⁻¹ towards a 680 Hz source. Observed frequency?</p><div class="ans step">\(680 \times \dfrac{357}{340} = 714 \,\mathrm{Hz}\)</div></div>
           <div class="q"><p><span class="n">06</span>Same relative speed: do a moving source and a moving observer give the same shift?</p><div class="ans step">No, not for sound</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>The Doppler effect on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>The Doppler effect in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">The effect</p><h3>Relative motion changes the observed frequency</h3><p>Approaching: higher. Receding: lower</p></div>
           <div class="card step"><p class="eyebrow">Wavefront diagrams</p><h3>Source: bunched ahead</h3><p>Observer: same wavelength, met more or less often</p></div>
           <div class="card step"><p class="eyebrow">Light</p><h3>\(\frac{|\Delta f|}{f} \approx \frac{|\Delta \lambda|}{\lambda} \approx \frac{v}{c}\)</h3><p>Red shift: receding<br>Blue shift: approaching</p></div>
-          <div class="card step"><p class="eyebrow">Uses</p><h3>Stars, radar, blood flow</h3><p>Shifted spectral lines show how stars and galaxies move</p></div>
+        </div>
+        <div class="slide-foot"><span>C.5 DOPPLER EFFECT, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>The Doppler effect in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Uses</p><h3>Stars, radar, blood flow</h3><p>Shifted spectral lines show how stars and galaxies move</p></div>
           <div class="card hl step"><p class="eyebrow">Moving source</p><h3>\(f_\mathrm{o} = f_\mathrm{s} \left(\frac{v}{v \pm u_\mathrm{s}}\right)\)</h3><p>Minus when approaching</p></div>
           <div class="card hl step"><p class="eyebrow">Moving observer</p><h3>\(f_\mathrm{o} = f_\mathrm{s} \left(\frac{v \pm u_\mathrm{o}}{v}\right)\)</h3><p>Plus when approaching</p></div>
         </div>

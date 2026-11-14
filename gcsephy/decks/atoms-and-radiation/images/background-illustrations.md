@@ -1,4 +1,4 @@
-# Background radiation illustrations — slide 43
+# Background radiation illustrations — slide 45
 
 Generated with the built-in imagegen tool. Four PNGs are placed inside the background-radiation SVG; headings, captions and the UK dose chart remain editable in `../figures.js`. White image backplates preserve contrast in both themes. Golden dots represent radioactive gas or material schematically; they are not visible particles at this scale.
 

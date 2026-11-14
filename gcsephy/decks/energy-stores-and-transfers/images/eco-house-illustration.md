@@ -1,6 +1,6 @@
 # Eco House illustration
 
-Generated using the built-in imagegen tool for slide 54. The labelled cutaway replaces the slide's 3D house and is used in both themes and print.
+Generated using the built-in imagegen tool for slide 59. The labelled cutaway replaces the slide's 3D house and is used in both themes and print.
 
 ## Prompt
 

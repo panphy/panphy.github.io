@@ -211,7 +211,7 @@
 
     // ============================================================ 4
     {
-      n: 4, accent: "leaf", slides: "18–23", title: "Measuring density (required practical)",
+      n: 4, accent: "leaf", slides: "18–24", title: "Measuring density (required practical)",
       spec: "AQA Physics 4.3.1.1, required practical 5; Combined Science 6.3.1.1, required practical 17",
       mapLine: "Regular solids, irregular solids by displacement, liquids; resolution and sources of error",
       big: "A jeweller is offered a lump of “gold” with an awkward shape. How could its density be measured?",

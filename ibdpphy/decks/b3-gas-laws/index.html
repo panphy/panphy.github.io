@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -63,19 +64,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="b3-box" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="b3-box" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Pressure and amount</h3>
             <p>\(P = \frac{F}{A}\), the mole and the Avogadro constant</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b3-pv" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="b3-pv" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>The gas laws</h3>
             <p>Three experiments, and one equation: \(PV = nRT\)</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b3-collision" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="b3-collision" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>The kinetic theory</h3>
             <p>Explaining pressure and temperature by the motion of molecules</p>
@@ -138,10 +139,10 @@
           <div class="stack">
           <div class="q"><p>A gas pushes on every wall of its container. What is doing the pushing?</p><div class="ans step">Its molecules, hitting the walls</div></div>
           <ul class="points small">
-            <li class="step">The molecules move <b>at random</b> and hit the walls</li>
+            <li class="step">Molecules move <b>at random</b>, hitting the walls</li>
             <li class="step">Each collision changes a molecule’s <b>momentum</b></li>
-            <li class="step">So the wall exerts a force on the molecule, and the molecule an equal and opposite force on the <b>wall</b></li>
-            <li class="step">Force on each unit area: the <b>pressure</b></li>
+            <li class="step">Wall pushes molecule; molecule pushes <b>wall</b>, equal and opposite</li>
+            <li class="step">Force per unit area: the <b>pressure</b></li>
           </ul>
           </div>
           <div class="panel">
@@ -200,15 +201,23 @@
       <section class="slide" data-title="Quick check: pressure and amount">
         <p class="eyebrow">Quick check</p>
         <h2>Pressure and amount<span>.</span></h2>
-        <div class="quiz fill">
-          <div class="q"><p><span class="n">01</span>A 600 N force acts at right angles on 0.030 m². Pressure?</p><div class="ans step">\(\frac{600}{0.030} = 2.0 \times 10^{4} \,\mathrm{Pa}\)</div></div>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">01</span>A 600 N force acts at right angles on 0.030 m². Pressure?</p><div class="ans step">\(\dfrac{600}{0.030} = 2.0 \times 10^{4} \,\mathrm{Pa}\)</div></div>
           <div class="q"><p><span class="n">02</span>What is 1 Pa in base SI units of force and area?</p><div class="ans step">1 N m⁻²</div></div>
           <div class="q"><p><span class="n">03</span>How many molecules are in 0.50 mol?</p><div class="ans step">\(3.0 \times 10^{23}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: pressure and amount">
+        <p class="eyebrow">Quick check</p>
+        <h2>Pressure and amount<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>How many moles are in 56 g of nitrogen, N₂ (28 g mol⁻¹)?</p><div class="ans step">2.0 mol</div></div>
           <div class="q"><p><span class="n">05</span>What happens to a molecule’s momentum when it hits a wall?</p><div class="ans step">It changes direction: a change of \(2mv\)</div></div>
           <div class="q"><p><span class="n">06</span>Which of Newton’s laws gives the force on the wall?</p><div class="ans step">The third (with the second)</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -235,12 +244,12 @@
           </div>
           <div class="stack">
             <ul class="points">
-              <li>Boyle’s assistant <b>Robert Hooke</b> built the apparatus</li>
-              <li>Air trapped in the closed end of a <b>J-shaped tube</b> was squeezed by pouring in mercury</li>
-              <li>Double the pressure: <b>half</b> the volume. Published in <b>1662</b></li>
-              <li>Richard Towneley and Henry Power had noticed the pattern first; Edme Mariotte found it again in 1679</li>
+              <li><b>Robert Hooke</b>, Boyle’s assistant, built the apparatus</li>
+              <li>Air trapped in a <b>J-shaped tube</b>, squeezed by adding mercury</li>
+              <li>Double the pressure: <b>half</b> the volume (<b>1662</b>)</li>
+              <li>Towneley and Power saw it first; Mariotte again in 1679</li>
             </ul>
-            <div class="idea">One of the first laws of physics to be established by measurement.</div>
+            <div class="idea">One of the first laws found by measurement</div>
           </div>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Robert_Boyle_by_Johann_Kerseboom.jpg" target="_blank" rel="noopener">Johann Kerseboom, about 1689</a>, public domain. Engraving: <a href="https://commons.wikimedia.org/wiki/File:Air_pump_and_glass_receptacle_demonstrating_that_a_small_animal_will_die_in_a_vacuum_LCCN2006690483.jpg" target="_blank" rel="noopener">Robert Boyle, 1669, Library of Congress</a>, public domain (cropped).</p>
@@ -339,12 +348,12 @@
       <section class="slide" data-title="Constant pressure: Charles’s law">
         <p class="eyebrow">Third law, constant pressure</p>
         <h2>Volume and temperature<span>.</span></h2>
-        <div class="split wide-fig">
+        <div class="split">
           <div class="stack">
             <div class="q"><p>Extend the line backwards. At what temperature would the volume reach zero?</p><div class="ans step">At −273 °C, whatever the gas: absolute zero</div></div>
             <div class="equation small step"><span>\(\dfrac{V}{T} = \text{constant}\)</span></div>
             <ul class="points small">
-              <li class="step">For a fixed mass of gas at <b>constant pressure</b></li>
+              <li class="step">Fixed mass, <b>constant pressure</b></li>
               <li class="step">\(V \propto T\), with \(T\) in <b>kelvin</b></li>
             </ul>
           </div>
@@ -392,7 +401,7 @@
       <section class="slide" data-title="Combining the three laws">
         <p class="eyebrow">One relation for a fixed mass of gas</p>
         <h2>Combining the three laws<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="stack">
             <div class="q"><p>Boyle’s law, the pressure law, Charles’s law: three laws, or one?</p><div class="ans step">One: the same relation, seen with one quantity held fixed</div></div>
             <div class="equation step"><span>\(\dfrac{PV}{T} = \text{constant}\)</span></div>
@@ -400,13 +409,6 @@
               <li class="frac step">Between two states: \(\dfrac{P_{1} V_{1}}{T_{1}} = \dfrac{P_{2} V_{2}}{T_{2}}\)</li>
               <li class="step">Hold one quantity constant and it reduces to one of the three laws</li>
             </ul>
-          </div>
-          <div class="work step">
-            <span class="say">A weather balloon: 2.0 m³ at <span class="equation-inline">\(1.0 \times 10^{5}\) Pa</span> and 290 K</span>
-            <span class="say">It rises to where <span class="equation-inline">\(P = 2.5 \times 10^{4}\) Pa</span> and <span class="equation-inline">\(T = 232\) K</span></span>
-            <span>\(V_{2} = \dfrac{P_{1} V_{1} T_{2}}{T_{1} P_{2}}\)</span>
-            <span class="step">\(V_{2} = \dfrac{1.0 \times 10^{5} \times 2.0 \times 232}{290 \times 2.5 \times 10^{4}}\)</span>
-            <span class="step">\(V_{2} = \class{res}{6.4 \,\mathrm{m}^{3}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
@@ -421,6 +423,21 @@
             <p class="tip">Only \(T\) must be in a particular unit, the kelvin. \(P\) and \(V\) can be in any units, as long as they are the same on both sides.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Combining the three laws">
+        <p class="eyebrow">Example</p>
+        <h2>Combining the three laws<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">A weather balloon: 2.0 m³ at <span class="equation-inline">\(1.0 \times 10^{5}\) Pa</span> and 290 K</span>
+            <span class="say">It rises to where <span class="equation-inline">\(P = 2.5 \times 10^{4}\) Pa</span> and <span class="equation-inline">\(T = 232\) K</span></span>
+            <span>\(V_{2} = \dfrac{P_{1} V_{1} T_{2}}{T_{1} P_{2}}\)</span>
+            <span class="step">\(V_{2} = \dfrac{1.0 \times 10^{5} \times 2.0 \times 232}{290 \times 2.5 \times 10^{4}}\)</span>
+            <span class="step">\(V_{2} = \class{res}{6.4 \,\mathrm{m}^{3}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Why launch it half full?">
@@ -545,13 +562,21 @@
       <section class="slide" data-title="Quick check: the gas laws">
         <p class="eyebrow">Quick check</p>
         <h2>The gas laws<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A gas at constant temperature is squeezed to a third of its volume. Pressure?</p><div class="ans step">Three times as great</div></div>
-          <div class="q"><p><span class="n">02</span>A sealed tire at <span class="equation-inline">\(2.0 \times 10^{5}\) Pa</span> warms from 280 K to 308 K. New pressure?</p><div class="ans step">\(2.0 \times 10^{5} \times \frac{308}{280} = 2.2 \times 10^{5} \,\mathrm{Pa}\)</div></div>
+          <div class="q"><p><span class="n">02</span>A sealed tire at <span class="equation-inline">\(2.0 \times 10^{5}\) Pa</span> warms from 280 K to 308 K. New pressure?</p><div class="ans step">\(2.0 \times 10^{5} \times \dfrac{308}{280} = 2.2 \times 10^{5} \,\mathrm{Pa}\)</div></div>
           <div class="q"><p><span class="n">03</span>Where does a graph of \(V\) against \(\theta\) in °C meet the temperature axis?</p><div class="ans step">−273 °C</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the gas laws">
+        <p class="eyebrow">Quick check</p>
+        <h2>The gas laws<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What is the name of a constant-temperature curve on a \(P\)–\(V\) diagram?</p><div class="ans step">An isotherm</div></div>
-          <div class="q"><p><span class="n">05</span>How are \(R\) and \(k_\mathrm{B}\) related?</p><div class="ans step">\(k_\mathrm{B} = \frac{R}{N_\mathrm{A}}\)</div></div>
-          <div class="q"><p><span class="n">06</span>Volume of 2.0 mol at 300 K and <span class="equation-inline">\(1.0 \times 10^{5}\) Pa</span>?</p><div class="ans step">\(\frac{2.0 \times 8.31 \times 300}{1.0 \times 10^{5}} = 0.050 \,\mathrm{m}^{3}\)</div></div>
+          <div class="q"><p><span class="n">05</span>How are \(R\) and \(k_\mathrm{B}\) related?</p><div class="ans step">\(k_\mathrm{B} = \dfrac{R}{N_\mathrm{A}}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Volume of 2.0 mol at 300 K and <span class="equation-inline">\(1.0 \times 10^{5}\) Pa</span>?</p><div class="ans step">\(\dfrac{2.0 \times 8.31 \times 300}{1.0 \times 10^{5}} = 0.050 \,\mathrm{m}^{3}\)</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
@@ -570,15 +595,13 @@
       </section>
 
       <section class="slide" data-title="The ideal gas model">
+        <p class="eyebrow">The model, 1 of 2</p>
         <h2>The ideal gas<span>.</span></h2>
         <div class="q" style="margin-bottom: 18px;"><p>Wait: what exactly is an <b>ideal</b> gas?</p></div>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr); align-content: center;">
           <div class="card step"><p class="eyebrow">Many, and random</p><h3>A very large number of identical molecules in random motion</h3><p>So averages are reliable</p></div>
           <div class="card step"><p class="eyebrow">Tiny</p><h3>The volume of the molecules is negligible</h3><p>Compared with the volume of the container</p></div>
           <div class="card step"><p class="eyebrow">No forces</p><h3>No forces between molecules except during collisions</h3><p>So no intermolecular potential energy</p></div>
-          <div class="card step"><p class="eyebrow">Elastic</p><h3>All collisions are elastic</h3><p>No kinetic energy is lost</p></div>
-          <div class="card step"><p class="eyebrow">Brief</p><h3>A collision takes a negligible time</h3><p>Compared with the time between collisions</p></div>
-          <div class="card step"><p class="eyebrow">Newtonian</p><h3>The molecules obey Newton’s laws</h3><p>Straight lines at constant speed between collisions</p></div>
         </div>
         <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -592,6 +615,17 @@
             <p class="tip">“State the assumptions of the kinetic model” is a standard question. Learn them as short phrases, not as the cards’ full sentences.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="The ideal gas model">
+        <p class="eyebrow">The model, 2 of 2</p>
+        <h2>The ideal gas<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr); align-content: center;">
+          <div class="card"><p class="eyebrow">Elastic</p><h3>All collisions are elastic</h3><p>No kinetic energy is lost</p></div>
+          <div class="card step"><p class="eyebrow">Brief</p><h3>A collision takes a negligible time</h3><p>Compared with the time between collisions</p></div>
+          <div class="card step"><p class="eyebrow">Newtonian</p><h3>The molecules obey Newton’s laws</h3><p>Straight lines at constant speed between collisions</p></div>
+        </div>
+        <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Pressure from collisions">
@@ -633,8 +667,8 @@
             <div class="equation"><span>\(P = \dfrac{1}{3} \rho v_\mathrm{rms}^{2}\)</span></div>
             <ul class="points small">
               <li>\(\rho\): the density of the gas</li>
-              <li class="step">\(v_\mathrm{rms}\): the <b>root-mean-square</b> speed: square every speed, take the mean, then the square root</li>
-              <li class="step">Not the mean velocity: that is <b>zero</b>, as molecules move equally in all directions</li>
+              <li class="step">\(v_\mathrm{rms}\): <b>root-mean-square</b> speed: square, mean, root</li>
+              <li class="step">Not the mean velocity, which is <b>zero</b></li>
               <li class="step">Links what a gauge reads to what the molecules are doing</li>
             </ul>
           </div>
@@ -785,10 +819,18 @@
       <section class="slide" data-title="Quick check: the kinetic theory">
         <p class="eyebrow">Quick check</p>
         <h2>The kinetic theory<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A molecule of mass \(m\) and speed \(v\) rebounds from a wall. Change of momentum?</p><div class="ans step">\(2mv\)</div></div>
           <div class="q"><p><span class="n">02</span>The speed of the molecules doubles at constant density. Pressure?</p><div class="ans step">Four times as great</div></div>
           <div class="q"><p><span class="n">03</span>What kind of energy is the internal energy of an ideal gas?</p><div class="ans step">Kinetic only</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the kinetic theory">
+        <p class="eyebrow">Quick check</p>
+        <h2>The kinetic theory<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>The kelvin temperature of an ideal gas doubles. Its internal energy?</p><div class="ans step">It doubles</div></div>
           <div class="q"><p><span class="n">05</span>Hydrogen and oxygen at the same temperature. Which molecules are faster?</p><div class="ans step">Hydrogen: the lighter ones</div></div>
           <div class="q"><p><span class="n">06</span>Under which conditions is a real gas most nearly ideal?</p><div class="ans step">Low pressure, low density, high temperature</div></div>
@@ -811,7 +853,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="term"><b>Pressure</b><span>Force at right angles to a surface, per unit area</span></div>
@@ -819,6 +861,14 @@
           <div class="term"><b>Avogadro constant</b><span>The number of particles in one mole</span></div>
           <div class="term"><b>Isotherm</b><span>A constant-temperature curve on a \(P\)–\(V\) diagram</span></div>
           <div class="term"><b>Absolute zero</b><span>0 K, −273 °C: where an ideal gas would have no pressure</span></div>
+        </div>
+        <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="term"><b>Ideal gas</b><span>The model gas that obeys \(PV = nRT\) exactly</span></div>
           <div class="term"><b>Kinetic theory</b><span>Gas behavior explained by molecules in random motion</span></div>
           <div class="term"><b>Elastic collision</b><span>No kinetic energy is lost</span></div>

@@ -27,7 +27,7 @@
       prep: "Computers or tablets with PhET Circuit Construction Kit: DC (Lab). Virtual Labs worksheet pp. 3–6 for pairs who finish. Optional: a real series loop with two ammeters.",
       timing: [
         [0, 6, "Do now", "Retrieval from Lesson 1. Then pose the big question and take predictions."],
-        [6, 18, "Learn", "Free electrons, coulombs, current as a rate (ticket barrier). Slide 10: model both examples while students fill in the workbook frames, then each ‘Your turn’ alone. Quick check (slide 13) in the workbook box at the end of the lesson."],
+        [6, 18, "Learn", "Free electrons, coulombs, current as a rate (ticket barrier). Slides 10–11: model both examples while students fill in the workbook frames, then each ‘Your turn’ alone. Quick check (slide 14) in the workbook box at the end of the lesson."],
         [18, 32, "Virtual Lab 1", "Pairs measure current at three points, then change R. Record in the Lab box. Ask: ‘Where did the current go?’"],
         [32, 44, "Try it", "Q1–Q5 in order: the calculation questions fade from full frame to no frame. Q6 is the challenge. Q7 is the misconception check."],
         [44, 50, "Exam corner", "Questions 10–11. Peer mark using the tip: time conversion, unit."],
@@ -43,7 +43,7 @@
       prep: "PhET (Lab) and Virtual Labs worksheet pp. 7–10. Real demo: 6 V supply, two lamps in series, two voltmeters.",
       timing: [
         [0, 6, "Do now", "Retrieval: current, Q = I t, current not used up."],
-        [6, 18, "Learn", "Delivery-van model; 1 V = 1 J/C. Worked example and Your turn; slide 15 two-step example in its workbook frame. Voltmeter in parallel: say ‘across’."],
+        [6, 18, "Learn", "Delivery-van model; 1 V = 1 J/C. Worked example and Your turn; slide 16 two-step example in its workbook frame. Voltmeter in parallel: say ‘across’."],
         [18, 30, "Virtual Lab 2", "Measure resistor p.d. at 3, 6, 9 V; calculate E for 2 C. Add a second resistor and test ‘p.d.s add up’."],
         [30, 43, "Try it", "Q1 (meter placement) as a class hinge first, then Q2–Q6."],
         [43, 50, "Exam corner", "Questions 9–10; model a two-idea explanation (joules + per coulomb)."],
@@ -59,7 +59,7 @@
       prep: "PhET (Lab), Virtual Labs pp. 11–14. Demo: dimmer (variable resistor) with a lamp.",
       timing: [
         [0, 6, "Do now", "Retrieval: p.d. meaning, voltmeter, p.d.s add up."],
-        [6, 18, "Learn", "Resistance as opposition; two circuits at 6 V. V = I R: fill in the two slide 19 examples together, each with its Your turn, then both worked examples (the second includes mA)."],
+        [6, 18, "Learn", "Resistance as opposition; two circuits at 6 V. V = I R: fill in the two slide 20 examples together, each with its Your turn, then both worked examples (the second includes mA)."],
         [18, 30, "Virtual Lab 3", "Change battery only; V ÷ I stays at 10 Ω. Note the axis convention box."],
         [30, 44, "Try it", "Q1–Q4 (fading calculation support), Q5 table + graph, Q6 temperature."],
         [44, 50, "Exam corner", "Questions 9–10."],
@@ -93,7 +93,7 @@
         [0, 6, "Do now", "Retrieval: V = I R, wire length, meaning of volt."],
         [6, 18, "Learn", "Build two lamps in series, then in parallel; unscrew one lamp in each. Fill the rules table from observation."],
         [18, 28, "Measure", "Measure the numbers shown in the two labelled circuits. Check ‘adds up’ each time."],
-        [28, 44, "Try it", "Worked example + Your turn, then the slide 30 example in its workbook frame, then Q1–Q6."],
+        [28, 44, "Try it", "Worked example + Your turn, then the slide 31 example in its workbook frame, then Q1–Q6."],
         [44, 50, "Exam corner", "Question 7."],
       ],
       hinge: "Q5: 6 Ω and 12 Ω in parallel. Anyone choosing 18 Ω is adding in parallel.",
@@ -171,8 +171,8 @@
       prep: "Appliance rating plates (photos or real). Calculators.",
       timing: [
         [0, 6, "Do now", "Retrieval: E = Q V, Q = I t, V = I R."],
-        [6, 18, "Learn", "Power as J per s; appliance table; E = P t: slide 43 example in its workbook frame (unit conversions)."],
-        [18, 28, "More power equations", "P = V I and P = I² R: the slide 42 examples in their workbook frames; ‘square the current first’."],
+        [6, 18, "Learn", "Power as J per s; appliance table; E = P t: slide 44 example in its workbook frame (unit conversions)."],
+        [18, 28, "More power equations", "P = V I and P = I² R: the slide 43 examples in their workbook frames; ‘square the current first’."],
         [28, 44, "Try it", "Q1 is the big question; then Q2–Q6."],
         [44, 50, "Exam corner", "Question 7 (six marks)."],
       ],

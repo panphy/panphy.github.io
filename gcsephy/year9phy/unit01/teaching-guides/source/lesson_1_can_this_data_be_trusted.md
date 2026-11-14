@@ -244,7 +244,7 @@ Students are given three small data sets and must:
 
 The workbook prints the worked example on slide 7 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
 
-The Quick check (slide 11) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 12) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 

@@ -1,4 +1,4 @@
-# Exposure illustration — slide 38
+# Exposure illustration — slide 39
 
 Generated with the built-in imagegen tool. `irradiation-contamination.png` is a slide-only image; headings and captions remain HTML in `../index.html`. Keep the existing `exposure` SVG in `../figures.js` for the Year 11 workbook, which uses it in Lesson 10. The white background preserves contrast in both themes. Golden specks schematically represent radioactive material.
 

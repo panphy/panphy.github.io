@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -64,19 +65,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="mini-nuclear" style="height: 200px;"></div>
+            <div class="fig" data-fig="mini-nuclear" style="height: 150px;"></div>
             <p class="eyebrow">Part 01, SL + HL</p>
             <h3>How was the nucleus discovered?</h3>
             <p>Geiger–Marsden–Rutherford, nuclear notation</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="mini-bohr" style="height: 200px;"></div>
+            <div class="fig" data-fig="mini-bohr" style="height: 150px;"></div>
             <p class="eyebrow">Part 02, SL + HL</p>
             <h3>What do spectra tell us?</h3>
             <p>Energy levels, photons, \(E = hf\)</p>
           </div>
           <div class="card hl">
-            <div class="fig" data-fig="mini-neutron" style="height: 200px;"></div>
+            <div class="fig" data-fig="mini-neutron" style="height: 150px;"></div>
             <p class="eyebrow">Part 03, HL only</p>
             <h3>How big is a nucleus? Why these levels?</h3>
             <p>Nuclear radius, closest approach, Bohr’s hydrogen</p>
@@ -188,9 +189,9 @@
             <figure><img src="images/geiger-marsden-1913-diagram.png" width="421" height="444" alt="Line drawing of a round metal chamber in cross-section, with parts labeled by letters"><figcaption>1913 apparatus: source <b>R</b>, foil <b>F</b>, screen <b>S</b>, microscope <b>M</b></figcaption></figure>
           </div>
           <ul class="points">
-            <li>Each alpha particle made a tiny <b>flash</b> on a screen. Geiger counted flashes through a microscope, for hours in a <b>darkened</b> lab</li>
-            <li>Rutherford asked Marsden, a <b>20-year-old student</b>, to look for alpha particles bouncing <b>back</b>. Nobody expected any</li>
-            <li>In an early test with a platinum plate, about <b>1 in 8000</b> bounced back. The plum pudding model could not explain it</li>
+            <li>Each alpha made a tiny <b>flash</b> on a screen. Geiger counted them for hours in a <b>dark</b> lab</li>
+            <li>Marsden, a <b>20-year-old student</b>, looked for alphas bouncing <b>back</b>. Nobody expected any</li>
+            <li>About <b>1 in 8000</b> bounced back: the plum pudding model could not explain it</li>
           </ul>
         </div>
         <p class="credits">Photos: <a href="https://commons.wikimedia.org/wiki/File:Geiger-Rutherford.jpg" target="_blank" rel="noopener">unknown photographer</a> and <a href="https://commons.wikimedia.org/wiki/File:Ernest_Marsden_1921.jpg" target="_blank" rel="noopener">S P Andrew Ltd</a>, public domain. Diagram: <a href="https://commons.wikimedia.org/wiki/File:Geiger-Marsden_diagram.gif" target="_blank" rel="noopener">Geiger and Marsden, 1913</a>, public domain.</p>
@@ -432,15 +433,23 @@
       <section class="slide" data-title="Quick check: the nucleus">
         <p class="eyebrow">Quick check</p>
         <h2>The nucleus<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Why did most alpha particles pass straight through?</p><div class="ans step">The atom is mostly empty space</div></div>
           <div class="q"><p><span class="n">02</span>Why did a very few come straight back?</p><div class="ans step">A tiny, dense, positive nucleus repelled them</div></div>
           <div class="q"><p><span class="n">03</span>How many neutrons in \({}^{56}_{26}\mathrm{Fe}\)?</p><div class="ans step">\(56 - 26 = 30\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the nucleus">
+        <p class="eyebrow">Quick check</p>
+        <h2>The nucleus<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What is a nucleon?</p><div class="ans step">A proton or a neutron</div></div>
           <div class="q"><p><span class="n">05</span>Roughly what is the ratio of an atom’s diameter to its nucleus’s diameter?</p><div class="ans step">About \(10^{5}\) (\(10^{-10}\,\mathrm{m}\) against \(10^{-15}\,\mathrm{m}\))</div></div>
           <div class="q"><p><span class="n">06</span>What could the plum pudding model not explain?</p><div class="ans step">Alpha particles scattered through large angles</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -481,7 +490,7 @@
       <section class="slide" data-title="Discrete energy levels">
         <p class="eyebrow">Energy levels</p>
         <h2>Only certain energies allowed<span>.</span></h2>
-        <div class="split">
+        <div class="split even">
           <div class="stack">
             <ul class="points">
               <li>An electron in an atom can have only <b>certain energies</b></li>
@@ -489,7 +498,7 @@
               <li>Lowest level: the <b>ground state</b></li>
               <li>Energies are <b>negative</b>: the electron is bound</li>
             </ul>
-            <div class="idea">Zero energy = electron just <b>free</b> of the atom.</div>
+            <div class="idea">Zero energy: electron just <b>free</b> of the atom</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>HYDROGEN: ENERGY LEVELS</span><span class="pill">NOT TO SCALE</span></div>
@@ -529,8 +538,6 @@
             <span>\(f = \dfrac{c}{\lambda} = \dfrac{3.00 \times 10^{8}}{532 \times 10^{-9}}\)</span>
             <span class="step">&nbsp; \(= \class{res}{5.64 \times 10^{14} \,\mathrm{Hz}}\)</span>
             <span class="step">\(E = hf = 6.63 \times 10^{-34} \times 5.64 \times 10^{14}\)</span>
-            <span class="step">&nbsp; \(= \class{res}{3.74 \times 10^{-19} \,\mathrm{J}}\)</span>
-            <span class="step">&nbsp; \(= \dfrac{3.74 \times 10^{-19}}{1.60 \times 10^{-19}} = \class{res}{2.34 \,\mathrm{eV}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM, SL + HL</span><span data-page></span></div>
@@ -546,6 +553,18 @@
             <p class="trap">Leaving the wavelength in nm. \(532 \,\mathrm{nm} = 532 \times 10^{-9} \,\mathrm{m}\).</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Photons: E = hf">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Light comes in packets<span>.</span></h2>
+        <div class="stack center" style="align-items: stretch;">
+          <div class="work">
+            <span class="step">&nbsp; \(= \class{res}{3.74 \times 10^{-19} \,\mathrm{J}}\)</span>
+            <span class="step">&nbsp; \(= \dfrac{3.74 \times 10^{-19}}{1.60 \times 10^{-19}} = \class{res}{2.34 \,\mathrm{eV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Atomic transitions">
@@ -727,10 +746,18 @@
       <section class="slide" data-title="Quick check: levels and spectra">
         <p class="eyebrow">Quick check</p>
         <h2>Levels and spectra<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is a photon?</p><div class="ans step">A packet of electromagnetic energy, \(E = hf\)</div></div>
           <div class="q"><p><span class="n">02</span>Electron drops from −1.51 eV to −3.40 eV. Photon energy?</p><div class="ans step">1.89 eV</div></div>
           <div class="q"><p><span class="n">03</span>Which photon has more energy: red or violet?</p><div class="ans step">Violet: higher frequency</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: levels and spectra">
+        <p class="eyebrow">Quick check</p>
+        <h2>Levels and spectra<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Why is an absorption line dark?</p><div class="ans step">The gas absorbed photons of that energy</div></div>
           <div class="q"><p><span class="n">05</span>How do spectra show energy levels are discrete?</p><div class="ans step">Only certain photon energies appear</div></div>
           <div class="q"><p><span class="n">06</span>How can we tell what a star is made of?</p><div class="ans step">Match its absorption lines to known elements</div></div>
@@ -761,9 +788,9 @@
             <figure><img src="images/manchester-staff-1910.jpg" width="1080" height="823" alt="About twenty men in suits posed in three rows outside a building"><figcaption>Rutherford with the staff of the <b>Manchester physics laboratories</b>, 1910</figcaption></figure>
           </div>
           <ul class="points">
-            <li>Geiger and Marsden had the counts. Rutherford wanted to know <b>how small</b> the center of the atom was</li>
-            <li>His argument: an alpha particle aimed straight at it stops when all its kinetic energy has become <b>electric potential energy</b></li>
-            <li>His answer for gold: about \(3 \times 10^{-14}\,\mathrm{m}\), <b>thousands of times</b> smaller than the atom</li>
+            <li>Rutherford wanted to know <b>how small</b> the center of the atom was</li>
+            <li>A head-on alpha stops when all its kinetic energy is <b>electric potential energy</b></li>
+            <li>Gold: about \(3 \times 10^{-14}\,\mathrm{m}\), <b>thousands of times</b> smaller than the atom</li>
           </ul>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Ernest_Rutherford_LOC.jpg" target="_blank" rel="noopener">Bain Collection, Library of Congress</a>, public domain. Group: <a href="https://commons.wikimedia.org/wiki/File:Manchester_University_Laboratory_Staff_1910.jpg" target="_blank" rel="noopener">unknown photographer, National Library of New Zealand</a>, public domain.</p>
@@ -839,16 +866,16 @@
 
       <section class="slide hl" data-title="HL: Deviations from Rutherford scattering">
         <h2>Where Rutherford’s formula fails<span>.</span></h2>
-        <div class="split">
+        <div class="split even">
           <div class="stack">
             <ul class="points small">
               <li>Rutherford assumed <b>only electric repulsion</b></li>
               <li>Low energy: prediction and count <b>agree</b></li>
               <li class="step">High energy: the alpha gets <b>close enough to touch</b></li>
               <li class="step">The <b>strong nuclear force</b> now acts too</li>
-              <li class="step">Fewer are scattered than predicted</li>
+              <li class="step">Fewer scattered than predicted</li>
             </ul>
-            <div class="idea step">The energy where it fails gives the <b>size of the nucleus</b>.</div>
+            <div class="idea step">Where it fails \(\Rightarrow\) the <b>size of the nucleus</b></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>ALPHAS SCATTERED AT ONE ANGLE</span><span class="pill">SKETCH</span></div>
@@ -1014,7 +1041,7 @@
       <section class="slide hl" data-title="HL: Quantized angular momentum">
         <p class="eyebrow">The Bohr model for hydrogen</p>
         <h2>Why only those levels<span>?</span></h2>
-        <div class="split">
+        <div class="split even">
           <div class="stack">
             <ul class="points small">
               <li>Bohr’s rule: angular momentum is <b>quantized</b></li>
@@ -1022,9 +1049,9 @@
             <div class="equation small"><span>\(mvr = \dfrac{nh}{2\pi}\)</span></div>
             <ul class="points small">
               <li class="step">Only certain <b>orbits</b> fit: \(r \propto n^{2}\)</li>
-              <li class="step">Each orbit has one energy: \(E \propto -\frac{1}{n^{2}}\)</li>
+              <li class="step frac">Each orbit, one energy: \(E \propto -\dfrac{1}{n^{2}}\)</li>
             </ul>
-            <div class="idea step">Quantized angular momentum → quantized <b>orbits</b> and <b>energy</b>.</div>
+            <div class="idea step">Quantized angular momentum \(\Rightarrow\) quantized <b>orbits</b> and <b>energy</b></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>BOHR ORBITS OF HYDROGEN</span><span class="pill">TO SCALE</span></div>
@@ -1075,27 +1102,43 @@
       <section class="slide hl" data-title="HL quick check">
         <p class="eyebrow">Quick check, HL</p>
         <h2>The nucleus and Bohr<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Radius of a nucleus with \(A = 64\)? \((R_{0} = 1.20 \,\mathrm{fm})\)</p><div class="ans step">\(1.20 \times 64^{1/3} = 4.80 \,\mathrm{fm}\)</div></div>
           <div class="q"><p><span class="n">02</span>Why do all nuclei have about the same density?</p><div class="ans step">Mass \(\propto A\) and volume \(\propto R^{3} \propto A\)</div></div>
           <div class="q"><p><span class="n">03</span>At closest approach, what has the kinetic energy become?</p><div class="ans step">Electric potential energy</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check, HL</p>
+        <h2>The nucleus and Bohr<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Why does Rutherford’s formula fail at high energy?</p><div class="ans step">The alpha reaches the nucleus: the strong force acts</div></div>
-          <div class="q"><p><span class="n">05</span>Energy of the \(n = 5\) level of hydrogen?</p><div class="ans step">\(\frac{-13.6}{25} = -0.544 \,\mathrm{eV}\)</div></div>
-          <div class="q"><p><span class="n">06</span>What did Bohr say is quantized?</p><div class="ans step">Angular momentum: \(mvr = \frac{nh}{2\pi}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Energy of the \(n = 5\) level of hydrogen?</p><div class="ans step">\(\dfrac{-13.6}{25} = -0.544 \,\mathrm{eV}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What did Bohr say is quantized?</p><div class="ans step">Angular momentum: \(mvr = \dfrac{nh}{2\pi}\)</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
-        <div class="terms fill">
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Nucleus</b><span>Tiny, dense, positive</span><span>Nearly all the mass</span></div>
           <div class="term"><b>Nucleon number</b><span>\(A\): protons + neutrons</span></div>
           <div class="term"><b>Proton number</b><span>\(Z\): fixes the element</span></div>
           <div class="term"><b>Energy level</b><span>An allowed energy of the atom</span><span>Discrete</span></div>
           <div class="term"><b>Photon</b><span>Packet of light energy</span><span>\(E = hf\)</span></div>
           <div class="term"><b>Transition</b><span>Jump between levels</span><span>\(E_\gamma = hf = |\Delta E_\mathrm{atom}|\)</span></div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Emission spectrum</b><span>Bright lines from a hot gas</span></div>
           <div class="term"><b>Absorption spectrum</b><span>Dark lines on a continuous spectrum</span></div>
           <div class="term hl"><b>Nuclear radius</b><span>\(R = R_{0}A^{1/3}\)</span><span>Density the same for all</span></div>

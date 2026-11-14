@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -61,25 +62,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="a3-work" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a3-work" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Work</h3>
             <p>A force transfers energy</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a3-fs-graph" data-still data-kind="spring" data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a3-fs-graph" data-still data-kind="spring" data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Kinetic and potential energy</h3>
             <p>Three kinds of mechanical energy</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a3-coaster" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a3-coaster" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Conservation</h3>
             <p>With and without resistive forces</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a3-sankey" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a3-sankey" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Power and efficiency</h3>
             <p>Rates, Sankey diagrams, energy density</p>
@@ -270,15 +271,23 @@
       <section class="slide" data-title="Quick check: work">
         <p class="eyebrow">Quick check</p>
         <h2>Work<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A 20 N force moves a box 3.0 m in its own direction. Work done?</p><div class="ans step">\(20 \times 3.0 = 60 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">02</span>The same force acts at 60° to the motion. Work done?</p><div class="ans step">\(60 \cos 60^{\circ} = 30 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">03</span>How much work does the normal force do on a sliding block?</p><div class="ans step">None: it is at right angles to the motion</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: work">
+        <p class="eyebrow">Quick check</p>
+        <h2>Work<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Friction of 8.0 N acts over 5.0 m. Work done by friction?</p><div class="ans step">\(-40 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">05</span>What does the area under a force–displacement graph give?</p><div class="ans step">The work done</div></div>
           <div class="q"><p><span class="n">06</span>Is work a scalar or a vector?</p><div class="ans step">A scalar</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -430,8 +439,6 @@
               <span class="say">\(k = 200 \,\mathrm{N} \,\mathrm{m}^{-1}\), \(\Delta x = 0.15 \,\mathrm{m}\), ball 0.050 kg</span>
               <span class="step">\(E_\mathrm{H} = \dfrac{1}{2} k (\Delta x)^{2}\)</span>
               <span class="step">\(E_\mathrm{H} = \dfrac{1}{2} \times 200 \times 0.15^{2} = \class{res}{2.25 \,\mathrm{J}}\)</span>
-              <span class="step">\(\Delta E_\mathrm{k} + \Delta E_\mathrm{H} = \dfrac{1}{2} m v^{2} - E_{\mathrm{H,i}} = 0\)</span>
-              <span class="step">\(v = \sqrt{\dfrac{2 \times 2.25}{0.050}} = \class{res}{9.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             </div>
           </div>
           <div class="panel">
@@ -453,15 +460,42 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Elastic energy: a spring launcher">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A spring launcher<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+            <span class="say">\(E_\mathrm{H} = 2.25 \,\mathrm{J}\), ball 0.050 kg</span>
+              <span class="step">\(\Delta E_\mathrm{k} + \Delta E_\mathrm{H} = \dfrac{1}{2} m v^{2} - E_{\mathrm{H,i}} = 0\)</span>
+              <span class="step">\(v = \sqrt{\dfrac{2 \times 2.25}{0.050}} = \class{res}{9.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>RELEASED FROM REST</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="a3-launcher"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER; SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Quick check: energy">
         <p class="eyebrow">Quick check</p>
         <h2>Kinetic and potential energy<span>.</span></h2>
-        <div class="quiz fill">
-          <div class="q"><p><span class="n">01</span>A 2.0 kg mass moves at 3.0 m s⁻¹. Kinetic energy?</p><div class="ans step">\(\frac{1}{2} \times 2.0 \times 3.0^{2} = 9.0 \,\mathrm{J}\)</div></div>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">01</span>A 2.0 kg mass moves at 3.0 m s⁻¹. Kinetic energy?</p><div class="ans step">\(\dfrac{1}{2} \times 2.0 \times 3.0^{2} = 9.0 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">02</span>Its speed doubles. What happens to its kinetic energy?</p><div class="ans step">Four times as large</div></div>
           <div class="q"><p><span class="n">03</span>A 5.0 kg mass is raised 2.0 m. Gain in potential energy?</p><div class="ans step">\(5.0 \times 9.8 \times 2.0 = 98 \,\mathrm{J}\)</div></div>
-          <div class="q"><p><span class="n">04</span>A spring with \(k = 400 \,\mathrm{N} \,\mathrm{m}^{-1}\) is stretched 0.10 m. Energy stored?</p><div class="ans step">\(\frac{1}{2} \times 400 \times 0.10^{2} = 2.0 \,\mathrm{J}\)</div></div>
-          <div class="q"><p><span class="n">05</span>A body has momentum 6.0 kg m s⁻¹ and mass 3.0 kg. Kinetic energy?</p><div class="ans step">\(\frac{6.0^{2}}{2 \times 3.0} = 6.0 \,\mathrm{J}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Kinetic and potential energy<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>A spring with \(k = 400 \,\mathrm{N} \,\mathrm{m}^{-1}\) is stretched 0.10 m. Energy stored?</p><div class="ans step">\(\dfrac{1}{2} \times 400 \times 0.10^{2} = 2.0 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">05</span>A body has momentum 6.0 kg m s⁻¹ and mass 3.0 kg. Kinetic energy?</p><div class="ans step">\(\dfrac{6.0^{2}}{2 \times 3.0} = 6.0 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">06</span>What equals the work done by the resultant force?</p><div class="ans step">The change in kinetic energy</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
@@ -484,11 +518,11 @@
         <p class="eyebrow">Without resistive forces</p>
         <h2>Mechanical energy is conserved<span>.</span></h2>
         <div class="stack center" style="gap: 20px;">
-          <div class="panel" style="height: 470px; align-self: stretch;">
+          <div class="panel" style="height: 440px; align-self: stretch;">
             <div class="panel-head"><span>A CART ON A FRICTIONLESS TRACK</span><span class="pill">KINETIC + POTENTIAL = CONSTANT</span></div>
             <div class="fig" data-fig="a3-coaster"></div>
           </div>
-          <div class="idea">Total mechanical energy = \(E_\mathrm{k} + E_\mathrm{p} + E_\mathrm{H}\). With <b>no frictional or resistive forces</b>, it stays the same.</div>
+          <div class="idea">Total mechanical energy \(E_\mathrm{k} + E_\mathrm{p} + E_\mathrm{H}\) is constant with <b>no frictional or resistive forces</b></div>
         </div>
         <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER; SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -573,10 +607,18 @@
       <section class="slide" data-title="Quick check: conservation">
         <p class="eyebrow">Quick check</p>
         <h2>Conservation of mechanical energy<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Name the three kinds of mechanical energy.</p><div class="ans step">Kinetic, gravitational potential, elastic potential</div></div>
           <div class="q"><p><span class="n">02</span>When is the total mechanical energy conserved?</p><div class="ans step">When there are no frictional or resistive forces</div></div>
           <div class="q"><p><span class="n">03</span>A ball is dropped 5.0 m. Speed at the bottom, ignoring drag?</p><div class="ans step">\(\sqrt{2 \times 9.8 \times 5.0} = 9.9 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: conservation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Conservation of mechanical energy<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Does that speed depend on the mass of the ball?</p><div class="ans step">No: the mass cancels</div></div>
           <div class="q"><p><span class="n">05</span>A block loses 50 J of potential energy and gains 35 J of kinetic. Work done by friction?</p><div class="ans step">\(-15 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">06</span>Where has that energy gone?</p><div class="ans step">To thermal energy of the surfaces</div></div>
@@ -718,23 +760,24 @@
       </section>
 
       <section class="slide" data-title="Energy density of fuels">
+        <p class="eyebrow">Approximate values</p>
         <h2>Energy density of fuels<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: .85fr 1.15fr;">
           <div class="stack">
             <ul class="points small">
-              <li><b>Specific energy</b>: energy released per unit <b>mass</b>, in J kg⁻¹</li>
-              <li class="step"><b>Energy density</b>: energy released per unit <b>volume</b>, in J m⁻³</li>
-              <li class="step">High values: less fuel to carry and to store</li>
+              <li><b>Specific energy</b>: energy per unit <b>mass</b>, J kg⁻¹</li>
+              <li class="step"><b>Energy density</b>: energy per unit <b>volume</b>, J m⁻³</li>
+              <li class="step">Higher \(\Rightarrow\) less fuel to carry and store</li>
             </ul>
-            <div class="idea step">Hydrogen: the most energy per kilogram, very little per cubic meter.</div>
+            <div class="idea step">Hydrogen: most energy per kilogram, little per cubic meter</div>
           </div>
           <table class="facts step">
-            <thead><tr><th>Fuel (approximate values)</th><th class="nocase">MJ kg⁻¹</th><th class="nocase">MJ m⁻³</th></tr></thead>
+            <thead><tr><th>Fuel</th><th class="nocase">MJ kg⁻¹</th><th class="nocase">MJ m⁻³</th></tr></thead>
             <tbody>
               <tr><td>Wood, dry</td><td class="num">16</td><td class="num">\(1 \times 10^{4}\)</td></tr>
               <tr><td>Petrol</td><td class="num">46</td><td class="num">\(3.4 \times 10^{4}\)</td></tr>
-              <tr><td>Natural gas, as a gas</td><td class="num">55</td><td class="num">38</td></tr>
-              <tr><td>Hydrogen, as a gas</td><td class="num">142</td><td class="num">12</td></tr>
+              <tr><td>Natural gas</td><td class="num">55</td><td class="num">38</td></tr>
+              <tr><td>Hydrogen gas</td><td class="num">142</td><td class="num">12</td></tr>
               <tr><td>Uranium-235, fission</td><td class="num">\(8 \times 10^{7}\)</td><td class="num">\(1.5 \times 10^{12}\)</td></tr>
             </tbody>
           </table>
@@ -792,10 +835,18 @@
       <section class="slide" data-title="Quick check: power and efficiency">
         <p class="eyebrow">Quick check</p>
         <h2>Power and efficiency<span>.</span></h2>
-        <div class="quiz fill">
-          <div class="q"><p><span class="n">01</span>600 J of work is done in 4.0 s. Power?</p><div class="ans step">\(\frac{600}{4.0} = 150 \,\mathrm{W}\)</div></div>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">01</span>600 J of work is done in 4.0 s. Power?</p><div class="ans step">\(\dfrac{600}{4.0} = 150 \,\mathrm{W}\)</div></div>
           <div class="q"><p><span class="n">02</span>A boat moves at 5.0 m s⁻¹ against 400 N of drag. Engine power?</p><div class="ans step">\(400 \times 5.0 = 2.0 \,\mathrm{kW}\)</div></div>
-          <div class="q"><p><span class="n">03</span>A lamp takes in 60 W and gives out 9 W of light. Efficiency?</p><div class="ans step">\(\frac{9}{60} = 0.15\)</div></div>
+          <div class="q"><p><span class="n">03</span>A lamp takes in 60 W and gives out 9 W of light. Efficiency?</p><div class="ans step">\(\dfrac{9}{60} = 0.15\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: power and efficiency">
+        <p class="eyebrow">Quick check</p>
+        <h2>Power and efficiency<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What does the width of an arrow on a Sankey diagram show?</p><div class="ans step">The amount of energy, or power</div></div>
           <div class="q"><p><span class="n">05</span>2.0 kg of fuel with specific energy 45 MJ kg⁻¹ is burned. Energy released?</p><div class="ans step">90 MJ</div></div>
           <div class="q"><p><span class="n">06</span>What is the unit of energy density?</p><div class="ans step">J m⁻³</div></div>
@@ -804,13 +855,21 @@
       </section>
 
       <section class="slide" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>Work, energy and power on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Work, energy and power in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Work</p><h3>\(W = Fs \cos \theta\)</h3><p>A transfer of energy<br>Area under a force–displacement graph</p></div>
           <div class="card step"><p class="eyebrow">Kinetic energy</p><h3>\(E_\mathrm{k} = \frac{1}{2} m v^{2} = \frac{p^{2}}{2m}\)</h3><p>Work by the resultant force changes it</p></div>
           <div class="card step"><p class="eyebrow">Potential energy</p><h3>\(mg \Delta h\) and \(\frac{1}{2} k (\Delta x)^{2}\)</h3><p>Gravitational, near the surface<br>Elastic, in a spring</p></div>
-          <div class="card step"><p class="eyebrow">Conservation</p><h3>Mechanical energy constant</h3><p>If there are no resistive forces<br>Otherwise the change is the work they do</p></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER; SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Work, energy and power in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Conservation</p><h3>Mechanical energy constant</h3><p>If there are no resistive forces<br>Otherwise the change is the work they do</p></div>
           <div class="card step"><p class="eyebrow">Power</p><h3>\(P = \frac{\Delta W}{\Delta t} = Fv\)</h3><p>The rate of transferring energy, in watts</p></div>
           <div class="card step"><p class="eyebrow">Efficiency and fuels</p><h3>\(\eta = \frac{E_\mathrm{output}}{E_\mathrm{input}}\)</h3><p>Sankey diagrams show it to scale<br>Energy density: J m⁻³</p></div>
         </div>
@@ -818,7 +877,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Work</b><span>Force × distance along the force</span></div>
@@ -827,6 +886,14 @@
           <div class="term"><b>Elastic potential energy</b><span>Energy of a stretched spring</span></div>
           <div class="term"><b>Mechanical energy</b><span>Kinetic + potential</span></div>
           <div class="term"><b>Non-conservative force</b><span>Friction or drag: path matters</span></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER; SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Power</b><span>Rate of transferring energy</span></div>
           <div class="term"><b>Efficiency</b><span>Useful output as a fraction of input</span></div>
           <div class="term"><b>Sankey diagram</b><span>Arrow widths show energy</span></div>

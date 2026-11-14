@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -63,25 +64,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="b1-states" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b1-states" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Particles and temperature</h3>
             <p>The molecular model, the kelvin and internal energy</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b1-heating-curve" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b1-heating-curve" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Heating and changes of phase</h3>
             <p>\(Q = mc \Delta T\) and \(Q = mL\)</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b1-conduction" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b1-conduction" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Conduction and convection</h3>
             <p>Energy passed on by particles, and carried by a moving fluid</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b1-planck" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b1-planck" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Thermal radiation</h3>
             <p>Black bodies, luminosity, brightness and Wien’s law</p>
@@ -168,12 +169,12 @@
         <h2>Kelvin and Celsius<span>.</span></h2>
         <div class="split even">
           <div class="stack">
-            <div class="q"><p>Celsius fixed 0 °C and 100 °C with water at 1&nbsp;atm. Why does the pressure matter?</p><div class="ans step">Boiling depends on pressure: in Lhasa, 3650 m up, water boils below 90 °C</div></div>
+            <div class="q"><p>Celsius set 0 °C and 100 °C with water at 1&nbsp;atm. Why does pressure matter?</p><div class="ans step">Boiling point depends on pressure: in Lhasa (3650 m), water boils below 90 °C</div></div>
             <div class="equation small step"><span>\(T / \mathrm{K} = \theta / {}^{\circ}\mathrm{C} + 273\)</span></div>
             <ul class="points small">
-              <li class="step">The kelvin scale starts at <b>absolute zero</b></li>
-              <li class="step">One kelvin is the same size as one degree Celsius</li>
-              <li class="step">So a temperature <b>change</b> is the same number on both scales</li>
+              <li class="step">Kelvin starts at <b>absolute zero</b></li>
+              <li class="step">1 K is the same size as 1 °C</li>
+              <li class="step">A temperature <b>change</b>: the same number on both</li>
             </ul>
           </div>
           <div class="panel">
@@ -259,15 +260,15 @@
       <section class="slide" data-title="Internal energy">
         <h2>Internal energy<span>.</span></h2>
         <div class="stack center" style="gap: 18px;">
-          <div class="q"><p>A cup of hot tea rides on a fast train. Does the train’s speed add to the tea’s internal energy?</p><div class="ans step">No: only the <b>random</b> motion of its molecules counts, not the motion of the whole cup</div></div>
+          <div class="q"><p>Hot tea on a fast train: does the speed add to its internal energy?</p><div class="ans step">No: only the <b>random</b> motion of its molecules counts</div></div>
           <div class="cards" style="grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center;">
-            <div class="card step"><p class="eyebrow">Total random</p><h3>Kinetic energy</h3><p>From the random motion of the molecules. Rises with <b>temperature</b></p></div>
+            <div class="card step"><p class="eyebrow">Total random</p><h3>Kinetic energy</h3><p>Random motion. Rises with <b>temperature</b></p></div>
             <div class="big-symbol step">+</div>
-            <div class="card step"><p class="eyebrow">Total intermolecular</p><h3>Potential energy</h3><p>From the forces between the molecules. Changes with their <b>separation</b>, so with the <b>phase</b></p></div>
+            <div class="card step"><p class="eyebrow">Total intermolecular</p><h3>Potential energy</h3><p>Forces between molecules. Changes with <b>separation</b>: the <b>phase</b></p></div>
             <div class="big-symbol step">=</div>
-            <div class="card step"><p class="eyebrow">The sum, for all the molecules</p><h3>Internal energy</h3><p>A property of the whole body, in joules</p></div>
+            <div class="card step"><p class="eyebrow">The sum, all molecules</p><h3>Internal energy</h3><p>For the whole body, in joules</p></div>
           </div>
-          <div class="idea step">Temperature: the <b>average</b> kinetic energy of one molecule. Internal energy: the <b>total</b> for all.</div>
+          <div class="idea step">Temperature: <b>average</b> kinetic energy per molecule. Internal energy: the <b>total</b></div>
         </div>
         <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -319,15 +320,23 @@
       <section class="slide" data-title="Quick check: particles and temperature">
         <p class="eyebrow">Quick check</p>
         <h2>Particles and temperature<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Convert 37 °C to kelvin.</p><div class="ans step">310 K</div></div>
           <div class="q"><p><span class="n">02</span>A liquid is heated by 15 °C. What is the rise in kelvin?</p><div class="ans step">15 K</div></div>
           <div class="q"><p><span class="n">03</span>The kelvin temperature of a gas doubles. The average kinetic energy of a molecule?</p><div class="ans step">It doubles</div></div>
-          <div class="q"><p><span class="n">04</span>Which two kinds of energy make up internal energy?</p><div class="ans step">Random kinetic and intermolecular potential</div></div>
-          <div class="q"><p><span class="n">05</span>What decides the direction of thermal energy transfer?</p><div class="ans step">The temperature difference</div></div>
-          <div class="q"><p><span class="n">06</span>A 2.0 m³ tank holds 1600 kg of oil. Density?</p><div class="ans step">\(\frac{1600}{2.0} = 800 \,\mathrm{kg} \,\mathrm{m}^{-3}\)</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: particles and temperature">
+        <p class="eyebrow">Quick check</p>
+        <h2>Particles and temperature<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>Which two kinds of energy make up internal energy?</p><div class="ans step">Random kinetic and intermolecular potential</div></div>
+          <div class="q"><p><span class="n">05</span>What decides the direction of thermal energy transfer?</p><div class="ans step">The temperature difference</div></div>
+          <div class="q"><p><span class="n">06</span>A 2.0 m³ tank holds 1600 kg of oil. Density?</p><div class="ans step">\(\dfrac{1600}{2.0} = 800 \,\mathrm{kg} \,\mathrm{m}^{-3}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -424,7 +433,6 @@
               <span class="step">\(c = \dfrac{Pt}{m \Delta T} = \dfrac{48 \times 300}{1.0 \times 15}\)</span>
               <span class="step">\(c = \class{res}{960 \,\mathrm{J} \,\mathrm{kg}^{-1} \,\mathrm{K}^{-1}}\)</span>
             </div>
-            <div class="q"><p>The accepted value for aluminum is 900. Source of error? Improvement?</p><div class="ans step">Energy lost to the room, so the result is too high: insulate it better</div><div class="ans step">The thermometer lags behind: oil in its hole, record the highest reading</div></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>A HEATED METAL BLOCK</span></div>
@@ -443,6 +451,21 @@
             <p class="tip">A graph of temperature against time for a steady heater has gradient \(\frac{P}{mc}\). Using the gradient of the straight part is better than using one pair of readings.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Measuring specific heat capacity">
+        <p class="eyebrow">An electrical method: evaluate</p>
+        <h2>Measuring specific heat capacity<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="q"><p>The accepted value for aluminum is 900. Source of error? Improvement?</p><div class="ans step">Energy lost to the room, so the result is too high: insulate it better</div><div class="ans step">The thermometer lags behind: oil in its hole, record the highest reading</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A HEATED METAL BLOCK</span></div>
+            <div class="fig" data-fig="b1-heater"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Mixing: hot copper into water">
@@ -485,10 +508,10 @@
             <div class="fig" data-fig="b1-heating-curve" data-animate></div>
           </div>
           <ul class="points small">
-            <li class="step">Sloping parts: the temperature rises, \(Q = mc \Delta T\)</li>
-            <li class="step">Flat parts: the phase changes at <b>constant temperature</b></li>
-            <li class="step">The energy goes into <b>potential</b> energy, not kinetic</li>
-            <li class="step">Cooling runs the graph backwards: condensing and freezing <b>release</b> energy</li>
+            <li class="step">Sloping: temperature rises, \(Q = mc \Delta T\)</li>
+            <li class="step">Flat: phase changes at <b>constant temperature</b></li>
+            <li class="step">Energy \(\rightarrow\) <b>potential</b>, not kinetic</li>
+            <li class="step">Cooling: backwards. Condensing and freezing <b>release</b> energy</li>
           </ul>
         </div>
         <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS, SL + HL</span><span data-page></span></div>
@@ -625,10 +648,18 @@
       <section class="slide" data-title="Quick check: heating and changes of phase">
         <p class="eyebrow">Quick check</p>
         <h2>Heating and changes of phase<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Energy to warm 2.0 kg of water by 10 K? (\(c\) = 4200 J kg⁻¹ K⁻¹)</p><div class="ans step">\(2.0 \times 4200 \times 10 = 8.4 \times 10^{4} \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">02</span>The same energy goes into 2.0 kg of copper. Larger or smaller rise?</p><div class="ans step">Larger: copper has a smaller \(c\)</div></div>
           <div class="q"><p><span class="n">03</span>What happens to the temperature while a pure solid melts?</p><div class="ans step">It stays constant</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: heating and changes of phase">
+        <p class="eyebrow">Quick check</p>
+        <h2>Heating and changes of phase<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Which energy of the molecules rises during melting?</p><div class="ans step">Their potential energy</div></div>
           <div class="q"><p><span class="n">05</span>Energy to boil away 0.10 kg of water at 100 °C? (\(L = 2.26 \times 10^{6} \,\mathrm{J} \,\mathrm{kg}^{-1}\))</p><div class="ans step">\(0.10 \times 2.26 \times 10^{6} = 2.3 \times 10^{5} \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">06</span>Why does evaporation cool a liquid?</p><div class="ans step">The fastest molecules leave</div></div>
@@ -833,10 +864,10 @@
       <section class="slide" data-title="Thermal radiation and black bodies">
         <h2>Thermal radiation and black bodies<span>.</span></h2>
         <div class="stack center" style="gap: 26px;">
-          <div class="q"><p>Everything above absolute zero <b>emits</b> electromagnetic waves, you included. Why?</p><div class="ans step">Its particles always vibrate, and the charges in them accelerate: accelerating charges emit electromagnetic waves</div></div>
+          <div class="q"><p>Everything above 0 K <b>emits</b> electromagnetic waves, you included. Why?</p><div class="ans step">Its charged particles always vibrate: accelerating charges emit EM waves</div></div>
           <ul class="points">
-            <li class="step">At everyday temperatures, almost all of it is <b>infrared</b></li>
-            <li class="step">A <b>black body</b> absorbs all the radiation that falls on it, and is also the best possible emitter</li>
+            <li class="step">Everyday temperatures: mostly <b>infrared</b></li>
+            <li class="step"><b>Black body</b>: absorbs all radiation that falls on it; the best emitter</li>
           </ul>
           <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
             <div class="card"><p class="eyebrow">Near enough black</p><h3>A star</h3><p>Its spectrum is close to a black body’s</p></div>
@@ -867,9 +898,9 @@
           <div class="q"><p>You glow too. Why can’t we see it?</p><div class="ans step">At body temperature almost all of it is <b>infrared</b>, which our eyes cannot detect</div></div>
           <div class="story band" style="--photo-h: 250px;">
             <div class="story-photos">
-              <figure class="step"><img src="images/infrared-dog.jpg" width="416" height="212" alt="A dog photographed with a thermal camera: its eyes and mouth glow yellow-white, its fur purple, beside a temperature scale from 20 to 35 °C"><figcaption><b>About 35 °C</b>: a dog through a thermal camera, which sees infrared</figcaption></figure>
-              <figure class="step"><img src="images/red-hot-iron.jpg" width="600" height="450" alt="A bar of iron glowing orange-red on an anvil, held in tongs by a blacksmith"><figcaption><b>About 1000 °C</b>: iron at a forge glows red</figcaption></figure>
-              <figure class="step"><img src="images/sun.jpg" width="1200" height="1200" alt="The Sun as a bright disk with a few dark sunspots"><figcaption><b>About 5800 K</b>: the Sun, brightest in the visible</figcaption></figure>
+              <figure class="step"><img src="images/infrared-dog.jpg" width="416" height="212" alt="A dog photographed with a thermal camera: its eyes and mouth glow yellow-white, its fur purple, beside a temperature scale from 20 to 35 °C"><figcaption><b>35 °C</b>: a dog, in infrared</figcaption></figure>
+              <figure class="step"><img src="images/red-hot-iron.jpg" width="600" height="450" alt="A bar of iron glowing orange-red on an anvil, held in tongs by a blacksmith"><figcaption><b>1000 °C</b>: iron glows red</figcaption></figure>
+              <figure class="step"><img src="images/sun.jpg" width="1200" height="1200" alt="The Sun as a bright disk with a few dark sunspots"><figcaption><b>5800 K</b>: the Sun, peak in the visible</figcaption></figure>
             </div>
           </div>
           <div class="idea step">Hotter: <b>more</b> radiation, at <b>shorter</b> wavelengths.</div>
@@ -891,18 +922,19 @@
 
       <section class="slide" data-title="The Stefan–Boltzmann law">
         <h2>The Stefan–Boltzmann law<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: .8fr 1.2fr;">
           <div class="stack">
             <div class="equation"><span>\(L = \sigma A T^{4}\)</span></div>
             <ul class="points small">
-              <li>\(L\): the <b>luminosity</b>, or <b>radiated power</b>: the total power emitted, in watts</li>
+              <li>\(L\): <b>luminosity</b>, the total power emitted (W)</li>
               <li class="step">\(A\): the <b>surface area</b> of the body</li>
               <li class="step">\(\sigma = 5.67 \times 10^{-8} \,\mathrm{W} \,\mathrm{m}^{-2} \,\mathrm{K}^{-4}\)</li>
             </ul>
           </div>
           <div class="work step">
             <span class="say">The Sun: radius \(6.96 \times 10^{8} \,\mathrm{m}\), surface at 5800 K</span>
-            <span>\(A = 4 \pi R^{2} = 4 \pi \times (6.96 \times 10^{8})^{2} = 6.09 \times 10^{18} \,\mathrm{m}^{2}\)</span>
+            <span>\(A = 4 \pi R^{2} = 4 \pi \times (6.96 \times 10^{8})^{2}\)</span>
+            <span>&nbsp; \(= 6.09 \times 10^{18} \,\mathrm{m}^{2}\)</span>
             <span class="step">\(L = \sigma A T^{4}\)</span>
             <span class="step">\(L = 5.67 \times 10^{-8} \times 6.09 \times 10^{18} \times 5800^{4}\)</span>
             <span class="step">\(L = \class{res}{3.9 \times 10^{26} \,\mathrm{W}}\)</span>
@@ -949,12 +981,11 @@
         <h2>Apparent brightness<span>.</span></h2>
         <div class="split">
           <div class="stack">
-            <div class="q"><p>Two stars look equally bright. Do they give out the same power?</p><div class="ans step">Not necessarily: it also depends on how far away they are</div></div>
+            <div class="q"><p>Two stars look equally bright. Same power?</p><div class="ans step">Not necessarily: distance matters too</div></div>
             <div class="equation small step"><span>\(b = \dfrac{L}{4 \pi d^{2}}\)</span></div>
             <ul class="points small">
-              <li class="step">\(b\): the power received <b>per unit area</b>, in \(\mathrm{W} \,\mathrm{m}^{-2}\)</li>
-              <li class="step">Also called <b>intensity</b>, \(I = \frac{P}{A}\)</li>
-              <li class="step">An <b>inverse square</b> law: twice as far, a quarter as bright</li>
+              <li class="step">\(b\): power <b>per unit area</b>, the <b>intensity</b></li>
+              <li class="step"><b>Inverse square</b>: \(2\times\) distance, \(\tfrac{1}{4}\) brightness</li>
             </ul>
           </div>
           <div class="panel">
@@ -1079,12 +1110,20 @@
       <section class="slide" data-title="Quick check: thermal radiation">
         <p class="eyebrow">Quick check</p>
         <h2>Thermal radiation<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is a black body?</p><div class="ans step">It absorbs all the radiation falling on it</div></div>
           <div class="q"><p><span class="n">02</span>The kelvin temperature of a black body doubles. Its power?</p><div class="ans step">16 times as great</div></div>
           <div class="q"><p><span class="n">03</span>A star is moved three times as far away. Its apparent brightness?</p><div class="ans step">One ninth</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: thermal radiation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Thermal radiation<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Which is hotter: a red star or a blue star?</p><div class="ans step">The blue star</div></div>
-          <div class="q"><p><span class="n">05</span>A star has \(\lambda_\mathrm{max}\) = 290 nm. Its surface temperature?</p><div class="ans step">\(\frac{2.9 \times 10^{-3}}{2.9 \times 10^{-7}} = 1.0 \times 10^{4} \,\mathrm{K}\)</div></div>
+          <div class="q"><p><span class="n">05</span>A star has \(\lambda_\mathrm{max}\) = 290 nm. Its surface temperature?</p><div class="ans step">\(\dfrac{2.9 \times 10^{-3}}{2.9 \times 10^{-7}} = 1.0 \times 10^{4} \,\mathrm{K}\)</div></div>
           <div class="q"><p><span class="n">06</span>What is the unit of apparent brightness?</p><div class="ans step">W m⁻²</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
@@ -1105,7 +1144,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Absolute temperature</b><span>In kelvin; proportional to the average kinetic energy of a particle</span></div>
@@ -1113,6 +1152,14 @@
           <div class="term"><b>Thermal equilibrium</b><span>Same temperature: no resultant transfer</span></div>
           <div class="term"><b>Specific heat capacity</b><span>Energy to warm 1 kg by 1 K</span></div>
           <div class="term"><b>Specific latent heat</b><span>Energy to change the phase of 1 kg at constant temperature</span></div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Thermal conductivity</b><span>How well a material conducts</span></div>
           <div class="term"><b>Black body</b><span>A perfect absorber and the best emitter</span></div>
           <div class="term"><b>Luminosity</b><span>Total power radiated, in W. Also called radiated power</span></div>

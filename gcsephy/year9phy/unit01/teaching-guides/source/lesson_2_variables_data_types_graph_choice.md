@@ -132,7 +132,7 @@ Students classify 10 investigation questions as requiring either a line graph or
 
 ## Using the workbook
 
-The Quick check (slide 19) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 20) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 

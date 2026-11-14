@@ -39,7 +39,7 @@
       hinge: "“A sealed can is cooled. Which is true? A: the particles get smaller. B: the particles hit the walls less often and less hard. C: some particles leave.” Anything but B: return to slide 10.",
       misconceptions: [["Heating makes the particles expand.", "The particles stay the same size and move faster. Ban “the particles expand”."], ["Pressure is caused by particles hitting each other.", "Only collisions with the walls push on the walls. Ask what the gauge is connected to."], ["Hot gas particles all move at the same speed.", "The model on slide 9 shows a spread of speeds: hence ‘average’ kinetic energy."]],
       support: "Give the four steps of the chain on cards to sequence before writing Q4. Accept bullet points for the explanation.",
-      stretch: "Q5. Triple Science: preview slide 48 by asking what would happen to the pressure if the same gas were squeezed into half the volume.",
+      stretch: "Q5. Triple Science: preview slide 49 by asking what would happen to the pressure if the same gas were squeezed into half the volume.",
       homework: "<strong>Prep 1</strong> (Lessons 1–2).",
     },
     3: {
@@ -63,7 +63,7 @@
     4: {
       week: "2",
       why: "Required practical 5 (Physics) / 17 (Combined Science). Students need all three methods, and exam questions concentrate on displacement, on the choice of instrument and on sources of error. The lab comes before the questions in this booklet, because the questions use the students' own results.",
-      prep: "Per group: balance (0.1 g or better), ruler, vernier callipers, two or three regular blocks, two irregular objects on thread (stones, lumps of modelling clay), 100 cm³ measuring cylinder, displacement can and beaker, water, a second liquid (salt water: about 15 g of salt per 100 cm³), paper towels. Deck slides 18–23. A circus of three stations (A, B, C) works well with 10 minutes at each.",
+      prep: "Per group: balance (0.1 g or better), ruler, vernier callipers, two or three regular blocks, two irregular objects on thread (stones, lumps of modelling clay), 100 cm³ measuring cylinder, displacement can and beaker, water, a second liquid (salt water: about 15 g of salt per 100 cm³), paper towels. Deck slides 18–24. A circus of three stations (A, B, C) works well with 10 minutes at each.",
       timing: [
         [0, 5, "Do now", "Density equation, 1 ml = 1 cm³, volume of a cuboid."],
         [5, 13, "Brief", "Slides 19–21: one slide for each method. Demonstrate reading a meniscus at eye level and using the callipers. Safety: spills."],
@@ -79,11 +79,11 @@
     5: {
       week: "3",
       why: "This is the conceptual centre of the unit: heating does one of two things, and the particle model says which energy changes. Flat sections on heating graphs are counter-intuitive (“the heater is on, why is it not getting hotter?”), so students collect or plot a cooling curve themselves before latent heat is quantified in Lesson 6.",
-      prep: "Per group: a boiling tube one third full of stearic acid, melted in a water bath at about 90 °C before the lesson, a thermometer in each tube, clamp stands, stopwatches, eye protection. The class practical takes 12 minutes of readings; if time is short, run one tube as a demonstration under a visualiser and give the sample results. Deck slides 24–28.",
+      prep: "Per group: a boiling tube one third full of stearic acid, melted in a water bath at about 90 °C before the lesson, a thermometer in each tube, clamp stands, stopwatches, eye protection. The class practical takes 12 minutes of readings; if time is short, run one tube as a demonstration under a visualiser and give the sample results. Deck slides 25–29.",
       timing: [
         [0, 5, "Do now", "Then start the cooling immediately: tubes out of the bath, first reading (Q5). One student in each group reads every minute while the lesson continues."],
-        [5, 17, "Learn: internal energy", "Slides 25–26. Kinetic and potential energy of particles; the two outcomes of heating. Keep recording."],
-        [17, 27, "Learn: graphs", "Slides 27–28. Label the heating graph for water with the class."],
+        [5, 17, "Learn: internal energy", "Slides 26–27. Kinetic and potential energy of particles; the two outcomes of heating. Keep recording."],
+        [17, 27, "Learn: graphs", "Slides 28–29. Label the heating graph for water with the class."],
         [27, 39, "Plot", "Q6: plot the cooling curve from their readings; Q7–Q8."],
         [39, 46, "Try it", "Q1–Q3; Q4 is the challenge."],
         [46, 50, "Exam corner", "Q9, marked against the three points."],
@@ -97,14 +97,14 @@
     6: {
       week: "3",
       why: R`Lesson 5 established that a change of state needs energy at constant temperature; now it is measured. \(E = m\,L\) has no temperature term, which makes it the simpler of the two heating equations, so it comes before specific heat capacity. The specification also asks for an experiment to measure the latent heat of fusion of water.`,
-      prep: "Demonstration or groups: two filter funnels of crushed ice (taken from the freezer 15 minutes earlier so it is at 0 °C and wet), two beakers, 12 V immersion heater, joulemeter, power supply, balance. Run the heater for 5 minutes; start it early in the lesson. Deck slides 29–34.",
+      prep: "Demonstration or groups: two filter funnels of crushed ice (taken from the freezer 15 minutes earlier so it is at 0 °C and wet), two beakers, 12 V immersion heater, joulemeter, power supply, balance. Run the heater for 5 minutes; start it early in the lesson. Deck slides 30–35.",
       timing: [
-        [0, 6, "Do now", "Then set the ice experiment running (slide 33) so that it melts during the teaching."],
-        [6, 18, "Learn", R`Slides 30–31: latent heat, the definition, \(E = m\,L\). Slide 31 Example 1: students fill in the workbook frame as you model it, then ‘Your turn’.`],
-        [18, 24, "Learn: two kinds", "Slide 32: fusion and vaporisation, the values for water, and the steam scald."],
-        [24, 36, "Try it", "Q1–Q4; Q5 is the challenge. Model slide 31 Example 2 (rearranging) and its ‘Your turn’ before Q4."],
+        [0, 6, "Do now", "Then set the ice experiment running (slide 34) so that it melts during the teaching."],
+        [6, 18, "Learn", R`Slides 31–32: latent heat, the definition, \(E = m\,L\). Slide 32 Example 1: students fill in the workbook frame as you model it, then ‘Your turn’.`],
+        [18, 24, "Learn: two kinds", "Slide 33: fusion and vaporisation, the values for water, and the steam scald."],
+        [24, 36, "Try it", "Q1–Q4; Q5 is the challenge. Model slide 32 Example 2 (rearranging) and its ‘Your turn’ before Q4."],
         [36, 46, "Practical results", "Read the joulemeter and both masses; Q6–Q8. Compare the class value with 334 000 J/kg."],
-        [46, 50, "Exam corner", "Q9 (grams to kilograms) as the hinge. Quick check (slide 34) in the workbook box, here or as next lesson's Do now."],
+        [46, 50, "Exam corner", "Q9 (grams to kilograms) as the hinge. Quick check (slide 35) in the workbook box, here or as next lesson's Do now."],
       ],
       hinge: R`“Which of these needs \(E = m\,L\)? A: warming water from 20 °C to 30 °C. B: melting ice at 0 °C. C: cooling a block of iron.” Then ask why there is no temperature in the equation.`,
       misconceptions: [["Boiling water keeps getting hotter the longer it boils.", "A thermometer in a boiling kettle or beaker stays at 100 °C."], ["Latent heat is only taken in, never given out.", "The same energy is released on freezing and condensing: the steam scald, and why frost-protection sprays work."], ["‘Fusion’ means joining nuclei.", "In this topic it is the old word for melting."]],
@@ -115,12 +115,12 @@
     7: {
       week: "4",
       why: R`Specific heat capacity appears in both the Energy section (4.1.1.3) and here (4.3.2.2); the Year 9 Energy unit left it for this unit. It has the unit's hardest equation, with three variables to rearrange and a temperature <em>change</em> to calculate first. Ending with ‘heat capacity or latent heat?’ makes students choose between the two equations, which is how exam questions test them.`,
-      prep: "Two identical hotplates or heaters; 200 g of water and 200 g of cooking oil in matching beakers, each with a thermometer (demonstration: equal energy, different temperature rises). Calculators. Deck slides 35–39.",
+      prep: "Two identical hotplates or heaters; 200 g of water and 200 g of cooking oil in matching beakers, each with a thermometer (demonstration: equal energy, different temperature rises). Calculators. Deck slides 36–40.",
       timing: [
         [0, 6, "Do now", R`Includes a temperature change, the step most often missed.`],
-        [6, 12, "Demonstration", "Heat the water and the oil for the same time. Predict first; read both thermometers. Slide 36."],
-        [12, 26, "Learn", R`Slide 37: definition and \(\Delta E = m\,c\,\Delta\theta\). Students fill in the workbook frame as you model it, then ‘Your turn’. Slide 38: the two rearranging examples, each with its ‘Your turn’.`],
-        [26, 42, "Try it", "Q1–Q4. Q5 (which equation?) after slide 39. Q6 is the two-step challenge."],
+        [6, 12, "Demonstration", "Heat the water and the oil for the same time. Predict first; read both thermometers. Slide 37."],
+        [12, 26, "Learn", R`Slide 38: definition and \(\Delta E = m\,c\,\Delta\theta\). Students fill in the workbook frame as you model it, then ‘Your turn’. Slide 39: the two rearranging examples, each with its ‘Your turn’.`],
+        [26, 42, "Try it", "Q1–Q4. Q5 (which equation?) after slide 40. Q6 is the two-step challenge."],
         [42, 50, "Exam corner", "Q7 and Q8 timed; Q9 for homework."],
       ],
       hinge: R`“Water is heated from 20 °C to 100 °C. \(\Delta\theta\) is: A 100 °C, B 80 °C, C 120 °C.” Then: “Which equation for melting ice at 0 °C?”`,
@@ -132,13 +132,13 @@
     8: {
       week: "4",
       why: R`Required practical 1 (Physics) / 14 (Combined Science). It is the most examined practical in the Energy and Particle model sections, and the evaluation (why the result is too high) is as important as the method. Measuring the energy with an ammeter, a voltmeter and a stopwatch revisits \(P = V\,I\) and \(E = P\,t\) from Electric Circuits; the joulemeter is the alternative, and students should recognise both in exam questions.`,
-      prep: "Per group: 1 kg aluminium (or other) block with two holes, 12 V immersion heater, thermometer, insulation jacket, heatproof mat, power supply, ammeter (0–10 A), voltmeter, leads, stopwatch, a drop of oil for the thermometer hole. A balance to share. A joulemeter for at least one group if you have one, so the class sees both methods. Check each heater is rated for the supply. Deck slides 40–44.",
+      prep: "Per group: 1 kg aluminium (or other) block with two holes, 12 V immersion heater, thermometer, insulation jacket, heatproof mat, power supply, ammeter (0–10 A), voltmeter, leads, stopwatch, a drop of oil for the thermometer hole. A balance to share. A joulemeter for at least one group if you have one, so the class sees both methods. Check each heater is rated for the supply. Deck slides 41–45.",
       timing: [
         [0, 5, "Do now", R`Includes \(P = V\,I\) and \(E = P\,t\), which combine to give today's equation.`],
-        [5, 13, "Brief", "Slide 41: the method, both ways of measuring energy. Safety: the heater must be in the block before it is switched on."],
+        [5, 13, "Brief", "Slide 42: the method, both ways of measuring energy. Safety: the heater must be in the block before it is switched on."],
         [13, 31, "Practical", "Q1–Q2: set up, then 10 minutes of heating with readings every 2 minutes. During the wait, groups calculate the energy row."],
         [31, 43, "Results", "Q3 (from the totals), then Q4–Q6 (graph and gradient). If time is short, set the graph as homework and do Q3 and Q7 in class."],
-        [43, 50, "Evaluate", "Slide 43; Q7. Compare class values with the accepted value. Quick check (slide 44) in the workbook box, here or as next lesson's Do now."],
+        [43, 50, "Evaluate", "Slide 44; Q7. Compare class values with the accepted value. Quick check (slide 45) in the workbook box, here or as next lesson's Do now."],
       ],
       hinge: R`“Our value came out higher than the true one. Is that because the temperature rise we measured was too big or too small?” (Too small: energy went to the surroundings.)`,
       misconceptions: [["Energy losses make the answer too low.", R`Less energy reaches the block, so \(\Delta\theta\) is too small, and dividing by a smaller number gives a bigger \(c\).`], ["Take the final temperature the moment the heater is switched off.", "The temperature keeps rising for a minute as energy spreads through the block: record the highest reading."], ["The difference from the true value is ‘human error’.", "Name the cause: energy transferred to the surroundings, a systematic error. Insulation reduces it."]],

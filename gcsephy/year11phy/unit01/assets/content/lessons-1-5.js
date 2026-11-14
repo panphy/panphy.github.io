@@ -184,7 +184,7 @@
       big: "Neon signs glow red and sodium street lamps glow orange. Each element gives out its own colours of light. What are its electrons doing?",
       goals: ["describe Bohr's model of electrons in energy levels", "explain how electrons change level when they absorb or emit electromagnetic radiation", "describe how protons and then neutrons were discovered", "explain why scientific models change"],
       keywords: ["Bohr model", "energy level", "absorb", "emit", "electromagnetic radiation", "proton", "neutron", "peer review"],
-      deck: { slides: "18–25", text: "The Bohr model, energy levels, protons then neutrons, and why models change.", sim: SIM_ATOMS },
+      deck: { slides: "18–26", text: "The Bohr model, energy levels, protons then neutrons, and why models change.", sim: SIM_ATOMS },
       doNow: [
         ["Which experiment showed that atoms have a tiny nucleus?", "The alpha scattering experiment."],
         ["What is the charge on an alpha particle?", "Positive (+2)."],
@@ -250,7 +250,7 @@
       big: "A smoke alarm contains a radioactive source. Nothing switches it on, yet it gives out radiation for hundreds of years. Why?",
       goals: ["explain why some nuclei give out radiation", "describe radioactive decay as random", "define activity and count rate", "describe what alpha, beta, gamma and neutron radiation are, and how each changes the nucleus"],
       keywords: ["unstable nucleus", "radioactive decay", "random", "activity", "becquerel (Bq)", "count rate", "Geiger–Müller tube", "alpha", "beta", "gamma"],
-      deck: { slides: "26–30", text: "Radioactive decay, activity and count rate, then alpha, beta and gamma.", sim: SIM_DECAY },
+      deck: { slides: "27–31", text: "Radioactive decay, activity and count rate, then alpha, beta and gamma.", sim: SIM_DECAY },
       doNow: [
         ["What is an isotope?", "An atom of the same element with a different number of neutrons."],
         ["What happens when an electron emits EM radiation?", "It moves to a lower energy level, closer to the nucleus."],

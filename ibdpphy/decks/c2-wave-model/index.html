@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -63,19 +64,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="c2-transverse" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="c2-transverse" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Traveling waves</h3>
             <p>Transverse and longitudinal waves, and \(v = f \lambda\)</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="c2-moving" data-still style="height: 220px;"></div>
+            <div class="fig" data-fig="c2-moving" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Two graphs of one wave</h3>
             <p>Displacement against position, and against time</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="c2-em" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="c2-em" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Sound and light</h3>
             <p>Mechanical waves and electromagnetic waves</p>
@@ -229,15 +230,23 @@
       <section class="slide" data-title="Quick check: traveling waves">
         <p class="eyebrow">Quick check</p>
         <h2>Traveling waves<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What does a traveling wave transfer?</p><div class="ans step">Energy, not matter</div></div>
           <div class="q"><p><span class="n">02</span>How do the particles move in a longitudinal wave?</p><div class="ans step">Along the direction of travel</div></div>
           <div class="q"><p><span class="n">03</span>Is sound in air transverse or longitudinal?</p><div class="ans step">Longitudinal</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: traveling waves">
+        <p class="eyebrow">Quick check</p>
+        <h2>Traveling waves<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A wave has \(f\) = 50 Hz and \(\lambda\) = 0.30 m. Speed?</p><div class="ans step">15 m s⁻¹</div></div>
           <div class="q"><p><span class="n">05</span>A wave of period 0.20 s travels at 4.0 m s⁻¹. Wavelength?</p><div class="ans step">0.80 m</div></div>
           <div class="q"><p><span class="n">06</span>What decides the frequency of a wave?</p><div class="ans step">The source</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -376,10 +385,18 @@
       <section class="slide" data-title="Quick check: graphs of a wave">
         <p class="eyebrow">Quick check</p>
         <h2>Two graphs of one wave<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Which graph gives the wavelength?</p><div class="ans step">Displacement against position</div></div>
           <div class="q"><p><span class="n">02</span>Which graph gives the period?</p><div class="ans step">Displacement against time</div></div>
           <div class="q"><p><span class="n">03</span>A snapshot repeats every 2.0 m; a particle repeats every 0.40 s. Wave speed?</p><div class="ans step">5.0 m s⁻¹</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: graphs of a wave">
+        <p class="eyebrow">Quick check</p>
+        <h2>Two graphs of one wave<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>How fast is a particle moving when it is at a crest?</p><div class="ans step">It is at rest</div></div>
           <div class="q"><p><span class="n">05</span>What is the displacement at the center of a compression?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">06</span>Two particles are half a wavelength apart. How do their motions compare?</p><div class="ans step">Exactly opposite</div></div>
@@ -476,9 +493,9 @@
             <figure><img src="images/hertz-apparatus.jpg" width="594" height="241" alt="Engraving of two curved metal reflectors facing each other, one with an induction coil and spark gap, the other with a receiver"><figcaption>A <b>spark transmitter and receiver</b> of the Hertz type</figcaption></figure>
           </div>
           <ul class="points">
-            <li>In 1864 James Clerk Maxwell’s theory had <b>predicted</b> electromagnetic waves. Nobody had made one</li>
-            <li>From 1886 to 1889 Hertz made them with a <b>spark</b> and detected them with a loop of wire. They reflected, refracted and traveled at the <b>speed of light</b></li>
-            <li>Asked what use they were: “Nothing, I guess.” He died at 36; the unit of frequency took his name in 1930</li>
+            <li>1864: Maxwell’s theory <b>predicted</b> electromagnetic waves. None had been made</li>
+            <li>1886–89: Hertz made them with a <b>spark</b>, detected them with a wire loop. They traveled at the <b>speed of light</b></li>
+            <li>Their use? “Nothing, I guess.” The unit of frequency is named after him</li>
           </ul>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:HEINRICH_HERTZ.JPG" target="_blank" rel="noopener">Robert Krewaldt, about 1890</a>, public domain. Engraving: <a href="https://commons.wikimedia.org/wiki/File:Hertzian_spark_gap_transmitter_and_receiver.png" target="_blank" rel="noopener">unknown author, before 1912</a>, public domain.</p>
@@ -513,14 +530,14 @@
       <section class="slide" data-title="Mechanical and electromagnetic waves">
         <p class="eyebrow">Compare</p>
         <h2>Mechanical and electromagnetic waves<span>.</span></h2>
-        <table class="facts compare">
+        <table class="facts compare snug">
           <thead><tr><th></th><th>Mechanical waves</th><th>Electromagnetic waves</th></tr></thead>
           <tbody>
             <tr><td><b>What oscillates</b></td><td>Particles of a medium</td><td>Electric and magnetic fields</td></tr>
             <tr class="step"><td><b>Medium</b></td><td>Essential</td><td>Not needed: can cross a vacuum</td></tr>
             <tr class="step"><td><b>Type</b></td><td>Transverse or longitudinal</td><td>Always transverse</td></tr>
-            <tr class="step"><td><b>Speed</b></td><td>Set by the medium: 340 m s⁻¹ for sound in air</td><td><span class="equation-inline">\(3.00 \times 10^{8}\) m s⁻¹</span> in a vacuum; slower in matter</td></tr>
-            <tr class="step"><td><b>Examples</b></td><td>Sound, waves on strings and water, seismic waves</td><td>Radio, microwaves, infrared, light, ultraviolet, X-rays, gamma rays</td></tr>
+            <tr class="step"><td><b>Speed</b></td><td>Set by the medium: 340 m s⁻¹, sound in air</td><td><span class="equation-inline">\(3.00 \times 10^{8}\) m s⁻¹</span> in a vacuum; slower in matter</td></tr>
+            <tr class="step"><td><b>Examples</b></td><td>Sound, strings, water, seismic waves</td><td>Radio to gamma rays</td></tr>
           </tbody>
         </table>
         <div class="slide-foot"><span>C.2 WAVE MODEL, SL + HL</span><span data-page></span></div>
@@ -540,11 +557,19 @@
       <section class="slide" data-title="Quick check: sound and light">
         <p class="eyebrow">Quick check</p>
         <h2>Sound and light<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Why can sound not cross a vacuum?</p><div class="ans step">It needs particles to oscillate</div></div>
           <div class="q"><p><span class="n">02</span>What oscillates in an electromagnetic wave?</p><div class="ans step">Electric and magnetic fields</div></div>
           <div class="q"><p><span class="n">03</span>Which has the longer wavelength: infrared or ultraviolet?</p><div class="ans step">Infrared</div></div>
-          <div class="q"><p><span class="n">04</span>Frequency of a radio wave of wavelength 3.0 m?</p><div class="ans step">\(\frac{3.00 \times 10^{8}}{3.0} = 1.0 \times 10^{8} \,\mathrm{Hz}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: sound and light">
+        <p class="eyebrow">Quick check</p>
+        <h2>Sound and light<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>Frequency of a radio wave of wavelength 3.0 m?</p><div class="ans step">\(\dfrac{3.00 \times 10^{8}}{3.0} = 1.0 \times 10^{8} \,\mathrm{Hz}\)</div></div>
           <div class="q"><p><span class="n">05</span>An echo from a cliff returns after 1.0 s. Distance to the cliff? (340 m s⁻¹)</p><div class="ans step">170 m: there and back is 340 m</div></div>
           <div class="q"><p><span class="n">06</span>Are electromagnetic waves transverse or longitudinal?</p><div class="ans step">Transverse</div></div>
         </div>

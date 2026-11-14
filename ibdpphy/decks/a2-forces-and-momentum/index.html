@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,31 +63,31 @@
         <h2>Five parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(5, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="fbd-block" data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="fbd-block" data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Newton’s laws</h3>
             <p>Free-body diagrams and the resultant force</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="slope-fbd" data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="slope-fbd" data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>The forces</h3>
             <p>Contact forces and field forces</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="impulse-graph" data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="impulse-graph" data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Momentum</h3>
             <p>Impulse and the full second law</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="collide" data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="collide" data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Collisions</h3>
             <p>Conservation, energy and explosions</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="circ-va" data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="circ-va" data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 05</p>
             <h3>Circular motion</h3>
             <p>Centripetal acceleration and force</p>
@@ -327,8 +328,6 @@
             <span class="step">\(F_\mathrm{N} - mg = ma\) &nbsp;so&nbsp; \(F_\mathrm{N} = m(g + a)\)</span>
             <span class="say step">Accelerating upwards: \(a = +1.5 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
             <span class="step">\(F_\mathrm{N} = 70(9.8 + 1.5) = \class{res}{791 \,\mathrm{N}}\)</span>
-            <span class="say step">Accelerating downwards: \(a = -1.5 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
-            <span class="step">\(F_\mathrm{N} = 70(9.8 - 1.5) = \class{res}{581 \,\mathrm{N}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>ACCELERATING UPWARDS</span></div>
@@ -349,18 +348,42 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Newton’s laws: in a lift">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A 70 kg person in a lift<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say step">Accelerating downwards: \(a = -1.5 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
+            <span class="step">\(F_\mathrm{N} = 70(9.8 - 1.5) = \class{res}{581 \,\mathrm{N}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ACCELERATING UPWARDS</span></div>
+            <div class="fig" data-fig="lift"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Quick check: Newton’s laws">
         <p class="eyebrow">Quick check</p>
         <h2>Newton’s laws<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A parcel slides at constant velocity. Resultant force on it?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">02</span>Forces of 6.0 N and 8.0 N act at right angles. Size of the resultant?</p><div class="ans step">\(\sqrt{6.0^{2} + 8.0^{2}} = 10 \,\mathrm{N}\)</div></div>
-          <div class="q"><p><span class="n">03</span>A resultant force of 45 N acts on a 15 kg trolley. Acceleration?</p><div class="ans step">\(\frac{45}{15} = 3.0 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
+          <div class="q"><p><span class="n">03</span>A resultant force of 45 N acts on a 15 kg trolley. Acceleration?</p><div class="ans step">\(\dfrac{45}{15} = 3.0 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: Newton’s laws">
+        <p class="eyebrow">Quick check</p>
+        <h2>Newton’s laws<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>The Earth pulls an apple down with 1.0 N. Its third-law partner?</p><div class="ans step">The apple pulls the Earth up with 1.0 N</div></div>
           <div class="q"><p><span class="n">05</span>Why are a book’s weight and the normal force on it not a third-law pair?</p><div class="ans step">Both act on the same body</div></div>
           <div class="q"><p><span class="n">06</span>A lift going up slows down. Normal force: more or less than the weight?</p><div class="ans step">Less: the acceleration is downward</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -480,9 +503,6 @@
             <span class="step">\(F_\mathrm{N} = mg = 5.0 \times 9.8 = 49 \,\mathrm{N}\)</span>
             <span class="step">Most static friction: \(\mu_\mathrm{s} F_\mathrm{N} = 0.40 \times 49 = \class{res}{19.6 \,\mathrm{N}}\)</span>
             <span class="step">A 15 N push: it stays at rest. Friction \(= \class{res}{15 \,\mathrm{N}}\)</span>
-            <span class="say step">A 25 N push: it slides</span>
-            <span class="step">\(F_\mathrm{f} = \mu_\mathrm{d} F_\mathrm{N} = 0.30 \times 49 = 14.7 \,\mathrm{N}\)</span>
-            <span class="step">\(a = \dfrac{F - F_\mathrm{f}}{m} = \dfrac{25 - 14.7}{5.0} = \class{res}{2.1 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>FORCES ON THE CRATE</span></div>
@@ -498,6 +518,24 @@
             <p>At 19.6 N the crate breaks free and friction falls at once to 14.7 N. If you keep pushing just as hard there is suddenly a resultant force of 4.9 N, so the crate lurches forwards. That is why a stuck object tends to shoot away when it finally gives.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Friction: pushing a crate">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Pushing a 5.0 kg crate<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Level floor, \(\mu_\mathrm{s} = 0.40\), \(\mu_\mathrm{d} = 0.30\), \(F_\mathrm{N} = 49 \,\mathrm{N}\)</span>
+            <span class="say step">A 25 N push: it slides</span>
+            <span class="step">\(F_\mathrm{f} = \mu_\mathrm{d} F_\mathrm{N} = 0.30 \times 49 = 14.7 \,\mathrm{N}\)</span>
+            <span class="step">\(a = \dfrac{F - F_\mathrm{f}}{m} = \dfrac{25 - 14.7}{5.0} = \class{res}{2.1 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FORCES ON THE CRATE</span></div>
+            <div class="fig" data-fig="fbd-block" data-view="170 50 520 390"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Friction: sliding down a slope">
@@ -691,19 +729,13 @@
       <section class="slide" data-title="Viscous drag: terminal velocity">
         <p class="eyebrow">Worked example</p>
         <h2>A steel ball falling through oil<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the terminal velocity of the ball.</span>
             <span class="say">\(r = 1.0 \,\mathrm{mm}\); \(\rho_\mathrm{s} = 7800\), \(\rho_\mathrm{o} = 900 \,\mathrm{kg} \,\mathrm{m}^{-3}\); \(\eta = 0.50 \,\mathrm{Pa} \,\mathrm{s}\)</span>
             <span class="step">\(V = \tfrac{4}{3} \pi r^{3} = 4.19 \times 10^{-9} \,\mathrm{m}^{3}\)</span>
             <span class="step">\(F_\mathrm{g} = \rho_\mathrm{s} V g = 7800 \times V \times 9.8 = 3.20 \times 10^{-4} \,\mathrm{N}\)</span>
             <span class="step">\(F_\mathrm{b} = \rho_\mathrm{o} V g = 900 \times V \times 9.8 = 0.37 \times 10^{-4} \,\mathrm{N}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">At terminal velocity</span>
-            <span class="step">\(F_\mathrm{d} = F_\mathrm{g} - F_\mathrm{b} = 2.83 \times 10^{-4} \,\mathrm{N}\)</span>
-            <span class="step">\(v = \dfrac{F_\mathrm{d}}{6 \pi \eta r} = \dfrac{2.83 \times 10^{-4}}{6 \pi \times 0.50 \times 1.0 \times 10^{-3}}\)</span>
-            <span class="step">\(v = \class{res}{0.030 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
@@ -721,10 +753,24 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Viscous drag: terminal velocity">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A steel ball falling through oil<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">At terminal velocity</span>
+            <span class="step">\(F_\mathrm{d} = F_\mathrm{g} - F_\mathrm{b} = 2.83 \times 10^{-4} \,\mathrm{N}\)</span>
+            <span class="step">\(v = \dfrac{F_\mathrm{d}}{6 \pi \eta r} = \dfrac{2.83 \times 10^{-4}}{6 \pi \times 0.50 \times 1.0 \times 10^{-3}}\)</span>
+            <span class="step">\(v = \class{res}{0.030 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Field forces">
         <h2>Field forces<span>.</span></h2>
         <div class="stack center">
-          <table class="facts big">
+          <table class="facts">
             <thead><tr><th>Force</th><th>Acts on</th><th>Direction</th><th>Studied in</th></tr></thead>
             <tbody>
               <tr><td>Gravitational \(F_\mathrm{g}\)</td><td>Anything with mass</td><td>Always attracts</td><td>Here, then D.1</td></tr>
@@ -732,7 +778,7 @@
               <tr><td>Magnetic \(F_\mathrm{m}\)</td><td>Moving charges and currents</td><td>At right angles to the motion</td><td>D.3</td></tr>
             </tbody>
           </table>
-          <div class="idea step">On a free-body diagram they are drawn like any other force, and labeled \(F_\mathrm{g}\), \(F_\mathrm{e}\) or \(F_\mathrm{m}\).</div>
+          <div class="idea step">Drawn on free-body diagrams like any force: \(F_\mathrm{g}\), \(F_\mathrm{e}\), \(F_\mathrm{m}\)</div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -751,10 +797,18 @@
       <section class="slide" data-title="Quick check: the forces">
         <p class="eyebrow">Quick check</p>
         <h2>The forces<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A 12 kg box rests on a level floor. Normal force?</p><div class="ans step">\(12 \times 9.8 = 118 \,\mathrm{N}\)</div></div>
           <div class="q"><p><span class="n">02</span>The box slides, with \(\mu_\mathrm{d} = 0.20\). Friction force?</p><div class="ans step">\(0.20 \times 118 = 24 \,\mathrm{N}\)</div></div>
           <div class="q"><p><span class="n">03</span>A spring with \(k = 80 \,\mathrm{N} \,\mathrm{m}^{-1}\) is stretched by 0.15 m. Size of the force?</p><div class="ans step">\(80 \times 0.15 = 12 \,\mathrm{N}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the forces">
+        <p class="eyebrow">Quick check</p>
+        <h2>The forces<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What is the normal force on a block of mass \(m\) on a slope at angle \(\theta\)?</p><div class="ans step">\(mg \cos \theta\)</div></div>
           <div class="q"><p><span class="n">05</span>In \(F_\mathrm{b} = \rho V g\), which density and which volume?</p><div class="ans step">Density of the fluid, volume of fluid displaced</div></div>
           <div class="q"><p><span class="n">06</span>A sphere falls through a liquid. Its speed doubles. What happens to the viscous drag?</p><div class="ans step">It doubles</div></div>
@@ -1001,9 +1055,6 @@
             <span class="step">\(m_{1}u_{1} = (m_{1} + m_{2})v\)</span>
             <span class="step">\(v = \dfrac{m_{1}u_{1}}{m_{1} + m_{2}}\)</span>
             <span class="step">&nbsp; \(= \dfrac{800 \times 15}{2000} = \class{res}{6.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="say step">Kinetic energy: \(E_\mathrm{k} = \tfrac{1}{2}mv^{2}\)</span>
-            <span class="step">Before: \(\tfrac{1}{2} \times 800 \times 15^{2} = 90 \,\mathrm{kJ}\)</span>
-            <span class="step">After: \(\tfrac{1}{2} \times 2000 \times 6.0^{2} = \class{res}{36 \,\mathrm{kJ}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
@@ -1018,6 +1069,23 @@
             <p class="tip">When bodies join, treat them after the collision as one body with the total mass.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Collision: the bodies join">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Two cars lock together<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>A MOVING CAR HITS A PARKED CAR</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="collide" data-kind="stick"></div>
+          </div>
+          <div class="work">
+            <span class="say step">Kinetic energy: \(E_\mathrm{k} = \tfrac{1}{2}mv^{2}\)</span>
+            <span class="step">Before: \(\tfrac{1}{2} \times 800 \times 15^{2} = 90 \,\mathrm{kJ}\)</span>
+            <span class="step">After: \(\tfrac{1}{2} \times 2000 \times 6.0^{2} = \class{res}{36 \,\mathrm{kJ}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Elastic and inelastic collisions">
@@ -1061,9 +1129,6 @@
             <span class="step">\(m_{1}u_{1} = m_{1}v_{1} + m_{2}v_{2}\)</span>
             <span class="step">\(v_{2} = \dfrac{m_{1}(u_{1} - v_{1})}{m_{2}}\)</span>
             <span class="step">&nbsp; \(= \dfrac{2.0(3.0 - 1.0)}{1.0} = \class{res}{4.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="say step">Kinetic energy: \(E_\mathrm{k} = \tfrac{1}{2}mv^{2}\)</span>
-            <span class="step">Before: \(\tfrac{1}{2} \times 2.0 \times 3.0^{2} = 9.0 \,\mathrm{J}\)</span>
-            <span class="step">After: \(1.0 + 8.0 = 9.0 \,\mathrm{J}\) &nbsp; <b>Elastic</b></span>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
@@ -1078,6 +1143,23 @@
             <p class="tip">Kinetic energy has no direction: add the values for the two bodies as positive numbers, whichever way each is moving.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Collision: is it elastic?">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Is this collision elastic<span>?</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>TWO TROLLEYS ON A TRACK</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="collide" data-kind="elastic"></div>
+          </div>
+          <div class="work">
+            <span class="say step">Kinetic energy: \(E_\mathrm{k} = \tfrac{1}{2}mv^{2}\)</span>
+            <span class="step">Before: \(\tfrac{1}{2} \times 2.0 \times 3.0^{2} = 9.0 \,\mathrm{J}\)</span>
+            <span class="step">After: \(1.0 + 8.0 = 9.0 \,\mathrm{J}\) &nbsp; <b>Elastic</b></span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Explosions">
@@ -1145,7 +1227,7 @@
       <section class="slide hl" data-title="HL: a two-dimensional collision">
         <p class="eyebrow">Higher level only, worked example</p>
         <h2>Finding the second puck’s velocity<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">A 2.0 kg puck at \(5.0 \,\mathrm{m} \,\mathrm{s}^{-1}\) along \(x\) strikes a 3.0 kg puck at rest. Afterwards the first puck moves at \(2.0 \,\mathrm{m} \,\mathrm{s}^{-1}\) along \(y\). Find the speed and direction of the second puck.</span>
             <span class="say step">Along \(x\)</span>
@@ -1154,13 +1236,6 @@
             <span class="say step">Along \(y\)</span>
             <span class="step">\(0 = m_{1}v_{1} + m_{2}v_{2y}\)</span>
             <span class="step">\(v_{2y} = -\dfrac{m_{1}v_{1}}{m_{2}} = -\dfrac{2.0 \times 2.0}{3.0} = \class{res}{-1.33 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">Put the components together</span>
-            <span class="step">\(v_{2} = \sqrt{v_{2x}^{2} + v_{2y}^{2}}\)</span>
-            <span class="step">&nbsp; \(= \sqrt{3.33^{2} + 1.33^{2}} = \class{res}{3.6 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="step">\(\tan \theta = \dfrac{|v_{2y}|}{v_{2x}} = \dfrac{1.33}{3.33}\)</span>
-            <span class="step">\(\theta = \class{res}{22^{\circ}}\) below the \(x\) direction</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, ADDITIONAL HL</span><span data-page></span></div>
@@ -1177,14 +1252,37 @@
         </aside>
       </section>
 
+      <section class="slide hl" data-title="HL: a two-dimensional collision">
+        <p class="eyebrow">Higher level only, worked example, continued</p>
+        <h2>Finding the second puck’s velocity<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">Put the components together</span>
+            <span class="step">\(v_{2} = \sqrt{v_{2x}^{2} + v_{2y}^{2}}\)</span>
+            <span class="step">&nbsp; \(= \sqrt{3.33^{2} + 1.33^{2}} = \class{res}{3.6 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(\tan \theta = \dfrac{|v_{2y}|}{v_{2x}} = \dfrac{1.33}{3.33}\)</span>
+            <span class="step">\(\theta = \class{res}{22^{\circ}}\) below the \(x\) direction</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Quick check: momentum">
         <p class="eyebrow">Quick check</p>
         <h2>Momentum and collisions<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Momentum of a 0.40 kg ball moving at 15 m s⁻¹?</p><div class="ans step">\(0.40 \times 15 = 6.0 \,\mathrm{kg} \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
           <div class="q"><p><span class="n">02</span>A resultant force of 30 N acts for 0.50 s. Change in momentum?</p><div class="ans step">\(30 \times 0.50 = 15 \,\mathrm{N} \,\mathrm{s}\)</div></div>
           <div class="q"><p><span class="n">03</span>What does the area under a force–time graph give?</p><div class="ans step">The impulse: the change in momentum</div></div>
-          <div class="q"><p><span class="n">04</span>A 3.0 kg trolley at 4.0 m s⁻¹ hits and sticks to a 1.0 kg trolley at rest. Speed afterwards?</p><div class="ans step">\(\frac{3.0 \times 4.0}{4.0} = 3.0 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: momentum">
+        <p class="eyebrow">Quick check</p>
+        <h2>Momentum and collisions<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>A 3.0 kg trolley at 4.0 m s⁻¹ hits and sticks to a 1.0 kg trolley at rest. Speed afterwards?</p><div class="ans step">\(\dfrac{3.0 \times 4.0}{4.0} = 3.0 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
           <div class="q"><p><span class="n">05</span>What is conserved in an elastic collision but not in an inelastic one?</p><div class="ans step">Kinetic energy</div></div>
           <div class="q"><p><span class="n">06</span>A stationary body explodes into two pieces. What is their total momentum?</p><div class="ans step">Zero</div></div>
         </div>
@@ -1210,9 +1308,9 @@
           <div class="stack">
             <div class="equation small"><span>\(v = \dfrac{2 \pi r}{T} = \omega r\)</span></div>
             <ul class="points small">
-              <li>\(T\): the <b>period</b>, time for one turn</li>
-              <li>\(\omega\): angle turned per second, in <b>rad s⁻¹</b></li>
-              <li>\(v\): <b>linear velocity</b>, along the tangent</li>
+              <li>\(T\): the <b>period</b>, one turn</li>
+              <li>\(\omega\): angle per second, <b>rad s⁻¹</b></li>
+              <li>\(v\): <b>linear velocity</b>, tangential</li>
             </ul>
             <div class="work step">
               <span class="say">\(r = 2.0 \,\mathrm{m}\), \(T = 5.0 \,\mathrm{s}\)</span>
@@ -1404,19 +1502,13 @@
       <section class="slide" data-title="Vertical circle: tension in the string">
         <p class="eyebrow">Worked example: non-uniform circular motion</p>
         <h2>A 0.25 kg ball on a 0.80 m string<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">The ball moves at \(7.0 \,\mathrm{m} \,\mathrm{s}^{-1}\) at the bottom of the circle and \(4.2 \,\mathrm{m} \,\mathrm{s}^{-1}\) at the top. Find the tension at the bottom and at the top, and the least speed at the top that keeps the string taut.</span>
             <span class="say step">Weight \(mg = 0.25 \times 9.8 = 2.45 \,\mathrm{N}\)</span>
             <span class="say step">Bottom, \(v_\mathrm{bottom} = 7.0 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
             <span class="step">\(T_\mathrm{bottom} = \dfrac{mv_\mathrm{bottom}^{2}}{r} + mg\)</span>
             <span class="step">\(T_\mathrm{bottom} = \dfrac{0.25 \times 7.0^{2}}{0.80} + 2.45 = \class{res}{17.8 \,\mathrm{N}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">Top, \(v_\mathrm{top} = 4.2 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
-            <span class="step">\(T_\mathrm{top} = \dfrac{mv_\mathrm{top}^{2}}{r} - mg\)</span>
-            <span class="step">\(T_\mathrm{top} = \dfrac{0.25 \times 4.2^{2}}{0.80} - 2.45 = \class{res}{3.1 \,\mathrm{N}}\)</span>
-            <span class="step">Least: \(v_\mathrm{top} = \sqrt{gr} = \sqrt{9.8 \times 0.80} = \class{res}{2.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
@@ -1433,13 +1525,35 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Vertical circle: tension in the string">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A 0.25 kg ball on a 0.80 m string<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">Top, \(v_\mathrm{top} = 4.2 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">\(T_\mathrm{top} = \dfrac{mv_\mathrm{top}^{2}}{r} - mg\)</span>
+            <span class="step">\(T_\mathrm{top} = \dfrac{0.25 \times 4.2^{2}}{0.80} - 2.45 = \class{res}{3.1 \,\mathrm{N}}\)</span>
+            <span class="step">Least: \(v_\mathrm{top} = \sqrt{gr} = \sqrt{9.8 \times 0.80} = \class{res}{2.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Quick check: circular motion">
         <p class="eyebrow">Quick check</p>
         <h2>Circular motion<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A body moves round a circle at constant speed. Direction of its acceleration?</p><div class="ans step">Towards the center</div></div>
-          <div class="q"><p><span class="n">02</span>A wheel turns once every 0.50 s. Angular velocity?</p><div class="ans step">\(\frac{2 \pi}{0.50} = 12.6 \,\mathrm{rad} \,\mathrm{s}^{-1}\)</div></div>
-          <div class="q"><p><span class="n">03</span>A car moves at 10 m s⁻¹ round a circle of radius 25 m. Its acceleration?</p><div class="ans step">\(\frac{10^{2}}{25} = 4.0 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
+          <div class="q"><p><span class="n">02</span>A wheel turns once every 0.50 s. Angular velocity?</p><div class="ans step">\(\dfrac{2 \pi}{0.50} = 12.6 \,\mathrm{rad} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">03</span>A car moves at 10 m s⁻¹ round a circle of radius 25 m. Its acceleration?</p><div class="ans step">\(\dfrac{10^{2}}{25} = 4.0 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: circular motion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Circular motion<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Its mass is 900 kg. Centripetal force, and what provides it?</p><div class="ans step">\(900 \times 4.0 = 3600 \,\mathrm{N}\), from friction</div></div>
           <div class="q"><p><span class="n">05</span>Why does a centripetal force not change the speed?</p><div class="ans step">It is at right angles to the velocity</div></div>
           <div class="q"><p><span class="n">06</span>A ball on a string moves in a vertical circle. Where is the tension greatest?</p><div class="ans step">At the bottom</div></div>
@@ -1448,13 +1562,21 @@
       </section>
 
       <section class="slide" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>Forces and momentum on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Forces and momentum in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Newton’s laws</p><h3>Find the resultant</h3><p>No resultant force: constant velocity<br>\(F = ma\). Forces come in pairs on different bodies</p></div>
           <div class="card step"><p class="eyebrow">The forces</p><h3>Name every one</h3><p>\(F_\mathrm{f} \le \mu_\mathrm{s} F_\mathrm{N}\) at rest, \(\mu_\mathrm{d} F_\mathrm{N}\) sliding<br>\(F_\mathrm{H} = -kx\), \(F_\mathrm{b} = \rho V g\), \(F_\mathrm{d} = 6 \pi \eta r v\)</p></div>
           <div class="card step"><p class="eyebrow">Momentum</p><h3>Impulse changes it</h3><p>\(p = mv\), a vector<br>\(F \Delta t = \Delta p\): the area under a force–time graph</p></div>
-          <div class="card step"><p class="eyebrow">Collisions</p><h3>Momentum is conserved</h3><p>Kinetic energy only if elastic<br>Explosion from rest: total momentum zero</p></div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Forces and momentum in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Collisions</p><h3>Momentum is conserved</h3><p>Kinetic energy only if elastic<br>Explosion from rest: total momentum zero</p></div>
           <div class="card hl step"><p class="eyebrow">Collisions, HL</p><h3>Two dimensions</h3><p>Conserve momentum along \(x\) and along \(y\) separately</p></div>
           <div class="card step"><p class="eyebrow">Circular motion</p><h3>Resultant to the center</h3><p>\(a = \dfrac{v^{2}}{r} = \omega^{2} r\), and \(v = \omega r\)<br>Top and bottom of a vertical circle differ</p></div>
         </div>
@@ -1462,7 +1584,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Resultant force</b><span>The vector sum of all the forces</span></div>
@@ -1471,6 +1593,14 @@
           <div class="term"><b>Coefficient of friction</b><span>Ratio of friction to normal force</span></div>
           <div class="term"><b>Buoyancy</b><span>Weight of the fluid displaced</span></div>
           <div class="term"><b>Viscous drag</b><span>A fluid’s force against motion</span></div>
+        </div>
+        <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Momentum</b><span>Mass × velocity. A vector</span></div>
           <div class="term"><b>Impulse</b><span>Force × time: change in momentum</span></div>
           <div class="term"><b>Elastic collision</b><span>Kinetic energy is conserved</span></div>

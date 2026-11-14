@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -42,11 +43,11 @@
 
       <!-- 1, Title -->
       <section class="slide title" data-title="D.3 Motion in electromagnetic fields">
-        <div class="title-grid">
+        <div class="title-grid" style="grid-template-columns: 1.35fr .65fr;">
           <div>
             <p class="eyebrow">IB DP Physics, Theme D: Fields</p>
             <h1>Motion in electromagnetic fields<span>.</span></h1>
-            <p class="lead">D.3: Charged particles in electric and magnetic fields, and the forces on currents<br>Standard level and higher level</p>
+            <p class="lead">Charged particles in electric and magnetic fields; forces on currents<br>SL and HL</p>
             <div class="chips">
               <span class="chip">SL + HL, 6 hours</span>
               <a class="chip on" href="/simulations/charges_in_fields.html" target="_blank" rel="noopener">Charges in Fields sim ↗</a>
@@ -63,19 +64,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="d3-accelerate" data-still data-plain style="height: 200px;"></div>
+            <div class="fig" data-fig="d3-accelerate" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Charges in electric fields</h3>
             <p>Constant force: speeding up, and parabolic paths</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d3-circle" data-still data-plain style="height: 200px;"></div>
+            <div class="fig" data-fig="d3-circle" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Charges in magnetic fields</h3>
             <p>Circular paths, charge-to-mass ratio, crossed fields</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d3-wire-force" data-still data-plain style="height: 200px;"></div>
+            <div class="fig" data-fig="d3-wire-force" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Forces on currents</h3>
             <p>A wire in a field, the field of a wire, and two parallel wires</p>
@@ -227,15 +228,23 @@
       <section class="slide" data-title="Quick check: electric fields">
         <p class="eyebrow">Quick check</p>
         <h2>Charges in electric fields<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What kind of acceleration does a charge have in a uniform electric field?</p><div class="ans step">Constant</div></div>
           <div class="q"><p><span class="n">02</span>A proton is accelerated from rest through 500 V. Kinetic energy gained?</p><div class="ans step">500 eV = \(8.0 \times 10^{-17} \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">03</span>What shape is the path when a charge enters at right angles to the field?</p><div class="ans step">A parabola</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: electric fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Charges in electric fields<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Which component of its velocity stays constant?</p><div class="ans step">The one at right angles to the field</div></div>
           <div class="q"><p><span class="n">05</span>The accelerating voltage is increased to nine times its initial value. The final speed?</p><div class="ans step">Three times the initial speed</div></div>
           <div class="q"><p><span class="n">06</span>Which way does an electron accelerate, relative to the field lines?</p><div class="ans step">Against them</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -399,7 +408,7 @@
 
       <section class="slide" data-title="The charge-to-mass ratio">
         <h2>The charge-to-mass ratio<span>.</span></h2>
-        <div class="split">
+        <div class="split even">
           <div class="stack">
             <div class="work">
               <span class="say">Accelerate through \(V\), then bend in \(B\)</span>
@@ -407,7 +416,7 @@
               <span class="step">\(v = \dfrac{qBr}{m}\)</span>
               <span class="step">\(\dfrac{q}{m} = \dfrac{2V}{B^{2} r^{2}}\)</span>
             </div>
-            <div class="idea step">Measure \(V\), \(B\) and \(r\): the path gives \(\dfrac{q}{m}\).</div>
+            <div class="idea step">Measure \(V\), \(B\), \(r\) \(\Rightarrow\) \(\dfrac{q}{m}\)</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>A FINE BEAM TUBE</span></div>
@@ -551,12 +560,20 @@
       <section class="slide" data-title="Quick check: magnetic fields">
         <p class="eyebrow">Quick check</p>
         <h2>Charges in magnetic fields<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is the magnetic force on a charge moving along the field lines?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">02</span>What happens to the kinetic energy of a particle in a magnetic field?</p><div class="ans step">It stays constant</div></div>
           <div class="q"><p><span class="n">03</span>The speed of a particle is doubled. What happens to the radius of its circle?</p><div class="ans step">It doubles</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: magnetic fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Charges in magnetic fields<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>And to the time for one circle?</p><div class="ans step">It does not change</div></div>
-          <div class="q"><p><span class="n">05</span>Fields \(E = 600 \,\mathrm{V} \,\mathrm{m}^{-1}\) and \(B = 2.0 \,\mathrm{mT}\) are crossed. Which speed passes undeflected?</p><div class="ans step">\(\frac{600}{2.0 \times 10^{-3}} = 3.0 \times 10^{5} \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Fields \(E = 600 \,\mathrm{V} \,\mathrm{m}^{-1}\) and \(B = 2.0 \,\mathrm{mT}\) are crossed. Which speed passes undeflected?</p><div class="ans step">\(\dfrac{600}{2.0 \times 10^{-3}} = 3.0 \times 10^{5} \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
           <div class="q"><p><span class="n">06</span>What path does a particle follow when its velocity is at 30° to the field?</p><div class="ans step">A helix</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
@@ -610,19 +627,13 @@
       <section class="slide" data-title="Force on a conductor: worked example">
         <p class="eyebrow">Worked example</p>
         <h2>A wire in a 0.050 T field<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the force on the wire at right angles to the field, and when it is turned to \(30^{\circ}\).</span>
             <span class="say">\(I = 3.0 \,\mathrm{A}\), \(L = 0.20 \,\mathrm{m}\) of wire in the field</span>
             <span class="step">\(F = BIL \sin \theta\)</span>
             <span class="say step">At right angles to the field: \(\theta = 90^{\circ}\)</span>
             <span class="step">\(F = 0.050 \times 3.0 \times 0.20 \times \sin 90^{\circ} = \class{res}{0.030 \,\mathrm{N}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">The wire is turned to \(\theta = 30^{\circ}\)</span>
-            <span class="step">\(F = 0.050 \times 3.0 \times 0.20 \times \sin 30^{\circ}\)</span>
-            <span class="step">\(F = \class{res}{0.015 \,\mathrm{N}}\)</span>
-            <span class="step">Still at right angles to the wire <b>and</b> to the field</span>
           </div>
         </div>
         <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS, SL + HL</span><span data-page></span></div>
@@ -639,16 +650,30 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Force on a conductor: worked example">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A wire in a 0.050 T field<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">The wire is turned to \(\theta = 30^{\circ}\)</span>
+            <span class="step">\(F = 0.050 \times 3.0 \times 0.20 \times \sin 30^{\circ}\)</span>
+            <span class="step">\(F = \class{res}{0.015 \,\mathrm{N}}\)</span>
+            <span class="step">Still at right angles to the wire <b>and</b> to the field</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="The field of a long straight wire">
         <h2>The field of a long straight wire<span>.</span></h2>
         <div class="split">
           <div class="stack">
             <div class="equation small"><span>\(B = \dfrac{\mu_{0} I}{2 \pi r}\)</span></div>
             <ul class="points small">
-              <li class="step">\(r\): the <b>perpendicular distance</b> from the wire, in meters</li>
-              <li class="step">\(B \propto I\): double the current, double the field</li>
+              <li class="step">\(r\): <b>perpendicular distance</b> from the wire</li>
+              <li class="step">\(B \propto I\)</li>
               <li class="step frac">\(B \propto \dfrac{1}{r}\): twice as far, <b>half</b> the field</li>
-              <li class="step">Direction: the <b>right-hand grip rule</b> (D.2)</li>
+              <li class="step">Direction: <b>right-hand grip rule</b></li>
             </ul>
           </div>
           <div class="panel">
@@ -826,10 +851,18 @@
       <section class="slide" data-title="Quick check: forces on currents">
         <p class="eyebrow">Quick check</p>
         <h2>Forces on currents<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A wire lies along the field lines. Force on it?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">02</span>0.10 m of wire carries 2.0 A at right angles to a 0.50 T field. Force?</p><div class="ans step">\(0.50 \times 2.0 \times 0.10 = 0.10 \,\mathrm{N}\)</div></div>
           <div class="q"><p><span class="n">03</span>Two parallel wires carry currents in the same direction. Attract or repel?</p><div class="ans step">Attract</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: forces on currents">
+        <p class="eyebrow">Quick check</p>
+        <h2>Forces on currents<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Both currents are doubled. What happens to the force per meter?</p><div class="ans step">It becomes four times its original value</div></div>
           <div class="q"><p><span class="n">05</span>The separation of the wires is tripled. Force per meter?</p><div class="ans step">One third</div></div>
           <div class="q"><p><span class="n">06</span>Wire 1 carries 1 A and wire 2 carries 5 A. Which feels the larger force?</p><div class="ans step">Neither: the forces are equal</div></div>

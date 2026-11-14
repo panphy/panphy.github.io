@@ -174,7 +174,7 @@ window.DeckFigures.add(P => {
       const on = labeled(el), y = OBS.y;
       const view = on ? [0, 0, 900, 450] : [-60, -190, 720, 720];
       let s = clipped(...view, live('c5-observer', observerAt, on, on ? 13.4 : 11.5, 10));
-      if (on) s += text(OBS.xs, y + 62, 'source at rest', 'lbl halo') + text(20, 302, 'standing still', 'lbl halo', 'start') + text(560, 302, 'walking towards the source', 'lbl halo', 'start') + text(20, 432, 'frequency heard: f', 'lbl strong', 'start') + text(560, 432, 'frequency heard: 1.5 f', 'lbl strong', 'start');
+      if (on) s += text(OBS.xs, y + 62, 'source at rest', 'lbl halo') + text(20, 302, 'standing still', 'lbl halo', 'start') + text(560, 302, 'walking towards it', 'lbl halo', 'start') + text(20, 432, 'frequency heard: f', 'lbl strong', 'start') + text(560, 432, 'frequency heard: 1.5 f', 'lbl strong', 'start');
       if (!on) return svg(view.join(' '), s, 'A stationary source sending out evenly spaced circular wavefronts, and an observer walking towards it');
       return svg(view.join(' '), s, 'A stationary source sending out evenly spaced circular wavefronts, an observer standing still and an observer walking towards the source at half the wave speed. The wavelength is the same everywhere, but the walker meets the wavefronts more often: the traces of what each one hears show the walker receiving one and a half times the frequency');
     },

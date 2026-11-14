@@ -4,11 +4,11 @@
 // velocities and wires apricot, forces teal, induced currents and emf terracotta, N red and S blue.
 //   data-magnet-coil  slide 5   a magnet moved in and out of a coil, with a meter
 //   data-flux         slide 6   a loop turned in a uniform field, threaded by its field lines
-//   data-lenz         slide 13  the current induced in a coil by an approaching or leaving magnet
-//   data-tube         slide 14  a magnet dropped through a plastic and a copper tube (a play step)
-//   data-rod          slide 15  a rod sliding along rails across a vertical field
-//   data-spring       slide 18  a magnet bouncing on a spring into a coil, with its emf traced
-//   data-generator    slide 22  a rectangular coil turning between two poles, with its emf graph
+//   data-lenz         slide 14  the current induced in a coil by an approaching or leaving magnet
+//   data-tube         slide 15  a magnet dropped through a plastic and a copper tube (a play step)
+//   data-rod          slide 16  a rod sliding along rails across a vertical field
+//   data-spring       slide 19  a magnet bouncing on a spring into a coil, with its emf traced
+//   data-generator    slide 24  a rectangular coil turning between two poles, with its emf graph
 import { model3d } from '../assets/model3d.js';
 
 const TAU = Math.PI * 2;
@@ -306,7 +306,7 @@ model3d('flux', ({ THREE, scene, css, label: plain, caption }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Slide 13: Lenz's law. The north pole of a magnet is pushed towards a coil, rests, is pulled away
+// Slide 14: Lenz's law. The north pole of a magnet is pushed towards a coil, rests, is pulled away
 // and rests. The arrowheads on the front of each turn show the induced current, the arrow inside
 // the coil its field, and the coil's near end is labeled with the pole it becomes.
 model3d('lenz', ({ THREE, scene, css, label: plain, caption }) => {
@@ -389,7 +389,7 @@ model3d('lenz', ({ THREE, scene, css, label: plain, caption }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Slide 14: the same magnet dropped through a plastic tube and a copper tube. The press on the
+// Slide 15: the same magnet dropped through a plastic tube and a copper tube. The press on the
 // figure's play step lets both go; going back lifts them again. In the copper tube the induced
 // currents (the ring below the magnet one way, the ring above the other) soon make the upward force
 // equal to the weight, so the magnet falls at its terminal velocity.
@@ -499,7 +499,7 @@ model3d('tube', ({ THREE, scene, css, label: plain, fig }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Slide 15: a rod sliding at speed v along two rails in a vertical field. Field, velocity and rod
+// Slide 16: a rod sliding at speed v along two rails in a vertical field. Field, velocity and rod
 // are at right angles. Seen from above, the induced current is counterclockwise: along the rod towards
 // the far rail, round through the resistor and back along the near rail.
 model3d('rod', ({ THREE, scene, css, label: plain }) => {
@@ -571,7 +571,7 @@ model3d('rod', ({ THREE, scene, css, label: plain }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Slide 18: a magnet on a spring, north pole down, oscillating into a coil joined to a resistor,
+// Slide 19: a magnet on a spring, north pole down, oscillating into a coil joined to a resistor,
 // with the emf traced beside it as it happens. The emf follows the velocity of the magnet, and the
 // current takes energy from the oscillation, so both die away together. Then the magnet is pulled
 // down again and released.
@@ -660,7 +660,7 @@ model3d('spring', ({ THREE, scene, css, label: plain, holder }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Slide 22: a rectangular coil turning steadily between the poles of a magnet, with the emf drawn
+// Slide 24: a rectangular coil turning steadily between the poles of a magnet, with the emf drawn
 // beside it. The normal and the velocities of the two long sides turn with the coil: along the
 // field the sides move parallel to the lines and the emf is zero; across it they cut the lines
 // fastest and the emf is greatest.

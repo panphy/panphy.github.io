@@ -21,6 +21,7 @@
   <script src="/assets/theme-toggle.js"></script>
   <script src="/gcsephy/sw-register.js" defer></script>
   <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <script src="../assets/deck-math.js"></script>
 </head>
 <body data-deck-key="electric-circuits" data-deck-title="Electric Circuits">
@@ -44,7 +45,7 @@
 
       <!-- Title -->
       <section class="slide dark a-hi" data-title="Electric Circuits">
-        <div class="hero">
+        <div class="hero" style="grid-template-columns: 1.3fr .7fr;">
           <div>
             <p class="eyebrow course"><span class="on">Year 10 physics</span><span>AQA GCSE Physics &amp; Combined Science</span></p>
             <h1>Follow the charge.<br><em>Track the energy.</em></h1>
@@ -268,13 +269,6 @@
                 <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(Q = 72\)&nbsp;C</span></dd></div>
               </dl>
             </div>
-            <div class="worked">
-              <div class="wq"><span>Example 2</span>5400 C at 1.2 A. Time in minutes?</div>
-              <dl>
-                <div class="step"><dt>Rearrange</dt><dd>\(t = Q \div I = 5400 \div 1.2\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(4500\ \text{s} = 75\ \text{min}\)</dd></div>
-              </dl>
-            </div>
           </div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 2: Charge on the move</span><span data-page></span></div>
@@ -288,6 +282,27 @@
             <p>A phone charging at 2 A for an hour: <span class="equation-inline">\(2 \times 3600 = 7200\)&nbsp;C</span>. If you get 0.002 C for a kettle, look for a unit you did not convert.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Q = I t">
+        <p class="eyebrow"><span class="num">02</span> Know and apply</p>
+        <h2>Charge flow</h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(Q = I\,t\)</span><span class="eq-words">\(\text{charge flow} = \text{current} \times \text{time}\)</span><span class="eq-units">\(Q\) in C, \(I\) in A, \(t\) in s</span></div>
+            <div class="remember">Time in <b>seconds</b>: min \(\times 60\), h \(\times 3600\)</div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>5400 C at 1.2 A. Time in minutes?</div>
+              <dl>
+                <div class="step"><dt>Rearrange</dt><dd>\(t = Q \div I = 5400 \div 1.2\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(4500\ \text{s} = 75\ \text{min}\)</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Mission 2: Charge on the move</span><span data-page></span></div>
       </section>
 
       <section class="slide a-cyan" data-title="Conventional current">
@@ -389,7 +404,7 @@
       <section class="slide a-hi" data-title="Potential difference">
         <p class="eyebrow"><span class="num">03</span> Know and apply</p>
         <h2>Potential <em>difference</em></h2>
-        <div class="split even top">
+        <div class="split even top" style="grid-template-columns: .8fr 1.2fr;">
           <div class="col">
             <ul class="points small">
               <li>p.d. = <b>energy transferred per coulomb</b></li>
@@ -649,13 +664,13 @@
       <section class="slide a-hot" data-title="Wire length results">
         <p class="eyebrow"><span class="num">RP</span> Results and evaluation</p>
         <h2>\(R \propto\) <em>length</em></h2>
-        <div class="split wide-fig" style="grid-template-columns: .72fr 1.28fr;">
+        <div class="split wide-fig" style="grid-template-columns: .9fr 1.1fr;">
           <div class="col">
             <ul class="points small">
-              <li>Straight line through origin → <b>\(R \propto L\)</b></li>
+              <li>Straight line through origin: <b>\(R \propto L\)</b></li>
               <li>Longer wire → <b>more collisions</b></li>
-              <li>Wire heats → \(R\) rises → keep current <b>small</b></li>
-              <li>Measure to the <b>same contact point</b> of the clip</li>
+              <li>Wire heats \(\Rightarrow\) \(R \uparrow\): keep current <b>small</b></li>
+              <li>Same <b>contact point</b> on the clip</li>
             </ul>
             <div class="mistakes"><div class="mistake"><p class="wrong">“Human error.”</p><p class="right">“The wire heated up, so \(R\) increased.”</p></div></div>
           </div>
@@ -764,13 +779,13 @@
       <section class="slide a-cyan" data-title="Why parallel lowers resistance">
         <p class="eyebrow"><span class="num">RP</span> Resistance: Part B</p>
         <h2>Another path<em>,</em> <em>less \(R\)</em></h2>
-        <div class="split wide-fig" style="grid-template-columns: .75fr 1.25fr;">
+        <div class="split wide-fig" style="grid-template-columns: .9fr 1.1fr;">
           <div class="col">
             <ul class="points small">
-              <li>Series: add a resistor → \(R_{\text{total}}\) <b>up</b></li>
-              <li>Parallel: add a branch → more paths</li>
-              <li>More current at the same p.d.</li>
-              <li>So \(R_{\text{total}} = V \div I\) goes <b>down</b></li>
+              <li>Series: add a resistor \(\Rightarrow\) \(R_{\text{total}} \uparrow\)</li>
+              <li>Parallel: add a branch \(\Rightarrow\) more paths</li>
+              <li>More current, same p.d.</li>
+              <li>So \(R_{\text{total}} = V \div I\) <b>falls</b></li>
             </ul>
             <table class="data compact">
               <caption>Two 10 Ω resistors</caption>
@@ -1356,14 +1371,14 @@
       <section class="slide a-hot" data-title="Live wire danger and earthing">
         <p class="eyebrow"><span class="num">08</span> Staying safe</p>
         <h2>Why live is <em>dangerous</em></h2>
-        <div class="split wide-fig" style="grid-template-columns: .8fr 1.2fr;">
+        <div class="split wide-fig" style="grid-template-columns: .95fr 1.05fr;">
           <div class="col">
             <ul class="points small">
               <li>Body at <b>0 V</b>, live at <b>230 V</b></li>
-              <li>Touch live → current through you: <b>shock</b></li>
+              <li>Touch live: current through you, a <b>shock</b></li>
               <li>Still live with the switch <b>off</b></li>
-              <li>Live–earth link → <b>huge current</b>, fire risk</li>
-              <li>Metal case is <b>earthed</b>: fault current → earth</li>
+              <li>Live–earth link: <b>huge current</b>, fire</li>
+              <li>Metal case <b>earthed</b>: fault current to earth</li>
             </ul>
             <div class="mistakes"><div class="mistake"><p class="wrong">“The earth wire is at 230 V.”</p><p class="right">Earth is at 0 V.</p></div></div>
           </div>
@@ -1405,17 +1420,13 @@
 
       <!-- ============ Summary ============ -->
       <section class="slide a-hi" data-title="Equation toolkit">
-        <p class="eyebrow">Learn to use these</p>
+        <p class="eyebrow">Learn to use these, 1 of 2</p>
         <h2>Equation <em>toolkit</em></h2>
-        <div class="toolkit three fill">
+        <div class="toolkit three fill" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
           <div class="tool a-cyan"><span class="eq">\(Q = I\,t\)</span><span class="words">\(\text{charge} = \text{current} \times \text{time}\)</span><span class="units">\(Q\) in C, \(I\) in A, \(t\) in s</span><span class="where">On the sheet</span></div>
           <div class="tool"><span class="eq">\(E = Q\,V\)</span><span class="words">\(\text{energy} = \text{charge} \times \text{p.d.}\)</span><span class="units">\(E\) in J, \(Q\) in C, \(V\) in V</span><span class="where">On the sheet</span></div>
           <div class="tool a-hot"><span class="eq">\(V = I\,R\)</span><span class="words">\(\text{p.d.} = \text{current} \times \text{resistance}\)</span><span class="units">\(V\) in V, \(I\) in A, \(R\) in Ω</span><span class="where">On the sheet</span></div>
           <div class="tool a-cyan"><span class="eq long">\(R_{\text{total}} = R_1 + R_2\)</span><span class="words">series resistance</span><span class="units">all in Ω, series only</span><span class="where">Learn it</span></div>
-          <div class="tool"><span class="eq">\(P = V\,I\)</span><span class="words">\(\text{power} = \text{p.d.} \times \text{current}\)</span><span class="units">\(P\) in W, \(V\) in V, \(I\) in A</span><span class="where">On the sheet</span></div>
-          <div class="tool"><span class="eq">\(P = I^2\,R\)</span><span class="words">\(\text{power} = \text{current}^2 \times \text{resistance}\)</span><span class="units">\(P\) in W, \(I\) in A, \(R\) in Ω</span><span class="where">On the sheet</span></div>
-          <div class="tool"><span class="eq">\(E = P\,t\)</span><span class="words">\(\text{energy} = \text{power} \times \text{time}\)</span><span class="units">\(E\) in J, \(P\) in W, \(t\) in s</span><span class="where">On the sheet</span></div>
-          <div class="tool given a-violet"><span class="eq">\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</span><span class="words">transformer: power in = power out</span><span class="units">\(\mathrm{p}\) = primary, \(\mathrm{s}\) = secondary</span><span class="where">On the sheet</span></div>
         </div>
         <div class="slide-foot"><span class="tag">Electric circuits</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -1426,6 +1437,18 @@
             <p>list what you are given and what you want, then pick the equation with exactly those quantities. If none fits, you need two steps, and the first finds the missing quantity.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Equation toolkit">
+        <p class="eyebrow">Learn to use these, 2 of 2</p>
+        <h2>Equation <em>toolkit</em></h2>
+        <div class="toolkit three fill" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <div class="tool"><span class="eq">\(P = V\,I\)</span><span class="words">\(\text{power} = \text{p.d.} \times \text{current}\)</span><span class="units">\(P\) in W, \(V\) in V, \(I\) in A</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(P = I^2\,R\)</span><span class="words">\(\text{power} = \text{current}^2 \times \text{resistance}\)</span><span class="units">\(P\) in W, \(I\) in A, \(R\) in Ω</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(E = P\,t\)</span><span class="words">\(\text{energy} = \text{power} \times \text{time}\)</span><span class="units">\(E\) in J, \(P\) in W, \(t\) in s</span><span class="where">On the sheet</span></div>
+          <div class="tool given a-violet"><span class="eq">\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</span><span class="words">transformer: power in = power out</span><span class="units">\(\mathrm{p}\) = primary, \(\mathrm{s}\) = secondary</span><span class="where">On the sheet</span></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Electric circuits</span><span data-page></span></div>
       </section>
 
       <section class="slide a-cyan" data-title="Key words">
@@ -1472,7 +1495,7 @@
         <div class="split">
           <div class="col">
             <ul class="points">
-              <li>Friction moves <b>electrons</b> from one material to the other</li>
+              <li>Friction moves <b>electrons</b> between materials</li>
               <li>Gains electrons → <b>negative</b></li>
               <li>Loses electrons → <b>equally positive</b></li>
               <li>Works for <b>insulators</b>: the charge cannot flow away</li>
@@ -1533,8 +1556,8 @@
           <div class="story">
             <p class="kicker">Measured at last</p>
             <h2>Weighing a push you <em>cannot see</em></h2>
-            <p class="standfirst">Coulomb hung a light rod from a very thin thread, with a charged ball on one end. A second charged ball pushed it away and twisted the thread. The bigger the force, the bigger the twist.</p>
-            <p class="follow-up"><b>What he found</b>Halve the distance between the balls and the force becomes four times as big.</p>
+            <p class="standfirst">A charged ball on a rod, hung from a thin thread. A second charged ball pushes it away: bigger force, bigger twist.</p>
+            <p class="follow-up"><b>What he found</b>Halve the distance: four times the force.</p>
             <p class="ask"><b>Talk about it</b>Why did Coulomb need such a thin thread?</p>
           </div>
         </div>
@@ -1592,7 +1615,7 @@
               <li>Strong enough to <b>ionise the air</b></li>
               <li>Air conducts: electrons jump as a <b>spark</b></li>
             </ul>
-            <div class="remember">Lightning and car-door shocks are sparks. Aircraft are <b>earthed</b> before refuelling</div>
+            <div class="remember">Lightning, car-door shocks: sparks. Aircraft are <b>earthed</b> before refuelling</div>
           </div>
           <div class="panel"><div class="fig" data-fig="sparkGap"></div></div>
         </div>
@@ -1610,10 +1633,18 @@
       <section class="slide a-violet triple" data-title="Quick check: Mission 9">
         <p class="eyebrow"><span class="num">09</span> Checkpoint</p>
         <h2>Quick check</h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">1</span>A rod rubbed with a cloth turns negative. What moved?</p><div class="ans step">Electrons, from the cloth to the rod</div></div>
           <div class="q"><p><span class="n">2</span>What charge does the cloth now have?</p><div class="ans step">Positive, equal in size</div></div>
           <div class="q"><p><span class="n">3</span>Two negative balloons: attract or repel?</p><div class="ans step">Repel</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-violet triple" data-title="Quick check: Mission 9">
+        <p class="eyebrow"><span class="num">09</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">4</span>Where is the field around a charged sphere strongest?</p><div class="ans step">Closest to the sphere</div></div>
           <div class="q"><p><span class="n">5</span>Field lines near a negative sphere point…?</p><div class="ans step">Inwards, towards the sphere</div></div>
           <div class="q"><p><span class="n">6</span>Why does a spark jump?</p><div class="ans step">Field strong enough to ionise the air</div></div>

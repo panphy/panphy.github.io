@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -61,25 +62,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="b4-piston" data-plain data-still style="height: 180px;"></div>
+            <div class="fig" data-fig="b4-piston" data-plain data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>The first law</h3>
             <p>Heat, work and internal energy</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b4-processes" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="b4-processes" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Gas processes</h3>
             <p>Four special changes, and cycles</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b4-coins" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="b4-coins" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Entropy</h3>
             <p>Disorder, and the second law</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b4-engine" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="b4-engine" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Heat engines</h3>
             <p>Efficiency and the Carnot limit</p>
@@ -294,15 +295,23 @@
       <section class="slide hl" data-title="Quick check: the first law">
         <p class="eyebrow">Quick check</p>
         <h2>The first law<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What can cross the boundary of a closed system?</p><div class="ans step">Energy, but not mass</div></div>
           <div class="q"><p><span class="n">02</span>On what does the internal energy of an ideal gas depend?</p><div class="ans step">Its temperature (and the amount of gas)</div></div>
           <div class="q"><p><span class="n">03</span>A gas at \(2.0 \times 10^{5} \,\mathrm{Pa}\) expands by \(3.0 \times 10^{-3} \,\mathrm{m}^{3}\). Work done?</p><div class="ans step">\(600 \,\mathrm{J}\), by the gas</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: the first law">
+        <p class="eyebrow">Quick check</p>
+        <h2>The first law<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What is the sign of \(W\) when a gas is compressed?</p><div class="ans step">Negative</div></div>
           <div class="q"><p><span class="n">05</span>\(Q = +800 \,\mathrm{J}\) and \(W = +300 \,\mathrm{J}\). Change in internal energy?</p><div class="ans step">\(+500 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">06</span>What does the area under a P–V graph give?</p><div class="ans step">The work done</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -413,15 +422,15 @@
       <section class="slide hl" data-title="Adiabatic changes">
         <p class="eyebrow">No thermal energy transferred</p>
         <h2>Adiabatic changes<span>.</span></h2>
-        <div class="split">
+        <div class="split even">
           <div class="stack">
             <div class="equation small"><span>\(P V^{\frac{5}{3}} = \text{constant}\)</span></div>
             <ul class="points small">
               <li>\(Q = 0\), so \(\Delta U = -W\)</li>
-              <li class="step">Expansion: the gas does work and <b>cools</b></li>
-              <li class="step">Compression: work is done on it and it <b>warms</b></li>
+              <li class="step">Expansion: gas does work, <b>cools</b></li>
+              <li class="step">Compression: work done on it, <b>warms</b></li>
             </ul>
-            <div class="q step"><p>Why is the adiabatic curve steeper than the isotherm?</p><div class="ans step">In an expansion the gas also cools, so its pressure falls further</div></div>
+            <div class="q step"><p>Why is the adiabatic curve steeper than the isotherm?</p><div class="ans step">Expanding, the gas also cools: its pressure falls further</div></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>ADIABATIC AND ISOTHERMAL COMPARED</span></div>
@@ -824,10 +833,18 @@
       <section class="slide hl" data-title="Quick check: entropy">
         <p class="eyebrow">Quick check</p>
         <h2>Entropy and the second law<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is a microstate?</p><div class="ans step">One exact arrangement of all the particles</div></div>
           <div class="q"><p><span class="n">02</span>How many microstates have three heads from four coins?</p><div class="ans step">4</div></div>
-          <div class="q"><p><span class="n">03</span>900 J is supplied to a body at 300 K. Entropy change?</p><div class="ans step">\(\frac{900}{300} = +3.0 \,\mathrm{J} \,\mathrm{K}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">03</span>900 J is supplied to a body at 300 K. Entropy change?</p><div class="ans step">\(\dfrac{900}{300} = +3.0 \,\mathrm{J} \,\mathrm{K}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: entropy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Entropy and the second law<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What happens to the entropy of a real isolated system?</p><div class="ans step">It always increases</div></div>
           <div class="q"><p><span class="n">05</span>State the Clausius form of the second law.</p><div class="ans step">Heat does not flow by itself from cold to hot</div></div>
           <div class="q"><p><span class="n">06</span>Water freezes: its entropy falls. Why is that allowed?</p><div class="ans step">The surroundings gain more</div></div>
@@ -987,11 +1004,19 @@
       <section class="slide hl" data-title="Quick check: heat engines">
         <p class="eyebrow">Quick check</p>
         <h2>Heat engines<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>An engine takes in 500 J and rejects 350 J. Work done?</p><div class="ans step">150 J</div></div>
-          <div class="q"><p><span class="n">02</span>Its efficiency?</p><div class="ans step">\(\frac{150}{500} = 0.30\)</div></div>
+          <div class="q"><p><span class="n">02</span>Its efficiency?</p><div class="ans step">\(\dfrac{150}{500} = 0.30\)</div></div>
           <div class="q"><p><span class="n">03</span>Which four processes make up a Carnot cycle?</p><div class="ans step">Two isothermal and two adiabatic</div></div>
-          <div class="q"><p><span class="n">04</span>Reservoirs at 600 K and 300 K. Greatest possible efficiency?</p><div class="ans step">\(1 - \frac{300}{600} = 0.50\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: heat engines">
+        <p class="eyebrow">Quick check</p>
+        <h2>Heat engines<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>Reservoirs at 600 K and 300 K. Greatest possible efficiency?</p><div class="ans step">\(1 - \dfrac{300}{600} = 0.50\)</div></div>
           <div class="q"><p><span class="n">05</span>Why must an engine reject heat?</p><div class="ans step">To remove the entropy it took in</div></div>
           <div class="q"><p><span class="n">06</span>How can the Carnot efficiency be raised?</p><div class="ans step">Hotter source or colder sink</div></div>
         </div>
@@ -1013,7 +1038,7 @@
       </section>
 
       <section class="slide hl" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Closed system</b><span>Energy can cross, mass cannot</span></div>
@@ -1022,6 +1047,14 @@
           <div class="term"><b>Isothermal</b><span>At constant temperature</span></div>
           <div class="term"><b>Adiabatic</b><span>No thermal energy transferred</span></div>
           <div class="term"><b>Isobaric</b><span>At constant pressure</span></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS, HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Isovolumetric</b><span>At constant volume</span></div>
           <div class="term"><b>Microstate</b><span>One exact arrangement</span></div>
           <div class="term"><b>Entropy</b><span>A measure of disorder, in J K⁻¹</span></div>
