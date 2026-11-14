@@ -145,7 +145,7 @@
 .tool .eq { font: 900 38px/1.05 var(--display); letter-spacing: -.03em; }
 .tool .eq.long { font-size: 33px; } /* the widest equation */
 .tool .words { font-size: 24px; font-weight: 800; }
-.tool .units { font-size: 24px; color: var(--muted); line-height: 1.35; }
+.tool .units { font-size: 24px; line-height: 1.35; }
 .tool .where { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .tool.given { background: #f1edff; }
 /* Three across, so each word equation fits on one line at full size. */
