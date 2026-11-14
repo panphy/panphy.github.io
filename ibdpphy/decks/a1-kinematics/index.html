@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,25 +63,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="path-displacement" style="height: 190px;"></div>
+            <div class="fig" data-fig="path-displacement" style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Describing motion</h3>
             <p>Displacement, velocity, acceleration</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="st-graph" style="height: 190px;"></div>
+            <div class="fig" data-fig="st-graph" style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Motion graphs</h3>
             <p>What the gradient and the area mean</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="suvat-area" style="height: 190px;"></div>
+            <div class="fig" data-fig="suvat-area" style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Equations of motion</h3>
             <p>Four equations for constant acceleration</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="drag-path" style="height: 190px;"></div>
+            <div class="fig" data-fig="drag-path" style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Projectiles</h3>
             <p>Two motions at once, then air resistance</p>
@@ -192,14 +193,14 @@
         <p class="eyebrow">The story: Palo Alto, California, 1878</p>
         <p class="not-examined">Background story: not assessed</p>
         <h2>Freezing a gallop<span>.</span></h2>
-        <div class="story band" style="--photo-h: 340px;">
+        <div class="story band" style="--photo-h: 300px;">
           <div class="story-photos">
             <figure><img src="images/horse-in-motion.jpg" width="960" height="592" alt="A printed card of twelve photographs in three rows, eleven showing the silhouette of a galloping horse and rider at successive points of its stride against a wall marked with vertical lines, and the last showing the horse standing still"><figcaption><b>The Horse in Motion</b>: the mare Sallie Gardner on Leland Stanford’s track, 19 June 1878</figcaption></figure>
           </div>
           <ul class="points">
-            <li>Do all four hooves of a galloping horse leave the ground <b>at once</b>? The photographs said <b>yes</b></li>
+            <li>Do all four hooves leave the ground <b>at once</b>? The photos said <b>yes</b></li>
             <li>Eadweard Muybridge’s <b>12 cameras</b> fired in turn: frames <b>27 inches</b> and about <b><span class="equation-inline">\(\frac{1}{25}\) s</span></b> apart</li>
-            <li><b>0.69 m</b> in <b>0.04 s</b>: an average speed of about <b>17 m s⁻¹</b>, over a time short enough to be nearly <b>instantaneous</b></li>
+            <li><b>0.69 m</b> in <b>0.04 s</b> \(\Rightarrow\) about <b>17 m s⁻¹</b>, almost <b>instantaneous</b></li>
           </ul>
         </div>
         <p class="credits">Photographs: <a href="https://commons.wikimedia.org/wiki/File:The_Horse_in_Motion_high_res.jpg" target="_blank" rel="noopener">Eadweard Muybridge, Library of Congress</a>, public domain.</p>
@@ -246,10 +247,10 @@
             <thead><tr><th>Quantity</th><th>Scalar or vector?</th><th>Unit</th><th>Tells you</th></tr></thead>
             <tbody>
               <tr><td>Distance</td><td>Scalar</td><td class="num">m</td><td>How far along the path</td></tr>
-              <tr><td>Displacement</td><td>Vector</td><td class="num">m</td><td>How far from the start, and which way</td></tr>
+              <tr><td>Displacement</td><td>Vector</td><td class="num">m</td><td>How far from the start, which way</td></tr>
               <tr><td>Speed</td><td>Scalar</td><td class="num">m s⁻¹</td><td>How fast</td></tr>
               <tr><td>Velocity</td><td>Vector</td><td class="num">m s⁻¹</td><td>How fast, and which way</td></tr>
-              <tr><td>Acceleration</td><td>Vector</td><td class="num">m s⁻²</td><td>How quickly the velocity changes</td></tr>
+              <tr><td>Acceleration</td><td>Vector</td><td class="num">m s⁻²</td><td>Rate of change of velocity</td></tr>
             </tbody>
           </table>
         </div>
@@ -388,9 +389,6 @@
             <span class="step">\(a = \dfrac{\Delta v}{\Delta t} = \dfrac{12 - 0}{4.0} = \class{res}{3.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
             <span class="say step">Last 3 s: gradient</span>
             <span class="step">\(a = \dfrac{\Delta v}{\Delta t} = \dfrac{0 - 12}{3.0} = \class{res}{-4.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
-            <span class="say step">Whole journey: area</span>
-            <span class="step">\(s = \text{area} = 24 + 72 + 18 = \class{res}{114 \,\mathrm{m}}\)</span>
-            <span class="step">Average speed \(= \dfrac{s}{t} = \dfrac{114}{13} = \class{res}{8.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>A SHORT CAR JOURNEY</span></div>
@@ -411,18 +409,43 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Motion graph: worked example">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Reading a journey<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say step">Whole journey: area</span>
+            <span class="step">\(s = \text{area} = 24 + 72 + 18 = \class{res}{114 \,\mathrm{m}}\)</span>
+            <span class="step">Average speed \(= \dfrac{s}{t} = \dfrac{114}{13} = \class{res}{8.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A SHORT CAR JOURNEY</span></div>
+            <div class="fig" data-fig="vt-graph" data-numbers></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Quick check: describing motion">
         <p class="eyebrow">Quick check</p>
         <h2>Describing motion<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A swimmer swims two 25 m lengths, there and back. Distance? Displacement?</p><div class="ans step">50 m and zero</div></div>
           <div class="q"><p><span class="n">02</span>What does the gradient of a displacement–time graph give?</p><div class="ans step">Velocity</div></div>
           <div class="q"><p><span class="n">03</span>What does the area under a velocity–time graph give?</p><div class="ans step">Displacement</div></div>
-          <div class="q"><p><span class="n">04</span>A train goes from 8 to 20 m s⁻¹ in 30 s. Acceleration?</p><div class="ans step">\(\frac{20 - 8}{30} = 0.40 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: describing motion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Describing motion<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>A train goes from 8 to 20 m s⁻¹ in 30 s. Acceleration?</p><div class="ans step">\(\dfrac{20 - 8}{30} = 0.40 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
           <div class="q"><p><span class="n">05</span>Velocity −6 m s⁻¹, acceleration −2 m s⁻². Speeding up or slowing?</p><div class="ans step">Speeding up: same sign</div></div>
           <div class="q"><p><span class="n">06</span>How do you find instantaneous velocity from a curved displacement–time graph?</p><div class="ans step">Gradient of the tangent at that time</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 3 -->
@@ -497,16 +520,16 @@
         <p class="eyebrow">Uniform acceleration in a straight line</p>
         <h2>The four equations<span>.</span></h2>
         <div class="stack center" style="gap: 16px;">
-          <table class="facts big">
+          <table class="facts">
             <thead><tr><th>Equation</th><th>Leaves out</th><th>Use it when…</th></tr></thead>
             <tbody>
-              <tr><td>\(s = \dfrac{u + v}{2}t\)</td><td class="num">\(a\)</td><td>the acceleration is not given or wanted</td></tr>
-              <tr><td>\(v = u + at\)</td><td class="num">\(s\)</td><td>the displacement is not given or wanted</td></tr>
-              <tr><td>\(s = ut + \tfrac{1}{2}at^{2}\)</td><td class="num">\(v\)</td><td>the final velocity is not given or wanted</td></tr>
-              <tr><td>\(v^{2} - u^{2} = 2as\)</td><td class="num">\(t\)</td><td>the time is not given or wanted</td></tr>
+              <tr><td>\(s = \dfrac{u + v}{2}t\)</td><td class="num">\(a\)</td><td>Acceleration not given or wanted</td></tr>
+              <tr><td>\(v = u + at\)</td><td class="num">\(s\)</td><td>Displacement not given or wanted</td></tr>
+              <tr><td>\(s = ut + \tfrac{1}{2}at^{2}\)</td><td class="num">\(v\)</td><td>Final velocity not given or wanted</td></tr>
+              <tr><td>\(v^{2} - u^{2} = 2as\)</td><td class="num">\(t\)</td><td>Time not given or wanted</td></tr>
             </tbody>
           </table>
-          <div class="idea step">Five quantities: \(s\), \(u\), \(v\), \(a\), \(t\). Know <b>three</b>, and you can find the other two.</div>
+          <div class="idea step">Five quantities \(s, u, v, a, t\): know <b>three</b>, find the other two</div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -637,9 +660,6 @@
             <span class="say">\(u = +14.7 \,\mathrm{m} \,\mathrm{s}^{-1}\), \(a = -9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
             <span class="step">Top: \(v = 0\), and \(v = u + at\)</span>
             <span class="step">\(t = \dfrac{v - u}{a} = \dfrac{0 - 14.7}{-9.8} = \class{res}{1.5 \,\mathrm{s}}\)</span>
-            <span class="step">Height: \(v^{2} - u^{2} = 2as\)</span>
-            <span class="step">\(s = \dfrac{v^{2} - u^{2}}{2a} = \dfrac{0 - 14.7^{2}}{2(-9.8)} = \class{res}{11 \,\mathrm{m}}\)</span>
-            <span class="step">Back at the hand: \(t = \class{res}{3.0 \,\mathrm{s}}\), \(v = \class{res}{-14.7 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>VELOCITY AGAINST TIME</span></div>
@@ -658,6 +678,24 @@
             <p class="trap">Saying the acceleration is zero at the top. The velocity is zero for an instant, but it is still changing at 9.8 m s⁻² downward. If the acceleration were zero the ball would stay there.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Equations of motion: thrown upwards">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A ball thrown straight up<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say">\(u = +14.7 \,\mathrm{m} \,\mathrm{s}^{-1}\), \(a = -9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
+            <span class="step">Height: \(v^{2} - u^{2} = 2as\)</span>
+            <span class="step">\(s = \dfrac{v^{2} - u^{2}}{2a} = \dfrac{0 - 14.7^{2}}{2(-9.8)} = \class{res}{11 \,\mathrm{m}}\)</span>
+            <span class="step">Back at the hand: \(t = \class{res}{3.0 \,\mathrm{s}}\), \(v = \class{res}{-14.7 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>VELOCITY AGAINST TIME</span></div>
+            <div class="fig" data-fig="throw-up"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Measuring g">
@@ -699,7 +737,7 @@
         <div class="quiz fill">
           <div class="q"><p><span class="n">01</span>When can the four equations be used?</p><div class="ans step">Only when the acceleration is constant</div></div>
           <div class="q"><p><span class="n">02</span>A stone is dropped from rest. How fast is it moving after 4.0 s?</p><div class="ans step">\(9.8 \times 4.0 = 39.2 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
-          <div class="q"><p><span class="n">03</span>How far has it fallen in that time?</p><div class="ans step">\(\frac{1}{2} \times 9.8 \times 4.0^{2} = 78.4 \,\mathrm{m}\)</div></div>
+          <div class="q"><p><span class="n">03</span>How far has it fallen in that time?</p><div class="ans step">\(\dfrac{1}{2} \times 9.8 \times 4.0^{2} = 78.4 \,\mathrm{m}\)</div></div>
           <div class="q"><p><span class="n">04</span>Which equation has no \(t\) in it?</p><div class="ans step">\(v^{2} - u^{2} = 2as\)</div></div>
           <div class="q"><p><span class="n">05</span>A cyclist accelerates from rest at 1.5 m s⁻² for 8.0 s. Final velocity?</p><div class="ans step">\(1.5 \times 8.0 = 12 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
           <div class="q"><p><span class="n">06</span>What is the acceleration of a ball at the top of its flight?</p><div class="ans step">9.8 m s⁻² downward</div></div>
@@ -782,7 +820,7 @@
       <section class="slide" data-title="Projectile: launched horizontally">
         <p class="eyebrow">Worked example</p>
         <h2>Launched horizontally from a cliff<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">How long does it take to land, and how far from the foot of the cliff? Find its velocity as it lands.</span>
             <span class="say">44.1 m high</span>
@@ -790,12 +828,6 @@
             <span class="step">Vertical: \(u = 0\), so \(s = \tfrac{1}{2}gt^{2}\)</span>
             <span class="step">\(t = \sqrt{\dfrac{2s}{g}} = \sqrt{\dfrac{2 \times 44.1}{9.8}} = \class{res}{3.0 \,\mathrm{s}}\)</span>
             <span class="step">Horizontal: \(x = u_{x}t = 12 \times 3.0 = \class{res}{36 \,\mathrm{m}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">Velocity on landing</span>
-            <span class="step">Vertical: \(v_{y} = gt = 9.8 \times 3.0 = 29.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
-            <span class="step">\(v = \sqrt{v_{x}^{2} + v_{y}^{2}} = \sqrt{12^{2} + 29.4^{2}} = \class{res}{32 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="step">\(\tan \theta = \dfrac{v_{y}}{v_{x}} = \dfrac{29.4}{12}\) &nbsp;so&nbsp; \(\class{res}{68^{\circ}}\) below horizontal</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
@@ -810,6 +842,20 @@
             <p class="trap">Adding the components: 12 + 29.4. Velocities at right angles combine by Pythagoras, never by simple addition.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Projectile: launched horizontally">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Launched horizontally from a cliff<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">Velocity on landing</span>
+            <span class="step">Vertical: \(v_{y} = gt = 9.8 \times 3.0 = 29.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">\(v = \sqrt{v_{x}^{2} + v_{y}^{2}} = \sqrt{12^{2} + 29.4^{2}} = \class{res}{32 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(\tan \theta = \dfrac{v_{y}}{v_{x}} = \dfrac{29.4}{12}\) &nbsp;so&nbsp; \(\class{res}{68^{\circ}}\) below horizontal</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Launched at an angle">
@@ -868,7 +914,7 @@
       <section class="slide" data-title="Projectile: launched upwards at an angle">
         <p class="eyebrow">Worked example</p>
         <h2>20 m s⁻¹ at 30° above the horizontal<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the time to the top, the maximum height, the time of flight and the range. It lands at the height it was launched from.</span>
             <span class="say step">Components</span>
@@ -876,13 +922,6 @@
             <span class="step">Vertical: \(u \sin \theta = 20 \sin 30^{\circ} = \class{res}{10.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="say step">Time to the top: vertical \(v = 0\)</span>
             <span class="step">\(t = \dfrac{u_{y}}{g} = \dfrac{10.0}{9.8} = \class{res}{1.02 \,\mathrm{s}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">Maximum height: \(v^{2} - u^{2} = 2as\)</span>
-            <span class="step">\(s = \dfrac{u_{y}^{2}}{2g} = \dfrac{10.0^{2}}{2 \times 9.8} = \class{res}{5.1 \,\mathrm{m}}\)</span>
-            <span class="say step">Same height up and down: twice the time</span>
-            <span class="step">Time of flight \(= 2t = 2 \times 1.02 = \class{res}{2.04 \,\mathrm{s}}\)</span>
-            <span class="step">Range \(= u_{x} \times 2t = 17.3 \times 2.04 = \class{res}{35.3 \,\mathrm{m}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
@@ -899,24 +938,31 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Projectile: launched upwards at an angle">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>20 m s⁻¹ at 30° above the horizontal<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">Maximum height: \(v^{2} - u^{2} = 2as\)</span>
+            <span class="step">\(s = \dfrac{u_{y}^{2}}{2g} = \dfrac{10.0^{2}}{2 \times 9.8} = \class{res}{5.1 \,\mathrm{m}}\)</span>
+            <span class="say step">Same height up and down: twice the time</span>
+            <span class="step">Time of flight \(= 2t = 2 \times 1.02 = \class{res}{2.04 \,\mathrm{s}}\)</span>
+            <span class="step">Range \(= u_{x} \times 2t = 17.3 \times 2.04 = \class{res}{35.3 \,\mathrm{m}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Projectile: launched downwards at an angle">
         <p class="eyebrow">Worked example</p>
         <h2>Thrown downwards from a height<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find its vertical velocity as it lands, the time of flight and how far away it lands.</span>
             <span class="say">8.0 m s⁻¹ at 30° below horizontal</span>
             <span class="say">25 m above ground, down is positive</span>
             <span class="step">Horizontal: \(u \cos \theta = 8.0 \cos 30^{\circ} = \class{res}{6.93 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="step">Vertical: \(u \sin \theta = 8.0 \sin 30^{\circ} = \class{res}{4.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">Vertical velocity on landing</span>
-            <span class="step">\(v^{2} - u^{2} = 2as\)</span>
-            <span class="step">\(v^{2} = 4.0^{2} + 2(9.8)(25) = 506\)</span>
-            <span class="step">\(v = \class{res}{22.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="step">\(t = \dfrac{v - u}{a} = \dfrac{22.5 - 4.0}{9.8} = \class{res}{1.89 \,\mathrm{s}}\)</span>
-            <span class="step">Lands \(u_{x}t = 6.93 \times 1.89 = \class{res}{13.1 \,\mathrm{m}}\) away</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
@@ -931,6 +977,22 @@
             <p class="tip">Compare with dropping it from rest: \(t = \sqrt{\frac{2 \times 25}{9.8}} = 2.26 \,\mathrm{s}\). Starting with a downward velocity gets it to the ground sooner.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Projectile: launched downwards at an angle">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Thrown downwards from a height<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">Vertical velocity on landing</span>
+            <span class="step">\(v^{2} - u^{2} = 2as\)</span>
+            <span class="step">\(v^{2} = 4.0^{2} + 2(9.8)(25) = 506\)</span>
+            <span class="step">\(v = \class{res}{22.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(t = \dfrac{v - u}{a} = \dfrac{22.5 - 4.0}{9.8} = \class{res}{1.89 \,\mathrm{s}}\)</span>
+            <span class="step">Lands \(u_{x}t = 6.93 \times 1.89 = \class{res}{13.1 \,\mathrm{m}}\) away</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Fluid resistance on a projectile">
@@ -1001,7 +1063,7 @@
             <div class="obs-row step"><div><b>\(g\) is constant</b></div><span class="to">→</span><div>The height is not small compared with the Earth: a satellite</div></div>
             <div class="obs-row step"><div><b>The body is a point</b></div><span class="to">→</span><div>Its size or its spin matters: a curving football</div></div>
           </div>
-          <div class="idea step">A model is good enough when its predictions <b>agree with measurement</b> to the accuracy you need.</div>
+          <div class="idea step">Good enough when its predictions <b>agree with measurement</b> to the accuracy needed</div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -1020,10 +1082,18 @@
       <section class="slide" data-title="Quick check: projectiles">
         <p class="eyebrow">Quick check</p>
         <h2>Projectiles<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is the horizontal acceleration of a projectile (no air resistance)?</p><div class="ans step">Zero</div></div>
-          <div class="q"><p><span class="n">02</span>A ball rolls off a table 1.25 m high. Time to reach the floor?</p><div class="ans step">\(\sqrt{\frac{2 \times 1.25}{9.8}} = 0.51 \,\mathrm{s}\)</div></div>
+          <div class="q"><p><span class="n">02</span>A ball rolls off a table 1.25 m high. Time to reach the floor?</p><div class="ans step">\(\sqrt{\dfrac{2 \times 1.25}{9.8}} = 0.51 \,\mathrm{s}\)</div></div>
           <div class="q"><p><span class="n">03</span>It left the table at 2.0 m s⁻¹. How far out does it land?</p><div class="ans step">\(2.0 \times 0.51 = 1.0 \,\mathrm{m}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: projectiles">
+        <p class="eyebrow">Quick check</p>
+        <h2>Projectiles<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What is the velocity of a projectile at the top of its path?</p><div class="ans step">\(u \cos \theta\), horizontal</div></div>
           <div class="q"><p><span class="n">05</span>Give two effects of air resistance on the path.</p><div class="ans step">Lower maximum height, shorter range</div></div>
           <div class="q"><p><span class="n">06</span>What is true of the forces at terminal velocity?</p><div class="ans step">Resistance equals weight: no resultant force</div></div>

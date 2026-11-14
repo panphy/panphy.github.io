@@ -42,7 +42,7 @@ function mount(THREE, fig, index, attr, make) {
   const labels = [];
   const label = (html, anchor) => {
     const el = document.createElement('div');
-    el.style.cssText = 'position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;pointer-events:none;font:500 24px/1.3 var(--font-body);color:var(--text-main);';
+    el.style.cssText = 'position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;pointer-events:none;font:500 28px/1.3 var(--font-body);color:var(--text-main);';
     el.innerHTML = html;
     holder.appendChild(el);
     el.anchor = new THREE.Vector3(...anchor);
@@ -51,7 +51,7 @@ function mount(THREE, fig, index, attr, make) {
   };
   const caption = html => {
     const el = document.createElement('div');
-    el.style.cssText = 'position:absolute;left:0;right:0;bottom:6px;text-align:center;pointer-events:none;font:500 24px/1.35 var(--font-body);color:var(--text-main);';
+    el.style.cssText = 'position:absolute;left:0;right:0;bottom:6px;text-align:center;pointer-events:none;font:500 28px/1.35 var(--font-body);color:var(--text-main);';
     el.innerHTML = html;
     holder.appendChild(el);
     return el;

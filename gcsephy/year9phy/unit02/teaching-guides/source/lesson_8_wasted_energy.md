@@ -132,7 +132,7 @@ Complete the Eco House. Stretch: estimate which feature would save the most ener
 
 ## Using the workbook
 
-The Quick check (slide 57) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 62) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 

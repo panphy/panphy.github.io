@@ -21,6 +21,7 @@
   <script src="/assets/theme-toggle.js"></script>
   <script src="/gcsephy/sw-register.js" defer></script>
   <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <script src="../assets/deck-math.js"></script>
 </head>
 <body data-deck-key="work-like-a-physicist" data-deck-title="Work Like a Physicist">
@@ -296,19 +297,14 @@
       </section>
 
       <section class="slide a-hi" data-title="Key words: measurement">
-        <p class="eyebrow"><span class="num">01</span> AQA key words</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Say it like <em>a physicist</em></h2>
-        <div class="terms fill">
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Precise</b><span>Little spread about the mean</span></div>
           <div class="term"><b>Accurate</b><span>Close to the true value</span></div>
           <div class="term"><b>Uncertainty</b><span>The interval within which the true value can be expected to lie</span></div>
           <div class="term"><b>Range</b><span>The maximum and minimum values of the independent or dependent variables</span></div>
           <div class="term"><b>Repeatable</b><span>Same person, method, kit → same results</span></div>
-          <div class="term"><b>Reproducible</b><span>Another person, kit or technique → same results</span></div>
-          <div class="term"><b>Resolution</b><span>Smallest change the instrument can show</span></div>
-          <div class="term"><b>Random error</b><span>Unpredictable spread; reduce with repeats</span></div>
-          <div class="term"><b>Systematic error</b><span>Same shift every time; check the method</span></div>
-          <div class="term"><b>Zero error</b><span>Reads a value when it should read zero</span></div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 1: Trust the data?</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -319,6 +315,19 @@
             <p>“I tested ramp heights from 5 cm to 25 cm” gives the range. It is the smallest and largest value, stated as “from … to …”, not one number.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Key words: measurement">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Say it like <em>a physicist</em></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Reproducible</b><span>Another person, kit or technique → same results</span></div>
+          <div class="term"><b>Resolution</b><span>Smallest change the instrument can show</span></div>
+          <div class="term"><b>Random error</b><span>Unpredictable spread; reduce with repeats</span></div>
+          <div class="term"><b>Systematic error</b><span>Same shift every time; check the method</span></div>
+          <div class="term"><b>Zero error</b><span>Reads a value when it should read zero</span></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Mission 1: Trust the data?</span><span data-page></span></div>
       </section>
 
       <section class="slide a-hi" data-title="Quick check: Mission 1">
@@ -523,10 +532,18 @@
       <section class="slide a-cyan" data-title="Quick check: Mission 2">
         <p class="eyebrow"><span class="num">02</span> Checkpoint</p>
         <h2>Quick check</h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">1</span>Independent variable means…</p><div class="ans step">The one variable that is deliberately changed</div></div>
           <div class="q"><p><span class="n">2</span>Dependent variable means…</p><div class="ans step">The variable that is measured</div></div>
           <div class="q"><p><span class="n">3</span>Water temperature → dissolving time. Graph?</p><div class="ans step">Line graph, because temperature is continuous</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-cyan" data-title="Quick check: Mission 2">
+        <p class="eyebrow"><span class="num">02</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">4</span>Is surface type continuous or categoric?</p><div class="ans step">Categoric</div></div>
           <div class="q"><p><span class="n">5</span>Why control variables?</p><div class="ans step">If two variables change, you cannot tell which caused the result</div></div>
           <div class="q"><p><span class="n">6</span>Does the DV decide the graph?</p><div class="ans step">No, the independent variable does</div></div>
@@ -576,7 +593,7 @@
             <p class="kicker">How it works</p>
             <h2>The helmet that is <em>built to break</em></h2>
             <p class="standfirst">The foam is crushed in a crash. The head takes longer to stop, so the force on the skull is smaller.</p>
-            <p class="follow-up"><b>Before it is sold</b>Each helmet is fitted to a head-shaped weight with sensors inside and dropped onto a steel anvil, helmet after helmet.</p>
+            <p class="follow-up"><b>Before it is sold</b>Helmets on a head-shaped weight with sensors are dropped onto steel, again and again.</p>
             <p class="ask"><b>Talk about it</b>Why is one drop on one helmet not enough?</p>
           </div>
         </div>
@@ -586,14 +603,14 @@
       <section class="slide a-hot" data-title="Drop test set-up">
         <p class="eyebrow"><span class="num">03</span> Variables first</p>
         <h2>The drop test</h2>
-        <div class="split wide-fig">
+        <div class="split even">
           <div class="col">
             <div class="rule"><strong>Question</strong><span>How does material affect bounce height?</span></div>
             <ul class="points small">
               <li><b>Independent</b>: material (<span class="hl">categoric</span>)</li>
               <li><b>Dependent</b>: bounce height / cm</li>
-              <li><b>Control</b>: same ball, drop height, release, ruler position</li>
-              <li>Lowest bounce = <b>best shock absorber</b></li>
+              <li><b>Control</b>: ball, drop height, release, ruler</li>
+              <li>Lowest bounce: <b>best absorber</b></li>
             </ul>
           </div>
           <div class="panel"><div class="fig" data-fig="dropTest"></div></div>
@@ -801,16 +818,16 @@
       <section class="slide a-violet" data-title="Ramp set-up">
         <p class="eyebrow"><span class="num">04</span> Set it up</p>
         <h2>The ramp</h2>
-        <div class="split wide-fig">
+        <div class="split even">
           <div class="col">
             <ul class="points small">
               <li><b>Independent</b>: ramp height / cm (<span class="hl">continuous</span>)</li>
               <li><b>Dependent</b>: distance travelled / cm</li>
-              <li><b>Control</b>: same trolley, ramp, start line, floor</li>
+              <li><b>Control</b>: trolley, ramp, start line, floor</li>
               <li>5 heights: 5 → 25 cm</li>
-              <li>3 trials each → <b>15 runs</b></li>
+              <li>3 trials each: <b>15 runs</b></li>
             </ul>
-            <div class="card a-alt flat"><p class="eyebrow">Safety</p><p style="margin-top: 8px;">Stable ramp, clear lane, never aim at people</p></div>
+            <div class="remember"><b>Safety</b>: stable ramp, clear lane, never aim at people</div>
           </div>
           <div class="panel"><div class="fig" data-fig="ramp"></div></div>
         </div>
@@ -965,8 +982,8 @@
           <div class="story">
             <p class="kicker">Breaking</p>
             <h2>A <em>hole</em> in the ozone layer</h2>
-            <p class="standfirst">British Antarctic Survey scientists report that ozone above Antarctica collapses every spring. They measured it from the ground, year after year.</p>
-            <p class="follow-up"><b>Meanwhile, in orbit</b>A satellite had recorded the same low values. Its software flagged them as readings it could not trust, so they had to be checked first.</p>
+            <p class="standfirst">Ozone above Antarctica collapses every spring: measured from the ground, year after year.</p>
+            <p class="follow-up"><b>Meanwhile, in orbit</b>A satellite saw the same low values, but its software flagged them as untrustworthy.</p>
             <p class="ask"><b>Talk about it</b>A reading looks far too strange. What do you do with it?</p>
           </div>
         </div>
@@ -977,7 +994,7 @@
         <p class="eyebrow"><span class="num">05</span> Key idea</p>
         <h2>Show the <em>trend</em></h2>
         <div class="stack">
-          <div class="panel" style="height: 390px; flex: none;"><div class="fig" data-fig="fitTypes"></div></div>
+          <div class="panel" style="height: 320px; flex: none;"><div class="fig" data-fig="fitTypes"></div></div>
           <div class="row two">
             <div class="card a-alt flat"><p class="eyebrow">Do</p><ul class="points small tight" style="margin-top: 10px;"><li>One thin, smooth line</li><li>Straight <b>or</b> curved</li><li>Points balanced above and below</li></ul></div>
             <div class="card a-hot flat"><p class="eyebrow">Don’t</p><ul class="points small tight" style="margin-top: 10px;"><li>Zig-zag point to point</li><li>Force it through the ends</li><li>Let an anomalous result drag it</li></ul></div>
@@ -997,15 +1014,15 @@
       <section class="slide a-alt" data-title="Spot the anomalous result">
         <p class="eyebrow"><span class="num">05</span></p>
         <h2>Spot the <em>anomaly</em></h2>
-        <div class="split wide-fig" style="grid-template-columns: .75fr 1.25fr;">
+        <div class="split wide-fig" style="grid-template-columns: .9fr 1.1fr;">
           <div class="col">
-            <table class="data">
+            <table class="data compact">
               <thead><tr><th>Ramp height / cm</th><th>Mean distance / cm</th></tr></thead>
               <tbody><tr><td>5</td><td>20</td></tr><tr><td>10</td><td>37</td></tr><tr><td>15</td><td>52</td></tr><tr><td>20</td><td class="odd">96</td></tr><tr><td>25</td><td>80</td></tr></tbody>
             </table>
             <ul class="points small tight">
               <li class="step"><b>20 cm → 96 cm</b>: far above the trend</li>
-              <li class="step">Line predicts about <b>66 cm</b></li>
+              <li class="step">Line predicts \(\approx\) <b>66 cm</b></li>
               <li class="step">Delete it? <b>Not yet</b>, check first</li>
             </ul>
           </div>
@@ -1086,7 +1103,7 @@
       <section class="slide a-alt" data-title="Graph checklist">
         <p class="eyebrow"><span class="num">05</span> Peer review</p>
         <h2>Check it <em>like a marker</em></h2>
-        <div class="split wide-fig" style="grid-template-columns: .72fr 1.28fr;">
+        <div class="split wide-fig" style="grid-template-columns: .9fr 1.1fr;">
           <div class="col">
             <ol class="steps">
               <li>Title: what against what</li>
@@ -1096,7 +1113,7 @@
               <li>One best-fit line</li>
               <li>Anomalous result circled, or “none”</li>
             </ol>
-            <div class="remember">Give <b>one specific</b> improvement, not “make it neater”</div>
+            <div class="remember"><b>One specific</b> improvement, not “neater”</div>
           </div>
           <div class="panel"><div class="fig" data-fig="graphMarks"></div></div>
         </div>
@@ -1106,10 +1123,18 @@
       <section class="slide a-alt" data-title="Quick check: Mission 5">
         <p class="eyebrow"><span class="num">05</span> Checkpoint</p>
         <h2>Quick check</h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">1</span>What is a best-fit line?</p><div class="ans step">One smooth line showing the overall trend of the data</div></div>
           <div class="q"><p><span class="n">2</span>Why avoid dot-to-dot?</p><div class="ans step">It claims every reading is exact</div></div>
           <div class="q"><p><span class="n">3</span>What is an anomalous result?</p><div class="ans step">A result that doesn’t fit the pattern</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-alt" data-title="Quick check: Mission 5">
+        <p class="eyebrow"><span class="num">05</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">4</span>First step with an anomalous result?</p><div class="ans step">Check the recording and plotting, then repeat it</div></div>
           <div class="q"><p><span class="n">5</span>Must a best-fit line touch points?</p><div class="ans step">No, balance points above and below</div></div>
           <div class="q"><p><span class="n">6</span>What makes a conclusion strong?</p><div class="ans step">The relationship between the variables, with values + units</div></div>
@@ -1157,9 +1182,9 @@
           <div class="story">
             <p class="kicker">Breaking</p>
             <h2>A helicopter <em>flies on Mars</em></h2>
-            <p class="standfirst">Ingenuity lifts off in air about 1% as dense as Earth’s. Its rotors are over a metre across and its mass is under 2 kg.</p>
-            <p class="follow-up"><b>How they knew it would fly</b>Rotors were tested in a chamber at Martian pressure: change the blade size and spin rate, measure the lift, plot it.</p>
-            <p class="ask"><b>Talk about it</b>Which one thing would you change first, and what would you measure?</p>
+            <p class="standfirst">Ingenuity flies in air 1% as dense as Earth’s: rotors over 1 m wide, mass under 2 kg.</p>
+            <p class="follow-up"><b>How they knew it would fly</b>Tests at Martian pressure: change blade size and spin, measure the lift.</p>
+            <p class="ask"><b>Talk about it</b>What would you change first? What would you measure?</p>
           </div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 6: Solo flight</span><span data-page></span></div>
@@ -1168,16 +1193,16 @@
       <section class="slide a-cyan" data-title="Plan the helicopter test">
         <p class="eyebrow"><span class="num">06</span> Plan before you cut</p>
         <h2>Wing length → <em>fall time</em></h2>
-        <div class="split wide-fig">
+        <div class="split even">
           <div class="col">
             <ul class="points small">
               <li class="step"><b>IV</b>: wing length / cm (continuous)</li>
               <li class="step"><b>DV</b>: fall time / s</li>
-              <li class="step"><b>Control</b>: paper, body, paperclips, drop height, release</li>
-              <li class="step"><b>Range</b>: from 4 cm to 8 cm, 5 lengths</li>
-              <li class="step"><b>Graph</b>: line, because wing length is continuous</li>
+              <li class="step"><b>Control</b>: paper, body, clips, height, release</li>
+              <li class="step"><b>Range</b>: 4 to 8 cm, 5 lengths</li>
+              <li class="step"><b>Graph</b>: line (continuous IV)</li>
             </ul>
-            <div class="card a-alt flat"><p class="eyebrow">Safety</p><p style="margin-top: 8px;">Never climb on furniture; careful with scissors</p></div>
+            <div class="remember"><b>Safety</b>: no climbing on furniture; careful with scissors</div>
           </div>
           <div class="panel"><div class="fig" data-fig="helicopter"></div></div>
         </div>
@@ -1285,10 +1310,18 @@
       <section class="slide a-cyan" data-title="Quick check: Mission 6">
         <p class="eyebrow"><span class="num">06</span> Checkpoint</p>
         <h2>Quick check</h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">1</span>Name three control variables</p><div class="ans step">Drop height, paper type, paperclips</div></div>
           <div class="q"><p><span class="n">2</span>Heading for the mean column?</p><div class="ans step">Mean fall time / s</div></div>
           <div class="q"><p><span class="n">3</span>A drop hits a chair. What now?</p><div class="ans step">Note the reason, then repeat that drop</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-cyan" data-title="Quick check: Mission 6">
+        <p class="eyebrow"><span class="num">06</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">4</span>Where is a prediction most trustworthy?</p><div class="ans step">Inside the range of the data</div></div>
           <div class="q"><p><span class="n">5</span>Why is reaction time a big problem here?</p><div class="ans step">Fall times are short, so the error is a big fraction</div></div>
           <div class="q"><p><span class="n">6</span>Improve “human error”</p><div class="ans step">Name it, its effect, a matching fix</div></div>
@@ -1337,8 +1370,8 @@
           <div class="story">
             <p class="kicker">Breaking</p>
             <h2>Ripples in space <em>detected</em></h2>
-            <p class="standfirst">Two detectors about 3000 km apart pick up the same signal: two black holes colliding a billion light years away.</p>
-            <p class="follow-up"><b>Why the five-month wait?</b>The team attacked its own result first: checking instruments, ruling out interference, running the analysis again.</p>
+            <p class="standfirst">Two detectors 3000 km apart catch the same signal: two black holes colliding.</p>
+            <p class="follow-up"><b>Why wait five months?</b>They tried to break their own result first.</p>
             <p class="ask"><b>Talk about it</b>How would you try to prove your own result wrong?</p>
           </div>
         </div>

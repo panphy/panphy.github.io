@@ -18,7 +18,7 @@
       big: "Radium-226 decays and becomes radon, a completely different element. How can we predict exactly which nucleus it turns into?",
       goals: ["use the symbols for alpha, beta, gamma and neutron radiation", "balance a nuclear equation using mass numbers and atomic numbers", "work out the new nucleus after alpha or beta decay", "explain the effect of each decay on the mass and charge of the nucleus"],
       keywords: ["nuclear equation", "parent nucleus", "daughter nucleus", "mass number", "atomic number", "balance"],
-      deck: { slides: "28–31", text: "Alpha, beta and gamma equations, and the ‘What changes?’ table.", sim: SIM_DECAY },
+      deck: { slides: "29–32", text: "Alpha, beta and gamma equations, and the ‘What changes?’ table.", sim: SIM_DECAY },
       doNow: [
         ["What is an alpha particle made of?", "2 protons and 2 neutrons (a helium nucleus)."],
         ["What happens in the nucleus in beta decay?", "A neutron turns into a proton, and a fast electron is emitted."],
@@ -32,13 +32,13 @@
         { t: "key", h: "In every nuclear equation, the <strong>top numbers add up to the same total</strong> on both sides, and so do the <strong>bottom numbers</strong>. If the atomic number changes, a <strong>new element</strong> forms." },
 
         { t: "sub", h: "Writing an equation" },
-        { t: "follow", slide: 28, q: `Americium-241, ${N(241, 95, "Am")}, emits an alpha particle and becomes neptunium (Np). Write the equation.`, steps: [["Top", "241 − 4 = 237"], ["Bottom", "95 − 2 = 93"], ["New nucleus", N(237, 93, "Np")], ["Equation", `${N(241, 95, "Am")} → ${N(237, 93, "Np")} + ${ALPHA}`]],
+        { t: "follow", slide: 29, q: `Americium-241, ${N(241, 95, "Am")}, emits an alpha particle and becomes neptunium (Np). Write the equation.`, steps: [["Top", "241 − 4 = 237"], ["Bottom", "95 − 2 = 93"], ["New nucleus", N(237, 93, "Np")], ["Equation", `${N(241, 95, "Am")} → ${N(237, 93, "Np")} + ${ALPHA}`]],
           yt: { q: `Thorium-230, ${N(230, 90, "Th")}, emits an alpha particle and becomes radium (Ra). Write the equation.`, steps: [["Top", "230 − 4 = 226"], ["Bottom", "90 − 2 = 88"], ["New nucleus", N(226, 88, "Ra")], ["Equation", `${N(230, 90, "Th")} → ${N(226, 88, "Ra")} + ${ALPHA}`]] } },
-        { t: "follow", slide: 29, q: `Carbon-14, ${N(14, 6, "C")}, emits a beta particle and becomes nitrogen (N). Write the equation.`, steps: [["Top", "14 − 0 = 14"], ["Bottom", "6 + 1 = 7"], ["New nucleus", N(14, 7, "N")], ["Equation", `${N(14, 6, "C")} → ${N(14, 7, "N")} + ${BETA}`]],
+        { t: "follow", slide: 30, q: `Carbon-14, ${N(14, 6, "C")}, emits a beta particle and becomes nitrogen (N). Write the equation.`, steps: [["Top", "14 − 0 = 14"], ["Bottom", "6 + 1 = 7"], ["New nucleus", N(14, 7, "N")], ["Equation", `${N(14, 6, "C")} → ${N(14, 7, "N")} + ${BETA}`]],
           yt: { q: `Strontium-90, ${N(90, 38, "Sr")}, emits a beta particle and becomes yttrium (Y). Write the equation.`, steps: [["Top", "90 − 0 = 90"], ["Bottom", "38 + 1 = 39"], ["New nucleus", N(90, 39, "Y")], ["Equation", `${N(90, 38, "Sr")} → ${N(90, 39, "Y")} + ${BETA}`]] } },
-        { t: "html", h: EQ([N("99m", 43, "Tc"), ARROW, N(99, 43, "Tc"), "+", GAMMA], "Gamma (slide 30). The ‘m’ means the nucleus has extra energy; A and Z do not change") },
+        { t: "html", h: EQ([N("99m", 43, "Tc"), ARROW, N(99, 43, "Tc"), "+", GAMMA], "Gamma (slide 31). The ‘m’ means the nucleus has extra energy; A and Z do not change") },
         { t: "sub", h: "Finding the missing particle" },
-        { t: "follow", slide: 31, q: `Complete the equation: ${N(226, 88, "Ra")} → ${N(222, 86, "Rn")} + ?`, steps: [["Top", "226 − 222 = 4"], ["Bottom", "88 − 86 = 2"], ["Particle", `${ALPHA}: an alpha particle`]],
+        { t: "follow", slide: 32, q: `Complete the equation: ${N(226, 88, "Ra")} → ${N(222, 86, "Rn")} + ?`, steps: [["Top", "226 − 222 = 4"], ["Bottom", "88 − 86 = 2"], ["Particle", `${ALPHA}: an alpha particle`]],
           yt: { q: `Complete the equation: ${N(214, 83, "Bi")} → ${N(214, 84, "Po")} + ?`, steps: [["Top", "214 − 214 = 0"], ["Bottom", "83 − 84 = −1"], ["Particle", `${BETA}: a beta particle`]] } },
       ],
       try: [
@@ -73,7 +73,7 @@
       big: "A smoke alarm uses alpha radiation, a paper mill uses beta and a hospital uses gamma. Why not use the same radiation for all three?",
       goals: ["compare the ionising power, range in air and penetration of alpha, beta and gamma", "explain why more ionising radiation is less penetrating", "identify radiation from absorber data", "choose a suitable source for a use and justify the choice"],
       keywords: ["ionising", "ion", "penetration", "range", "absorbed", "smoke alarm", "thickness gauge", "tracer"],
-      deck: { slides: "32–34", text: "Comparing alpha, beta and gamma, penetration, and choosing a source.", sim: SIM_DECAY },
+      deck: { slides: "33–35", text: "Comparing alpha, beta and gamma, penetration, and choosing a source.", sim: SIM_DECAY },
       doNow: [
         [`Complete: ${N(210, 84, "Po")} → ${N(206, 82, "Pb")} + ?`, `${ALPHA} (an alpha particle)`],
         ["What happens to the atomic number in beta decay?", "It increases by 1."],
@@ -120,7 +120,7 @@
       big: "You cannot predict when one nucleus will decay. So how can we say that half of a sample of iodine-131 will be left after 8 days?",
       goals: ["explain why decay is random but a large sample is predictable", "define half-life in two ways", "find the half-life from a decay curve", "plot a decay curve from data"],
       keywords: ["half-life", "random", "decay curve", "sample", "count rate", "activity"],
-      deck: { slides: "35–37", text: "Half-life, using half-life and random decay.", sim: SIM_DECAY },
+      deck: { slides: "36–38", text: "Half-life, using half-life and random decay.", sim: SIM_DECAY },
       doNow: [
         ["Which radiation is stopped by paper?", "Alpha."],
         ["What does a count rate measure?", "The number of decays a detector records each second."],
@@ -181,7 +181,7 @@
       big: "A hospital uses iodine-131, with a half-life of 8 days. How long before less than 1% of it is left, and why does that matter?",
       goals: ["count half-lives to find how much is left", "find a half-life from data", "find how long it takes to fall to a given value", "work out the net decline as a ratio"],
       keywords: ["half-life", "number of half-lives", "initial activity", "fraction remaining", "net decline", "ratio"],
-      deck: { slides: "36", text: "Using half-life: from a graph, counting halvings, and as a ratio." },
+      deck: { slides: "37", text: "Using half-life: from a graph, counting halvings, and as a ratio." },
       doNow: [
         ["Define half-life.", "The time for the number of unstable nuclei (or the count rate) to halve."],
         ["A count rate falls from 600 to 300 in 5 days. What is the half-life?", "5 days."],
@@ -191,7 +191,7 @@
       learn: [
         { t: "sub", h: "Three steps" },
         { t: "html", h: "<ol class='steps'><li>Work out the <strong>number of half-lives</strong>: time ÷ half-life. Use the same units for both.</li><li><strong>Halve</strong> the starting value that many times.</li><li>Give the answer <strong>with a unit</strong>.</li></ol>" },
-        { t: "follow", slide: 36, q: "A count rate falls from 400 to 200 counts per second in 8 days. What is the count rate after 24 days?", steps: [["Half-life", "400 → 200 takes 8 days"], ["Half-lives", "24 ÷ 8 = 3"], ["Halve", "400 → 200 → 100 → 50"], ["Answer", "50 counts per second"]],
+        { t: "follow", slide: 37, q: "A count rate falls from 400 to 200 counts per second in 8 days. What is the count rate after 24 days?", steps: [["Half-life", "400 → 200 takes 8 days"], ["Half-lives", "24 ÷ 8 = 3"], ["Halve", "400 → 200 → 100 → 50"], ["Answer", "50 counts per second"]],
           yt: { q: "A count rate falls from 960 to 480 counts per second in 6 hours. What is the count rate after 18 hours?", steps: [["Half-life", "960 → 480 takes 6 hours"], ["Half-lives", "18 ÷ 6 = 3"], ["Halve", "960 → 480 → 240 → 120"], ["Answer", "120 counts per second"]] } },
         { t: "worked", q: "A source has an activity of 640 Bq. Its half-life is 2 hours. Calculate its activity after 8 hours.", steps: [["Half-lives", "8 ÷ 2 = 4"], ["Halve", "640 → 320 → 160 → 80 → 40"], ["Answer", "40 Bq"]],
           yt: { q: "A source has an activity of 3200 Bq. Its half-life is 5 days. Calculate its activity after 15 days.", steps: [["Half-lives", "15 ÷ 5 = 3"], ["Halve", "3200 → 1600 → 800 → 400"], ["Answer", "400 Bq"]] } },
@@ -199,7 +199,7 @@
         { t: "worked", q: "The activity of a sample falls from 2400 Bq to 300 Bq in 36 minutes. Calculate the half-life.", steps: [["Halvings", "2400 → 1200 → 600 → 300: 3 halvings"], ["Half-life", "36 ÷ 3"], ["Answer", "12 minutes"]],
           yt: { q: "A count rate falls from 960 to 60 counts per minute in 20 hours. Calculate the half-life.", steps: [["Halvings", "960 → 480 → 240 → 120 → 60: 4"], ["Half-life", "20 ÷ 4"], ["Answer", "5 hours"]] } },
         { t: "sub", h: "Net decline as a ratio" },
-        { t: "follow", slide: 36, q: "What fraction of the unstable nuclei is left after 3 half-lives? What is the net decline, as a ratio of the starting amount?", steps: [["Fraction left", "(½)<sup>3</sup> = ⅛"], ["Net decline", "1 − ⅛ = ⅞"], ["Answer", "⅛ left; net decline ⅞ (7 : 8)"]],
+        { t: "follow", slide: 37, q: "What fraction of the unstable nuclei is left after 3 half-lives? What is the net decline, as a ratio of the starting amount?", steps: [["Fraction left", "(½)<sup>3</sup> = ⅛"], ["Net decline", "1 − ⅛ = ⅞"], ["Answer", "⅛ left; net decline ⅞ (7 : 8)"]],
           yt: { q: "What fraction of the unstable nuclei is left after 5 half-lives? What is the net decline, as a ratio of the starting amount?", steps: [["Fraction left", "(½)<sup>5</sup> = 1/32"], ["Net decline", "1 − 1/32 = 31/32"], ["Answer", "1/32 left; net decline 31/32 (31 : 32)"]] } },
         { t: "split", cls: "top", left: [
           { t: "p", h: "After <em>n</em> half-lives, the fraction left is (½)<sup><em>n</em></sup>. The <strong>net decline</strong> is how much the activity has fallen. As a ratio of the initial activity, it is 1 − (½)<sup><em>n</em></sup>." },
@@ -232,7 +232,7 @@
       big: "Supermarkets can sell food treated with gamma rays to kill bacteria. Does eating it make you radioactive?",
       goals: ["explain the difference between irradiation and contamination", "compare the hazards of alpha, beta and gamma inside and outside the body", "describe precautions for working with radioactive sources", "explain why studies of radiation effects are published and peer reviewed"],
       keywords: ["irradiation", "contamination", "hazard", "precaution", "dosimeter", "peer review"],
-      deck: { slides: "38–41", text: "Contamination and irradiation, the quick check and the key words." },
+      deck: { slides: "39–43", text: "Contamination and irradiation, the quick check and the key words." },
       doNow: [
         ["A source has a half-life of 3 hours. What fraction is left after 9 hours?", "⅛ (3 half-lives)."],
         ["Which radiation is the most penetrating?", "Gamma."],
@@ -270,7 +270,7 @@
         { tip: "Define both words, and make the difference clear: outside source vs radioactive atoms on or in the object.", p: "Explain the difference between irradiation and contamination.", marks: 2, lines: 2, a: "Irradiation: an object is exposed to radiation from a source outside it and does not become radioactive (1). Contamination: radioactive atoms get onto or into an object, so it keeps emitting radiation (1)." },
         { p: "A technician uses a sealed gamma source. Describe two precautions the technician should take, and explain how each one reduces the risk.", marks: 4, lines: 4, a: "Any two, each with a reason: use tongs / keep a distance (1) so less radiation reaches the body (1); keep exposure time short (1) so the total dose is lower (1); store in a lead-lined box (1) because lead absorbs gamma (1); wear a dosimeter (1) to monitor the dose (1)." },
       ],
-      quick: { slide: 40, covers: "Lessons 5–10", items: [
+      quick: { slide: 41, covers: "Lessons 5–10", items: [
         [`Complete: ${N(210, 84, "Po")} → ${N(206, 82, "Pb")} + ?`, `${ALPHA} (an alpha particle)`],
         ["In beta decay, how does the atomic number change?", "It goes up by 1: a neutron becomes a proton."],
         ["Which radiation is the most ionising?", "Alpha."],

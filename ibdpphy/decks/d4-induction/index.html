@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,19 +63,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="d4-magnet-coil" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="d4-magnet-coil" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Flux and Faraday’s law</h3>
             <p>A changing flux induces an emf</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d4-rod" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="d4-rod" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Lenz’s law and moving conductors</h3>
             <p>The direction of the emf, and \(\varepsilon = BvL\)</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d4-generator" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="d4-generator" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>The rotating coil</h3>
             <p>A sinusoidal emf, and the effect of frequency</p>
@@ -101,7 +102,7 @@
         <p class="eyebrow">The story: London, 1831</p>
         <p class="not-examined">Background story: not assessed</p>
         <h2>Faraday makes electricity from magnetism<span>.</span></h2>
-        <div class="story" style="--photo-h: 400px;">
+        <div class="story" style="--photo-h: 340px;">
           <div class="story-photos">
             <figure><img src="images/faraday.jpg" width="772" height="1000" alt="Painted portrait of Michael Faraday, a man with wavy gray hair in a dark coat and white cravat"><figcaption><b>Michael Faraday</b>, painted by Thomas Phillips in 1842</figcaption></figure>
             <figure><img src="images/faraday-disk.jpg" width="1000" height="781" alt="Engraving of a copper disk mounted on an axle between the poles of a horseshoe magnet, with a handle to turn it and sliding contacts at its axle and rim"><figcaption>His <b>disk generator</b> of 1831 (engraving of 1884)</figcaption></figure>
@@ -109,11 +110,11 @@
           <div class="stack">
             <ul class="points">
               <li>A bookbinder’s apprentice at 14, with little schooling</li>
-              <li>Ørsted got magnetism from electricity. Faraday wanted the <b>reverse</b></li>
-              <li><b>1831</b>: two coils on an iron ring. Switching one gave a <b>brief current</b> in the other</li>
+              <li>Ørsted: electricity \(\rightarrow\) magnetism. Faraday wanted the <b>reverse</b></li>
+              <li><b>1831</b>: two coils on an iron ring. Switching one: a <b>brief current</b> in the other</li>
               <li>Then a magnet into a coil, and a spinning copper disk</li>
             </ul>
-            <div class="idea">A magnet held still beside a coil does nothing. Only a <b>change</b> in the flux through the coil induces a current.</div>
+            <div class="idea">Only a <b>change</b> in flux induces a current</div>
           </div>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:M_Faraday_Th_Phillips_oil_1842.jpg" target="_blank" rel="noopener">Thomas Phillips, 1842</a>, public domain. Engraving: <a href="https://commons.wikimedia.org/wiki/File:Faraday_disk_generator.jpg" target="_blank" rel="noopener">Émile Alglave, 1884</a>, public domain.</p>
@@ -310,15 +311,23 @@
       <section class="slide hl" data-title="Quick check: flux and Faraday’s law">
         <p class="eyebrow">Quick check</p>
         <h2>Flux and Faraday’s law<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is the unit of magnetic flux?</p><div class="ans step">The weber, Wb (T m²)</div></div>
           <div class="q"><p><span class="n">02</span>The plane of a coil lies along the field. Flux through it?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">03</span>A magnet rests inside a coil. Induced emf?</p><div class="ans step">Zero: the flux is not changing</div></div>
-          <div class="q"><p><span class="n">04</span>Flux through one turn changes by 0.020 Wb in 0.10 s. Emf in 50 turns?</p><div class="ans step">\(\frac{50 \times 0.020}{0.10} = 10 \,\mathrm{V}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: flux and Faraday’s law">
+        <p class="eyebrow">Quick check</p>
+        <h2>Flux and Faraday’s law<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>Flux through one turn changes by 0.020 Wb in 0.10 s. Emf in 50 turns?</p><div class="ans step">\(\dfrac{50 \times 0.020}{0.10} = 10 \,\mathrm{V}\)</div></div>
           <div class="q"><p><span class="n">05</span>The same change happens in half the time. The emf?</p><div class="ans step">It doubles</div></div>
           <div class="q"><p><span class="n">06</span>What does the gradient of a flux–time graph give?</p><div class="ans step">The size of the induced emf, per turn</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -545,10 +554,18 @@
       <section class="slide hl" data-title="Quick check: Lenz’s law">
         <p class="eyebrow">Quick check</p>
         <h2>Lenz’s law and moving conductors<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>State Lenz’s law.</p><div class="ans step">The induced current opposes the change that causes it</div></div>
           <div class="q"><p><span class="n">02</span>Which conservation law does it follow from?</p><div class="ans step">Conservation of energy</div></div>
           <div class="q"><p><span class="n">03</span>A 0.50 m rod moves at 4.0 m s⁻¹ across a 0.20 T field. Emf?</p><div class="ans step">\(0.20 \times 4.0 \times 0.50 = 0.40 \,\mathrm{V}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: Lenz’s law">
+        <p class="eyebrow">Quick check</p>
+        <h2>Lenz’s law and moving conductors<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A coil is completely inside a uniform field and moving. Emf?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">05</span>A north pole approaches a coil. Polarity of the near end?</p><div class="ans step">North</div></div>
           <div class="q"><p><span class="n">06</span>Why does a magnet fall slowly through a copper tube?</p><div class="ans step">Induced currents oppose its motion</div></div>
@@ -576,7 +593,7 @@
             <div class="panel-head"><span>ONE ROTATION</span><span class="pill">COIL AND EMF IN STEP</span></div>
             <div class="fig" data-fig="d4-generator" data-generator></div>
           </div>
-          <div class="idea">The flux linkage is \(NBA \cos \theta\). As the coil turns steadily, \(\theta\) grows steadily and the induced emf varies as a <b>sine curve</b>.</div>
+          <div class="idea">Flux linkage \(NBA \cos \theta\): steady turning \(\Rightarrow\) emf is a <b>sine curve</b></div>
         </div>
         <div class="slide-foot"><span>D.4 INDUCTION, HL ONLY</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -691,10 +708,18 @@
       <section class="slide hl" data-title="Quick check: the rotating coil">
         <p class="eyebrow">Quick check</p>
         <h2>The rotating coil<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What shape is the graph of emf against time for a steadily rotating coil?</p><div class="ans step">A sine curve</div></div>
           <div class="q"><p><span class="n">02</span>In which position of the coil is the emf greatest?</p><div class="ans step">Plane of the coil along the field</div></div>
           <div class="q"><p><span class="n">03</span>What is the flux through the coil at that moment?</p><div class="ans step">Zero</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: the rotating coil">
+        <p class="eyebrow">Quick check</p>
+        <h2>The rotating coil<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>The frequency of rotation is tripled. What happens to the peak emf?</p><div class="ans step">It triples</div></div>
           <div class="q"><p><span class="n">05</span>And to the period of the emf?</p><div class="ans step">It falls to one third</div></div>
           <div class="q"><p><span class="n">06</span>Give two other ways to increase the peak emf.</p><div class="ans step">More turns, a stronger field or a larger area</div></div>
@@ -703,13 +728,21 @@
       </section>
 
       <section class="slide hl" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>Induction on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Induction in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Flux</p><h3>\(\Phi = BA \cos \theta\)</h3><p>In webers. \(\theta\) is measured from the normal<br>Flux linkage \(N \Phi\)</p></div>
           <div class="card step"><p class="eyebrow">Faraday’s law</p><h3>\(\varepsilon = -N \frac{\Delta \Phi}{\Delta t}\)</h3><p>The rate of change of flux linkage<br>Gradient of a flux–time graph</p></div>
           <div class="card step"><p class="eyebrow">Lenz’s law</p><h3>Opposes the change</h3><p>A consequence of conservation of energy</p></div>
-          <div class="card step"><p class="eyebrow">Moving conductor</p><h3>\(\varepsilon = BvL\)</h3><p>A coil entering or leaving a field<br>No emf while fully inside</p></div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION, HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Induction in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Moving conductor</p><h3>\(\varepsilon = BvL\)</h3><p>A coil entering or leaving a field<br>No emf while fully inside</p></div>
           <div class="card step"><p class="eyebrow">Self-induction</p><h3>A coil opposes changes in its own current</h3><p>Qualitative only, exams in 2027 only</p></div>
           <div class="card step"><p class="eyebrow">Rotating coil</p><h3>A sinusoidal emf</h3><p>Peak when the flux is zero<br>Double the frequency: double the peak, half the period</p></div>
         </div>

@@ -1,0 +1,155 @@
+/* Large-room type for the Year 9 and Year 10 GCSE decks, loaded last (after teaching-deck.css)
+   by the decks that have been reworked for it. It sets the type scale for a 75" screen read
+   from the back of a 10 m lab: anything students read is at least 28px on the 1600 × 900
+   slide, and body text is 34–40px. A slide whose content no longer fits is split into two or
+   more slides rather than set smaller. Slide side margins are narrower to make room. Eyebrows,
+   the footer, AQA spec references and the copyright line keep their sizes.
+   Diagram labels are enlarged here, in the deck only: the drawings are shared with the
+   printed workbooks, which keep their own label sizes. */
+.slide { padding-left: 72px; padding-right: 72px; }
+.slide-foot { left: 72px; right: 72px; }
+.year-badge { right: 72px; }
+.slide-copyright { right: 72px; }
+
+.lead, .slide.dark .lead { font-size: 34px; }
+.unlocks span { font-size: 28px; }
+.case-card h3 { font-size: 42px; line-height: 1.1; }
+
+.points { gap: 18px; }
+.points li { font-size: 40px; line-height: 1.25; }
+.points.small li { font-size: 37px; }
+.points li::before { width: 16px; height: 16px; top: .46em; }
+.card .points li, .case-card .points li { font-size: 34px; }
+ol.steps { gap: 16px; }
+ol.steps li { font-size: 37px; min-height: 50px; padding: 4px 0 0 66px; }
+ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
+.chain li { font-size: 36px; padding: 14px 20px 14px 70px; }
+.chain li::before { width: 42px; height: 42px; font-size: 26px; }
+
+.remember { font-size: 35px; }
+.rule { font-size: 35px; }
+.formula { font-size: 34px; }
+.card p { font-size: 32px; }
+.cap { font-size: 30px; }
+.pair > div > p { font-size: 32px; }
+
+.eq-block .eq-words { font-size: 32px; }
+.eq-block .eq-units { font-size: 29px; }
+.worked .wq { font-size: 32px; }
+.worked .wq span, .worked dt { font-size: 28px; }
+.worked dd { font-size: 37px; padding: 10px 20px; }
+.worked dt { padding: 10px 20px; }
+
+.mistake p { font-size: 32px; }
+.mistake p::before { font-size: 24px; }
+
+.pm-table { font-size: 34px; }
+.pm-table.tight { font-size: 32px; }
+.pm-table th, .pm-table td { padding: 12px 18px; }
+.pm-table.tight th, .pm-table.tight td { padding: 8px 16px; }
+
+.quiz { gap: 16px 24px; }
+.q { padding: 16px 22px; gap: 10px; }
+.q p { font-size: 34px; }
+.q .ans { font-size: 33px; }
+.q .n { font-size: 28px; }
+
+.terms { padding: 22px 32px; }
+.term { padding: 12px 0; }
+.term b { font-size: 36px; }
+.term span { font-size: 31px; }
+.tool .words { font-size: 30px; }
+.tool .units { font-size: 28px; }
+.values b { font-size: 40px; }
+.values span { font-size: 28px; }
+.mission p { font-size: 26px; }
+
+/* Live particle models: readouts and controls */
+.pm-readout span, .pm-slider span { font-size: 28px; }
+.pm-readout b { font-size: 34px; }
+.pm-controls button { font-size: 28px; }
+.pm-note { font-size: 26px; }
+
+/* Workbook drawings (figures.css, class .pf): labels about a third larger on the slide. */
+.slide .pf text { font-size: 14.5px; }
+.slide .pf text.sm { font-size: 14px; }
+.slide .pf text.b { font-size: 15.5px; }
+.slide .pf text.lg { font-size: 19px; }
+.slide .pf text.read { font-size: 13px; }
+
+/* Year 11 (atoms-and-radiation) keeps its own deck.css, built like the IB decks; these rules
+   match ibdpphy/decks/assets/readable.css. */
+.deck-y11 .not-examined { right: 72px; }
+.deck-y11 .idea { font-size: 35px; padding: 16px 24px; }
+.deck-y11 .equation.small { font-size: 42px; }
+.deck-y11 .panel-head { font-size: 26px; }
+.deck-y11 .pill { font-size: 24px; }
+.deck-y11 .legend > span { font-size: 30px; padding: 4px 16px 4px 5px; }
+.deck-y11 .legend i { width: 36px; height: 36px; font-size: 22px; }
+.deck-y11 .card h3 { font-size: 40px; }
+.deck-y11 .card p:not(.spec-ref) { font-size: 34px; }
+.deck-y11 table.facts { font-size: 34px; }
+.deck-y11 table.facts.big { font-size: 38px; }
+.deck-y11 table.facts.compare { font-size: 34px; }
+.deck-y11 .facts th, .deck-y11 .facts td { padding: 16px 22px; }
+.deck-y11 .facts.big td { padding: 22px 24px; }
+.deck-y11 .facts .num { white-space: nowrap; }
+.deck-y11 .facts thead th, .deck-y11 .facts.big thead th { font-size: 26px; }
+.deck-y11 .obs { gap: 14px; }
+.deck-y11 .obs-row { grid-template-columns: 1fr 44px 1fr; }
+.deck-y11 .obs-row > div { font-size: 34px; padding: 14px 20px; }
+.deck-y11 .obs-row .to { font-size: 40px; }
+.deck-y11 .obs-head { grid-template-columns: 1fr 44px 1fr; font-size: 26px; }
+.deck-y11 .q p { font-size: 34px; }
+.deck-y11 .q .ans { font-size: 33px; }
+.deck-y11 .term b { font-size: 38px; }
+.deck-y11 .term span { font-size: 32px; }
+.deck-y11 .story .points li { font-size: 36px; }
+.deck-y11 .story.band .points li { font-size: 32px; }
+.deck-y11 .story-photos figcaption { font-size: 28px; }
+.deck-y11 .lbl { font-size: 27px; }
+.deck-y11 .lbl.mono { font-size: 24px; }
+.deck-y11 .lbl.small { font-size: 22px; }
+.deck-y11 .lbl.display { font-size: 35px; }
+.deck-y11 .lbl.greek { font-size: 42px; }
+/* Slightly shorter illustrations on the source and medical cards, so the larger card text fits. */
+.deck-y11 .source-illustration { height: 205px; }
+.deck-y11 .medical-illustration { height: 270px; }
+
+/* Energy deck: the drop-test readout keeps a fixed height (so the panel does not jump as its
+   text changes), now tall enough for three lines at the larger size. */
+.dk-readout { font-size: 28px; height: 124px; }
+.deck-y11 .terms.fill { align-content: center; }
+
+/* Map cards: tighter spacing so the larger text and the spec references stay inside each card. */
+.mission { padding: 14px 18px; }
+.mission h3 { margin-top: 12px; font-size: 30px; line-height: 1.05; }
+.mission p { margin-top: 6px; }
+
+/* News-style case slides (Work Like a Physicist, Energy, Circuits). */
+.slide .story .standfirst { font-size: 34px; line-height: 1.3; }
+.slide .story .follow-up, .slide .story .ask { font-size: 31px; line-height: 1.3; }
+.slide .news-photo figcaption { font-size: 28px; }
+/* Data tables, captions and figure captions. */
+table.data, .data.compact { font-size: 30px; }
+.data thead th, .data caption { font-size: 28px; }
+.fig > .circuit-figure figcaption, .photo figcaption, .symbol-tile figcaption { font-size: 28px; }
+.fig > .circuit-figure .cable-key { font-size: 28px; }
+.grid-text { font-size: 29px; }
+.grid-band-tag { font-size: 28px; }
+/* Energy deck: store cards, toolkit notes and the controls of the live models. */
+.store b { font-size: 30px; }
+.store span, .store i { font-size: 28px; }
+.tool p { font-size: 28px; }
+.dk-controls button, .pm-controls button { font-size: 28px; }
+.pm-note { font-size: 28px; }
+/* Year 11: timelines, checks and table text. */
+.deck-y11 .tl .year { font-size: 28px; }
+.deck-y11 .tl p { font-size: 29px; }
+.deck-y11 .eq-check { font-size: 28px; }
+.deck-y11 .obs-head { font-size: 28px; }
+.deck-y11 .facts thead th, .deck-y11 .facts.big thead th { font-size: 28px; }
+.deck-y11 .medical-illustration { height: 240px; }
+/* News-style case slides: a slightly narrower photo column leaves room for the larger story text. */
+.front { grid-template-columns: 600px 1fr; gap: 44px; }
+.news-photo img { max-height: 440px; }

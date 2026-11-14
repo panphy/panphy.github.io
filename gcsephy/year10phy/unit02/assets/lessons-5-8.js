@@ -16,7 +16,7 @@
   const lessons = [
     // ============================================================ 5
     {
-      n: 5, accent: "violet", slides: "24–28", title: "Internal energy and heating curves",
+      n: 5, accent: "violet", slides: "25–29", title: "Internal energy and heating curves",
       spec: "AQA Physics 4.3.2.1, 4.3.2.3; Combined Science 6.3.2.1, 6.3.2.3",
       mapLine: "Internal energy, the two things heating can do, heating and cooling graphs",
       big: "A pan of water boils on the hob for ten minutes. The hob keeps supplying energy, but the water never gets hotter than 100 °C. Where does the energy go?",
@@ -91,7 +91,7 @@
 
     // ============================================================ 6
     {
-      n: 6, accent: "cyan", slides: "29–34", title: "Specific latent heat",
+      n: 6, accent: "cyan", slides: "30–35", title: "Specific latent heat",
       spec: "AQA Physics 4.3.2.3; Combined Science 6.3.2.3",
       mapLine: R`Latent heat, \(E = m\,L\), fusion and vaporisation, measuring \(L\) for melting ice`,
       big: "A scald from steam at 100 °C is far worse than a scald from water at 100 °C. Why?",
@@ -114,9 +114,9 @@
           ["Specific latent heat of <strong>vaporisation</strong>", "liquid to vapour (boiling), or vapour to liquid (condensing)", "2 260 000 J/kg"],
         ] },
         { t: "p", h: "Boiling needs much more energy than melting, because the particles must be pulled completely apart. When the change goes the other way, the same amount of energy is <strong>given out</strong>. Steam that condenses on your skin transfers 2 260 000 J for every kilogram, <em>before</em> it starts to cool as hot water. That is why steam scalds so badly." },
-        { t: "follow", slide: 31, q: "Calculate the energy needed to melt 0.50 kg of ice at 0 °C. Specific latent heat of fusion of water = 334 000 J/kg", steps: [["Equation", R`\(E = m\,L\)`], ["Substitute", R`\(E = 0.50 \times 334\,000\)`], ["Answer", R`\(E = 167\,000\) J`]],
+        { t: "follow", slide: 32, q: "Calculate the energy needed to melt 0.50 kg of ice at 0 °C. Specific latent heat of fusion of water = 334 000 J/kg", steps: [["Equation", R`\(E = m\,L\)`], ["Substitute", R`\(E = 0.50 \times 334\,000\)`], ["Answer", R`\(E = 167\,000\) J`]],
           yt: { q: "Calculate the energy needed to boil away 0.20 kg of water at 100 °C. Specific latent heat of vaporisation of water = 2 260 000 J/kg", steps: [["Equation", R`\(E = m\,L\)`], ["Substitute", R`\(E = 0.20 \times 2\,260\,000\)`], ["Answer", R`\(E = 452\,000\) J`]] } },
-        { t: "follow", slide: 31, q: "A heater transfers 90 000 J to a block of wax at its melting point. The specific latent heat of fusion of the wax is 150 000 J/kg. Calculate the mass of wax that melts.", steps: [["Equation", R`\(E = m\,L\)`], ["Rearrange", R`\(m = \dfrac{E}{L}\)`], ["Substitute", R`\(m = \dfrac{90\,000}{150\,000}\)`], ["Answer", "m = 0.60 kg"]],
+        { t: "follow", slide: 32, q: "A heater transfers 90 000 J to a block of wax at its melting point. The specific latent heat of fusion of the wax is 150 000 J/kg. Calculate the mass of wax that melts.", steps: [["Equation", R`\(E = m\,L\)`], ["Rearrange", R`\(m = \dfrac{E}{L}\)`], ["Substitute", R`\(m = \dfrac{90\,000}{150\,000}\)`], ["Answer", "m = 0.60 kg"]],
           yt: { q: "It takes 50 400 J to melt 0.40 kg of a metal at its melting point. Calculate the specific latent heat of fusion of the metal.", steps: [["Equation", R`\(E = m\,L\)`], ["Rearrange", R`\(L = \dfrac{E}{m}\)`], ["Substitute", R`\(L = \dfrac{50\,400}{0.40}\)`], ["Answer", R`\(L = 126\,000\) J/kg`]] } },
         { t: "tip", h: "There is no temperature in this equation. If a question gives a temperature change, you need a different equation (Lesson 7)." },
       ],
@@ -144,7 +144,7 @@
         { tip: "“Calculate” with a mass in grams: convert to kilograms before you substitute.", p: "A 60 g ice cube at 0 °C melts in a drink. Calculate the energy transferred to the ice cube as it melts. Specific latent heat of fusion of water = 334 000 J/kg", marks: 3, frame: frame4, frameA: ["m = 0.060 kg (1)", R`\(E = m\,L\)`, R`\(E = 0.060 \times 334\,000\) (1)`, "20 040 J (accept 20 000 J) (1)"] },
         { p: "State what is meant by the specific latent heat of vaporisation of a substance.", marks: 2, lines: 3, a: "The energy needed to change 1 kg of the substance from liquid to vapour (1) with no change in temperature (1)." },
       ],
-      quick: { slide: 34, covers: "Lessons 5–6", items: [
+      quick: { slide: 35, covers: "Lessons 5–6", items: [
         ["Internal energy is the total of which two energies?", "The kinetic energy and potential energy of the particles."],
         ["What does a flat section of a heating graph show?", "A change of state."],
         ["Which energy of the particles increases while ice melts?", "Their potential energy."],
@@ -159,7 +159,7 @@
 
     // ============================================================ 7
     {
-      n: 7, accent: "copper", slides: "35–39", title: "Specific heat capacity",
+      n: 7, accent: "copper", slides: "36–40", title: "Specific heat capacity",
       spec: "AQA Physics 4.3.2.2, 4.1.1.3; Combined Science 6.3.2.2, 6.1.1.3",
       mapLine: R`What a temperature rise depends on, \(\Delta E = m\,c\,\Delta\theta\), rearranging, heat capacity or latent heat?`,
       big: "On a sunny beach the sand burns your feet but the sea is still cold. Both have had the same sunshine. Why?",
@@ -179,12 +179,12 @@
         { t: "eq", stack: true, eq: R`\(\Delta E = m\,c\,\Delta\theta\)`, words: "change in thermal energy = mass × specific heat capacity × temperature change", units: R`\(\Delta E\) in J, \(m\) in kg, \(c\) in J/kg °C, \(\Delta\theta\) in °C`, re: R`Rearranged: \(c = \dfrac{\Delta E}{m\,\Delta\theta}\) and \(\Delta\theta = \dfrac{\Delta E}{m\,c}\). \(\Delta\) (delta) means “change in”; \(\theta\) (theta) is temperature.`, tri: { top: "ΔE", bottom: ["m", "c", "Δθ"] } },
         { t: "compare", head: ["Material", "Specific heat capacity in J/kg °C"], rows: [["water", "4200"], ["cooking oil", "2000"], ["aluminium", "900"], ["iron", "450"], ["copper", "390"], ["lead", "130"]] },
         { t: "p", h: "Water has a very high specific heat capacity: it takes a lot of energy to warm it up, and it gives out a lot as it cools. That is why the sea stays cool on a hot day, and why water is used in radiators and to cool car engines." },
-        { t: "follow", slide: 37, q: "Calculate the energy needed to heat 2.0 kg of water from 20 °C to 100 °C. Specific heat capacity of water = 4200 J/kg °C", steps: [["Change", R`\(\Delta\theta = 100 - 20 = 80\) °C`], ["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Substitute", R`\(\Delta E = 2.0 \times 4200 \times 80\)`], ["Answer", R`\(\Delta E = 672\,000\) J`]],
+        { t: "follow", slide: 38, q: "Calculate the energy needed to heat 2.0 kg of water from 20 °C to 100 °C. Specific heat capacity of water = 4200 J/kg °C", steps: [["Change", R`\(\Delta\theta = 100 - 20 = 80\) °C`], ["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Substitute", R`\(\Delta E = 2.0 \times 4200 \times 80\)`], ["Answer", R`\(\Delta E = 672\,000\) J`]],
           yt: { q: "Calculate the energy needed to heat a 0.50 kg aluminium pan from 20 °C to 50 °C. Specific heat capacity of aluminium = 900 J/kg °C", steps: [["Change", R`\(\Delta\theta = 50 - 20 = 30\) °C`], ["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Substitute", R`\(\Delta E = 0.50 \times 900 \times 30\)`], ["Answer", R`\(\Delta E = 13\,500\) J`]] } },
         { t: "sub", h: "Finding the temperature change or the specific heat capacity" },
-        { t: "follow", slide: 38, q: "7800 J is transferred to a 0.50 kg block of copper. Calculate its temperature rise. Specific heat capacity of copper = 390 J/kg °C", steps: [["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Rearrange", R`\(\Delta\theta = \dfrac{\Delta E}{m\,c}\)`], ["Substitute", R`\(\Delta\theta = \dfrac{7800}{0.50 \times 390}\)`], ["Answer", R`\(\Delta\theta = 40\) °C`]],
+        { t: "follow", slide: 39, q: "7800 J is transferred to a 0.50 kg block of copper. Calculate its temperature rise. Specific heat capacity of copper = 390 J/kg °C", steps: [["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Rearrange", R`\(\Delta\theta = \dfrac{\Delta E}{m\,c}\)`], ["Substitute", R`\(\Delta\theta = \dfrac{7800}{0.50 \times 390}\)`], ["Answer", R`\(\Delta\theta = 40\) °C`]],
           yt: { q: "5400 J is transferred to a 0.20 kg block of aluminium. Calculate its temperature rise. Specific heat capacity of aluminium = 900 J/kg °C", steps: [["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Rearrange", R`\(\Delta\theta = \dfrac{\Delta E}{m\,c}\)`], ["Substitute", R`\(\Delta\theta = \dfrac{5400}{0.20 \times 900}\)`], ["Answer", R`\(\Delta\theta = 30\) °C`]] } },
-        { t: "follow", slide: 38, q: "27 000 J raises the temperature of a 1.5 kg metal block by 20 °C. Calculate the specific heat capacity of the metal.", steps: [["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Rearrange", R`\(c = \dfrac{\Delta E}{m\,\Delta\theta}\)`], ["Substitute", R`\(c = \dfrac{27\,000}{1.5 \times 20}\)`], ["Answer", "c = 900 J/kg °C"]],
+        { t: "follow", slide: 39, q: "27 000 J raises the temperature of a 1.5 kg metal block by 20 °C. Calculate the specific heat capacity of the metal.", steps: [["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Rearrange", R`\(c = \dfrac{\Delta E}{m\,\Delta\theta}\)`], ["Substitute", R`\(c = \dfrac{27\,000}{1.5 \times 20}\)`], ["Answer", "c = 900 J/kg °C"]],
           yt: { q: "12 600 J raises the temperature of 0.60 kg of a liquid by 10 °C. Calculate the specific heat capacity of the liquid.", steps: [["Equation", R`\(\Delta E = m\,c\,\Delta\theta\)`], ["Rearrange", R`\(c = \dfrac{\Delta E}{m\,\Delta\theta}\)`], ["Substitute", R`\(c = \dfrac{12\,600}{0.60 \times 10}\)`], ["Answer", "c = 2100 J/kg °C"]] } },
         { t: "tip", h: R`\(\Delta\theta\) is the <strong>change</strong> in temperature, not the final temperature. From 20 °C to 100 °C is a change of 80 °C. If the question asks for the final temperature, add your \(\Delta\theta\) to the starting temperature.` },
         { t: "sub", h: "Heat capacity or latent heat?" },
@@ -213,7 +213,7 @@
 
     // ============================================================ 8
     {
-      n: 8, accent: "leaf", slides: "40–44", title: "Measuring specific heat capacity (required practical)",
+      n: 8, accent: "leaf", slides: "41–45", title: "Measuring specific heat capacity (required practical)",
       spec: "AQA Physics 4.1.1.3, required practical 1; Combined Science 6.1.1.3, required practical 14",
       mapLine: R`Heating a metal block, \(E = V\,I\,t\) or a joulemeter, the graph method, why the answer comes out too high`,
       big: "How could you find out which metal a block is made of, using only a heater and a thermometer?",
@@ -272,7 +272,7 @@
           a: "Indicative content: measure the mass of the block with a balance; insulate the block; put an immersion heater and a thermometer in the block; record the starting temperature; switch on the heater for a measured time; measure the energy supplied with a joulemeter (or measure p.d., current and time and use E = V I t); record the highest temperature and calculate the temperature rise; use c = ΔE ÷ (m Δθ); repeat, or plot temperature against energy and use the gradient. Level 3 (5–6): a detailed, logically ordered method that would give a valid result." },
         { p: "A 2.0 kg copper block is heated with an immersion heater. The joulemeter reads 16 400 J and the temperature of the block rises from 21 °C to 41 °C. Calculate the specific heat capacity of copper given by these results.", marks: 4, frame: [["Temperature rise"], ["Equation"], ["Rearrange"], ["Substitute"], ["Answer", "unit:"]], frameA: [R`\(\Delta\theta = 41 - 21 = 20\) °C (1)`, R`\(\Delta E = m\,c\,\Delta\theta\)`, R`\(c = \dfrac{\Delta E}{m\,\Delta\theta}\) (1)`, R`\(c = \dfrac{16\,400}{2.0 \times 20}\) (1)`, "410 J/kg °C (1)"] },
       ],
-      quick: { slide: 44, covers: "Lessons 7–8", items: [
+      quick: { slide: 45, covers: "Lessons 7–8", items: [
         ["State the unit of specific heat capacity.", "J/kg °C"],
         [R`Water is heated from 15 °C to 95 °C. Calculate \(\Delta\theta\).`, "80 °C"],
         ["Calculate the energy to heat 3.0 kg of iron by 50 °C. c = 450 J/kg °C", R`\(3.0 \times 450 \times 50 = 67\,500\) J`],

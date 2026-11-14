@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -42,11 +43,11 @@
 
       <!-- 1, Title -->
       <section class="slide title hl" data-title="A.5 Galilean and special relativity">
-        <div class="title-grid">
+        <div class="title-grid" style="grid-template-columns: 1.35fr .65fr;">
           <div>
             <p class="eyebrow">IB DP Physics, Theme A: Space, time and motion</p>
             <h1>Galilean and special relativity<span>.</span></h1>
-            <p class="lead">A.5: Reference frames, the Lorentz transformations, time dilation, length contraction and space–time diagrams<br>Higher level only: there is no standard level content in A.5</p>
+            <p class="lead">Reference frames, Lorentz transformations, time dilation, length contraction, space–time diagrams<br>HL only: no SL content</p>
             <div class="chips">
               <span class="chip hl">Additional HL, 8 hours</span>
               <a class="chip on" href="../a1-kinematics/">A.1 Kinematics ↗</a>
@@ -63,25 +64,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="a5-frames" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a5-frames" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Galilean relativity</h3>
             <p>Reference frames, and the <span class="nowrap">common-sense</span> rules for changing between them</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a5-gamma" data-still style="height: 170px;"></div>
+            <div class="fig" data-fig="a5-gamma" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Einstein’s postulates</h3>
             <p>The Lorentz transformations and velocity addition</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a5-light-clock" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a5-light-clock" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Time and length</h3>
             <p>Simultaneity, time dilation, length contraction and muons</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a5-st" data-kind="axes" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a5-st" data-kind="axes" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Space–time diagrams</h3>
             <p>World lines, and two frames on one diagram</p>
@@ -230,9 +231,9 @@
             <figure><img src="images/michelson-morley.jpg" width="742" height="432" alt="Black and white photograph of a large square stone slab carrying optical parts, resting on a round trough in a brick-walled basement"><figcaption>The <b>interferometer</b> of 1887 on its stone slab, which floated on mercury</figcaption></figure>
           </div>
           <ul class="points">
-            <li>Albert Michelson and Edward Morley sent two beams of light at right angles, back and forth across a sandstone slab, and made them <b>interfere</b></li>
-            <li>Turning the slab should have shifted the fringes by about <b>0.4</b> of a fringe as the Earth moved through the ether</li>
-            <li>They saw less than <b>0.02</b>. The speed of light was the same in every direction</li>
+            <li>Michelson and Morley: two light beams at right angles, across a stone slab, made to <b>interfere</b></li>
+            <li>Turning it should shift the fringes by \(\approx\) <b>0.4</b> of a fringe (the Earth moving through the ether)</li>
+            <li>They saw \(&lt;\) <b>0.02</b>: light has the same speed in every direction</li>
           </ul>
         </div>
         <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Michelson_morley_experiment_1887.jpg" target="_blank" rel="noopener">Case Western Reserve University, about 1887</a>, public domain.</p>
@@ -242,15 +243,23 @@
       <section class="slide hl" data-title="Quick check: Galilean relativity">
         <p class="eyebrow">Quick check</p>
         <h2>Galilean relativity<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is an inertial reference frame?</p><div class="ans step">One that is not accelerating</div></div>
           <div class="q"><p><span class="n">02</span>What does Galilean relativity say about time?</p><div class="ans step">\(t' = t\): the same in every frame</div></div>
           <div class="q"><p><span class="n">03</span>S′ moves at 4.0 m s⁻¹. An event is at \(x\) = 50 m, \(t\) = 5.0 s. Find \(x'\).</p><div class="ans step">\(50 - 4.0 \times 5.0 = 30 \,\mathrm{m}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: Galilean relativity">
+        <p class="eyebrow">Quick check</p>
+        <h2>Galilean relativity<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A car at 25 m s⁻¹ is overtaken by one at 35 m s⁻¹. Velocity of the second, seen from the first?</p><div class="ans step">10 m s⁻¹</div></div>
           <div class="q"><p><span class="n">05</span>What did the Galilean rule predict for the speed of light?</p><div class="ans step">That it depends on the observer’s motion</div></div>
           <div class="q"><p><span class="n">06</span>What did Michelson and Morley find?</p><div class="ans step">No difference: the same speed in all directions</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -375,7 +384,7 @@
       <section class="slide hl" data-title="Lorentz transformation of an event">
         <p class="eyebrow">Worked example</p>
         <h2>One event, two frames<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the coordinates \(x'\) and \(t'\) of the event in S′.</span>
             <span class="say">S′ moves at \(v = 0.60c\), \(\gamma = 1.25\)</span>
@@ -383,12 +392,6 @@
             <span class="step">\(x' = \gamma (x - vt)\)</span>
             <span class="step">\(x' = 1.25 \times (1.2 \times 10^{9} - 0.60 \times 3.00 \times 10^{8} \times 5.0)\)</span>
             <span class="step">\(x' = \class{res}{3.8 \times 10^{8} \,\mathrm{m}}\)</span>
-          </div>
-          <div class="work step">
-            <span>\(t' = \gamma \left(t - \dfrac{vx}{c^{2}}\right)\)</span>
-            <span class="step">\(\dfrac{vx}{c^{2}} = \dfrac{0.60 \times 1.2 \times 10^{9}}{3.00 \times 10^{8}} = 2.4 \,\mathrm{s}\)</span>
-            <span class="step">\(t' = 1.25 \times (5.0 - 2.4)\)</span>
-            <span class="step">\(t' = \class{res}{3.3 \,\mathrm{s}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
@@ -403,6 +406,20 @@
             <p class="tip">Keep these numbers. A later slide uses both sets of coordinates to check that the space–time interval is the same in the two frames.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide hl" data-title="Lorentz transformation of an event">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>One event, two frames<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span>\(t' = \gamma \left(t - \dfrac{vx}{c^{2}}\right)\)</span>
+            <span class="step">\(\dfrac{vx}{c^{2}} = \dfrac{0.60 \times 1.2 \times 10^{9}}{3.00 \times 10^{8}} = 2.4 \,\mathrm{s}\)</span>
+            <span class="step">\(t' = 1.25 \times (5.0 - 2.4)\)</span>
+            <span class="step">\(t' = \class{res}{3.3 \,\mathrm{s}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
       </section>
 
       <section class="slide hl" data-title="Relativistic velocity addition">
@@ -441,10 +458,18 @@
       <section class="slide hl" data-title="Quick check: the postulates">
         <p class="eyebrow">Quick check</p>
         <h2>Einstein’s postulates<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>State the second postulate.</p><div class="ans step">The speed of light in a vacuum is the same in all inertial frames</div></div>
           <div class="q"><p><span class="n">02</span>\(\gamma\) for \(v = 0.60c\)?</p><div class="ans step">1.25</div></div>
           <div class="q"><p><span class="n">03</span>\(\gamma\) for \(v = 0.80c\)?</p><div class="ans step">1.67</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: the postulates">
+        <p class="eyebrow">Quick check</p>
+        <h2>Einstein’s postulates<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What do the Lorentz transformations become at low speed?</p><div class="ans step">The Galilean transformations</div></div>
           <div class="q"><p><span class="n">05</span>A ship at \(0.50c\) fires a probe forward at \(0.50c\) relative to itself. Probe’s speed from the Earth?</p><div class="ans step">\(\dfrac{0.50c + 0.50c}{1 + 0.25} = 0.80c\)</div></div>
           <div class="q"><p><span class="n">06</span>The ship shines a laser forward. Speed of the light from the Earth?</p><div class="ans step">\(c\)</div></div>
@@ -633,7 +658,7 @@
       <section class="slide hl" data-title="Muons: the numbers">
         <p class="eyebrow">Worked example</p>
         <h2>Muons in two frames<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">What fraction of a lifetime passes while the muons descend? Work it out in the Earth frame and in the muon frame.</span>
             <span class="say">\(v = 0.995c\), \(\gamma = 10\), height 1920 m, \(\Delta t_{0} = 2.2 \,\mu\mathrm{s}\)</span>
@@ -641,12 +666,6 @@
             <span class="step">Time of flight \(= \dfrac{L_{0}}{v} = \dfrac{1920}{0.995 \times 3.00 \times 10^{8}} = 6.4 \,\mu\mathrm{s}\)</span>
             <span class="step">Lifetime \(\Delta t = \gamma \Delta t_{0} = 10 \times 2.2 = \class{res}{22 \,\mu\mathrm{s}}\)</span>
             <span class="step">\(\dfrac{6.4}{22} = 0.29\) of a lifetime</span>
-          </div>
-          <div class="work step">
-            <span class="say">Muon frame</span>
-            <span class="step">\(L = \dfrac{L_{0}}{\gamma} = \dfrac{1920}{10} = \class{res}{192 \,\mathrm{m}}\)</span>
-            <span class="step">Time \(= \dfrac{L}{v} = \dfrac{192}{0.995 \times 3.00 \times 10^{8}} = 0.64 \,\mu\mathrm{s}\)</span>
-            <span class="step">\(\dfrac{0.64}{2.2} = 0.29\) of a lifetime</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
@@ -663,9 +682,23 @@
         </aside>
       </section>
 
+      <section class="slide hl" data-title="Muons: the numbers">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Muons in two frames<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">Muon frame</span>
+            <span class="step">\(L = \dfrac{L_{0}}{\gamma} = \dfrac{1920}{10} = \class{res}{192 \,\mathrm{m}}\)</span>
+            <span class="step">Time \(= \dfrac{L}{v} = \dfrac{192}{0.995 \times 3.00 \times 10^{8}} = 0.64 \,\mu\mathrm{s}\)</span>
+            <span class="step">\(\dfrac{0.64}{2.2} = 0.29\) of a lifetime</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
+      </section>
+
       <section class="slide hl" data-title="The space–time interval">
         <h2>The space–time interval<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: .8fr 1.2fr;">
           <div class="stack">
             <div class="equation small"><span>\((\Delta s)^{2} = (c \Delta t)^{2} - (\Delta x)^{2}\)</span></div>
             <ul class="points small">
@@ -678,8 +711,6 @@
             <span class="say">The event of Part 2, measured from the origin</span>
             <span class="say">S: <span class="equation-inline">\(c \Delta t = 1.5 \times 10^{9}\) m</span>, <span class="equation-inline">\(\Delta x = 1.2 \times 10^{9}\) m</span></span>
             <span>\((\Delta s)^{2} = (1.5^{2} - 1.2^{2}) \times 10^{18} = \class{res}{8.1 \times 10^{17} \,\mathrm{m}^{2}}\)</span>
-            <span class="say step">S′: <span class="equation-inline">\(c \Delta t' = 9.75 \times 10^{8}\) m</span>, <span class="equation-inline">\(\Delta x' = 3.75 \times 10^{8}\) m</span></span>
-            <span class="step">\((\Delta s)^{2} = (9.75^{2} - 3.75^{2}) \times 10^{16} = \class{res}{8.1 \times 10^{17} \,\mathrm{m}^{2}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
@@ -698,13 +729,34 @@
         </aside>
       </section>
 
+      <section class="slide hl" data-title="The space–time interval">
+        <p class="eyebrow">Example, continued</p>
+        <h2>The space–time interval<span>.</span></h2>
+        <div class="stack center" style="align-items: flex-start;">
+          <div class="equation small"><span>\((\Delta s)^{2} = (c \Delta t)^{2} - (\Delta x)^{2}\)</span></div>
+          <div class="work">
+            <span class="say step">S′: <span class="equation-inline">\(c \Delta t' = 9.75 \times 10^{8}\) m</span>, <span class="equation-inline">\(\Delta x' = 3.75 \times 10^{8}\) m</span></span>
+            <span class="step">\((\Delta s)^{2} = (9.75^{2} - 3.75^{2}) \times 10^{16} = \class{res}{8.1 \times 10^{17} \,\mathrm{m}^{2}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
+      </section>
+
       <section class="slide hl" data-title="Quick check: time and length">
         <p class="eyebrow">Quick check</p>
         <h2>Time and length<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is a proper time interval?</p><div class="ans step">Measured where both events happen at the same place</div></div>
           <div class="q"><p><span class="n">02</span>A clock moves at \(0.60c\). 8.0 s pass on it. Time in the lab?</p><div class="ans step">\(1.25 \times 8.0 = 10 \,\mathrm{s}\)</div></div>
           <div class="q"><p><span class="n">03</span>A 100 m rod moves along its length at \(0.60c\). Length in the lab?</p><div class="ans step">\(\dfrac{100}{1.25} = 80 \,\mathrm{m}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: time and length">
+        <p class="eyebrow">Quick check</p>
+        <h2>Time and length<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>Which dimension of a moving object is contracted?</p><div class="ans step">Only the one along its motion</div></div>
           <div class="q"><p><span class="n">05</span>Which quantity is the same in all inertial frames?</p><div class="ans step">The space–time interval (and \(c\))</div></div>
           <div class="q"><p><span class="n">06</span>How do muons provide evidence for relativity?</p><div class="ans step">Far more reach the ground than their lifetime at rest allows</div></div>

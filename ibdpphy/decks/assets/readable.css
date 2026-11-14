@@ -1,0 +1,102 @@
+/* Large-room type for the IB DP Physics decks, loaded after deck.css by the decks that have
+   been reworked for it. It sets the type scale for a 75" screen read from the back of a
+   10 m lab: anything students read is at least 28px on the 1600 × 900 slide, body text is
+   34–40px. A slide whose content no longer fits is split into two or more slides rather than
+   set smaller. Slide side margins are narrower to make room. Eyebrows, the footer, credits and the "not
+   assessed" label keep their sizes: nobody reads them from the back. */
+.slide { padding: 60px 72px 70px; }
+.slide-foot { left: 72px; right: 72px; }
+.slide.hl::after { right: 72px; }
+.slide.hl .not-examined { right: 276px; }
+.not-examined { right: 72px; }
+.slide-copyright { right: 72px; }
+
+.lead { font-size: 36px; }
+.points { gap: 20px; }
+.points li { font-size: 40px; line-height: 1.25; padding-left: 44px; }
+.points.small li { font-size: 37px; }
+.points .sub { font-size: .85em; }
+
+.split { gap: 40px; }
+.stack { gap: 24px; }
+
+.idea { font-size: 35px; padding: 16px 24px; }
+.equation { font-size: 48px; }
+.equation.small { font-size: 42px; }
+.equation .where { font-size: 30px; }
+
+.work { font-size: 35px; gap: 16px; padding: 22px 28px; }
+.work:has(> .ask) { gap: 14px; }
+.work .say { font: 700 32px/1.35 var(--font-body); letter-spacing: 0; white-space: normal; }
+.work .say mjx-container { font-size: 100%; }
+.work .ask { font-size: 32px; }
+
+.panel { padding: 16px 20px 18px; }
+.panel-head { font-size: 28px; }
+.pill { font-size: 26px; }
+.legend > span { font-size: 30px; padding: 4px 16px 4px 5px; }
+.legend i { width: 36px; height: 36px; font-size: 24px; }
+
+.card { padding: 24px 28px; }
+.card h3 { font-size: 40px; }
+.card p { font-size: 34px; }
+table.facts { font-size: 34px; }
+table.facts.big { font-size: 38px; }
+table.facts.compare { font-size: 34px; }
+.facts th, .facts td { padding: 16px 22px; }
+.facts.big td { padding: 22px 24px; }
+.facts .num { white-space: nowrap; }
+.facts thead th, .facts.big thead th { font-size: 28px; }
+
+.obs { gap: 14px; }
+.obs-row { grid-template-columns: 1fr 44px 1fr; }
+.obs-row > div { font-size: 34px; padding: 14px 20px; }
+.obs-row .to { font-size: 40px; }
+.obs-head { grid-template-columns: 1fr 44px 1fr; font-size: 28px; }
+
+.quiz { gap: 14px 24px; }
+.q { padding: 16px 24px; gap: 10px; }
+.q p { font-size: 34px; }
+.q .n { font-size: 28px; }
+.q .ans { font-size: 33px; }
+.reveal-hint { font-size: 28px; }
+
+.term { padding: 16px 20px; }
+.term b { font-size: 38px; }
+.term > span { font-size: 32px; }
+
+.story .points li { font-size: 36px; }
+.story.band .points li { font-size: 32px; }
+.story-photos figcaption, .story-strip figcaption { font-size: 28px; }
+.chip { font-size: 28px; }
+
+/* Diagram labels, in the units of each figure's viewBox: a little larger than deck.css, as far
+   as the shared drawings allow without labels colliding. E.2's drawings are laid out for the
+   larger sizes below (.deck-labels-large on its <html>). */
+.lbl { font-size: 30px; }
+.lbl.mono { font-size: 27px; }
+.lbl.small { font-size: 25px; }
+.lbl.display { font-size: 37px; }
+.lbl.greek { font-size: 40px; }
+.deck-labels-large .lbl { font-size: 32px; }
+.deck-labels-large .lbl.mono { font-size: 30px; }
+.deck-labels-large .lbl.small { font-size: 28px; }
+.deck-labels-large .lbl.display { font-size: 40px; }
+.deck-labels-large .lbl.greek { font-size: 42px; }
+
+/* Key-word cards keep their natural height, centered, instead of stretching to fill the slide. */
+.terms.fill { align-content: center; }
+/* A long comparison table keeps its rows a little tighter. */
+.facts.snug td { padding-top: 10px; padding-bottom: 10px; }
+
+/* Lesson-map cards sit four or five to a row: slightly smaller headings and text keep them
+   clear of the note below, still well above 28px. */
+.slide[data-title="Lesson map"] .card { padding: 20px 22px; }
+.slide[data-title="Lesson map"] .card h3 { font-size: 34px; margin: 6px 0 8px; }
+.slide[data-title="Lesson map"] .card p { font-size: 30px; line-height: 1.25; }
+/* Story slides: background reading, so the text column steps down a little to fit beside the photos. */
+.story .points li { font-size: 34px; }
+.story.band .points li { font-size: 31px; }
+.tl .year { font-size: 28px; }
+.tl p { font-size: 29px; }
+.eq-check { font-size: 28px; }

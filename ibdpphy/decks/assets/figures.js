@@ -1019,19 +1019,19 @@
     'photon-budget': () => {
       const sub = t => `<tspan dy="7" font-size="70%">${t}</tspan><tspan dy="-7"> </tspan>`;
       // Bars take the deck palette, not the particle colors: they are amounts of energy, not particles.
-      const bar = (x, y, w, color, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--bar-${color})"/>` + text(x + w / 2, y + 28, label, 'lbl strong', 'middle', `style="fill:var(--on-bar-${color})"`) + text(x + w / 2, y + 59, note, 'lbl small', 'middle', `style="fill:var(--on-bar-${color})"`);
-      const sign = (x, y, t) => text(x, y, t, 'lbl display', 'middle', 'font-size="44"');
-      let s = text(90, 38, 'Above the threshold: the photon has more than Φ', 'lbl strong a', 'start');
-      s += bar(90, 54, 760, 'teal', 'photon energy hf', 'all of it goes to one electron');
-      s += sign(54, 187, '=') + bar(90, 138, 430, 'slate', 'work function Φ', 'used up escaping the metal');
-      s += sign(545, 187, '+') + bar(570, 138, 280, 'apricot', `kinetic energy E${sub('max')}`, 'what is left over');
-      s += text(90, 286, 'Below the threshold: the photon has less than Φ', 'lbl strong a', 'start');
-      s += `<rect x="90" y="302" width="430" height="68" rx="10" style="fill:none;stroke:var(--bar-slate);stroke-width:3;stroke-dasharray:8 7"/>`;
-      s += bar(90, 302, 290, 'teal', 'photon energy hf', 'not enough') + text(450, 344, 'short', 'lbl italic small');
-      s += `<line x1="90" y1="380" x2="90" y2="404" class="tick"/><line x1="520" y1="380" x2="520" y2="404" class="tick"/>` + arrow(100, 392, 512, 392, 'text-secondary', 2.5) + arrow(510, 392, 98, 392, 'text-secondary', 2.5);
-      s += text(305, 428, 'work function Φ needed to escape', 'lbl small');
-      s += text(700, 330, 'no electron escapes,', 'lbl strong') + text(700, 360, 'however bright the light', 'lbl');
-      return svg('0 0 900 440', s, 'Energy of one photon: above the threshold frequency it equals the work function plus the kinetic energy of the electron; below the threshold it is less than the work function, so no electron escapes');
+      const bar = (x, y, w, color, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="78" rx="10" style="fill:var(--bar-${color})"/>` + text(x + w / 2, y + 33, label, 'lbl strong', 'middle', `style="fill:var(--on-bar-${color})"`) + text(x + w / 2, y + 66, note, 'lbl small', 'middle', `style="fill:var(--on-bar-${color})"`);
+      const sign = (x, y, t) => text(x, y, t, 'lbl display', 'middle', 'font-size="48"');
+      let s = text(90, 36, 'Above the threshold: the photon has more than Φ', 'lbl strong a', 'start');
+      s += bar(90, 52, 790, 'teal', 'photon energy hf', 'all of it goes to one electron');
+      s += sign(54, 200, '=') + bar(90, 146, 400, 'slate', 'work function Φ', 'used up escaping');
+      s += sign(518, 200, '+') + bar(546, 146, 334, 'apricot', `E${sub('max')}`, 'kinetic energy left');
+      s += text(90, 302, 'Below the threshold: the photon has less than Φ', 'lbl strong a', 'start');
+      s += `<rect x="90" y="318" width="400" height="78" rx="10" style="fill:none;stroke:var(--bar-slate);stroke-width:3;stroke-dasharray:8 7"/>`;
+      s += bar(90, 318, 270, 'teal', 'photon energy hf', 'not enough') + text(425, 366, 'short', 'lbl italic small');
+      s += `<line x1="90" y1="406" x2="90" y2="430" class="tick"/><line x1="490" y1="406" x2="490" y2="430" class="tick"/>` + arrow(100, 418, 482, 418, 'text-secondary', 2.5) + arrow(480, 418, 98, 418, 'text-secondary', 2.5);
+      s += text(290, 462, 'work function Φ needed', 'lbl small');
+      s += text(700, 350, 'no electron escapes,', 'lbl strong') + text(700, 388, 'however bright', 'lbl');
+      return svg('20 0 880 476', s, 'Energy of one photon: above the threshold frequency it equals the work function plus the kinetic energy of the electron; below the threshold it is less than the work function, so no electron escapes');
     },
 
     'emax-graph': () => {
@@ -1039,7 +1039,7 @@
       s += text(700, 336, 'frequency f', 'lbl mono', 'end') + text(126, 52, 'E<tspan dy="6" font-size="70%">max</tspan>', 'lbl mono', 'start');
       s += `<line x1="110" y1="420" x2="300" y2="300" class="guide"/><path d="M300,300 L660,72" class="curve" style="stroke:var(--brand-primary)"/>`;
       s += `<path d="M470,300 L700,154" class="curve" style="stroke:var(--text-secondary);stroke-width:3;stroke-dasharray:10 8"/>`;
-      s += `<circle cx="300" cy="300" r="8" style="fill:var(--hl)"/>` + text(300, 338, 'f₀', 'lbl display', 'middle', 'style="fill:var(--hl)"') + text(300, 366, 'threshold', 'lbl mono small');
+      s += `<circle cx="300" cy="300" r="8" style="fill:var(--hl)"/>` + text(300, 344, 'f₀', 'lbl display', 'middle', 'style="fill:var(--hl)"') + text(300, 384, 'threshold', 'lbl mono small');
       s += `<circle cx="110" cy="420" r="8" style="fill:var(--hl)"/>` + text(96, 428, '−Φ', 'lbl display', 'end', 'style="fill:var(--hl)"');
       s += `<path d="M430,218 H560 V135" class="guide accent"/>` + text(520, 132, 'gradient = h', 'lbl strong', 'end');
       s += text(596, 262, 'another metal:', 'lbl small', 'start') + text(596, 288, 'same gradient', 'lbl small', 'start');
@@ -1053,7 +1053,7 @@
       s += `<rect x="604" y="100" width="16" height="110" rx="4" style="fill:var(--lead)"/>` + text(634, 196, 'collector', 'lbl small', 'start');
       s += wave(90, 20, 232, 130, { cycles: 6, amp: 8 }) + text(46, 44, 'light', 'lbl mono small', 'middle', 'style="fill:var(--photon)"');
       [[280, 130, 430], [280, 155, 520], [280, 180, 370]].forEach(([x, y, x2]) => { s += arrow(x, y, x2, y, 'electron', 3) + ball(x, y, 9, 'electron'); });
-      s += text(290, 108, 'slowed by the reverse p.d.', 'lbl small', 'start');
+      s += text(272, 106, 'slowed by reverse p.d.', 'lbl small', 'start');
       s += `<path d="M248,210 V360 H330 M400,360 H520 M580,360 H612 V210" class="cable"/>`;
       s += `<line x1="330" y1="336" x2="330" y2="384" class="tick" style="stroke-width:5"/><line x1="346" y1="346" x2="346" y2="374" class="tick"/><line x1="384" y1="336" x2="384" y2="384" class="tick" style="stroke-width:5"/><line x1="400" y1="346" x2="400" y2="374" class="tick"/><line x1="350" y1="360" x2="380" y2="360" class="guide"/>`;
       s += text(365, 414, 'variable supply', 'lbl small') + text(318, 326, '+', 'lbl strong') + text(412, 326, '−', 'lbl strong');

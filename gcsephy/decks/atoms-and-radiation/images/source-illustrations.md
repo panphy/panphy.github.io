@@ -1,6 +1,6 @@
-# Source-use illustrations — slide 34
+# Source-use illustrations — slide 35
 
-Generated with the built-in imagegen tool. These slide-only PNGs replace the smoke alarm and thickness gauge icons. The medical tracer reuses `medical-tracer.png` from slide 46; its prompts are in `medical-illustrations.md`. Shared workbook SVG diagrams remain in `../figures.js`.
+Generated with the built-in imagegen tool. These slide-only PNGs replace the smoke alarm and thickness gauge icons. The medical tracer reuses `medical-tracer.png` from slide 48; its prompts are in `medical-illustrations.md`. Shared workbook SVG diagrams remain in `../figures.js`.
 
 ## Shared prompt
 

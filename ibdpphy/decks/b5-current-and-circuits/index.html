@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -63,25 +64,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="b5-wire" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b5-wire" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Current and potential difference</h3>
             <p>Charge carriers, cells and circuit diagrams</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b5-iv" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b5-iv" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Resistance and power</h3>
             <p>Ohm’s law, resistivity and the heating effect</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b5-combine" data-kind="parallel" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b5-combine" data-kind="parallel" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Series and parallel</h3>
             <p>Combining resistors, and the potential divider</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b5-internal" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="b5-internal" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Real cells and sensors</h3>
             <p>Internal resistance, thermistors, LDRs and potentiometers</p>
@@ -220,14 +221,14 @@
         <h2>Cells as sources of emf<span>.</span></h2>
         <div class="stack center" style="gap: 24px;">
           <ul class="points">
-            <li>A cell does work on charge: its <b>emf</b> is the energy it supplies to each coulomb, in volts</li>
+            <li>A cell does work on charge. <b>Emf</b>: energy supplied per coulomb, in volts</li>
           </ul>
           <table class="facts compare step">
             <thead><tr><th></th><th>Chemical cell</th><th>Solar (photovoltaic) cell</th></tr></thead>
             <tbody>
-              <tr><td><b>Energy from</b></td><td>A chemical reaction inside the cell</td><td>Light falling on a semiconductor</td></tr>
-              <tr><td><b>For</b></td><td>Portable; works anywhere, at any time; steady emf</td><td>No fuel and nothing emitted in use; lasts for decades</td></tr>
-              <tr><td><b>Against</b></td><td>Runs down; limited energy stored; materials must be mined and recycled</td><td>Output depends on the light: none at night; low emf per cell, so many are joined in series; little power from each square meter, so large areas are needed</td></tr>
+              <tr><td><b>Energy from</b></td><td>A chemical reaction inside</td><td>Light on a semiconductor</td></tr>
+              <tr><td><b>For</b></td><td>Portable; works anywhere, any time; steady emf</td><td>No fuel, no emissions in use; lasts decades</td></tr>
+              <tr><td><b>Against</b></td><td>Runs down; limited energy; materials mined and recycled</td><td>No light, no output; low emf, so many in series; large areas needed</td></tr>
             </tbody>
           </table>
         </div>
@@ -632,14 +633,11 @@
         <h2>A combination<span>.</span></h2>
         <div class="split">
           <div class="work">
-            <span class="ask">Find the current from the supply and the potential difference across the parallel pair.</span>
+            <span class="ask">Find the supply current and the p.d. across the parallel pair.</span>
             <span class="say step">The parallel pair</span>
             <span class="step">\(\dfrac{1}{R_\mathrm{p}} = \dfrac{1}{4.0} + \dfrac{1}{12} = \dfrac{4}{12}\) &nbsp;so&nbsp; \(R_\mathrm{p} = 3.0 \,\Omega\)</span>
             <span class="say step">The whole circuit</span>
             <span class="step">\(R = 6.0 + 3.0 = 9.0 \,\Omega\)</span>
-            <span class="step">\(I = \dfrac{V}{R} = \dfrac{9.0}{9.0} = \class{res}{1.0 \,\mathrm{A}}\)</span>
-            <span class="say step">Across the pair</span>
-            <span class="step">\(V_\mathrm{p} = I R_\mathrm{p} = 1.0 \times 3.0 = \class{res}{3.0 \,\mathrm{V}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>THREE RESISTORS</span></div>
@@ -660,6 +658,23 @@
             <p class="tip">Always finish with the two checks: currents at each junction add up, and potential differences round each loop add up to the emf.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Series and parallel together">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A combination<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="step">\(I = \dfrac{V}{R} = \dfrac{9.0}{9.0} = \class{res}{1.0 \,\mathrm{A}}\)</span>
+            <span class="say step">Across the pair</span>
+            <span class="step">\(V_\mathrm{p} = I R_\mathrm{p} = 1.0 \times 3.0 = \class{res}{3.0 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THREE RESISTORS</span></div>
+            <div class="fig" data-fig="b5-combine" data-kind="combo"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="The potential divider">
@@ -729,9 +744,9 @@
         <div class="quiz fill">
           <div class="q"><p><span class="n">01</span>10 Ω and 15 Ω in series. Total?</p><div class="ans step">25 Ω</div></div>
           <div class="q"><p><span class="n">02</span>Two 10 Ω resistors in parallel. Total?</p><div class="ans step">5.0 Ω</div></div>
-          <div class="q"><p><span class="n">03</span>3.0 Ω and 6.0 Ω in parallel. Total?</p><div class="ans step">\(\frac{3.0 \times 6.0}{9.0} = 2.0 \,\Omega\)</div></div>
+          <div class="q"><p><span class="n">03</span>3.0 Ω and 6.0 Ω in parallel. Total?</p><div class="ans step">\(\dfrac{3.0 \times 6.0}{9.0} = 2.0 \,\Omega\)</div></div>
           <div class="q"><p><span class="n">04</span>Which conservation law explains why currents add at a junction?</p><div class="ans step">Conservation of charge</div></div>
-          <div class="q"><p><span class="n">05</span>2.0 kΩ above 4.0 kΩ across 12 V. P.d. across the 4.0 kΩ?</p><div class="ans step">\(\frac{4.0}{6.0} \times 12 = 8.0 \,\mathrm{V}\)</div></div>
+          <div class="q"><p><span class="n">05</span>2.0 kΩ above 4.0 kΩ across 12 V. P.d. across the 4.0 kΩ?</p><div class="ans step">\(\dfrac{4.0}{6.0} \times 12 = 8.0 \,\mathrm{V}\)</div></div>
           <div class="q"><p><span class="n">06</span>How is a voltmeter connected, and what is its ideal resistance?</p><div class="ans step">In parallel; infinite</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
@@ -785,7 +800,7 @@
       <section class="slide" data-title="Internal resistance: a torch cell">
         <p class="eyebrow">Worked example</p>
         <h2>A cell and a lamp<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the current, the terminal potential difference and the lost volts. Where does the power from the cell go?</span>
             <span class="say">\(\varepsilon = 1.5 \,\mathrm{V}\), \(r = 0.50 \,\Omega\), lamp \(R = 2.5 \,\Omega\)</span>
@@ -793,12 +808,6 @@
             <span class="step">\(I = \dfrac{1.5}{2.5 + 0.50} = \class{res}{0.50 \,\mathrm{A}}\)</span>
             <span class="step">\(V = IR = 0.50 \times 2.5 = \class{res}{1.25 \,\mathrm{V}}\)</span>
             <span class="step">Lost volts \(= Ir = 0.50 \times 0.50 = 0.25 \,\mathrm{V}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">Where the power goes</span>
-            <span class="step">Cell supplies: \(\varepsilon I = 1.5 \times 0.50 = 0.75 \,\mathrm{W}\)</span>
-            <span class="step">Lamp: \(I^{2} R = 0.50^{2} \times 2.5 = 0.625 \,\mathrm{W}\)</span>
-            <span class="step">Inside the cell: \(I^{2} r = 0.50^{2} \times 0.50 = 0.125 \,\mathrm{W}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
@@ -813,6 +822,20 @@
             <p class="more">A source delivers the most power to a load whose resistance equals its internal resistance, but then half the energy is wasted inside the source.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Internal resistance: a torch cell">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A cell and a lamp<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">Where the power goes</span>
+            <span class="step">Cell supplies: \(\varepsilon I = 1.5 \times 0.50 = 0.75 \,\mathrm{W}\)</span>
+            <span class="step">Lamp: \(I^{2} R = 0.50^{2} \times 2.5 = 0.625 \,\mathrm{W}\)</span>
+            <span class="step">Inside the cell: \(I^{2} r = 0.50^{2} \times 0.50 = 0.125 \,\mathrm{W}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Measuring emf and internal resistance">
@@ -887,9 +910,6 @@
             <span class="say">\(V_\mathrm{in} = 6.0 \,\mathrm{V}\), \(R_{2} = 10 \,\mathrm{k}\Omega\), thermistor \(R_{1}\)</span>
             <span class="step">\(V_\mathrm{out} = \dfrac{R_{2}}{R_{1} + R_{2}} V_\mathrm{in}\)</span>
             <span class="say step">Cold: \(R_{1} = 5.0 \,\mathrm{k}\Omega\)</span>
-            <span class="step">\(V_\mathrm{out} = \dfrac{10}{5.0 + 10} \times 6.0 = \class{res}{4.0 \,\mathrm{V}}\)</span>
-            <span class="say step">Hot: \(R_{1} = 1.0 \,\mathrm{k}\Omega\)</span>
-            <span class="step">\(V_\mathrm{out} = \dfrac{10}{1.0 + 10} \times 6.0 = \class{res}{5.5 \,\mathrm{V}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>THERMISTOR ABOVE, FIXED RESISTOR BELOW</span></div>
@@ -910,6 +930,23 @@
             <p class="trap">Deciding which way the output moves by guessing. Ask first what happens to the sensor’s resistance, then to its share of the potential difference, then to the other component’s share.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="A sensor circuit">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A thermistor in a potential divider<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="step">\(V_\mathrm{out} = \dfrac{10}{5.0 + 10} \times 6.0 = \class{res}{4.0 \,\mathrm{V}}\)</span>
+            <span class="say step">Hot: \(R_{1} = 1.0 \,\mathrm{k}\Omega\)</span>
+            <span class="step">\(V_\mathrm{out} = \dfrac{10}{1.0 + 10} \times 6.0 = \class{res}{5.5 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THERMISTOR ABOVE, FIXED RESISTOR BELOW</span></div>
+            <div class="fig" data-fig="b5-divider" data-kind="thermistor"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="The potentiometer">
@@ -946,10 +983,18 @@
       <section class="slide" data-title="Quick check: real cells and sensors">
         <p class="eyebrow">Quick check</p>
         <h2>Real cells and sensors<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A cell of emf 6.0 V and \(r\) = 1.0 Ω drives 0.50 A. Terminal p.d.?</p><div class="ans step">\(6.0 - 0.50 \times 1.0 = 5.5 \,\mathrm{V}\)</div></div>
           <div class="q"><p><span class="n">02</span>When does the terminal p.d. equal the emf?</p><div class="ans step">When no current flows</div></div>
           <div class="q"><p><span class="n">03</span>On a graph of \(V\) against \(I\) for a cell, what is the gradient?</p><div class="ans step">\(-r\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: real cells and sensors">
+        <p class="eyebrow">Quick check</p>
+        <h2>Real cells and sensors<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A thermistor is warmed. Its resistance?</p><div class="ans step">It falls</div></div>
           <div class="q"><p><span class="n">05</span>An LDR is the upper resistor of a divider. It gets dark. The output across the lower resistor?</p><div class="ans step">It falls</div></div>
           <div class="q"><p><span class="n">06</span>How many terminals of a potentiometer are used in a potential divider?</p><div class="ans step">Three</div></div>

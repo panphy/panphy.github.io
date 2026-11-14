@@ -1,4 +1,4 @@
-# Medical illustrations — slide 46
+# Medical illustrations — slide 48
 
 Generated with the built-in imagegen tool. These slide-only PNGs replace the medical-use illustrations on page 46; the shared SVG figures remain available to the workbooks. Both themes use a white image background to preserve label contrast.
 

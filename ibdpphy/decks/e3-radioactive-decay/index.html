@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -63,25 +64,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="carbon-nucleus" data-still style="height: 180px;"></div>
+            <div class="fig" data-fig="carbon-nucleus" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 01, SL + HL</p>
             <h3>What holds a nucleus together?</h3>
             <p>The strong force, mass defect, binding energy</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="e3-alpha" data-still style="height: 180px;"></div>
+            <div class="fig" data-fig="e3-alpha" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 02, SL + HL</p>
             <h3>How does a nucleus change?</h3>
             <p>Alpha, beta and gamma decay</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="e3-half-life" data-still style="height: 180px;"></div>
+            <div class="fig" data-fig="e3-half-life" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 03, SL + HL</p>
             <h3>How fast does it happen?</h3>
             <p>Activity, half-life, background</p>
           </div>
           <div class="card hl">
-            <div class="fig" data-fig="e3-nz" data-still style="height: 180px;"></div>
+            <div class="fig" data-fig="e3-nz" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 04, HL only</p>
             <h3>Stability and the decay law</h3>
             <p>Energy levels, the neutrino, \(N = N_{0} e^{-\lambda t}\)</p>
@@ -107,15 +108,15 @@
       <section class="slide" data-title="Isotopes">
         <h2>Isotopes<span>.</span></h2>
         <div class="stack center" style="gap: 24px;">
-          <div class="panel" style="height: 400px; align-self: stretch;">
+          <div class="panel" style="height: 380px; align-self: stretch;">
             <div class="panel-head"><span>THREE ISOTOPES OF CARBON</span></div>
             <div class="fig" data-fig="e3-isotopes"></div>
           </div>
           <ul class="points small" style="grid-template-columns: 1fr 1fr; gap: 14px 40px;">
-            <li>Same number of <b>protons</b>: the same element, the same chemistry</li>
-            <li>Different numbers of <b>neutrons</b>: a different mass</li>
-            <li class="step">A <b>nuclide</b> is one kind of nucleus: \({}^{14}_{6}\mathrm{C}\) has \(A = 14\) and \(Z = 6\)</li>
-            <li class="step">Some isotopes are <b>stable</b>, others are <b>radioactive</b></li>
+            <li>Same <b>protons</b>: same element, same chemistry</li>
+            <li>Different <b>neutrons</b>: different mass</li>
+            <li class="step"><b>Nuclide</b>: one kind of nucleus, e.g. \({}^{14}_{6}\mathrm{C}\)</li>
+            <li class="step">Some <b>stable</b>, some <b>radioactive</b></li>
           </ul>
         </div>
         <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
@@ -138,11 +139,11 @@
           <div class="stack">
             <ul class="points small">
               <li>Protons <b>repel</b> one another, yet nuclei exist</li>
-              <li class="step">An <b>attractive</b> force acts between nucleons: proton or neutron alike</li>
+              <li class="step"><b>Attractive</b> between all nucleons</li>
               <li class="step"><b>Short range</b>: near neighbors only, about \(10^{-15} \,\mathrm{m}\) <span class="hl-tag">HL only</span></li>
-              <li class="step">Much <b>stronger</b> than the electric force at that range</li>
+              <li class="step">Far <b>stronger</b> than the electric force there</li>
             </ul>
-            <div class="idea">The curves are <b>not required</b>: know that the strong force is attractive and short range.</div>
+            <div class="idea">Curves <b>not required</b>: know it is attractive and short range</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>TWO PROTONS</span><span class="pill">SKETCH, NOT TO SCALE</span></div>
@@ -209,8 +210,6 @@
             <span class="say">Proton \(1.007276 \,\mathrm{u}\), neutron \(1.008665 \,\mathrm{u}\)</span>
             <span>\(\Delta m = m_\mathrm{He} - (2 m_\mathrm{p} + 2 m_\mathrm{n})\)</span>
             <span class="step">\(\Delta m = 4.001506 - 4.031882 = -0.030376 \,\mathrm{u}\)</span>
-            <span class="step">\(E_\mathrm{b} = -\Delta m\,c^{2} = -(-0.030376) \times 931.5 = \class{res}{28.3 \,\mathrm{MeV}}\)</span>
-            <span class="step">Per nucleon: \(\dfrac{28.3}{4} = \class{res}{7.07 \,\mathrm{MeV}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
@@ -225,6 +224,18 @@
             <p class="trap">Rounding the masses early. The mass defect is a small difference between large numbers: keep every digit you are given until the subtraction is done.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Binding energy">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Nuclear binding energy<span>.</span></h2>
+        <div class="stack center" style="align-items: stretch;">
+          <div class="work">
+            <span class="step">\(E_\mathrm{b} = -\Delta m\,c^{2} = -(-0.030376) \times 931.5 = \class{res}{28.3 \,\mathrm{MeV}}\)</span>
+            <span class="step">Per nucleon: \(\dfrac{28.3}{4} = \class{res}{7.07 \,\mathrm{MeV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Binding energy per nucleon">
@@ -296,15 +307,23 @@
       <section class="slide" data-title="Quick check: binding energy">
         <p class="eyebrow">Quick check</p>
         <h2>Binding energy<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>How do isotopes of an element differ?</p><div class="ans step">In their number of neutrons</div></div>
           <div class="q"><p><span class="n">02</span>Give two properties of the strong nuclear force.</p><div class="ans step">Attractive between nucleons, short range</div></div>
           <div class="q"><p><span class="n">03</span>What is the mass defect of a nucleus?</p><div class="ans step">Mass of its separate nucleons minus its own mass</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: binding energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Binding energy<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A mass defect of 0.100 u. Binding energy?</p><div class="ans step">\(0.100 \times 931.5 = 93.2 \,\mathrm{MeV}\)</div></div>
           <div class="q"><p><span class="n">05</span>Which nuclei have the greatest binding energy per nucleon?</p><div class="ans step">Those near iron-56</div></div>
           <div class="q"><p><span class="n">06</span>Why does fusing light nuclei release energy?</p><div class="ans step">The product is higher on the curve</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -331,12 +350,12 @@
           </div>
           <div class="stack">
             <ul class="points">
-              <li>X-rays had just been discovered. Becquerel thought sunlight made uranium salts give them out</li>
-              <li>He left the salts on a <b>wrapped</b> photographic plate in a dark drawer</li>
+              <li>X-rays were new. Becquerel thought sunlit uranium salts emit them</li>
+              <li>Salts on a <b>wrapped</b> plate, in a dark drawer</li>
               <li>The plate darkened <b>anyway</b>, with no sunlight</li>
-              <li>The radiation came from the <b>uranium itself</b>. Nobel Prize with the Curies, <b>1903</b></li>
+              <li>From the <b>uranium itself</b>. Nobel Prize with the Curies, <b>1903</b></li>
             </ul>
-            <div class="idea"><b>Spontaneous</b>: nothing was done to the uranium to make it happen.</div>
+            <div class="idea"><b>Spontaneous</b>: nothing triggered it</div>
           </div>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Paul_Nadar_-_Henri_Becquerel_(cropped).jpg" target="_blank" rel="noopener">Paul Nadar</a>, public domain. Plate: <a href="https://commons.wikimedia.org/wiki/File:Becquerel_plate.jpg" target="_blank" rel="noopener">Henri Becquerel, 1896</a>, public domain.</p>
@@ -622,10 +641,18 @@
       <section class="slide" data-title="Quick check: decay">
         <p class="eyebrow">Quick check</p>
         <h2>Radioactive decay<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What does “spontaneous” mean for radioactive decay?</p><div class="ans step">It cannot be influenced from outside</div></div>
           <div class="q"><p><span class="n">02</span>\({}^{226}_{88}\mathrm{Ra}\) emits an alpha particle. \(A\) and \(Z\) of the product?</p><div class="ans step">222 and 86</div></div>
           <div class="q"><p><span class="n">03</span>What is emitted with the electron in <span class="nowrap">beta-minus</span> decay?</p><div class="ans step">An antineutrino</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: decay">
+        <p class="eyebrow">Quick check</p>
+        <h2>Radioactive decay<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>\({}^{14}_{6}\mathrm{C}\) decays by beta-minus. \(A\) and \(Z\) of the product?</p><div class="ans step">14 and 7</div></div>
           <div class="q"><p><span class="n">05</span>Which radiation is the most ionizing?</p><div class="ans step">Alpha</div></div>
           <div class="q"><p><span class="n">06</span>What happens to \(A\) and \(Z\) in gamma decay?</p><div class="ans step">Neither changes</div></div>
@@ -677,9 +704,9 @@
         <div class="split wide-fig">
           <div class="stack">
             <ul class="points small">
-              <li>The time for <b>half</b> the undecayed nuclei in a sample to decay</li>
-              <li class="step">Also the time for the <b>activity</b>, or the count rate, to halve</li>
-              <li class="step">Always the <b>same</b> for a given nuclide, whenever you start</li>
+              <li>Time for <b>half</b> the undecayed nuclei to decay</li>
+              <li class="step">Also for the <b>activity</b> (count rate) to halve</li>
+              <li class="step">The <b>same</b> for a nuclide, whenever you start</li>
             </ul>
             <div class="idea step">After \(n\) half-lives: \(\left(\dfrac{1}{2}\right)^{n}\) remains.</div>
           </div>
@@ -705,12 +732,12 @@
       <section class="slide" data-title="Random decay and half-life">
         <h2>Random decay, predictable half-life<span>.</span></h2>
         <div class="stack center" style="gap: 20px;">
-          <div class="panel" style="height: 440px; align-self: stretch;">
+          <div class="panel" style="height: 410px; align-self: stretch;">
             <div class="panel-head"><span>64 NUCLEI</span><span class="reveal-hint">PRESS → FOR EACH HALF-LIFE</span></div>
             <div class="fig" data-fig="e3-random" data-animate></div>
           </div>
           <div class="legend"><span><i class="undecayed"></i>undecayed</span><span><i class="decayed"></i>decayed</span></div>
-          <div class="idea">About half decay in each half-life, but <b>not exactly</b> half, and nobody can say which ones.</div>
+          <div class="idea">About half decay each half-life: <b>not exactly</b> half, and not predictably which</div>
         </div>
         <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -845,10 +872,18 @@
       <section class="slide" data-title="Quick check: half-life">
         <p class="eyebrow">Quick check</p>
         <h2>Half-life<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is the unit of activity?</p><div class="ans step">The becquerel, Bq: one decay per second</div></div>
-          <div class="q"><p><span class="n">02</span>What fraction of a sample remains after 3 half-lives?</p><div class="ans step">\(\frac{1}{8}\)</div></div>
+          <div class="q"><p><span class="n">02</span>What fraction of a sample remains after 3 half-lives?</p><div class="ans step">\(\dfrac{1}{8}\)</div></div>
           <div class="q"><p><span class="n">03</span>Activity falls from 1200 Bq to 150 Bq in 12 hours. Half-life?</p><div class="ans step">3 half-lives, so 4.0 hours</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: half-life">
+        <p class="eyebrow">Quick check</p>
+        <h2>Half-life<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A detector reads 95 counts per minute; background is 15. Corrected count rate?</p><div class="ans step">80 counts per minute</div></div>
           <div class="q"><p><span class="n">05</span>Which radiation would suit a gauge for the thickness of paper?</p><div class="ans step">Beta</div></div>
           <div class="q"><p><span class="n">06</span>Why does a medical tracer need a short <span class="nowrap">half-life</span>?</p><div class="ans step">So the patient’s dose is small</div></div>
@@ -1174,11 +1209,19 @@
       <section class="slide hl" data-title="HL quick check">
         <p class="eyebrow">Quick check, additional higher level</p>
         <h2>Stability and the decay law<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Why do heavy stable nuclei need extra neutrons?</p><div class="ans step">More attraction, no more repulsion</div></div>
           <div class="q"><p><span class="n">02</span>Which spectra are evidence for nuclear energy levels?</p><div class="ans step">Alpha and gamma: both discrete</div></div>
           <div class="q"><p><span class="n">03</span>What does the continuous beta spectrum show?</p><div class="ans step">A third particle: the neutrino</div></div>
-          <div class="q"><p><span class="n">04</span>A nuclide has \(\lambda = 0.050 \,\mathrm{s}^{-1}\). Half-life?</p><div class="ans step">\(\frac{0.693}{0.050} = 14 \,\mathrm{s}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check, additional higher level</p>
+        <h2>Stability and the decay law<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>A nuclide has \(\lambda = 0.050 \,\mathrm{s}^{-1}\). Half-life?</p><div class="ans step">\(\dfrac{0.693}{0.050} = 14 \,\mathrm{s}\)</div></div>
           <div class="q"><p><span class="n">05</span>\(N = 2.0 \times 10^{12}\), \(\lambda = 1.5 \times 10^{-6} \,\mathrm{s}^{-1}\). Activity?</p><div class="ans step">\(3.0 \times 10^{6} \,\mathrm{Bq}\)</div></div>
           <div class="q"><p><span class="n">06</span>What is the gradient of a graph of \(\ln A\) against \(t\)?</p><div class="ans step">\(-\lambda\)</div></div>
         </div>
@@ -1186,13 +1229,21 @@
       </section>
 
       <section class="slide" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>Radioactive decay on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Radioactive decay in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Binding energy</p><h3>Mass defect × \(c^{2}\)</h3><p>\(1 \,\mathrm{u} = 931.5 \,\mathrm{MeV} \,c^{-2}\)<br>Per nucleon: greatest near iron-56</p></div>
           <div class="card step"><p class="eyebrow">Strong nuclear force</p><h3>Short range, attractive</h3><p>Between all nucleons<br>Balances the repulsion of the protons</p></div>
           <div class="card step"><p class="eyebrow">Decay</p><h3>Random and spontaneous</h3><p>Alpha, <span class="nowrap">beta-minus</span> with \(\bar{\nu}\), <span class="nowrap">beta-plus</span> with \(\nu\), gamma<br>\(A\) and \(Z\) balance</p></div>
-          <div class="card step"><p class="eyebrow">Half-life</p><h3>The time to halve</h3><p>\(\left(\frac{1}{2}\right)^{n}\) remains after \(n\) half-lives<br>Subtract the background</p></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Radioactive decay in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Half-life</p><h3>The time to halve</h3><p>\(\left(\frac{1}{2}\right)^{n}\) remains after \(n\) half-lives<br>Subtract the background</p></div>
           <div class="card hl step"><p class="eyebrow">Evidence, HL</p><h3>Spectra</h3><p>Alpha and gamma discrete: nuclear levels<br>Beta continuous: the neutrino</p></div>
           <div class="card hl step"><p class="eyebrow">Decay law, HL</p><h3>\(N = N_{0} e^{-\lambda t}\)</h3><p>\(A = \lambda N\) and \(T_{\frac{1}{2}} = \frac{\ln 2}{\lambda}\)</p></div>
         </div>
@@ -1200,7 +1251,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Isotopes</b><span>Same protons, different neutrons</span></div>
@@ -1209,6 +1260,14 @@
           <div class="term"><b>Strong nuclear force</b><span>Short-range attraction of nucleons</span></div>
           <div class="term"><b>Spontaneous</b><span>Not affected by outside conditions</span></div>
           <div class="term"><b>Antineutrino</b><span>Emitted in beta-minus decay</span></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Activity</b><span>Decays per second, in Bq</span></div>
           <div class="term"><b>Half-life</b><span>Time for half the nuclei to decay</span></div>
           <div class="term"><b>Background radiation</b><span>Always present. Subtract it</span></div>

@@ -22,10 +22,10 @@
       <p class="page-intro">Eight 50-minute lessons over four weeks, for AQA Physics 4.3 (with 4.1.1.3) and Combined Science 6.3 (with 6.1.1.3). The student workbook comes in three part booklets (Lessons 1–2, 3 and 5, 6–7) and a booklet for each required practical (Lessons 4 and 8); each lesson has its own section of the teaching deck.</p>
       <h4 class="sub">How the resources fit together</h4>
       <table class="compare"><thead><tr><th>Resource</th><th>Used for</th></tr></thead><tbody>
-        <tr><th>Teaching deck</th><td>52 slides with revision notes (press N). Slides 3–46 are for every class. Slides 47–52, after the Key words slide, are flagged <strong>Triple Science only</strong>: pressure and volume (\\(p\\,V = \\text{constant}\\)) and doing work on a gas.</td></tr>
+        <tr><th>Teaching deck</th><td>53 slides with revision notes (press N). Slides 3–47 are for every class. Slides 48–53, after the Key words slide, are flagged <strong>Triple Science only</strong>: pressure and volume (\\(p\\,V = \\text{constant}\\)) and doing work on a gas.</td></tr>
         <tr><th>Student workbook</th><td>Five booklets (12 pt text, wide writing lines): Part 1 (Lessons 1–2), Part 2 (Lessons 3 and 5), Lesson 4, Part 3 (Lessons 6–7) and Lesson 8, each with the toolkit so far, its key words and quick answers. Every lesson: Do now, explanations, the slide examples to fill in with “Your turn”, graded practice, practical records, exam questions and a revision box.</td></tr>
         <tr><th>Answer edition</th><td>The same pages and page numbers as each booklet, with answers in blue. For marking, or for students to mark their own work.</td></tr>
-        <tr><th>Unit review</th><td>${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks of mixed exam practice, a fix-it log, the toolkit, all the key words and a progress tracker. Its last pages are the Triple Science only extension, matching deck slides 47–52.</td></tr>
+        <tr><th>Unit review</th><td>${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks of mixed exam practice, a fix-it log, the toolkit, all the key words and a progress tracker. Its last pages are the Triple Science only extension, matching deck slides 48–53.</td></tr>
         <tr><th>Preps</th><td>Four one-page homework sheets, each out of 10, set after Lessons 2, 4, 6 and 8: three Do Now bank questions on earlier learning, then questions on the two latest lessons.</td></tr>
       </tbody></table>
       <h4 class="sub">Design principles</h4>
@@ -40,7 +40,7 @@
       ])}
       <h4 class="sub">Sequence</h4>
       <table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Week</th><th>Slides</th></tr></thead><tbody>${rows}</tbody></table>
-      <p style="margin-top:2mm">The Scheme of Work places P3.1–P3.3 in weeks 1–2 and P3.4–P3.5 in weeks 3–4. With both required practicals given a full lesson, internal energy (P3.3) is the first lesson of week 3. Triple Science classes need one extra lesson for slides 47–52 and the extension pages of the Unit review.</p>
+      <p style="margin-top:2mm">The Scheme of Work places P3.1–P3.3 in weeks 1–2 and P3.4–P3.5 in weeks 3–4. With both required practicals given a full lesson, internal energy (P3.3) is the first lesson of week 3. Triple Science classes need one extra lesson for slides 48–53 and the extension pages of the Unit review.</p>
     </section>`;
   }
 

@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,25 +63,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="c1-circle" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="c1-circle" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>What makes motion simple harmonic</h3>
             <p>\(a = -\omega^{2} x\), period and frequency</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="c1-pendulum" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="c1-pendulum" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Two oscillators</h3>
             <p>The mass on a spring and the simple pendulum</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="c1-energy" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="c1-energy" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Energy</h3>
             <p>Kinetic and potential energy through a cycle</p>
           </div>
           <div class="card hl">
-            <div class="fig" data-fig="c1-xva" data-still style="height: 170px;"></div>
+            <div class="fig" data-fig="c1-xva" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 04, HL only</p>
             <h3>The equations of the motion</h3>
             <p>Displacement, velocity, phase angle and energy</p>
@@ -439,16 +440,16 @@
         <div class="story" style="--photo-h: 430px;">
           <div class="story-photos">
             <figure><img src="images/huygens.jpg" width="765" height="789" alt="Painted portrait of Christiaan Huygens, a man with long dark curled hair and a lace collar"><figcaption><b>Christiaan Huygens</b>, painted by Caspar Netscher in 1671</figcaption></figure>
-            <figure><img src="images/huygens-clock.jpg" width="327" height="933" alt="Engraving of the mechanism of a clock seen from the side, with gear wheels, hanging weights on pulleys and a long pendulum ending in a round bob"><figcaption>His <b>first pendulum clock</b>, as he drew it in 1658</figcaption></figure>
+            <figure><img src="images/huygens-clock.jpg" width="327" height="933" alt="Engraving of the mechanism of a clock seen from the side, with gear wheels, hanging weights on pulleys and a long pendulum ending in a round bob"><figcaption>His <b>clock</b>, 1658</figcaption></figure>
           </div>
           <div class="stack">
             <ul class="points">
-              <li>About 1602, Galileo had found that a pendulum’s period does not depend on the size of its swing</li>
-              <li>On <b>25 December 1656</b> Huygens invented a clock regulated by a pendulum</li>
-              <li>The best clocks went from errors of about <b>15 minutes</b> a day to about <b>15 seconds</b></li>
-              <li>He also found that <b>wide</b> swings spoil the timekeeping</li>
+              <li>About 1602, Galileo: the period does not depend on the size of the swing</li>
+              <li><b>25 December 1656</b>: Huygens’s pendulum clock</li>
+              <li>Errors fell from about <b>15 minutes</b> a day to about <b>15 seconds</b></li>
+              <li><b>Wide</b> swings spoil the timekeeping</li>
             </ul>
-            <div class="idea">Pendulum clocks were the most precise timekeepers in the world until the 1930s.</div>
+            <div class="idea">The most precise timekeepers until the 1930s</div>
           </div>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Christiaan_Huygens-painting_(cropped).jpeg" target="_blank" rel="noopener">Caspar Netscher, 1671</a>, public domain. Drawing: <a href="https://commons.wikimedia.org/wiki/File:Huygens_first_pendulum_clock.png" target="_blank" rel="noopener">Christiaan Huygens, 1658</a>, public domain.</p>
@@ -523,13 +524,21 @@
       <section class="slide" data-title="Quick check: two oscillators">
         <p class="eyebrow">Quick check</p>
         <h2>Two oscillators<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>The mass on a spring is made four times as large. The period?</p><div class="ans step">It doubles</div></div>
           <div class="q"><p><span class="n">02</span>The amplitude of a mass on a spring is doubled. The period?</p><div class="ans step">Unchanged</div></div>
           <div class="q"><p><span class="n">03</span>A pendulum’s bob is replaced by a heavier one. The period?</p><div class="ans step">Unchanged</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: two oscillators">
+        <p class="eyebrow">Quick check</p>
+        <h2>Two oscillators<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A pendulum is taken to the Moon. The period?</p><div class="ans step">Longer: \(g\) is smaller</div></div>
           <div class="q"><p><span class="n">05</span>Why must a pendulum’s swings be small?</p><div class="ans step">So the restoring force is proportional to displacement</div></div>
-          <div class="q"><p><span class="n">06</span>Period of 0.50 kg on a spring of 200 N m⁻¹?</p><div class="ans step">\(2 \pi \sqrt{\frac{0.50}{200}} = 0.31 \,\mathrm{s}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Period of 0.50 kg on a spring of 200 N m⁻¹?</p><div class="ans step">\(2 \pi \sqrt{\dfrac{0.50}{200}} = 0.31 \,\mathrm{s}\)</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
@@ -819,19 +828,13 @@
       <section class="slide hl" data-title="HL: Energy of an oscillator">
         <p class="eyebrow">Worked example</p>
         <h2>The energy of an oscillator<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the total energy, and the potential and kinetic energies at \(x = 0.030 \,\mathrm{m}\).</span>
             <span class="say">\(m = 0.20 \,\mathrm{kg}\), \(\omega = 7.85 \,\mathrm{rad} \,\mathrm{s}^{-1}\), \(x_{0} = 0.050 \,\mathrm{m}\)</span>
             <span class="step">\(E_\mathrm{T} = \dfrac{1}{2} m \omega^{2} x_{0}^{2}\)</span>
             <span class="step">\(E_\mathrm{T} = \dfrac{1}{2} \times 0.20 \times 7.85^{2} \times 0.050^{2}\)</span>
             <span class="step">\(E_\mathrm{T} = \class{res}{1.5 \times 10^{-2} \,\mathrm{J}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">At \(x = 0.030 \,\mathrm{m}\)</span>
-            <span class="step">\(E_\mathrm{p} = \dfrac{1}{2} m \omega^{2} x^{2} = \dfrac{1}{2} \times 0.20 \times 7.85^{2} \times 0.030^{2}\)</span>
-            <span class="step">\(E_\mathrm{p} = \class{res}{5.5 \times 10^{-3} \,\mathrm{J}}\)</span>
-            <span class="step">\(E_\mathrm{k} = E_\mathrm{T} - E_\mathrm{p} = \class{res}{9.9 \times 10^{-3} \,\mathrm{J}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION, ADDITIONAL HL</span><span data-page></span></div>
@@ -848,15 +851,37 @@
         </aside>
       </section>
 
+      <section class="slide hl" data-title="HL: Energy of an oscillator">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>The energy of an oscillator<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">At \(x = 0.030 \,\mathrm{m}\)</span>
+            <span class="step">\(E_\mathrm{p} = \dfrac{1}{2} m \omega^{2} x^{2} = \dfrac{1}{2} \times 0.20 \times 7.85^{2} \times 0.030^{2}\)</span>
+            <span class="step">\(E_\mathrm{p} = \class{res}{5.5 \times 10^{-3} \,\mathrm{J}}\)</span>
+            <span class="step">\(E_\mathrm{k} = E_\mathrm{T} - E_\mathrm{p} = \class{res}{9.9 \times 10^{-3} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION, ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide hl" data-title="HL quick check">
         <p class="eyebrow">Quick check, HL</p>
         <h2>The equations of the motion<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is the greatest speed of an oscillator, in terms of \(\omega\) and \(x_{0}\)?</p><div class="ans step">\(\omega x_{0}\)</div></div>
-          <div class="q"><p><span class="n">02</span>What phase angle makes \(x = x_{0} \sin (\omega t + \phi)\) start at \(+x_{0}\)?</p><div class="ans step"><span class="equation-inline">\(\frac{\pi}{2}\) rad</span></div></div>
+          <div class="q"><p><span class="n">02</span>What phase angle makes \(x = x_{0} \sin (\omega t + \phi)\) start at \(+x_{0}\)?</p><div class="ans step"><span class="equation-inline">\(\dfrac{\pi}{2}\) rad</span></div></div>
           <div class="q"><p><span class="n">03</span>Two oscillators are half a cycle apart. Phase difference?</p><div class="ans step"><span class="equation-inline">\(\pi\) rad</span></div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check, HL</p>
+        <h2>The equations of the motion<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>The amplitude is tripled. The total energy?</p><div class="ans step">Nine times as great</div></div>
-          <div class="q"><p><span class="n">05</span>At \(x = \frac{1}{2} x_{0}\), what fraction of the energy is kinetic?</p><div class="ans step">\(\frac{3}{4}\)</div></div>
+          <div class="q"><p><span class="n">05</span>At \(x = \frac{1}{2} x_{0}\), what fraction of the energy is kinetic?</p><div class="ans step">\(\dfrac{3}{4}\)</div></div>
           <div class="q"><p><span class="n">06</span>\(\omega\) = 10 rad s⁻¹, \(x_{0}\) = 0.10 m. Speed at \(x\) = 0.060 m?</p><div class="ans step">\(10 \sqrt{0.10^{2} - 0.060^{2}} = 0.80 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>

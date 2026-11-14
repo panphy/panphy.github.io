@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,25 +63,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="a4-beam" data-kind="seesaw" data-still style="height: 170px;"></div>
+            <div class="fig" data-fig="a4-beam" data-kind="seesaw" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Torque and equilibrium</h3>
             <p>\(\tau = Fr \sin \theta\), and when a body does not start to turn</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a4-wheel" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a4-wheel" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Rotational motion</h3>
             <p>Angular displacement, velocity and acceleration</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a4-inertia" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a4-inertia" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Moment of inertia</h3>
             <p>\(I = \Sigma m r^{2}\) and \(\tau = I \alpha\)</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="a4-skater" data-still data-plain style="height: 170px;"></div>
+            <div class="fig" data-fig="a4-skater" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04</p>
             <h3>Angular momentum and energy</h3>
             <p>\(L = I \omega\), its conservation, and \(\frac{1}{2} I \omega^{2}\)</p>
@@ -145,9 +146,9 @@
             <figure><img src="images/archimedes-lever.jpg" width="640" height="427" alt="Engraving of a bearded man pushing down on the end of a long lever resting on a rock, lifting a globe of the Earth at its other end"><figcaption><b>Archimedes</b> moving the Earth, from the <i>Mechanics Magazine</i> of 1824</figcaption></figure>
           </div>
           <ul class="points">
-            <li>People had used levers for thousands of years: the Egyptians moved obelisks of over a hundred tonnes with them</li>
-            <li>The earliest surviving writing on <b>why</b> they work is from the third century BC, and is credited to <b>Archimedes</b></li>
-            <li>The boast attributed to him: give me a lever long enough and a place to rest it, and I shall <b>move the world</b></li>
+            <li>Levers are ancient: Egyptians moved obelisks of over <b>100 tonnes</b> with them</li>
+            <li>The oldest surviving account of <b>why</b> they work: <b>Archimedes</b>, third century BC</li>
+            <li>His boast: give me a long enough lever and somewhere to rest it, and I will <b>move the world</b></li>
           </ul>
         </div>
         <p class="credits">Engraving: <a href="https://commons.wikimedia.org/wiki/File:Archimedes_lever_(Small).jpg" target="_blank" rel="noopener">Mechanics Magazine, 1824</a>, public domain.</p>
@@ -225,15 +226,23 @@
       <section class="slide hl" data-title="Quick check: torque and equilibrium">
         <p class="eyebrow">Quick check</p>
         <h2>Torque and equilibrium<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A 20 N force acts at right angles, 0.30 m from an axis. Torque?</p><div class="ans step">6.0 N m</div></div>
           <div class="q"><p><span class="n">02</span>The same force acts along the line to the axis. Torque?</p><div class="ans step">Zero</div></div>
           <div class="q"><p><span class="n">03</span>State the two conditions for equilibrium.</p><div class="ans step">Zero resultant force; zero resultant torque</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: torque and equilibrium">
+        <p class="eyebrow">Quick check</p>
+        <h2>Torque and equilibrium<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>400 N sits 1.5 m from a pivot. Where must 600 N sit to balance it?</p><div class="ans step">1.0 m on the other side</div></div>
           <div class="q"><p><span class="n">05</span>Why take torques about a point where an unknown force acts?</p><div class="ans step">Its torque is zero there</div></div>
           <div class="q"><p><span class="n">06</span>Where does the weight of a uniform beam act?</p><div class="ans step">At its midpoint, the center of mass</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -372,11 +381,19 @@
       <section class="slide hl" data-title="Quick check: rotational motion">
         <p class="eyebrow">Quick check</p>
         <h2>Rotational motion<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>How many radians in one revolution?</p><div class="ans step">\(2 \pi\)</div></div>
           <div class="q"><p><span class="n">02</span>A wheel turns at 12 rad s⁻¹. Speed of a point 0.50 m from the axis?</p><div class="ans step">6.0 m s⁻¹</div></div>
           <div class="q"><p><span class="n">03</span>From 4.0 to 10 rad s⁻¹ in 3.0 s. Angular acceleration?</p><div class="ans step">2.0 rad s⁻²</div></div>
-          <div class="q"><p><span class="n">04</span>And the angle turned in that time?</p><div class="ans step">\(\frac{4.0 + 10}{2} \times 3.0 = 21 \,\mathrm{rad}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: rotational motion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Rotational motion<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>And the angle turned in that time?</p><div class="ans step">\(\dfrac{4.0 + 10}{2} \times 3.0 = 21 \,\mathrm{rad}\)</div></div>
           <div class="q"><p><span class="n">05</span>What does the area under an \(\omega\)–\(t\) graph give?</p><div class="ans step">Angular displacement</div></div>
           <div class="q"><p><span class="n">06</span>What must be true for the four equations to apply?</p><div class="ans step">Constant angular acceleration</div></div>
         </div>
@@ -509,9 +526,6 @@
             <span class="say">\(m = 0.50 \,\mathrm{kg}\), \(I = 0.020 \,\mathrm{kg} \,\mathrm{m}^{2}\), \(r = 0.10 \,\mathrm{m}\)</span>
             <span class="step">Mass: \(mg - T = ma\)</span>
             <span class="step">Wheel: \(Tr = I \alpha\) &nbsp;with&nbsp; \(a = \alpha r\)</span>
-            <span class="step">\(a = \dfrac{mg}{m + \dfrac{I}{r^{2}}} = \dfrac{0.50 \times 9.8}{0.50 + 2.0}\)</span>
-            <span class="step">\(a = \class{res}{2.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
-            <span class="step">\(T = m(g - a) = \class{res}{3.9 \,\mathrm{N}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>A STRING WOUND ROUND THE RIM</span></div>
@@ -534,13 +548,39 @@
         </aside>
       </section>
 
+      <section class="slide hl" data-title="A falling mass turns a wheel">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>A falling mass turns a wheel<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say">\(m = 0.50 \,\mathrm{kg}\), \(I = 0.020 \,\mathrm{kg} \,\mathrm{m}^{2}\), \(r = 0.10 \,\mathrm{m}\)</span>
+            <span class="step">\(a = \dfrac{mg}{m + \dfrac{I}{r^{2}}} = \dfrac{0.50 \times 9.8}{0.50 + 2.0}\)</span>
+            <span class="step">\(a = \class{res}{2.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="step">\(T = m(g - a) = \class{res}{3.9 \,\mathrm{N}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A STRING WOUND ROUND THE RIM</span></div>
+            <div class="fig" data-fig="a4-falling"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS, HL ONLY</span><span data-page></span></div>
+      </section>
+
       <section class="slide hl" data-title="Quick check: moment of inertia">
         <p class="eyebrow">Quick check</p>
         <h2>Moment of inertia<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A 3.0 kg point mass is 2.0 m from an axis. Moment of inertia?</p><div class="ans step">12 kg m²</div></div>
           <div class="q"><p><span class="n">02</span>It is moved to 1.0 m. Moment of inertia now?</p><div class="ans step">3.0 kg m²: a quarter</div></div>
           <div class="q"><p><span class="n">03</span>Which has the larger \(I\): a hoop or a disk of the same mass and radius?</p><div class="ans step">The hoop</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: moment of inertia">
+        <p class="eyebrow">Quick check</p>
+        <h2>Moment of inertia<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A torque of 8.0 N m acts on \(I\) = 2.0 kg m². Angular acceleration?</p><div class="ans step">4.0 rad s⁻²</div></div>
           <div class="q"><p><span class="n">05</span>What is the unit of moment of inertia?</p><div class="ans step">kg m²</div></div>
           <div class="q"><p><span class="n">06</span>What links \(a\) and \(\alpha\) for a string round a wheel of radius \(r\)?</p><div class="ans step">\(a = \alpha r\)</div></div>
@@ -780,7 +820,7 @@
 
       <section class="slide hl" data-title="Linear and rotational">
         <h2>Linear and rotational<span>.</span></h2>
-        <table class="facts compare">
+        <table class="facts compare snug">
           <thead><tr><th></th><th>Linear</th><th>Rotational</th></tr></thead>
           <tbody>
             <tr><td><b>Position, velocity, acceleration</b></td><td>\(s\), \(v\), \(a\)</td><td>\(\theta\), \(\omega\), \(\alpha\)</td></tr>
@@ -797,12 +837,20 @@
       <section class="slide hl" data-title="Quick check: angular momentum and energy">
         <p class="eyebrow">Quick check</p>
         <h2>Angular momentum and energy<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>\(I\) = 0.50 kg m², \(\omega\) = 6.0 rad s⁻¹. Angular momentum?</p><div class="ans step">3.0 kg m² s⁻¹</div></div>
           <div class="q"><p><span class="n">02</span>When is angular momentum conserved?</p><div class="ans step">No resultant external torque</div></div>
           <div class="q"><p><span class="n">03</span>A spinning star shrinks to half its moment of inertia. Its angular velocity?</p><div class="ans step">It doubles</div></div>
-          <div class="q"><p><span class="n">04</span>And its rotational kinetic energy?</p><div class="ans step">It doubles: \(\frac{L^{2}}{2I}\)</div></div>
-          <div class="q"><p><span class="n">05</span>Rotational kinetic energy for \(I\) = 0.50 kg m² at 6.0 rad s⁻¹?</p><div class="ans step">\(\frac{1}{2} \times 0.50 \times 6.0^{2} = 9.0 \,\mathrm{J}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: angular momentum and energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Angular momentum and energy<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>And its rotational kinetic energy?</p><div class="ans step">It doubles: \(\dfrac{L^{2}}{2I}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Rotational kinetic energy for \(I\) = 0.50 kg m² at 6.0 rad s⁻¹?</p><div class="ans step">\(\dfrac{1}{2} \times 0.50 \times 6.0^{2} = 9.0 \,\mathrm{J}\)</div></div>
           <div class="q"><p><span class="n">06</span>Which reaches the bottom of a slope first: a rolling hoop or a rolling solid sphere?</p><div class="ans step">The sphere</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>

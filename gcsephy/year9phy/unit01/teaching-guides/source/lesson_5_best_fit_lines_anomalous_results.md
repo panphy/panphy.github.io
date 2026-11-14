@@ -162,7 +162,7 @@ Students are given a printed line graph with mistakes. They must identify and co
 
 ## Using the workbook
 
-The Quick check (slide 42) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 44) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 

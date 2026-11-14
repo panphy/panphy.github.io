@@ -120,7 +120,7 @@
           yt: { q: "A 900 kg car moves at 20 m/s. Calculate the energy in its kinetic store.", steps: [["Equation", R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`], ["Substitute", R`\(E_k = 0.5 \times 900 \times 20^2\)`], ["Answer", R`\(E_k = 180\,000\) J`]] } },
         { t: "sub", h: "Mass in grams? Convert first" },
         { t: "p", h: R`The mass must be in kilograms. Divide grams by 1000. For example, \(600\ \text{g} = 0.600\ \text{kg}\).` },
-        { t: "follow", slide: 12, q: "A 450 g football is kicked at 20 m/s. Calculate the energy in its kinetic store.", steps: [["Convert", R`\(m = 450\ \text{g} = 0.450\ \text{kg}\)`], ["Equation", R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`], ["Substitute", R`\(E_k = 0.5 \times 0.450 \times 20^2\)`], ["Answer", R`\(E_k = 90\) J`]],
+        { t: "follow", slide: 13, q: "A 450 g football is kicked at 20 m/s. Calculate the energy in its kinetic store.", steps: [["Convert", R`\(m = 450\ \text{g} = 0.450\ \text{kg}\)`], ["Equation", R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`], ["Substitute", R`\(E_k = 0.5 \times 0.450 \times 20^2\)`], ["Answer", R`\(E_k = 90\) J`]],
           yt: { q: "A 300 g ball is thrown at 12 m/s. Calculate the energy in its kinetic store.", steps: [["Convert", R`\(m = 300\ \text{g} = 0.300\ \text{kg}\)`], ["Equation", R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`], ["Substitute", R`\(E_k = 0.5 \times 0.300 \times 12^2\)`], ["Answer", R`\(E_k = 21.6\) J`]] } },
         { t: "sub", h: "Double the speed, four times the energy" },
         { t: "compare", head: ["Speed of a 1200 kg car", R`\(v^2\)`, R`\(E_k\)`], rows: [["15 m/s", "225", "135 000 J"], ["30 m/s (2 × faster)", "900", "540 000 J (4 × more)"], ["45 m/s (3 × faster)", "2025", "1 215 000 J (9 × more)"]] },
@@ -151,7 +151,7 @@
         { tip: "Write the equation, then substitute, then give the answer with its unit.", p: "A cyclist and bike have a total mass of 70 kg and move at 8.0 m/s. Calculate the energy in their kinetic store.", marks: 2, frame: frame3, frameA: [R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 70 \times 8.0^2\) (1)`, "2240 J (1)"] },
         { p: R`Car A and car B have the same mass. Car B moves twice as fast as car A. Complete the sentence.`, marks: 2, fill: R`Car B has [[4|2 / 4 / 8]] times as much energy in its kinetic store as car A, because in the equation the speed is {{halved|squared*|doubled}}.` },
       ],
-      quick: { slide: 15, items: [
+      quick: { slide: 16, items: [
         ["A 60 kg runner moves at 5.0 m/s. Calculate the energy in their kinetic store.", R`\(0.5 \times 60 \times 5.0^2 = 750\) J`],
         ["Convert 250 g to kilograms.", "0.250 kg"],
         ["The speed doubles. What happens to the kinetic energy?", R`It is multiplied by 4 (\(\times 4\)).`],

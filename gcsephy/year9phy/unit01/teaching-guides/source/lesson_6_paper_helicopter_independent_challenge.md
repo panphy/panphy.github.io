@@ -166,7 +166,7 @@ Students write a short evaluation of their investigation, including:
 
 ## Using the workbook
 
-The Quick check (slide 49) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 52) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 

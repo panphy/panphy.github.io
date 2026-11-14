@@ -50,7 +50,7 @@ window.DeckSvgTex = {
   // The practical diagrams set label sizes inline for small print;
   // enlarge them so they read from the back of a room.
   const bigger = (markup, k) => markup.replace(/(font:\s*\d+ )(\d+(?:\.\d+)?)px/g, (m, pre, px) => `${pre}${Math.round(px * k * 10) / 10}px`);
-  // Lattice geometry for the slide 21 simulation (panel-local units).
+  // Lattice geometry for the slide 22 simulation (panel-local units).
   // The panel is one repeating tile of the lattice: electrons leaving one edge
   // come back in at the opposite edge, so there are no walls.
   const LAT = { top: 56, w: 230, h: 156, ionR: 10, eR: 5, rows: [0, 52, 104], cols: [23, 69, 115, 161, 207] };
@@ -252,7 +252,7 @@ window.DeckSvgTex = {
     }
   };
 
-  // Slide 21 model, in panel units. Electrons move at a steady speed; the p.d.
+  // Slide 22 model, in panel units. Electrons move at a steady speed; the p.d.
   // gradually turns them towards +x. Hitting an ion bounces them off it (in the
   // ion's frame), then their speed settles back to normal as energy is handed
   // to the lattice. Ions vibrate about fixed sites, slowed

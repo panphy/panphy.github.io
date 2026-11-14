@@ -22,6 +22,7 @@
   <script src="/assets/theme-toggle.js"></script>
   <script src="/gcsephy/sw-register.js" defer></script>
   <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <script src="../assets/deck-math.js"></script>
 </head>
 <body data-deck-key="particle-model" data-deck-title="Particle Model of Matter">
@@ -125,7 +126,7 @@
           <tbody>
             <tr><th>Arrangement</th><td>Very close together, <b>regular pattern</b></td><td>Close together, <b>random</b></td><td><b>Far apart</b>, random</td></tr>
             <tr><th>Motion</th><td><b>Vibrate</b> about fixed positions</td><td>Move around, <b>slide past</b> each other</td><td>Move <b>quickly</b> in all directions</td></tr>
-            <tr><th>Shape</th><td>Fixed</td><td>Takes the shape of its container</td><td>Fills its container</td></tr>
+            <tr><th>Shape</th><td>Fixed</td><td>Takes the container’s shape</td><td>Fills its container</td></tr>
             <tr><th>Squash it?</th><td>No</td><td>No</td><td class="step">Yes: empty space between particles</td></tr>
           </tbody>
         </table>
@@ -150,10 +151,10 @@
           <div class="col center">
             <ul class="points small">
               <li><b>Boiling</b>: at the boiling point, all through the liquid</li>
-              <li><b>Evaporating</b>: at any temperature, from the surface</li>
-              <li><b>Sublimating</b>: solid straight to gas</li>
+              <li><b>Evaporating</b>: any temperature, surface only</li>
+              <li><b>Sublimating</b>: solid \(\rightarrow\) gas</li>
             </ul>
-            <div class="remember">Orange arrows: heated. Blue arrows: cooled.</div>
+            <div class="remember">Orange: heated. Blue: cooled.</div>
           </div>
           <div class="panel"><div class="fig" data-fig="changes"></div></div>
         </div>
@@ -174,7 +175,7 @@
         <div class="split even top">
           <div class="col">
             <ul class="points">
-              <li>No particles <b>added</b>, none <b>taken away</b></li>
+              <li>No particles <b>added</b> or <b>taken away</b></li>
               <li>Same particles, <b>rearranged</b></li>
               <li class="step">50 g of ice → <b>50 g</b> of water → <b>50 g</b> of steam</li>
             </ul>
@@ -182,7 +183,7 @@
           <div class="col">
             <div class="mistakes">
               <div class="mistake"><p class="wrong">“A new substance is made.”</p><p class="right">Physical change: <b>no new substance</b>.</p></div>
-              <div class="mistake step"><p class="wrong">“It cannot be undone.”</p><p class="right">Reverse it and the material <b>recovers its original properties</b>.</p></div>
+              <div class="mistake step"><p class="wrong">“It cannot be undone.”</p><p class="right">Reverse it: the <b>original properties</b> return.</p></div>
             </div>
           </div>
         </div>
@@ -238,9 +239,9 @@
         <div class="split">
           <ol class="steps">
             <li>Molecules <b>collide</b> with the walls</li>
-            <li>Each collision gives the wall a small <b>force</b></li>
-            <li>Billions of collisions every second</li>
-            <li>Together: a steady force on each square metre, the <b>pressure</b></li>
+            <li>Each collision: a small <b>force</b> on the wall</li>
+            <li>Billions of collisions each second</li>
+            <li>Steady force per square metre \(=\) <b>pressure</b></li>
           </ol>
           <div class="panel"><div class="fig" data-fig="gasBox"></div></div>
         </div>
@@ -261,11 +262,11 @@
       <section class="slide a-hot" data-title="Heating a gas at constant volume">
         <p class="eyebrow"><span class="num">02</span></p>
         <h2>Heat a <em>sealed</em> gas</h2>
-        <div class="split even">
+        <div class="split wide-fig">
           <ol class="chain">
-            <li>Gas heated: molecules gain <b>kinetic energy</b>, move <b>faster</b></li>
-            <li class="step">They hit the walls <b>more often</b></li>
-            <li class="step">Each collision has a <b>bigger force</b></li>
+            <li>Heated: more <b>kinetic energy</b> \(\Rightarrow\) <b>faster</b></li>
+            <li class="step">Hit the walls <b>more often</b></li>
+            <li class="step">Each collision: a <b>bigger force</b></li>
             <li class="step">The <b>pressure increases</b></li>
           </ol>
           <div class="panel"><div class="fig" data-fig="gasPair"></div></div>
@@ -288,10 +289,10 @@
         <p class="eyebrow"><span class="num">01–02</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>Particles close together, random arrangement. Which state?</p><div class="ans step">Liquid</div></div>
-          <div class="q"><p><span class="n">2</span>How do the particles in a solid move?</p><div class="ans step">They vibrate about fixed positions</div></div>
+          <div class="q"><p><span class="n">1</span>Close together, random arrangement. Which state?</p><div class="ans step">Liquid</div></div>
+          <div class="q"><p><span class="n">2</span>How do the particles in a solid move?</p><div class="ans step">Vibrate about fixed positions</div></div>
           <div class="q"><p><span class="n">3</span>Gas to liquid: name the change.</p><div class="ans step">Condensing</div></div>
-          <div class="q"><p><span class="n">4</span>80 g of wax melts. Mass of liquid wax?</p><div class="ans step">80 g: same number of particles</div></div>
+          <div class="q"><p><span class="n">4</span>80 g of wax melts. Mass of liquid wax?</p><div class="ans step">80 g: same particles</div></div>
           <div class="q"><p><span class="n">5</span>What causes gas pressure?</p><div class="ans step">Molecules colliding with the walls</div></div>
           <div class="q"><p><span class="n">6</span>A sealed can of gas is cooled. Pressure?</p><div class="ans step">Decreases: slower molecules</div></div>
         </div>
@@ -326,7 +327,7 @@
           </div>
           <div class="col">
             <div class="worked">
-              <div class="wq"><span>Example</span>5400 kg of aluminium has a volume of 2.0 m³</div>
+              <div class="wq"><span>Example</span>5400 kg of aluminium, volume 2.0 m³</div>
               <dl>
                 <div class="step"><dt>Equation</dt><dd>\(\rho = \dfrac{m}{V}\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(\rho = \dfrac{5400}{2.0}\)</dd></div>
@@ -352,12 +353,12 @@
       <section class="slide a-hi" data-title="Density and the particle model">
         <p class="eyebrow"><span class="num">03</span></p>
         <h2>Why gases are <em>so light</em></h2>
-        <div class="split third">
+        <div class="split wide-fig">
           <div class="col">
             <ul class="points small">
-              <li>Solid and liquid: particles <b>close together</b> → high density</li>
-              <li>Gas: particles <b>far apart</b> → very low density</li>
-              <li class="step">Water is about <b>800 times</b> denser than air</li>
+              <li>Solid, liquid: <b>close together</b> \(\Rightarrow\) high density</li>
+              <li>Gas: <b>far apart</b> \(\Rightarrow\) very low density</li>
+              <li class="step">Water \(\approx\) <b>800 \(\times\)</b> denser than air</li>
             </ul>
           </div>
           <div class="panel"><div class="fig" data-fig="states"></div></div>
@@ -488,8 +489,8 @@
         <p class="eyebrow"><span class="num">RP</span> Density: Part B</p>
         <h2>An <em>irregular</em> solid</h2>
         <div class="pair">
-          <div><div class="fig" data-fig="displacement"></div><p>Volume of stone = rise in the water level</p></div>
-          <div><div class="fig" data-fig="eureka"></div><p>Too big for the cylinder: catch the water it pushes out</p></div>
+          <div><div class="fig" data-fig="displacement"></div><p>Volume of stone = rise in water level</p></div>
+          <div><div class="fig" data-fig="eureka"></div><p>Too big? Catch the water pushed out</p></div>
         </div>
         <div class="slide-foot"><span class="tag">Required practical: Density</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -537,11 +538,11 @@
             <li>Read at <b>eye level</b>, at the <b>bottom of the meniscus</b></li>
             <li>Balance reads <b>zero</b> before you start</li>
             <li>Mass <b>before</b> the object gets wet</li>
-            <li>No splashes; no <b>air bubbles</b> on the object</li>
+            <li>No splashes, no <b>air bubbles</b></li>
             <li><b>Narrow</b> cylinder: scale lines further apart</li>
           </ul>
           <div class="mistakes">
-            <div class="mistake"><p class="wrong">“The volume of the stone is 68 cm³.”</p><p class="right">It is the <b>change</b>: 68 − 50 = 18 cm³.</p></div>
+            <div class="mistake"><p class="wrong">“The volume of the stone is 68 cm³.”</p><p class="right">The <b>change</b>: 68 − 50 = 18 cm³.</p></div>
             <div class="mistake step"><p class="wrong">“Human error.”</p><p class="right">“An air bubble made the volume too big, so the density came out too small.”</p></div>
           </div>
         </div>
@@ -559,11 +560,19 @@
       <section class="slide a-alt" data-title="Quick check: Lessons 3–4">
         <p class="eyebrow"><span class="num">03–04</span> Checkpoint</p>
         <h2>Quick check</h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">1</span>150 g, 60 cm³. Density?</p><div class="ans step"><span class="equation-inline">\(\rho = \dfrac{150}{60} = 2.5\)&nbsp;g/cm³</span></div></div>
           <div class="q"><p><span class="n">2</span>2.5 g/cm³ in kg/m³?</p><div class="ans step">2500 kg/m³</div></div>
-          <div class="q"><p><span class="n">3</span>Density 800 kg/m³, volume 0.50 m³. Mass?</p><div class="ans step"><span class="equation-inline">\(m = 800 \times 0.50 = 400\)&nbsp;kg</span></div></div>
-          <div class="q"><p><span class="n">4</span>Why is a gas much less dense than a liquid?</p><div class="ans step">Particles far apart: less mass in each cm³</div></div>
+          <div class="q"><p><span class="n">3</span>800 kg/m³, 0.50 m³. Mass?</p><div class="ans step"><span class="equation-inline">\(m = 800 \times 0.50 = 400\)&nbsp;kg</span></div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-alt" data-title="Quick check: Lessons 3–4">
+        <p class="eyebrow"><span class="num">03–04</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">4</span>Why is a gas far less dense than a liquid?</p><div class="ans step">Particles far apart: less mass per cm³</div></div>
           <div class="q"><p><span class="n">5</span>Water level 40 → 55 cm³. Volume of object?</p><div class="ans step">15 cm³</div></div>
           <div class="q"><p><span class="n">6</span>Where do you read a meniscus?</p><div class="ans step">The bottom, at eye level</div></div>
         </div>
@@ -597,9 +606,9 @@
           </div>
           <div class="col">
             <ul class="points">
-              <li><b>Kinetic</b>: the particles are moving or vibrating</li>
-              <li><b>Potential</b>: depends on how far apart the particles are</li>
-              <li class="step">Heating → particles gain energy → internal energy <b>increases</b></li>
+              <li><b>Kinetic</b>: particles move or vibrate</li>
+              <li><b>Potential</b>: depends on particle spacing</li>
+              <li class="step">Heating: particles gain energy \(\Rightarrow\) internal energy <b>increases</b></li>
             </ul>
           </div>
         </div>
@@ -673,8 +682,8 @@
           <div class="col">
             <ul class="points small">
               <li>Liquid cools: particles <b>slow down</b></li>
-              <li class="step">Flat: <b>freezing</b>. Potential energy falls</li>
-              <li class="step">Energy still leaves, temperature <b>constant</b></li>
+              <li class="step">Flat: <b>freezing</b>. <span class="nowrap">Potential energy \(\downarrow\)</span></li>
+              <li class="step">Energy still leaves; temperature <b>constant</b></li>
               <li class="step">Then the solid cools</li>
             </ul>
           </div>
@@ -719,8 +728,8 @@
           <div class="col">
             <ul class="points">
               <li><b>Latent</b> means hidden</li>
-              <li>Energy goes in; a thermometer shows <b>no change</b></li>
-              <li class="step">Internal energy still <b>increases</b>: potential energy of the particles</li>
+              <li>Energy in; the thermometer shows <b>no change</b></li>
+              <li class="step">Internal energy still <b>increases</b>: potential energy</li>
             </ul>
           </div>
         </div>
@@ -745,20 +754,21 @@
           <div class="col">
             <div class="eq-block"><span class="eq">\(E = m\,L\)</span><span class="eq-words">\(\text{energy} = \text{mass} \times \text{specific latent heat}\)</span><span class="eq-units">\(E\) in J, \(m\) in kg, \(L\) in J/kg</span></div>
             <div class="worked">
-              <div class="wq"><span>Example 2</span>90 000 J melts wax. \(L = 150\,000\) J/kg. Mass?</div>
-              <dl>
-                <div class="step" data-step-order="2"><dt>Rearrange</dt><dd>\(E = m\,L\), so \(m = \dfrac{E}{L}\)</dd></div>
-                <div class="step" data-step-order="2"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(m = \dfrac{90\,000}{150\,000} = 0.60\)&nbsp;kg</span></dd></div>
-              </dl>
-            </div>
-          </div>
-          <div class="col">
-            <div class="worked">
               <div class="wq"><span>Example 1</span>Melt 0.50 kg of ice. \(L = 334\,000\) J/kg</div>
               <dl>
                 <div class="step"><dt>Equation</dt><dd>\(E = m\,L\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(E = 0.50 \times 334\,000\)</dd></div>
                 <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(E = 167\,000\)&nbsp;J</span></dd></div>
+              </dl>
+            </div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>90 000 J melts wax. \(L = 150\,000\) J/kg. Mass?</div>
+              <dl>
+                <div class="step" data-step-order="2"><dt>Rearrange</dt><dd>\(m = \dfrac{E}{L}\)</dd></div>
+                <div class="step" data-step-order="2"><dt>Substitute</dt><dd>\(m = \dfrac{90\,000}{150\,000}\)</dd></div>
+                <div class="step" data-step-order="2"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(m = 0.60\)&nbsp;kg</span></dd></div>
               </dl>
             </div>
           </div>
@@ -830,12 +840,12 @@
         <p class="eyebrow"><span class="num">05–06</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>Internal energy is the total of which two energies?</p><div class="ans step">Kinetic and potential energy of the particles</div></div>
-          <div class="q"><p><span class="n">2</span>What does a flat section of a heating graph show?</p><div class="ans step">A change of state</div></div>
-          <div class="q"><p><span class="n">3</span>Which energy increases while ice melts?</p><div class="ans step">Potential energy of the particles</div></div>
+          <div class="q"><p><span class="n">1</span>Internal energy: the total of which two energies?</p><div class="ans step">Kinetic + potential energy of the particles</div></div>
+          <div class="q"><p><span class="n">2</span>A flat section of a heating graph shows?</p><div class="ans step">A change of state</div></div>
+          <div class="q"><p><span class="n">3</span>Which energy increases as ice melts?</p><div class="ans step">Potential energy of the particles</div></div>
           <div class="q"><p><span class="n">4</span>Unit of specific latent heat?</p><div class="ans step">J/kg</div></div>
           <div class="q"><p><span class="n">5</span>Melt 2.0 kg of ice. \(L = 334\,000\) J/kg</p><div class="ans step"><span class="equation-inline">\(E = 2.0 \times 334\,000 = 668\,000\)&nbsp;J</span></div></div>
-          <div class="q"><p><span class="n">6</span>Liquid to vapour: fusion or vaporisation?</p><div class="ans step">Vaporisation</div></div>
+          <div class="q"><p><span class="n">6</span>Liquid \(\rightarrow\) vapour: fusion or vaporisation?</p><div class="ans step">Vaporisation</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
@@ -864,8 +874,8 @@
         <div class="split even top">
           <div class="col">
             <ul class="points">
-              <li><b>Energy</b> transferred: more energy, bigger rise</li>
-              <li><b>Mass</b>: more mass, smaller rise</li>
+              <li><b>Energy</b> \(\uparrow \Rightarrow\) bigger rise</li>
+              <li><b>Mass</b> \(\uparrow \Rightarrow\) smaller rise</li>
               <li><b>Material</b>: some are harder to heat</li>
             </ul>
             <div class="eq-block step"><span class="eq" style="font-size:40px">specific heat capacity</span><span class="eq-words">the energy needed to raise the temperature of <b>1 kg</b> of a substance by <b>1 °C</b></span><span class="eq-units">Unit: J/kg °C</span></div>
@@ -899,14 +909,14 @@
       <section class="slide a-hot" data-title="ΔE = m c Δθ">
         <p class="eyebrow"><span class="num">07</span> Know and apply</p>
         <h2>Change in <em>thermal energy</em></h2>
-        <div class="split even top">
+        <div class="split even top" style="grid-template-columns: .9fr 1.1fr;">
           <div class="col">
             <div class="eq-block"><span class="eq">\(\Delta E = m\,c\,\Delta\theta\)</span><span class="eq-words">energy = mass × specific heat capacity × temperature change</span><span class="eq-units">\(\Delta E\) in J, \(m\) in kg, \(c\) in J/kg °C, \(\Delta\theta\) in °C</span></div>
-            <div class="remember">\(\Delta\theta\) = <b>change</b> in temperature. Work it out first</div>
+            <div class="remember">\(\Delta\theta\) = temperature <b>change</b>: find it first</div>
           </div>
           <div class="col">
             <div class="worked">
-              <div class="wq"><span>Example</span>Heat 2.0 kg of water from 20 °C to 100 °C. \(c = 4200\) J/kg °C</div>
+              <div class="wq"><span>Example</span>2.0 kg of water, 20 °C to 100 °C. \(c = 4200\) J/kg °C</div>
               <dl>
                 <div class="step"><dt>Change</dt><dd><span class="equation-inline">\(\Delta\theta = 100 - 20 = 80\)&nbsp;°C</span></dd></div>
                 <div class="step"><dt>Equation</dt><dd>\(\Delta E = m\,c\,\Delta\theta\)</dd></div>
@@ -1036,7 +1046,7 @@
         <div class="split third">
           <div class="col">
             <ul class="points small tight">
-              <li>1.00 kg of aluminium, 12.0 V, 4.0 A, 600 s</li>
+              <li>1.00 kg aluminium, 12.0 V, 4.0 A, 600 s</li>
               <li><span class="equation-inline">\(E = V\,I\,t = 28\,800\)&nbsp;J</span></li>
               <li><span class="equation-inline">\(\Delta\theta = 49.0 - 20.0 = 29.0\)&nbsp;°C</span></li>
               <li class="step">\(c = \dfrac{\Delta E}{m\,\Delta\theta} = \dfrac{28\,800}{1.00 \times 29.0}\)</li>
@@ -1062,13 +1072,13 @@
         <h2>Why is it <em>too high</em>?</h2>
         <div class="split even top">
           <ol class="chain">
-            <li>Some energy goes to the <b>surroundings</b>, not the block</li>
-            <li class="step">The temperature rise is <b>smaller</b> than it should be</li>
-            <li class="step">Dividing by a smaller \(\Delta\theta\) gives a <b>bigger</b> \(c\)</li>
+            <li>Some energy \(\rightarrow\) <b>surroundings</b>, not the block</li>
+            <li class="step">Temperature rise <b>smaller</b> than it should be</li>
+            <li class="step">Smaller \(\Delta\theta \Rightarrow\) <b>bigger</b> \(c\)</li>
           </ol>
           <div class="col">
             <ul class="points small">
-              <li><b>Insulate</b> the block: sides, top, underneath</li>
+              <li><b>Insulate</b> the block: sides, top, bottom</li>
               <li>Drop of <b>oil</b> in the thermometer hole</li>
               <li>Record the <b>highest</b> temperature after switching off</li>
             </ul>
@@ -1094,10 +1104,10 @@
         <div class="quiz fill">
           <div class="q"><p><span class="n">1</span>Unit of specific heat capacity?</p><div class="ans step">J/kg °C</div></div>
           <div class="q"><p><span class="n">2</span>Water goes from 15 °C to 95 °C. \(\Delta\theta\)?</p><div class="ans step">80 °C</div></div>
-          <div class="q"><p><span class="n">3</span>3.0 kg of iron, \(c = 450\) J/kg °C, rise of 50 °C. Energy?</p><div class="ans step"><span class="equation-inline">\(3.0 \times 450 \times 50 = 67\,500\)&nbsp;J</span></div></div>
+          <div class="q"><p><span class="n">3</span>3.0 kg iron, \(c = 450\) J/kg °C, rise 50 °C. Energy?</p><div class="ans step"><span class="equation-inline">\(3.0 \times 450 \times 50 = 67\,500\)&nbsp;J</span></div></div>
           <div class="q"><p><span class="n">4</span>12 V, 3.0 A for 300 s. Energy supplied?</p><div class="ans step"><span class="equation-inline">\(E = V\,I\,t = 10\,800\)&nbsp;J</span></div></div>
-          <div class="q"><p><span class="n">5</span>Why insulate the block?</p><div class="ans step">Less energy transferred to the surroundings</div></div>
-          <div class="q"><p><span class="n">6</span>Ice melting at 0 °C: \(c\) or \(L\)?</p><div class="ans step">\(L\): the state changes, not the temperature</div></div>
+          <div class="q"><p><span class="n">5</span>Why insulate the block?</p><div class="ans step">Less energy lost to the surroundings</div></div>
+          <div class="q"><p><span class="n">6</span>Ice melting at 0 °C: \(c\) or \(L\)?</p><div class="ans step">\(L\): state changes, not temperature</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
@@ -1234,12 +1244,12 @@
       <section class="slide a-violet triple" data-title="Doing work on a gas">
         <p class="eyebrow"><span class="num">+</span> Squash it quickly</p>
         <h2>Doing <em>work</em> on a gas</h2>
-        <div class="split even">
+        <div class="split wide-fig">
           <ol class="chain">
-            <li>A <b>force</b> pushes the piston in: <b>work</b> is done on the gas</li>
-            <li class="step">Energy is transferred to the gas</li>
-            <li class="step">Its <b>internal energy</b> increases</li>
-            <li class="step">Its <b>temperature</b> rises</li>
+            <li>A <b>force</b> pushes the piston in: <b>work</b> done on the gas</li>
+            <li class="step">Energy transferred to the gas</li>
+            <li class="step"><b>Internal energy</b> increases</li>
+            <li class="step"><b>Temperature</b> rises</li>
           </ol>
           <div class="panel"><div class="fig" data-fig="pump"></div></div>
         </div>
@@ -1260,12 +1270,12 @@
         <p class="eyebrow"><span class="num">+</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>Direction of the force of a gas on a wall?</p><div class="ans step">At right angles to the wall</div></div>
-          <div class="q"><p><span class="n">2</span>Volume doubled at constant temperature. Pressure?</p><div class="ans step">Halved</div></div>
-          <div class="q"><p><span class="n">3</span>200 kPa, 0.50 m³ expands to 2.0 m³. Pressure?</p><div class="ans step"><span class="equation-inline">\(p_2 = \dfrac{200 \times 0.50}{2.0} = 50\)&nbsp;kPa</span></div></div>
+          <div class="q"><p><span class="n">1</span>Direction of a gas’s force on a wall?</p><div class="ans step">At right angles to the wall</div></div>
+          <div class="q"><p><span class="n">2</span>Volume \(\times 2\), constant temperature. Pressure?</p><div class="ans step">Halved</div></div>
+          <div class="q"><p><span class="n">3</span>200 kPa, 0.50 m³ \(\rightarrow\) 2.0 m³. Pressure?</p><div class="ans step"><span class="equation-inline">\(p_2 = \dfrac{200 \times 0.50}{2.0} = 50\)&nbsp;kPa</span></div></div>
           <div class="q"><p><span class="n">4</span>Two conditions for \(p\,V = \text{constant}\)?</p><div class="ans step">Fixed mass, constant temperature</div></div>
           <div class="q"><p><span class="n">5</span>What is work?</p><div class="ans step">Energy transferred by a force</div></div>
-          <div class="q"><p><span class="n">6</span>Work is done on a gas. Its internal energy?</p><div class="ans step">Increases, so it can get hotter</div></div>
+          <div class="q"><p><span class="n">6</span>Work done on a gas. Internal energy?</p><div class="ans step">Increases: it can get hotter</div></div>
         </div>
         <div class="slide-foot"><span></span><span data-page></span></div>
       </section>

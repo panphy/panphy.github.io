@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -63,19 +64,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="e4-curve" data-still style="height: 220px;"></div>
+            <div class="fig" data-fig="e4-curve" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Fission and its energy</h3>
             <p>What happens, why energy is released, and how much</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="e4-chain" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="e4-chain" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Chain reactions and reactors</h3>
             <p>Moderator, control rods, heat exchanger and shielding</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="e4-waste" data-still style="height: 220px;"></div>
+            <div class="fig" data-fig="e4-waste" data-still style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>The products of fission</h3>
             <p>What is left behind, and how it is managed</p>
@@ -187,7 +188,7 @@
               <li class="step">Uranium: about <b>7.6 MeV</b> per nucleon</li>
               <li class="step">The fragments: about <b>8.4 MeV</b> per nucleon</li>
             </ul>
-            <div class="idea step">The difference in binding energy is released.</div>
+            <div class="idea step">The difference is released</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>MOVING UP THE CURVE</span></div>
@@ -252,7 +253,7 @@
       <section class="slide" data-title="Energy from the mass defect">
         <p class="eyebrow">Worked example: second method</p>
         <h2>Energy released, from masses<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the energy released in the same fission from the masses. \(1 \,\mathrm{u}\) is equivalent to \(931.5 \,\mathrm{MeV}\).</span>
             <span class="say">Masses / u</span>
@@ -261,12 +262,6 @@
             <span class="step">Before: \(235.043930 + 1.008665 = 236.052595\)</span>
             <span class="step">After: \(140.914411 + 91.926156 + 3 \times 1.008665\)</span>
             <span class="step">\(= 235.866562\)</span>
-          </div>
-          <div class="work step">
-            <span>\(\Delta m = 235.866562 - 236.052595\)</span>
-            <span class="step">\(\Delta m = -0.186033 \,\mathrm{u}\)</span>
-            <span class="step">\(E_\mathrm{released} = -\Delta m\,c^{2}\)</span>
-            <span class="step">\(E_\mathrm{released} = -(-0.186033) \times 931.5 = \class{res}{173 \,\mathrm{MeV}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
@@ -284,6 +279,20 @@
             <p class="trap">Forgetting that one neutron goes in and three come out. Count all the particles on both sides.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Energy from the mass defect">
+        <p class="eyebrow">Worked example: second method, continued</p>
+        <h2>Energy released, from masses<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span>\(\Delta m = 235.866562 - 236.052595\)</span>
+            <span class="step">\(\Delta m = -0.186033 \,\mathrm{u}\)</span>
+            <span class="step">\(E_\mathrm{released} = -\Delta m\,c^{2}\)</span>
+            <span class="step">\(E_\mathrm{released} = -(-0.186033) \times 931.5 = \class{res}{173 \,\mathrm{MeV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Energy from a kilogram of fuel">
@@ -323,15 +332,23 @@
       <section class="slide" data-title="Quick check: fission and its energy">
         <p class="eyebrow">Quick check</p>
         <h2>Fission and its energy<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What is the difference between spontaneous and induced fission?</p><div class="ans step">Induced fission first absorbs a neutron</div></div>
           <div class="q"><p><span class="n">02</span>n + \({}^{235}\mathrm{U}\) → \({}^{144}\mathrm{Ba}\) + \({}^{89}\mathrm{Kr}\) + ? neutrons</p><div class="ans step">3 neutrons</div></div>
           <div class="q"><p><span class="n">03</span>Which is more tightly bound per nucleon: uranium or its fragments?</p><div class="ans step">The fragments</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: fission and its energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Fission and its energy<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>A mass defect of 0.20 u. Energy released?</p><div class="ans step">\(0.20 \times 931.5 = 186 \,\mathrm{MeV}\)</div></div>
           <div class="q"><p><span class="n">05</span>In what form is most of the energy released?</p><div class="ans step">Kinetic energy of the fragments</div></div>
           <div class="q"><p><span class="n">06</span>Why can a slow neutron enter a nucleus easily?</p><div class="ans step">It has no charge: no repulsion</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -413,12 +430,12 @@
           </div>
           <div class="stack">
             <ul class="points">
-              <li>A sphere of plutonium, <b>6.2 kg</b> and 8.9 cm across: just below the critical mass</li>
-              <li><b>21 August 1945</b>: Harry Daghlian dropped a tungsten carbide brick, a neutron reflector, beside it</li>
-              <li><b>21 May 1946</b>: Louis Slotin’s screwdriver slipped and a beryllium shell closed over it</li>
-              <li>Each time the core went <b>critical</b> for an instant. Both men died of radiation sickness</li>
+              <li>Plutonium sphere, <b>6.2 kg</b>: just below critical mass</li>
+              <li><b>21 August 1945</b>: Daghlian dropped a neutron-reflecting brick beside it</li>
+              <li><b>21 May 1946</b>: Slotin’s screwdriver slipped; a reflector shell closed over it</li>
+              <li>Both times: <b>critical</b> for an instant. Both men died</li>
             </ul>
-            <div class="idea">Nothing was added to the core. A reflector alone made it critical.</div>
+            <div class="idea">Nothing added: a reflector alone made it critical</div>
           </div>
         </div>
         <p class="credits">Photographs: re-creations by <a href="https://commons.wikimedia.org/wiki/File:Partially-reflected-plutonium-sphere.jpeg" target="_blank" rel="noopener">Los Alamos National Laboratory</a>, credit required, and <a href="https://commons.wikimedia.org/wiki/File:The_demon_core.jpg" target="_blank" rel="noopener">Los Alamos National Laboratory</a>, public domain.</p>
@@ -616,7 +633,7 @@
       <section class="slide" data-title="Fuel used by a power station">
         <p class="eyebrow">Worked example</p>
         <h2>The fuel used in a day<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">What mass of uranium-235 does the station use in a day?</span>
             <span class="say">1000 MW of electrical power, efficiency 33%</span>
@@ -624,13 +641,6 @@
             <span class="step">\(P_\mathrm{in} = \dfrac{P_\mathrm{out}}{\eta} = \dfrac{1.0 \times 10^{9}}{0.33} = 3.0 \times 10^{9} \,\mathrm{W}\)</span>
             <span class="step">Fissions per second \(= \dfrac{3.0 \times 10^{9}}{2.77 \times 10^{-11}}\)</span>
             <span class="step">\(= 1.1 \times 10^{20} \,\mathrm{s}^{-1}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">In one day: 86 400 s</span>
-            <span class="step">\(N = 1.1 \times 10^{20} \times 86\,400 = 9.5 \times 10^{24}\)</span>
-            <span class="step">\(m = N \times 235 \,\mathrm{u}\)</span>
-            <span class="step">\(m = 9.5 \times 10^{24} \times 235 \times 1.661 \times 10^{-27}\)</span>
-            <span class="step">\(m = \class{res}{3.7 \,\mathrm{kg}}\) of \({}^{235}\mathrm{U}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
@@ -645,6 +655,21 @@
             <p class="tip">The method: electrical power → thermal power (divide by the efficiency) → fissions per second (divide by the energy of one) → mass (multiply by the mass of one nucleus).</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Fuel used by a power station">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>The fuel used in a day<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">In one day: 86 400 s</span>
+            <span class="step">\(N = 1.1 \times 10^{20} \times 86\,400 = 9.5 \times 10^{24}\)</span>
+            <span class="step">\(m = N \times 235 \,\mathrm{u}\)</span>
+            <span class="step">\(m = 9.5 \times 10^{24} \times 235 \times 1.661 \times 10^{-27}\)</span>
+            <span class="step">\(m = \class{res}{3.7 \,\mathrm{kg}}\) of \({}^{235}\mathrm{U}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Quick check: chain reactions and reactors">
@@ -744,8 +769,8 @@
           <div class="q"><p>Spent fuel comes out still hot and highly radioactive. What do you do with it?</p></div>
           <div class="story band" style="--photo-h: 290px;">
             <div class="story-photos">
-              <figure class="step"><img src="images/fuel-pool.jpg" width="1280" height="876" alt="A large hall with a pool of clear blue-green water, a crane above it and workers in hard hats beside it"><figcaption><b>First, a cooling pond</b>: about 7 m of water over the fuel absorbs radiation and carries the heat away</figcaption></figure>
-              <figure class="step"><img src="images/dry-casks.jpg" width="1280" height="893" alt="A row of tall concrete storage casks with two workers beside them, and a cutaway drawing showing fuel inside a cask"><figcaption><b>After a few years, dry casks</b>: steel and concrete, cooled by air, kept on site for decades</figcaption></figure>
+              <figure class="step"><img src="images/fuel-pool.jpg" width="1280" height="876" alt="A large hall with a pool of clear blue-green water, a crane above it and workers in hard hats beside it"><figcaption><b>First, a cooling pond</b>: 7 m of water absorbs radiation and heat</figcaption></figure>
+              <figure class="step"><img src="images/dry-casks.jpg" width="1280" height="893" alt="A row of tall concrete storage casks with two workers beside them, and a cutaway drawing showing fuel inside a cask"><figcaption><b>Later, dry casks</b>: steel and concrete, air-cooled, for decades</figcaption></figure>
             </div>
           </div>
           <div class="idea step">Finally: burial deep underground, as at Onkalo.</div>
@@ -823,7 +848,7 @@
           <div class="q"><p><span class="n">01</span>Why are fission fragments radioactive?</p><div class="ans step">Too many neutrons for their size</div></div>
           <div class="q"><p><span class="n">02</span>Which decay do they mostly undergo?</p><div class="ans step">Beta-minus</div></div>
           <div class="q"><p><span class="n">03</span>Why is spent fuel first stored under water?</p><div class="ans step">To absorb radiation and remove heat</div></div>
-          <div class="q"><p><span class="n">04</span>Strontium-90 has a half-life of 29 years. Fraction left after 87 years?</p><div class="ans step">\(\frac{1}{8}\)</div></div>
+          <div class="q"><p><span class="n">04</span>Strontium-90 has a half-life of 29 years. Fraction left after 87 years?</p><div class="ans step">\(\dfrac{1}{8}\)</div></div>
           <div class="q"><p><span class="n">05</span>Why is plutonium a long-term problem?</p><div class="ans step">Its half-life is 24 000 years</div></div>
           <div class="q"><p><span class="n">06</span>Where is high-level waste finally stored?</p><div class="ans step">Deep underground, in stable rock</div></div>
         </div>

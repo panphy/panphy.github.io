@@ -77,7 +77,7 @@
         { t: "q", p: "Draw a diagram to show how one fission can start a chain reaction. Label the neutrons and the new nuclei.", marks: 3, box: 46, a: "A neutron hits a U-235 nucleus (1); it splits into two smaller nuclei and 2 or 3 neutrons (1); each of those neutrons hits another U-235 nucleus, which also splits (1)." },
         { t: "q", p: "Compare nuclear fission with nuclear fusion.", marks: 4, lines: 4, a: "Fission splits a large nucleus; fusion joins two light nuclei (1). Fission usually needs a neutron to be absorbed first; fusion joins nuclei such as hydrogen isotopes (1). Both release energy (1). Fission is used in nuclear power stations; fusion powers the stars (1)." },
       ],
-      quick: { slide: 55, covers: "Triple Science, using the nucleus", items: [
+      quick: { slide: 57, covers: "Triple Science, using the nucleus", items: [
         ["Name two natural sources of background radiation.", "Rocks (radon gas) and cosmic rays."],
         ["Why do aircrew get a higher dose?", "There are more cosmic rays at high altitude."],
         ["Why does a medical tracer need a short half-life?", "It lasts for the scan, then soon decays away."],

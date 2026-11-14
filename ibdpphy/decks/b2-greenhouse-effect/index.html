@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,19 +63,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="b2-balance" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="b2-balance" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Energy in, energy out</h3>
             <p>Emissivity, albedo, the solar constant and a planet with no atmosphere</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b2-reemit" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="b2-reemit" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Greenhouse gases</h3>
             <p>Which gases absorb infrared, and why</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="b2-layer" data-still data-plain style="height: 220px;"></div>
+            <div class="fig" data-fig="b2-layer" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>The balance with an atmosphere</h3>
             <p>A model of the greenhouse effect, and how human activity enhances it</p>
@@ -129,7 +130,7 @@
 
       <section class="slide" data-title="Emissivity">
         <h2>Emissivity<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="stack">
             <div class="q"><p>\(\sigma T^{4}\) is for a perfect black body. Is the Earth one?</p><div class="ans step">No: real surfaces radiate less. Emissivity says how much less</div></div>
             <div class="equation small step"><span>\(\text{emissivity} = \dfrac{\text{power radiated per unit area}}{\sigma T^{4}}\)</span></div>
@@ -139,16 +140,6 @@
               <li class="step frac">So the power radiated per unit area is \(\epsilon \sigma T^{4}\)</li>
             </ul>
           </div>
-          <table class="facts step">
-            <thead><tr><th>Surface (approximate values)</th><th style="white-space: nowrap;">Emissivity \(\epsilon\)</th></tr></thead>
-            <tbody>
-              <tr><td>Black body</td><td class="num">1</td></tr>
-              <tr><td>Ocean</td><td class="num">0.96</td></tr>
-              <tr><td>Soil, vegetation</td><td class="num">0.9 to 0.98</td></tr>
-              <tr><td>The Earth and its atmosphere, seen from space</td><td class="num">0.6</td></tr>
-              <tr><td>Polished aluminum</td><td class="num">0.05</td></tr>
-            </tbody>
-          </table>
         </div>
         <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -165,9 +156,27 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Emissivity">
+        <p class="eyebrow">Approximate values</p>
+        <h2>Emissivity<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <table class="facts">
+              <thead><tr><th>Surface</th><th style="white-space: nowrap;">Emissivity \(\epsilon\)</th></tr></thead>
+              <tbody>
+                <tr><td>Black body</td><td class="num">1</td></tr>
+                <tr><td>Ocean</td><td class="num">0.96</td></tr>
+                <tr><td>Soil, vegetation</td><td class="num">0.9 to 0.98</td></tr>
+                <tr><td>Earth and atmosphere, from space</td><td class="num">0.6</td></tr>
+                <tr><td>Polished aluminum</td><td class="num">0.05</td></tr>
+              </tbody>
+            </table>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide" data-title="Albedo">
         <h2>Albedo<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="stack">
             <div class="q"><p>What fraction of the sunlight reaching the Earth goes straight back into space?</p><div class="ans step">About 30%: clouds, ice and the ground reflect it</div></div>
             <div class="equation small step"><span>\(\text{albedo} = \dfrac{\text{total scattered power}}{\text{total incident power}}\)</span></div>
@@ -177,17 +186,6 @@
               <li class="step">The Earth’s albedo varies <b>daily</b>, with <b>cloud</b> cover and with <b>latitude</b></li>
             </ul>
           </div>
-          <table class="facts step">
-            <thead><tr><th>Surface (approximate values)</th><th>Albedo \(\alpha\)</th></tr></thead>
-            <tbody>
-              <tr><td>Fresh snow</td><td class="num">0.85</td></tr>
-              <tr><td>Thick cloud</td><td class="num">0.7</td></tr>
-              <tr><td>Desert sand</td><td class="num">0.4</td></tr>
-              <tr><td>Forest</td><td class="num">0.15</td></tr>
-              <tr><td>Ocean</td><td class="num">0.06</td></tr>
-              <tr><td><b>The Earth, on average</b></td><td class="num"><b>0.30</b></td></tr>
-            </tbody>
-          </table>
         </div>
         <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -201,6 +199,25 @@
             <p class="trap">Multiplying by the albedo to find the power absorbed. The albedo is the part sent back. The part absorbed is \(1 - \alpha\): 70% for the Earth.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Albedo">
+        <p class="eyebrow">Approximate values</p>
+        <h2>Albedo<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <table class="facts">
+              <thead><tr><th>Surface</th><th>Albedo \(\alpha\)</th></tr></thead>
+              <tbody>
+                <tr><td>Fresh snow</td><td class="num">0.85</td></tr>
+                <tr><td>Thick cloud</td><td class="num">0.7</td></tr>
+                <tr><td>Desert sand</td><td class="num">0.4</td></tr>
+                <tr><td>Forest</td><td class="num">0.15</td></tr>
+                <tr><td>Ocean</td><td class="num">0.06</td></tr>
+                <tr><td><b>The Earth, on average</b></td><td class="num"><b>0.30</b></td></tr>
+              </tbody>
+            </table>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="Albedo you can see">
@@ -238,11 +255,11 @@
           <div class="stack">
             <div class="equation small"><span>\(S = 1.36 \times 10^{3} \,\mathrm{W} \,\mathrm{m}^{-2}\)</span></div>
             <ul class="points small">
-              <li>The intensity of sunlight at the Earth’s distance, <b>above the atmosphere</b></li>
-              <li class="step">On a surface at <b>right angles</b> to the rays</li>
-              <li class="step">It is the Sun’s apparent brightness from B.1</li>
+              <li>Intensity of sunlight at the Earth’s distance, <b>above the atmosphere</b></li>
+              <li class="step">On a surface <b>perpendicular</b> to the rays</li>
+              <li class="step">The Sun’s apparent brightness (B.1)</li>
             </ul>
-            <div class="q step"><p>Is it the same at the ground?</p><div class="ans step">No: reflection, scattering and absorption by the atmosphere can leave as little as half</div></div>
+            <div class="q step"><p>Is it the same at the ground?</p><div class="ans step">No: the atmosphere can halve it</div></div>
           </div>
           <div class="work step">
             <span class="say">For another planet: the inverse square law</span>
@@ -341,15 +358,23 @@
       <section class="slide" data-title="Quick check: energy in, energy out">
         <p class="eyebrow">Quick check</p>
         <h2>Energy in, energy out<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>A surface has albedo 0.25. What fraction does it absorb?</p><div class="ans step">0.75</div></div>
           <div class="q"><p><span class="n">02</span>What is the emissivity of a black body?</p><div class="ans step">1</div></div>
           <div class="q"><p><span class="n">03</span>Why is the mean intensity \(\frac{S}{4}\), not \(S\)?</p><div class="ans step">A disk \(\pi R^{2}\) intercepts; a sphere \(4 \pi R^{2}\) shares it</div></div>
-          <div class="q"><p><span class="n">04</span>A planet is twice as far from its star as the Earth. Its solar constant?</p><div class="ans step">A quarter of \(S\)</div></div>
-          <div class="q"><p><span class="n">05</span>Ice melts to open sea. What happens to the albedo there?</p><div class="ans step">It falls, so more is absorbed</div></div>
-          <div class="q"><p><span class="n">06</span>A surface at 300 K radiates 413 W m⁻²; a black body would radiate 459. Emissivity?</p><div class="ans step">\(\frac{413}{459} = 0.90\)</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: energy in, energy out">
+        <p class="eyebrow">Quick check</p>
+        <h2>Energy in, energy out<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>A planet is twice as far from its star as the Earth. Its solar constant?</p><div class="ans step">A quarter of \(S\)</div></div>
+          <div class="q"><p><span class="n">05</span>Ice melts to open sea. What happens to the albedo there?</p><div class="ans step">It falls, so more is absorbed</div></div>
+          <div class="q"><p><span class="n">06</span>A surface at 300 K radiates 413 W m⁻²; a black body would radiate 459. Emissivity?</p><div class="ans step">\(\dfrac{413}{459} = 0.90\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -369,19 +394,19 @@
         <p class="eyebrow">The story: London, 1859</p>
         <p class="not-examined">Background story: not assessed</p>
         <h2>John Tyndall tests the air<span>.</span></h2>
-        <div class="story" style="--photo-h: 400px;">
+        <div class="story" style="--photo-h: 330px;">
           <div class="story-photos">
             <figure><img src="images/tyndall.jpg" width="960" height="1313" alt="Photograph of John Tyndall, an elderly man with a long white beard, seated in a dark coat"><figcaption><b>John Tyndall</b>, about 1885</figcaption></figure>
             <figure><img src="images/tyndall-apparatus.jpg" width="1280" height="1191" alt="Engraving of Tyndall’s apparatus with modern labels: a long tube holding the gas to be tested, a source of heat at each end, a thermopile to compare them, a vacuum pump and a gas supply"><figcaption>His apparatus, drawn in 1861 (labels added later)</figcaption></figure>
           </div>
           <div class="stack">
             <ul class="points">
-              <li>Professor at the Royal Institution, he began on <b>9 May 1859</b></li>
-              <li>Radiant heat passed down a tube of gas to a <b>thermopile</b>, which compared it with a second source</li>
-              <li>He measured nitrogen, oxygen, water vapor, carbon dioxide, methane and more</li>
-              <li><b>Water vapor</b> was the strongest absorber in the atmosphere</li>
+              <li>At the Royal Institution, from <b>9 May 1859</b></li>
+              <li>Radiant heat through a tube of gas \(\rightarrow\) a <b>thermopile</b></li>
+              <li>Nitrogen, oxygen, water vapor, carbon dioxide, methane and more</li>
+              <li><b>Water vapor</b>: the strongest absorber</li>
             </ul>
-            <div class="idea">The gases that make up 99% of the air let the heat through. The trace gases did not.</div>
+            <div class="idea">99% of the air lets the heat through. The <b>trace gases</b> do not</div>
           </div>
         </div>
         <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:John_Tyndall_(ca._1885).jpg" target="_blank" rel="noopener">Herbert Rose Barraud, 1880s</a>, public domain. Apparatus: <a href="https://commons.wikimedia.org/wiki/File:Tyndalls_setup_for_measuring_radiant_heat_absorption_by_gases_annotated.svg" target="_blank" rel="noopener">John Tyndall, 1861, annotated</a>, public domain.</p>
@@ -420,12 +445,12 @@
       <section class="slide" data-title="The main greenhouse gases">
         <p class="eyebrow">Four to know</p>
         <h2>The main greenhouse gases<span>.</span></h2>
-        <table class="facts compare">
-          <thead><tr><th>Gas</th><th>Natural sources</th><th>Sources from human activity</th></tr></thead>
+        <table class="facts compare snug">
+          <thead><tr><th>Gas</th><th>Natural sources</th><th>Human sources</th></tr></thead>
           <tbody>
-            <tr><td><b>Water vapor</b>, H₂O</td><td>Evaporation from oceans, lakes and plants</td><td>Irrigation; burning fuels; more evaporation as the planet warms</td></tr>
-            <tr class="step"><td><b>Carbon dioxide</b>, CO₂</td><td>Respiration, decay, volcanoes, wildfires</td><td><b>Burning fossil fuels</b>; clearing forests; making cement</td></tr>
-            <tr class="step"><td><b>Methane</b>, CH₄</td><td>Wetlands; termites</td><td>Cattle and rice fields; landfill; leaks of natural gas</td></tr>
+            <tr><td><b>Water vapor</b>, H₂O</td><td>Evaporation: oceans, lakes, plants</td><td>Irrigation; burning fuels; a warmer planet</td></tr>
+            <tr class="step"><td><b>Carbon dioxide</b>, CO₂</td><td>Respiration, decay, volcanoes, fires</td><td><b>Burning fossil fuels</b>; forest clearing; cement</td></tr>
+            <tr class="step"><td><b>Methane</b>, CH₄</td><td>Wetlands; termites</td><td>Cattle, rice fields, landfill, gas leaks</td></tr>
             <tr class="step"><td><b>Nitrous oxide</b>, N₂O</td><td>Bacteria in soils and oceans</td><td>Nitrogen fertilizers; burning fuels</td></tr>
           </tbody>
         </table>
@@ -542,10 +567,18 @@
       <section class="slide" data-title="Quick check: greenhouse gases">
         <p class="eyebrow">Quick check</p>
         <h2>Greenhouse gases<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Name the four main greenhouse gases.</p><div class="ans step">H₂O, CO₂, CH₄, N₂O</div></div>
           <div class="q"><p><span class="n">02</span>Which part of the spectrum do they absorb?</p><div class="ans step">Infrared</div></div>
           <div class="q"><p><span class="n">03</span>Why does sunlight pass through them?</p><div class="ans step">Its photon energies match no gap</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: greenhouse gases">
+        <p class="eyebrow">Quick check</p>
+        <h2>Greenhouse gases<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>In the resonance model, what must match?</p><div class="ans step">The infrared and natural frequencies</div></div>
           <div class="q"><p><span class="n">05</span>In which direction is the absorbed energy <span class="nowrap">re-emitted</span>?</p><div class="ans step">All directions</div></div>
           <div class="q"><p><span class="n">06</span>Give a human source of methane.</p><div class="ans step">Cattle, rice fields, landfill or gas leaks</div></div>
@@ -686,12 +719,12 @@
             <span class="step">\(T = \class{res}{229 \,\mathrm{K}}\)</span>
           </div>
           <div class="stack">
-            <div class="q"><p>Guess first: Venus is closer to the Sun. With no greenhouse effect, is it hotter than the Earth?</p></div>
+            <div class="q"><p>Guess first: with no greenhouse effect, is Venus hotter than the Earth?</p></div>
             <ul class="points small">
-              <li class="step">Colder than the Earth’s 255 K, although Venus is closer to the Sun: its clouds reflect three quarters of the sunlight</li>
-              <li class="step">The measured surface temperature is about <b>735 K</b></li>
+              <li class="step">Colder than the Earth’s 255 K: its clouds reflect three quarters of the sunlight</li>
+              <li class="step">Measured surface: about <b>735 K</b></li>
             </ul>
-            <div class="idea step">An atmosphere of 96% carbon dioxide, at ninety times the pressure of ours.</div>
+            <div class="idea step">96% carbon dioxide, at 90 times our pressure</div>
           </div>
         </div>
         <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT, SL + HL</span><span data-page></span></div>
@@ -711,14 +744,14 @@
       <section class="slide" data-title="The enhanced greenhouse effect">
         <p class="eyebrow">Human activity</p>
         <h2>The enhanced greenhouse effect<span>.</span></h2>
-        <div class="split wide-fig">
+        <div class="split">
           <div class="stack">
             <ul class="points small">
-              <li>The <b>natural</b> effect keeps the Earth at 288 K, not 255 K</li>
-              <li class="step">Human activity <b>adds</b> greenhouse gases, mainly by <b>burning fossil fuels</b></li>
-              <li class="step">More infrared is absorbed, so the surface warms to restore the balance</li>
+              <li><b>Natural</b> effect: 288&nbsp;K, not 255&nbsp;K</li>
+              <li class="step">Humans <b>add</b> greenhouse gases: mainly <b>burning fossil fuels</b></li>
+              <li class="step">More infrared absorbed \(\Rightarrow\) surface warms \(\Rightarrow\) balance restored</li>
             </ul>
-            <div class="idea step">The extra warming is the <b>enhanced</b> greenhouse effect.</div>
+            <div class="idea step">The extra warming: the <b>enhanced</b> greenhouse effect</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>CARBON DIOXIDE AT MAUNA LOA</span><span class="pill">A FIT TO THE RECORD</span></div>
@@ -750,9 +783,9 @@
             <figure><img src="images/mauna-loa.jpg" width="1280" height="716" alt="Aerial photograph of a small group of white buildings and a tall mast on a bare slope of dark lava, under a clear blue sky"><figcaption>The <b>Mauna Loa Observatory</b>, high on a Hawaiian volcano, far from cities and forests</figcaption></figure>
           </div>
           <ul class="points">
-            <li><b>Charles David Keeling</b> began measuring the carbon dioxide in the air here in March <b>1958</b>: about 316 parts per million</li>
-            <li>The record has run ever since. It passed <b>400</b> on 9 May 2013. Its yearly ripple is the northern forests growing each summer</li>
-            <li>Air trapped in ice shows <b>275 to 285</b> for thousands of years before the nineteenth century</li>
+            <li><b>Charles David Keeling</b> began here in March <b>1958</b>: about 316 parts per million of CO₂</li>
+            <li>It passed <b>400</b> on 9 May 2013. The yearly ripple: northern forests growing each summer</li>
+            <li>Ice-core air: <b>275 to 285</b> for thousands of years before 1800</li>
           </ul>
         </div>
         <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Mauna_Loa_Observatory_north_flank_of_Mauna_Loa.jpg" target="_blank" rel="noopener">Brian Vasel, NOAA</a>, public domain.</p>
@@ -796,10 +829,18 @@
       <section class="slide" data-title="Quick check: the balance with an atmosphere">
         <p class="eyebrow">Quick check</p>
         <h2>The balance with an atmosphere<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>The Earth absorbs 238 W m⁻² of sunlight. How much must it radiate to space?</p><div class="ans step">238 W m⁻²</div></div>
           <div class="q"><p><span class="n">02</span>Why does the layer in the model radiate twice \(\sigma T_\mathrm{a}^{4}\)?</p><div class="ans step">It has two faces: up and down</div></div>
           <div class="q"><p><span class="n">03</span>Which two inputs warm the surface?</p><div class="ans step">Sunlight, and infrared from the atmosphere</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the balance with an atmosphere">
+        <p class="eyebrow">Quick check</p>
+        <h2>The balance with an atmosphere<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What is the enhanced greenhouse effect?</p><div class="ans step">Extra warming from gases added by human activity</div></div>
           <div class="q"><p><span class="n">05</span>Its primary cause?</p><div class="ans step">Burning fossil fuels</div></div>
           <div class="q"><p><span class="n">06</span>More greenhouse gas is added. What happens to the emissivity of the atmosphere?</p><div class="ans step">It rises</div></div>
@@ -822,7 +863,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Emissivity</b><span>Power radiated compared with a black body at the same temperature</span></div>
@@ -830,6 +871,14 @@
           <div class="term"><b>Solar constant</b><span>Intensity of sunlight above the atmosphere: \(1.36 \times 10^{3} \,\mathrm{W} \,\mathrm{m}^{-2}\)</span></div>
           <div class="term"><b>Equilibrium temperature</b><span>Where power absorbed = power radiated</span></div>
           <div class="term"><b>Greenhouse gas</b><span>Absorbs infrared and re-emits it in all directions</span></div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Resonance</b><span>Large response when the driving and natural frequencies match</span></div>
           <div class="term"><b>Greenhouse effect</b><span>The natural warming of the surface by the atmosphere</span></div>
           <div class="term"><b>Enhanced greenhouse effect</b><span>The extra warming from human activity</span></div>

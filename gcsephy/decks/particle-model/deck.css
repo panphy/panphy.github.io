@@ -74,3 +74,7 @@
 .values > div { padding: 14px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
 .values b { display: block; font: 600 34px var(--font-mono, monospace); }
 .values span { font-size: 24px; font-weight: 700; color: var(--muted); }
+
+/* Large-room labels (../assets/readable.css): the cooling curve's last label sits at the drawing's
+   right edge, so the figure leaves room for it inside its panel. */
+.panel .fig[data-fig="cooling"] { margin-right: 48px; }

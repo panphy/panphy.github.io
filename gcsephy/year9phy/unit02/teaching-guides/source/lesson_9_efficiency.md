@@ -138,9 +138,9 @@ Complete the Sankey diagram page. Stretch: a car engine is about 30% efficient. 
 
 ## Using the workbook
 
-The workbook prints the two worked examples on slide 59 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
+The workbook prints the two worked examples on slides 64 and 65 blank in Learn it, tagged with the slide number, beside a “Your turn” with new numbers. Students fill in the frame as you model the example, then try “Your turn” on their own. The answers are only in the answer edition.
 
-The Quick check (slide 63) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 69) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 

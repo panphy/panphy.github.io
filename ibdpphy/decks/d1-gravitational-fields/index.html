@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -62,25 +63,25 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="d1-ellipse" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="d1-ellipse" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 01, SL + HL</p>
             <h3>Kepler’s laws</h3>
             <p>How the planets move round the Sun</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d1-two-masses" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="d1-two-masses" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 02, SL + HL</p>
             <h3>Newton’s law of gravitation</h3>
             <p>The force between any two masses</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d1-field-lines" data-still data-kind="radial" style="height: 180px;"></div>
+            <div class="fig" data-fig="d1-field-lines" data-still data-kind="radial" style="height: 150px;"></div>
             <p class="eyebrow">Part 03, SL + HL</p>
             <h3>Gravitational fields</h3>
             <p>Field strength and field lines</p>
           </div>
           <div class="card hl">
-            <div class="fig" data-fig="d1-equipotentials" data-still data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="d1-equipotentials" data-still data-plain style="height: 150px;"></div>
             <p class="eyebrow">Part 04, HL only</p>
             <h3>Energy and orbits</h3>
             <p>Potential, orbital speed and escape speed</p>
@@ -257,15 +258,23 @@
       <section class="slide" data-title="Quick check: Kepler’s laws">
         <p class="eyebrow">Quick check</p>
         <h2>Kepler’s laws<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>What shape is the orbit of a planet, and where is the Sun?</p><div class="ans step">An ellipse, with the Sun at one focus</div></div>
           <div class="q"><p><span class="n">02</span>Where in its orbit does a planet move fastest?</p><div class="ans step">Where it is closest to the Sun</div></div>
           <div class="q"><p><span class="n">03</span>What is the same for two equal time intervals on one orbit?</p><div class="ans step">The area swept out by the line from the Sun</div></div>
-          <div class="q"><p><span class="n">04</span>Which quantity is the same for every planet round the Sun?</p><div class="ans step">\(\frac{T^{2}}{r^{3}}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: Kepler’s laws">
+        <p class="eyebrow">Quick check</p>
+        <h2>Kepler’s laws<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>Which quantity is the same for every planet round the Sun?</p><div class="ans step">\(\dfrac{T^{2}}{r^{3}}\)</div></div>
           <div class="q"><p><span class="n">05</span>A planet orbits at 4.0 AU. Its period?</p><div class="ans step">\(4.0^{\frac{3}{2}} = 8.0\) years</div></div>
           <div class="q"><p><span class="n">06</span>Can the third law compare the Moon with Mars?</p><div class="ans step">No: they orbit different bodies</div></div>
         </div>
-        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
       </section>
 
       <!-- Part 2 -->
@@ -496,10 +505,18 @@
       <section class="slide" data-title="Quick check: gravitation">
         <p class="eyebrow">Quick check</p>
         <h2>Newton’s law of gravitation<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>The separation of two masses is doubled. What happens to the force?</p><div class="ans step">It falls to a quarter</div></div>
           <div class="q"><p><span class="n">02</span>One of the masses is doubled. What happens to the force?</p><div class="ans step">It doubles</div></div>
           <div class="q"><p><span class="n">03</span>The Earth pulls the Moon. How big is the force of the Moon on the Earth?</p><div class="ans step">The same size, in the opposite direction</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: gravitation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Newton’s law of gravitation<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>From where is \(r\) measured for a planet?</p><div class="ans step">From its center</div></div>
           <div class="q"><p><span class="n">05</span>What provides the centripetal force on a satellite?</p><div class="ans step">The gravitational force</div></div>
           <div class="q"><p><span class="n">06</span>Which mass sets the constant in \(T^{2} \propto r^{3}\)?</p><div class="ans step">The central mass \(M\)</div></div>
@@ -611,18 +628,13 @@
       <section class="slide" data-title="Field strength: at the surface and in orbit">
         <p class="eyebrow">Worked example</p>
         <h2>The Earth’s field, on the ground and in orbit<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">Find the gravitational field strength at the surface, and 400 km above it.</span>
             <span class="say">\(M = 5.97 \times 10^{24} \,\mathrm{kg}\), radius \(R = 6.37 \times 10^{6} \,\mathrm{m}\)</span>
             <span class="step">\(g = G \dfrac{M}{r^{2}}\)</span>
             <span class="say step">At the surface: \(r = R\)</span>
             <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.37 \times 10^{6})^{2}} = \class{res}{9.81 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">400 km up: \(r = R + h = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
-            <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.77 \times 10^{6})^{2}}\)</span>
-            <span class="step">\(g = \class{res}{8.69 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, SL + HL</span><span data-page></span></div>
@@ -637,6 +649,19 @@
             <p class="trap">Using the height \(h\) in place of \(r\). The distance is always from the center of the planet: add the radius.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide" data-title="Field strength: at the surface and in orbit">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>The Earth’s field, on the ground and in orbit<span>.</span></h2>
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
+          <div class="work">
+            <span class="say">400 km up: \(r = R + h = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
+            <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.77 \times 10^{6})^{2}}\)</span>
+            <span class="step">\(g = \class{res}{8.69 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, SL + HL</span><span data-page></span></div>
       </section>
 
       <section class="slide" data-title="The resultant field of two bodies">
@@ -677,10 +702,18 @@
       <section class="slide" data-title="Quick check: fields">
         <p class="eyebrow">Quick check</p>
         <h2>Gravitational fields<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Define gravitational field strength.</p><div class="ans step">Force per unit mass on a small point mass</div></div>
-          <div class="q"><p><span class="n">02</span>A 3.0 kg mass feels 11.1 N on Mars. Field strength?</p><div class="ans step">\(\frac{11.1}{3.0} = 3.7 \,\mathrm{N} \,\mathrm{kg}^{-1}\)</div></div>
-          <div class="q"><p><span class="n">03</span>\(g\) is 9.8 N kg⁻¹ at the surface. What is it at \(r = 2R\)?</p><div class="ans step">\(\frac{9.8}{4} = 2.5 \,\mathrm{N} \,\mathrm{kg}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">02</span>A 3.0 kg mass feels 11.1 N on Mars. Field strength?</p><div class="ans step">\(\dfrac{11.1}{3.0} = 3.7 \,\mathrm{N} \,\mathrm{kg}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">03</span>\(g\) is 9.8 N kg⁻¹ at the surface. What is it at \(r = 2R\)?</p><div class="ans step">\(\dfrac{9.8}{4} = 2.5 \,\mathrm{N} \,\mathrm{kg}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Gravitational fields<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What do field lines that spread apart tell you?</p><div class="ans step">The field is getting weaker</div></div>
           <div class="q"><p><span class="n">05</span>Describe the field lines of a uniform field.</p><div class="ans step">Parallel and evenly spaced</div></div>
           <div class="q"><p><span class="n">06</span>Which way do gravitational field lines point?</p><div class="ans step">Towards the mass that produces the field</div></div>
@@ -771,8 +804,6 @@
             <span class="say">From the surface, \(R = 6.37 \times 10^{6} \,\mathrm{m}\), to \(r = 2R\)</span>
             <span class="step">\(W = m \Delta V_\mathrm{g}\) &nbsp;with&nbsp; \(V_\mathrm{g} = -\dfrac{G M}{r}\)</span>
             <span class="step">\(V_\mathrm{surface} = -\dfrac{3.98 \times 10^{14}}{6.37 \times 10^{6}} = -6.25 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
-            <span class="step">\(V_{2R} = -3.13 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
-            <span class="step">\(W = 500 \times (-3.13 + 6.25) \times 10^{7} = \class{res}{1.56 \times 10^{10} \,\mathrm{J}}\)</span>
           </div>
           <div class="stack">
             <ul class="points small">
@@ -794,6 +825,18 @@
             <p class="tip">The sign tells you who does the work. Moving outwards, \(\Delta V_\mathrm{g}\) is positive and an engine must supply the energy. Moving inwards, it is negative and the field supplies it.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Work done in moving a mass">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Lifting a 500 kg satellite<span>.</span></h2>
+        <div class="stack center" style="align-items: stretch;">
+          <div class="work">
+            <span class="step">\(V_{2R} = -3.13 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
+            <span class="step">\(W = 500 \times (-3.13 + 6.25) \times 10^{7} = \class{res}{1.56 \times 10^{10} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
       </section>
 
       <section class="slide hl" data-title="HL: Field strength as the potential gradient">
@@ -949,8 +992,6 @@
             <span class="say">From \(r_{1} = 6.77 \times 10^{6} \,\mathrm{m}\) to \(r_{2} = 4.22 \times 10^{7} \,\mathrm{m}\)</span>
             <span class="step">\(E = -\dfrac{G M m}{2r}\)</span>
             <span class="step">\(\Delta E = \dfrac{G M m}{2} \left(\dfrac{1}{r_{1}} - \dfrac{1}{r_{2}}\right)\)</span>
-            <span class="step">\(\Delta E = \dfrac{3.98 \times 10^{14} \times 500}{2} \left(\dfrac{1}{6.77 \times 10^{6}} - \dfrac{1}{4.22 \times 10^{7}}\right)\)</span>
-            <span class="step">\(\Delta E = \class{res}{1.23 \times 10^{10} \,\mathrm{J}}\)</span>
           </div>
           <div class="stack">
             <table class="facts step">
@@ -976,6 +1017,18 @@
             <p class="trap">Finding only the change in potential energy. A change of orbit changes the kinetic energy as well: use the total.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Changing orbit">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>Raising a 500 kg satellite to a higher orbit<span>.</span></h2>
+        <div class="stack center" style="align-items: stretch;">
+          <div class="work">
+            <span class="step">\(\Delta E = \dfrac{3.98 \times 10^{14} \times 500}{2} \left(\dfrac{1}{6.77 \times 10^{6}} - \dfrac{1}{4.22 \times 10^{7}}\right)\)</span>
+            <span class="step">\(\Delta E = \class{res}{1.23 \times 10^{10} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
       </section>
 
       <section class="slide hl" data-title="HL: Escape speed">
@@ -1019,9 +1072,6 @@
             <span class="say">A 500 kg satellite, at rest on a planet that does not rotate</span>
             <span class="say">\(R = 6.37 \times 10^{6} \,\mathrm{m}\), orbit \(r = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
             <span class="step">\(E_\mathrm{surface} = -\dfrac{G M m}{R}\), &nbsp;\(E_\mathrm{orbit} = -\dfrac{G M m}{2r}\)</span>
-            <span class="step">\(\Delta E = G M m \left(\dfrac{1}{R} - \dfrac{1}{2r}\right)\)</span>
-            <span class="step">\(\Delta E = 3.98 \times 10^{14} \times 500 \left(\dfrac{1}{6.37 \times 10^{6}} - \dfrac{1}{1.354 \times 10^{7}}\right)\)</span>
-            <span class="step">\(\Delta E = \class{res}{1.65 \times 10^{10} \,\mathrm{J}}\)</span>
           </div>
           <div class="stack">
             <ul class="points small">
@@ -1046,16 +1096,29 @@
         </aside>
       </section>
 
+      <section class="slide hl" data-title="HL: Launching into orbit">
+        <p class="eyebrow">Worked example, continued</p>
+        <h2>From the launch pad to a low orbit<span>.</span></h2>
+        <div class="stack center" style="align-items: stretch;">
+          <div class="work">
+            <span class="step">\(\Delta E = G M m \left(\dfrac{1}{R} - \dfrac{1}{2r}\right)\)</span>
+            <span class="step">\(\Delta E = 3.98 \times 10^{14} \times 500 \left(\dfrac{1}{6.37 \times 10^{6}} - \dfrac{1}{1.354 \times 10^{7}}\right)\)</span>
+            <span class="step">\(\Delta E = \class{res}{1.65 \times 10^{10} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide hl" data-title="HL: Atmospheric drag on a satellite">
         <h2>A satellite in the thin upper atmosphere<span>.</span></h2>
-        <div class="split">
+        <div class="split even">
           <div class="stack">
             <ul class="points small">
-              <li>A small <b>viscous drag</b> does negative work: the <b>total</b> energy falls</li>
+              <li>Slight <b>drag</b> does negative work: <b>total</b> energy falls</li>
               <li class="step frac">Total energy \(-\dfrac{G M m}{2r}\) falls, so \(r\) gets <b>smaller</b></li>
               <li class="step frac">\(v = \sqrt{\dfrac{G M}{r}}\), so the speed <b>rises</b></li>
             </ul>
-            <div class="idea step">Drag makes the satellite go <b>faster</b>.</div>
+            <div class="idea step">Drag makes it go <b>faster</b></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>A SLOWLY DECAYING ORBIT</span><span class="pill">MUCH EXAGGERATED</span></div>
@@ -1080,10 +1143,18 @@
       <section class="slide hl" data-title="HL quick check">
         <p class="eyebrow">Quick check, additional higher level</p>
         <h2>Energy and orbits<span>.</span></h2>
-        <div class="quiz fill">
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">01</span>Where is gravitational potential zero?</p><div class="ans step">At infinity</div></div>
           <div class="q"><p><span class="n">02</span>The potential at a point is −40 MJ kg⁻¹. Potential energy of 2.0 kg there?</p><div class="ans step">\(2.0 \times (-40) = -80 \,\mathrm{MJ}\)</div></div>
           <div class="q"><p><span class="n">03</span>How much work is done moving a mass along an equipotential?</p><div class="ans step">None</div></div>
+        </div>
+        <div class="slide-foot"><span></span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check, additional higher level</p>
+        <h2>Energy and orbits<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
           <div class="q"><p><span class="n">04</span>What does the gradient of a potential–distance graph give?</p><div class="ans step">The field strength (with a minus sign)</div></div>
           <div class="q"><p><span class="n">05</span>The orbital speed at some radius is 5.0 km s⁻¹. Escape speed there?</p><div class="ans step">\(\sqrt{2} \times 5.0 = 7.1 \,\mathrm{km} \,\mathrm{s}^{-1}\)</div></div>
           <div class="q"><p><span class="n">06</span>Drag acts on a satellite. What happens to its speed?</p><div class="ans step">It increases, as the orbit shrinks</div></div>
@@ -1092,13 +1163,21 @@
       </section>
 
       <section class="slide" data-title="Summary">
-        <p class="eyebrow">Summary</p>
-        <h2>Gravitational fields on one slide<span>.</span></h2>
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Gravitational fields in summary<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
           <div class="card"><p class="eyebrow">Kepler’s laws</p><h3>How orbits behave</h3><p>Ellipses with the Sun at a focus. Equal areas in equal times<br>\(T^{2} \propto r^{3}\)</p></div>
           <div class="card step"><p class="eyebrow">Newton’s law</p><h3>An inverse square force</h3><p>\(F = G \frac{m_{1} m_{2}}{r^{2}}\), between centers<br>Gravity is the centripetal force of an orbit</p></div>
           <div class="card step"><p class="eyebrow">Field strength</p><h3>Force per unit mass</h3><p>\(g = \frac{F}{m} = G \frac{M}{r^{2}}\), a vector<br>Radial round a planet, uniform near its surface</p></div>
-          <div class="card hl step"><p class="eyebrow">Potential, HL</p><h3>Energy per unit mass</h3><p>\(V_\mathrm{g} = -\frac{G M}{r}\), zero at infinity<br>\(W = m \Delta V_\mathrm{g}\) and \(g = -\frac{\Delta V_\mathrm{g}}{\Delta r}\)</p></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Gravitational fields in summary<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card hl"><p class="eyebrow">Potential, HL</p><h3>Energy per unit mass</h3><p>\(V_\mathrm{g} = -\frac{G M}{r}\), zero at infinity<br>\(W = m \Delta V_\mathrm{g}\) and \(g = -\frac{\Delta V_\mathrm{g}}{\Delta r}\)</p></div>
           <div class="card hl step"><p class="eyebrow">Equipotentials, HL</p><h3>At right angles to the field</h3><p>No work is done along one<br>Closer together where the field is stronger</p></div>
           <div class="card hl step"><p class="eyebrow">Orbits, HL</p><h3>Two speeds</h3><p>\(v_\mathrm{orbital} = \sqrt{\frac{G M}{r}}\) and \(v_\mathrm{esc} = \sqrt{\frac{2 G M}{r}}\)<br>Drag: smaller orbit, higher speed</p></div>
         </div>
@@ -1106,7 +1185,7 @@
       </section>
 
       <section class="slide" data-title="Key words">
-        <p class="eyebrow">Summary</p>
+        <p class="eyebrow">Summary, 1 of 2</p>
         <h2>Key words<span>.</span></h2>
         <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Ellipse</b><span>The shape of an orbit</span></div>
@@ -1115,6 +1194,14 @@
           <div class="term"><b>Inverse square law</b><span>Force \(\propto \dfrac{1}{r^{2}}\)</span></div>
           <div class="term"><b>Gravitational field strength</b><span>Force per unit mass. A vector</span></div>
           <div class="term"><b>Field line</b><span>Direction of the force on a mass</span></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="term"><b>Uniform field</b><span>Same strength and direction everywhere</span></div>
           <div class="term hl"><b>Gravitational potential</b><span>Work done per unit mass from infinity</span></div>
           <div class="term hl"><b>Potential gradient</b><span>Potential change per meter</span></div>
