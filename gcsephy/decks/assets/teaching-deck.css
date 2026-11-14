@@ -179,6 +179,7 @@ ol.steps li::before { border: 0; color: var(--year-ink); font: 600 24px var(--fo
 .rule, .remember, .formula { border: 1px solid var(--card-border); border-radius: 16px; background: var(--muted-bg); color: var(--text-main); box-shadow: none; font-weight: 500; }
 .rule { border-left: 4px solid var(--brand-primary); }
 .rule > strong:first-child, .formula > span:first-child { font: 800 24px var(--font-body); letter-spacing: .06em; }
+.formula > .line { display: block; margin-top: 12px; }
 .remember { border: 0; border-left: 4px solid var(--brand-primary); border-radius: 0 16px 16px 0; }
 .eq-block { background: var(--formula); border: 1px solid var(--card-border); border-radius: 20px; color: var(--text-main); box-shadow: none; }
 .eq-block .eq { color: var(--text-main); font: 600 56px/1.1 var(--font-mono); letter-spacing: 0; }
