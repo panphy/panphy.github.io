@@ -8,9 +8,11 @@ Five browser presentations, available by direct link from the GCSE hub:
 | `energy-stores-and-transfers/` | 9 | 77 | Light orange |
 | `electric-circuits/` | 10 | 66 | Lime |
 | `particle-model/` | 10 | 53 | Lime |
-| `atoms-and-radiation/` | 11 | 59 | Light yellow |
+| `atoms-and-radiation/` | 11 | 61 | Light yellow |
 
 Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. Each point of a note opens with its question or heading on its own line, `<h3 class="rn-head">`, followed by the explanation in `<p>`; call-outs go in `<div class="rn-side">`. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
+
+The Year 10 decks put a photograph under the title of some lesson and mission dividers (`.hero-photo` in their `deck.css`, files `images/divider-*.jpg`), each with its credit; the Year 9 Energy deck puts its divider photos in the question card instead. All are from Wikimedia Commons, public domain or Creative Commons; change a photo and its credit together.
 
 Year 11 slides 35, 39, 45 and 48 use generated illustrations from `atoms-and-radiation/images/`; prompts are in `source-illustrations.md`, `exposure-illustration.md`, `background-illustrations.md` and `medical-illustrations.md` alongside the PNGs. Slide 39 keeps its comparison labels as HTML, and slide 45 retains SVG labels and its dose chart. Source-use, exposure and medical illustrations are slide-only assets, with the shared workbook diagrams remaining in `figures.js`. Slides 35 and 48 share the cartoon medical tracer.
 

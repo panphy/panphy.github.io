@@ -260,3 +260,10 @@ h2 .prop { stroke-width: 3.4; }
 .story .follow-up b { color: var(--muted); }
 /* An engraving on white keeps its whole page in view. */
 .news-photo.engraving img { object-fit: contain; background: #fff; }
+
+/* A photo under a lesson divider's title. */
+.hero-photo { margin: 26px 0 0; max-width: 600px; }
+.hero-photo img { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: 18px; }
+.hero-photo figcaption { margin-top: 6px; }
+.hero-photo .credit { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+.hero-photo .credit a { color: inherit; }
