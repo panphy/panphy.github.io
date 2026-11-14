@@ -2102,7 +2102,6 @@ function closeFitQualityHelp() {
 // Fitted parameters as "value ± uncertainty", and χ²/ν when every point has a ±ΔY.
 function renderFitParameters() {
 	const box = document.getElementById('fit-parameters');
-	const note = document.getElementById('fit-weighting-note');
 	const result = datasetFitResults[activeFitKey];
 	const lines = [];
 	if (result && Array.isArray(result.parameters)) {
@@ -2149,13 +2148,6 @@ function renderFitParameters() {
 	details.replaceChildren(...nodes);
 	quality.hidden = !result;
 	if (nodes.length) safeTypeset(details);
-	if (note) {
-		note.textContent = !result ? 'Fits use unweighted least squares unless Weight by uncertainties is on.'
-			: result.weighted ? 'Weighted least squares: each point counts with weight 1/σ², where σ² = ΔY² + (slope × ΔX)². The ± values assume these are standard uncertainties.'
-				: Array.isArray(result.parameters)
-					? 'Unweighted least squares. The ± values come from the scatter of the points about the fit.'
-					: 'Unweighted least squares. This fit\'s parameters are too closely linked to give ± values.';
-	}
 }
 
 // The Extend line fields act on the chosen series' fit, so they wait until it has one.
