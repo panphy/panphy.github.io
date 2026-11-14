@@ -165,8 +165,8 @@
 /* News slides: each mission's case as the front page of an invented paper, with a real
    photograph (images/case-*.jpg). The credit under each photo links to its source. */
 .masthead { display: flex; align-items: center; gap: 22px; padding-bottom: 14px; border-bottom: 6px double var(--ink); }
-.masthead .paper-name { font: 900 44px/1 var(--display); letter-spacing: -.05em; text-transform: uppercase; }
-.masthead .dateline { margin-left: auto; font: 900 20px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+/* No newspaper name: the dateline leads. */
+.masthead .dateline { font: 900 20px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
 .masthead .edition { padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .front { display: grid; grid-template-columns: 690px 1fr; gap: 50px; margin-top: 28px; }
 .news-photo { margin: 0; min-height: 0; }
