@@ -180,10 +180,9 @@ function applyChartMode() {
 		if (input.value !== value) input.value = value;
 	});
 	document.getElementById('bar-error-bars').checked = sheet.errorBars;
-	document.getElementById('data-pane-hint').textContent = bar
-		? 'Each column is a bar; its rows are repeat readings'
-		: 'Y plots against the nearest X to its left';
-	document.getElementById('data-pane-foot-hint').hidden = bar;
+	document.getElementById('data-pane-title').title = bar
+		? 'Each column is a bar; its rows are repeat readings.'
+		: 'Y plots against the nearest X to its left. Paste a block from a spreadsheet into any cell: a heading row such as L / m becomes names and units.';
 	document.getElementById('graph-empty-text').textContent = bar
 		? 'Type a name and a reading in each column. Each column becomes a bar, as tall as the mean of its readings.'
 		: 'Type or paste readings into the table. Each Y column becomes a series.';

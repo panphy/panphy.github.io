@@ -226,13 +226,6 @@ input[type="number"]:focus {
 	outline-offset: 2px;
 }
 
-.neo-switch small {
-	display: block;
-	font-weight: 500;
-	font-size: 0.75rem;
-	color: var(--ink-3);
-}
-
 /* ---------- App shell ---------- */
 
 .neo-app {
@@ -609,22 +602,14 @@ input[type="number"]:focus {
 	font-size: 1.25rem;
 }
 
-.neo-pane-hint {
-	margin: 0;
-	font-size: 0.8rem;
-	color: var(--ink-3);
-}
-
 .neo-pane-foot {
 	padding: 8px 16px 12px;
 	border-top: 1px solid var(--line);
 }
 
-.neo-hint {
-	margin: 0;
-	font-size: 0.8rem;
-	line-height: 1.45;
-	color: var(--ink-3);
+/* The foot holds only validation messages, so it shows only when there is one. */
+.neo-pane-foot:has(> .validation-message:empty) {
+	display: none;
 }
 
 .validation-message {
@@ -3343,7 +3328,6 @@ h1.neo-wordmark {
 }
 
 .neo-bar-settings[hidden],
-.neo-hint[hidden],
 .neo-check[hidden],
 .neo-dialog-pair > div[hidden],
 .neo-csv-unit[hidden],
