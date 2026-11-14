@@ -81,11 +81,11 @@ function photocell(fig) {
     out('I').textContent = `${I.toFixed(2)} μA`;
     out('none').style.display = E > 0 || !state.intensity ? 'none' : '';
     // Shorter wavelength, closer waves; more intensity, more of them.
-    const beams = state.intensity ? 1 + Math.round(state.intensity / 34) : 0, cycles = Math.round(1500 / state.lambda);
+    const beams = state.intensity ? 1 + Math.round(state.intensity / 50) : 0, cycles = Math.round(1500 / state.lambda);
     // Parallel beams, spread evenly down the face of the plate.
     const DX = 128, DY = 79;
     light.innerHTML = Array.from({ length: beams }, (_, k) => {
-      const y = 111 + (k - (beams - 1) / 2) * 30;
+      const y = 108 + (k - (beams - 1) / 2) * 40;
       return P.wave(224 - DX, y - DY, 224, y, { cycles, amp: 8 });
     }).join('');
   }
