@@ -247,7 +247,10 @@ window.DeckSvgTex = {
 
     // Trolley and ramp.
     ramp: () => {
-      const A = [40, 226], B = [440, 420];
+      // The board's underside rests on the top right corner of the blocks (150, 228) and
+      // its upper end overhangs the top a little; its lower end sits on the floor.
+      const B = [440, 420], over = 14, slope = (420 - 228) / (B[0] - 26 - 150);
+      const A = [150 - over, 228 - over * slope - 12];
       const ang = Math.atan2(B[1] - A[1], B[0] - A[0]);
       const at = (u, lift = 0) => [A[0] + (B[0] - A[0]) * u + Math.sin(ang) * lift, A[1] + (B[1] - A[1]) * u - Math.cos(ang) * lift];
       let s = line(10, 420, 890, 420, 'floor');
@@ -261,7 +264,7 @@ window.DeckSvgTex = {
       s += `<g class="trolley" style="${places}" transform="translate(${f(tx)} ${f(ty)}) rotate(${deg})"><rect x="-42" y="-40" width="86" height="30" class="f-accent box" rx="4"/>${dot(-24, -8, 9, 'wheel')}${dot(26, -8, 9, 'wheel')}</g>`;
       const [s1x, s1y] = at(0.1), [s2x, s2y] = at(0.1, 34);
       s += line(s1x, s1y, s2x, s2y, 'tape') + t(s2x - 8, s2y - 14, 'start line', 'body-t small', 'end');
-      s += t(230, 236, 'release, no push', 'body-t', 'start');
+      s += t(296, 196, 'release, no push', 'body-t', 'start');
       s += step(1, '');
       s += rect(440, 424, 400, 14, 'f-alt box');
       for (let i = 0; i <= 40; i++) s += line(440 + i * 10, 424, 440 + i * 10, i % 5 ? 430 : 434, 'ink thin');
