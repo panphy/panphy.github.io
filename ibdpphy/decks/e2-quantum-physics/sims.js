@@ -1,7 +1,8 @@
 // Interactive figures for the E.2 deck, drawn over the flat pictures of ../assets/figures.js, which
 // stay for print. Controls come from ../assets/sim-control.js.
-//   data-photocell  slide 13  ultraviolet on zinc in a photocell with a reverse p.d.: the wavelength,
-//                             intensity and p.d. can be set, and the microammeter reads the current
+//   data-photocell  slide 13  ultraviolet on zinc in a photocell: the wavelength, intensity and the
+//                             p.d. of the collector (negative slows the electrons, positive speeds
+//                             them up) can be set, and the microammeter reads the current
 //   data-compton    slide 30  a photon scattered by an electron at rest through an angle θ that can be
 //                             set: the scattered photon has a longer wavelength and the electron recoils
 import { control, typeset, drawn } from '../assets/sim-control.js';
@@ -46,27 +47,29 @@ function run(fig, step) {
 
 // ---- Slide 13: the photocell ----
 function photocell(fig) {
-  const PHI = 4.30, I_FULL = 2.0;               // zinc's work function (eV); current at full intensity, no p.d. (μA)
+  const PHI = 4.30, I_FULL = 2.0;               // zinc's work function (eV); current at full intensity with every electron collected (μA)
   const X0 = 246, X1 = 632, L = X1 - X0;        // the faces of the metal and the collector
   const C = 560;                                // speed in px/s of a 1 eV electron
-  const state = { lambda: 250, intensity: 50, V: 0 };
+  const state = { lambda: 250, intensity: 50, V: 0 };   // V: the collector's potential relative to the metal
   const eMax = () => HC / state.lambda - PHI;
+  const signed = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)} V`;
 
   const rows = [
     control({ label: 'Wavelength', name: 'wavelength', min: 200, max: 320, step: 1, value: state.lambda, format: v => `${v} nm`, onChange: v => { state.lambda = v; update(); } }),
     control({ label: 'Intensity', name: 'intensity', min: 0, max: 100, step: 5, value: state.intensity, format: v => `${v}%`, onChange: v => { state.intensity = v; update(); } }),
-    control({ label: 'Reverse p.d.', name: 'reverse potential difference', min: 0, max: 2.5, step: 0.01, value: state.V, format: v => `${v.toFixed(2)} V`, onChange: v => { state.V = v; update(); } })
+    control({ label: 'Collector p.d.', name: 'potential difference of the collector', min: -2.5, max: 2.5, step: 0.01, value: state.V, format: signed, onChange: v => { state.V = v; update(); } })
   ];
-  const svg = mount(fig, '0 -44 800 394', 'Photocell: ultraviolet light falls on a zinc plate in a vacuum tube and releases electrons, which cross towards a collector made negative by a variable supply. A microammeter reads the current', rows);
+  const svg = mount(fig, '0 -44 800 394', 'Photocell: ultraviolet light falls on a zinc plate in a vacuum tube and releases electrons, which cross towards a collector whose potential a variable supply sets. A microammeter reads the current', rows);
   fig.style.setProperty('--sim-label-w', '200px');
 
   let s = `<rect x="150" y="20" width="540" height="170" rx="85" class="inset"/>`;
   s += `<rect x="230" y="50" width="16" height="110" rx="4" style="fill:var(--aluminum)"/>` + `<rect x="632" y="50" width="16" height="110" rx="4" style="fill:var(--lead)"/>`;
   s += P.text(222, 236, 'zinc', 'lbl small', 'end') + P.text(222, 268, 'Φ = 4.30 eV', 'lbl mono small', 'end') + P.text(656, 236, 'collector', 'lbl small', 'start');
-  s += `<path d="M238,160 V290 H330 M400,290 H470 M600,290 H640 V160" class="cable"/>`;
-  s += `<line x1="330" y1="266" x2="330" y2="314" class="tick" style="stroke-width:5"/><line x1="346" y1="276" x2="346" y2="304" class="tick"/><line x1="384" y1="266" x2="384" y2="314" class="tick" style="stroke-width:5"/><line x1="400" y1="276" x2="400" y2="304" class="tick"/><line x1="350" y1="290" x2="380" y2="290" class="guide"/>`;
-  s += P.text(318, 256, '+', 'lbl strong') + P.text(412, 256, '−', 'lbl strong') + `<text data-out="V" x="365" y="346" class="lbl mono small" text-anchor="middle"></text>`;
-  s += `<rect x="470" y="262" width="130" height="56" rx="12" class="node"/><text data-out="I" x="535" y="300" class="lbl mono strong" text-anchor="middle"></text>`;
+  s += `<path d="M238,160 V290 H330 M400,290 H455 M615,290 H640 V160" class="cable"/>`;
+  // The supply's cells, + on the left (the metal) as drawn; mirrored when the collector is positive.
+  s += `<g data-cells><line x1="330" y1="266" x2="330" y2="314" class="tick" style="stroke-width:5"/><line x1="346" y1="276" x2="346" y2="304" class="tick"/><line x1="384" y1="266" x2="384" y2="314" class="tick" style="stroke-width:5"/><line x1="400" y1="276" x2="400" y2="304" class="tick"/><line x1="350" y1="290" x2="380" y2="290" class="guide"/></g>`;
+  s += `<g data-signs>${P.text(318, 256, '+', 'lbl strong')}${P.text(412, 256, '−', 'lbl strong')}</g><text data-out="V" x="365" y="346" class="lbl mono small" text-anchor="middle"></text>`;
+  s += `<rect x="455" y="262" width="160" height="56" rx="12" class="node"/><text data-out="I" x="535" y="300" class="lbl mono strong" text-anchor="middle"></text>`;
   s += `<g data-light></g><text data-out="hf" x="40" y="-20" class="lbl mono small" text-anchor="start" style="fill:var(--photon)"></text>`;
   s += `<text data-out="none" x="439" y="112" class="lbl italic small" text-anchor="middle">no electrons emitted</text><g data-electrons></g>`;
   svg.innerHTML = s;
@@ -76,8 +79,15 @@ function photocell(fig) {
   function update() {
     const E = eMax(), hf = HC / state.lambda;
     out('hf').textContent = `ultraviolet, hf = ${hf.toFixed(2)} eV`;
-    out('V').textContent = `${state.V.toFixed(2)} V`;
-    const I = E > 0 ? I_FULL * state.intensity / 100 * Math.max(0, 1 - state.V / E) : 0;
+    out('V').textContent = `${Math.abs(state.V).toFixed(2)} V`;
+    const forward = state.V > 0, signs = svg.querySelectorAll('[data-signs] text');
+    svg.querySelector('[data-cells]').setAttribute('transform', forward ? 'matrix(-1 0 0 1 730 0)' : '');
+    signs[0].textContent = forward ? '−' : '+';
+    signs[1].textContent = forward ? '+' : '−';
+    svg.querySelector('[data-signs]').style.display = state.V ? '' : 'none';
+    // A positive collector collects every electron; a negative one turns back those with less than eV.
+    const reach = forward ? 1 : Math.max(0, 1 + state.V / E);
+    const I = E > 0 ? I_FULL * state.intensity / 100 * reach : 0;
     out('I').textContent = `${I.toFixed(2)} μA`;
     out('none').style.display = E > 0 || !state.intensity ? 'none' : '';
     // Shorter wavelength, closer waves; more intensity, more of them.
@@ -92,12 +102,12 @@ function photocell(fig) {
   update();
   if (reduce) return;
 
-  // Each electron leaves with a kinetic energy between 0 and E max and is slowed by the field:
-  // one with exactly eV just reaches the collector.
+  // Each electron leaves with a kinetic energy between 0 and E max. A negative collector slows it, so
+  // one with exactly e|V| just reaches it; a positive collector speeds every electron across.
   const electrons = [];
   let due = 0;
   run(fig, dt => {
-    const E = eMax(), a = C * C * state.V / (2 * L);
+    const E = eMax(), a = -C * C * state.V / (2 * L);
     if (E > 0 && state.intensity) {
       due += dt * 30 * state.intensity / 100;
       while (due >= 1 && electrons.length < 160) {
