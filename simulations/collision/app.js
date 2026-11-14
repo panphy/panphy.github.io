@@ -14,7 +14,6 @@ const ui = {
     trailsToggle: document.getElementById('trailsToggle'),
     arrowsToggle: document.getElementById('arrowsToggle'),
     physicsStepperGrid: document.getElementById('physicsStepperGrid'),
-    gravityHelp: document.getElementById('gravityHelp'),
     controlsToggle: document.getElementById('controlsToggle'),
     controlsPanel: document.getElementById('controlsPanel'),
     controlsClose: document.getElementById('controlsClose'),
@@ -719,11 +718,13 @@ function createStepper({
     decimals,
     value,
     ariaLabel = labelText,
+    tooltip = '',
     onChange
 }) {
     const id = `stepper-${++stepperIdCounter}`;
     const block = document.createElement('div');
     block.className = 'control-block stepper-block';
+    if (tooltip) block.title = tooltip;
 
     const row = document.createElement('span');
     row.className = 'control-label-row';
@@ -1036,6 +1037,7 @@ function renderBallControls(focusTab = false) {
         decimals: 2,
         value: sphere.launchVelocity.x,
         ariaLabel: `launch velocity${state.oneD ? '' : ' x'} of ${ballName}`,
+        tooltip: 'Positive velocity points right',
         onChange: (next) => {
             sphere.launchVelocity.x = next;
             refreshSummary();
@@ -1054,6 +1056,7 @@ function renderBallControls(focusTab = false) {
             decimals: 2,
             value: sphere.launchVelocity.y,
             ariaLabel: `launch velocity y of ${ballName}`,
+            tooltip: 'Positive velocity points up',
             onChange: (next) => {
                 sphere.launchVelocity.y = next;
                 refreshSummary();
@@ -3638,6 +3641,7 @@ function buildPhysicsSteppers() {
         decimals: 2,
         value: state.ballRestitution,
         ariaLabel: 'coefficient of restitution between balls',
+        tooltip: 'e is the coefficient of restitution: 1 is elastic, 0 is perfectly inelastic',
         onChange: (next) => {
             state.ballRestitution = next;
         }
@@ -3650,6 +3654,7 @@ function buildPhysicsSteppers() {
         decimals: 2,
         value: state.wallRestitution,
         ariaLabel: 'coefficient of restitution with the walls',
+        tooltip: 'e is the coefficient of restitution: 1 is elastic, 0 is perfectly inelastic',
         onChange: (next) => {
             state.wallRestitution = next;
         }
@@ -3710,7 +3715,7 @@ function setAirDrag(value) {
 
 function updateOneDDependentUI() {
     physicsSteppers.gravity.setDisabled(state.oneD);
-    ui.gravityHelp.hidden = !state.oneD;
+    physicsSteppers.gravity.element.title = state.oneD ? 'Gravity is off in 1D mode because the balls move horizontally only' : '';
     renderBallControls();
     updateAddBtnState();
     renderDataPanel(true);

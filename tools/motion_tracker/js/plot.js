@@ -225,8 +225,8 @@ function setResultsView(view) {
 	graphControls.hidden = points;
 	showGraphTab.setAttribute('aria-selected', String(!points));
 	showPointsTab.setAttribute('aria-selected', String(points));
-	graphHint.textContent = points
-		? 'Positions from the origin, in the scale units'
+	graphHint.title = points
+		? 'Positions from the origin, in the scale units. Edit a value to move a mark, or click a time to show its frame.'
 		: (state.graphTouchCopyMode ? 'Tap the graph to copy it' : 'Click the graph to copy it');
 	if (points) highlightCurrentRow(true);
 }

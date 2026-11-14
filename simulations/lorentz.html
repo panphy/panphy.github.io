@@ -1805,7 +1805,7 @@
                 coordinatesDiv.innerHTML = `
                     <h3>Event Coordinates</h3>
                     <div class="coordinates-table-scroll">
-                        <table>
+                        <table${events.length ? ' title="Type a coordinate to move an event exactly"' : ""}>
                             <thead>
                                 <tr>
                                     <th rowspan="2">Event</th>
@@ -1822,7 +1822,6 @@
                             <tbody>${rows}</tbody>
                         </table>
                     </div>
-                    ${events.length ? `<p class="table-hint">Type a coordinate to move an event exactly.</p>` : ""}
                 `;
                 updateEventTable();
             }

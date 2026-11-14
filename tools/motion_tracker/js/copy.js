@@ -194,7 +194,7 @@ function initializeCopy() {
 		chartCanvasContainer.setAttribute('role', 'group');
 		chartCanvasContainer.setAttribute('aria-label', 'Graph copy actions');
 		chartCopyActionButton.hidden = false;
-		graphHint.textContent = 'Tap the graph to copy it';
+		graphHint.title = 'Tap the graph to copy it';
 	} else {
 		chartCanvasContainer.tabIndex = 0;
 		chartCanvasContainer.setAttribute('role', 'button');

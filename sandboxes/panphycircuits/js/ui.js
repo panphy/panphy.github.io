@@ -188,19 +188,19 @@
     // label, then a slider with the range at its ends; switches are one row.
     function field(p, value, compId, disabled = false) {
       const id = `f-${compId}-${p.key}`;
-      const help = p.help ? `<p class="field-help">${esc(p.help)}</p>` : '';
+      const tip = p.help ? ` title="${esc(p.help)}"` : '';
       if (p.kind === 'bool') {
-        return `<div class="field"><label class="toggle"><span>${esc(p.label)}</span><input type="checkbox" id="${id}" data-prop="${p.key}" ${value ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>${help}</div>`;
+        return `<div class="field"><label class="toggle"${tip}><span>${esc(p.label)}</span><input type="checkbox" id="${id}" data-prop="${p.key}" ${value ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label></div>`;
       }
       if (p.kind === 'select') {
-        return `<div class="field field-stack"><label for="${id}">${esc(p.label)}</label><select id="${id}" data-prop="${p.key}"${disabled ? ' disabled' : ''}>${p.options.map((o) => `<option value="${esc(o.value)}" ${o.value === value ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>${help}</div>`;
+        return `<div class="field field-stack"><label for="${id}"${tip}>${esc(p.label)}</label><select id="${id}" data-prop="${p.key}"${disabled ? ' disabled' : ''}>${p.options.map((o) => `<option value="${esc(o.value)}" ${o.value === value ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select></div>`;
       }
       const unit = p.unit || '';
       const [lo, hi] = rangeEnds(p);
-      return `<div class="field"><div class="field-row"><label for="${id}">${esc(p.label)}</label>` +
+      return `<div class="field"><div class="field-row"><label for="${id}"${tip}>${esc(p.label)}</label>` +
         `<div class="num"><input id="${id}" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" data-prop="${p.key}"${disabled ? ' disabled' : ''} value="${esc(fmtField(p, value))}" aria-describedby="${id}-err"><span class="unit">${esc(unit)}</span></div></div>` +
         `<input type="range" class="slider" min="0" max="1000" step="1" value="${toSlider(p, value)}" data-slider="${p.key}"${disabled ? ' disabled' : ''} aria-label="${esc(p.label)} slider">` +
-        `<p class="field-range"><span>${esc(lo)}</span><span>${esc(hi)}</span></p><p class="field-err" id="${id}-err" role="alert"></p>${help}</div>`;
+        `<p class="field-range"><span>${esc(lo)}</span><span>${esc(hi)}</span></p><p class="field-err" id="${id}-err" role="alert"></p></div>`;
     }
     function fmtField(p, v) {
       if (p.unit === '%' || p.unit === '°C' || p.unit === 'K' || !p.unit) return String(Math.round(v * 1000) / 1000);
@@ -328,12 +328,11 @@
 
     function renderDisplayMenu() {
       const s = app.doc.settings;
-      const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
+      const toggle = (key, label, tip = '') => `<label class="toggle"${tip ? ` title="${tip}"` : ''}><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
       const opt = (v, label) => `<option value="${v}" ${s.logicStyle === v ? 'selected' : ''}>${label}</option>`;
       $('display-menu').innerHTML = `<p class="icard-label">Display</p>` +
-        toggle('showLabels', 'Labels') + toggle('showValues', 'Values') + toggle('currentFlow', 'Animate current') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
-        `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', 'Standard shapes')}${opt('iec', 'IEC rectangles')}</select></div>` +
-        `<p class="menu-note">Animated current shows conventional current, from + to −. Values appear beside the labels in the circuit diagram.</p>`;
+        toggle('showLabels', 'Labels') + toggle('showValues', 'Values', 'Values appear beside the labels in the circuit diagram') + toggle('currentFlow', 'Animate current', 'Animated current shows conventional current, from + to −') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
+        `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', 'Standard shapes')}${opt('iec', 'IEC rectangles')}</select></div>`;
     }
     const displayBtn = $('btn-display'), displayMenu = $('display-menu');
     const closeDisplay = () => { displayMenu.hidden = true; displayBtn.setAttribute('aria-expanded', 'false'); };
@@ -602,7 +601,7 @@
       quick.dataset.view = app.doc.view;
       quick.setAttribute('aria-label', `${c.label} · ${def.name} settings`);
       quick.innerHTML = def.props.map(p => field(p, c.props[p.key], 'quick-' + id, c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv')))).join('');
-      quick.querySelectorAll('.field-range, .field-help').forEach(el => el.remove());
+      quick.querySelectorAll('.field-range').forEach(el => el.remove());
       quick.style.maxHeight = '';
       quick.hidden = false;
       const rect = quick.getBoundingClientRect();

@@ -66,7 +66,6 @@ const teVal = $('teVal');
 const fastForwardToggle = $('fastForwardToggle');
 const playPauseBtn = $('playPauseBtn');
 const resetBtn = $('resetBtn');
-const simHint = $('simHint');
 const fastForwardBadge = $('fastForwardBadge');
 const presetButtons = {
   solid: $('presetSolidBtn'),
@@ -638,13 +637,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-const coarsePointer = window.matchMedia('(pointer: coarse)');
-function updateHint() {
-  simHint.textContent = coarsePointer.matches ? 'Drag to rotate · Pinch to zoom' : 'Drag to rotate · Scroll to zoom';
-}
-coarsePointer.addEventListener('change', updateHint);
-updateHint();
 
 new ResizeObserver(resize).observe(simPanel);
 

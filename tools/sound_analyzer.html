@@ -570,7 +570,7 @@
     <div class="plots">
     <!-- Spectrum Panel (collapsible) -->
     <details class="simulation-area" id="spectrum-panel" open>
-      <summary>Spectrum</summary>
+      <summary title="Drag across the spectrum to zoom into a frequency range">Spectrum</summary>
       <div id="visualizer-container" class="panel-body">
         <div class="spectrum-actions">
           <button id="resetZoomBtn" class="spectrum-reset is-hidden" type="button"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>Reset zoom</span></button>
@@ -579,12 +579,11 @@
         <canvas id="visualizer" width="800" height="200"></canvas>
         <div id="tooltip"></div>
       </div>
-    <p class="plot-hint">Drag across the spectrum to zoom into a frequency range.</p>
     </details>
 
     <!-- Oscilloscope Panel -->
     <section class="simulation-area" id="waveform-panel">
-      <div class="panel-header">Oscilloscope</div>
+      <div class="panel-header" title="Pause, then drag the markers to measure a time interval">Oscilloscope</div>
       <div id="waveform-container" class="panel-body">
         <div class="waveform-stage"><canvas id="waveform" width="800" height="200"></canvas></div>
         <div class="grid-legend">
@@ -592,7 +591,6 @@
           <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- /div</span></span>
         </div>
       </div>
-      <p class="plot-hint">Pause, then drag the markers to measure a time interval.</p>
     </section>
 
     </div>
@@ -649,12 +647,11 @@
       <div class="control-section">
         <h3 class="section-title">Actions</h3>
         <div class="button-group">
-          <button id="toggleBtn" class="btn-primary"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 11 7-11 7Z"/></svg><span>Start</span></button>
+          <button id="toggleBtn" class="btn-primary" title="Start / pause (Space)"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 11 7-11 7Z"/></svg><span>Start</span></button>
           <button id="exportSpectrumBtn" class="btn-secondary" disabled><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></svg><span>Export Spectrum (.csv)</span></button>
           <button id="exportWaveformBtn" class="btn-secondary" disabled><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></svg><span>Export Waveform (.csv)</span></button>
         </div>
       </div>
-    <p class="hint-text"><kbd>Space</kbd> start / pause</p>
     </aside>
   </main>
 

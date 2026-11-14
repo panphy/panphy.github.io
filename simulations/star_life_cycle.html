@@ -156,7 +156,6 @@
             <canvas id="mini-hr-canvas" width="300" height="230" role="img" aria-label="Small Hertzsprung–Russell diagram showing where the star is now"></canvas>
             <figcaption id="mini-hr-caption" class="mono"></figcaption>
           </figure>
-          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Click the model, then scroll to zoom</p>
         </div>
         <div class="side-controls" id="side-controls">
         <div class="fs-mass" id="fs-mass" role="group" aria-label="Starting mass" hidden></div>
@@ -176,11 +175,10 @@
             <button type="button" data-speed="1" aria-pressed="true">1×</button>
             <button type="button" data-speed="2" aria-pressed="false">2×</button>
           </div>
-          <button type="button" id="cutaway" class="switch" aria-pressed="false" aria-describedby="cutaway-note"><span class="switch-label">Cutaway</span><span class="switch-track" aria-hidden="true"></span></button>
+          <button type="button" id="cutaway" class="switch" aria-pressed="false"><span class="switch-label">Cutaway</span><span class="switch-track" aria-hidden="true"></span></button>
           <button type="button" id="gas" class="switch" aria-pressed="false" hidden title="Add a disk of gas spiraling into the black hole"><span class="switch-label">Infalling gas</span><span class="switch-track" aria-hidden="true"></span></button>
           <button type="button" id="reset" title="Start again: the Sun, its first stage, normal speed and the starting view."><svg viewBox="0 0 24 24" aria-hidden="true"><path class="stroke" d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg><span>Reset</span></button>
         </div>
-        <p class="cutaway-note" id="cutaway-note" hidden>This stage has no layers inside to cut away.</p>
         </div>
       </div>
 
@@ -203,10 +201,9 @@
     <section class="charts">
       <div class="card">
         <p class="eyebrow">THE HERTZSPRUNG–RUSSELL DIAGRAM</p>
-        <h2>Brightness against temperature</h2>
+        <h2 title="A star that crosses the dashed lines is growing or shrinking">Brightness against temperature</h2>
         <div class="hr-wrap"><canvas id="hr-canvas" role="img" aria-label="Hertzsprung–Russell diagram showing this star's track"></canvas></div>
         <p class="caption" id="hr-caption"></p>
-        <p class="caption">A star that crosses the dashed lines is growing or shrinking.</p>
       </div>
       <div class="card">
         <p class="eyebrow">THE WHOLE LIFE, TO SCALE</p>

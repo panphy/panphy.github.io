@@ -193,8 +193,7 @@
 		<section id="graphPane" class="mt-pane" aria-labelledby="graphPaneTitle">
 			<div class="pane-head">
 				<div class="pane-title">
-					<h2 class="pane-heading" id="graphPaneTitle">Results</h2>
-					<p class="pane-hint" id="graphHint">Click the graph to copy it</p>
+					<h2 class="pane-heading" id="graphPaneTitle" title="Click the graph to copy it">Results</h2>
 				</div>
 				<div class="mt-segmented" role="tablist" aria-label="Results view">
 					<button type="button" id="showGraph" class="mt-segment" role="tab" aria-selected="true" aria-controls="graphView">Graph</button>
@@ -234,7 +233,6 @@
 					</div>
 				</div>
 				<div id="pointEditor" role="tabpanel" aria-labelledby="showPoints" hidden>
-					<p class="points-note" id="pointsNote">Edit a value to move a mark, or click a time to show its frame.</p>
 					<div class="points-scroll">
 						<table class="points-table">
 							<thead><tr><th scope="col">t (s)</th><th scope="col" id="pointXHead">x (px)</th><th scope="col" id="pointYHead">y (px)</th><th scope="col"><span hidden>Delete</span></th></tr></thead>
@@ -279,7 +277,6 @@
 	<dialog id="exportPrompt" class="mt-dialog" aria-labelledby="exportTitle">
 		<form autocomplete="off" novalidate>
 			<h2 class="modal-title" id="exportTitle">Export CSV</h2>
-			<p class="modal-lead">Positions, velocities and smoothed velocities, with times, in one file.</p>
 			<div class="modal-field">
 				<label class="modal-field-label" for="exportFilename">File name</label>
 				<input type="text" id="exportFilename" class="modal-input" value="panphytrack_data">
@@ -295,19 +292,17 @@
 		<form autocomplete="off" novalidate>
 			<h2 class="modal-title" id="frameRateTitle">Frame rate</h2>
 			<div class="modal-field" id="detectedFpsSection">
-				<label class="modal-field-label" for="userPlaybackFrameRate">Video frame rate</label>
+				<label class="modal-field-label" for="userPlaybackFrameRate" title="The detected value is the playback frame rate, not the original filming rate. Correct it if you know the video's frame rate.">Video frame rate</label>
 				<div class="modal-input-suffix"><input id="userPlaybackFrameRate" class="modal-input" type="number" min="0" step="any" inputmode="decimal" required><span>fps</span></div>
 				<span class="detected-chip">Detected: <span id="detectedFpsDisplay">detecting&hellip;</span></span>
-				<p class="modal-hint">This estimates the playback frame rate, not the original filming rate. Correct it if you know the video's frame rate.</p>
 			</div>
-			<label class="modal-check">
+			<label class="modal-check" title="Filmed at a different rate from the one it plays at, such as 240 fps slow motion that plays at 30 fps">
 				<input type="checkbox" id="specialRecordingMode">
-				<span>Slow-motion or time-lapse recording<small>Filmed at a different rate from the one it plays at, such as 240 fps slow motion that plays at 30 fps.</small></span>
+				<span>Slow-motion or time-lapse recording</span>
 			</label>
 			<div class="modal-field" id="captureRateSection" style="display: none;">
-				<label class="modal-field-label" for="userCaptureFrameRate">Frame rate when filmed</label>
+				<label class="modal-field-label" for="userCaptureFrameRate" title="The camera's original recording rate, such as 240 fps. It gives real elapsed times and velocities; the app cannot detect it.">Frame rate when filmed</label>
 				<div class="modal-input-suffix"><input type="number" id="userCaptureFrameRate" class="modal-input" value="240" min="0" step="any" inputmode="decimal" placeholder="e.g. 240"><span>fps</span></div>
-				<p class="modal-hint">Use the camera’s original recording rate, such as 240 fps. This gives real elapsed times and velocities; the app cannot detect this rate automatically.</p>
 			</div>
 			<div class="modal-buttons">
 				<button type="button" id="cancelFrameRate">Cancel</button>
