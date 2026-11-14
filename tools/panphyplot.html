@@ -449,7 +449,7 @@
 			<p id="formula-reads" class="neo-dialog-note neo-formula-reads" aria-live="polite"></p>
 			<p id="formula-columns-label" class="neo-dialog-note">Columns</p>
 			<div id="formula-references" class="neo-formula-chips" role="group" aria-labelledby="formula-columns-label"></div>
-			<p class="neo-dialog-note">Use <code>*</code> to multiply and <code>^</code> for powers. Functions include <code>sqrt</code>, <code>log</code> (natural), <code>log10</code>, <code>exp</code>, <code>sin</code> and <code>mean</code>. <button type="button" class="neo-link-button" id="formula-help">Math reference</button></p>
+			<p class="neo-dialog-note"><button type="button" class="neo-link-button" id="formula-help">Math reference</button></p>
 			<div class="neo-dialog-pair">
 				<div>
 					<label for="formula-name">Column name</label>
@@ -473,14 +473,11 @@
 	<dialog id="chart-type-dialog" class="neo-dialog" aria-labelledby="chart-type-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="chart-type-dialog-title">Start a bar chart</h2>
-			<p class="neo-dialog-note" id="chart-type-dialog-note"></p>
 			<button type="button" class="neo-choice" id="chart-type-blank">
 				<span class="neo-choice-title" id="chart-type-blank-title">New blank bar sheet</span>
-				<span class="neo-choice-note" id="chart-type-blank-note"></span>
 			</button>
 			<button type="button" class="neo-choice" id="chart-type-copy">
 				<span class="neo-choice-title" id="chart-type-copy-title">Copy this data to a new bar sheet</span>
-				<span class="neo-choice-note" id="chart-type-copy-note"></span>
 			</button>
 			<div class="neo-dialog-actions">
 				<button type="button" class="neo-dialog-cancel" data-close>Cancel</button>
@@ -548,7 +545,6 @@
 	<dialog id="fill-dialog" class="neo-dialog" aria-labelledby="fill-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="fill-dialog-title">Fill column</h2>
-			<p id="fill-summary" class="neo-dialog-note"></p>
 			<label for="fill-value">Value</label>
 			<div class="neo-fill-row">
 				<input type="text" id="fill-value" inputmode="decimal" autocomplete="off" placeholder="e.g. 0.05">
@@ -565,7 +561,6 @@
 	<dialog id="mean-dialog" class="neo-dialog" aria-labelledby="mean-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="mean-dialog-title">Mean of repeats</h2>
-			<p class="neo-dialog-note">Tick the columns of repeat readings. A new formula column holds their mean, row by row; a row with a blank reading stays blank.</p>
 			<fieldset id="mean-columns" class="neo-checklist">
 				<legend>Repeat readings</legend>
 			</fieldset>
@@ -582,7 +577,6 @@
 	<dialog id="table-dialog" class="neo-dialog neo-dialog-wide" aria-labelledby="table-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="table-dialog-title">View Table</h2>
-			<p class="neo-dialog-note">Each value is shown with its own ± uncertainty. Copy the table into a spreadsheet, a document or a report.</p>
 			<div class="neo-table-wrap neo-table-view-wrap">
 				<table class="neo-table neo-table-view" id="table-view"></table>
 			</div>
@@ -599,9 +593,7 @@
 	<dialog id="csv-dialog" class="neo-dialog neo-dialog-wide" aria-labelledby="csv-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="csv-dialog-title">Import CSV</h2>
-			<p id="csv-summary" class="neo-dialog-note"></p>
 			<label class="neo-check"><input type="checkbox" id="csv-headers"> The first row holds column names (such as <code>L / m</code>)</label>
-			<p class="neo-dialog-note" id="csv-roles-note">Choose a role for each column. Nothing is guessed silently: check the suggestions before importing.</p>
 			<div class="neo-table-wrap neo-csv-preview">
 				<table class="neo-table" id="csv-preview"></table>
 			</div>
