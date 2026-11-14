@@ -247,20 +247,10 @@ let pendingChartType = null;
 
 function openChartTypeDialog(type) {
 	const bar = type === 'bar';
-	const name = getSheetDisplayName(plotState.activeSheet);
 	pendingChartType = type;
 	document.getElementById('chart-type-dialog-title').textContent = bar ? 'Start a bar chart' : 'Start a scatter graph';
-	document.getElementById('chart-type-dialog-note').textContent = bar
-		? `"${name}" is a scatter sheet with data, so it stays a scatter graph. A bar chart goes on a new sheet.`
-		: `"${name}" is a bar sheet with data, so it stays a bar chart. A scatter graph goes on a new sheet.`;
 	document.getElementById('chart-type-blank-title').textContent = bar ? 'New blank bar sheet' : 'New blank scatter sheet';
-	document.getElementById('chart-type-blank-note').textContent = bar
-		? 'An empty table in which each column is a bar.'
-		: 'An empty table with columns x and y.';
 	document.getElementById('chart-type-copy-title').textContent = bar ? 'Copy this data to a new bar sheet' : 'Copy this data to a new scatter sheet';
-	document.getElementById('chart-type-copy-note').textContent = bar
-		? 'Each column becomes a bar, as tall as the mean of its values. Units, formulas and fits are not copied.'
-		: 'The first column becomes X and the others become Y. The axis titles are not copied.';
 	openDialog('chart-type-dialog');
 	document.getElementById('chart-type-blank').focus();
 }
@@ -341,15 +331,6 @@ function openFillDialog(sheet, column) {
 	document.getElementById('fill-dialog-title').textContent = column.name.trim() ? `Fill ${label}` : `Fill column ${label}`;
 	document.getElementById('fill-unit').textContent = percent ? '%' : (column.unit || '');
 	const count = target.rows.length;
-	const rowsText = `${count} ${count === 1 ? 'row' : 'rows'}`;
-	const summary = !count
-		? (target.owner
-			? `${PlotModel.getColumnLabel(sheet, target.owner)} has no readings yet, so there is nothing to fill.`
-			: 'This sheet has no data yet, so there is nothing to fill.')
-		: target.owner
-			? `Sets ${label} in the ${rowsText} that have a reading of ${PlotModel.getColumnLabel(sheet, target.owner)}. Rows without a reading stay empty.`
-			: `Sets ${label} in the ${rowsText} that have data.`;
-	document.getElementById('fill-summary').textContent = summary;
 	const input = document.getElementById('fill-value');
 	input.value = '';
 	input.disabled = !count;
@@ -466,9 +447,6 @@ function openCsvDialog() {
 	const { rows } = csvImport;
 	// From a bar sheet the file is imported as bars: every column is a bar, so there are no roles to choose.
 	csvImport.bar = PlotModel.isBarSheet(getActiveSheet());
-	document.getElementById('csv-roles-note').textContent = csvImport.bar
-		? 'This sheet is a bar chart, so each column is imported as a bar and its rows as repeat readings.'
-		: 'Choose a role for each column. Nothing is guessed silently: check the suggestions before importing.';
 	const width = Math.max(...rows.map(row => row.length));
 	const firstRowIsText = rows.length > 1 && rows[0].some(cell => cell !== '' && !Number.isFinite(PlotModel.parseNumber(cell)));
 	document.getElementById('csv-headers').checked = firstRowIsText;
@@ -547,8 +525,6 @@ function renderCsvPreview() {
 		body.appendChild(tr);
 	});
 	table.replaceChildren(head, body);
-	const more = data.length > CSV_PREVIEW_ROWS ? `, showing the first ${CSV_PREVIEW_ROWS}` : '';
-	document.getElementById('csv-summary').textContent = `${data.length} ${data.length === 1 ? 'row' : 'rows'} and ${csvImport.width} ${csvImport.width === 1 ? 'column' : 'columns'}${more}.`;
 }
 
 function applyCsvImport() {
