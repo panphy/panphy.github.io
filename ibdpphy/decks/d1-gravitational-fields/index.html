@@ -970,23 +970,14 @@
       <section class="slide hl" data-title="HL: Changing orbit">
         <p class="eyebrow">Worked example</p>
         <h2>Raising a 500 kg satellite to a higher orbit<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">How much energy is needed? \(G M = 3.98 \times 10^{14} \,\mathrm{N} \,\mathrm{m}^{2} \,\mathrm{kg}^{-1}\)</span>
             <span class="say">From \(r_{1} = 6.77 \times 10^{6} \,\mathrm{m}\) to \(r_{2} = 4.22 \times 10^{7} \,\mathrm{m}\)</span>
             <span class="step">\(E = -\dfrac{G M m}{2r}\)</span>
             <span class="step">\(\Delta E = \dfrac{G M m}{2} \left(\dfrac{1}{r_{1}} - \dfrac{1}{r_{2}}\right)\)</span>
-          </div>
-          <div class="stack">
-            <table class="facts step">
-              <thead><tr><th></th><th>Low orbit</th><th>High orbit</th></tr></thead>
-              <tbody>
-                <tr><td>\(E_\mathrm{k}\) / GJ</td><td class="num">+14.7</td><td class="num">+2.4</td></tr>
-                <tr><td>\(E_\mathrm{p}\) / GJ</td><td class="num">−29.4</td><td class="num">−4.7</td></tr>
-                <tr><td>Total / GJ</td><td class="num">−14.7</td><td class="num">−2.4</td></tr>
-              </tbody>
-            </table>
-            <div class="idea step">Kinetic energy <b>falls</b> by 12.3 GJ. Potential energy <b>rises</b> by 24.7 GJ.</div>
+            <span class="step">\(\Delta E = \dfrac{3.98 \times 10^{14} \times 500}{2} \left(\dfrac{1}{6.77 \times 10^{6}} - \dfrac{1}{4.22 \times 10^{7}}\right)\)</span>
+            <span class="step">\(\Delta E = \class{res}{1.23 \times 10^{10} \,\mathrm{J}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
@@ -1004,12 +995,21 @@
       </section>
 
       <section class="slide hl" data-title="HL: Changing orbit">
-        <p class="eyebrow">Worked example, continued</p>
+        <p class="eyebrow">Worked example: the energy stores</p>
         <h2>Raising a 500 kg satellite to a higher orbit<span>.</span></h2>
-        <div class="stack center" style="align-items: stretch;">
-          <div class="work">
-            <span class="step">\(\Delta E = \dfrac{3.98 \times 10^{14} \times 500}{2} \left(\dfrac{1}{6.77 \times 10^{6}} - \dfrac{1}{4.22 \times 10^{7}}\right)\)</span>
-            <span class="step">\(\Delta E = \class{res}{1.23 \times 10^{10} \,\mathrm{J}}\)</span>
+        <div class="split even">
+          <div class="stack">
+            <table class="facts step">
+              <thead><tr><th></th><th>Low orbit</th><th>High orbit</th></tr></thead>
+              <tbody>
+                <tr><td>\(E_\mathrm{k}\) / GJ</td><td class="num">+14.7</td><td class="num">+2.4</td></tr>
+                <tr><td>\(E_\mathrm{p}\) / GJ</td><td class="num">−29.4</td><td class="num">−4.7</td></tr>
+                <tr><td>Total / GJ</td><td class="num">−14.7</td><td class="num">−2.4</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="stack">
+            <div class="idea step">Kinetic energy <b>falls</b> by 12.3 GJ. Potential energy <b>rises</b> by 24.7 GJ.</div>
           </div>
         </div>
         <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
@@ -1050,20 +1050,15 @@
       <section class="slide hl" data-title="HL: Launching into orbit">
         <p class="eyebrow">Worked example</p>
         <h2>From the launch pad to a low orbit<span>.</span></h2>
-        <div class="split even">
+        <div class="split even" style="grid-template-columns: minmax(0, 1fr);">
           <div class="work">
             <span class="ask">How much energy is needed to put it into the orbit? \(G M = 3.98 \times 10^{14} \,\mathrm{N} \,\mathrm{m}^{2} \,\mathrm{kg}^{-1}\)</span>
             <span class="say">A 500 kg satellite, at rest on a planet that does not rotate</span>
             <span class="say">\(R = 6.37 \times 10^{6} \,\mathrm{m}\), orbit \(r = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
             <span class="step">\(E_\mathrm{surface} = -\dfrac{G M m}{R}\), &nbsp;\(E_\mathrm{orbit} = -\dfrac{G M m}{2r}\)</span>
-          </div>
-          <div class="stack">
-            <ul class="points small">
-              <li class="step">On the pad: potential energy <b>only</b></li>
-              <li class="step">In orbit: potential <b>and</b> kinetic</li>
-              <li class="step">Most of the energy goes into <b>speed</b>, not height</li>
-            </ul>
-            <div class="idea step">To escape from that orbit: a further \(\dfrac{G M m}{2r} = 1.47 \times 10^{10} \,\mathrm{J}\).</div>
+            <span class="step">\(\Delta E = G M m \left(\dfrac{1}{R} - \dfrac{1}{2r}\right)\)</span>
+            <span class="step">\(\Delta E = 3.98 \times 10^{14} \times 500 \left(\dfrac{1}{6.37 \times 10^{6}} - \dfrac{1}{1.354 \times 10^{7}}\right)\)</span>
+            <span class="step">\(\Delta E = \class{res}{1.65 \times 10^{10} \,\mathrm{J}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
@@ -1081,13 +1076,18 @@
       </section>
 
       <section class="slide hl" data-title="HL: Launching into orbit">
-        <p class="eyebrow">Worked example, continued</p>
+        <p class="eyebrow">Worked example: where the energy goes</p>
         <h2>From the launch pad to a low orbit<span>.</span></h2>
-        <div class="stack center" style="align-items: stretch;">
-          <div class="work">
-            <span class="step">\(\Delta E = G M m \left(\dfrac{1}{R} - \dfrac{1}{2r}\right)\)</span>
-            <span class="step">\(\Delta E = 3.98 \times 10^{14} \times 500 \left(\dfrac{1}{6.37 \times 10^{6}} - \dfrac{1}{1.354 \times 10^{7}}\right)\)</span>
-            <span class="step">\(\Delta E = \class{res}{1.65 \times 10^{10} \,\mathrm{J}}\)</span>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">On the pad: potential energy <b>only</b></li>
+              <li class="step">In orbit: potential <b>and</b> kinetic</li>
+              <li class="step">Most of the energy goes into <b>speed</b>, not height</li>
+            </ul>
+          </div>
+          <div class="stack">
+            <div class="idea step">To escape from that orbit: a further \(\dfrac{G M m}{2r} = 1.47 \times 10^{10} \,\mathrm{J}\).</div>
           </div>
         </div>
         <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS, ADDITIONAL HL</span><span data-page></span></div>
