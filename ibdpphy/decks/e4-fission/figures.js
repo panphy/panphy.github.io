@@ -76,14 +76,34 @@ window.DeckFigures.add(P => {
       return svg(named ? '0 0 880 620' : '0 0 880 565', s, 'A chain reaction. A neutron hits a uranium-235 nucleus, which splits into two fragments, barium-141 and krypton-92, releasing energy and three neutrons. Two of the neutrons split two more uranium-235 nuclei, whose neutrons split four more, and so on; the third neutron from each fission flies on');
     },
 
-    // A fast neutron losing speed in collisions with the nuclei of the moderator.
+    // A fast neutron losing speed in collisions with the nuclei of the moderator. On screen the neutron
+    // runs the path, slower after each collision, and each light nucleus it hits recoils; the still
+    // picture draws the path as arrows that thin as the neutron slows.
     'e4-moderator': () => {
       const pts = [[90, 250], [250, 150], [400, 320], [520, 200], [640, 300], [770, 250]], widths = [7, 5.5, 4.5, 3.5, 2.5];
+      const nuclei = pts.slice(1, -1), R = 22, r = 11;
+      const arrows = pts.slice(0, -1).map(([x, y], i) => { const [x2, y2] = pts[i + 1]; return arrow(x, y, x2 - (x2 - x) * 0.08, y2 - (y2 - y) * 0.08, 'brand-accent', widths[i]); }).join('');
       let s = `<rect x="200" y="70" width="480" height="360" rx="14" style="fill:color-mix(in srgb, var(--electron) 16%, transparent);stroke:var(--electron);stroke-width:3;stroke-dasharray:12 8"/>`;
-      pts.slice(0, -1).forEach(([x, y], i) => { const [x2, y2] = pts[i + 1]; s += arrow(x, y, x2 - (x2 - x) * 0.08, y2 - (y2 - y) * 0.08, 'brand-accent', widths[i]); });
-      s += pts.slice(1, -1).map(([x, y]) => ball(x, y, 22, 'electron', '')).join('') + neutron(pts[0][0], pts[0][1]) + neutron(pts[5][0], pts[5][1]);
       s += text(90, 200, 'fast', 'lbl strong') + text(90, 310, '~1 MeV', 'lbl mono') + text(770, 200, 'slow', 'lbl strong') + text(770, 310, '~0.03 eV', 'lbl mono') + text(440, 470, 'moderator: each collision takes some of the kinetic energy', 'lbl');
-      return svg('20 40 840 450', s, 'A fast neutron enters the moderator and collides with one light nucleus after another. Each collision takes away some of its kinetic energy, so it leaves as a slow, thermal neutron');
+      const still = arrows + nuclei.map(([x, y]) => ball(x, y, R, 'electron', '')).join('') + neutron(...pts[0]) + neutron(...pts[5]);
+      // The neutron's run: it turns where it touches each nucleus, and each leg is slower than the last.
+      const unit = (a, b) => { const d = Math.hypot(b[0] - a[0], b[1] - a[1]); return [(b[0] - a[0]) / d, (b[1] - a[1]) / d]; };
+      const turns = nuclei.map((c, i) => { const [ux, uy] = unit(pts[i], c); return [c[0] - ux * (R + r), c[1] - uy * (R + r)]; });
+      const path = [pts[0], ...turns, pts[5]], speeds = [420, 270, 185, 130, 92];
+      const legs = speeds.map((v, i) => Math.hypot(path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1]) / v);
+      const LEAD = 0.4, HOLD = 1.3, T = LEAD + legs.reduce((a, b) => a + b, 0) + HOLD;
+      const times = [LEAD]; legs.forEach(t => times.push(times.at(-1) + t));
+      const key = t => f(t / T);
+      const runner = `<g>${track([path[0], ...path, path[5]], T, { extra: `keyTimes="0;${times.map(key).join(';')};1"` })}${anim('opacity', [0, 1, 1, 0, 0], T, { extra: `keyTimes="0;${key(LEAD * 0.5)};${key(times[5] + HOLD * 0.5)};${key(times[5] + HOLD * 0.8)};1"` })}${neutron(0, 0)}</g>`;
+      // Each nucleus is knocked along the momentum it gains, then settles back.
+      const recoils = nuclei.map(([x, y], i) => {
+        const [ax, ay] = unit(pts[i], nuclei[i]), [bx, by] = unit(path[i + 1], path[i + 2]);
+        const px = ax * speeds[i] - bx * speeds[i + 1], py = ay * speeds[i] - by * speeds[i + 1], k = 18 / Math.hypot(px, py);
+        const hit = times[i + 1] / T, out = Math.min(hit + 0.03, 0.99), back = Math.min(hit + 0.2, 0.995);
+        return `<g transform="translate(${x} ${y})"><g>${track([[0, 0], [0, 0], [px * k, py * k], [0, 0], [0, 0]], T, { extra: `keyTimes="0;${f(hit)};${f(out)};${f(back)};1"` })}${ball(0, 0, R, 'electron', '')}</g></g>`;
+      }).join('');
+      const mover = `<g opacity=".3">${arrows}</g>` + recoils + runner;
+      return svg('20 40 840 450', s + twoState(still, mover), 'A fast neutron enters the moderator and collides with one light nucleus after another. Each nucleus it hits recoils, taking away some of its kinetic energy, so the neutron moves more slowly after each collision and leaves as a slow, thermal neutron');
     },
 
     // A pressurized-water reactor with its two water loops. Loop 1 is sealed and stays liquid under pressure: hot water
