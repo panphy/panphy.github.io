@@ -8,7 +8,6 @@ export const MODE_ORDER = ['efield', 'bfield', 'selector', 'cyclotron'];
 export const MODES = {
   efield: {
     title: 'CHARGE IN AN ELECTRIC FIELD',
-    date: R`\(F = qE\) · BETWEEN PARALLEL PLATES`,
     level: 'GCSE EXTENSION · A LEVEL · IB DP',
     heading: 'A uniform electric field bends a beam into a parabola.',
     description: R`Two parallel plates with a voltage across them make a uniform electric field, \(E = \dfrac{V}{d}\), pointing from the positive plate to the negative plate. A charged particle between the plates feels a constant force \(F = qE\) along the field (positive charges) or against it (negative charges). The particle keeps its horizontal speed, but speeds up steadily across the field: exactly like a ball thrown sideways in gravity.`,
@@ -18,7 +17,6 @@ export const MODES = {
   },
   bfield: {
     title: 'CHARGE IN A MAGNETIC FIELD',
-    date: R`\(F = qvB\) · CIRCLES AND HELICES`,
     level: 'A LEVEL · IB DP',
     heading: 'A magnetic force bends the path but never changes the speed.',
     description: R`A charge moving across a magnetic field feels a force \(F = qvB\), at right angles to both its velocity and the field. Because the force is always at right angles to the motion, it changes the direction but not the speed: the particle moves in a circle. The magnetic force provides the centripetal force.`,
@@ -28,7 +26,6 @@ export const MODES = {
   },
   selector: {
     title: 'VELOCITY SELECTOR',
-    date: R`CROSSED \(E\) AND \(B\) FIELDS`,
     level: 'A LEVEL · IB DP',
     heading: 'Only one speed goes straight through.',
     description: R`Here an electric field and a magnetic field act at right angles to each other and to the beam. The electric force \(qE\) is the same for every particle, but the magnetic force \(qvB\) grows with speed. For one speed, \(v = \dfrac{E}{B}\), the two forces are equal and opposite, so those particles go straight through the slit. Slower particles are pulled one way, faster ones the other.`,
@@ -38,7 +35,6 @@ export const MODES = {
   },
   cyclotron: {
     title: 'CYCLOTRON',
-    date: 'A PARTICLE ACCELERATOR',
     level: 'A LEVEL · IB DP · BEYOND',
     heading: 'Speed up in the gap, turn round in the dees.',
     description: 'A cyclotron has two hollow D-shaped electrodes (dees) between the poles of a large magnet. Inside a dee there is no electric field, so the magnetic field turns the particle in a semicircle. Each time it crosses the gap between the dees, an alternating voltage accelerates it. Faster particles move in bigger semicircles, so the path spirals outwards until the particle leaves at the edge.',

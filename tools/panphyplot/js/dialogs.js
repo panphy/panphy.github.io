@@ -63,7 +63,7 @@ function renderFormulaChips(sheet) {
 	});
 	document.getElementById('formula-references').replaceChildren(...chips);
 	document.getElementById('formula-columns-label').textContent = chips.length
-		? 'Columns: choose one to add it to the formula.'
+		? 'Columns'
 		: 'No other columns to use yet.';
 }
 

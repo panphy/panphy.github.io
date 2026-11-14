@@ -1428,7 +1428,7 @@ function selectModel(model, animate = true) {
   for (const id of ['measure', 'cloud-controls', 'radial-graph']) $(id).hidden = model !== 'cloud';
   $('look-closer').hidden = model === 'cloud';
   setMath(readout, DEFAULT_READOUT[model]);
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-date': 'date', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-model]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.model === model)));
   viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   if (previous !== model || !animate) resetView();

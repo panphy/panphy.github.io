@@ -78,12 +78,12 @@
   </header>
   <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
   <main>
-    <div class="intro"><div><p class="eyebrow">THE FIELD LAB / STEER A CHARGE</p><h1>Push it. Bend it.<br>Spin it up<span>!</span></h1></div><p>Fire electrons, protons and alpha particles through electric and magnetic fields.<br>Then build a velocity selector and a cyclotron.</p></div>
+    <div class="intro"><h1>Push it. Bend it.<br>Spin it up<span>!</span></h1></div>
     <nav class="models" aria-label="Choose an experiment">
-      <button type="button" data-mode="efield" aria-pressed="true"><span>01 / E-FIELD</span><strong>Electric field</strong><small>Parabola between plates</small></button>
-      <button type="button" data-mode="bfield" aria-pressed="false"><span>02 / B-FIELD</span><strong>Magnetic field</strong><small>Circles and helices</small></button>
-      <button type="button" data-mode="selector" aria-pressed="false"><span data-math-static>03 / \(E \times B\)</span><strong>Velocity selector</strong><small>Crossed fields</small></button>
-      <button type="button" data-mode="cyclotron" aria-pressed="false"><span>04 / ACCELERATE</span><strong>Cyclotron</strong><small>A particle accelerator</small></button>
+      <button type="button" data-mode="efield" aria-pressed="true"><strong>Electric field</strong><small>Parabola between plates</small></button>
+      <button type="button" data-mode="bfield" aria-pressed="false"><strong>Magnetic field</strong><small>Circles and helices</small></button>
+      <button type="button" data-mode="selector" aria-pressed="false"><strong>Velocity selector</strong><small>Crossed fields</small></button>
+      <button type="button" data-mode="cyclotron" aria-pressed="false"><strong>Cyclotron</strong><small>A particle accelerator</small></button>
     </nav>
     <div class="lab-strip">
       <span>YOUR MISSION <b>Learn to steer a charged particle.</b></span>
@@ -119,7 +119,7 @@
       </div>
       <aside aria-live="polite">
         <div class="guide-text">
-        <p class="eyebrow" id="mode-date"></p><h2 id="mode-heading"></h2>
+        <h2 id="mode-heading"></h2>
         <p class="level" id="mode-level"></p>
         <p id="description"></p>
         <div class="idea"><h3><svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 21 21"/></svg> Your observation mission</h3><p id="look"></p></div>

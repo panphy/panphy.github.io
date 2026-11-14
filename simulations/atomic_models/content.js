@@ -6,7 +6,6 @@ export const MODEL_ORDER = ['plum', 'rutherford', 'bohr', 'cloud'];
 export const MODELS = {
   plum: {
     title: 'PLUM PUDDING MODEL',
-    date: 'THOMSON · 1904',
     heading: 'A positive sphere, with electrons inside.',
     description: 'Negative electrons are embedded in a spread of positive charge, like fruit in a pudding. There is no nucleus in this model.',
     look: 'Zoom inside the sphere. The blue electrons sit inside it, not on an outer shell, and can only vibrate about fixed places. The + marks show positive charge spread through the whole atom.',
@@ -15,7 +14,6 @@ export const MODELS = {
   },
   rutherford: {
     title: 'RUTHERFORD MODEL',
-    date: 'RUTHERFORD · 1911',
     heading: 'A tiny nucleus. Mostly empty space.',
     description: 'Positive charge and most of the mass are concentrated in a tiny central nucleus. Electrons are outside it. This model did not specify fixed electron energy levels.',
     look: 'Find the orange nucleus, then the blue electrons around it. The orbit lines show the paths used in this animation; Rutherford’s model did not specify them. The nucleus is hugely enlarged: a real one is about 1/100 000 of the atom’s width.',
@@ -24,7 +22,6 @@ export const MODELS = {
   },
   bohr: {
     title: 'BOHR MODEL',
-    date: 'BOHR · 1913',
     heading: 'Electrons occupy fixed energy levels.',
     description: 'Bohr added allowed energy levels around the nucleus. Our carbon-12 classroom adaptation has six protons, six neutrons and six electrons (2 in the first level, 4 in the second). Neutrons were discovered later, in 1932.',
     look: 'Follow the rings labeled \\(n = 1\\) and \\(n = 2\\). Each is an allowed energy level, not a solid track. Electrons in the outer level move more slowly. Press “Excite an electron” to watch a level change.',
@@ -33,7 +30,6 @@ export const MODELS = {
   },
   cloud: {
     title: 'ELECTRON CLOUD MODEL',
-    date: 'SCHRÖDINGER · 1926',
     heading: 'Electrons as clouds of probability.',
     description: 'The quantum model keeps Bohr’s energy levels but drops fixed paths. Each electron is described by a wavefunction \\(\\psi\\), and \\(|\\psi|^2\\) gives the probability of finding it at each place. Carbon’s six electrons fill the orbitals \\(\\mathrm{1s^2\\,2s^2\\,2p^2}\\).',
     look: 'Press “Measure the position” a few times: each result is one dot, and no path joins them. Thousands of results build the cloud. Then pick an orbital to see its shape, and compare the graph of \\(P(r)\\) with the cloud.',

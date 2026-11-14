@@ -119,12 +119,12 @@
 				<div class="mt-menu-wrap mt-clear-tools">
 					<button type="button" id="clearButton" aria-label="Clear" class="mt-tool mt-tool-danger" disabled aria-expanded="false" aria-controls="clearMenu" title="Clear marks, rulers, protractors, scale, origin or video"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span><svg class="mt-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
 					<div id="clearMenu" class="mt-menu mt-menu-right" hidden>
-						<button type="button" id="clearDataPoints" class="mt-menu-item mt-menu-danger" disabled>Clear marks<small>Remove every mark</small></button>
-						<button type="button" id="clearRulers" class="mt-menu-item" disabled>Clear rulers<small>Remove every ruler from the video</small></button>
-						<button type="button" id="clearProtractors" class="mt-menu-item" disabled>Clear protractors<small>Remove every protractor from the video</small></button>
+						<button type="button" id="clearDataPoints" class="mt-menu-item mt-menu-danger" disabled>Clear marks</button>
+						<button type="button" id="clearRulers" class="mt-menu-item" disabled>Clear rulers</button>
+						<button type="button" id="clearProtractors" class="mt-menu-item" disabled>Clear protractors</button>
 						<button type="button" id="clearCalibration" class="mt-menu-item" disabled>Clear scale<small>Measure in pixels again</small></button>
 						<button type="button" id="clearOrigin" class="mt-menu-item" disabled>Clear origin<small>Back to the bottom-left corner</small></button>
-						<button type="button" id="clearVideo" class="mt-menu-item mt-menu-danger" disabled>Clear video<small>Remove the video and analysis to start over</small></button>
+						<button type="button" id="clearVideo" class="mt-menu-item mt-menu-danger" disabled>Clear video</button>
 					</div>
 				</div>
 				<input type="file" id="videoUploadInput" accept="video/*" hidden>
@@ -234,7 +234,7 @@
 					</div>
 				</div>
 				<div id="pointEditor" role="tabpanel" aria-labelledby="showPoints" hidden>
-					<p class="points-note" id="pointsNote">One mark per frame. Edit a value to move a mark; click a time to select it and show that frame. Delete removes only that mark.</p>
+					<p class="points-note" id="pointsNote">Edit a value to move a mark, or click a time to show its frame.</p>
 					<div class="points-scroll">
 						<table class="points-table">
 							<thead><tr><th scope="col">t (s)</th><th scope="col" id="pointXHead">x (px)</th><th scope="col" id="pointYHead">y (px)</th><th scope="col"><span hidden>Delete</span></th></tr></thead>

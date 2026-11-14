@@ -608,14 +608,6 @@
         .hero-brand { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.6rem; }
         .logo { height: 48px; width: auto; }
 
-        .hero-eyebrow {
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.74rem;
-            font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-        }
 
         .hero h1 {
             margin: 0;
@@ -735,19 +727,8 @@
             -webkit-backdrop-filter: blur(16px);
         }
 
-        .catalog-kicker,
-        .section-eyebrow {
-            display: block;
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-        }
 
-        .catalog-copy h2 { margin: 0.35rem 0 0.2rem; font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
-        .catalog-copy p { margin: 0; color: var(--text-secondary); }
+        .catalog-copy h2 { margin: 0; font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
 
         .filter-button {
             padding: 0.45rem 0.85rem;
@@ -809,17 +790,8 @@
             letter-spacing: -0.03em;
         }
 
-        .section h2 .section-label {
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.68rem;
-            font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
 
         .section-summary { display: flex; align-items: flex-end; justify-content: flex-end; gap: 1rem; }
-        .section-summary p { margin: 0; color: var(--text-secondary); font-size: 0.95rem; }
 
         .section-count {
             flex: none;
@@ -981,7 +953,6 @@
 
         @media (max-width: 768px) {
             .about-panel { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.8rem 1.4rem; }
-            .catalog-copy p { display: none; }
             .grid > .card:nth-child(1 of :not([hidden])) { display: flex; }
             .grid > .card:nth-child(1 of :not([hidden])) .card-art { display: block; margin: 8px 8px 0; }
             .grid > .card:nth-child(1 of :not([hidden])) .card-meta { align-self: auto; margin-top: 1rem; }
@@ -1050,7 +1021,6 @@
         <div class="hero-copy">
             <div class="hero-brand">
                 <img src="/assets/panphy.png" alt="" class="logo" onerror="this.style.display='none'">
-                <span class="hero-eyebrow">Physics in the browser</span>
             </div>
             <h1>PanPhy <em>Labs</em></h1>
             <p class="hero-tagline">Physics apps, tools, sims, and some random stuff.</p>
@@ -1079,9 +1049,7 @@
     <section class="catalog-intro" aria-labelledby="catalog-title">
         <div class="catalog-bar">
             <div class="catalog-copy">
-                <span class="catalog-kicker">Explore the collection</span>
                 <h2 id="catalog-title">Find the right physics app.</h2>
-                <p>Browse the collection by topic.</p>
             </div>
             <div class="catalog-tools">
                 <div class="filter-row" role="group" aria-label="Filter apps by topic">
@@ -1105,11 +1073,9 @@
     <section class="section app-section" id="tools" data-section="01" data-category="tools">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Build &amp; analyze</span>
-                <h2>Tools <span class="section-label">Explore</span></h2>
+                <h2>Tools</h2>
             </div>
             <div class="section-summary">
-                <p>Practical browser-based tools for writing, measuring, plotting, and investigating.</p>
                 <span class="section-count">5 apps</span>
             </div>
         </div>
@@ -1223,11 +1189,9 @@
     <section class="section app-section" id="sandboxes" data-section="02" data-category="sandboxes">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Build &amp; experiment</span>
-                <h2>Sandboxes <span class="section-label">Create</span></h2>
+                <h2>Sandboxes</h2>
             </div>
             <div class="section-summary">
-                <p>Build your own physics experiments, from circuits to mechanical systems.</p>
                 <span class="section-count">2 apps</span>
             </div>
         </div>
@@ -1298,11 +1262,9 @@
     <section class="section app-section" id="simulations" data-section="03" data-category="simulations">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">See physics move</span>
-                <h2>Simulations <span class="section-label">Interact</span></h2>
+                <h2>Simulations</h2>
             </div>
             <div class="section-summary">
-                <p>Interactive models for exploring waves, mechanics, matter, electromagnetism, nuclear physics, space, and relativity.</p>
                 <span class="section-count">12 apps</span>
             </div>
         </div>
@@ -1566,11 +1528,9 @@
     <section class="section app-section" id="for_teachers" data-section="04" data-category="for_teachers">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Made for the classroom</span>
-                <h2>For Teachers <span class="section-label">Utility</span></h2>
+                <h2>For Teachers</h2>
             </div>
             <div class="section-summary">
-                <p>Simple utilities designed for lessons, demonstrations, and assessments.</p>
                 <span class="section-count">2 apps</span>
             </div>
         </div>
@@ -1623,11 +1583,9 @@
     <section class="section app-section" id="fun" data-section="05" data-category="fun">
         <div class="section-heading">
             <div class="section-title-block">
-                <span class="section-eyebrow">Experiments &amp; play</span>
-                <h2>For Fun <span class="section-label">Play</span></h2>
+                <h2>For Fun</h2>
             </div>
             <div class="section-summary">
-                <p>Playful side projects where physics, cameras, and code get a little strange.</p>
                 <span class="section-count">2 apps</span>
             </div>
         </div>
@@ -1682,7 +1640,6 @@
     <section class="section" id="about" data-section="06">
         <div class="about-panel">
             <div>
-                <span class="section-eyebrow">Why PanPhy</span>
                 <h2>About</h2>
                 <p class="about-lead">Small, useful physics apps that run wherever a browser does.</p>
                 <div class="about-points" aria-label="PanPhy principles">

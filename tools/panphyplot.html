@@ -447,7 +447,7 @@
 				<input type="text" id="formula-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. T^2 or 4*pi^2*L/T^2" aria-describedby="formula-reads">
 			</div>
 			<p id="formula-reads" class="neo-dialog-note neo-formula-reads" aria-live="polite"></p>
-			<p id="formula-columns-label" class="neo-dialog-note">Columns: choose one to add it to the formula.</p>
+			<p id="formula-columns-label" class="neo-dialog-note">Columns</p>
 			<div id="formula-references" class="neo-formula-chips" role="group" aria-labelledby="formula-columns-label"></div>
 			<p class="neo-dialog-note">Use <code>*</code> to multiply and <code>^</code> for powers. Functions include <code>sqrt</code>, <code>log</code> (natural), <code>log10</code>, <code>exp</code>, <code>sin</code> and <code>mean</code>. <button type="button" class="neo-link-button" id="formula-help">Math reference</button></p>
 			<div class="neo-dialog-pair">
@@ -491,7 +491,6 @@
 	<dialog id="clear-dialog" class="neo-dialog" aria-labelledby="clear-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="clear-dialog-title">Clear sheet</h2>
-			<p class="neo-dialog-note">Choose what to clear. Nothing changes until you pick one.</p>
 			<button type="button" class="neo-choice" id="clear-keep-columns">
 				<span class="neo-choice-title">Clear data, keep columns</span>
 				<span class="neo-choice-note" id="clear-keep-note"></span>
@@ -522,7 +521,6 @@
 					<input type="radio" name="export-style" value="screen">
 					<span class="neo-option-text">
 						<span class="neo-choice-title">Screen</span>
-						<span class="neo-choice-note">As shown here, in the current theme and size.</span>
 					</span>
 				</label>
 			</fieldset>
@@ -532,7 +530,6 @@
 					<input type="radio" name="export-format" value="png">
 					<span class="neo-option-text">
 						<span class="neo-choice-title">PNG</span>
-						<span class="neo-choice-note">An image for slides, documents and reports.</span>
 					</span>
 				</label>
 				<label class="neo-option">

@@ -6,7 +6,6 @@ export const MODE_ORDER = ['fission', 'chain', 'fusion', 'energy'];
 export const MODES = {
   fission: {
     title: 'NUCLEAR FISSION',
-    date: 'FISSION · URANIUM-235',
     heading: 'A slow neutron splits a heavy nucleus in two.',
     description: 'Fission means splitting. When a uranium-235 nucleus absorbs a slow neutron it becomes uranium-236, which is unstable. It wobbles, stretches and splits into two smaller nuclei (here barium-141 and krypton-92) and releases 2 or 3 neutrons. The products have a little less mass than the uranium-236 nucleus; the missing mass has become about 170 MeV of energy, mostly the kinetic energy of the fragments.',
     look: 'Press “Fire a neutron”. Watch the neutron join the nucleus, the nucleus wobble and stretch, then split. Count the free neutrons that come out. Then read the equation: the top numbers and the bottom numbers both still add up.',
@@ -14,7 +13,6 @@ export const MODES = {
   },
   chain: {
     title: 'CHAIN REACTION',
-    date: 'CHAIN · A BLOCK OF FUEL',
     heading: 'One fission can cause many more.',
     description: 'Each fission releases 2 or 3 neutrons. If, on average, more than one of them goes on to cause another fission, the reaction grows very fast: a chain reaction. Only uranium-235 splits. Uranium-238 (most of natural uranium) almost always absorbs neutrons without splitting, and control rods absorb them too. Fuel nuclei are drawn as plain spheres here; each one splits as in the Fission tab.',
     look: 'Press “Start chain reaction” to fire a burst of neutrons at the block. Watch the fission rate in the graph, then push control rods in one at a time to hold the reaction steady. Try less enriched fuel and see the reaction die away.',
@@ -22,7 +20,6 @@ export const MODES = {
   },
   fusion: {
     title: 'NUCLEAR FUSION',
-    date: 'FUSION · DEUTERIUM + TRITIUM',
     heading: 'Light nuclei join, if they can get close enough.',
     description: 'Fusion means joining. Two isotopes of hydrogen, deuterium (1 proton + 1 neutron) and tritium (1 proton + 2 neutrons), can fuse into helium-4 and a fast neutron, releasing 17.6 MeV. Both nuclei are positively charged, so they repel each other. They must move extremely fast, which means the gas must be extremely hot, to get close enough for the strong nuclear force to take over.',
     look: 'Choose a temperature and press “Collide the nuclei”. If it is too cool they slow down, stop and bounce back: watch the energy graph, where the kinetic energy runs out before the top of the barrier. Raise the temperature in steps until they fuse.',
@@ -30,7 +27,6 @@ export const MODES = {
   },
   energy: {
     title: 'BINDING ENERGY',
-    date: 'ENERGY · WHY BOTH RELEASE ENERGY',
     heading: 'Why do splitting and joining both release energy?',
     description: 'Binding energy per nucleon shows how tightly a nucleus is held together. The curve rises steeply for light nuclei, peaks near iron-56 and falls slowly for heavy nuclei. Moving up the curve means the nucleons end up more tightly bound, and the difference is released as energy. Heavy nuclei split to climb the curve from the right; light nuclei fuse to climb it from the left.',
     look: 'Choose a reaction and watch the arrows: where do the nuclei start and where do they end up? Compare the energy per reaction, per nucleon and per kilogram of fuel. Click a nucleus on the curve to read its binding energy.',
