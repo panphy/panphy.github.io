@@ -332,6 +332,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; }
 h1 { font-size: 118px; line-height: 1; letter-spacing: -.02em; margin-top: 18px; }
 h1 span, h2 span { color: var(--brand-primary); }
 h2 { font-size: 64px; line-height: 1.05; letter-spacing: -.015em; margin: 10px 0 34px; }
+/* A slide with no label above its heading keeps the heading where a labeled one sits. */
+.slide > h2:first-child { margin-top: 39px; }
 h3 { font-size: 34px; line-height: 1.15; }
 .mono { font-family: var(--font-mono); }
 .nocase, .facts thead th.nocase { text-transform: none; }

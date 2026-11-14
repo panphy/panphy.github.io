@@ -157,6 +157,8 @@ body.is-fullscreen .triple-flag { bottom: calc(10px - var(--fs-extra, 0px)); }
 .slide-foot .tag::before { display: none; }
 h1, h2, h3, .slide.dark h1 { font-family: var(--font-display); font-weight: 400; text-transform: none; letter-spacing: -.015em; }
 h2 { font-size: 64px; line-height: 1.05; margin-bottom: 28px; }
+/* A slide with no label above its heading keeps the heading where a labeled one sits. */
+.slide > h2:first-child { margin-top: 39px; }
 h2 em, h3 em { box-shadow: none; color: var(--brand-primary); }
 .slide.dark h1 { font-size: 106px; line-height: 1.02; margin-top: 24px; }
 .slide.dark h1 em { color: var(--brand-primary); }
