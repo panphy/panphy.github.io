@@ -147,6 +147,8 @@ function mount(THREE, fig, index, attr, make) {
     image.alt = '';
     image.style.cssText = canvas.style.cssText;
     shot.querySelector('canvas').replaceWith(image);
+    // A thumbnail is a picture: controls the model added (sim-control.js rows) stay on the slide.
+    shot.querySelectorAll('.sim-row').forEach(node => node.remove());
     copy.querySelector('.model3d')?.remove();
     copy.querySelectorAll('svg').forEach(svg => { svg.style.display = 'none'; });
     copy.appendChild(shot);
