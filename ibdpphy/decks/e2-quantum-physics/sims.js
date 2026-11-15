@@ -1,9 +1,9 @@
 // Interactive figures for the E.2 deck, drawn over the flat pictures of ../assets/figures.js, which
 // stay for print. Controls come from ../assets/sim-control.js.
-//   data-photocell  slide 13  ultraviolet on zinc in a photocell: the wavelength, intensity and the
+//   data-photocell  slide 14  ultraviolet on zinc in a photocell: the wavelength, intensity and the
 //                             p.d. of the collector (negative slows the electrons, positive speeds
 //                             them up) can be set, and the microammeter reads the current
-//   data-compton    slide 28  a photon scattered by an electron at rest through an angle θ that can be
+//   data-compton    slide 30  a photon scattered by an electron at rest through an angle θ that can be
 //                             set: the scattered photon has a longer wavelength and the electron recoils
 import { control, typeset, drawn } from '../assets/sim-control.js';
 
