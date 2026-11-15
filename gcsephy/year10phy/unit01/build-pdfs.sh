@@ -47,7 +47,7 @@ booklet() { # key, file name, query, expected title text
   pdf "$OUT/$2 (Ans).pdf" "$BASE/workbook.html?$3&answers" "$4.*Ans"
 }
 
-part() { # number (as PARTS in assets/workbook.js)
+part() { # number (as parts in assets/book.js)
   booklet "p$1" "$NAME (Part $1)" "part=$1" "Part $1"
 }
 

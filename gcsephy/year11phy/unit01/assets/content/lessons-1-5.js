@@ -10,7 +10,7 @@
   window.WB.lessons.push(
     // ============================================================ 1
     {
-      n: 1, accent: "proton", title: "Inside the atom",
+      n: 1, accent: "spark", title: "Inside the atom",
       spec: "AQA Physics 4.4.1.1–4.4.1.2; Combined Science 6.4.1.1–6.4.1.2",
       mapLine: "Protons, neutrons and electrons, the size of an atom, atomic and mass numbers",
       big: "Everything around you is made of atoms, yet an atom is almost entirely empty space. So what is actually in there?",
@@ -56,7 +56,7 @@
         { t: "q", type: "Challenge", p: "The radius of an atom is about 10 000 times the radius of its nucleus. If you drew the nucleus as a dot 1 mm across, how wide would you have to draw the atom? Give your answer in metres, and say whether it would fit on this page.", lines: 2, a: "10 000 × 1 mm = 10 000 mm = 10 m. It would not fit on the page: this is why atom diagrams are never to scale." },
       ],
       exam: [
-        { tip: "A ‘describe’ question about structure needs where each particle is, not just its name.", p: "Describe the structure of an atom.", marks: 4, lines: 4, a: "A tiny nucleus at the centre (1), containing protons and neutrons (1). Electrons are at different distances from the nucleus / in energy levels around it (1). Most of the atom is empty space: the nucleus radius is less than 1/10 000 of the atom's (1)." },
+        { p: "Describe the structure of an atom.", marks: 4, lines: 4, a: "A tiny nucleus at the centre (1), containing protons and neutrons (1). Electrons are at different distances from the nucleus / in energy levels around it (1). Most of the atom is empty space: the nucleus radius is less than 1/10 000 of the atom's (1)." },
         { p: `An atom of potassium is ${N(39, 19, "K")}. (a) Give the number of neutrons. (b) Explain why the atom has no overall charge.`, marks: 3, lines: 3, a: "(a) 39 − 19 = 20 (1). (b) It has 19 protons and 19 electrons (1); their charges are equal and opposite, so they cancel (1)." },
       ],
       summary: ["The nucleus contains protons (+1) and neutrons (0). Electrons (−1) are in energy levels around it.", "Atom radius ≈ 1 × 10<sup>−10</sup> m; nucleus radius less than 1/10 000 of this.", "Almost all the mass is in the nucleus.", "Atomic number = protons. Mass number = protons + neutrons.", "In an atom, electrons = protons, so there is no overall charge."],
@@ -66,7 +66,7 @@
 
     // ============================================================ 2
     {
-      n: 2, accent: "electron", title: "Isotopes and ions",
+      n: 2, accent: "cyan", title: "Isotopes and ions",
       spec: "AQA Physics 4.4.1.2; Combined Science 6.4.1.2",
       mapLine: "Same element, different neutrons; atoms that lose outer electrons",
       big: "Carbon-12 and carbon-14 are both carbon, but only carbon-14 is radioactive. What is different about them?",
@@ -114,7 +114,7 @@
         { t: "q", type: "Challenge", p: `Uranium-235, ${N(235, 92, "U")}, and uranium-238, ${N(238, 92, "U")}, are both found in uranium ore. Explain why they are isotopes. Give one way their atoms are the same and one way they are different.`, lines: 3, a: "Same number of protons (92), so the same element, but different numbers of neutrons (143 and 146). Same: 92 protons / 92 electrons / same chemistry. Different: number of neutrons / mass number / how stable the nucleus is." },
       ],
       exam: [
-        { tip: "‘Similarities and differences’ needs both: give at least one of each, with numbers.", p: `Carbon has two isotopes, ${N(12, 6, "C")} and ${N(14, 6, "C")}. Describe the similarities and differences between the nuclei of these two isotopes.`, marks: 3, lines: 3, a: "Both have 6 protons (1). Carbon-12 has 6 neutrons and carbon-14 has 8 neutrons (1). So they have different mass numbers / carbon-14 is unstable (1)." },
+        { p: `Carbon has two isotopes, ${N(12, 6, "C")} and ${N(14, 6, "C")}. Describe the similarities and differences between the nuclei of these two isotopes.`, marks: 3, lines: 3, a: "Both have 6 protons (1). Carbon-12 has 6 neutrons and carbon-14 has 8 neutrons (1). So they have different mass numbers / carbon-14 is unstable (1)." },
         { p: "Explain how a sodium atom can become a sodium ion, Na<sup>+</sup>.", marks: 2, lines: 2, a: "It loses one outer electron (1). It now has 11 protons and 10 electrons, so the overall charge is +1 (1)." },
       ],
       summary: ["Isotopes: same number of protons, different numbers of neutrons.", "Isotopes of an element have the same atomic number but different mass numbers.", "Some isotopes are unstable (radioactive), e.g. carbon-14.", "An atom that loses outer electrons becomes a positive ion.", "Forming an ion does not change the nucleus, so the element stays the same."],
@@ -124,7 +124,7 @@
 
     // ============================================================ 3
     {
-      n: 3, accent: "alpha", title: "From plum pudding to the nucleus",
+      n: 3, accent: "copper", title: "From plum pudding to the nucleus",
       spec: "AQA Physics 4.4.1.3; Combined Science 6.4.1.3",
       mapLine: "The plum pudding model, alpha scattering and the nuclear model",
       big: "Nobody has ever seen inside an atom. So how did scientists find out that almost all of its mass is squeezed into a tiny nucleus?",
@@ -168,7 +168,7 @@
       ],
       examSplit: true,
       exam: [
-        { tip: "In a ‘compare’ question, say what each model says about the same feature: charge, mass, empty space, electrons.", p: "Describe the differences between the plum pudding model and the nuclear model of the atom.", marks: 4, lines: 4, a: "Any four: plum pudding has the positive charge spread out; nuclear model has it in a tiny nucleus (1). Mass spread out vs concentrated in the nucleus (1). Plum pudding has no empty space; the nuclear atom is mostly empty space (1). Electrons embedded in the positive charge vs electrons outside the nucleus (1)." },
+        { p: "Describe the differences between the plum pudding model and the nuclear model of the atom.", marks: 4, lines: 4, a: "Any four: plum pudding has the positive charge spread out; nuclear model has it in a tiny nucleus (1). Mass spread out vs concentrated in the nucleus (1). Plum pudding has no empty space; the nuclear atom is mostly empty space (1). Electrons embedded in the positive charge vs electrons outside the nucleus (1)." },
         { p: "In the alpha scattering experiment, most alpha particles passed straight through the gold foil, but a very small number were deflected by more than 90°. Explain what each result showed about the structure of the atom.", marks: 4, lines: 4, a: "Most passing straight through shows the atom is mostly empty space (2). A very small number deflected by more than 90° shows there is a tiny centre (1) where the positive charge and mass are concentrated, which repels alpha particles (1)." },
       ],
       summary: ["Models change when new evidence does not fit them.", "Plum pudding (1904): a ball of positive charge with electrons embedded; no nucleus.", "Alpha scattering: most straight through (empty space), some deflected (positive centre), a very few bounced back (mass in a tiny centre).", "Nuclear model (1911): tiny, dense, positive nucleus with electrons outside.", "The nuclear model replaced the plum pudding model."],
@@ -178,7 +178,7 @@
 
     // ============================================================ 4
     {
-      n: 4, accent: "photon", title: "Energy levels and the nucleus",
+      n: 4, accent: "violet", title: "Energy levels and the nucleus",
       spec: "AQA Physics 4.4.1.1–4.4.1.3; Combined Science 6.4.1.1–6.4.1.3",
       mapLine: "The Bohr model, absorbing and emitting EM radiation, protons and neutrons, why models change",
       big: "Neon signs glow red and sodium street lamps glow orange. Each element gives out its own colours of light. What are its electrons doing?",
@@ -225,7 +225,7 @@
       ],
       examSplit: true,
       exam: [
-        { tip: "Use the key words: absorb/emit, higher/lower energy level, further from/closer to the nucleus.", p: "Describe how the arrangement of the electrons in an atom may change when the atom absorbs electromagnetic radiation.", marks: 2, lines: 2, a: "An electron moves to a higher energy level (1), further from the nucleus (1)." },
+        { p: "Describe how the arrangement of the electrons in an atom may change when the atom absorbs electromagnetic radiation.", marks: 2, lines: 2, a: "An electron moves to a higher energy level (1), further from the nucleus (1)." },
         { p: "Explain why Bohr's model of the atom was accepted by other scientists.", marks: 2, lines: 2, a: "His theoretical calculations agreed with experimental observations (1); it could be tested and checked by other scientists / explained evidence the nuclear model could not (1)." },
         { p: "Give the name of the scientist who provided the evidence for neutrons.", marks: 1, lines: 1, a: "James Chadwick." },
       ],
@@ -244,7 +244,7 @@
 
     // ============================================================ 5
     {
-      n: 5, accent: "teal", title: "Radioactive decay",
+      n: 5, accent: "leaf", title: "Radioactive decay",
       spec: "AQA Physics 4.4.2.1; Combined Science 6.4.2.1",
       mapLine: "Unstable nuclei, activity and count rate, alpha, beta, gamma and neutron radiation",
       big: "A smoke alarm contains a radioactive source. Nothing switches it on, yet it gives out radiation for hundreds of years. Why?",
@@ -283,7 +283,7 @@
         { t: "q", say: ["Ava", "Beta particles are electrons knocked out of the energy levels, so beta decay just turns the atom into an ion."], p: "Explain what is wrong with Ava's statement.", lines: 3, a: "A beta particle comes from the nucleus: a neutron turns into a proton and a fast electron is emitted. The nucleus gains a proton, so the atom becomes a different element; it is not just an ion." },
         { t: "q", type: "Challenge", p: "A Geiger–Müller tube records 1800 counts in 1 minute. (a) Calculate the count rate in counts per second. (b) Suggest why the activity of the source is greater than this count rate.", lines: 3, a: "(a) 1800 ÷ 60 = 30 counts per second. (b) Radiation goes out in all directions, so only some of it enters the tube; some is absorbed by the air or the tube wall before it is detected." },
       ],
-      lab: { title: "Virtual lab: watch a nucleus decay", aside: "Nuclear Decay simulation, tabs 01 to 03", blocks: [
+      lab: { title: "Virtual lab: watch a nucleus decay", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Open the <strong>Nuclear Decay</strong> simulation. For each tab, press <strong>Decay this nucleus</strong> and read the equation it shows." },
           { t: "q", p: "Record what happens.", table: { head: ["Tab", "Parent nucleus", "What leaves the nucleus?", "Change in mass number", "Change in atomic number", "New nucleus"], rows: [["01 α", "americium-241", null, null, null, null], ["02 β", "carbon-14", null, null, null, null], ["03 γ", "technetium-99m", null, null, null, null]], ans: [[null, null, "alpha particle (He nucleus)", "−4", "−2", "neptunium-237"], [null, null, "beta particle (electron)", "0", "+1", "nitrogen-14"], [null, null, "gamma ray", "0", "0", "technetium-99"]] } },
@@ -291,7 +291,7 @@
         ] },
       ] },
       exam: [
-        { tip: "Two marks: say what the nucleus gives out <em>and</em> why.", p: "Describe what is meant by radioactive decay.", marks: 2, lines: 2, a: "An unstable nucleus gives out radiation (1) as it changes to become more stable (1). (Accept: it is random.)" },
+        { p: "Describe what is meant by radioactive decay.", marks: 2, lines: 2, a: "An unstable nucleus gives out radiation (1) as it changes to become more stable (1). (Accept: it is random.)" },
         { p: "Compare an alpha particle with a beta particle.", marks: 3, lines: 3, a: "Alpha is 2 protons and 2 neutrons (a helium nucleus); beta is a high-speed electron (1). Alpha has a charge of +2; beta −1 (1). Alpha is much more massive / beta is made when a neutron turns into a proton (1)." },
       ],
       summary: ["Unstable nuclei give out radiation to become more stable: radioactive decay.", "Decay is random: we cannot predict which nucleus decays, or when.", "Activity: decays per second, in becquerel (Bq). Count rate: decays recorded per second by a detector.", "Alpha: 2p + 2n (helium nucleus). Beta: fast electron; a neutron becomes a proton. Gamma: EM radiation. Neutron: a neutron."],

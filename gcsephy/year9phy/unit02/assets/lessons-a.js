@@ -1,4 +1,4 @@
-/* Lessons 1-2 of the Year 9 Energy: Stores and Transfers workbook (assets/workbook.js).
+/* Lessons 1-2 of the Year 9 Energy: Stores and Transfers workbook (/gcsephy/assets/workbook/workbook.js).
    Maths is LaTeX between \( and \); text is written with String.raw (R`…`) so backslashes stay.
    In sentences: [[answer|a / b / c]] is a blank followed by its options; {{a|b*|c}} is an AQA-style
    ring box with * on the answer. `a` holds the answer shown only in the answer edition.
@@ -80,7 +80,7 @@
         { t: "q", say: ["Sam", "When the car stopped, its energy was used up."], p: "Explain what is wrong with what Sam says.", lines: 3, a: "Energy cannot be used up (destroyed). The energy in the car's kinetic store was transferred to the thermal store of the brakes and the surroundings." },
       ],
       exam: [
-        { tip: "Name both stores and say which one empties and which one fills.", p: R`A student throws a ball straight up. Complete the sentence.`, marks: 2, fill: R`As the ball rises, energy is transferred from the [[kinetic|kinetic / chemical / thermal]] store of the ball to its [[gravitational potential|elastic potential / gravitational potential / nuclear]] store.` },
+        { p: R`A student throws a ball straight up. Complete the sentence.`, marks: 2, fill: R`As the ball rises, energy is transferred from the [[kinetic|kinetic / chemical / thermal]] store of the ball to its [[gravitational potential|elastic potential / gravitational potential / nuclear]] store.` },
         { p: "What is the unit of energy? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["joule", "newton", "watt", "kilogram"], c: 0, cols: 4 } },
         { p: "A child lands on a trampoline. Describe the energy transfer as the mat and springs stretch and the child slows down.", marks: 2, lines: 2, a: "Energy is transferred mechanically from the kinetic store of the child (1) to the elastic potential store of the trampoline (1)." },
       ],
@@ -138,7 +138,7 @@
         { t: "q", type: "Challenge", p: "A car speeds up from 10 m/s to 30 m/s. How many times bigger is the energy in its kinetic store? Explain without calculating the energy.", lines: 2, a: R`9 times bigger. The speed is 3 times bigger, and the speed is squared: \(3^2 = 9\).` },
         { t: "q", say: ["Ava", "At 4 m/s my bike has twice as much kinetic energy as at 2 m/s."], p: "Explain what is wrong with what Ava says.", lines: 2, a: R`The speed is squared, so doubling the speed gives \(2^2 = 4\) times as much kinetic energy, not twice as much.` },
       ],
-      lab: { title: "Measure the energy of a moving trolley", aside: "Work in a group of three: one pushes, one times, one records.", blocks: [
+      lab: { title: "Measure the energy of a moving trolley", blocks: [
         { t: "lab", blocks: [
           { t: "steps", items: ["Measure the trolley's mass on the balance in grams. Convert it to kilograms.", "Mark a 1.00 m section of the track with tape.", "Give the trolley a gentle push so it rolls through the section. Time how long it takes to cross the 1.00 m.", "Repeat twice more with the same push, and find the mean time.", "Calculate the speed, then the kinetic energy."] },
           { t: "q", p: "Record your results.", table: { head: ["Mass / g", "Mass / kg", "Time 1 / s", "Time 2 / s", "Time 3 / s", "Mean time / s"], rows: [[null, null, null, null, null, null]], ans: [["500", "0.500", "1.62", "1.55", "1.59", "1.59"]] } },
@@ -148,7 +148,7 @@
         ] },
       ] },
       exam: [
-        { tip: "Write the equation, then substitute, then give the answer with its unit.", p: "A cyclist and bike have a total mass of 70 kg and move at 8.0 m/s. Calculate the energy in their kinetic store.", marks: 2, frame: frame3, frameA: [R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 70 \times 8.0^2\) (1)`, "2240 J (1)"] },
+        { p: "A cyclist and bike have a total mass of 70 kg and move at 8.0 m/s. Calculate the energy in their kinetic store.", marks: 2, frame: frame3, frameA: [R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 70 \times 8.0^2\) (1)`, "2240 J (1)"] },
         { p: R`Car A and car B have the same mass. Car B moves twice as fast as car A. Complete the sentence.`, marks: 2, fill: R`Car B has [[4|2 / 4 / 8]] times as much energy in its kinetic store as car A, because in the equation the speed is {{halved|squared*|doubled}}.` },
       ],
       quick: { slide: 17, items: [

@@ -1,4 +1,4 @@
-/* Content for the Electric Circuits Year 10 workbook (assets/workbook.js) and teacher
+/* Content for the Electric Circuits Year 10 workbook (/gcsephy/assets/workbook/workbook.js) and teacher
    guide (assets/plans.js). All questions are original. Block types are documented in
    workbook.js; `a` holds the answer shown only in the answer edition. */
 (function () {
@@ -199,7 +199,7 @@
         { t: "q", p: "<strong>Torch detective.</strong> Look back at the big question. Suggest <strong>two</strong> faults that could stop the torch working, and how you could test for each one.", lines: 3, a: "e.g. a loose or broken wire/connection, leaving a gap: check or replace each connection. The switch does not close properly: replace it with a working switch. The batteries are in the wrong way round: turn them round." },
       ],
       exam: [
-        { tip: "Examiners look for correct symbols, a complete loop with no gaps, and the ammeter in series.", p: "Draw a circuit diagram to show a battery, a resistor and a lamp connected in series, with an ammeter to measure the current.", marks: 3, box: 44, grid: true, a: "Correct symbols for battery, resistor and lamp (1); all in one complete loop with no gaps (1); ammeter in series in the same loop (1)." },
+        { p: "Draw a circuit diagram to show a battery, a resistor and a lamp connected in series, with an ammeter to measure the current.", marks: 3, box: 44, grid: true, a: "Correct symbols for battery, resistor and lamp (1); all in one complete loop with no gaps (1); ammeter in series in the same loop (1)." },
         { p: "State what is meant by a <em>series</em> circuit.", marks: 1, lines: 1, a: "The components are connected one after another in a single loop." },
       ],
       summary: ["A circuit needs a source (cell or battery) and a <strong>complete loop</strong>.", "A gap anywhere stops the current everywhere.", "Circuit diagrams use standard symbols, drawn with a ruler: straight wires, right-angle corners, no gaps.", "An ammeter measures current and goes <strong>in series</strong>."],
@@ -250,7 +250,7 @@
         { t: "q", type: "Challenge", p: "A phone charger supplies 0.80 A. How long does it take for 240 C to flow? Give your answer in seconds and in minutes.", lines: 2, a: "t = Q ÷ I = 240 ÷ 0.80 = 300 s = 5.0 minutes" },
         { t: "q", say: ["Mia", "The lamp uses up some current, so ammeter A₂ after the lamp will read less than A₁."], fig: D.circuit({ w: 360, h: 170, wires: ["M40 40 H320 V130 H40 Z"], parts: [["cell", 180, 40, "h"], ["ammeter", 90, 130, "h", "A₁ = 0.30 A", "b"], ["lamp", 180, 130, "h"], ["ammeter", 270, 130, "h", "A₂ = ?", "b"]] }), figCls: "fig-small", p: "Predict the reading on A₂. Explain why Mia is wrong.", lines: 3, a: "A₂ = 0.30 A. It is a single loop, so the current is the same everywhere. Charge is not used up: the lamp transfers energy, not charge." },
       ],
-      lab: { title: "Virtual Lab 1: Is current used up?", aside: "PhET Circuit Construction Kit: DC → Lab. Full steps: Virtual Labs worksheet pp. 3–6.", blocks: [
+      lab: { title: "Virtual Lab 1: Is current used up?", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Build one loop with a <strong>6 V battery</strong> and a <strong>10 Ω resistor</strong>. Use the non-contact ammeter to measure the current at three places." },
           { t: "q", p: "Record your readings.", table: { head: ["Position", "Current / A", "Current with 20 Ω / A"], rows: [["Before the resistor", null, null], ["After the resistor", null, null], ["Next to the battery", null, null]], ans: [[null, "0.60", "0.30"], [null, "0.60", "0.30"], [null, "0.60", "0.30"]] } },
@@ -258,7 +258,7 @@
         ] },
       ] },
       exam: [
-        { tip: "Convert minutes to seconds before you substitute. The unit (C) is part of the answer.", p: "A motor draws a current of 0.60 A for 5.0 minutes. Calculate the charge that flows through the motor.", marks: 3, frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["Q = I t, with t = 5.0 × 60 = 300 s", "Q = 0.60 × 300", "180 C"], a: "" },
+        { p: "A motor draws a current of 0.60 A for 5.0 minutes. Calculate the charge that flows through the motor.", marks: 3, frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["Q = I t, with t = 5.0 × 60 = 300 s", "Q = 0.60 × 300", "180 C"], a: "" },
         { p: "A student says the current leaving the motor is smaller than the current entering it. Explain why the student is wrong.", marks: 2, lines: 2, a: "The motor is in a single loop, so the current is the same everywhere (1). Charge is not used up; the motor transfers energy (1)." },
       ],
       quick: { slide: 14, covers: "Missions 1–2", items: [["45 C flows in 30 s. Calculate the current.", "I = 45 ÷ 30 = 1.5 A"], ["0.25 A flows for 2.0 minutes. Calculate the charge.", "0.25 × 120 = 30 C"], ["Is an ammeter connected in series or in parallel?", "In series, in the same loop."], ["Which way do electrons flow?", "From the − terminal to the + terminal."], ["What do ammeters before and after a lamp read?", "The same."], ["The switch is opened. What is the current?", "Zero everywhere: the loop is broken."]] },
@@ -310,7 +310,7 @@
         { t: "q", fig: D.circuit({ w: 360, h: 218, wires: ["M40 40 H320 V130 H40 Z", "M75 130 V180 H145 V130", "M215 130 V180 H285 V130"], parts: [["battery", 180, 40, "h", "12 V"], ["lamp", 110, 130, "h"], ["lamp", 250, 130, "h"], ["voltmeter", 110, 180, "h", "V₁ = 7.5 V", "b"], ["voltmeter", 250, 180, "h", "V₂ = ?", "b"]], dots: [[75, 130], [145, 130], [215, 130], [285, 130]] }), figCls: "fig-small", p: "(a) What does voltmeter V₂ read? (b) How much energy does each coulomb transfer in the second lamp?", lines: 2, a: "(a) 12 − 7.5 = 4.5 V. (b) 4.5 J per coulomb." },
         { t: "q", say: ["Leo", "A 9 V battery pushes the charges faster than a 1.5 V battery. That's what volts measure."], p: "Explain what is wrong with Leo's idea.", lines: 3, a: "Volts measure energy transferred per coulomb, not speed. A 9 V battery gives each coulomb 9 J of energy; a 1.5 V battery gives each coulomb only 1.5 J." },
       ],
-      lab: { title: "Virtual Lab 2: What does a volt mean?", aside: "Full steps: Virtual Labs worksheet pp. 7–10.", blocks: [
+      lab: { title: "Virtual Lab 2: What does a volt mean?", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Use one <strong>10 Ω</strong> resistor. At each battery setting, measure the p.d. across the resistor. Then calculate the energy transferred when 2 C passes." },
           { t: "q", p: "Record and calculate.", table: { head: ["Battery setting / V", "p.d. across resistor / V", "Energy for 2 C / J"], rows: [["3", null, null], ["6", null, null], ["9", null, null]], ans: [[null, "3.0", "6.0"], [null, "6.0", "12"], [null, "9.0", "18"]] } },
@@ -318,7 +318,7 @@
         ] },
       ] },
       exam: [
-        { tip: "Explaining a p.d. needs two ideas: energy (joules) and per coulomb of charge.", p: "A 9.0 V battery moves 20 C of charge around a circuit. Calculate the energy transferred by the battery.", marks: 2, frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["E = Q V", "E = 20 × 9.0", "180 J"] },
+        { p: "A 9.0 V battery moves 20 C of charge around a circuit. Calculate the energy transferred by the battery.", marks: 2, frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["E = Q V", "E = 20 × 9.0", "180 J"] },
         { p: "A voltmeter connected across a resistor reads 3.0 V. Explain what this reading means.", marks: 2, lines: 2, a: "3.0 J of energy is transferred (1) to the resistor for every coulomb of charge passing through it (1)." },
       ],
       summary: ["p.d. is the <strong>energy transferred per coulomb</strong>: 1 V = 1 J/C.", "A voltmeter goes <strong>across</strong> a component (in parallel).", "<strong>E = Q V</strong>", "Charge is not used up; energy is transferred.", "In a series loop, the component p.d.s add up to the supply p.d."],
@@ -370,7 +370,7 @@
           after: [{ t: "p", h: "Is the component an ohmic conductor? Use the table and the graph." }], lines: 2, a: "Yes: V ÷ I is constant (20 Ω) and the graph is a straight line through the origin, so current is directly proportional to p.d." },
         { t: "q", p: "Explain why a resistor only has a constant resistance if its temperature stays the same.", lines: 3, starter: "If the resistor gets hotter, the ions …", a: "If it heats up, the ions vibrate more, so the electrons collide with them more often and the resistance increases. So R is only constant at constant temperature." },
       ],
-      lab: { title: "Virtual Lab 3: Discover the resistance rule", aside: "Full steps: Virtual Labs worksheet pp. 11–14.", blocks: [
+      lab: { title: "Virtual Lab 3: Discover the resistance rule", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Set the resistor to <strong>10 Ω</strong>. Change only the battery setting. Measure the p.d. across the resistor and the current." },
           { t: "q", p: "Record and calculate.", table: { head: ["Battery setting / V", "p.d. / V", "current / A", "V ÷ I / Ω"], rows: [["2", null, null, null], ["4", null, null, null], ["6", null, null, null], ["8", null, null, null], ["10", null, null, null], ["12", null, null, null]], ans: [[null, "2.0", "0.20", "10"], [null, "4.0", "0.40", "10"], [null, "6.0", "0.60", "10"], [null, "8.0", "0.80", "10"], [null, "10", "1.0", "10"], [null, "12", "1.2", "10"]] } },
@@ -378,7 +378,7 @@
         ] },
       ] },
       exam: [
-        { tip: "In part (b) use your answer to (a). Quick check: 3 × the p.d. should give 3 × the current if R is constant.", p: "A fixed resistor has a p.d. of 2.0 V across it and a current of 0.10 A through it. Calculate its resistance.", marks: 2, frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["R = V ÷ I", "R = 2.0 ÷ 0.10", "20 Ω"] },
+        { p: "A fixed resistor has a p.d. of 2.0 V across it and a current of 0.10 A through it. Calculate its resistance.", marks: 2, frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["R = V ÷ I", "R = 2.0 ÷ 0.10", "20 Ω"] },
         { p: "The p.d. is increased to 6.0 V. The temperature stays constant. Calculate the new current.", marks: 2, lines: 2, a: "I = V ÷ R (1) = 6.0 ÷ 20 = 0.30 A (1)" },
       ],
       summary: ["Resistance opposes the current. Unit: <strong>ohm (Ω)</strong>.", "<strong>V = I R</strong>. Convert mA → A (÷ 1000) and kΩ → Ω (× 1000).", "Ohmic conductor: I ∝ V at constant temperature; the graph is a straight line through the origin.", "Hotter metal → ions vibrate more → more collisions → higher resistance."],
@@ -409,7 +409,7 @@
         { t: "steps", items: ["Set up the circuit. Fix one clip at 0 cm.", "Put the sliding clip at 10 cm. Switch on.", "Quickly read the ammeter and voltmeter. Switch off.", "Move the clip to 20 cm and repeat, up to 100 cm.", "Calculate R = V ÷ I for each length.", "Repeat any reading that does not fit the pattern."] },
         { t: "safety", items: ["The thin wire can get hot enough to burn. Do not touch it while the current is on.", "Switch off between readings. This also stops the wire heating up, which would change its resistance.", "Keep the p.d. low."] },
       ],
-      lab: { title: "Results", aside: "Answer edition: example results. Yours will differ.", blocks: [
+      lab: { title: "Results", blocks: [
         { t: "lab", blocks: [
           { t: "q", p: "Record your readings and calculate the resistance.", table: { head: ["Length / cm", "p.d. / V", "current / A", "R = V ÷ I / Ω"], rows: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((l) => [String(l), null, null, null]), ans: [[null, "0.50", "1.00", "0.50"], [null, "0.80", "0.80", "1.0"], [null, "0.99", "0.66", "1.5"], [null, "1.14", "0.57", "2.0"], [null, "1.25", "0.50", "2.5"], [null, "1.44", "0.40", "3.6 (anomaly)"], [null, "1.40", "0.40", "3.5"], [null, "1.45", "0.36", "4.0"], [null, "1.49", "0.33", "4.5"], [null, "1.55", "0.31", "5.0"]] } },
           { t: "q", p: "Plot resistance (up the side) against length (along the bottom). Draw a line of best fit.", graph: { w: 110, h: 100, x: [10, 1], y: [0.5, 2], yTicks: false, xLabel: "length / cm", yLabel: "resistance / Ω", points: [[10, 0.5], [20, 1], [30, 1.5], [40, 2], [50, 2.5], [60, 3.6], [70, 3.5], [80, 4], [90, 4.5], [100, 5]], fit: [[0, 0], [100, 5]] } },
@@ -424,7 +424,7 @@
         { t: "q", p: "A student's line of best fit crosses the resistance axis a little above zero. Suggest why.", lines: 2, a: "The clips and connections add a small extra resistance to every reading (or the length was not measured from the contact point of the fixed clip): a systematic error." },
       ],
       exam: [
-        { tip: "A 6-mark method covers: the circuit, what you change and how, what you measure, how you calculate R, how you keep it fair and safe, and what you do with the results.", p: "Describe how you would investigate how the resistance of a wire depends on its length.", marks: 6, lines: 9, a: "Any six: ammeter in series with the wire and voltmeter across the measured length (circuit); change the length by moving a clip along a metre ruler; record V and I for each length; calculate R = V ÷ I; keep material and diameter the same; keep p.d. low and switch off between readings so the temperature stays constant; repeat readings and plot R against length." },
+        { p: "Describe how you would investigate how the resistance of a wire depends on its length.", marks: 6, lines: 9, a: "Any six: ammeter in series with the wire and voltmeter across the measured length (circuit); change the length by moving a clip along a metre ruler; record V and I for each length; calculate R = V ÷ I; keep material and diameter the same; keep p.d. low and switch off between readings so the temperature stays constant; repeat readings and plot R against length." },
       ],
       quick: { slide: 26, covers: "Missions 3–4", items: [["5.0 C flows through a 12 V lamp. Calculate the energy transferred.", "E = 5.0 × 12 = 60 J"], ["69 000 J is transferred by 300 C. Calculate the p.d.", "V = 69 000 ÷ 300 = 230 V"], ["How is a voltmeter connected?", "In parallel, across the component."], ["A component has 6.0 V across it and 0.30 A through it. Calculate its resistance.", "R = 6.0 ÷ 0.30 = 20 Ω"], ["The length of a wire doubles. What happens to its resistance?", "It doubles: R is proportional to length."], ["Why switch off between readings?", "It stops the wire heating up, so R stays constant."]] },
       summary: ["Resistance of a wire: <strong>R = V ÷ I</strong>, ammeter in series, voltmeter across the wire.", "Change the length. Keep material, diameter and temperature the same.", "Resistance is <strong>directly proportional</strong> to length.", "Switch off between readings so the wire does not heat up."],
@@ -472,7 +472,7 @@
         { t: "q", p: "Answer the big question. Give <strong>two</strong> reasons why the lights in a house are wired in parallel.", lines: 3, a: "If one lamp breaks, the others stay on (each branch is its own loop). Each lamp gets the full supply p.d. Each light can be switched on and off on its own." },
       ],
       exam: [
-        { tip: "Show the equation for each step. You can still get later marks with an earlier wrong answer if your method is right.", p: "A 4.0 Ω resistor and an 8.0 Ω resistor are connected in series to a 9.0 V battery. (a) Calculate the total resistance. (b) Calculate the current. (c) Calculate the p.d. across the 8.0 Ω resistor.", marks: 5, lines: 5, a: "(a) 4.0 + 8.0 = 12 Ω (1). (b) I = V ÷ R (1) = 9.0 ÷ 12 = 0.75 A (1). (c) V = I R = 0.75 × 8.0 (1) = 6.0 V (1)." },
+        { p: "A 4.0 Ω resistor and an 8.0 Ω resistor are connected in series to a 9.0 V battery. (a) Calculate the total resistance. (b) Calculate the current. (c) Calculate the p.d. across the 8.0 Ω resistor.", marks: 5, lines: 5, a: "(a) 4.0 + 8.0 = 12 Ω (1). (b) I = V ÷ R (1) = 9.0 ÷ 12 = 0.75 A (1). (c) V = I R = 0.75 × 8.0 (1) = 6.0 V (1)." },
       ],
       summary: ["Series: <strong>same current</strong>; p.d.s <strong>add up</strong>; R<sub>total</sub> = R₁ + R₂.", "Parallel: <strong>same p.d.</strong> across each branch; branch currents <strong>add up</strong>.", "Adding a branch in parallel <strong>lowers</strong> the total resistance: there is another path, so more current flows.", "Houses are wired in parallel."],
       recall: [["In series, what is the same everywhere?", "The current."], ["In parallel, what is the same for each branch?", "The p.d."], ["Total resistance of 3 Ω and 5 Ω in series?", "8 Ω"], ["Branch currents 0.2 A and 0.3 A. Supply current?", "0.5 A"]],
@@ -501,7 +501,7 @@
         { t: "safety", items: ["Resistors can get hot. Switch off between readings.", "Keep the p.d. low, and check the circuit before switching on."] },
         { t: "q", p: "<strong>Predict</strong> before you measure. Rank R₁ alone, series and parallel from the <em>largest</em> to the <em>smallest</em> total resistance.", lines: 1, a: "series > one resistor > parallel" },
       ],
-      lab: { title: "Results", aside: "Answer edition: example results with two 10 Ω resistors at 3.0 V.", blocks: [
+      lab: { title: "Results", blocks: [
         { t: "lab", blocks: [
           { t: "q", p: "Record your readings.", table: { head: ["Arrangement", "p.d. / V", "current / A", "R = V ÷ I / Ω"], rows: [["R₁ on its own", null, null, null], ["R₂ on its own", null, null, null], ["R₁ and R₂ in series", null, null, null], ["R₁ and R₂ in parallel", null, null, null]], ans: [[null, "3.0", "0.30", "10"], [null, "3.0", "0.30", "10"], [null, "3.0", "0.15", "20"], [null, "3.0", "0.60", "5.0"]] } },
         ] },
@@ -514,7 +514,7 @@
         { t: "q", type: "Extra practice", p: "Resistors of 5.0 Ω, 10 Ω and 15 Ω are connected in series with a 6.0 V supply. Calculate the current.", frame: [["Total R"], ["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["5.0 + 10 + 15 = 30 Ω", "I = V ÷ R", "I = 6.0 ÷ 30", "0.20 A"] },
       ],
       exam: [
-        { tip: "‘Explain’ needs a chain: another path → more current at the same p.d. → lower total resistance.", p: "Two identical resistors each have a resistance of 12 Ω. (a) Calculate their total resistance in series. (b) A student measures 6.0 Ω when they are connected in parallel. Explain why this is less than 12 Ω. (c) State one variable the student should keep the same for a fair comparison.", marks: 5, lines: 6, a: "(a) 12 + 12 = 24 Ω (1). (b) Parallel gives another path for the charge (1), so at the same p.d. the total current is larger (1), and R = V ÷ I is smaller (1). (c) The supply p.d., the same resistors, or the temperature (1)." },
+        { p: "Two identical resistors each have a resistance of 12 Ω. (a) Calculate their total resistance in series. (b) A student measures 6.0 Ω when they are connected in parallel. Explain why this is less than 12 Ω. (c) State one variable the student should keep the same for a fair comparison.", marks: 5, lines: 6, a: "(a) 12 + 12 = 24 Ω (1). (b) Parallel gives another path for the charge (1), so at the same p.d. the total current is larger (1), and R = V ÷ I is smaller (1). (c) The supply p.d., the same resistors, or the temperature (1)." },
       ],
       quick: { slide: 32, covers: "Mission 5", items: [["5 Ω and 15 Ω are in series. Calculate the total resistance.", "5 + 15 = 20 Ω"], ["In series with a 12 V supply, one part has 5 V across it. What does the other part have?", "7 V"], ["Two branches carry 0.4 A and 0.6 A. What is the supply current?", "0.4 + 0.6 = 1.0 A"], ["What is the p.d. across each parallel branch?", "The full supply p.d."], ["A resistor is added in parallel. What happens to the total resistance?", "It decreases."], ["6.0 V supply, 0.20 A, R<sub>1</sub> = 12 Ω. Calculate R<sub>2</sub> in series.", "R<sub>total</sub> = 6.0 ÷ 0.20 = 30 Ω; 30 − 12 = 18 Ω"]] },
       summary: ["Find total resistance from the <strong>supply current</strong> and the <strong>p.d. across the combination</strong>: R = V ÷ I.", "Series: the total is the sum (R₁ + R₂): bigger than either.", "Parallel: the total is smaller than either resistor.", "Evaluate by naming a specific source of error and a specific improvement."],
@@ -558,7 +558,7 @@
         { t: "q", p: "What happens to the current through a diode when it is connected the other way round? Suggest one use for this.", lines: 2, a: "There is (almost) no current: the diode has a very high resistance in reverse. Use: protecting a circuit from a battery put in backwards, or making sure current flows only one way." },
       ],
       exam: [
-        { tip: "A sketch needs labelled axes and the right shape in both directions. The explanation needs cause → effect: current → heating → resistance.", p: "Sketch the I–V graph of a filament lamp for positive and negative p.d. Then explain its shape.", marks: 4, box: 45, grid: true, a: D.ivSketch("lamp") + "<br>Curve through the origin (1) that gets less steep at higher p.d. (1), with the same shape for negative p.d. (1). The current heats the filament, so its resistance increases (1)." },
+        { p: "Sketch the I–V graph of a filament lamp for positive and negative p.d. Then explain its shape.", marks: 4, box: 45, grid: true, a: D.ivSketch("lamp") + "<br>Curve through the origin (1) that gets less steep at higher p.d. (1), with the same shape for negative p.d. (1). The current heats the filament, so its resistance increases (1)." },
       ],
       summary: ["I–V graph: current up the side, p.d. along the bottom. Negative = connected the other way.", "Fixed resistor: straight line through the origin (constant R).", "Filament lamp: gets less steep; the filament heats up, so R increases.", "Diode: current in one direction only; very high resistance in reverse. An LED is a diode that gives out light.", "Resistance at a point: R = V ÷ I."],
       recall: [["Sketch the I–V graph for a fixed resistor.", "Straight line through the origin."], ["Why does a filament lamp's resistance increase?", "It gets hotter, so the ions vibrate more and there are more collisions."], ["What does a diode do?", "Lets current flow in one direction only."], ["How do you find R at a point on an I–V graph?", "Read V and I; R = V ÷ I."]],
@@ -586,7 +586,7 @@
         { t: "steps", items: ["Set up the circuit with the fixed resistor as the test component.", "Use the variable resistor to set a range of p.d.s, for example from 0 to 6 V. Record V and I each time.", "Reverse the connections to the power supply. Repeat, recording V and I as negative values.", "Repeat for the filament lamp.", "Repeat for the diode with its protective resistor, taking small steps of p.d. from 0 to about 1 V."] },
         { t: "safety", items: ["The lamp gets hot. Do not touch it while it is on or just after.", "Do not go above the lamp's rated p.d. (for example 6 V).", "Always use the protective resistor with the diode, so the current stays small."] },
       ],
-      lab: { title: "Results", aside: "Answer edition: example results. Your values will differ.", blocks: [
+      lab: { title: "Results", blocks: [
         { t: "lab", blocks: [
           { t: "q", p: "Aim for these p.d.s. Record the actual p.d. if it is slightly different.", table: { head: ["p.d. / V", "Resistor: current / A", "Lamp: current / A"], rows: ["−6.0", "−4.0", "−2.0", "−1.0", "0", "1.0", "2.0", "4.0", "6.0"].map((v) => [v, null, null]), ans: [[null, "−0.30", "−0.30"], [null, "−0.20", "−0.27"], [null, "−0.10", "−0.20"], [null, "−0.05", "−0.12"], [null, "0", "0"], [null, "0.05", "0.12"], [null, "0.10", "0.20"], [null, "0.20", "0.27"], [null, "0.30", "0.30"]] } },
           { t: "q", p: "Plot both components on the same axes. Use a different symbol for each, and add a key.", graph: { w: 120, h: 80, origin: "centre", x: [1, 1], y: [0.1, 1], xLabel: "p.d. / V", yLabel: "current / A", points: [[-6, -0.3], [-4, -0.27], [-2, -0.2], [-1, -0.12], [1, 0.12], [2, 0.2], [4, 0.27], [6, 0.3]], fit: lampFn, fitRange: [-6, 6], points2: [[-6, -0.3], [-4, -0.2], [-2, -0.1], [-1, -0.05], [1, 0.05], [2, 0.1], [4, 0.2], [6, 0.3]], fit2: [[-6, -0.3], [6, 0.3]] }, a: "Crosses and curve: filament lamp. Circles and dashed straight line: fixed resistor." },
@@ -602,7 +602,7 @@
         { t: "q", p: "A student plots the reversed readings as positive numbers. What will be wrong with the graph?", lines: 2, a: "All the points would be in the top-right quadrant. Reversed readings should be negative V and negative I, in the bottom-left quadrant." },
       ],
       exam: [
-        { tip: "Name the equipment and say what it is for. Cover both directions, safety, and the changes for a diode.", p: "Describe a method to obtain the I–V characteristic of a filament lamp for positive and negative p.d. State two ways the method would change for a diode.", marks: 6, lines: 9, a: "Lamp method, any four (4): ammeter in series and voltmeter across the lamp; vary the p.d. with a variable resistor or variable supply; record pairs of V and I readings over a range; reverse the supply connections to get negative values; stay below the lamp's rated p.d.; plot I against V. Diode changes, two needed (2): add a protective resistor in series (1); use smaller p.d. steps / a milliammeter (1)." },
+        { p: "Describe a method to obtain the I–V characteristic of a filament lamp for positive and negative p.d. State two ways the method would change for a diode.", marks: 6, lines: 9, a: "Lamp method, any four (4): ammeter in series and voltmeter across the lamp; vary the p.d. with a variable resistor or variable supply; record pairs of V and I readings over a range; reverse the supply connections to get negative values; stay below the lamp's rated p.d.; plot I against V. Diode changes, two needed (2): add a protective resistor in series (1); use smaller p.d. steps / a milliammeter (1)." },
       ],
       summary: ["Vary the p.d. with a <strong>variable resistor</strong>; ammeter in series, voltmeter across the component.", "Reverse the supply connections for negative readings, and record them as negative.", "Diode: protective resistor, a milliammeter and small steps of p.d.", "Plot I (up) against V (along), with the origin in the middle."],
       recall: [["How do you change the p.d. across the component?", "Adjust the variable resistor (or variable supply)."], ["How do you get negative readings?", "Swap the connections to the supply."], ["Why is a protective resistor used with a diode?", "To limit the current and stop damage."], ["Where do reversed readings go on the graph?", "In the bottom-left quadrant (negative V and I)."]],
@@ -644,7 +644,7 @@
         { t: "q", p: "Which change would <strong>increase</strong> the current through a thermistor in a series circuit?", mcq: { o: ["cooling the thermistor", "heating the thermistor", "covering it with a black cloth", "adding another resistor in series"], c: 1 } },
       ],
       exam: [
-        { tip: "For ‘explain’, link each step: light → LDR resistance → total resistance → current.", p: "A 6.0 V supply is connected to an LDR and a fixed resistor in series. In dim light the total resistance is 1500 Ω. (a) Calculate the current. (b) Explain what happens to the current when the light becomes brighter.", marks: 4, lines: 5, a: "(a) I = V ÷ R (1) = 6.0 ÷ 1500 = 0.0040 A (1). (b) The LDR's resistance decreases (1), so the total resistance decreases and the current increases (1)." },
+        { p: "A 6.0 V supply is connected to an LDR and a fixed resistor in series. In dim light the total resistance is 1500 Ω. (a) Calculate the current. (b) Explain what happens to the current when the light becomes brighter.", marks: 4, lines: 5, a: "(a) I = V ÷ R (1) = 6.0 ÷ 1500 = 0.0040 A (1). (b) The LDR's resistance decreases (1), so the total resistance decreases and the current increases (1)." },
       ],
       quick: { slide: 42, covers: "Mission 6", items: [["What does a straight-line I–V graph through the origin show?", "An ohmic conductor, such as a fixed resistor at constant temperature."], ["Why does the I–V graph of a lamp curve?", "The filament heats up, so its resistance increases."], ["What happens with a diode in reverse?", "Its resistance is very high, so there is almost no current."], ["A thermistor gets hotter. What happens to its resistance?", "It decreases."], ["Which sensor would switch on a streetlight?", "An LDR."], ["The supply is reversed. What happens to the readings?", "The current flows the other way, so the readings are negative."]] },
       summary: ["Thermistor: temperature up → resistance <strong>down</strong>.", "LDR: light intensity up → resistance <strong>down</strong>.", "In a series circuit at a fixed p.d.: lower total resistance → bigger current.", "Thermistors sense temperature (thermostats, fire alarms); LDRs sense light (streetlights, night lights)."],
@@ -691,7 +691,7 @@
         { t: "q", type: "Challenge", p: "A lamp is rated 60 W, 230 V. Calculate the current through it and its resistance.", lines: 3, a: "I = P ÷ V = 60 ÷ 230 = 0.26 A. R = V ÷ I = 230 ÷ 0.26 ≈ 880 Ω." },
       ],
       exam: [
-        { tip: "Write the power in watts before you substitute: 2.2 kW = 2200 W. Give answers to a sensible number of significant figures.", p: "A 2.2 kW kettle runs on the 230 V mains. (a) Calculate the current through the kettle. (b) Calculate the energy transferred in 150 s. (c) A heater draws twice this current through the same resistance. How does its heating power compare?", marks: 6, lines: 7, a: "(a) P = 2200 W (1); I = P ÷ V = 2200 ÷ 230 (1) = 9.6 A (1). (b) E = P t = 2200 × 150 (1) = 330 000 J (1). (c) P = I² R, so it is 4 times the power (1)." },
+        { p: "A 2.2 kW kettle runs on the 230 V mains. (a) Calculate the current through the kettle. (b) Calculate the energy transferred in 150 s. (c) A heater draws twice this current through the same resistance. How does its heating power compare?", marks: 6, lines: 7, a: "(a) P = 2200 W (1); I = P ÷ V = 2200 ÷ 230 (1) = 9.6 A (1). (b) E = P t = 2200 × 150 (1) = 330 000 J (1). (c) P = I² R, so it is 4 times the power (1)." },
       ],
       summary: ["Power is energy transferred per second. 1 W = 1 J/s.", "<strong>E = P t</strong> (P in W, t in s).", "<strong>P = V I</strong> and <strong>P = I² R</strong>.", "Doubling the current through a resistor makes the heating 4 times bigger.", "Appliances transfer energy electrically to thermal, kinetic or chemical stores."],
       recall: [["What is power?", "Energy transferred per second."], ["Convert 3.5 kW into watts.", "3500 W"], ["Write two equations for electrical power.", "P = V I and P = I² R"], ["Write the equation linking energy, power and time.", "E = P t"]],
@@ -743,7 +743,7 @@
         { t: "q", p: "An ideal transformer has 20 kV across the primary coil and 500 A in it. The p.d. across the secondary coil is 200 kV. Calculate the current in the secondary coil.", lines: 3, a: "V<sub>p</sub> I<sub>p</sub> = V<sub>s</sub> I<sub>s</sub>: I<sub>s</sub> = (20 000 × 500) ÷ 200 000 = 50 A" },
       ],
       exam: [
-        { tip: "Safety answers are sequences. Use cause → effect words: ‘so’, ‘which means’, ‘therefore’.", p: "A toaster has a metal case connected to the earth wire. A fault makes the live wire touch the case. Explain how the earth wire and the fuse protect someone who then touches the toaster.", marks: 5, lines: 6, a: "The earth wire gives a low-resistance path from the case to earth (1). A very large current flows through the live and earth wires (1). This melts the fuse (1), which disconnects the live wire (1), so the case is not at a high p.d. and no current flows through the person (1)." },
+        { p: "A toaster has a metal case connected to the earth wire. A fault makes the live wire touch the case. Explain how the earth wire and the fuse protect someone who then touches the toaster.", marks: 5, lines: 6, a: "The earth wire gives a low-resistance path from the case to earth (1). A very large current flows through the live and earth wires (1). This melts the fuse (1), which disconnects the live wire (1), so the case is not at a high p.d. and no current flows through the person (1)." },
         { p: "Explain why the National Grid transmits electricity at a very high p.d., and why the p.d. is reduced before it reaches homes.", marks: 4, lines: 5, a: "A step-up transformer increases the p.d. (1); for the same power, the current is smaller (1); a smaller current means less heating/energy loss in the cables, so it is more efficient (1); a step-down transformer reduces the p.d. to 230 V so it is safer in homes (1)." },
       ],
       quick: [{ slide: 49, covers: "Mission 7", items: [["A 12 V headlamp draws 5.0 A. Calculate its power.", "P = 12 × 5.0 = 60 W"], ["3.0 A flows through 20 Ω. Calculate the power.", "P = 3.0² × 20 = 180 W"], ["A 9.0 kW shower runs for 8.0 minutes. Calculate the energy.", "9000 × 480 = 4 320 000 J"], ["The current doubles through the same resistance. What happens to the power?", "It is 4 times bigger."], ["Why is electricity transmitted at a high p.d.?", "The current is small, so there is less heating and it is more efficient."], ["What does a step-down transformer do?", "It lowers the p.d. to a safer value for homes."]] },

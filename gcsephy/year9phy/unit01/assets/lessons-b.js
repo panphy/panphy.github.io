@@ -1,4 +1,4 @@
-/* Lessons 3-5 of the Work Like a Physicist workbook (assets/workbook.js): Part 2.
+/* Lessons 3-5 of the Work Like a Physicist workbook (/gcsephy/assets/workbook/workbook.js): Part 2.
    Same marks as lessons-a.js. Sample results are the deck's: drop test from 50 cm; ramp means
    20, 37, 52, 66, 80 cm (Lesson 5's anomalous copy has 96 cm at 20 cm). */
 (function () {
@@ -57,7 +57,7 @@
         ] },
         { t: "warn", h: "“There was human error” earns nothing. Name the mechanism: “the top of the bounce was judged by eye”. A zero error makes every bar too short by the same amount, so the <em>order</em> of the materials stays the same. Random error could swap two materials whose means are close." },
       ],
-      lab: { title: "The drop test", aside: "Groups of three: one drops, one reads, one records. Then swap jobs.", blocks: [
+      lab: { title: "The drop test", blocks: [
         { t: "lab", blocks: [
           { t: "steps", items: ["Choose 4 or 5 materials and write them in the table.", "Clamp the ruler vertical, with 0 cm at the surface of the material.", "Hold the ball at 50 cm and release it. Do not throw it or push it down.", "Read the top of the first bounce, with your eye level with it.", "Do three trials for each material, then work out each mean."] },
           { t: "safety", items: ["Drop the ball vertically; never throw it.", "Make sure the tray and the materials are stable before you release.", "Keep the drop zone clear and do not crowd round it."] },
@@ -68,7 +68,7 @@
           { t: "q", p: "Did any reading make you look twice? Which one, and what did you do about it?", lines: 2, a: "e.g. cardboard trial 3 (27 cm) was lower than 31 and 32, so we checked it and repeated the drop, recording both." },
         ] },
       ] },
-      lab2: { title: "Draw your bar chart", aside: "Use the checklist before your teacher sees it.", blocks: [
+      lab2: { title: "Draw your bar chart", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Material on the x-axis, mean bounce height on the y-axis. Choose your own scale. Add a title." },
           { t: "graph", w: 150, h: 90, blank: true, x: [1, 1], y: [5, 1], xLabel: "Material", yLabel: "Mean bounce height / cm", barStep: 28, barW: 16, bars: [["sponge", 13], ["card", 30], ["cloth", 23], ["rubber", 38], ["bubble", 17]] },
@@ -87,7 +87,7 @@
         { t: "q", type: "Challenge", p: "You test foam that is 1 cm, 2 cm, 3 cm and 4 cm thick instead of different materials. You would now need a {{bar chart|line graph*}} because thickness is {{continuous*|categoric}} What has changed?", lines: 1, a: "The independent variable is now continuous (a number on a scale), not categoric." },
       ],
       exam: [
-        { tip: "Show the sum, then divide by the number of trials.", p: "A student drops a ball onto three surfaces.", marks: 2, table: { head: ["Surface", "Trial 1 / cm", "Trial 2 / cm", "Trial 3 / cm", "Mean / cm"], rows: [["Carpet", "14", "16", "15", "15"], ["Wood", "42", "40", "44", null], ["Grass", "25", "31", "22", "26"]], ans: [0, [0, 0, 0, 0, "42"]] },
+        { p: "A student drops a ball onto three surfaces.", marks: 2, table: { head: ["Surface", "Trial 1 / cm", "Trial 2 / cm", "Trial 3 / cm", "Mean / cm"], rows: [["Carpet", "14", "16", "15", "15"], ["Wood", "42", "40", "44", null], ["Grass", "25", "31", "22", "26"]], ans: [0, [0, 0, 0, 0, "42"]] },
           after: [{ t: "part", p: "Calculate the mean bounce height for wood. Write it in the table.", lines: 1, a: "(42 + 40 + 44) ÷ 3 = 126 ÷ 3 (1) = 42 cm (1)" }] },
         { p: "Which surface absorbs the most energy from the ball? Give a reason.", marks: 2, lines: 2, a: "Carpet (1); it has the lowest mean bounce height (1)." },
         { p: "The student judged the bounce height by eye. Suggest <strong>one</strong> improvement to the method.", marks: 1, lines: 1, a: "Film the bounce against the ruler and read the height from the paused video (1)." },
@@ -127,7 +127,7 @@
         { t: "sub", h: "Plot precisely" },
         { t: "list", items: ["Independent variable on the x-axis, dependent variable on the y-axis.", "Label each axis with the quantity and the unit: “Ramp height / cm”.", "Plot the <strong>means</strong>, as small crosses: the centre of a × is an exact point; a blob covers several small squares.", "No bars and no dot-to-dot. The line comes in Lesson 5.", "Read each cross back off the graph and compare it with the table. It catches most plotting slips."] },
       ],
-      lab: { title: "The ramp", aside: "Record each number the moment you read it: redoing a height because nobody wrote down trial 2 is the biggest time-waster.", blocks: [
+      lab: { title: "The ramp", blocks: [
         { t: "lab", blocks: [
           { t: "vars", rows: [["Independent variable", "", "ramp height / cm"], ["Dependent variable", "", "distance travelled / cm"], ["Continuous or categoric?", "{{continuous*|categoric}}"], ["Graph type", "{{line graph*|bar chart}}"]] },
           { t: "q", p: "Four control variables. Tick each one off as your group agrees on it.", lines: 2, a: "Same trolley; same start line on the ramp; same floor surface; release with no push (also: same ramp)." },
@@ -141,7 +141,7 @@
           ] },
         ] },
       ] },
-      lab2: { title: "Plot your line graph", aside: "Leave the line until Lesson 5.", blocks: [
+      lab2: { title: "Plot your line graph", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Ramp height on the x-axis, mean distance on the y-axis. Plot each mean as a small ×. Label both axes with units, and add a title." },
           { t: "graph", w: 150, h: 100, blank: true, x: [2, 1], y: [10, 1], xLabel: "Ramp height / cm", yLabel: "Mean distance / cm", points: RAMP },
@@ -168,7 +168,7 @@
         { t: "q", p: "Look at the sample means: 20, 37, 52, 66, 80 cm. For each extra 5 cm of height, the distance goes up by 17, 15, 14 and then 14 cm. Will the graph be a straight line or a curve? Commit to an answer and give your reason.", lines: 2, a: "A gentle curve: the distance keeps rising, but by slightly smaller steps each time." },
       ],
       exam: [
-        { tip: "Plot each point as a small × to within half a small square.", p: "A student measures how the temperature of water affects the time for sugar to dissolve. Three points are plotted.", marks: 2,
+        { p: "A student measures how the temperature of water affects the time for sugar to dissolve. Three points are plotted.", marks: 2,
           table: { head: ["Temperature / °C", "20", "30", "40", "50", "60"], rows: [["Time / s", "80", "62", "48", "38", "31"]] },
           graph: { w: 140, h: 90, x: [5, 2], y: [10, 1], xLabel: "Temperature / °C", yLabel: "Time / s", given: [[20, 80], [30, 62], [40, 48]], points: [[50, 38], [60, 31]] },
           after: [{ t: "part", p: "Plot the results for 50 °C and 60 °C.", a: "(50, 38) (1); (60, 31) (1)" }] },
@@ -241,7 +241,7 @@
         ] },
         { t: "q", p: "Which conclusion is best? Tick <strong>one</strong> box.", mcq: { o: ["It went up.", "The distance increased.", "As the ramp height increased, the mean distance increased, from 20 cm at 5 cm to 80 cm at 25 cm.", "The results were good."], c: 2, cols: 1 } },
       ],
-      lab: { title: "Finish your own ramp graph", aside: "Go back to your Lesson 4 graph.", blocks: [
+      lab: { title: "Finish your own ramp graph", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Add the best-fit line. Circle any point that is far from it and write a short note beside it. If there are none, write “no anomalous results: all points lie close to the line”. Saying so is worth marks." },
           { t: "checks", title: "Before you call it finished", head: ["✓"], items: ["Title included", "x-axis labelled with the unit", "y-axis labelled with the unit", "Sensible scale, using most of the grid", "Points plotted accurately as small crosses", "One best-fit line, not dot-to-dot", "Anomalous results circled and noted, or “none” written"] },
@@ -256,7 +256,7 @@
       ] },
       flow: ["doNow", "learn", "try", "lab", "check", "exam", "home", "revise"],
       exam: [
-        { tip: "A best-fit line shows the trend; it does not have to pass through any point.", p: "A student's best-fit line passes through none of the plotted points. A friend says the line must be wrong. Is the friend right? Explain.", marks: 2, lines: 2, a: "No: a best-fit line shows the overall trend (1); the points should be balanced on either side, and it need not touch any of them (1)." },
+        { p: "A student's best-fit line passes through none of the plotted points. A friend says the line must be wrong. Is the friend right? Explain.", marks: 2, lines: 2, a: "No: a best-fit line shows the overall trend (1); the points should be balanced on either side, and it need not touch any of them (1)." },
         { p: "Give <strong>two</strong> reasons why an anomalous result should not simply be deleted.", marks: 2, lines: 2, a: "It might be a real effect (1); it should be checked and repeated first / deleting inconvenient data is dishonest (1)." },
       ],
       home: { title: "Take it home", blocks: [{ t: "q", p: "Find a graph outside school: a news site, a sports app or an advert. Run it through the graph checklist on the last page.", after: [

@@ -5,7 +5,7 @@
 # MathJax is fetched from a CDN, so the build needs a network connection.
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year9phy/unit02}"
-PARTS="1:1-3 2:4-6 3:7-9" # part:lessons, as PARTS in assets/workbook.js
+PARTS="1:1-3 2:4-6 3:7-9" # part:lessons, as parts in assets/book.js
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 COMPRESS="$(dirname "$0")/../../assets/compress-pdfs.sh"
 OUT="${OUT:-pdf}"

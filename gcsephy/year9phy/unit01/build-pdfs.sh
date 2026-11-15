@@ -5,7 +5,7 @@
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 # Ghostscript, if installed, checks that each answer edition has as many pages as its student edition.
 BASE="${BASE:-http://localhost:8000/gcsephy/year9phy/unit01}"
-PARTS="1:1-2 2:3-5 3:6-8" # part:lessons, as PARTS in assets/workbook.js
+PARTS="1:1-2 2:3-5 3:6-8" # part:lessons, as parts in assets/book.js
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 COMPRESS="$(dirname "$0")/../../assets/compress-pdfs.sh"
 OUT="${OUT:-pdf}"

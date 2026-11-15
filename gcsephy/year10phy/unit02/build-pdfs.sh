@@ -54,7 +54,7 @@ lesson() { # number
   booklet "$1" "$NAME (Lesson $(printf %02d "$1"))" "lesson=$1" "Lesson $(printf %02d "$1")"
 }
 
-part() { # number (as PARTS in assets/workbook.js)
+part() { # number (as parts in assets/book.js)
   booklet "p$1" "$NAME (Part $1)" "part=$1" "Part $1"
 }
 

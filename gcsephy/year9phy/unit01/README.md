@@ -18,9 +18,9 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 |---|---|---|
 | [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 57-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points. A compact Note pill at the lower right opens student notes above navigation (N), without resizing the slide |
 | `index.html` | Student hub, linked from the GCSE landing page: the workbook parts, the review, their answers, the slide deck and the four Preps | Share its address with students |
-| `pdf/Y09 - Unit 01 - Work Like a Physicist (Part 1).pdf`, `(Part 2)`, `(Part 3)` | The A4 student workbook in three booklets: Lessons 1–2, 3–5 and 6–8 (27, 37 and 28 pages). Each part has its own cover, How this booklet works, its lessons with diagrams for revision, key words, a progress tracker, quick answers and the Physicist's toolkit on the last page | Print double-sided; hand out each part as you reach it |
+| `pdf/Y09 - Unit 01 - Work Like a Physicist (Part 1).pdf`, `(Part 2)`, `(Part 3)` | The A4 student workbook in three booklets: Lessons 1–2, 3–5 and 6–8. Each part has a cover listing its lessons, the lessons with diagrams for revision, the Physicist's toolkit, key words and quick answers | Print double-sided; hand out each part as you reach it |
 | `pdf/… (Ans).pdf` | Each part with answers filled in, so page numbers match; practical tasks show sample results from the deck | Mark with it, or let students self-check |
-| `pdf/… (Unit Review).pdf`, `… (Unit Review) (Ans).pdf` | 9-page unit review after Lesson 8, in the workbook's design: 40 marks of mixed AQA-style questions, a fix-it log and the toolkit; the answer edition has the same pages with a mark scheme | Set after Lesson 8, in class or at home |
+| `pdf/… (Unit Review).pdf`, `… (Unit Review) (Ans).pdf` | Unit review after Lesson 8: 40 marks of mixed AQA-style questions, a fix-it log, the toolkit, all the key words and the progress tracker; the answer edition has the same pages with a mark scheme | Set after Lesson 8, in class or at home |
 | `workbook.html`, `assets/`, `build-pdfs.sh` | Editable source of the workbook parts, the Unit review and their answer editions (HTML, CSS, JavaScript) | Edit `assets/lessons-*.js` or `review.js`, then run `sh build-pdfs.sh`. See [Workbook source](#workbook-source) |
 | `prep/` | Four one-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions (`pdf/`); the hub links the sheets, not the answer editions | Set after Lessons 2, 4, 6 and 8. Edit `prep/content.js`, then rebuild; see [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 | `lesson-plans/` | The seven lesson plans (`pdf/… - Lesson Plan 01.pdf` to `… - Lesson Plan 07-08.pdf`) and their editable source | Read the PDFs before teaching; they are the detail behind each lesson. Edit `lesson-plans/source/*.md`, then run `sh build-pdfs.sh`. See `lesson-plans/README.md` |
@@ -133,7 +133,7 @@ A working-scientifically unit with no new physics; the practicals are vehicles f
 
 ## The student workbook
 
-Three parts, one per stage of the unit: Lessons 1–2 (the language), 3–5 (technique on structured practicals) and 6–8 (on your own). Each lesson follows Do now → Learn it → Practical → Try it → Exam corner → Revise it, with diagrams students can revise from, printed graph paper, and the options printed beside every gap. Each part ends with key words, “phrases that pick up marks”, a progress tracker, quick answers and the Physicist's toolkit, which holds every rule, calculation and checklist.
+Three parts, one per stage of the unit: Lessons 1–2 (the language), 3–5 (technique on structured practicals) and 6–8 (on your own). Each lesson follows Do now → Learn it → Practical → Try it → Exam corner → Revise it, with diagrams students can revise from, printed graph paper, and the options printed beside every gap. Each part ends with the Physicist's toolkit, which holds every rule, calculation and checklist, the key words with “phrases that pick up marks”, and quick answers. The progress tracker is in the Unit review.
 
 ---
 
@@ -143,7 +143,7 @@ Three parts, one per stage of the unit: Lessons 1–2 (the language), 3–5 (tec
 
 ## Workbook source
 
-The workbook source prints three parts, the Unit review and an answer edition of each with the same page numbers into `pdf/`. It uses the same engine and look as the Year 9 Energy workbook (`../unit02/`): each lesson runs Do now → Learn it → Practical → Try it → Exam corner → Revise it, and each part ends with key words, a progress tracker, quick answers and the Physicist's toolkit.
+The workbook source prints three parts, the Unit review and an answer edition of each with the same page numbers into `pdf/`. It uses the shared GCSE workbook renderer ([`../../assets/workbook/README.md`](../../assets/workbook/README.md)); this unit's settings, cover drawing, case-study panel and Physicist's toolkit are in `assets/book.js`.
 
 The student hub, `index.html`, uses `/gcsephy/assets/workbook-hub.css`, shared by all six workbook hubs. That stylesheet does not affect the printed workbooks.
 
@@ -151,18 +151,18 @@ The student hub, `index.html`, uses `/gcsephy/assets/workbook-hub.css`, shared b
 
 | File | Use |
 |---|---|
-| `workbook.html` | Print preview: `?part=1` (2, 3) for one part as printed, `&answers` for the answer edition, `?review` for the Unit review; with no part, the whole booklet. The parts are `PARTS` in `workbook.js` and `build-pdfs.sh` |
+| `workbook.html` | Print preview: `?part=1` (2, 3) for one part as printed, `&answers` for the answer edition, `?review` for the Unit review; with no part, the whole booklet. The parts are `parts` in `assets/book.js` and `PARTS` in `build-pdfs.sh` |
 | `assets/lessons-a.js`, `lessons-b.js`, `lessons-c.js` | Lessons 1–2, 3–5 and 6–8: all the words, questions and answers. Lessons 7–8 are one entry (`n: 7, last: 8`) |
 | `assets/content.js` | Joins the lessons; holds the key words and the “phrases that pick up marks” (each tagged with its lesson) and the Physicist's toolkit |
 | `assets/review.js` | Unit review questions (`window.UNIT.review`), 40 marks, in the Exam corner format; `part: true` continues a question without a new number |
-| `assets/workbook.js`, `workbook.css` | Renderer and print styles, adapted from the Year 9 Energy workbook (no MathJax: maths is plain text, with ÷) |
+| `assets/book.js` | Settings for the shared renderer: file names, parts, cover, the lesson case-study panel, the Physicist's toolkit and the tracker's closing message. No MathJax: maths is plain text, with ÷ |
 | `assets/figures.js`, `figures.css` | Line drawings for the workbook. Sample data match the teaching deck |
 | `build-pdfs.sh` | Rebuilds the three parts, the Unit review and their answer editions into `pdf/` with headless Chrome (`ONLY_PART=2` for one part, `ONLY_REVIEW=1` for the review), then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`), and warns if an answer edition's page count differs from its student edition |
 | `index.html` | Student hub linking the parts, the review, their answers, the slide deck and the four Preps (`prep/`) |
 
 ### Editing
 
-In sentences, `[[answer|a / b / c]]` prints a blank followed by its options and `{{a|b*|c}}` prints an AQA-style ring box with `*` on the answer: every gap shows its choices. Personal results (own data, own graph) use labelled rows (`vars`) or writing lines instead of blanks. An answer (`a`, table `ans`, graph `points`, `fit`, `bars`) prints only in the answer edition; the student edition keeps its space, so both paginate identically. Block types are listed in `workbook.js`.
+In sentences, `[[answer|a / b / c]]` prints a blank followed by its options and `{{a|b*|c}}` prints an AQA-style ring box with `*` on the answer: every gap shows its choices. Personal results (own data, own graph) use labelled rows (`vars`) or writing lines instead of blanks. An answer (`a`, table `ans`, graph `points`, `fit`, `bars`) prints only in the answer edition; the student edition keeps its space, so both paginate identically. Block types are listed in the shared renderer's README.
 
 To rebuild: serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` here (needs Chrome; Ghostscript for the page-count check). Practical, Exam corner and question cards print whole, moving to the next page rather than splitting; keep each card shorter than a page (about 224 mm on screen, since pages print 1.2× larger), splitting a long one into two cards. The toolkit must stay on one page.
 

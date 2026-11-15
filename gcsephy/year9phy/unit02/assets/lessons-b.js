@@ -54,7 +54,7 @@
         { t: "q", p: R`Complete the table. Use \(g = 9.8\) N/kg. Show your working underneath.`, table: { head: ["Object", "Mass / kg", "Height gained / m", R`\(E_p\) / J`], rows: [["Child at the top of a slide", "30", "2.5", null], ["Rock on a cliff", "4.0", null, "196"], ["Crate on a lorry", null, "3.0", "882"], ["Lift with passengers", "800", "12", null]], ans: [[null, null, null, "735"], [null, null, "5.0", null], [null, "30", null, null], [null, null, null, "94 080"]] }, box: 30, grid: true },
         { t: "q", type: "Challenge", p: "A 50 kg student gains 4.9 kJ in their gravitational potential store climbing stairs. How high did they climb? <em>Convert kJ to J first.</em>", lines: 3, a: R`\(E_p = 4900\) J; \(h = \dfrac{E_p}{m\,g} = \dfrac{4900}{50 \times 9.8} = 10\) m` },
       ],
-      lab: { title: "Activity: lift it", aside: "Work in pairs. Lift gently and keep the floor clear.", blocks: [
+      lab: { title: "Activity: lift it", safety: "Lift gently and keep the floor clear.", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Choose three objects. Measure the mass of each and the height of the shelf or bench you lift it onto. Calculate the energy transferred to each gravitational potential store." },
           { t: "q", p: "Record and calculate.", table: { head: ["Object", "Mass / kg", "Height / m", R`\(E_p\) / J`], rows: [[null, null, null, null], [null, null, null, null], [null, null, null, null]], ans: [["textbook", "1.2", "0.90", "10.6"], ["water bottle", "0.50", "0.90", "4.4"], ["school bag", "4.0", "0.90", "35.3"]] } },
@@ -62,7 +62,7 @@
         ] },
       ] },
       exam: [
-        { tip: R`\(g\) is always given in the question. AQA uses 9.8 N/kg.`, p: "A crane lifts a 250 kg load through a height of 12 m. Calculate the energy transferred to the load's gravitational potential store. Gravitational field strength = 9.8 N/kg", marks: 2, frame: frame3, frameA: [R`\(E_p = m\,g\,h\)`, R`\(E_p = 250 \times 9.8 \times 12\) (1)`, "29 400 J (1)"] },
+        { p: "A crane lifts a 250 kg load through a height of 12 m. Calculate the energy transferred to the load's gravitational potential store. Gravitational field strength = 9.8 N/kg", marks: 2, frame: frame3, frameA: [R`\(E_p = m\,g\,h\)`, R`\(E_p = 250 \times 9.8 \times 12\) (1)`, "29 400 J (1)"] },
         { p: "A 0.40 kg ball gains 7.84 J in its gravitational potential store when it is thrown upwards. Calculate how high it rises. Gravitational field strength = 9.8 N/kg", marks: 3, frame: frameRe, frameA: [R`\(E_p = m\,g\,h\)`, R`\(h = \dfrac{E_p}{m\,g}\) (1)`, R`\(h = \dfrac{7.84}{0.40 \times 9.8}\) (1)`, "2.0 m (1)"] },
       ],
       quick: { slide: 26, items: [
@@ -111,7 +111,7 @@
         { t: "sub", h: "Masses into forces at the bench" },
         { t: "key", h: "Gravity pulls each kilogram down with 9.8 N, so each 100 g pulls down with 0.98 N. At the bench we round this: <strong>each 100 g pulls down with about 1 N</strong>. A mass is not a force: always record the force in newtons." },
       ],
-      lab: { title: "Practical: stretching a spring", aside: "Work in pairs. Stand up while you work.", blocks: [
+      lab: { title: "Practical: stretching a spring", blocks: [
         { t: "p", h: "Before you start, write the question this practical answers and name its variables." },
         { t: "vars", rows: [["Question", "", "How does the extension of a spring depend on the force pulling it?"], ["Independent variable", "", "the force (the load we add)"], ["Dependent variable", "", "the extension"], ["Control variable", "", "the same spring for every reading"]] },
         { t: "split", cls: "narrow-fig", left: [
@@ -147,7 +147,7 @@
       ],
       order: ["doNow", "learn", "lab", "try", "check", "exam", "revise"],
       exam: [
-        { tip: "Convert the extension to metres before you divide.", p: "A force of 5.0 N stretches a spring by 25 cm. Calculate the spring constant of the spring.", marks: 3, frame: frame4, frameA: ["e = 25 cm = 0.25 m (1)", R`\(k = \dfrac{F}{e}\)`, R`\(k = \dfrac{5.0}{0.25}\) (1)`, "20 N/m (1)"] },
+        { p: "A force of 5.0 N stretches a spring by 25 cm. Calculate the spring constant of the spring.", marks: 3, frame: frame4, frameA: ["e = 25 cm = 0.25 m (1)", R`\(k = \dfrac{F}{e}\)`, R`\(k = \dfrac{5.0}{0.25}\) (1)`, "20 N/m (1)"] },
         { p: "Describe what happens to the extension of a spring when the force on it is doubled. Assume the limit of proportionality is not passed.", marks: 2, lines: 2, a: "The extension doubles (1), because extension is directly proportional to force (1)." },
       ],
       quick: { slide: 37, items: [
@@ -191,7 +191,7 @@
         { t: "compare", head: ["Extension of a 50 N/m spring", R`\(e^2\)`, R`\(E_e\)`], rows: [["0.040 m", "0.0016", "0.04 J"], ["0.080 m (2 × further)", "0.0064", "0.16 J (4 × more)"], ["0.120 m (3 × further)", "0.0144", "0.36 J (9 × more)"]] },
         { t: "p", h: R`This is the same pattern as kinetic energy, because the extension is squared. <strong>Why?</strong> The further you stretch a spring, the harder you have to pull. So each extra centimetre takes more work than the one before.` },
       ],
-      lab: { title: "Your own spring", aside: "Use the spring constant you found in Lesson 4.", blocks: [
+      lab: { title: "Your own spring", blocks: [
         { t: "lab", blocks: [
           { t: "q", p: R`My spring constant from Lesson 4: \(k\) = [[25|20]] N/m. Calculate the energy stored at each extension.`, table: { head: ["Extension / m", R`\(e^2\) / m²`, R`\(E_e\) / J`], rows: [["0.05", null, null], ["0.10", null, null], ["0.20", null, null]], ans: [[null, "0.0025", "0.031"], [null, "0.010", "0.125"], [null, "0.040", "0.50"]] }, box: 20, grid: true },
           { t: "q", p: R`Check: did doubling the extension from 0.10 m to 0.20 m give four times the energy? {{yes*|no}} Show how you know.`, lines: 1, a: "0.50 ÷ 0.125 = 4 (sample)." },
@@ -210,7 +210,7 @@
         { t: "q", type: "Challenge", p: "Spring A has k = 100 N/m and is stretched by 0.10 m. Spring B has k = 50 N/m and is stretched by 0.20 m. Which spring stores more energy? Show your working.", lines: 3, a: "A: 0.5 × 100 × 0.10² = 0.50 J. B: 0.5 × 50 × 0.20² = 1.0 J. Spring B stores more." },
       ],
       exam: [
-        { tip: "Square only the extension. Give the unit.", p: "A catapult has a spring constant of 500 N/m. It is stretched by 0.12 m. Calculate the energy in its elastic potential store.", marks: 2, frame: frame3, frameA: [R`\(E_e = \tfrac{1}{2}\,k\,e^2\)`, R`\(E_e = 0.5 \times 500 \times 0.12^2\) (1)`, "3.6 J (1)"] },
+        { p: "A catapult has a spring constant of 500 N/m. It is stretched by 0.12 m. Calculate the energy in its elastic potential store.", marks: 2, frame: frame3, frameA: [R`\(E_e = \tfrac{1}{2}\,k\,e^2\)`, R`\(E_e = 0.5 \times 500 \times 0.12^2\) (1)`, "3.6 J (1)"] },
         { p: R`Explain why \(E_e = \tfrac{1}{2}\,k\,e^2\) cannot be used once the spring has passed its limit of proportionality.`, marks: 2, lines: 2, a: "Beyond the limit of proportionality the extension is no longer proportional to the force, so k is not constant (1). The spring may be inelastically deformed and not return all the energy (1)." },
       ],
       quick: { slide: 43, items: [

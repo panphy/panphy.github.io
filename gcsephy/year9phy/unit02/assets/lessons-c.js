@@ -40,7 +40,7 @@
         { t: "sub", h: "Real systems: some energy is dissipated" },
         { t: "p", h: "In real life, air resistance and friction transfer some energy to the <strong>thermal store</strong> of the surroundings. This energy is not destroyed, but it is spread out and we cannot use it again. We say it is <strong>dissipated</strong>. That is why a pendulum swings a little lower each time, and why it will not hit your nose." },
       ],
-      lab: { title: "Practical: does the pendulum keep its energy?", aside: "Every reading is a height, so you do not need fast timing.", blocks: [
+      lab: { title: "Practical: does the pendulum keep its energy?", blocks: [
         { t: "split", cls: "narrow-fig", left: [
           { t: "safety", items: ["Clamp the stand firmly so it cannot tip.", "Let the bob go from rest; never push it.", "Keep clear of the swing."] },
           { t: "steps", items: ["Hang the bob. Note the height of its lowest point on the metre rule.", "Pull the bob to the side until it is 0.20 m higher than its lowest point (A). Let go.", "Read the height it reaches on the other side (C). Filming helps.", "Let it keep swinging. Read the height it reaches after 10 swings."] },
@@ -59,7 +59,7 @@
         { t: "q", say: ["Mo", "The pendulum swings lower each time, so energy is being destroyed."], p: "Explain why Mo is wrong.", lines: 2, a: "Energy cannot be destroyed. It is dissipated: transferred to the thermal store of the surroundings by air resistance and friction." },
       ],
       exam: [
-        { tip: "In part (b), say why the two energies are equal.", p: "A diver of mass 60 kg stands on a board 10 m above the water. Gravitational field strength = 9.8 N/kg.<br>(a) Calculate the energy in the diver's gravitational potential store.", marks: 2, frame: frame3, frameA: [R`\(E_p = m\,g\,h\)`, R`\(E_p = 60 \times 9.8 \times 10\) (1)`, "5880 J (1)"] },
+        { p: "A diver of mass 60 kg stands on a board 10 m above the water. Gravitational field strength = 9.8 N/kg.<br>(a) Calculate the energy in the diver's gravitational potential store.", marks: 2, frame: frame3, frameA: [R`\(E_p = m\,g\,h\)`, R`\(E_p = 60 \times 9.8 \times 10\) (1)`, "5880 J (1)"] },
         { p: "(b) The diver falls into the water. Ignoring air resistance, how much energy is in the diver's kinetic store just before they reach the water? Give a reason.", marks: 2, lines: 2, a: "5880 J (1). All the energy lost from the gravitational potential store is transferred to the kinetic store (1)." },
         { p: "(c) In real life, the energy in the kinetic store is a little less. Explain why.", marks: 2, lines: 2, a: "Air resistance acts on the diver (1), so some energy is transferred to the thermal store of the air / surroundings (1)." },
       ],
@@ -101,7 +101,7 @@
         { t: "follow", slide: 56, q: "A 2.0 kW kettle is switched on for 2.0 minutes. Calculate the energy transferred.", steps: [["Convert", "P = 2000 W, t = 120 s"], ["Equation", R`\(P = \dfrac{E}{t}\)`], ["Rearrange", R`\(E = P\,t\)`], ["Substitute", R`\(E = 2000 \times 120\)`], ["Answer", "E = 240 000 J"]],
           yt: { q: "A 1.5 kW heater is switched on for 3.0 minutes. Calculate the energy transferred.", steps: [["Convert", "P = 1500 W, t = 180 s"], ["Equation", R`\(P = \dfrac{E}{t}\)`], ["Rearrange", R`\(E = P\,t\)`], ["Substitute", R`\(E = 1500 \times 180\)`], ["Answer", "E = 270 000 J"]] } },
       ],
-      lab: { title: "Practical: how powerful are you?", aside: "Everyone uses a mass of 50 kg, so nobody is weighed.", blocks: [
+      lab: { title: "Practical: how powerful are you?", blocks: [
         { t: "split", cls: "narrow-fig", left: [
           { t: "safety", items: ["Walk briskly. Do not run. Hold the handrail.", "One person on the stairs at a time.", "Use dry, clear stairs."] },
           { t: "steps", items: ["Measure the height of one step. Count the steps. Height h = step height × number of steps.", "Your partner times you walking briskly up the stairs.", R`Calculate the energy transferred: \(E = m\,g\,h\), with \(m = 50\) kg.`, R`Calculate your power: \(P = \dfrac{E}{t}\).`] },
@@ -120,7 +120,7 @@
         { t: "q", type: "Challenge", p: "A 3.0 kW heater transfers 540 kJ. How many minutes was it on for?", lines: 3, a: R`\(t = \dfrac{E}{P} = \dfrac{540\,000}{3000} = 180\) s = 3.0 minutes` },
       ],
       exam: [
-        { tip: "Two steps: find the energy first, then the power.", p: "A lift motor raises a 600 kg lift through 15 m in 20 s. Gravitational field strength = 9.8 N/kg.<br>(a) Calculate the energy transferred to the lift's gravitational potential store.", marks: 2, frame: frame3, frameA: [R`\(E_p = m\,g\,h\)`, R`\(E_p = 600 \times 9.8 \times 15\) (1)`, "88 200 J (1)"] },
+        { p: "A lift motor raises a 600 kg lift through 15 m in 20 s. Gravitational field strength = 9.8 N/kg.<br>(a) Calculate the energy transferred to the lift's gravitational potential store.", marks: 2, frame: frame3, frameA: [R`\(E_p = m\,g\,h\)`, R`\(E_p = 600 \times 9.8 \times 15\) (1)`, "88 200 J (1)"] },
         { p: "(b) Calculate the useful power output of the motor.", marks: 2, frame: frame3, frameA: [R`\(P = \dfrac{E}{t}\)`, R`\(P = \dfrac{88\,200}{20}\) (1)`, "4410 W (1)"] },
         { p: "Motor A lifts a load in 5 s. Motor B lifts the same load through the same height in 10 s. Complete the sentence.", marks: 2, fill: R`Motor A transfers [[the same|more / less / the same]] energy as motor B, and has [[a greater|a greater / a smaller / the same]] power.` },
       ],
@@ -163,7 +163,7 @@
         { t: "p", h: "Energy is transferred through a solid by <strong>conduction</strong>, from the hotter side to the colder side. A material with a <strong>higher thermal conductivity</strong> transfers energy <strong>faster</strong>. Metals have a high thermal conductivity. Air, wool and plastic foam have a low thermal conductivity, so they are good <strong>thermal insulators</strong>. Many insulators work because they trap air." },
         { t: "key", h: "A house cools <strong>more slowly</strong> if its walls are <strong>thicker</strong> and have a <strong>lower thermal conductivity</strong>." },
       ],
-      lab: { title: 'Practical: cooling cups <span class="triple-tag">Triple only</span>', aside: "Your teacher pours the hot water.", blocks: [
+      lab: { title: 'Practical: cooling cups <span class="triple-tag">Triple only</span>', blocks: [
         { t: "fig", h: F.cups(["none", "newspaper", "bubble wrap", "cotton wool", "felt"]), cls: "fig-small" },
         { t: "p", h: "<strong>Question:</strong> which material is the best thermal insulator?" },
         { t: "vars", rows: [["Independent variable", "", "the insulating material"], ["Dependent variable", "", "the temperature drop in 10 minutes"], ["Control variables (two)", "", "volume of water, starting temperature, type of cup, thickness of wrapping, lid"]] },
@@ -187,7 +187,7 @@
         ] }] },
       ],
       exam: [
-        { tip: "Say what the lubricant does to friction, and then what that does to the energy.", p: "Explain how oiling a bicycle chain reduces the energy wasted when you cycle.", marks: 2, lines: 2, a: "Oil reduces friction between the moving parts (1), so less energy is transferred to the thermal store of the chain and surroundings (1)." },
+        { p: "Explain how oiling a bicycle chain reduces the energy wasted when you cycle.", marks: 2, lines: 2, a: "Oil reduces friction between the moving parts (1), so less energy is transferred to the thermal store of the chain and surroundings (1)." },
         { p: "Two houses have walls of the same thickness. The bricks of house A have a higher thermal conductivity than the bricks of house B. Which house cools faster? Explain.", marks: 2, lines: 2, a: "House A (1): a higher thermal conductivity means energy is transferred through the walls by conduction faster (1)." },
       ],
       order: ["doNow", "learn", "lab", "try", "check", "exam", "revise"],
@@ -233,7 +233,7 @@
         { t: "sub", h: "Increasing efficiency" },
         { t: "p", h: "Reduce the wasted energy: <strong>lubricate</strong> moving parts (less friction), <strong>streamline</strong> vehicles (less air resistance), <strong>insulate</strong> hot things (less energy transferred by heating), and choose devices that waste less, such as LEDs instead of filament lamps." },
       ],
-      lab: { title: "Practical: how efficient is a bounce?", aside: "Filming the bounce against the ruler makes it much easier to read.", blocks: [
+      lab: { title: "Practical: how efficient is a bounce?", blocks: [
         { t: "split", cls: "narrow-fig", left: [
           { t: "steps", items: ["Measure the mass in kg. Drop the ball from 1.00 m.", "Measure the height of the first bounce.", "Repeat three times and find the mean bounce height.", "Repeat with a different ball."] },
           { t: "p", h: R`Measure both heights from the bottom of the ball. Use \(E_p = m\,g\,h\) with \(g = 9.8\) N/kg for each energy; then \(\text{efficiency} = \dfrac{E_{p2}}{E_{p1}}\). Round only at the end.` },
@@ -252,7 +252,7 @@
         { t: "q", p: "Complete the sentences. The choices are after each gap.", fill: [R`Oiling the gears of a machine [[increases|increases / decreases]] its efficiency, because less energy is transferred by [[friction|friction / light]].`, R`An LED is [[more|more / less]] efficient than a filament lamp, because [[less|more / less]] energy is wasted heating the room.`] },
       ],
       exam: [
-        { tip: "Check: is your efficiency less than 1 (100%)?", p: "A 1200 W hair dryer has a useful power output of 1080 W. Calculate its efficiency as a percentage.", marks: 3, frame: frame3, frameA: [R`\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)`, R`\(\dfrac{1080}{1200} = 0.90\) (1)(1)`, "90% (1)"] },
+        { p: "A 1200 W hair dryer has a useful power output of 1080 W. Calculate its efficiency as a percentage.", marks: 3, frame: frame3, frameA: [R`\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)`, R`\(\dfrac{1080}{1200} = 0.90\) (1)(1)`, "90% (1)"] },
         { p: "Explain why an LED is more efficient than a filament lamp.", marks: 2, lines: 2, a: "An LED wastes less energy heating the surroundings (1), so a bigger fraction of the input energy is transferred usefully by light (1)." },
       ],
       quick: { slide: 76, items: [

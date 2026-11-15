@@ -1,4 +1,4 @@
-/* Lessons 6 and 7-8 of the Work Like a Physicist workbook (assets/workbook.js): Part 3.
+/* Lessons 6 and 7-8 of the Work Like a Physicist workbook (/gcsephy/assets/workbook/workbook.js): Part 3.
    Lessons 7-8 are one entry (n: 7, last: 8). Same marks as lessons-a.js. Sample helicopter
    results are the deck's: wing length 4 to 8 cm, mean fall time 1.10 to 1.88 s. */
 (function () {
@@ -46,7 +46,7 @@
         ] },
         { t: "key", h: "<strong>Put a number on the problem.</strong> A reaction time is about 0.2 s. On the shortest fall, 1.10 s, that is nearly a fifth of the measurement; on the longest, 1.88 s, about a tenth. So make the error smaller (video) or the measurement bigger (a higher drop). “Be more careful” is not an improvement: name the equipment and the problem it solves." },
       ],
-      lab: { title: "Plan before you cut anything", aside: "Assessed. Work on your own.", blocks: [
+      lab: { title: "Plan before you cut anything", blocks: [
         { t: "lab", blocks: [
           { t: "vars", cls: "tall", rows: [
             ["My research question", "", "How does wing length affect the fall time of a paper helicopter?"],
@@ -60,7 +60,7 @@
           { t: "safety", items: ["Never climb on chairs, stools or benches to gain height. Use a height you can reach standing on the floor, the same every time.", "Take care with scissors.", "Keep the landing zone clear."] },
         ] },
       ] },
-      lab2: { title: "Design your table, then fly and record", aside: "Assessed. Nothing is printed for you on purpose.", blocks: [
+      lab2: { title: "Design your table, then fly and record", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Draw your own results table. A good table has a column for the independent variable, three trial columns, a mean column, and units in every heading." },
           { t: "q", p: "My results table:", box: 72, a: sampleTable },
@@ -69,7 +69,6 @@
         ] },
       ] },
       tryTitle: "Graph, conclude, predict",
-      tryAside: "Assessed.",
       try: [
         { t: "q", p: "Graph your results: title, axes, units, scale, accurate crosses, best-fit line, anomalous results noted.", graph: { w: 110, h: 100, blank: true, x: [1, 1], y: [0.2, 1], xLabel: "Wing length / cm", yLabel: "Mean fall time / s", points: [[4, 1.10], [5, 1.32], [6, 1.50], [7, 1.71], [8, 1.88]], fit: [[3.4, 0.996], [8.6, 2.016]], guide: [6.5, 1.6] } },
         { t: "q", p: "Your conclusion.", after: [
@@ -87,7 +86,7 @@
         ] },
       ],
       exam: [
-        { tip: "Compare the size of the error with the size of the measurement.", p: "A student times paper helicopters falling. Human reaction time is about 0.2 s. Explain why reaction time matters more for a short fall than for a long one.", marks: 2, lines: 2, a: "The reaction time is about the same for every fall (1), so it is a bigger fraction of a short fall time (1)." },
+        { p: "A student times paper helicopters falling. Human reaction time is about 0.2 s. Explain why reaction time matters more for a short fall than for a long one.", marks: 2, lines: 2, a: "The reaction time is about the same for every fall (1), so it is a bigger fraction of a short fall time (1)." },
         { p: "The student tested wing lengths from 4 cm to 8 cm. Which prediction from the best-fit line is most trustworthy? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["the fall time for 2 cm wings", "the fall time for 6.5 cm wings", "the fall time for 12 cm wings"], c: 1, cols: 3 } },
         { p: "Suggest <strong>one</strong> improvement to the way the fall time is measured, and say how it helps.", marks: 2, lines: 2, a: "Film the fall and time it from the video / use a greater drop height (1); this removes the reaction time / makes the reaction time a smaller fraction of the time (1)." },
       ],
@@ -144,7 +143,7 @@
         ] },
         { t: "q", p: "Repair one of them. Write it in the form “How does X affect Y?”", lines: 1, a: "e.g. “How does ramp height affect the distance travelled by a toy car?” (you can set a ramp height exactly; you cannot throw with the same force twice)." },
       ],
-      lab: { title: "Plan (Lesson 7)", aside: "Stop at the teacher checkpoint.", blocks: [
+      lab: { title: "Plan (Lesson 7)", blocks: [
         { t: "lab", title: "Planning grid", blocks: [
           { t: "vars", cls: "tall", rows: [["Our research question", ""], ["Group members", ""], ["Independent variable (and unit)", ""], ["Dependent variable (and unit)", ""], ["The independent variable is", CC], ["Graph we will use, and why", "{{line graph|bar chart}} because"], ["At least three control variables", ""], ["Values or categories we will test (4–5)", ""], ["Equipment we need", ""], ["Safety risks, and how we will reduce them", ""]] },
         ] },
@@ -157,7 +156,7 @@
           { t: "vars", rows: [["Approved by", ""], ["Date", ""]] },
         ] },
       ] },
-      lab2: { title: "Collect (Lesson 7)", aside: "Record results the moment you take them.", blocks: [
+      lab2: { title: "Collect (Lesson 7)", blocks: [
         { t: "lab", title: "Results table", blocks: [
           { t: "p", h: "Write your own headings in the top row, with units. If your independent variable is categoric, the first heading is the category name: “Surface type”, “Material”." },
           { t: "table", head: ["", "", "", "", ""], rh: 11, rows: [[null, null, null, null, null], [null, null, null, null, null], [null, null, null, null, null], [null, null, null, null, null], [null, null, null, null, null], [null, null, null, null, null]] },
@@ -172,7 +171,7 @@
         ] },
       ] },
       flow: ["doNow", "learn", "try", "lab", "lab2",
-        { sec: "lab", title: "Graph (Lesson 8)", aside: "Decide before you draw.", blocks: [
+        { sec: "lab", title: "Graph (Lesson 8)", blocks: [
           { t: "lab", blocks: [
             { t: "vars", rows: [["Our independent variable is", CC], ["So our graph is a", "{{line graph|bar chart}}"], ["On the x-axis", ""], ["On the y-axis", ""], ["Largest mean, and the value of each big square on the y-axis", ""]] },
           ] },
@@ -181,7 +180,7 @@
             { t: "p", h: "Crosses and a best-fit line for a line graph. Equal bars with gaps for a bar chart. Title, labels and units either way." },
           ] },
         ] },
-        { sec: "try", title: "Conclude and evaluate (Lesson 8)", aside: "Assessed. This is where the marks hide.", blocks: [
+        { sec: "try", title: "Conclude and evaluate (Lesson 8)", blocks: [
           { t: "q", p: "Interrogate your own results.", after: [
             { t: "vars", cls: "tall", rows: [["The pattern: the dependent variable…", "{{increases|decreases|stays about the same}}"], ["The pattern is", "{{strong and clear|weak and scattered}} because"], ["Possible anomalous results (or “none”)", ""], ["The one number a doubter would find hardest to argue with", ""]] },
           ] },
@@ -193,7 +192,7 @@
           ] },
           { t: "q", p: "How confident are you in your conclusion, and what would make you more confident?", lines: 2, a: "Tie it to the evidence: how big the change is compared with the scatter of the repeats; ways to improve: more repeats, more values, better resolution, another group repeating it." },
         ] },
-        { sec: "try", title: "Peer review (Lesson 8)", aside: "Their job is to find the weakness you missed.", blocks: [
+        { sec: "try", title: "Peer review (Lesson 8)", blocks: [
           { t: "checks", title: "Feature", head: ["✓"], items: ["Question uses “How does X affect Y?”", "All three types of variable named", "Results table has units in the headings", "Three trials, means calculated", "Right graph for the independent variable", "Labels, units, scale, accurate crosses or bars", "Best fit line drawn; anomalous results dealt with", "Conclusion quotes numbers", "Evaluation names an improvement"] },
           { t: "vars", rows: [["Reviewed by", ""], ["The strongest part of this investigation", ""], ["The question I would ask this group", ""]] },
           { t: "q", type: "Challenge", p: "Compare your results with another group who investigated something similar. Do you agree? If not, what could explain the difference?", lines: 2, a: "Compare numbers; explain differences by equipment, a control variable, resolution or a systematic error." },
@@ -201,7 +200,7 @@
         ] },
         "exam", "home", "revise"],
       exam: [
-        { tip: "Think about what you can and cannot see with only a few points.", p: "A group investigates how the mass of a ball affects how far it rolls. They test only two masses. Explain why this is not enough.", marks: 2, lines: 2, a: "Two points can always be joined by a straight line (1), so they cannot show whether the pattern is straight or curved / test four or five masses (1)." },
+        { p: "A group investigates how the mass of a ball affects how far it rolls. They test only two masses. Explain why this is not enough.", marks: 2, lines: 2, a: "Two points can always be joined by a straight line (1), so they cannot show whether the pattern is straight or curved / test four or five masses (1)." },
         { p: "Two groups in different schools do the same investigation with their own equipment and get similar results. Complete the sentence.", marks: 1, fill: "The results are {{repeatable|reproducible*|anomalous}}" },
         { p: "Suggest why a teacher checks the plan before any equipment is used.", marks: 1, lines: 1, a: "A flaw is easy to fix on paper, before time is spent collecting results that cannot be used / to check that the method is safe (1)." },
       ],
