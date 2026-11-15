@@ -6,7 +6,6 @@
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year11phy/unit01}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
-COMPRESS="$(dirname "$0")/../../assets/compress-pdfs.sh"
 OUT="pdf"
 mkdir -p "$OUT"
 
@@ -16,7 +15,7 @@ pdf() { # output, url, text the PDF title must contain; retries when Chrome prin
     print_once "$1" "$2"
     # A good print embeds the deck's display font; a fallback to Georgia means the fonts had not loaded.
     if [ -s "$1" ] && [ "$(wc -c < "$1")" -gt 50000 ] && strings "$1" | grep -q DMSerifDisplay && ! strings "$1" | grep -q "+Georgia" \
-      && strings "$1" | grep "/Title" | grep -q "$3"; then sh "$COMPRESS" "$1"; return 0; fi
+      && strings "$1" | grep "/Title" | grep -q "$3"; then return 0; fi
     echo "Retrying $1"; sleep 3
   done
   echo "FAILED: $1"

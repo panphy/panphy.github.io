@@ -8,7 +8,7 @@ The seven lesson plans for *Work Like a Physicist* as printable A4 PDFs (lessons
 | `source/*.md` | Editable text, one file per guide |
 | `guide.html` | Browser preview: `guide.html?lesson=3` (1 to 7) |
 | `assets/guide.css`, `assets/guide.js` | Print styles and the small Markdown renderer |
-| `build-pdf.sh` | Prints all seven PDFs with headless Chrome, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`) |
+| `build-pdf.sh` | Prints all seven PDFs with headless Chrome |
 
 To edit: serve the repository root (`python3 -m http.server 8000`), edit `source/`, preview at <http://localhost:8000/gcsephy/year9phy/unit01/teaching-guides/guide.html?lesson=1>, then run `sh build-pdf.sh` here (needs Chrome).
 

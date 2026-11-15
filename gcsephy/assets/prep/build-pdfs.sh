@@ -6,7 +6,6 @@
 # Optional: CHROME=/path/to/chrome HOST=http://localhost:8000 ONLY=2 (one prep number)
 HOST="${HOST:-http://localhost:8000}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
-COMPRESS="$(dirname "$0")/../compress-pdfs.sh"
 
 pdf() { # output, url
   profile="$(mktemp -d)"
@@ -19,7 +18,7 @@ pdf() { # output, url
   sleep 2
   kill "$pid" 2>/dev/null
   wait "$pid" 2>/dev/null
-  if [ -s "$tmp" ]; then mv "$tmp" "$1" && echo "Wrote $1" && sh "$COMPRESS" "$1"; else echo "FAILED: $1"; fi
+  if [ -s "$tmp" ]; then mv "$tmp" "$1" && echo "Wrote $1"; else echo "FAILED: $1"; fi
   rm -rf "$profile"
 }
 
