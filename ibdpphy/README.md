@@ -32,7 +32,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/d2-electric-and-magnetic-fields/` | D.2 teaching deck, 49 slides: SL and HL, then an additional HL part (slides 35 to 45) |
 | `decks/d3-motion-in-electromagnetic-fields/` | D.3 teaching deck, 35 slides: SL and HL, with no additional HL content |
 | `decks/d4-induction/` | D.4 teaching deck, 32 slides: HL only |
-| `decks/e1-structure-of-the-atom/` | E.1 teaching deck, 45 slides: SL and HL, then an additional HL part (slides 30 to 43) |
+| `decks/e1-structure-of-the-atom/` | E.1 teaching deck, 47 slides: SL and HL, then an additional HL part (slides 32 to 45) |
 | `decks/e2-quantum-physics/` | E.2 teaching deck, 34 slides: HL only |
 | `decks/e3-radioactive-decay/` | E.3 teaching deck, 52 slides: SL and HL, then an additional HL part (slides 36 to 48); the range of the strong force on slide 5 carries an `hl-tag` |
 | `decks/e4-fission/` | E.4 teaching deck, 34 slides: SL and HL, with no additional HL content |
@@ -45,7 +45,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/b2-greenhouse-effect/quarter.js` | The planet, its intercepting disk and the sunlight of slide 11, drawn with Three.js over the flat `b2-quarter` figure |
 | `decks/d3-motion-in-electromagnetic-fields/hand.js` | The left hand of slide 12, drawn with Three.js (from the CDN the rest of the site uses) over the flat `d3-rule` figure |
 | `decks/d4-induction/models.js` | Seven Three.js models over flat figures: the magnet and coil (slide 5), flux through a turning loop (6), Lenz’s law (14), the two tubes (15), the rod on rails (16), the magnet on a spring with its emf traced live (19) and the rotating coil with its emf graph (24) |
-| `decks/e1-structure-of-the-atom/sims.js` | The head-on alpha particle of slide 32, drawn over the flat `closest-approach` figure: it slows as it nears the gold nucleus, stops at the distance of closest approach and returns, with Play/Pause and Reset buttons |
+| `decks/e1-structure-of-the-atom/sims.js` | The head-on alpha particle of slide 34, drawn over the flat `closest-approach` figure: it slows as it nears the gold nucleus, stops at the distance of closest approach and returns, with Play/Pause and Reset buttons |
 | `decks/e2-quantum-physics/sims.js` | Two interactive figures over flat ones: the photocell of slide 13 (wavelength, intensity and collector p.d. from −2.5 to +2.5 V set by the viewer, electrons slowed or sped up by the field, the microammeter reading the current) and Compton scattering on slide 28 (the scattering angle set by the viewer, with the wavelengths and shift read out) |
 | `decks/e2-quantum-physics/tube.js` | The electron diffraction tube of slide 21, drawn with Three.js over the flat `ediff-setup` figure: electrons spread along two cones into rings, seen face on beside the tube, which shrink as the accelerating p.d. is raised |
 | `decks/assets/sim-control.js` | Control rows for interactive figures (label, − and + buttons that repeat while held, slider, value) and Play/Pause and Reset buttons, none of which turn the slide; used by E.1’s `sims.js` and E.2’s `sims.js` and `tube.js` |
@@ -93,7 +93,7 @@ Give a deck story slides whenever a suitable story and a freely licensed picture
 
 The atom diagrams and eleven slides of E.1 began as copies from `gcsephy/decks/atoms-and-radiation/`. The two decks are now separate: a change to one does not reach the other. The story-slide photographs in `decks/e1-structure-of-the-atom/images/` are copies too, and their credits and the history dates follow the table in [`gcsephy/year11phy/unit01/README.md`](../gcsephy/year11phy/unit01/README.md).
 
-E.1's HL part has three more story slides (32, 36 and 39: Rutherford's estimate of the nucleus, Hofstadter's electron scattering from 1953 as on his Nobel page, and Balmer's formula of 1885, which has no Nobel page and is dated by his paper). Their photographs are from Wikimedia Commons, public domain except the hydrogen tube (CC BY 4.0) and the photographed spectrum (CC0).
+E.1's HL part has three more story slides (33, 37 and 40: Rutherford's estimate of the nucleus, Hofstadter's electron scattering from 1953 as on his Nobel page, and Balmer's formula of 1885, which has no Nobel page and is dated by his paper). Their photographs are from Wikimedia Commons, public domain except the hydrogen tube (CC BY 4.0) and the photographed spectrum (CC0). Slide 4, on Democritus, Dalton and Thomson, is a background slide with no pictures; its dates (about 400 BC, 1808 and 1897) are from the articles “Democritus”, “John Dalton” and “J. J. Thomson”.
 
 E.2 has five story slides (8, 12, 17, 20 and 27) with photographs in `decks/e2-quantum-physics/images/`, all from Wikimedia Commons and either public domain or CC BY 4.0 (Thomson's camera and diffraction photograph, Science Museum Group). Each has a caption and a credit linking to its source; change a photo and its credit together. Their dates follow the laureates' pages on nobelprize.org (checked 12 October 2026): Einstein's light quanta 1905, Millikan's test 1912–1915 (published 1916), de Broglie's thesis 1924, electron diffraction 1927, and Compton's discovery 1922 (published 1923, the date on the Compton slides that follow).
 
