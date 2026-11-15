@@ -330,6 +330,29 @@
         <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
       </section>
 
+      <section class="slide history" data-title="Story: Röntgen’s rays">
+        <p class="eyebrow">The story: Würzburg, 1895</p>
+        <p class="not-examined">Background story: not assessed</p>
+        <h2>Röntgen’s new rays<span>.</span></h2>
+        <div class="story" style="--photo-h: 380px;">
+          <div class="story-photos">
+            <figure><img src="images/roentgen.webp" width="911" height="1216" alt="Black and white portrait of Wilhelm Röntgen, a bearded man in a dark suit"><figcaption><b>Wilhelm Röntgen</b> (1845–1923)</figcaption></figure>
+            <figure><img src="images/xray-hand.webp" width="1280" height="1841" alt="An early X-ray photograph of a hand, showing the bones of the fingers and a dark ring on one finger"><figcaption>His wife’s hand, <b>22 December 1895</b></figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>8 November 1895: a covered cathode-ray tube makes a screen across the room <b>glow</b></li>
+              <li>The rays pass through card, wood and flesh, but not bone or metal</li>
+              <li>Seeing her bones, Anna Bertha Röntgen said: “I have seen my death!”</li>
+              <li>The first <b>Nobel Prize in Physics</b>, 1901</li>
+            </ul>
+            <div class="idea">Weeks later, Becquerel wondered whether other things gave out rays like these.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Wilhelm_R%C3%B6ntgen_1900_Portrait_(3x4_cropped).jpg" target="_blank" rel="noopener">unknown photographer, about 1900</a>, public domain. X-ray: <a href="https://commons.wikimedia.org/wiki/File:First_medical_X-ray_by_Wilhelm_R%C3%B6ntgen_of_his_wife_Anna_Bertha_Ludwig%27s_hand_-_18951222.jpg" target="_blank" rel="noopener">Wilhelm Röntgen</a>, public domain.</p>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, SL + HL</span><span data-page></span></div>
+      </section>
+
       <section class="slide history" data-title="Story: Becquerel’s plate">
         <p class="eyebrow">The story: Paris, 1896</p>
         <p class="not-examined">Background story: not assessed</p>
@@ -1059,6 +1082,39 @@
           </div>
           <div class="rn-side">
             <p class="tip">\(\lambda\) and \(t\) must use the same unit of time: per second with seconds, per day with days. Their product has no unit.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Where the decay law comes from">
+        <p class="eyebrow">Not required in exams: the calculus</p>
+        <h2>Where the decay law comes from<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Decays per second are proportional to the nuclei left:</span>
+            <span>\(\dfrac{\mathrm{d}N}{\mathrm{d}t} = -\lambda N\)</span>
+            <span class="say step">Separate the variables:</span>
+            <span class="step">\(\dfrac{\mathrm{d}N}{N} = -\lambda \, \mathrm{d}t\)</span>
+            <span class="say step">Integrate, from \(N_{0}\) at \(t = 0\):</span>
+            <span class="step">\(\ln \dfrac{N}{N_{0}} = -\lambda t\) &nbsp;so&nbsp; \(\class{res}{N = N_{0} e^{-\lambda t}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">After one half-life, \(N = \dfrac{N_{0}}{2}\):</span>
+            <span>\(\ln \dfrac{1}{2} = -\lambda T_{\frac{1}{2}}\) &nbsp;so&nbsp; \(\class{res}{T_{\frac{1}{2}} = \dfrac{\ln 2}{\lambda}}\)</span>
+            <span class="say step">The easier way, in whole half-lives:</span>
+            <span class="step">\(N = N_{0} \left(\dfrac{1}{2}\right)^{n}\), &nbsp;\(n = \dfrac{t}{T_{\frac{1}{2}}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY, ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why the minus sign</h3>
+            <p>\(\frac{\mathrm{d}N}{\mathrm{d}t}\) is the rate at which the number of undecayed nuclei changes. Nuclei are being lost, so the rate is negative, and its size, \(\lambda N\), is the activity.</p>
+            <h3 class="rn-head">The two forms agree</h3>
+            <p>Put \(\lambda = \frac{\ln 2}{T_{\frac{1}{2}}}\) into \(e^{-\lambda t}\): \(e^{-\ln 2 \times t / T_{\frac{1}{2}}} = \left(e^{\ln 2}\right)^{-n} = 2^{-n} = \left(\frac{1}{2}\right)^{n}\). The exponential law works for any time; the half-life form is quicker when \(t\) is a whole number of half-lives.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The data booklet gives \(N = N_{0} e^{-\lambda t}\) and \(T_{\frac{1}{2}} = \frac{\ln 2}{\lambda}\). You will not be asked to derive them.</p>
           </div>
         </aside>
       </section>
