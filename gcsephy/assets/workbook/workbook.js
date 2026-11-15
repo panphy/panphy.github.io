@@ -168,10 +168,12 @@
 
   // ---------- formula triangles ----------
   // tri: { top, bottom: [two or three labels] } or [top, left, right]. "E_p" draws E with a subscript p.
-  const svgLabel = (s) => s.replace(/_(\w+)/, '<tspan baseline-shift="sub" font-size="70%">$1</tspan>');
+  // Subscripts after "_"; a squared or cubed label (I², v²) gets a real raised digit at full letter size.
+  const svgLabel = (s) => s.replace(/_(\w+)/, '<tspan baseline-shift="sub" font-size="70%">$1</tspan>')
+    .replace(/[²³]/g, (c) => `<tspan baseline-shift="super" font-size="62%">${c === "²" ? 2 : 3}</tspan>`);
   function triangleSvg(tri, size) {
     const { top, bottom } = Array.isArray(tri) ? { top: tri[0], bottom: tri.slice(1) } : tri;
-    const font = (s) => { const n = s.replace(/_\w+/, "").length; return n > 4 ? 11 : n > 1 ? 15 : 21; };
+    const font = (s) => { const n = s.replace(/_\w+/, "").replace(/[²³]/g, "").length; return n > 4 ? 11 : n > 1 ? 15 : 21; };
     const three = bottom.length === 3;
     const cells = three ? [[30, 88], [60, 88], [90, 88]] : [[35, 88], [85, 88]];
     const dividers = three ? "M33 56 H87 M46 56 V99 M74 56 V99" : "M33 56 H87 M60 56 V99";
@@ -503,7 +505,7 @@
     if (!eqs.length) return "";
     const tools = eqs.map((e) => {
       const tri = triFor(e);
-      return `<div class="tool${tri ? " has-tri" : ""}"><div class="eq">${e.eq}</div><span class="lesson-tag">${e.triple ? "Triple only" : `Lesson ${e.lesson}`}</span><div class="words">${e.words}</div><div class="units">${e.units}</div><div class="recall-cover">${e.re}</div>${tri ? `<div class="tool-tri">${triangleSvg(tri, "24mm")}</div>` : ""}</div>`;
+      return `<div class="tool${tri ? " has-tri" : ""}"><div class="eq">${e.eq}</div>${e.triple ? `<span class="lesson-tag">Triple only</span>` : ""}<div class="words">${e.words}</div><div class="units">${e.units}</div><div class="recall-cover">${e.re}</div>${tri ? `<div class="tool-tri">${triangleSvg(tri, "24mm")}</div>` : ""}</div>`;
     }).join("");
     const how = eqs.some(triFor) ? `<div class="tri-how"><div class="tri-steps"><p><b>1</b> Cover the quantity you want to find.</p><p><b>2</b> What is left side by side? <strong>Multiply</strong>.</p><p><b>3</b> One above the other? <strong>Divide</strong> the top by the bottom.</p></div>${o.note ? `<p class="tri-note">${o.note}</p>` : ""}</div>` : "";
     return `<section class="new-page toolkit-page"><div class="eyebrow">Reference</div><h2 class="page-title">Equation toolkit</h2>
