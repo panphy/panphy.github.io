@@ -580,9 +580,23 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 /* Name runs the full width; Class, Teacher (and Score on the Unit review) share the row below. */
 .cover-fields { grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); }
 .cover-fields div:first-child { grid-column: 1 / -1; }
-/* The name fields, then a navy band to the page edges holding the topic emblem (cover-art.js); the band
-   takes the space left, so busy covers get a smaller emblem. */
-.cover::before { display: none; }
-.cover-foot { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; padding-top: 8mm; }
-.cover-circuit { flex: 1 1 0; min-height: 62mm; max-height: 120mm; margin: 10mm -20mm -18mm; padding: 10mm 22mm 12mm; background: var(--navy); }
+/* The drawing fills the space between the contents and the name fields, up to 86 mm high. */
+.cover-foot { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; }
+.cover-circuit { flex: 1 1 0; min-height: 28mm; max-height: 86mm; margin: 0 0 8mm; }
 .cover-circuit .cover-svg { display: block; width: 100%; height: 100%; }
+
+/* Softer covers: a pale tint of the year colour, the full colour for the part label, a deeper shade for
+   the title's second line, rounded shapes and the drawing on a pale card. */
+.cover { --year-soft: #fde3cb; --year-ink: #a8540f; --cover-ink: #1d2a44; background: var(--year-soft); color: var(--cover-ink); }
+.cover[data-year="10"] { --year-soft: #e6f2c6; --year-ink: #557716; }
+.cover[data-year="11"] { --year-soft: #fcefb6; --year-ink: #856804; }
+.cover::before { display: none; }
+.cover .eyebrow, .cover .lede, .cover-sub, .cover-part span, .cover-lessons, .cover-quote, .cover-quote span { color: var(--cover-ink); }
+.cover h1 em, .cover-lessons li::marker { color: var(--year-ink); }
+.cover-part b { padding: 1.2mm 4mm; border-radius: 3mm; background: var(--year); color: var(--cover-ink); }
+.cover-quote { border-left-color: var(--year); }
+.cover .edition { border: 1.5px solid var(--cover-ink); border-radius: 99px; background: none; color: var(--cover-ink); }
+.cover-circuit { padding: 6mm 7mm; border-radius: 6mm; background: rgba(255, 255, 255, .6); }
+.cover-fields { border: 1.4px solid rgba(29, 42, 68, .25); border-radius: 5mm; }
+.cover-fields div { color: var(--cover-ink); }
+.cover-fields div span { border-bottom-color: rgba(29, 42, 68, .45); }
