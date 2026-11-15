@@ -14,7 +14,7 @@ Printable PDFs for students to revise from, and the page that lists them. `index
 | `assets/sheet.css` | Styles for both sheets |
 | `assets/shared.js` | CSV parser, topic and practical lists and PDF file names, shared by the pages, the sheets and the build |
 | `practicals/` | One SVG per practical step, named `<number>-<step>.svg` (`M3-2.svg` is step 2 of practical M3) |
-| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome |
+| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`) |
 
 Each question sheet has the questions on the left, the answers on the right and a tick box per question; diagrams come from `../images/`. Questions with `7` in the `Target` column of `../questions.csv` get a star under their number, and the instruction line says how many to learn first.
 

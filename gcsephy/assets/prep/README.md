@@ -7,7 +7,7 @@ Prep is the school's word for homework. Each GCSE unit has one A4 Prep sheet for
 | `prep.js` | Builds the sheets from a unit's `prep/content.js` (`window.PREP`); the comment at the top lists the fields and the inline marks for blanks, ring boxes and tick boxes |
 | `prep.css` | A4 print styles; the year accent (orange, green, yellow) follows the GCSE landing page |
 | `graph.js` | `PrepGraph` graph paper (model lines and read-offs appear only in the answer edition) and `PrepTable` |
-| `build-pdfs.sh` | Prints every sheet and answer edition of the named units to `<unit>/prep/pdf/` |
+| `build-pdfs.sh` | Prints every sheet and answer edition of the named units to `<unit>/prep/pdf/`, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`) |
 
 Each unit's `prep/` folder holds `content.js`, `prep.html` and `pdf/`. Preview at `<unit>/prep/prep.html` (`?n=2` for one sheet, `&answers` for its answers); a sheet whose content overflows the page gets a red outline, and the console warns when a sheet is not out of 10. Spare space at the foot of a page is shared out as taller writing lines.
 
