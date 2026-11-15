@@ -294,12 +294,6 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 /* review, glossary, tracker */
 .glossary { columns: 2; column-gap: 7mm; font-size: 9pt; line-height: 1.35; }
 .glossary p { break-inside: avoid; margin: 0 0 1.6mm; }
-.tracker { width: 100%; border-collapse: collapse; font-size: 8.8pt; }
-.tracker th, .tracker td { border-bottom: 1px solid var(--rule); padding: .6mm 2mm; text-align: left; vertical-align: middle; }
-.tracker th { font: 900 7pt Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; border-bottom: 1.2px solid var(--line); }
-.tracker .lesson-row td { padding-top: 2mm; font-weight: 900; border-bottom: 1.2px solid var(--line); background: #f6f7f9; }
-.tracker td.rag-cell { width: 20mm; }
-.tracker .rag i { width: 3.6mm; height: 3.6mm; }
 .fix-log { width: 100%; border-collapse: collapse; font-size: 9pt; }
 .fix-log th, .fix-log td { border: 1.2px solid var(--line-strong); padding: 1.5mm 2mm; height: 11mm; text-align: left; vertical-align: top; }
 .fix-log th { height: auto; background: var(--violet-t); font-size: 8.2pt; }

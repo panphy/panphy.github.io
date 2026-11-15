@@ -19,6 +19,4 @@ window.WORKBOOK = {
       <div class="tk-grid">${W.U.toolkit.cards.map((c) => `<div class="tk${c.cls ? " " + c.cls : ""}"><h4>${c.title}</h4>${c.h}</div>`).join("")}</div>
       <div class="rule-card"><div class="rule-head">The rule that decides your graph</div><div class="rule-body">Continuous independent variable → <strong>line graph</strong>. Categoric independent variable → <strong>bar chart</strong>.</div><div class="rule-foot">It depends on what you <em>changed</em>, not on what you measured.</div></div>
     </section>`,
-  trackerFoot: () => `<div class="key warn"><strong>One habit worth building.</strong> When something in your results looks wrong, the useful question is never “can I ignore that?” It is “why did that happen?”</div>
-      <div class="sentence"><div class="k">The whole unit in one sentence</div><div class="v">Measure it more than once, be honest about the doubt, show the pattern clearly, and let the evidence decide.</div></div>`,
 };

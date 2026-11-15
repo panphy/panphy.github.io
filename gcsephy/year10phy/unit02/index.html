@@ -42,14 +42,14 @@
       ['Part 3', 'Part 3: Latent heat and heat capacity', 'Lessons 6–7', 17, 'E = m L, fusion and vaporisation, melting ice; what a temperature rise depends on, ΔE = m c Δθ, heat capacity or latent heat?'],
       ['Lesson 08', 'Measuring specific heat capacity (required practical)', 'Lesson 8', 10, 'Required practical: heating a metal block, E = V I t or a joulemeter, the graph method'],
     ];
-    const REVIEW_PAGES = 14;
+    const REVIEW_PAGES = 12;
     const base = 'pdf/' + encodeURIComponent('Y10 - Unit 02 - Particle Model of Matter ');
     const file = (name, answers) => `${base}${encodeURIComponent(`(${name})` + (answers ? ' (Ans)' : ''))}.pdf`;
     const card = (label, title, text, name, review) => `<article class="card${review ? ' review' : ''}"><strong><a href="${file(name)}">${title}</a></strong><span class="meta">${label}</span><span>${text}</span>
       <small><a href="${file(name)}">Workbook PDF</a><a href="${file(name, true)}">Answers PDF</a></small></article>`;
     document.getElementById('cards').innerHTML = BOOKLETS.map(([name, title, label, pages, text]) =>
       card(`${label}, ${pages} pages`, title, text, name)).join('') +
-      card(`After Lesson 8, ${REVIEW_PAGES} pages`, 'Unit review', 'Mixed exam practice (39 marks), a fix-it log, the equation toolkit, all the key words, a progress tracker and extension pages for GCSE Physics: pressure and volume, and doing work on a gas.', 'Unit Review', true);
+      card(`After Lesson 8, ${REVIEW_PAGES} pages`, 'Unit review', 'Mixed exam practice (39 marks), a fix-it log, the equation toolkit, all the key words and extension pages for GCSE Physics: pressure and volume, and doing work on a gas.', 'Unit Review', true);
   </script>
 </body>
 </html>

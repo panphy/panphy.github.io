@@ -13,7 +13,7 @@ A unit's `workbook.html` loads its figure styles and scripts, its content, `cove
 ## Booklets
 
 - `?part=N`: a part booklet (`parts` in `book.js`): cover with its contents, the lessons, the toolkit so far, key words and quick answers.
-- `?review`: the Unit review: cover, mixed exam practice and a fix-it log, any Triple Science only pages, the toolkit, all the key words and the progress tracker.
+- `?review`: the Unit review: cover, mixed exam practice and a fix-it log, any Triple Science only pages, the toolkit and all the key words.
 - `?lesson=N`: one lesson, as a booklet (Particle Model prints its required practicals this way).
 - No query: the whole unit, for previewing. Add `&answers` for the answer edition, which has the same page numbers: answers print only in it, in space the student edition keeps blank.
 
@@ -27,4 +27,4 @@ Block types (`t`): `p`, `html`, `sub`, `key`, `warn`, `tip`, `say`, `model`, `ru
 
 ## Unit settings (`assets/book.js`)
 
-`file` (PDF name stem), `name`, `year`, `coverTitle`, `coverArt`, `lede`, `parts`, optional `booklets`, `deck`, `quote`, `firstDoNow`, `triangles`, `extension`, and hooks `toolkit`, `side`, `reviewStart`, `trackerFoot`, `block`, `question` and `beforeRender`. `W.equationToolkit()` prints the standard equation toolkit with formula triangles.
+`file` (PDF name stem), `name`, `year`, `coverTitle`, `coverArt`, `lede`, `parts`, optional `booklets`, `deck`, `quote`, `firstDoNow`, `triangles`, `extension`, and hooks `toolkit`, `side`, `reviewStart`, `block`, `question` and `beforeRender`. `W.equationToolkit()` prints the standard equation toolkit with formula triangles.

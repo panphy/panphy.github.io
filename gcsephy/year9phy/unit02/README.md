@@ -35,7 +35,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all six workb
 | `index.html` | Student hub, linked from the GCSE landing page and the deck |
 | `pdf/Y09 - Unit 02 - Energy (Part 1).pdf`, `(Part 2)`, `(Part 3)` | The A4 student workbook in three booklets: Lessons 1–3, 4–6 and 7–9, one set per student. Each part has a cover listing its lessons, the lessons, the equation toolkit with formula triangles for every equation so far, key words and quick answers |
 | `pdf/… (Ans).pdf` | Each part with answers filled in, so page numbers match |
-| `pdf/… (Unit Review).pdf`, `… (Unit Review) (Ans).pdf` | Unit review after Lesson 9: 40 marks of mixed AQA-style questions, a fix-it log, the equation toolkit, all the key words and the progress tracker; the answer edition has the same pages |
+| `pdf/… (Unit Review).pdf`, `… (Unit Review) (Ans).pdf` | Unit review after Lesson 9: 40 marks of mixed AQA-style questions, a fix-it log, the equation toolkit and all the key words; the answer edition has the same pages |
 | `workbook.html`, `assets/`, `build-pdfs.sh` | Workbook source; see below |
 | `lesson-plans/` | Nine lesson plans (`pdf/… - Lesson Plan 01.pdf` to `09`) and their Markdown source; see its README |
 | `prep/` | One-page Prep (homework) sheets, one per week (Prep 5 follows Lesson 9), each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links the sheets, not the answer editions. See [`../../assets/prep/README.md`](../../assets/prep/README.md). Maths is LaTeX for MathJax, as in the workbook |
