@@ -194,7 +194,7 @@
         ] },
         { sec: "try", title: "Peer review (Lesson 8)", blocks: [
           { t: "checks", title: "Feature", head: ["✓"], items: ["Question uses “How does X affect Y?”", "All three types of variable named", "Results table has units in the headings", "Three trials, means calculated", "Right graph for the independent variable", "Labels, units, scale, accurate crosses or bars", "Best fit line drawn; anomalous results dealt with", "Conclusion quotes numbers", "Evaluation names an improvement"] },
-          { t: "vars", rows: [["Reviewed by", ""], ["The strongest part of this investigation", ""], ["The question I would ask this group", ""]] },
+          { t: "vars", rows: [["Reviewed by", ""]] },
           { t: "q", type: "Challenge", p: "Compare your results with another group who investigated something similar. Do you agree? If not, what could explain the difference?", lines: 2, a: "Compare numbers; explain differences by equipment, a control variable, resolution or a systematic error." },
           { t: "q", type: "Challenge", p: "Is your relationship a straight line or a curve? Is it directly proportional? {{yes|no}} How can you tell?", lines: 2, a: "Directly proportional only if the best-fit line is straight and passes through the origin." },
         ] },
