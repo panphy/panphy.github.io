@@ -10,7 +10,7 @@
   window.WB.lessons.push(
     // ============================================================ 1
     {
-      n: 1, accent: "proton", title: "Inside the atom",
+      n: 1, accent: "spark", title: "Inside the atom",
       spec: "AQA Physics 4.4.1.1–4.4.1.2; Combined Science 6.4.1.1–6.4.1.2",
       mapLine: "Protons, neutrons and electrons, the size of an atom, atomic and mass numbers",
       big: "Everything around you is made of atoms, yet an atom is almost entirely empty space. So what is actually in there?",
@@ -66,7 +66,7 @@
 
     // ============================================================ 2
     {
-      n: 2, accent: "electron", title: "Isotopes and ions",
+      n: 2, accent: "cyan", title: "Isotopes and ions",
       spec: "AQA Physics 4.4.1.2; Combined Science 6.4.1.2",
       mapLine: "Same element, different neutrons; atoms that lose outer electrons",
       big: "Carbon-12 and carbon-14 are both carbon, but only carbon-14 is radioactive. What is different about them?",
@@ -124,7 +124,7 @@
 
     // ============================================================ 3
     {
-      n: 3, accent: "alpha", title: "From plum pudding to the nucleus",
+      n: 3, accent: "copper", title: "From plum pudding to the nucleus",
       spec: "AQA Physics 4.4.1.3; Combined Science 6.4.1.3",
       mapLine: "The plum pudding model, alpha scattering and the nuclear model",
       big: "Nobody has ever seen inside an atom. So how did scientists find out that almost all of its mass is squeezed into a tiny nucleus?",
@@ -178,7 +178,7 @@
 
     // ============================================================ 4
     {
-      n: 4, accent: "photon", title: "Energy levels and the nucleus",
+      n: 4, accent: "violet", title: "Energy levels and the nucleus",
       spec: "AQA Physics 4.4.1.1–4.4.1.3; Combined Science 6.4.1.1–6.4.1.3",
       mapLine: "The Bohr model, absorbing and emitting EM radiation, protons and neutrons, why models change",
       big: "Neon signs glow red and sodium street lamps glow orange. Each element gives out its own colours of light. What are its electrons doing?",
@@ -244,7 +244,7 @@
 
     // ============================================================ 5
     {
-      n: 5, accent: "teal", title: "Radioactive decay",
+      n: 5, accent: "leaf", title: "Radioactive decay",
       spec: "AQA Physics 4.4.2.1; Combined Science 6.4.2.1",
       mapLine: "Unstable nuclei, activity and count rate, alpha, beta, gamma and neutron radiation",
       big: "A smoke alarm contains a radioactive source. Nothing switches it on, yet it gives out radiation for hundreds of years. Why?",

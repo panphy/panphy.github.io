@@ -474,12 +474,6 @@ table.data.wide th, table.data.wide td { padding-left: 1mm; padding-right: 1mm; 
 .question:has(> .question.part) > .prompt, .question:has(> .question.part) > .fig { break-after: avoid; }
 
 /* ---------- Shared additions: every unit's blocks in one sheet ---------- */
-:root {
-  --proton: #D45132; --proton-t: #FBE7E1; --electron: #1675BB; --electron-t: #E3EFF8;
-  --alpha: #B5179E; --alpha-t: #F7E3F3; --photon: #7C3AED; --photon-t: #EDE7FB;
-  --positive: #B7791F; --positive-t: #F7EEDC; --object: #5E8C38; --object-t: #EAF2E1;
-  --teal: #0D9488; --teal-t: #E0F2EF;
-}
 .sec h3 { line-height: 1.05; }
 .opener-foot.solo { grid-template-columns: minmax(0, 1fr); }
 .opener .num-to { display: block; margin-top: 1.5mm; font-size: 24pt; letter-spacing: -.04em; }
@@ -554,12 +548,12 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .worked .data th, .worked .data td { height: 6.2mm; padding: .8mm 2mm; }
 .worked .data td { white-space: nowrap; }
 
-/* Nuclide notation and nuclear equations */
+/* Nuclide notation and nuclear equations (particle colours from the unit's figures-print.css) */
 .nuc { white-space: nowrap; font-weight: 800; font-size: 1.08em; }
 .nuc .nums { display: inline-block; vertical-align: -.26em; margin: -.25em 1px -.2em 0; text-align: right; font: 700 .56em/.98 Arial, sans-serif; }
 .nuc .nums > span { display: block; }
 .nuc.alpha { color: var(--alpha); } .nuc.electron { color: var(--electron); } .nuc.gamma { color: var(--photon); } .nuc.neutron { color: #56636f; }
-.nuc-eq { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2.5mm; margin: 2mm 0 3mm; padding: 2.5mm 4mm; border: 1.5px solid var(--ink); background: var(--spark-t); font-size: 16pt; }
+.nuc-eq { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2.5mm; margin: 2mm 0 3mm; padding: 2.5mm 4mm; border: 1.5px solid var(--ink); background: white; font-size: 16pt; }
 .nuc-eq .op { font: 400 14pt Arial, sans-serif; color: var(--muted); }
 .nuc-eq .gap { display: inline-block; min-width: 14mm; min-height: 10mm; border: 1.5px dashed var(--ink); background: white; text-align: center; font-size: 13pt; line-height: 10mm; }
 .nuc-eq .check { flex-basis: 100%; text-align: center; font: 700 8.5pt Arial, sans-serif; color: var(--muted); }
@@ -575,3 +569,4 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .fact .compare { margin-bottom: 0; font-size: 8.6pt; }
 .fact .compare th, .fact .compare td { padding: 1.2mm 1.8mm; }
 .fact .nuc-eq { font-size: 13pt; margin: 1.5mm 0; }
+.eyebrow, .page-title { break-after: avoid; }

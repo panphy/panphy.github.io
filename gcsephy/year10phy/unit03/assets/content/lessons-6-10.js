@@ -12,7 +12,7 @@
   window.WB.lessons.push(
     // ============================================================ 6
     {
-      n: 6, accent: "positive", title: "Nuclear equations",
+      n: 6, accent: "spark", title: "Nuclear equations",
       spec: "AQA Physics 4.4.2.2; Combined Science 6.4.2.2",
       mapLine: "Symbols for each radiation, balancing mass and atomic numbers",
       big: "Radium-226 decays and becomes radon, a completely different element. How can we predict exactly which nucleus it turns into?",
@@ -67,7 +67,7 @@
 
     // ============================================================ 7
     {
-      n: 7, accent: "object", title: "Properties and uses of radiation",
+      n: 7, accent: "leaf", title: "Properties and uses of radiation",
       spec: "AQA Physics 4.4.2.1; Combined Science 6.4.2.1",
       mapLine: "Ionising power, range and penetration; choosing the right source",
       big: "A smoke alarm uses alpha radiation, a paper mill uses beta and a hospital uses gamma. Why not use the same radiation for all three?",
@@ -114,7 +114,7 @@
 
     // ============================================================ 8
     {
-      n: 8, accent: "electron", title: "Half-life and random decay",
+      n: 8, accent: "cyan", title: "Half-life and random decay",
       spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3",
       mapLine: "Random but predictable, defining half-life, reading a decay curve",
       big: "You cannot predict when one nucleus will decay. So how can we say that half of a sample of iodine-131 will be left after 8 days?",
@@ -175,7 +175,7 @@
 
     // ============================================================ 9
     {
-      n: 9, accent: "alpha", title: "Half-life calculations",
+      n: 9, accent: "copper", title: "Half-life calculations",
       spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3",
       mapLine: "Counting half-lives, finding a half-life from data, net decline as a ratio",
       big: "A hospital uses iodine-131, with a half-life of 8 days. How long before less than 1% of it is left, and why does that matter?",
@@ -226,7 +226,7 @@
 
     // ============================================================ 10
     {
-      n: 10, accent: "photon", title: "Contamination and irradiation",
+      n: 10, accent: "violet", title: "Contamination and irradiation",
       spec: "AQA Physics 4.4.2.4; Combined Science 6.4.2.4",
       mapLine: "Two ways to be exposed, hazards inside and outside the body, staying safe, peer review",
       big: "Supermarkets can sell food treated with gamma rays to kill bacteria. Does eating it make you radioactive?",

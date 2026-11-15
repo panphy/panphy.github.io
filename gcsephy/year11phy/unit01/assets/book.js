@@ -2,7 +2,7 @@
 // Figures are the teaching deck's drawings (/gcsephy/decks/atoms-and-radiation/figures.js).
 window.WORKBOOK = {
   file: "Y11 - Unit 01 - Atoms and Nuclear Radiation",
-  name: "Atoms &amp; Nuclear Radiation",
+  name: "Atoms and Nuclear Radiation",
   year: 11,
   coverTitle: "Atoms &amp; Nuclear<br><em>Radiation</em>",
   coverArt: () => `<div class="dfig">${window.DeckFigures.figure("hero")}</div>`,

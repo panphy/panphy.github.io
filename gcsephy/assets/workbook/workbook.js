@@ -194,12 +194,15 @@
     }
     return out.join("");
   }
-  // A section heading stays with its first block, so a heading never ends a page.
+  // A section heading stays with its first block (and any sub-headings before it), so a heading
+  // never ends a page.
   function section(key, title, blocks, safety) {
     const items = blocks || [];
     if (!items.length) return "";
+    let first = 1;
+    while (first < items.length && items[first - 1] && items[first - 1].t === "sub") first += 1;
     const warn = safety ? renderBlock({ t: "safety", items: [].concat(safety) }) : "";
-    return keep(secHead(key, title) + warn + renderBlocks(items.slice(0, 1))) + renderBlocks(items.slice(1));
+    return keep(secHead(key, title) + warn + renderBlocks(items.slice(0, first))) + renderBlocks(items.slice(first));
   }
 
   function renderBlock(b) {
@@ -458,8 +461,10 @@
     return `<section class="lesson" style="--accent:var(--violet);--accent-t:var(--violet-t)">
       <div class="eyebrow">After ${reviewAfter}</div><h2 class="page-title">Unit review</h2>
       ${C.reviewStart ? C.reviewStart(W) : ""}
-      ${secHead("exam", "Mixed exam practice")}
-      ${U.review.map((q) => (q.after ? question(q) : keep(question(q)))).join("")}
+      ${U.review.map((q, i) => {
+        const html = (i ? "" : secHead("exam", "Mixed exam practice")) + question(q);
+        return q.after && i ? html : keep(html); // the heading stays with the first question
+      }).join("")}
       ${keep(`${secHead("revise", "Fix-it log")}
       <table class="fix-log"><thead><tr><th style="width:14mm">Q</th><th>What went wrong?</th><th>The correct physics (or method) is…</th><th style="width:26mm">Lesson to revisit</th></tr></thead>
       <tbody>${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(6)}</tbody></table>`)}</section>`;

@@ -42,8 +42,8 @@
     // The Unit review opens with every equation to recall in symbols, with its units.
     reviewStart: (W) => {
       const eqs = W.U.equations.filter((e) => !e.ht);
-      return W.secHead("doNow", "Equation recall challenge") +
-        W.question({ p: "Write each equation in symbols. Then give the unit of every quantity in it.", table: { head: ["Equation in words", "In symbols", "Units"], rows: eqs.map((e) => [e.words, null, null]), ans: eqs.map((e) => [null, e.eq, e.units]) } });
+      return W.keep(W.secHead("doNow", "Equation recall challenge") +
+        W.question({ p: "Write each equation in symbols. Then give the unit of every quantity in it.", table: { head: ["Equation in words", "In symbols", "Units"], rows: eqs.map((e) => [e.words, null, null]), ans: eqs.map((e) => [null, e.eq, e.units]) } }));
     },
     block: (b) => {
       if (b.t !== "symbank") return null;
