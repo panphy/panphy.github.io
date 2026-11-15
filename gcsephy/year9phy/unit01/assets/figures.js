@@ -137,9 +137,9 @@
     // Change one thing, measure one thing, keep the rest the same.
     variables() {
       const card = (x, y, w, h, head, body, cls) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" class="ink ${cls}"/>` + t(x + w / 2, y + 22, head, { c: "lg" }) + body.map((b, i) => t(x + w / 2, y + 42 + i * 16, b, { c: i ? "sm" : "" })).join("");
-      let s = card(4, 6, 190, 82, "CHANGE", ["independent variable", "e.g. ramp height"], "sun-t");
-      s += arrow(196, 47, 246, 47) + `<rect x="248" y="20" width="104" height="54" rx="6" class="ink soft"/>` + t(300, 44, "the") + t(300, 60, "experiment");
-      s += arrow(354, 47, 404, 47) + card(406, 6, 190, 82, "MEASURE", ["dependent variable", "e.g. distance travelled"], "cool-t");
+      let s = card(4, 6, 170, 82, "CHANGE", ["independent variable", "e.g. ramp height"], "sun-t");
+      s += arrow(176, 47, 213, 47) + `<rect x="215" y="6" width="170" height="82" rx="6" class="ink soft"/>` + t(300, 43, "the") + t(300, 59, "experiment");
+      s += arrow(387, 47, 424, 47) + card(426, 6, 170, 82, "MEASURE", ["dependent variable", "e.g. distance travelled"], "cool-t");
       s += card(4, 108, 592, 70, "KEEP THE SAME", ["control variables", "e.g. same trolley, same start line, same floor, released with no push"], "leaf-t");
       s += `<path class="ink" d="M40 128v-7a9 9 0 0 1 18 0v7"/><rect x="34" y="128" width="30" height="22" rx="3" class="ink paper"/>`;
       return svg(600, 182, "Change the independent variable, measure the dependent variable, keep the control variables the same", s);

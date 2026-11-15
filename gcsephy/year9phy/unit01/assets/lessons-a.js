@@ -132,6 +132,7 @@
         ["Calculate the uncertainty for 3.2 s, 3.6 s and 3.4 s.", "(3.6 − 3.2) ÷ 2 = 0.2 s"],
       ],
       learnTitle: "Take the question apart",
+      newPage: ["learn"],
       learn: [
         { t: "p", h: "Every investigation answers one question: <strong>How does X affect Y?</strong> X is what you change. Y is what you measure." },
         { t: "fig", h: F.variables() },

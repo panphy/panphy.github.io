@@ -397,7 +397,12 @@
     // flow lists the sections in order: a name from `parts`, or { sec, title, blocks, safety } for an
     // extra Practical or Try it section (the long practical lessons have several).
     const flow = l.flow || l.order || ["doNow", "learn", "try", "lab", "lab2", "check", "exam", "home", "revise"];
-    return `<section class="lesson" style="--accent:var(--${l.accent});--accent-t:var(--${l.accent}-t)">${opener}${flow.map((k) => (typeof k === "string" ? parts[k]() : section(k.sec, k.title, k.blocks, k.safety))).join("")}</section>`;
+    // newPage lists the parts that start a new page.
+    const place = (k) => {
+      const html = typeof k === "string" ? parts[k]() : section(k.sec, k.title, k.blocks, k.safety);
+      return html && typeof k === "string" && (l.newPage || []).includes(k) ? `<div class="new-page">${html}</div>` : html;
+    };
+    return `<section class="lesson" style="--accent:var(--${l.accent});--accent-t:var(--${l.accent}-t)">${opener}${flow.map(place).join("")}</section>`;
   }
 
   // ---------- front and back matter ----------
@@ -431,13 +436,9 @@
   function glossary() {
     const words = U.glossary.filter(([, , n]) => (SEL ? inSel(n) : n <= LAST));
     if (!words.length) return "";
-    const tag = (n) => {
-      const l = U.lessons.find((x) => x.n === n);
-      return n > MAX ? "Triple" : l && l.last ? `L${n}–${l.last}` : `L${n}`;
-    };
     const phrases = (U.phrases || []).filter(([, , n]) => (SEL ? inSel(n) : n <= LAST));
     return `<section class="${SEL ? "tracker-flow" : "new-page"}"><div class="eyebrow">Reference</div><h2 class="page-title">Key words</h2>
-      <div class="glossary${SEL ? " one" : ""}">${words.map(([k, v, n]) => `<p><strong>${k}</strong>${SOLO ? "" : ` <span class="g-lesson">${tag(n)}</span>`}: ${v}</p>`).join("")}</div>
+      <div class="glossary${SEL ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong>: ${v}</p>`).join("")}</div>
       ${phrases.length ? keep(`<h4 class="sub">Phrases that pick up marks</h4>
       <table class="compare phrases"><thead><tr><th>Instead of writing…</th><th>Write…</th></tr></thead><tbody>${phrases.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</tbody></table>`) : ""}</section>`;
   }

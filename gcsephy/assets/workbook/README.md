@@ -17,7 +17,7 @@ A unit's `workbook.html` loads its figure styles and scripts, its content, `cove
 - `?lesson=N`: one lesson, as a booklet (Particle Model prints its required practicals this way).
 - No query: the whole unit, for previewing. Add `&answers` for the answer edition, which has the same page numbers: answers print only in it, in space the student edition keeps blank.
 
-Each lesson runs opener, Do now, Learn it, Try it, Practical, Quick check, Exam corner, Revise it (`order` or `flow` in a lesson changes the order); questions are numbered in print order. Section headings carry no notes or labels: a lab's `safety` text prints as a Stay safe box under its heading.
+Each lesson runs opener, Do now, Learn it, Try it, Practical, Quick check, Exam corner, Revise it (`order` or `flow` in a lesson changes the order, and `newPage: ["learn"]` starts the listed parts on a new page); questions are numbered in print order. Section headings carry no notes or labels: a lab's `safety` text prints as a Stay safe box under its heading.
 
 ## Content
 
