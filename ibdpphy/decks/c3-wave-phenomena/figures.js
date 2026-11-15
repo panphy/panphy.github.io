@@ -2,7 +2,7 @@
 // Wavefronts are teal, rays apricot, and a second wave or medium slate. Terracotta is kept for
 // what is higher level only (the single slit, the modulated pattern and gratings).
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, f, TAU } = P;
+  const { svg, spectrumColor, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const rad = deg => deg * Math.PI / 180;
   let clips = 0;
@@ -19,7 +19,6 @@ window.DeckFigures.add(P => {
   const slits = (delta, N) => { const s = Math.sin(delta / 2); return Math.abs(s) < 1e-6 ? 1 : (Math.sin(N * delta / 2) / (N * s)) ** 2; };
   const pattern = (fn, x0, x1, base, height, color, n = 400, width = 4) => line(sampled(t => [x0 + (x1 - x0) * t, base - height * fn(-1 + 2 * t)], n), color, width);
   const patternAxes = (x0, x1, base, top, label = 'position on the screen') => arrow((x0 + x1) / 2, base, (x0 + x1) / 2, top, 'text-secondary', 2.5) + `<line x1="${x0}" y1="${base}" x2="${x1}" y2="${base}" class="tick"/>` + text((x0 + x1) / 2 + 14, top + 12, 'intensity', 'lbl mono', 'start') + text(x1, base + 40, label, 'lbl mono', 'end');
-  const RAINBOW = ['#7B2FBE', '#3F4FD1', '#2F9FE0', '#3FB54A', '#F2D43D', '#F08A2E', '#D93A2B'];
 
   return {
     // Wavefronts and rays for a point source and for a distant source. Also drawn plain.
@@ -164,10 +163,24 @@ window.DeckFigures.add(P => {
 
     // White light through a grating: a white center with a spectrum on each side in each order.
     'c3-grating-white': () => {
-      const cx = 450, y = 190, h = 110, unit = 150;
-      let s = `<rect x="60" y="${y - 20}" width="780" height="${h + 40}" rx="10" style="fill:var(--spectrum-bg)"/><rect x="${cx - 8}" y="${y}" width="16" height="${h}" style="fill:#fff"/>`;
-      // In order n the colors run from violet (0.4 μm) nearest the center to red (0.7 μm) furthest out.
-      [1, 2].forEach(n => [-1, 1].forEach(side => RAINBOW.forEach((color, k) => { const a = n * unit * (0.4 + 0.05 * k) / 0.4 * 0.62, w = n * unit * 0.05 / 0.4 * 0.62 + 1; s += `<rect x="${f(side > 0 ? cx + a : cx - a - w)}" y="${y}" width="${f(w)}" height="${h}" style="fill:${color};opacity:${n === 1 ? 1 : 0.7}"/>`; })));
+      const cx = 450, y = 190, h = 110, id = `c3-white-${++clips}`;
+      // In order n the colors run continuously from violet (380 nm) nearest the center to red
+      // (700 nm) furthest out, at a distance from the center proportional to nλ. Each order is a
+      // band shaded smoothly through the wavelengths, with a soft glow, and the second order is
+      // fainter and spread twice as wide.
+      const at = (n, nm) => n * 0.2325 * nm;
+      let defs = `<filter id="${id}-glow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="7"/></filter><filter id="${id}-soft" x="-5%" y="-10%" width="110%" height="120%"><feGaussianBlur stdDeviation="1.4"/></filter>`, bands = '';
+      [1, 2].forEach(n => [-1, 1].forEach(side => {
+        const x1 = cx + side * at(n, 380), x2 = cx + side * at(n, 700), gid = `${id}-${n}${side > 0 ? 'r' : 'l'}`;
+        defs += `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${f(x1)}" y1="0" x2="${f(x2)}" y2="0">${Array.from({ length: 33 }, (_, k) => `<stop offset="${f(k / 32 * 100)}%" stop-color="${spectrumColor(380 + 10 * k)}"/>`).join('')}</linearGradient>`;
+        const band = `<rect x="${f(Math.min(x1, x2))}" y="${y}" width="${f(Math.abs(x2 - x1))}" height="${h}" style="fill:url(#${gid})"/>`;
+        bands += `<g style="opacity:${n === 1 ? 1 : 0.72}"><g filter="url(#${id}-glow)" style="opacity:.8">${band}</g><g filter="url(#${id}-soft)">${band}</g></g>`;
+      }));
+      // The zero order is every wavelength on the same spot: brighter than either spectrum, so it
+      // gets a wide halo as well as the glow.
+      defs += `<filter id="${id}-halo" x="-400%" y="-60%" width="900%" height="220%"><feGaussianBlur stdDeviation="16"/></filter>`;
+      const center = `<rect x="${cx - 8}" y="${y}" width="16" height="${h}" style="fill:#fff"/>`;
+      let s = `<defs>${defs}</defs><rect x="60" y="${y - 20}" width="780" height="${h + 40}" rx="10" style="fill:var(--spectrum-bg)"/>` + bands + `<g filter="url(#${id}-halo)">${center}${center}</g><g filter="url(#${id}-glow)">${center}</g><g filter="url(#${id}-soft)">${center}</g>`;
       s += text(cx, y - 44, 'n = 0: white', 'lbl strong') + text(cx + 142, y - 44, 'n = 1', 'lbl mono strong') + text(cx - 142, y - 44, 'n = 1', 'lbl mono strong') + text(cx + 284, y - 44, 'n = 2', 'lbl mono strong') + text(cx - 284, y - 44, 'n = 2', 'lbl mono strong') + text(cx, y + h + 70, 'in every order: violet nearest the center, red furthest out', 'lbl');
       return svg('40 100 820 290', s, 'The pattern from white light passing through a diffraction grating. In the center is a white line, the zero order. On each side is a first-order spectrum with violet nearest the center and red furthest out, then a wider second-order spectrum');
     }
