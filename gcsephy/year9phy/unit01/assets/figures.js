@@ -177,17 +177,22 @@
 
     // The drop test set-up.
     dropTest() {
-      const Y = (cm) => 280 - cm * 4.2;
-      let s = line(10, 280, 330, 280, "ink bold") + `<rect x="150" y="270" width="110" height="10" class="ink hot-t"/>` + t(205, 298, "material under test", { c: "sm" });
-      s += `<rect x="20" y="266" width="60" height="14" class="ink mid"/>` + line(36, 266, 36, 30, "ink bold") + `<path class="ink" d="M36 60H120"/><rect x="118" y="54" width="18" height="12" class="ink mid"/>`;
-      s += `<rect x="140" y="${Y(60)}" width="22" height="${Y(0) - Y(60)}" class="ink sun-t"/>`;
-      for (let cm = 0; cm <= 60; cm += 5) s += line(140, Y(cm), cm % 10 ? 148 : 152, Y(cm), "ink thin") + (cm % 10 ? "" : t(158, Y(cm) + 3, cm, { c: "sm", a: "start" }).replace('class="sm"', 'class="sm" style="font-size:8px"'));
-      s += `<circle cx="205" cy="${Y(50) - 9}" r="9" class="ink cool-t"/>` + t(222, Y(50) - 5, "released from 50 cm, no push", { a: "start", c: "sm" });
-      s += `<circle cx="205" cy="${Y(13) - 9}" r="9" class="ink dash paper"/>` + line(205, Y(50) + 4, 205, 262, "ink thin dash");
-      s += line(214, Y(13), 300, Y(13), "ink thin dash") + `<path class="ink" d="M302 ${Y(13) - 8}q14 8 0 16"/><circle cx="306" cy="${Y(13)}" r="2.5" class="solid"/>`;
-      s += t(330, Y(13) - 22, "eye level with the", { a: "end", c: "sm" }) + t(330, Y(13) - 8 - 0, "top of the bounce", { a: "end", c: "sm" });
-      s += dim(118, Y(13), 118, Y(0), "bounce", -1);
-      s += t(150, 22, "ruler vertical, 0 cm at the surface", { c: "sm" });
+      const Y = (cm) => 272 - cm * 3.8; // 0 cm at the top of the material
+      const rx = 118, bx = 182, top = Y(13); // ruler's left edge, ball's line of fall, top of the bounce
+      let s = t(170, 16, "ruler vertical, 0 cm at the surface", { c: "sm" });
+      s += line(6, 280, 334, 280, "ink bold") + `<rect x="158" y="272" width="100" height="8" class="ink hot-t"/>` + t(208, 298, "material under test", { c: "sm" });
+      // Clamp stand holding the ruler.
+      s += `<rect x="12" y="266" width="56" height="14" class="ink mid"/>` + line(30, 266, 30, 44, "ink bold") + line(30, 70, rx - 8, 70) + `<rect x="${rx - 12}" y="64" width="12" height="12" class="ink mid"/>`;
+      // Ruler, with its scale outside it so no number sits on a tick.
+      s += `<rect x="${rx}" y="${Y(60)}" width="18" height="${280 - Y(60)}" class="ink sun-t"/>`;
+      for (let cm = 0; cm <= 60; cm += 5) s += line(rx + 18, Y(cm), rx + (cm % 10 ? 12 : 8), Y(cm), "ink thin") + (cm % 10 ? "" : t(rx + 22, Y(cm) + 4, cm, { c: "sm", a: "start" }));
+      // Ball released from 50 cm, its fall, and the top of its bounce.
+      s += `<circle cx="${bx}" cy="${Y(50) - 9}" r="9" class="ink cool-t"/>` + t(bx + 16, Y(50) - 11, "released from 50 cm,", { a: "start", c: "sm" }) + t(bx + 16, Y(50) + 3, "no push", { a: "start", c: "sm" });
+      s += line(bx, Y(50) + 4, bx, 268, "ink thin dash") + `<circle cx="${bx}" cy="${top - 9}" r="9" class="ink dash paper"/>`;
+      s += dim(bx + 22, top, bx + 22, Y(0), "bounce", 1);
+      // Eye level with the top of the bounce, looking across at the ruler.
+      s += line(rx + 18, top, 300, top, "ink thin dash") + `<path class="ink" d="M318 ${top - 9}q-15 9 0 18"/><circle cx="312" cy="${top}" r="2.5" class="solid"/>`;
+      s += t(334, top - 32, "eye level with the", { a: "end", c: "sm" }) + t(334, top - 18, "top of the bounce", { a: "end", c: "sm" });
       return svg(340, 306, "Drop test: a ball released from 50 cm beside a vertical ruler onto the material; the bounce height is read at eye level", s);
     },
 
@@ -204,16 +209,20 @@
 
     // The ramp set-up.
     ramp() {
-      let s = line(6, 140, 594, 140, "ink bold");
-      s += `<path class="ink soft" d="M30 140 L30 60 L200 140 Z"/>`;
-      s += `<g transform="translate(46 70) rotate(25.2)"><rect x="0" y="-16" width="40" height="16" rx="3" class="ink sun-t"/><circle cx="9" cy="2" r="5" class="ink paper"/><circle cx="31" cy="2" r="5" class="ink paper"/></g>`;
-      s += line(40, 56, 60, 66, "ink s-hot bold") + t(64, 52, "same start line", { a: "start", c: "sm" });
-      s += dim(18, 60, 18, 140, "h", -1);
-      s += `<g transform="translate(470 124)"><rect x="0" y="0" width="40" height="16" rx="3" class="ink sun-t"/><circle cx="9" cy="18" r="5" class="ink paper"/><circle cx="31" cy="18" r="5" class="ink paper"/></g>`;
-      s += dim(200, 160, 470, 160, "");
-      s += t(335, 180, "distance travelled d: from the bottom of the ramp to where the trolley stops", { c: "sm" });
-      s += t(110, 30, "ramp height h", { c: "sm" });
-      return svg(600, 186, "Ramp practical: ramp height h, a fixed start line, and distance d from the bottom of the ramp to where the trolley stops", s);
+      const x0 = 110, y0 = 60, x1 = 290, base = 140; // top of the ramp, bottom of the slope, floor
+      const len = Math.hypot(x1 - x0, base - y0), ux = (x1 - x0) / len, uy = (base - y0) / len;
+      const deg = r1(Math.atan2(base - y0, x1 - x0) * 180 / Math.PI);
+      const at = (d, up = 0) => [x0 + d * ux + up * uy, y0 + d * uy - up * ux]; // along the slope, then out of it
+      const trolley = (cx, cy, rot) => `<g transform="translate(${r1(cx)} ${r1(cy)})${rot ? ` rotate(${rot})` : ""}"><rect x="0" y="-26" width="40" height="16" rx="3" class="ink sun-t"/><circle cx="9" cy="-5" r="5" class="ink paper"/><circle cx="31" cy="-5" r="5" class="ink paper"/></g>`;
+      let s = line(6, base, 594, base, "ink bold") + `<path class="ink soft" d="M${x0} ${base}L${x0} ${y0}L${x1} ${base}Z"/>`;
+      const [lx1, ly1] = at(12), [lx2, ly2] = at(12, 34);
+      s += line(lx1, ly1, lx2, ly2, "ink s-hot bold") + t(lx2 + 6, ly2 - 4, "same start line", { a: "start", c: "sm" });
+      s += trolley(...at(14), deg);
+      s += dim(x0 - 14, y0, x0 - 14, base, "ramp height h", -1);
+      s += trolley(520, base, 0);
+      s += dim(x1, base + 18, 520, base + 18, "");
+      s += t(405, base + 38, "distance travelled d", { c: "sm" }) + t(405, base + 53, "from the bottom of the ramp to where the trolley stops", { c: "sm" });
+      return svg(600, 200, "Ramp practical: ramp height h, a fixed start line, and distance d from the bottom of the ramp to where the trolley stops", s);
     },
 
     // A good scale and the classic bad one.

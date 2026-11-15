@@ -207,7 +207,8 @@ strong { font-weight: 700; }
 .data { width: 100%; border-collapse: collapse; margin: 1mm 0 2.5mm; font-size: 9.4pt; break-inside: avoid; }
 .data th, .data td { padding: 1.2mm 2.2mm; border: 1.2px solid var(--line-strong); text-align: center; height: 7.6mm; }
 .data th { background: var(--accent-t); font-size: 8.6pt; }
-.data td.given { font-weight: 700; background: #f7f7f4; }
+.data td { background: white; }
+.data td.given { font-weight: 700; }
 .data td .ans { font-size: 9pt; }
 
 /* graph paper */
@@ -252,8 +253,6 @@ strong { font-weight: 700; }
 /* lab record */
 .lab-card { padding: 3mm 3.5mm 1mm; border: 1.2px solid var(--line); background: var(--leaf-t); break-inside: avoid; margin-bottom: 3mm; }
 .lab-card .lines, .lab-card .box, .lab-card .data { background-color: white; }
-.lab-card .data td { background: white; }
-.lab-card .data td.given { background: #f7f7f4; }
 .safety { margin: 1.5mm 0 3mm; padding: 2.5mm 3mm 2mm 3mm; border: 1.2px solid var(--line); background: repeating-linear-gradient(135deg, var(--spark) 0 3mm, var(--ink) 3mm 4.5mm) left / 3mm 100% no-repeat, white; padding-left: 7mm; font-size: 9.3pt; break-inside: avoid; }
 .safety h4 { margin: 0 0 1mm; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; }
 .safety ul { margin: 0; }
