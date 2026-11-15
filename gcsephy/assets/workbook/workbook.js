@@ -185,14 +185,16 @@
 
   // ---------- blocks ----------
   let qNum = 0;
-  // A sub-heading stays on the same page as the block after it.
+  // A sub-heading stays on the same page as the block after it. A block with newPage: true starts a page.
   function renderBlocks(blocks) {
     const out = [];
     const items = blocks || [];
     for (let i = 0; i < items.length; i += 1) {
       const b = items[i];
-      if (b && b.t === "sub" && items[i + 1]) { out.push(keep(renderBlock(b) + renderBlock(items[i + 1]))); i += 1; }
-      else out.push(renderBlock(b));
+      let html;
+      if (b && b.t === "sub" && items[i + 1]) { html = keep(renderBlock(b) + renderBlock(items[i + 1])); i += 1; }
+      else html = renderBlock(b);
+      out.push(b && b.newPage ? `<div class="new-page">${html}</div>` : html);
     }
     return out.join("");
   }
