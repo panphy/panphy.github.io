@@ -641,6 +641,20 @@
       return svg('0 0 790 460', s, 'Velocity against time for a 100 meter sprint: zero for the first 0.2 seconds, rising steadily to 10 meters per second at 4.2 seconds, then constant until the finish at time T');
     },
 
+    // Galileo's ramps: a ball released at height h rises to h on any second ramp; on a flat one it never stops.
+    'a2-galileo-ramps': () => {
+      const floor = 380, top = 120;
+      let s = `<line x1="10" y1="${floor}" x2="760" y2="${floor}" class="tick"/>`;
+      s += `<path d="M10,${top} H560" class="guide accent"/>` + text(16, top - 18, 'h', 'lbl display', 'start');
+      s += `<path d="M50,${top} L190,${floor} H240" class="curve" style="stroke:var(--text-main)"/>`;
+      s += `<path d="M240,${floor} L330,${top}" class="curve" style="stroke:var(--brand-primary)"/>`;
+      s += `<path d="M240,${floor} L550,${top}" class="curve" style="stroke:var(--brand-primary);stroke-dasharray:14 9"/>`;
+      s += arrow(560, floor - 26, 750, floor - 26, 'brand-accent', 4) + text(655, floor - 46, 'flat?', 'lbl a');
+      s += body(62, top - 14, 16) + body(330, top - 16, 13) + body(550, top - 16, 13);
+      s += text(300, floor + 42, 'steep', 'lbl') + text(470, floor + 42, 'gentle', 'lbl');
+      return svg('0 0 770 440', s, 'A ball released from height h on a ramp rolls down and up a second ramp to the same height h: on a gentler second ramp it rolls further, and on a flat track it never reaches h');
+    },
+
     'chord-tangent': () => {
       const at = t => [110 + 580 * t, 400 - 300 * t * t];
       let s = axes(110, 400, 740, 40, 'time', 'displacement');
