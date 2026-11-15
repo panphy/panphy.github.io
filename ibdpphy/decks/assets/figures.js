@@ -1146,7 +1146,7 @@
 
   // A deck's own figures.js adds its diagrams with DeckFigures.add(parts => ({ name: el => svg }));
   // the shared drawing helpers arrive as parts. Prefix the names with the topic (d1-…).
-  const PARTS = { svg, ball, cluster, shadow, arrow, fline, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU };
+  const PARTS = { svg, spectrumColor, ball, cluster, shadow, arrow, fline, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU };
   const add = make => Object.assign(FIGURES, make(PARTS));
 
   window.DeckFigures = { render, orbitPoint, add };
