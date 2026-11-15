@@ -28,7 +28,7 @@
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
-  document.title = `Atoms and Nuclear Radiation - Year 10 Workbook${partNo ? ` Part ${partNo} - Lessons ${nums.replace("–", "-")}` : ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
+  document.title = `Y10 - Unit 03 - Atoms and Nuclear Radiation${partNo ? ` (Part ${partNo})` : ONE ? ` (Lesson ${pad(ONE.n)})` : REVIEW ? " (Unit Review)" : ""}${answers ? " (Ans)" : ""}`;
 
   // ---------- small helpers ----------
   const ans = (html) => (html ? `<span class="ans">${html}</span>` : "");

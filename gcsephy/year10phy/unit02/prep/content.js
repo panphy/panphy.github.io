@@ -12,7 +12,7 @@
   window.PREP = {
     year: 10,
     unit: "Particle Model of Matter",
-    file: "Particle Model of Matter - Year 10",
+    file: "Y10 - Unit 02 - Particle Model of Matter",
     preps: [
       /* 1 */
       { lessons: "1–2", title: "Particles and gas pressure", subtitle: "Solids, liquids and gases; changes of state; what causes gas pressure",

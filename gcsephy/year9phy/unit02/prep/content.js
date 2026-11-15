@@ -9,7 +9,7 @@
   window.PREP = {
     year: 9,
     unit: "Energy: Stores and Transfers",
-    file: "Energy - Year 9",
+    file: "Y09 - Unit 02 - Energy",
     preps: [
       /* 1 */
       { lessons: "1–2", title: "Stores and the kinetic store", subtitle: "Energy stores and transfers; describing a transfer; kinetic energy",

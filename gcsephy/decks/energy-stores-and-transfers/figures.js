@@ -1,5 +1,5 @@
 // Figures for the Energy: Stores and Transfers deck. Static drawings come from the workbook's
-// EnergyFigures (gcsephy/year9phy/unit02/workbook/assets/figures.js), so slides and workbook
+// EnergyFigures (gcsephy/year9phy/unit02/assets/figures.js), so slides and workbook
 // match. <div data-fig="name"> is filled with a drawing; <div data-widget="name"> becomes an
 // interactive model with its own buttons. Models only move on the live slide, and only when a
 // button is pressed, so thumbnails and print show the starting picture.

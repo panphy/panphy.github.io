@@ -11,7 +11,7 @@
   window.PREP = {
     year: 10,
     unit: "Electric Circuits",
-    file: "Electric Circuits - Year 10",
+    file: "Y10 - Unit 01 - Electric Circuits",
     preps: [
       /* 1 */
       { lessons: "1–2", title: "Complete circuits and current", subtitle: "Circuit symbols; ammeters; current as a flow of charge; Q = I t",

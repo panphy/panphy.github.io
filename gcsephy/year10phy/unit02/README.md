@@ -30,23 +30,23 @@ The Scheme of Work lists P3.1 particle model and motion in gases, P3.2 density a
 | Path | Use |
 |---|---|
 | `index.html` | Student page linking the six booklets (in teaching order), their answer editions and the four Preps (not their answers). Its `BOOKLETS` list holds each booklet's page count: update it after a rebuild changes one |
-| `pdf/` | Part 1 (Lessons 1–2), Part 2 (Lessons 3 and 5), Part 3 (Lessons 6–7), one booklet for each required practical (Lessons 4 and 8), the Unit review, an answer edition of each with the same page numbers, and `Particle Model of Matter - Year 10 Teacher Guide.pdf` (hosted but not linked from any page) |
+| `pdf/` | `Y10 - Unit 02 - Particle Model of Matter (Part 1).pdf`: Part 1 (Lessons 1–2), Part 2 (Lessons 3 and 5), Part 3 (Lessons 6–7), one booklet for each required practical (`(Lesson 04)`, `(Lesson 08)`), the `(Unit Review)`, an `(Ans)` edition of each with the same page numbers |
 | `workbook.html` | PDF source: `?part=1`…`3` (`PARTS` in `workbook.js`), `?lesson=4` or `8`, or `?review`, add `&answers`; with none it previews the whole unit. `?lesson=N` still previews any single lesson |
-| `teacher-guide.html` | Guide source (`?lesson=N` for one plan) |
+| `lesson-plans/` | One lesson plan per lesson (`pdf/… - Lesson Plan 01.pdf` to `08`), not linked from any page. `plan.html` renders them from the lesson files, `assets/plans-data.js` and `assets/plans.js` (`?lesson=N` for one plan, with none an overview and every plan); `build-pdfs.sh` there rebuilds them |
 | `assets/lessons-1-4.js`, `lessons-5-8.js` | The lessons: all the words and questions |
 | `assets/reference.js` | Equation toolkit, key words, Unit review and the Triple Science only extension pages; builds `window.UNIT` |
-| `assets/plans-data.js`, `assets/plans.js` | Teacher notes for each lesson, and their renderer |
+| `assets/plans-data.js`, `assets/plans.js` | Teacher notes for each lesson, and their renderer (used by `lesson-plans/`) |
 | `assets/workbook.js`, `assets/workbook.css` | Renderer and print styles, adapted from the Year 9 Energy workbook, which is also printed in parts |
 | `assets/figures.js`, `assets/figures.css` | Line drawings (`window.ParticleFigures`), shared with the Preps and the deck |
-| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`); name booklets (`p1 p2 p3 4 8 review guide`) to rebuild only those |
+| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`); name booklets (`p1 p2 p3 4 8 review`) to rebuild only those |
 | `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. See [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 | [`../../decks/particle-model/`](../../decks/particle-model/) | 53-slide teaching deck, with photographs on six lesson dividers (3, 8, 13, 25, 36 and 48) in its `images/` folder, each credited on the slide; see [`../../decks/README.md`](../../decks/README.md) for shared styling and controls |
 
 Maths is LaTeX between `\(` and `\)`, typeset by MathJax from a CDN, so previews and builds need a network connection; text is written as `String.raw` templates so backslashes survive. In sentences, `[[answer|a / b / c]]` prints a blank followed by its options and `{{a|b*|c}}` prints an AQA-style ring box with `*` on the answer: every gap shows its choices. Each lesson runs: opener → Do now → Learn it → Try it (supported → independent → challenge) → Practical where relevant → Quick check (Lessons 2, 4, 6 and 8) → Exam corner → Revise it. In the two required-practical lessons the Practical comes before Try it, because the questions use the students' results. Every page after the cover prints 1.2× larger, as in the other workbooks.
 
-**Slides and workbook match.** Every worked example on a deck slide is a `follow` block at the same point in Learn it (`slide` gives its number): the same question, printed blank with the slide's own step labels for students to fill in as the teacher models it, beside a “Your turn” with numbers that appear on no slide. Each Quick check slide (12, 23, 35, 45, and 52 for Triple) is a lesson's `quick` field, numbered on its own so that question numbers in the teacher guide do not move. Answers to both are in the answer editions only. When a slide example or Quick check changes, change its workbook copy, and keep practice questions from repeating their numbers. The Lesson 8 heater example is not on a slide, so it stays a printed `worked` example.
+**Slides and workbook match.** Every worked example on a deck slide is a `follow` block at the same point in Learn it (`slide` gives its number): the same question, printed blank with the slide's own step labels for students to fill in as the teacher models it, beside a “Your turn” with numbers that appear on no slide. Each Quick check slide (12, 23, 35, 45, and 52 for Triple) is a lesson's `quick` field, numbered on its own so that question numbers in the lesson plans do not move. Answers to both are in the answer editions only. When a slide example or Quick check changes, change its workbook copy, and keep practice questions from repeating their numbers. The Lesson 8 heater example is not on a slide, so it stays a printed `worked` example.
 
-Each lesson's `slides` field (in the lesson files) and the Sequence table above cite deck slide numbers, and the teacher guide repeats them: adding or removing a deck slide before the Key words slide means updating all three and rebuilding the PDFs.
+Each lesson's `slides` field (in the lesson files) and the Sequence table above cite deck slide numbers, and the lesson plans repeat them: adding or removing a deck slide before the Key words slide means updating all three and rebuilding the PDFs.
 
 ## Rebuild
 

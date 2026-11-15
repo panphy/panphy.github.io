@@ -45,16 +45,16 @@ wanted() { [ -z "$ONLY" ] || case " $ONLY " in *" $1 "*) return 0 ;; *) return 1
 booklet() { # key (lesson number or "review"), file name, query, expected title text
   wanted "$1" || return 0
   pdf "$OUT/$2.pdf" "$BASE/workbook.html?$3" "$4"
-  pdf "$OUT/$2 (Answers).pdf" "$BASE/workbook.html?$3&answers" "$4.*Answers"
+  pdf "$OUT/$2 (Ans).pdf" "$BASE/workbook.html?$3&answers" "$4.*Ans"
 }
 
-part() { # number, lessons for the file name (as PARTS in assets/workbook.js)
-  booklet "p$1" "Atoms and Nuclear Radiation - Year 11 Workbook - Part $1 - $2" "part=$1" "Part $1"
+part() { # number (as PARTS in assets/workbook.js)
+  booklet "p$1" "Y11 - Unit 01 - Atoms and Nuclear Radiation (Part $1)" "part=$1" "Part $1"
 }
 
 ONLY="$*"
-part 1 "Lessons 1-2"
-part 2 "Lessons 3-4"
-part 3 "Lessons 5-7"
-part 4 "Lessons 8-10"
-booklet review "Atoms and Nuclear Radiation - Year 11 Workbook - Unit review" "review" "Unit review"
+part 1
+part 2
+part 3
+part 4
+booklet review "Y11 - Unit 01 - Atoms and Nuclear Radiation (Unit Review)" "review" "Unit Review"

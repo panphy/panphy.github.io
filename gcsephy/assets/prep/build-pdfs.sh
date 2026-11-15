@@ -32,10 +32,10 @@ for unit in "$@"; do
     const stub = new Proxy(function () {}, { get: () => stub, apply: () => "" });
     global.window = new Proxy({}, { get: (t, k) => (k in t ? t[k] : stub) }); require(require("path").resolve(process.argv[1]));
     const U = window.PREP;
-    U.preps.forEach((p, i) => console.log(`${i + 1}|${U.file} Prep ${i + 1} - Lesson${p.lessons.includes("–") ? "s" : ""} ${p.lessons.replace("–", "-")}`));
+    U.preps.forEach((p, i) => console.log(`${i + 1}|${U.file} - Prep ${String(i + 1).padStart(2, "0")}`));
   ' "$unit/prep/content.js" | while IFS='|' read -r n name; do
     [ -n "$ONLY" ] && [ "$ONLY" != "$n" ] && continue
     pdf "$unit/prep/pdf/$name.pdf" "$HOST/$unit/prep/prep.html?n=$n"
-    pdf "$unit/prep/pdf/$name (Answers).pdf" "$HOST/$unit/prep/prep.html?n=$n&answers"
+    pdf "$unit/prep/pdf/$name (Ans).pdf" "$HOST/$unit/prep/prep.html?n=$n&answers"
   done
 done

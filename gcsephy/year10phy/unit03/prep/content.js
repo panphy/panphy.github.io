@@ -12,7 +12,7 @@
   window.PREP = {
     year: 10,
     unit: "Atoms and Nuclear Radiation",
-    file: "Atoms and Nuclear Radiation - Year 10",
+    file: "Y10 - Unit 03 - Atoms and Nuclear Radiation",
     preps: [
       /* 1 */
       { lessons: "1–2", title: "Inside the atom", subtitle: "Protons, neutrons and electrons; atomic and mass numbers; isotopes and ions",
