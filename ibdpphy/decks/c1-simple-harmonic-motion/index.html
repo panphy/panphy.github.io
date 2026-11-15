@@ -103,6 +103,29 @@
         <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION, SL + HL</span><span data-page></span></div>
       </section>
 
+      <section class="slide" data-title="Join the dots">
+        <p class="eyebrow">How simple?</p>
+        <h2>Join the dots<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="q"><p>A mass bobs on a spring. Its position is marked at equal time steps. What shape do the dots make?</p><div class="ans step">A smooth <b>cosine</b> curve: <b>simple harmonic</b> motion</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>POSITION AGAINST TIME</span></div>
+            <div class="fig" data-fig="c1-dots"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why “simple”</h3>
+            <p>Many things oscillate: a guitar string, a car on its springs, a tall building in the wind. Their motion is often complicated. The simplest oscillation of all is the one whose position against time is a single, pure sine or cosine curve. It is simple because one equation describes it completely, and many real oscillations are close to it when the swings are small.</p>
+            <h3 class="rn-head">Sine or cosine?</h3>
+            <p>They are the same curve, shifted by a quarter of a cycle. Which one fits depends only on when the clock is started: start timing at the top of the motion and the graph is a cosine; start as the mass passes the middle and it is a sine.</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="Describing an oscillation">
         <h2>Describing an oscillation<span>.</span></h2>
         <div class="split wide-fig">
@@ -429,6 +452,40 @@
           </div>
           <div class="rn-side">
             <p class="tip">Keep the swing below about 10° in any experiment. The period of a 1 m pendulum is then within 0.2% of the formula.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Why a pendulum is simple harmonic">
+        <p class="eyebrow">Where the formula comes from</p>
+        <h2>Why a pendulum is simple harmonic<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Restoring force along the arc:</span>
+            <span>\(F = -mg \sin \theta\)</span>
+            <span class="say step">Small angle, in radians:</span>
+            <span class="step">\(\sin \theta \approx \theta = \dfrac{x}{l}\)</span>
+            <span class="say step">So:</span>
+            <span class="step">\(ma = -\dfrac{mg}{l} x\) &nbsp;and&nbsp; \(a = -\dfrac{g}{l} x\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Compare with \(a = -\omega^{2} x\):</span>
+            <span>\(\omega^{2} = \dfrac{g}{l}\)</span>
+            <span class="say step">Therefore:</span>
+            <span class="step">\(T = \dfrac{2 \pi}{\omega} = \class{res}{2 \pi \sqrt{\dfrac{l}{g}}}\)</span>
+            <div class="idea step">The mass cancels; the small angle is what makes it simple harmonic.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">The displacement along the arc</h3>
+            <p>\(x\) here is the distance of the bob along its arc from the lowest point. An arc of radius \(l\) through an angle \(\theta\) in radians has length \(l \theta\), so \(\theta = \dfrac{x}{l}\) exactly. The only approximation is \(\sin \theta \approx \theta\).</p>
+            <h3 class="rn-head">Which part of the weight</h3>
+            <p>The weight \(mg\) acts straight down. Its component along the string is balanced by the tension, which only changes the direction of the bob. Its component along the arc, \(mg \sin \theta\), points back towards the lowest point: that is the restoring force.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">You are given \(T = 2 \pi \sqrt{\frac{l}{g}}\) in the data booklet; this slide shows why it has that form.</p>
           </div>
         </aside>
       </section>
@@ -923,7 +980,7 @@
   <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
   <script src="../assets/figures.js"></script>
-  <script src="figures.js"></script>
+  <script src="figures.js?v=20261115"></script>
   <script src="../assets/deck-math.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/deck-notes.js"></script>

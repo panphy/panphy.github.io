@@ -107,6 +107,17 @@ window.DeckFigures.add(P => {
       s += `<line x1="${f(x0 + per - lead)}" y1="${y0}" x2="${f(x0 + per - lead)}" y2="${y0 + 190}" class="guide"/><line x1="${f(x0 + per)}" y1="${y0}" x2="${f(x0 + per)}" y2="${y0 + 190}" class="guide"/>` + both(f(x0 + per - lead), y0 + 176, f(x0 + per), y0 + 176) + text(f(x0 + per - lead / 2), y0 + 216, 'φ = π/3: a sixth of a cycle', 'lbl', 'middle');
       s += text(x0 + 16, 54, 'x', 'lbl display', 'start') + text(x1 + 40, y0 + 40, 'time', 'lbl mono', 'end') + text(350, 60, 'x₀ sin(ωt + φ)', 'lbl mono strong halo', 'start', 'style="fill:var(--hl-text)"') + text(350, 100, 'x₀ sin ωt', 'lbl mono strong halo', 'start', 'style="fill:var(--brand-primary)"');
       return svg('80 20 760 470', s, 'Two sine curves of the same amplitude and period. The second reaches each peak a sixth of a cycle before the first: it leads by a phase angle of pi over 3 radians');
+    },
+
+    // The position of a bobbing mass marked at equal time steps; joining the dots, on a step,
+    // shows the cosine curve.
+    'c1-dots': () => {
+      const x0 = 90, x1 = 860, y0 = 230, amp = 150, steps = 16, cycles = 1.5;
+      const at = t => [x0 + (x1 - x0 - 30) * t, y0 - amp * Math.cos(t * cycles * TAU)];
+      let s = axes(x0, y0, x1 + 20, 50, 410, 'time', 'position');
+      s += `<g class="step">${line(sampled(at, 120), 'brand-primary', 5)}</g>`;
+      for (let i = 0; i <= steps; i++) { const [x, y] = at(i / steps); s += `<circle cx="${f(x)}" cy="${f(y)}" r="10" style="fill:var(--brand-accent-strong)"/>`; }
+      return svg('40 30 880 400', s, 'Dots marking the position of a bobbing mass at equal time intervals; joined up they make a cosine curve');
     }
   };
 });
