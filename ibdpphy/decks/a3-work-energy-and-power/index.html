@@ -105,9 +105,10 @@
 
       <section class="slide" data-title="Conservation of energy">
         <h2>Conservation of energy<span>.</span></h2>
-        <div class="stack center" style="gap: 30px;">
+        <div class="stack center" style="gap: 20px;">
+          <div class="q"><p>How can energy pass from one body to another?</p><div class="ans step">By <b>heating</b> or by <b>doing work</b></div></div>
           <ul class="points">
-            <li>Energy cannot be <b>created or destroyed</b>. It can only be <b>transferred</b> or changed from one form to another</li>
+            <li class="step">Energy cannot be <b>created or destroyed</b>, only <b>transferred</b> or changed in form</li>
             <li class="step">The total energy of an <b>isolated system</b> stays constant</li>
           </ul>
           <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
@@ -521,6 +522,32 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="Graphs of a fall">
+        <p class="eyebrow">Predict first</p>
+        <h2>Sketch the graphs of a fall<span>.</span></h2>
+        <div class="stack center" style="gap: 22px;">
+          <div class="q"><p>A ball is dropped from rest, with no air resistance. Sketch its kinetic and potential energy against time and against distance fallen.</p></div>
+          <div class="panel">
+            <div class="fig" data-fig="a3-fall-graphs"></div>
+          </div>
+          <div class="idea step">Against distance: <b>straight lines</b>, \(\Delta E = mg \Delta h\). Against time: <b>curves</b>, as the distance grows with \(t^{2}\).</div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER; SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Against distance</h3>
+            <p>Each meter the ball falls, the gravitational force does the same work, \(mg \times 1 \,\mathrm{m}\), so the kinetic energy rises by the same amount and the potential energy falls by the same amount. Equal steps in distance give equal steps in energy: straight lines, with gradients \(+mg\) and \(-mg\).</p>
+            <h3 class="rn-head">Against time</h3>
+            <p>The ball speeds up, so it falls further in each second than in the one before: \(s = \tfrac{1}{2}gt^{2}\). The kinetic energy is \(mgs = \tfrac{1}{2}mg^{2}t^{2}\), a parabola that starts flat and gets steeper. The potential energy is the mirror image, falling slowly at first and then faster.</p>
+            <h3 class="rn-head">The check</h3>
+            <p>On every graph, at any moment, the two energies add up to the same total: the height of the potential energy curve at the start. That is conservation of mechanical energy.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Drawing kinetic energy against time as a straight line. That is the velocity–time graph; kinetic energy depends on \(v^{2}\).</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="Conservation: falling through a height">
         <p class="eyebrow">Worked example</p>
         <h2>A roller coaster drops 20 m<span>.</span></h2>
@@ -898,7 +925,7 @@
   <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
   <script src="../assets/figures.js"></script>
-  <script src="figures.js"></script>
+  <script src="figures.js?v=20261115"></script>
   <script src="../assets/deck-math.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/deck-notes.js"></script>

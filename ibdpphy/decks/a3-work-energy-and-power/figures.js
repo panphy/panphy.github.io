@@ -114,6 +114,25 @@ window.DeckFigures.add(P => {
       s += `<path d="M80,176 H470 C540,176 564,220 564,300 V380 L606,380 L522,430 L438,380 L480,380 V300 C480,268 470,260 430,260 H80 Z" fill="url(#a3-sankey-wasted)"/>`;
       if (on) s += text(250, 210, '100 J in', 'lbl strong', 'middle', 'style="fill:#fff"') + text(250, 120, 'chemical energy of the fuel', 'lbl') + text(720, 150, '30 J useful', 'lbl strong', 'start') + text(720, 184, 'kinetic energy', 'lbl', 'start') + text(626, 330, '70 J wasted', 'lbl strong', 'start') + text(626, 364, 'thermal energy', 'lbl', 'start');
       return svg(on ? '60 90 880 360' : '60 110 660 340', s, 'Sankey diagram for a petrol engine. An arrow 100 units wide, the chemical energy input, splits into a narrow arrow of 30 units going straight on, the useful kinetic energy, and a wide arrow of 70 units turning downwards, the wasted thermal energy');
+    },
+
+    // A ball dropped from rest: kinetic and potential energy against time and against distance
+    // fallen. Each curve is its own step, so the class can predict it first.
+    'a3-fall-graphs': () => {
+      const W = 300, gap = 50, H = 220, y0 = 300;
+      const panels = [
+        ['Kinetic', 'time', 'brand-accent', t => t * t],
+        ['Potential', 'time', 'brand-primary', t => 1 - t * t],
+        ['Kinetic', 'distance', 'brand-accent', t => t],
+        ['Potential', 'distance', 'brand-primary', t => 1 - t],
+      ];
+      let s = '';
+      panels.forEach(([name, against, color, fn], k) => {
+        const x0 = 40 + k * (W + gap);
+        s += axes(x0, y0, x0 + W, y0 - H - 20, '', '') + text(x0 + W / 2, 40, name, 'lbl strong') + text(x0 + W - 4, y0 + 40, against, 'lbl', 'end');
+        s += `<g class="step">${plot(sampled(t => [x0 + (W - 30) * t, y0 - (H - 20) * fn(t)]), color)}</g>`;
+      });
+      return svg('0 0 1440 360', s, 'Four graphs for a ball dropped from rest: kinetic energy against time rises as a curve, potential energy against time falls as a curve, and against distance fallen kinetic energy rises and potential energy falls in straight lines');
     }
   };
 });
