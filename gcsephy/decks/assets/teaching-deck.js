@@ -1,8 +1,8 @@
 // Shared visual setup runs before the viewers clone slides into thumbnails.
 (() => {
   const root = document.documentElement;
-  // data-year overrides the class, so the Year 10 copy of the Atoms deck keeps the deck-y11 layout.
-  const year = Number(root.dataset.year) || (root.classList.contains('deck-y11') ? 11 : root.classList.contains('deck-y10') ? 10 : 9);
+  // Each deck names its year in data-year on <html>.
+  const year = Number(root.dataset.year) || 9;
   document.querySelectorAll('#deck > .slide').forEach(slide => {
     const badge = document.createElement('span');
     badge.className = 'year-badge';

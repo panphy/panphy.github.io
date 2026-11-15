@@ -2,8 +2,8 @@
 
 /* The Year 9 and Year 10 companion-style decks (Work Like a Physicist and
    Electric Circuits, and the later Year 9 and 10 decks): navy and paper, Arial Black headings, 2px ink borders
-   and hard offset shadows in the mission colours. The Year 9 palette is the
-   default; <html class="deck-y10"> switches to the Year 10 electric palette. */
+   and hard offset shadows in the mission colours. The navy-and-lime palette is the
+   default; <html class="palette-electric"> switches to the electric palette (Electric Circuits, Particle Model). */
 :root {
   --navy: #07162f;
   --navy-deep: #030c1e;
@@ -25,7 +25,7 @@
   --display: "Arial Black", "Archivo Black", Arial, sans-serif;
   --accent: var(--hi);
 }
-.deck-y10 {
+.palette-electric {
   --navy: #0a1326;
   --paper: #f3f0e7;
   --ink: #0a1326;

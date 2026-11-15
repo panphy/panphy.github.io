@@ -662,7 +662,7 @@ window.DeckSvgTex = {
       s += sources.map(([file, title, caption], i) => {
         const x = xs[i];
         return `<rect x="${x + 14}" y="${top + 14}" width="${W - 28}" height="${W - 28}" rx="12" fill="#fff"/>`
-          + `<image href="/gcsephy/decks/atoms-and-radiation-y10/images/${file}" x="${x + 20}" y="${top + 20}" width="${W - 40}" height="${W - 40}" preserveAspectRatio="xMidYMid meet"/>`
+          + `<image href="/gcsephy/decks/atoms-and-nuclear-radiation/images/${file}" x="${x + 20}" y="${top + 20}" width="${W - 40}" height="${W - 40}" preserveAspectRatio="xMidYMid meet"/>`
           + label(x, title, caption);
       }).join('');
 

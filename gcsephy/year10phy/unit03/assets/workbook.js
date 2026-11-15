@@ -20,7 +20,7 @@
   const inSel = (n) => !!SEL && SEL.some((l) => l.n === n);
   const nums = SEL ? `${SEL[0].n}–${SEL[SEL.length - 1].n}` : "";
   const pad = (n) => String(n).padStart(2, "0");
-  const DECK = "panphy.app/gcsephy/decks/atoms-and-radiation-y10";
+  const DECK = "panphy.app/gcsephy/decks/atoms-and-nuclear-radiation";
   if (answers) document.body.classList.add("answers");
 
   const which = partNo ? `Part ${partNo}, Lessons ${nums}` : ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
