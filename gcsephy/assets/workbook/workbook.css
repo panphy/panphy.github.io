@@ -140,7 +140,7 @@ strong { font-weight: 700; }
 .worked h4 { margin: 0 0 1.5mm; font: 900 8pt/1 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
 .worked > div:first-child h4 { color: var(--ink); }
 .worked .q { margin-bottom: 2mm; font-size: 9.6pt; font-weight: 700; line-height: 1.35; }
-.step { display: grid; grid-template-columns: 17mm 1fr; gap: 2mm; align-items: end; min-height: 7.4mm; border-bottom: 1px solid var(--rule); font-size: 9.6pt; }
+.step { display: grid; grid-template-columns: 21mm 1fr; gap: 2mm; align-items: end; min-height: 7.4mm; border-bottom: 1px solid var(--rule); font-size: 9.6pt; }
 .step > span:first-child { font: 900 7.5pt/1.6 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-bottom: 1mm; }
 .step > span:last-child { padding-bottom: .8mm; }
 .step:last-child { border-bottom: 0; }

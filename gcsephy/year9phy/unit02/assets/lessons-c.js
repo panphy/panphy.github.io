@@ -64,7 +64,7 @@
         { p: "(c) In real life, the energy in the kinetic store is a little less. Explain why.", marks: 2, lines: 2, a: "Air resistance acts on the diver (1), so some energy is transferred to the thermal store of the air / surroundings (1)." },
       ],
       quick: { slide: 51, items: [
-        ["State the principle of conservation of energy.", "Energy can be transferred, stored or dissipated, but never created or destroyed."],
+        ["State the principle of conservation of energy.", "Energy can be transferred usefully, stored or dissipated, but cannot be created or destroyed."],
         [R`A 2.0 kg rock falls 5.0 m, with no air resistance. Calculate \(E_k\) at the bottom.`, R`\(2.0 \times 9.8 \times 5.0 = 98\) J`],
         ["A 0.10 kg ball is thrown up with 4.9 J, with no air resistance. Calculate its greatest height.", R`\(\dfrac{4.9}{0.10 \times 9.8} = 5.0\) m`],
         ["A pendulum swings lower each time. Why?", "Energy is dissipated to the thermal store of the air."],
@@ -263,7 +263,7 @@
         ["What is the unit of efficiency?", "It has no unit."],
         ["On a Sankey diagram, which arrow shows the wasted energy?", "The one that bends away."],
       ] },
-      summary: [R`\(\text{efficiency} = \dfrac{\text{useful output}}{\text{total input}}\), using energy or power.`, "As a decimal (at most 1) or a percentage (at most 100%). No unit.", "useful = efficiency × total; total = useful ÷ efficiency.", "Sankey diagrams: arrow width shows energy; wasted energy bends away.", "Higher: lubricate, streamline, insulate to increase efficiency."],
+      summary: [R`\(\text{efficiency} = \dfrac{\text{useful output}}{\text{total input}}\), using energy or power.`, "As a decimal (at most 1) or a percentage (at most 100%). No unit.", "useful = efficiency × total; total = useful ÷ efficiency.", "Sankey diagrams: arrow width shows energy; wasted energy bends away.", "To increase efficiency: lubricate, streamline, insulate."],
       recall: [["Write the equation for efficiency using energy.", "efficiency = useful output energy transfer ÷ total input energy transfer"], ["A device transfers 30 J usefully from 120 J. What is its efficiency?", "0.25 (25%)"], ["Why can efficiency never be more than 100%?", "Energy cannot be created: the useful output can never be more than the input."], ["On a Sankey diagram, what does the width of an arrow show?", "The amount of energy."]],
       cando: ["calculate efficiency as a decimal and a percentage", "find the useful output or the total input", "draw and read a Sankey diagram", "describe ways to increase efficiency"],
     },

@@ -79,10 +79,10 @@
       ],
       quick: { slide: 59, covers: "Triple Science, using the nucleus", items: [
         ["Name two natural sources of background radiation.", "Rocks (radon gas) and cosmic rays."],
-        ["Why do aircrew get a higher dose?", "There are more cosmic rays at high altitude."],
+        ["What is the unit of radiation dose?", "The sievert (Sv)."],
         ["Why does a medical tracer need a short half-life?", "It lasts for the scan, then soon decays away."],
         ["What must a uranium nucleus absorb before fission?", "A neutron."],
-        ["What do control rods do?", "They absorb neutrons to control the chain reaction."],
+        ["What is a chain reaction?", "Neutrons from one fission go on to cause more fissions."],
         ["Fusion joins two light nuclei. Where does the energy come from?", "Some of the mass is converted into energy."],
       ] },
     },
