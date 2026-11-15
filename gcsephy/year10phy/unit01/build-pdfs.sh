@@ -1,9 +1,9 @@
 #!/bin/sh
-# Rebuild the workbook PDFs (six part booklets, the Unit review and their answer editions)
+# Rebuild the workbook PDFs (three part booklets, the Unit review and their answer editions)
 # from workbook.html with headless Chrome. The lesson plans have their own script in lesson-plans/.
 # Serve the repository root first:  python3 -m http.server 8000
 # Then run from this folder:        sh build-pdfs.sh
-# To rebuild only some booklets, name them: sh build-pdfs.sh p1 p3 review (p1-p6 are the parts)
+# To rebuild only some booklets, name them: sh build-pdfs.sh p1 p3 review (p1-p3 are the parts)
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year10phy/unit01}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
@@ -52,6 +52,6 @@ part() { # number (as parts in assets/book.js)
 }
 
 ONLY="$*"
-for n in 1 2 3 4 5 6; do part "$n"; done
+for n in 1 2 3; do part "$n"; done
 booklet review "$NAME (Unit Review)" "review" "Unit Review"
 exit 0

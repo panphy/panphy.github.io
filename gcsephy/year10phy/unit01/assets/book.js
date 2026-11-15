@@ -12,7 +12,7 @@
     coverTitle: "Electric<br><em>Circuits</em>",
     coverArt: () => window.CoverArt.circuit(),
     lede: "Charge, energy and resistance: from your first circuit to confident exam answers.",
-    parts: [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]],
+    parts: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]],
     firstDoNow: "What do you already think?",
     // Only equations of the form A = B × C have a triangle. P = I² R gives I², so a square root follows.
     triangles: {
