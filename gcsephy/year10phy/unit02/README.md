@@ -4,7 +4,7 @@ Eight 50-minute lessons over four weeks for AQA GCSE Physics 4.3 and Combined Sc
 
 **Address:** <https://panphy.app/gcsephy/year10phy/unit02/>
 
-The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all five workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
+The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all six workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
 
 ## Sequence
 

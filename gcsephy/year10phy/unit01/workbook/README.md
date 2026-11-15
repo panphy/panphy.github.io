@@ -2,7 +2,7 @@
 
 Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCSE Physics, sections 6.2.1–6.2.4 / 4.2.1–4.2.4, for students with no prior knowledge of electricity. The booklets are self-contained; students reach [`index.html`](index.html) here from the GCSE landing page.
 
-The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all five workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
+The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all six workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
 
 ## Files
 

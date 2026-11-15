@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en" class="deck-y11" data-year="10" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for AQA GCSE Physics (4.4) and Combined Science: Trilogy (6.4) atomic structure: the atom, changing atomic models, nuclear radiation and half-life, with the GCSE Physics only hazards, uses, fission and fusion.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="gcsephy" data-legacy-dark="atoms-radiation-deck-dark" data-legacy-light="atoms-radiation-deck-light"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>Atoms and Nuclear Radiation — GCSE Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/gcsephy/sw-register.js" defer></script>
+  <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <link rel="stylesheet" href="../assets/readable.css">
+  <script src="../assets/deck-math.js"></script>
+</head>
+<body>
+  <header class="banner">
+    <div class="banner-start">
+      <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+      <a class="nav-pill" aria-label="Open workbook resources" href="/gcsephy/year10phy/unit03/" target="_blank" rel="noopener"><span class="wide">Workbook</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+    </div>
+    <a class="banner-title" href="#1">Atoms &amp; Nuclear Radiation</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1, Title -->
+      <section class="slide title" data-title="Atoms and Nuclear Radiation">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Year 10, AQA GCSE Physics &amp; Combined Science</p>
+            <h1>Tiny atom.<br>Big ideas<span>!</span></h1>
+            <p class="lead">Inside the atom, changing models<br>Nuclear radiation, half-life<br>Fission and fusion <span class="triple-tag">Triple only</span></p>
+            <div class="chips">
+              <a class="chip on" href="/simulations/atomic_models.html" target="_blank" rel="noopener">Atomic Models sim ↗</a>
+              <a class="chip on" href="/simulations/nuclear_decay.html" target="_blank" rel="noopener">Nuclear Decay sim ↗</a>
+              <a class="chip on" href="/simulations/fission_fusion.html" target="_blank" rel="noopener">Fission &amp; Fusion sim ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="hero"></div>
+        </div>
+        <p class="slide-copyright">&copy; 2026 PanPhy Labs. All rights reserved.</p>
+      </section>
+
+      <!-- 2, Roadmap -->
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">AQA Physics 8463: 4.4; Combined Science 8464: 6.4</p>
+        <h2>Four big questions<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr); align-content: center;">
+          <div class="card">
+            <div class="fig" data-fig="mini-neutron" style="height: 220px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>What is inside an atom?</h3>
+            <p>Particles, size, isotopes, ions</p>
+            <p class="spec-ref"><span>Physics 4.4.1.1, 4.4.1.2</span><span>Combined 6.4.1.1, 6.4.1.2</span></p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="mini-plum" style="height: 220px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>How do we know?</h3>
+            <p>Plum pudding → nuclear → Bohr</p>
+            <p class="spec-ref"><span>Physics 4.4.1.1, 4.4.1.3</span><span>Combined 6.4.1.1, 6.4.1.3</span></p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="mini-decay" style="height: 220px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>What do unstable nuclei do?</h3>
+            <p>Alpha, beta, gamma, half-life</p>
+            <p class="spec-ref"><span>Physics 4.4.2</span><span>Combined 6.4.2</span></p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="mini-fission" style="height: 220px;"></div>
+            <p class="eyebrow">Part 04 <span class="triple-tag">Triple only</span></p>
+            <h3>How do we use the nucleus?</h3>
+            <p>Hazards, medicine, fission, fusion</p>
+            <p class="spec-ref"><span>Physics 4.4.3, 4.4.4</span><span>Not in Combined</span></p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <!-- Section 1 -->
+      <section class="slide section" data-title="Part 1: Inside the atom">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Inside the atom<span>.</span></h1>
+            <p class="lead">Protons, neutrons, electrons</p>
+            <p class="spec-ref"><span>AQA spec: Physics 4.4.1.1, 4.4.1.2</span><span>Combined Science 6.4.1.1, 6.4.1.2</span></p>
+          </div>
+          <div class="fig" data-fig="carbon-nucleus"></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Particles in an atom">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Three particles<span>.</span></h2>
+        <div class="stack centre">
+          <table class="facts big">
+            <thead><tr><th>Particle</th><th>Relative charge</th><th>Relative mass</th><th>Where?</th></tr></thead>
+            <tbody>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="proton"></span>Proton</span></td><td class="num">+1</td><td class="num">1</td><td>Nucleus</td></tr>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="neutron"></span>Neutron</span></td><td class="num">0</td><td class="num">1</td><td>Nucleus</td></tr>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="electron"></span>Electron</span></td><td class="num">−1</td><td>Very small</td><td>Energy levels around the nucleus</td></tr>
+            </tbody>
+          </table>
+          <div class="idea"><b>Atom = neutral.</b> Number of electrons = number of protons.</div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why “relative”?</h3>
+            <p>The real charges and masses are awkwardly tiny, so everything is compared with a proton, which counts as mass 1 and charge +1.</p>
+            <h3 class="rn-head">Why does only the nucleus count for mass?</h3>
+            <p>An electron has about 1/2000 of the mass of a proton. Even all the electrons in a large atom add almost nothing. That is why the mass number counts protons and neutrons and ignores electrons.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Writing the electron’s mass as 0. It is very small, not zero.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Size of an atom">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Mostly empty space<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Atom radius \(\approx\) <b><span class="equation-inline">\(1 \times 10^{-10}\)&nbsp;m</span></b></li>
+            <li>Nucleus radius <b>\(< \dfrac{1}{10\,000}\)</b> of the atom’s</li>
+            <li>Almost all the <b>mass</b> is in the nucleus</li>
+            <li>Electrons at different distances: <b>energy levels</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>AN ATOM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scale"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">How empty is “mostly empty”?</h3>
+            <p>Scale an atom up to a football stadium and the nucleus is a pea on the centre spot.</p>
+            <h3 class="rn-head">Using the numbers</h3>
+            <p>One ten-thousandth of <span class="equation-inline">\(1 \times 10^{-10}\)&nbsp;m</span> is <span class="equation-inline">\(1 \times 10^{-14}\)&nbsp;m</span>. Dividing by \(10\,000\) lowers the power of ten by 4, from \(-10\) to \(-14\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Why can you not push your hand through a table? The electrons on the outside of your atoms repel the electrons on the outside of the table’s.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Atomic number and mass number">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Reading the symbol<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li><b>Atomic number</b> = number of protons</li>
+              <li><b>Mass number</b> = protons + neutrons</li>
+              <li>Neutrons = mass no. − atomic no.</li>
+              <li>Protons decide the <b>element</b></li>
+            </ul>
+            <div class="idea step eqrow">Try: <span class="nuc">\({}^{23}_{11}\mathrm{Na}\)</span> <span class="step">→ <b>11 p, 12 n, 11 e</b></span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>NUCLEAR NOTATION</span></div>
+            <div class="fig" data-fig="notation"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Work through another one</h3>
+            <p>Chlorine with 35 on top and 17 below. Protons: 17. Neutrons: \(35 - 17 = 18\). Electrons in a neutral atom: 17.</p>
+            <h3 class="rn-head">Why do the protons decide the element?</h3>
+            <p>The number of protons sets how many electrons the neutral atom holds, and that sets how it behaves chemically. Change the protons and it is a different element. Change the neutrons and it is the same element with a different mass.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Isotopes">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Isotopes<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: 1fr 1fr; gap: 16px 40px;">
+            <li>Same element: <b>same protons</b></li>
+            <li><b>Different</b> numbers of neutrons</li>
+            <li>So different <b>mass numbers</b></li>
+            <li>Some are <b>unstable</b>: carbon-14</li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>ISOTOPES OF CARBON</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="isotopes"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why are they the same element?</h3>
+            <p>All three have 6 protons and 6 electrons, so they react in exactly the same way. Only the mass of the nucleus differs.</p>
+            <h3 class="rn-head">Why are some unstable?</h3>
+            <p>A nucleus needs a suitable balance of protons and neutrons. Carbon-14 has too many neutrons for its 6 protons, so sooner or later it decays.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Living things stop taking in carbon-14 when they die. Measuring how much is left tells archaeologists how old a bone is.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Atoms and ions">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Atoms and ions<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Atom: electrons = protons</li>
+            <li>So <b>no overall charge</b></li>
+            <li>Lose outer electron(s) → <b>positive ion</b></li>
+            <li>The nucleus does <b>not</b> change</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>LITHIUM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="ion" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why is it electrons that move, and never protons?</h3>
+            <p>The outer electrons are far from the nucleus and weakly held. Protons are locked inside the nucleus. So an atom can only become charged by losing or gaining electrons.</p>
+            <h3 class="rn-head">Losing an electron gives a positive ion</h3>
+            <p>Lithium has 3 protons and 3 electrons: +3 and −3 make zero. Take one electron away: +3 and −2 make +1. The atom has not gained anything positive. It has lost something negative.</p>
+            <h3 class="rn-head">Gaining an electron gives a negative ion</h3>
+            <p>Fluorine has 9 protons and 9 electrons. Add one electron: +9 and −10 make −1.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Mixing up ions and isotopes. An ion has a different number of <b>electrons</b>. An isotope has a different number of <b>neutrons</b>.</p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="slide section" data-title="Part 2: How the model changed">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>How the model changed<span>.</span></h1>
+            <p class="lead">New evidence → new model</p>
+            <p class="spec-ref"><span>AQA spec: Physics 4.4.1.1, 4.4.1.3</span><span>Combined Science 6.4.1.1, 6.4.1.3</span></p>
+          </div>
+          <div class="fig" data-fig="rutherford"></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Timeline of atomic models">
+        <p class="eyebrow">Changing models</p>
+        <h2>A model that kept changing<span>.</span></h2>
+        <div class="stack centre">
+          <div class="timeline">
+            <div class="tl"><div class="fig" data-fig="mini-solid"></div><span class="year">Before 1897</span><h3>Solid spheres</h3><p>Tiny spheres that cannot be divided</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-plum"></div><span class="year">1904</span><h3>Plum pudding</h3><p>After the electron was discovered</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-nuclear"></div><span class="year">1911</span><h3>Nuclear model</h3><p>From alpha scattering</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-bohr"></div><span class="year">1913</span><h3>Bohr model</h3><p>Electrons in energy levels</p></div>
+          </div>
+          <div class="idea">The <a href="/simulations/atomic_models.html" target="_blank" rel="noopener">Atomic Models sim ↗</a> also shows the 1926 electron cloud: <b>not needed for GCSE</b>.</div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">The same thing happens at every step</h3>
+            <p>A model explains the evidence of its day. An experiment gives a result it cannot explain. A new model is built that explains both the old evidence and the new.</p>
+            <h3 class="rn-head">Each model keeps what still works</h3>
+            <p>The nuclear model kept the electrons and moved the positive charge to the centre. Bohr kept the nucleus and organised the electrons. The earlier scientists were not foolish; each model was the best explanation of what was then known.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Thomson finds the electron">
+        <p class="eyebrow">The story: Cambridge, 1897</p>
+        <p class="not-examined">Background story: the exam tests the models, not these details</p>
+        <h2>Thomson finds the electron<span>.</span></h2>
+        <div class="story" style="--photo-h: 300px;">
+          <div class="story-photos">
+            <figure><img src="images/thomson.jpg" width="500" height="688" alt="Portrait of J. J. Thomson, an older man with glasses and a moustache"><figcaption><b>J. J. Thomson</b></figcaption></figure>
+            <figure><img src="images/thomson-cathode-ray-tube.jpg" width="960" height="639" alt="A long glass tube with a bulb at each end and wire coils around the middle"><figcaption>The <b>cathode ray tube</b> he used in 1897, now in the Science Museum, London (photo mirrored)</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Glowing <b>rays</b> crossed the tube. Nobody knew what they were</li>
+              <li>Magnets and electric fields <b>bent</b> them: <b>negative particles</b></li>
+              <li>Every metal he tried gave the <b>same</b> particles</li>
+              <li>Inside <b>every atom</b>: the <b class="t-electron">electron</b></li>
+            </ul>
+            <div class="idea">Atoms <b>can be divided</b>: the solid sphere model had to go</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:J.J._Thomson_LCCN2014715407.jpg" target="_blank" rel="noopener">Bain News Service, Library of Congress</a>, public domain. Tube: <a href="https://commons.wikimedia.org/wiki/File:J_J_Thomsons_cathode_ray_tube_with_magnet_coils,_1897._(9663807404).jpg" target="_blank" rel="noopener">Science Museum London</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a>.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Plum pudding model">
+        <p class="eyebrow">Thomson (1904)</p>
+        <h2>The plum pudding model<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>Electron discovered → atoms <b>can be divided</b></li>
+              <li>A <b>ball of positive charge</b></li>
+              <li><b>Negative electrons</b> embedded in it</li>
+              <li><b>No nucleus</b></li>
+            </ul>
+            <a class="try" href="/simulations/atomic_models.html" target="_blank" rel="noopener">Try it: Atomic Models sim ↗</a>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PLUM PUDDING MODEL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="plum"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="positive">+</i> Positive charge (spread)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why did Thomson suggest this?</h3>
+            <p>He had shown that atoms contain negative electrons. Atoms are neutral, so there had to be positive charge to balance them. Nobody knew where it was, so he took the simplest idea: spread through the whole atom.</p>
+            <h3 class="rn-head">What it predicted</h3>
+            <p>With charge and mass spread thinly, nothing is concentrated enough to push a fast particle off course. The next experiment tested exactly that.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: the gold foil team">
+        <p class="eyebrow">The story: Manchester, 1909</p>
+        <p class="not-examined">Background story: the exam tests the models, not these details</p>
+        <h2>A professor, his assistant and a student<span>.</span></h2>
+        <div class="story band" style="--photo-h: 230px;">
+          <div class="story-photos">
+            <figure><img src="images/geiger-rutherford.jpg" width="1400" height="872" alt="Two men in dark suits sitting either side of a bench of laboratory apparatus"><figcaption><b>Hans Geiger</b> (left) and <b>Ernest Rutherford</b> in the laboratory</figcaption></figure>
+            <figure><img src="images/marsden.jpg" width="500" height="666" alt="Portrait of Ernest Marsden, a man with glasses in a suit"><figcaption style="--caption-min: 300px;"><b>Ernest Marsden</b>, pictured in 1921</figcaption></figure>
+            <figure><img src="images/geiger-marsden-1913-diagram.png" width="421" height="444" alt="Line drawing of a round metal chamber in cross-section, with parts labelled by letters"><figcaption style="--caption-min: 480px;">Their apparatus, from the 1913 paper: source <b>R</b>, foil <b>F</b>, screen <b>S</b>, microscope <b>M</b></figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>Each alpha made a tiny <b>flash</b> on a screen. Geiger counted them for hours in a <b>dark</b> lab</li>
+            <li>Marsden, a <b>20-year-old student</b>, looked for alphas bouncing <b>back</b>. Nobody expected any</li>
+            <li>About <b>1 in 8000</b> bounced back: plum pudding could not explain it</li>
+          </ul>
+        </div>
+        <p class="credits">Photos: <a href="https://commons.wikimedia.org/wiki/File:Geiger-Rutherford.jpg" target="_blank" rel="noopener">unknown photographer</a> and <a href="https://commons.wikimedia.org/wiki/File:Ernest_Marsden_1921.jpg" target="_blank" rel="noopener">S P Andrew Ltd</a>, public domain. Diagram: <a href="https://commons.wikimedia.org/wiki/File:Geiger-Marsden_diagram.gif" target="_blank" rel="noopener">Geiger and Marsden, 1913</a>, public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Alpha scattering experiment">
+        <p class="eyebrow">Rutherford, Geiger &amp; Marsden (1909–1911)</p>
+        <h2>The alpha scattering experiment<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Fire <b class="t-alpha">alpha particles</b> (+) at thin <b>gold foil</b></li>
+            <li>Count them at <b>all angles</b></li>
+            <li>Plum pudding predicts: all pass through</li>
+            <li>Only <b>tiny</b> deflections expected</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ALPHA SCATTERING</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scatter"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why alpha particles?</h3>
+            <p>They are positive, fast and heavy. Positive charge inside the atom would push on them, and how far they were pushed would show how that charge is arranged.</p>
+            <h3 class="rn-head">Why gold?</h3>
+            <p>It can be beaten into an extremely thin foil, so an alpha particle is unlikely to be pushed off course more than once.</p>
+            <h3 class="rn-head">Why count at every angle, even back towards the source?</h3>
+            <p>Nobody expected anything there. Checking anyway led to the discovery.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Alpha scattering results">
+        <p class="eyebrow">Evidence → conclusion</p>
+        <h2>What they saw. What it means<span>.</span></h2>
+        <div class="split">
+          <div class="obs">
+            <div class="obs-head"><span>OBSERVATION</span><span>CONCLUSION</span></div>
+            <div class="obs-row"><div>Most went <b>straight through</b></div><span class="to">→</span><div>Atom is mostly <b>empty space</b></div></div>
+            <div class="obs-row step"><div>Some were <b>deflected</b></div><span class="to">→</span><div>Centre is <b>positively charged</b></div></div>
+            <div class="obs-row step"><div>A very few <b>bounced back</b></div><span class="to">→</span><div><b>Mass concentrated</b> in a tiny centre</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CLOSE-UP</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scatter-zoom" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why do the few that bounced back tell us the most?</h3>
+            <p>To turn a fast, heavy alpha particle right round takes a large force from something much more massive than it. And because it happened so rarely, that something must be a very small target, seldom hit head-on.</p>
+            <p>Rutherford said it was as surprising as firing a shell at tissue paper and having it come back and hit you.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Each mark needs an observation joined to its conclusion with “so” or “because”.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Nuclear model">
+        <p class="eyebrow">Rutherford (1911)</p>
+        <h2>The nuclear model<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>A tiny, dense <b>nucleus</b> at the centre</li>
+            <li>The nucleus is <b>positive</b></li>
+            <li>Almost all the <b>mass</b> is in it</li>
+            <li><b>Electrons</b> outside the nucleus</li>
+            <li>Replaced the plum pudding model</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>NUCLEAR MODEL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="rutherford"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="positive">+</i> Nucleus (positive)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Check that the new model explains all three results</h3>
+            <h3 class="rn-head">Straight through</h3>
+            <p>most alpha particles pass through empty space.</p>
+            <h3 class="rn-head">Deflected</h3>
+            <p>one passing near the positive nucleus is repelled.</p>
+            <h3 class="rn-head">Bounced back</h3>
+            <p>one heading straight at the nucleus is repelled so strongly that it reverses. The nucleus is tiny, so this is rare.</p>
+            <p>The plum pudding model could explain only the first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Comparing the models">
+        <p class="eyebrow">Compare</p>
+        <h2>Plum pudding vs nuclear<span>.</span></h2>
+        <div class="stack centre">
+        <table class="facts big">
+          <thead><tr><th></th><th><span class="icon-cell"><span class="fig" data-fig="mini-plum" style="width: 96px; height: 96px;"></span>Plum pudding</span></th><th><span class="icon-cell"><span class="fig" data-fig="mini-nuclear" style="width: 96px; height: 96px;"></span>Nuclear model</span></th></tr></thead>
+          <tbody>
+            <tr><td>Positive charge</td><td>Spread through the atom</td><td>In a tiny nucleus</td></tr>
+            <tr><td>Mass</td><td>Spread through the atom</td><td>Concentrated in the nucleus</td></tr>
+            <tr><td>Empty space?</td><td>No</td><td>Mostly empty space</td></tr>
+            <tr><td>Electrons</td><td>Embedded in the positive ball</td><td>Outside the nucleus</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Each row is tied to a piece of evidence</h3>
+            <p>“Mostly empty space” comes from the alpha particles that went straight through. “Positive charge in a tiny nucleus” from those that were deflected. “Mass concentrated in the nucleus” from the few that bounced back.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To compare, say how the same feature differs in the two models. “Whereas” helps: “the positive charge is spread through the atom, whereas in the nuclear model it is in a tiny nucleus”. If asked for a similarity: both contain electrons and are neutral overall.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Bohr fixes the nuclear model">
+        <p class="eyebrow">The story: Copenhagen, 1913</p>
+        <p class="not-examined">Background story: the exam tests the models, not these details</p>
+        <h2>Bohr fixes the nuclear model<span>.</span></h2>
+        <div class="story" style="--photo-h: 380px;">
+          <div class="story-photos">
+            <figure><img src="images/bohr.jpg" width="500" height="703" alt="Portrait of Niels Bohr in a suit and tie"><figcaption><b>Niels Bohr</b>, pictured about 1922, the year he won the Nobel Prize</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>1912: Bohr, 26, in <b>Rutherford’s laboratory</b></li>
+              <li>Problem: an orbiting electron should <b>lose energy</b> and spiral in</li>
+              <li>1913: electrons orbit only at <b>certain distances</b></li>
+              <li>His calculations <b>matched</b> hydrogen’s colours of light</li>
+            </ul>
+            <div class="idea">He kept the nucleus; changed only what the evidence demanded</div>
+          </div>
+        </div>
+        <p class="credits">Photo: <a href="https://commons.wikimedia.org/wiki/File:Niels_Bohr.jpg" target="_blank" rel="noopener">AB Lagrelius &amp; Westphal</a>, public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Bohr model">
+        <p class="eyebrow">Bohr (1913)</p>
+        <h2>The Bohr model<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>Bohr <b>adapted</b> the nuclear model</li>
+              <li>Electrons orbit at <b>specific distances</b></li>
+              <li>These are <b>energy levels</b></li>
+              <li>His <b>calculations agreed</b> with experiments</li>
+            </ul>
+            <div class="idea">Carbon: <b>2</b> electrons in \(n = 1\), <b>4</b> in \(n = 2\)</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BOHR MODEL: CARBON-12</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="bohr"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Bohr’s idea</h3>
+            <p>electrons can only be at certain fixed distances from the nucleus, like the rungs of a ladder. You can stand on a rung, not between rungs.</p>
+            <h3 class="rn-head">Why was it accepted?</h3>
+            <p>His calculations agreed with the results of experiments. That is the answer the exam wants: theory and observation matched.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The problem he solved: in the nuclear model, a circling electron should lose energy and spiral into the nucleus. The experiments: hot hydrogen gives out light of a few exact colours, and Bohr’s numbers for those colours matched the measurements.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="What Bohr didn’t know">
+        <p class="eyebrow">Bohr (1913)</p>
+        <h2>What Bohr didn’t know<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack centre">
+            <ul class="points">
+              <li>Bohr’s nucleus: a tiny <b>positive</b> centre</li>
+              <li><b class="t-proton">Protons</b>: identified 1919</li>
+              <li><b class="t-neutron">Neutrons</b>: <b>1932</b>, James Chadwick</li>
+            </ul>
+            <div class="idea">Our Bohr diagrams add protons and neutrons: a <b>modern</b> version</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CARBON: THEN AND NOW</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="bohr-then-now"></div>
+            <div class="legend"><span><i class="positive">+</i> Positive nucleus</span><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="electron">−</i> Electron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does this slide matter?</h3>
+            <p>The Bohr diagrams you draw show protons and neutrons. Bohr could not have drawn that: in 1913 the nucleus was just a small positive lump.</p>
+            <h3 class="rn-head">How were protons found?</h3>
+            <p>The charge on any nucleus turned out to be a whole number of equal units, which pointed to identical positive particles inside it.</p>
+            <h3 class="rn-head">Why did neutrons take until 1932?</h3>
+            <p>They have no charge, so the methods for detecting charged particles missed them.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy levels and EM radiation">
+        <h2>Electrons can change level<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: 1fr 1fr; gap: 16px 40px;">
+            <li><b>Absorb</b> EM radiation → move <b>further out</b></li>
+            <li><b>Emit</b> EM radiation → move <b>closer in</b></li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>HYDROGEN ATOM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="levels" data-animate></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="proton">+</i> Proton</span><span><i class="photon">~</i> EM radiation</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Think of the ladder</h3>
+            <p>Climbing to a higher rung takes energy; stepping down gives it back. An electron that absorbs electromagnetic radiation moves up a level. One that drops down gives out the difference as electromagnetic radiation.</p>
+            <h3 class="rn-head">Why does “further out” mean “more energy”?</h3>
+            <p>The electron is attracted to the nucleus, so pulling it away takes energy, like lifting something off the ground.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The colours of fireworks come from electrons dropping back down. Each element has its own levels, so each gives its own colours.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Chadwick finds the neutron">
+        <p class="eyebrow">The story: Cambridge, 1932</p>
+        <p class="not-examined">Background story: the exam tests the models, not these details</p>
+        <h2>Chadwick finds the neutron<span>.</span></h2>
+        <div class="story" style="--photo-h: 370px;">
+          <div class="story-photos">
+            <figure><img src="images/chadwick.jpg" width="500" height="625" alt="James Chadwick, a man with glasses in a suit, sitting in a chair"><figcaption><b>James Chadwick</b>, pictured about 1945</figcaption></figure>
+            <figure><img src="images/rutherford.jpg" width="500" height="671" alt="Portrait of Ernest Rutherford, a man with a moustache in a suit"><figcaption><b>Ernest Rutherford</b>, his teacher and then his boss</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>Chadwick was Rutherford’s <b>student</b> in Manchester, then his deputy in Cambridge</li>
+            <li>The masses did not add up: a helium nucleus has the <b>charge of 2</b> protons but the <b>mass of 4</b></li>
+            <li>They suspected a particle with mass and <b>no charge</b>, and hunted it for years</li>
+            <li>1932: Chadwick found the evidence. 1935: Nobel Prize</li>
+          </ul>
+        </div>
+        <p class="credits">Photos: <a href="https://commons.wikimedia.org/wiki/File:James_Chadwick.jpg" target="_blank" rel="noopener">Los Alamos National Laboratory</a> (<a href="https://commons.wikimedia.org/wiki/Template:PD-LosAlamos" target="_blank" rel="noopener">reuse terms</a>); <a href="https://commons.wikimedia.org/wiki/File:Ernest_Rutherford_LOC.jpg" target="_blank" rel="noopener">Bain Collection, Library of Congress</a>, public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Protons and neutrons">
+        <h2>Protons, then neutrons<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>Later experiments: positive charge is in small particles: <b class="t-proton">protons</b></li>
+            <li>Each proton: the <b>same</b> positive charge</li>
+            <li><b>James Chadwick</b> (1932): evidence for <b class="t-neutron">neutrons</b></li>
+            <li>About <b>20 years</b> after the nucleus was accepted</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>CARBON-12 NUCLEUS</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="carbon-nucleus"></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why did anyone suspect another particle?</h3>
+            <p>The masses did not add up. A helium nucleus has the charge of 2 protons but the mass of 4. Something with mass and no charge had to be in there.</p>
+            <h3 class="rn-head">What the neutron explains</h3>
+            <p>Mass number, and isotopes: atoms of one element can have different masses because they have different numbers of neutrons.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Why models change">
+        <p class="eyebrow">Working scientifically</p>
+        <h2>Why models change<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>A model must explain the <b>evidence</b></li>
+            <li>It makes <b>predictions</b> we can test</li>
+            <li>New evidence can <b>change or replace</b> it</li>
+            <li>Results are <b>published</b> and <b>peer reviewed</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>THE SCIENCE CYCLE</span></div>
+            <div class="fig" data-fig="cycle"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">The atom is the standard example</h3>
+            <p>The plum pudding model predicted that alpha particles would pass almost straight through gold foil. Some bounced back. The model could not explain that, so it was replaced by one that could.</p>
+            <h3 class="rn-head">Is the current model “proved”?</h3>
+            <p>No model is. It is accepted because it explains all the evidence so far, and stays accepted until evidence turns up that it cannot explain.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: atoms and models">
+        <p class="eyebrow">Quick check</p>
+        <h2>Atoms and models<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">01</span>What is in the nucleus?</p><div class="ans step">Protons and neutrons</div></div>
+          <div class="q"><p><span class="n">02</span>How many neutrons in <span class="nuc in-text">\({}^{37}_{17}\mathrm{Cl}\)</span>?</p><div class="ans step">\(37 - 17 = 20\)</div></div>
+          <div class="q"><p><span class="n">03</span>Why did most alpha particles pass straight through?</p><div class="ans step">The atom is mostly empty space</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: atoms and models">
+        <p class="eyebrow">Quick check</p>
+        <h2>Atoms and models<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>Why did a very few bounce back?</p><div class="ans step">Tiny, dense, positive nucleus</div></div>
+          <div class="q"><p><span class="n">05</span>An electron absorbs EM radiation. What happens?</p><div class="ans step">Moves to a higher energy level (further out)</div></div>
+          <div class="q"><p><span class="n">06</span>Who gave evidence for the neutron?</p><div class="ans step">James Chadwick</div></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="slide section" data-title="Part 3: Nuclear radiation">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Nuclear radiation<span>.</span></h1>
+            <p class="lead">Alpha, beta, gamma, half-life</p>
+            <p class="spec-ref"><span>AQA spec: Physics 4.4.2</span><span>Combined Science 6.4.2</span></p>
+          </div>
+          <div class="fig" data-fig="mini-decay"></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Radioactive decay">
+        <h2>Radioactive decay<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>Unstable nuclei give out <b>radiation</b></li>
+            <li>They become <b>more stable</b></li>
+            <li>Decay is <b>random</b></li>
+            <li><b>Activity</b>: decays per second, in <b>becquerel (Bq)</b></li>
+            <li><b>Count rate</b>: decays a detector records per second</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>DECAY AND DETECTION</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="decay-intro"></div>
+            <div class="legend"><span><i class="alpha">α</i> Alpha</span><span><i class="electron">β</i> Beta</span><span><i class="photon">γ</i> Gamma</span><span><i class="neutron">n</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What does “random” really mean?</h3>
+            <p>Nothing you do to the sample, heating, cooling or squashing it, makes a particular nucleus decay sooner. Each has the same chance of decaying in the next second as any other of its kind.</p>
+            <h3 class="rn-head">Why is count rate less than activity?</h3>
+            <p>Radiation leaves the source in all directions and the detector sits on one side, so most of it misses.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Move the detector further away and the count rate falls. The activity has not changed.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Alpha decay">
+        <p class="eyebrow"><span class="nocase">\(\alpha\)</span>: Americium-241</p>
+        <h2>Alpha decay<span>.</span></h2>
+        <div class="split">
+          <div class="stack centre">
+            <ul class="points">
+              <li><b>2 protons + 2 neutrons</b></li>
+              <li>Same as a <b>helium nucleus</b></li>
+              <li>Mass number <b>− 4</b></li>
+              <li>Atomic number <b>− 2</b> → new element</li>
+            </ul>
+            <div>
+              <div class="equation"><span class="nuc">\({}^{241}_{\phantom{0}95}\mathrm{Am}\)</span><span class="op">→</span><span class="nuc">\({}^{237}_{\phantom{0}93}\mathrm{Np}\)</span><span class="op">+</span><span class="nuc alpha">\({}^{4}_{2}\mathrm{He}\)</span></div>
+              <p class="eq-check">TOP: \(241 = 237 + 4\) <b>✓</b>, BOTTOM: \(95 = 93 + 2\) <b>✓</b></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ALPHA DECAY</span><span class="pill">SIMPLIFIED, NOT TO SCALE</span></div>
+            <div class="fig" data-fig="alpha" data-animate></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="alpha">α</i> Alpha particle</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">See where the numbers come from</h3>
+            <p>An alpha particle carries away 2 protons and 2 neutrons. Four particles gone, so the mass number falls by 4. Two were protons, so the atomic number falls by 2.</p>
+            <h3 class="rn-head">Why do the checks work?</h3>
+            <p>No protons or neutrons are created or destroyed. They are shared between the new nucleus and the alpha particle. So the top numbers on the right add up to the top number on the left, and the bottom numbers do the same.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Beta decay">
+        <p class="eyebrow"><span class="nocase">\(\beta^-\)</span>: Carbon-14</p>
+        <h2>Beta decay<span>.</span></h2>
+        <div class="split">
+          <div class="stack centre">
+            <ul class="points">
+              <li>A <b>neutron → proton + electron</b></li>
+              <li>The fast <b class="t-electron">electron</b> leaves the nucleus</li>
+              <li>Mass number <b>unchanged</b></li>
+              <li>Atomic number <b>+ 1</b> → new element</li>
+            </ul>
+            <div>
+              <div class="equation"><span class="nuc">\({}^{14}_{\phantom{0}6}\mathrm{C}\)</span><span class="op">→</span><span class="nuc">\({}^{14}_{\phantom{0}7}\mathrm{N}\)</span><span class="op">+</span><span class="nuc electron">\({}^{\phantom{0}0}_{-1}\mathrm{e}\)</span></div>
+              <p class="eq-check">TOP: \(14 = 14 + 0\) <b>✓</b>, BOTTOM: \(6 = 7 + (-1)\) <b>✓</b></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BETA DECAY</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="beta" data-animate></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="electron">β</i> Beta particle (electron)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Where does the electron come from?</h3>
+            <p>There are no electrons in a nucleus. A neutron changes into a proton, and an electron is created at that moment and thrown out.</p>
+            <h3 class="rn-head">Why the −1?</h3>
+            <p>The bottom number tracks charge. A neutron (0) becomes a proton (+1) and an electron (−1), which still add up to 0.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying the beta particle is one of the atom’s orbiting electrons. Those are still there afterwards.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Gamma emission">
+        <p class="eyebrow"><span class="nocase">\(\gamma\)</span>: Technetium-99<span class="nocase">m</span></p>
+        <h2>Gamma emission<span>.</span></h2>
+        <div class="split">
+          <div class="stack centre">
+            <ul class="points">
+              <li><b class="t-photon">EM radiation</b> from the nucleus</li>
+              <li>The nucleus loses <b>energy</b> only</li>
+              <li>Mass number <b>unchanged</b></li>
+              <li>Atomic number <b>unchanged</b></li>
+            </ul>
+            <div>
+              <div class="equation"><span class="nuc">\({}^{99\mathrm{m}}_{\phantom{0}43}\mathrm{Tc}\)</span><span class="op">→</span><span class="nuc">\({}^{99}_{43}\mathrm{Tc}\)</span><span class="op">+</span><span class="nuc gamma">\(\gamma\)</span></div>
+              <p class="eq-check">SAME PROTONS, SAME NEUTRONS, LESS ENERGY <b>✓</b></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>GAMMA EMISSION</span><span class="pill">SIMPLIFIED, NOT TO SCALE</span></div>
+            <div class="fig" data-fig="gamma" data-animate></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="photon">γ</i> Gamma ray</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Compare with electrons</h3>
+            <p>An electron dropping to a lower energy level gives out electromagnetic radiation. A nucleus can do the same kind of thing: settle into a lower-energy arrangement and give out the difference. The energy is far larger, so the radiation is gamma, not light.</p>
+            <h3 class="rn-head">When does it happen?</h3>
+            <p>Often straight after an alpha or beta decay, when the new nucleus has energy to spare.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Nuclear equations">
+        <p class="eyebrow">Nuclear equations</p>
+        <h2>What changes<span>?</span></h2>
+        <div class="stack">
+          <table class="facts">
+            <thead><tr><th>Emitted</th><th>Symbol</th><th>Mass number</th><th>Atomic number</th></tr></thead>
+            <tbody>
+              <tr><td class="t-alpha">Alpha</td><td><span class="nuc alpha">\({}^{4}_{2}\mathrm{He}\)</span></td><td class="num">\(-4\)</td><td class="num">\(-2\)</td></tr>
+              <tr><td class="t-electron">Beta</td><td><span class="nuc electron">\({}^{\phantom{0}0}_{-1}\mathrm{e}\)</span></td><td>No change</td><td class="num">\(+1\)</td></tr>
+              <tr><td class="t-photon">Gamma</td><td><span class="nuc gamma">\(\gamma\)</span></td><td>No change</td><td>No change</td></tr>
+              <tr><td class="t-neutron">Neutron</td><td><span class="nuc">\({}^{1}_{0}\mathrm{n}\)</span></td><td class="num">\(-1\)</td><td>No change</td></tr>
+            </tbody>
+          </table>
+          <div class="eq-row">
+            <div class="idea step">Complete: <span class="nuc">\({}^{226}_{\phantom{0}88}\mathrm{Ra}\)</span> → <span class="nuc">\({}^{222}_{\phantom{0}86}\mathrm{Rn}\)</span> + <b>?</b></div>
+            <div class="idea step"><span class="calc"><span class="calc-label">Top</span><span>\(226 - 222 =\) <b>4</b></span><span class="calc-label">Bottom</span><span>\(88 - 86 =\) <b>2</b></span></span> → <span class="nuc alpha">\({}^{4}_{2}\mathrm{He}\)</span> <b>alpha</b></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">The two rules are two things that do not change</h3>
+            <p>The top row counts protons plus neutrons, and that total stays the same. The bottom row counts charge, which is conserved.</p>
+            <h3 class="rn-head">Finding a missing nucleus</h3>
+            <p>Uranium-238 (atomic number 92) emits an alpha particle: top \(238 - 4 = 234\), bottom \(92 - 2 = 90\). The new nucleus has mass number 234 and atomic number 90. You do not need to name the element.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Making the atomic number go down in beta decay. It goes up: a neutron has become a proton.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Comparing alpha, beta and gamma">
+        <p class="eyebrow">Compare</p>
+        <h2>Alpha, beta, gamma<span>.</span></h2>
+        <div class="stack centre">
+        <table class="facts big compare">
+          <thead><tr><th></th><th class="t-alpha"><span class="nocase">\(\alpha\)</span> Alpha</th><th class="t-electron"><span class="nocase">\(\beta\)</span> Beta</th><th class="t-photon"><span class="nocase">\(\gamma\)</span> Gamma</th></tr></thead>
+          <tbody>
+            <tr><td>What is it?</td><td>Helium nucleus</td><td>Fast electron</td><td>EM wave</td></tr>
+            <tr><td>Charge</td><td class="num">+2</td><td class="num">−1</td><td class="num">0</td></tr>
+            <tr><td>Ionising</td><td><b>Strongly</b></td><td>Moderately</td><td>Weakly</td></tr>
+            <tr><td>Range in air</td><td>A few cm</td><td>About 1 m</td><td>Very far</td></tr>
+            <tr><td>Stopped by</td><td>Paper or skin</td><td>A few mm of aluminium</td><td>Thick lead or concrete (reduced)</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">You can work the table out from what each one is</h3>
+            <p><b>Alpha</b> is big with a charge of +2. It pulls electrons off almost every atom it passes, and each ionisation costs it energy, so it runs out within centimetres.</p>
+            <p><b>Beta</b> is a tiny, fast electron. It ionises fewer atoms, loses energy more slowly and gets further.</p>
+            <p><b>Gamma</b> has no charge or mass. It passes most atoms without affecting them, so it goes a very long way.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Penetration">
+        <p class="eyebrow">Penetration</p>
+        <h2>What stops each one<span>?</span></h2>
+        <div class="stack">
+          <div class="panel fill">
+            <div class="panel-head"><span>PENETRATION TEST</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="penetration" data-animate></div>
+          </div>
+          <div class="idea step"><b>More ionising → less penetrating.</b> Alpha loses its energy fastest. <a href="/simulations/nuclear_decay.html" target="_blank" rel="noopener">Test it in the Nuclear Decay sim ↗</a></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does paper stop alpha when lead struggles with gamma?</h3>
+            <p>Stopping radiation means taking its energy away. Alpha gives its energy to every atom it meets, so a thin sheet is enough. Gamma hardly interacts, so it takes a lot of dense material to absorb even some.</p>
+            <h3 class="rn-head">Identifying a source</h3>
+            <p>Put absorbers in front of a detector one at a time. Count rate drops with paper: alpha. Only with aluminium: beta. Only with thick lead: gamma.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Choosing a source">
+        <p class="eyebrow">Uses</p>
+        <h2>Choosing the right source<span>.</span></h2>
+        <div class="stack centre">
+          <div class="uses">
+            <div class="card use"><img class="source-illustration" src="images/source-smoke-alarm.png" width="1536" height="1024" alt="A simple cutaway smoke alarm shows a small alpha source inside. Smoke enters through the vents and the alarm sounds."><p class="eyebrow">Alpha</p><h3>Smoke alarm</h3><p>Ionises air; smoke lowers the current. Long half-life</p></div>
+            <div class="card use"><img class="source-illustration" src="images/source-thickness-gauge.png" width="1536" height="1024" alt="A beta source below a moving paper sheet emits particles towards a detector above. Some are absorbed by the paper; others pass through to the detector."><p class="eyebrow">Beta</p><h3>Thickness gauge</h3><p>Paper absorbs some: count rate \(\Rightarrow\) thickness</p></div>
+            <div class="card use"><img class="source-illustration" src="images/medical-tracer.png" width="1536" height="1024" alt="A cartoon patient lies beneath a gamma camera. Radiation leaves a tracer inside an organ and reaches the detector above."><p class="eyebrow">Gamma</p><h3>Medical tracer <span class="triple-tag">Triple only</span></h3><p>Leaves the body. Short half-life</p></div>
+          </div>
+          <div class="idea">Choose by: <b>penetration</b>, <b>ionising power</b>, <b>half-life</b></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Ask why the other two types would fail</h3>
+            <h3 class="rn-head">Smoke alarm</h3>
+            <p>beta and gamma would pass through smoke as if it were not there, and out through the case into the room.</p>
+            <h3 class="rn-head">Thickness gauge</h3>
+            <p>alpha would be stopped by any paper; gamma would pass through almost unchanged, however thick the paper.</p>
+            <h3 class="rn-head">Tracer</h3>
+            <p>alpha and beta would be absorbed inside the body, doing damage and never reaching the detector.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Half-life">
+        <h2>Half-life<span>.</span></h2>
+        <div class="split idea-last">
+          <div class="stack">
+            <ul class="points">
+              <li>Time for the number of unstable nuclei to <b>halve</b></li>
+              <li>Or: time for the <b>count rate</b> (activity) to halve</li>
+              <li>Same time for <b>every</b> halving</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>DECAY CURVE: IODINE-131</span></div>
+            <div class="fig" data-fig="half-life" data-animate></div>
+          </div>
+          <div class="idea step">Iodine-131: half-life \(\approx\) <b>8 days</b></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why does it halve, and not fall by the same amount each time?</h3>
+            <p>Every unstable nucleus has the same chance of decaying in the next second. So a fixed fraction of whatever is left decays in a given time, and half always takes the same time to go.</p>
+            <h3 class="rn-head">Why not a “full life”?</h3>
+            <p>Halving never reaches zero: a half, a quarter, an eighth. There is no definite moment when the last nucleus goes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">“After two half-lives it has all gone.” A quarter is left.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Half-life calculations">
+        <h2>Using half-life<span>.</span></h2>
+        <div class="cards fill calc" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <p class="eyebrow">From a graph</p>
+            <h3>Find the half-life</h3>
+            <ul class="points tight" style="margin-top: 18px;">
+              <li class="step">Read the start value</li>
+              <li class="step">Halve it</li>
+              <li class="step">Read across, then down</li>
+              <li class="step"><b>400 → 200</b> at <b>8 days</b></li>
+            </ul>
+          </div>
+          <div class="card">
+            <p class="eyebrow">Count the halvings</p>
+            <h3>\(T_{\frac{1}{2}} = 8\) days<br>After 24 days?</h3>
+            <ul class="points tight" style="margin-top: 18px;">
+              <li class="step">\(24 \div 8 =\) <b>3</b> half-lives</li>
+              <li class="step"><span class="equation-inline">400 → 200 → 100 → <b>50</b></span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <p class="eyebrow">As a ratio</p>
+            <h3>Net decline?</h3>
+            <ul class="points tight" style="margin-top: 18px;">
+              <li class="step">Left after \(n\) half-lives: <b>\(\left(\dfrac{1}{2}\right)^{n}\)</b></li>
+              <li class="step">3 half-lives: <b>\(\dfrac{1}{8}\) left</b></li>
+              <li class="step">Net decline: <b>⅞</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Every question is the same three numbers</h3>
+            <p>a start value, an end value and a number of half-lives. Given two, find the third.</p>
+            <h3 class="rn-head">Working backwards</h3>
+            <p>A count rate falls from 80 to 10 in 6 hours. Count the halvings: 80 → 40 → 20 → 10 is three. Three half-lives take 6 hours, so one takes 2 hours.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Dividing by the number of half-lives. Three half-lives is \(\div 2\) three times, which is \(\div 8\), not \(\div 3\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Random decay">
+        <h2>Random decay, but predictable<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: repeat(3, 1fr); gap: 16px 34px;">
+            <li>Can’t predict <b>which</b> nucleus or <b>when</b></li>
+            <li>Large samples → predictable <b>half-life</b></li>
+            <li>Small samples → counts <b>vary</b></li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>64 NUCLEI</span></div>
+            <div class="fig" data-fig="random" data-animate></div>
+            <div class="legend"><span><i class="undecayed"></i> Undecayed nucleus</span><span><i class="decayed"></i> Decayed nucleus</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">How can something random be predictable?</h3>
+            <p>Think of dice. You cannot say what one will show. Throw six thousand and close to a thousand will show a six. A sample has far more nuclei than that, so the time for half to decay comes out the same every time.</p>
+            <h3 class="rn-head">Why do small samples vary?</h3>
+            <p>Throw six dice and you might get no sixes, or three. A weak source jumps about in the same way, which is why count rates are measured over a longer time.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Contamination and irradiation">
+        <p class="eyebrow">Staying safe</p>
+        <h2>Contamination vs irradiation<span>.</span></h2>
+        <div class="stack">
+          <div class="panel fill exposure-panel">
+            <div class="exposure-headings"><h3>Irradiation</h3><h3>Contamination</h3></div>
+            <img class="exposure-illustration" src="images/irradiation-contamination.png" alt="Left: a separate source sends radiation towards a clean apple. Right: radioactive material stays on an apple and emits radiation outwards.">
+            <div class="exposure-captions">
+              <div><p>Exposed to radiation</p><p><b>Does not</b> become radioactive</p></div>
+              <div><p>Radioactive material on or in it</p><p>Keeps emitting until removed or decayed</p></div>
+            </div>
+          </div>
+          <div class="chips" style="margin-top: 0; justify-content: center;">
+            <span class="chip">Gloves and tongs</span><span class="chip">Keep your distance</span><span class="chip">Short exposure</span><span class="chip">Lead-lined storage</span><span class="chip">Dosimeter badge</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">A way to picture it</h3>
+            <p>Irradiation is like standing in front of a heater. Walk away and it stops, and you have not become a heater. Contamination is like glitter on your clothes. You carry it with you until it is cleaned off.</p>
+            <h3 class="rn-head">Why each precaution works</h3>
+            <p>Gloves and tongs keep radioactive material off your skin: they prevent contamination. Distance, a short exposure and lead-lined storage cut the radiation that reaches you: they reduce irradiation.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Marie Curie’s notebooks">
+        <p class="eyebrow">The story: Paris, from 1898</p>
+        <p class="not-examined">Background story: the exam tests the models, not these details</p>
+        <h2>Still radioactive after a century<span>.</span></h2>
+        <div class="story" style="--photo-h: 330px;">
+          <div class="story-photos">
+            <figure><img src="images/curie.jpg" width="566" height="800" alt="Portrait of Marie Curie, an older woman with her hair tied back"><figcaption><b>Marie Curie</b>, pictured about 1920</figcaption></figure>
+            <figure><img src="images/curie-notebook.jpg" width="900" height="703" alt="An open notebook with squared yellowed pages covered in handwriting and small sketches of apparatus"><figcaption>One of her <b>laboratory notebooks</b>, now in London. Tests found radium on it</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>With Pierre, discovered <b>polonium</b> and <b>radium</b></li>
+              <li>Unaware of the danger: radioactive tubes in her <b>pocket</b></li>
+              <li>Her <b>notebooks</b> are still <b>contaminated</b></li>
+              <li>Readers of her papers follow strict <b>safety rules</b></li>
+            </ul>
+            <div class="idea">Radium-226 half-life \(\approx\) <b>1600 years</b>: radioactive for over 1000 more</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Portrait_of_Marie_Curie_(1867_-_1934),_Polish_chemist_Wellcome_M0000113.jpg" target="_blank" rel="noopener">Henri Manuel, Wellcome Collection</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> (cropped). Notebook: <a href="https://commons.wikimedia.org/wiki/File:Marie_Curie;_Holograph_Notebook._Wellcome_L0021265.jpg" target="_blank" rel="noopener">Wellcome Collection</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: nuclear radiation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Nuclear radiation<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Complete: <span class="nuc in-text">\({}^{210}_{\phantom{0}84}\mathrm{Po}\)</span> → <span class="nuc in-text">\({}^{206}_{\phantom{0}82}\mathrm{Pb}\)</span> + ?</p><div class="ans step"><span class="nuc in-text alpha">\({}^{4}_{2}\mathrm{He}\)</span> (alpha)</div></div>
+          <div class="q"><p><span class="n">02</span>Beta decay: change in atomic number?</p><div class="ans step">+1: a neutron becomes a proton</div></div>
+          <div class="q"><p><span class="n">03</span>Which radiation is most ionising?</p><div class="ans step">Alpha</div></div>
+          <div class="q"><p><span class="n">04</span>What stops beta radiation?</p><div class="ans step">A few mm of aluminium</div></div>
+          <div class="q"><p><span class="n">05</span>Half-life 6 hours. Fraction left after 18 hours?</p><div class="ans step">3 half-lives → \(\dfrac{1}{8}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Does irradiated food become radioactive?</p><div class="ans step">No: its nuclei do not become unstable</div></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words: atoms and radiation">
+        <p class="eyebrow">Summary, 1 of 2</p>
+        <h2>Key words: atoms and radiation<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Nucleus</b><span>Protons + neutrons</span><span>Tiny</span><span>Most of the mass</span></div>
+          <div class="term"><b>Isotopes</b><span>Same protons</span><span>Different neutrons</span></div>
+          <div class="term"><b>Ion</b><span>Atom that has lost or gained electrons</span><span>Positive or negative charge</span></div>
+          <div class="term"><b>Energy level</b><span>Fixed distance for electrons</span></div>
+          <div class="term"><b>Alpha</b><span>Helium nucleus</span><span>A − 4</span><span>Z − 2</span></div>
+          <div class="term"><b>Beta</b><span>Fast electron</span><span>Same A</span><span>Z + 1</span></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words: decay and hazards">
+        <p class="eyebrow">Summary, 2 of 2</p>
+        <h2>Key words: decay and hazards<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Gamma</b><span>EM radiation</span><span>No change to A or Z</span></div>
+          <div class="term"><b>Activity</b><span>Decays per second</span><span>Becquerel (Bq)</span></div>
+          <div class="term"><b>Half-life</b><span>Time for nuclei or count rate to halve</span></div>
+          <div class="term"><b>Random</b><span>Can’t predict which nucleus</span><span>Or when it decays</span></div>
+          <div class="term"><b>Irradiation</b><span>Exposed to radiation</span><span>Does not become radioactive</span></div>
+          <div class="term"><b>Contamination</b><span>Radioactive atoms on or in an object</span></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <!-- Section 4: GCSE Physics (8463) only, AQA 4.4.3 and 4.4.4 -->
+      <section class="slide section triple" data-title="Part 4: Hazards, uses, fission and fusion">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04</p>
+            <h1>Using the nucleus<span>.</span></h1>
+            <p class="lead">Background radiation, hazards, medicine<br>Nuclear fission and fusion</p>
+            <p class="spec-ref"><span>AQA spec: Physics 4.4.3, 4.4.4</span><span>Not in Combined Science</span></p>
+            <div class="chips">
+              <a class="chip on" href="/simulations/fission_fusion.html" target="_blank" rel="noopener">Fission &amp; Fusion sim ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="mini-fission"></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide triple" data-title="Background radiation">
+        <p class="eyebrow">Hazards</p>
+        <h2>Background radiation<span>.</span></h2>
+        <div class="stack">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px; align-items: center;">
+            <ul class="points tight" style="grid-template-columns: 1fr 1fr; gap: 10px 24px;">
+              <li style="font-size: 28px;">Always <b>around us</b></li>
+              <li style="font-size: 28px;">Natural: <b>rocks</b>, <b>cosmic rays</b></li>
+              <li style="font-size: 28px;"><b>Subtract</b> from count rates</li>
+              <li style="font-size: 28px;">Man-made: <b>tests</b>, <b>accidents</b></li>
+            </ul>
+            <div class="idea step" style="font-size: 25px;"><span class="equation-inline">Corrected = measured − background</span><br>\(185 - 25 = 160\) counts per minute</div>
+          </div>
+          <div class="panel fill">
+            <div class="panel-head"><span>WHERE IT COMES FROM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="background"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why do rocks give off radiation?</h3>
+            <p>Rocks such as granite contain traces of uranium. As it decays, one of the atoms it produces is radon, a radioactive gas. Radon seeps out of the ground and can build up indoors, where people breathe it in. It is the largest single part of the UK’s background radiation.</p>
+            <h3 class="rn-head">Why correct a count rate?</h3>
+            <p>A detector cannot tell which counts came from your source. Measure the count rate with the source taken away and subtract it from every reading. Otherwise a source that has almost gone looks as if it never quite reaches zero.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Medical X-rays and scans add to the dose people receive, but for most people they are a smaller part than natural sources.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Radiation dose">
+        <p class="eyebrow">Hazards</p>
+        <h2>Same world, different dose<span>.</span></h2>
+        <div class="stack centre">
+          <table class="facts big">
+            <thead><tr><th>Who</th><th>Higher dose, because…</th></tr></thead>
+            <tbody>
+              <tr><td>Someone living on granite</td><td>More radon from the rocks</td></tr>
+              <tr><td>Aircrew</td><td>More cosmic rays at high altitude</td></tr>
+              <tr><td>Radiographers, nuclear workers</td><td>They work near radioactive sources</td></tr>
+            </tbody>
+          </table>
+          <div class="idea"><b>Radiation dose</b> measures the risk of harm. It is in <b>sieverts (Sv)</b>: \(1\ \text{Sv} = 1000\ \text{mSv}\)</div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why a dose and not just a count rate?</h3>
+            <p>Harm depends on how much energy the body absorbs and on the type of radiation. The same energy from alpha inside the body does far more damage than from gamma. The sievert takes both into account, so doses from different sources can be added and compared.</p>
+            <h3 class="rn-head">Why do aircrew get more?</h3>
+            <p>The atmosphere absorbs most cosmic rays. At 10&nbsp;km up there is much less air above you to stop them.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Half-life and hazard">
+        <p class="eyebrow">Hazards</p>
+        <h2>Half-life changes the hazard<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Half-lives range from <b>fractions of a second</b> to <b>billions of years</b></li>
+              <li>For the <b>same number</b> of nuclei:</li>
+              <li><b>Short</b>: very active, but the activity falls quickly</li>
+              <li><b>Long</b>: less active, but a hazard for a <b>very long time</b></li>
+            </ul>
+            <div class="idea step">Nuclear waste must be stored safely for <b>thousands of years</b></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>SAME AXES, TWO SOURCES</span></div>
+            <div class="fig" data-fig="half-lives"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why is a short half-life very active?</h3>
+            <p>If the nuclei decay in hours rather than years, the same number of nuclei must give out their radiation in a much shorter time. More decays every second means a higher activity, so it is more dangerous to be near at first.</p>
+            <h3 class="rn-head">Why is a long half-life still a problem?</h3>
+            <p>Plutonium-239 has a half-life of about 24&nbsp;000 years. Ten half-lives, the time for its activity to fall to about a thousandth, is about 240&nbsp;000 years. Its waste has to stay sealed away from water and people for all of that time.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">“A long half-life is safer.” Lower activity, yes, but for far longer.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Medical uses">
+        <p class="eyebrow">Uses</p>
+        <h2>Radiation in medicine<span>.</span></h2>
+        <div class="stack centre">
+          <div class="uses" style="grid-template-columns: 1fr 1fr;">
+            <div class="card use"><img class="medical-illustration" src="images/medical-tracer.png" width="1536" height="1024" alt="A patient lies beneath a gamma camera. Gamma rays leave a tracer in an internal organ and reach the detector; the monitor shows the organ’s scan."><p class="eyebrow">Exploring internal organs</p><h3>Tracer</h3><p>Gamma source inside; a camera outside detects it. Short half-life</p></div>
+            <div class="card use"><img class="medical-illustration" src="images/radiotherapy.png" width="1536" height="1024" alt="Cross-section of a torso: an external source moves around the patient. Beams from different directions meet at the tumour, concentrating the dose there and spreading it through healthy tissue."><p class="eyebrow">Destroying unwanted tissue</p><h3>Radiotherapy</h3><p>Beams from several directions meet at the tumour</p></div>
+          </div>
+          <div class="idea step">Benefit must <b>outweigh</b> the risk of harm to healthy cells</div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why a short half-life for a tracer?</h3>
+            <p>It must stay active long enough to take the images, a few hours, then die away so the patient is not irradiated for days. Technetium-99m, with a half-life of 6 hours, is the usual choice.</p>
+            <h3 class="rn-head">Why several beams in radiotherapy?</h3>
+            <p>Each beam alone is weak enough to do little harm to the tissue it passes through. Only at the tumour, where they all cross, do the doses add up to enough to kill cells. The beams are moved around the patient to spread the dose to healthy tissue even more thinly.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Radiotherapy can also use a small sealed source placed inside or next to the tumour, so the radiation reaches little else.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Evaluating the risk">
+        <p class="eyebrow">Uses</p>
+        <h2>Is the scan worth it<span>?</span></h2>
+        <div class="split even">
+          <div class="stack centre">
+            <div class="card">
+              <p class="eyebrow">The data</p>
+              <ul class="points tight small" style="margin-top: 14px;">
+                <li>Bone scan dose: <b>3 mSv</b></li>
+                <li>UK background: about <b>2.7 mSv</b> a year</li>
+                <li>Without the scan, a fracture may be <b>missed</b></li>
+              </ul>
+            </div>
+          </div>
+          <div class="stack centre">
+            <div class="idea step">Compare: about <b>one year’s</b> background dose</div>
+            <div class="idea step">Risk: small extra chance of harm to cells</div>
+            <div class="idea step">Benefit: the right diagnosis and treatment</div>
+            <div class="idea step"><b>Conclusion:</b> benefit outweighs the risk</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Perceived risk against measured risk</h3>
+            <p>People often fear radiation more than risks they are used to, such as driving. Exam questions give you data so that you judge the size of the risk from the numbers, not from how it feels.</p>
+            <h3 class="rn-head">A good evaluation does three things</h3>
+            <p>It compares the dose with something familiar, such as background radiation. It names the risk and the benefit. It ends with a judgement that follows from them. A dose of 300 mSv, a hundred times larger, would need a much bigger benefit.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Nuclear fission">
+        <h2>Nuclear fission<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack centre">
+            <ul class="points small">
+              <li>A large, unstable nucleus <b>splits</b>: uranium or plutonium</li>
+              <li>Usually it must first <b>absorb a neutron</b></li>
+              <li>Two smaller nuclei, about the same size</li>
+              <li><b>Two or three neutrons</b> and <b>gamma rays</b></li>
+              <li><b>Energy</b> released: all products have kinetic energy</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FISSION OF URANIUM-235</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="fission" data-animate></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="photon">γ</i> Gamma ray</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Check it balances</h3>
+            <p>\({}^{1}_{0}\mathrm{n} + {}^{235}_{\phantom{0}92}\mathrm{U} \to {}^{141}_{\phantom{0}56}\mathrm{Ba} + {}^{92}_{36}\mathrm{Kr} + 3\,{}^{1}_{0}\mathrm{n}\). Top: \(1 + 235 = 141 + 92 + 3 = 236\). Bottom: \(92 = 56 + 36\). The same nucleons are shared out, as in alpha and beta decay.</p>
+            <h3 class="rn-head">Why add a neutron and not a proton?</h3>
+            <p>A neutron has no charge, so the positive nucleus does not repel it. It can drift in and be absorbed, which makes the nucleus so unstable that it splits.</p>
+            <h3 class="rn-head">Where does the energy go?</h3>
+            <p>The two new nuclei and the neutrons fly apart at high speed. In a reactor they collide with the material around them and heat it, and that heat boils water to drive turbines.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Calling fission a kind of radioactive decay that happens by itself. Spontaneous fission is rare; almost all of it is started by a neutron.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history triple" data-title="Story: Meitner and Hahn">
+        <p class="eyebrow">The story: Berlin and Sweden, 1938</p>
+        <p class="not-examined">Background story: the exam tests fission, not these details</p>
+        <h2>The nucleus that split<span>.</span></h2>
+        <div class="story" style="--photo-h: 420px;">
+          <div class="story-photos">
+            <figure><img src="images/meitner-hahn.jpg" width="960" height="1257" alt="Black and white photograph of Lise Meitner and Otto Hahn standing at a laboratory bench in front of tall windows"><figcaption><b>Lise Meitner</b> and <b>Otto Hahn</b> in their laboratory, 1913</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In Berlin, Otto Hahn fired <b>neutrons</b> at uranium and found <b>barium</b>, an element about half its size</li>
+              <li>His colleague of thirty years, <b>Lise Meitner</b>, had fled Nazi Germany that summer</li>
+              <li>At Christmas in Sweden, she and her nephew Otto Frisch worked it out: the uranium nucleus had <b>split in two</b></li>
+              <li>Frisch named it <b>fission</b>, after the way a living cell divides</li>
+            </ul>
+            <div class="idea">The Nobel Prize for the discovery went to Hahn alone.</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Otto_Hahn_und_Lise_Meitner.jpg" target="_blank" rel="noopener">unknown photographer, 1913</a>, public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide triple" data-title="Chain reaction">
+        <p class="eyebrow">Fission</p>
+        <h2>Chain reaction<span>.</span></h2>
+        <div class="split wide-fig idea-last">
+          <div class="stack">
+            <ul class="points small">
+              <li>Each fission gives out <b>2 or 3 neutrons</b></li>
+              <li>Each neutron can split <b>another</b> nucleus</li>
+              <li>The number of fissions <b>multiplies</b> at every step</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>EACH FISSION STARTS MORE</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="chain" data-animate></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i style="background:var(--gold);border-radius:0;clip-path:polygon(50% 0,61% 32%,95% 25%,70% 50%,95% 75%,61% 68%,50% 100%,39% 68%,5% 75%,30% 50%,5% 25%,39% 32%)"></i> Energy released</span></div>
+          </div>
+          <div class="idea step">Two go on each time: after 10 steps, \(2^{10} \approx 1000\) fissions</div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Drawing one</h3>
+            <p>Start with one neutron hitting one nucleus. Show it split into two smaller nuclei and two or three neutrons. Draw each new neutron hitting another nucleus, which splits in the same way. Two generations are enough to show the idea.</p>
+            <h3 class="rn-head">Why so fast?</h3>
+            <p>Each step takes a tiny fraction of a second, so the multiplying happens almost at once. About eighty steps of doubling would split every nucleus in a kilogram of uranium-235. That is why the chain must be controlled, or it releases its energy as an explosion.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Not every neutron causes a fission: some escape, like the faint ones in the diagram, and some are absorbed. A chain reaction keeps going only if, on average, at least one neutron from each fission splits another nucleus.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Controlled and uncontrolled">
+        <p class="eyebrow">Fission</p>
+        <h2>Reactor or bomb<span>?</span></h2>
+        <div class="stack">
+          <div class="panel fill">
+            <div class="panel-head"><span>IN A NUCLEAR REACTOR</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="controlled"></div>
+          </div>
+          <div class="eq-row">
+            <div class="idea"><span><b>Reactor:</b> controlled. On average, one neutron from each fission causes another fission, so energy is released at a <b>steady rate</b></span></div>
+            <div class="idea step"><span><b>Weapon:</b> uncontrolled. On average, more than one neutron from each fission causes another fission, so the energy is released in an <b>explosion</b></span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">How the control rods work</h3>
+            <p>They are made of a material, such as boron, that absorbs neutrons without splitting. Lowering them further absorbs more neutrons and slows the reaction; raising them speeds it up. Dropping them in fully stops it.</p>
+            <h3 class="rn-head">Why a reactor cannot explode like a bomb</h3>
+            <p>A weapon packs nearly pure uranium-235 or plutonium-239 together so that almost every neutron hits another nucleus. Reactor fuel is mostly uranium-238, which does not split easily, so the chain cannot run away in the same way.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A moderator, such as water or graphite, slows the neutrons down, because slow neutrons are absorbed by uranium-235 more easily.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="What a reactor looks like">
+        <p class="eyebrow">Fission, in photos</p>
+        <h2>What a reactor looks like<span>.</span></h2>
+        <div class="story band" style="--photo-h: 330px;">
+          <div class="story-photos">
+            <figure><img src="images/fuel-pellets.jpg" width="1280" height="834" alt="A gloved hand holding small dark cylindrical pellets over a row of metal tubes"><figcaption><b>Fuel pellets</b> of uranium, about 1&nbsp;cm across, go into metal tubes: the fuel rods</figcaption></figure>
+            <figure class="step" style="--caption-min: 300px;"><img src="images/fuel-assemblies.jpg" width="833" height="1280" alt="Tall square bundles of metal rods standing upright, with a worker crouching beside them"><figcaption><b>Fuel rods</b>, bundled, about 4&nbsp;m long</figcaption></figure>
+            <figure class="step" style="--caption-min: 300px;"><img src="images/atr-core.jpg" width="974" height="1280" alt="A reactor core deep under water, glowing bright blue"><figcaption><b>A working core</b>, under water</figcaption></figure>
+          </div>
+          <div class="idea step"><b>Control rods</b> slide in between the fuel rods to absorb neutrons</div>
+        </div>
+        <p class="credits">Photographs: US Nuclear Regulatory Commission (<a href="https://commons.wikimedia.org/wiki/File:Nuclear_Fuel_Pellets_(14492225000).jpg" target="_blank" rel="noopener">fuel pellets</a>, <a href="https://commons.wikimedia.org/wiki/File:Nuclear-Fuel.jpg" target="_blank" rel="noopener">fuel assemblies</a>, <a href="https://commons.wikimedia.org/wiki/File:The_Advanced_Test_Reactor_at_Idaho_National_Laboratory_(14676550274).jpg" target="_blank" rel="noopener">Advanced Test Reactor, Idaho National Laboratory</a>), public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">One pellet, one tonne of coal</h3>
+            <p>A fuel pellet has a mass of about 7&nbsp;g. Over its years in a reactor, its fissions release about as much energy as burning a tonne of coal. Each fission releases millions of times more energy than a chemical reaction such as burning, so a small mass of fuel goes a very long way.</p>
+            <h3 class="rn-head">Why the core glows blue</h3>
+            <p>Fission products in the core are highly radioactive. Their fast beta particles travel through the water faster than light does in water, and give out a faint blue glow as they go. The glow is a sign of intense radiation, which the water absorbs before it reaches the surface.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The blue glow is called Cherenkov radiation. You do not need to know it.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Where spent fuel goes">
+        <p class="eyebrow">Hazards, in photos</p>
+        <h2>Where spent fuel goes<span>.</span></h2>
+        <div class="stack centre" style="gap: 22px;">
+          <div class="q"><p>Spent fuel is hot, and some of it stays radioactive for thousands of years. What do you do with it?</p></div>
+          <div class="story band" style="--photo-h: 300px;">
+            <div class="story-photos">
+              <figure class="step"><img src="images/fuel-pool.jpg" width="1280" height="876" alt="A large hall with a pool of clear blue-green water, a crane above it and workers in hard hats beside it"><figcaption><b>First, a cooling pond</b>: 7&nbsp;m of water absorbs radiation and heat</figcaption></figure>
+              <figure class="step"><img src="images/dry-casks.jpg" width="1280" height="893" alt="A row of tall concrete storage casks with two workers beside them, and a cutaway drawing showing fuel inside a cask"><figcaption><b>Then dry casks</b>: steel and concrete, for decades</figcaption></figure>
+              <figure class="step"><img src="images/onkalo.jpg" width="1280" height="802" alt="A wide tunnel cut through bare rock, lit by lamps, with a side chamber opening on the right and a wet gravel floor"><figcaption><b>Finally, deep rock</b>: Onkalo, Finland, about 450&nbsp;m down</figcaption></figure>
+            </div>
+          </div>
+        </div>
+        <p class="credits">Photographs: US Nuclear Regulatory Commission (<a href="https://commons.wikimedia.org/wiki/File:Spent_Fuel_Pool_of_Unit_2_at_Brunswick_Nuclear_Power_Plant_(14676549844).jpg" target="_blank" rel="noopener">spent fuel pool, Brunswick Nuclear Power Plant</a>, <a href="https://commons.wikimedia.org/wiki/File:Dry_Cask_Storage_of_Spent_Nuclear_Fuel_(36801710635).jpg" target="_blank" rel="noopener">dry cask storage</a>), public domain; <a href="https://commons.wikimedia.org/wiki/File:Onkalo_spent_nuclear_fuel_repository.jpg" target="_blank" rel="noopener">Onkalo repository</a>, kallerna, CC BY-SA 4.0.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why it is still hot</h3>
+            <p>Shutting a reactor down stops the chain reaction, but the fission products go on decaying, and their radiation heats the fuel. Most of them have short half-lives, so the heat falls quickly over the first years. That is why the fuel spends those years under water.</p>
+            <h3 class="rn-head">Why it must be buried so deep</h3>
+            <p>A few of the substances in spent fuel, such as plutonium, have half-lives of thousands of years. Their activity is low, but it falls so slowly that the waste stays hazardous far longer than any building lasts. Deep, dry rock keeps it away from people and from water for that long.</p>
+          </div>
+          <div class="rn-side">
+            <p class="spec">Storing spent fuel is not in the AQA specification. It asks you to “explain why the hazards associated with radioactive material differ according to the half-life involved” (Physics 4.4.3.2; not in Combined Science).</p>
+          </div>
+        </aside>
+      </section>
+
+      
+<section class="slide history triple" data-title="Story: Chicago Pile-1">
+        <p class="eyebrow">The story: Chicago, 2 December 1942</p>
+        <p class="not-examined">Background story: the exam tests the reactor, not these details</p>
+        <h2>A reactor under a stadium<span>.</span></h2>
+        <div class="story" style="--photo-h: 390px;">
+          <div class="story-photos">
+            <figure><img src="images/cp1.jpg" width="1280" height="1004" alt="Drawing of a large stack of dark blocks, as tall as a room, built inside a timber frame with a ladder leaning against it"><figcaption><b>Chicago Pile-1</b>, drawn by Melvin A. Miller</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Under a university sports ground: Fermi’s pile of <b>graphite blocks</b> and uranium</li>
+              <li>Cadmium strips were the <b>control rods</b>: they absorbed neutrons</li>
+              <li>Rods out \(\Rightarrow\) count rate climbed. At <b>3:25 pm</b> the chain reaction kept itself going</li>
+              <li>Power: about <b>half a watt</b>, less than a torch bulb</li>
+            </ul>
+            <div class="idea">The first <b>controlled</b> chain reaction, with no shielding at all</div>
+          </div>
+        </div>
+        <p class="credits">Drawing: <a href="https://commons.wikimedia.org/wiki/File:Stagg_Field_reactor.jpg" target="_blank" rel="noopener">Melvin A. Miller, Argonne National Laboratory</a>, public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide triple" data-title="Nuclear fusion">
+        <h2>Nuclear fusion<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack centre">
+            <ul class="points small">
+              <li>Two <b>light nuclei join</b> to make a heavier nucleus</li>
+              <li>Some of the <b>mass</b> is converted into <b>energy</b>, released as radiation</li>
+              <li>How the <b>Sun</b> and other stars release energy</li>
+            </ul>
+            <div>
+              <div class="equation"><span class="nuc">\({}^{2}_{1}\mathrm{H}\)</span><span class="op">+</span><span class="nuc">\({}^{3}_{1}\mathrm{H}\)</span><span class="op">→</span><span class="nuc">\({}^{4}_{2}\mathrm{He}\)</span><span class="op">+</span><span class="nuc">\({}^{1}_{0}\mathrm{n}\)</span></div>
+              <p class="eq-check">TOP: \(2 + 3 = 4 + 1\) <b>✓</b>, BOTTOM: \(1 + 1 = 2 + 0\) <b>✓</b></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FUSION OF HYDROGEN</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="fusion" data-animate></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">If the numbers balance, where does the energy come from?</h3>
+            <p>The equation counts nucleons, not mass. The helium nucleus and the neutron together have slightly less mass than the two hydrogen nuclei. That missing mass has become energy.</p>
+            <h3 class="rn-head">Why is fusion so hard to do on Earth?</h3>
+            <p>Both nuclei are positive and repel each other strongly. They only get close enough to join if they collide extremely fast, which needs temperatures of many millions of degrees, as in the core of the Sun.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Mixing up the two words. Fission: one nucleus splits (think “fissure”, a crack). Fusion: two nuclei fuse together.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide triple" data-title="Fission and fusion compared">
+        <p class="eyebrow">Compare</p>
+        <h2>Fission vs fusion<span>.</span></h2>
+        <div class="stack centre">
+          <table class="facts big compare">
+            <thead><tr><th></th><th>Fission</th><th>Fusion</th></tr></thead>
+            <tbody>
+              <tr><td>What happens</td><td>One heavy nucleus <b>splits</b></td><td>Two light nuclei <b>join</b></td></tr>
+              <tr><td>Nuclei used</td><td>Uranium, plutonium</td><td>Hydrogen</td></tr>
+              <tr><td>Started by</td><td>Absorbing a neutron</td><td>Very high temperature</td></tr>
+              <tr><td>Where</td><td>Nuclear power stations</td><td>The Sun and other stars</td></tr>
+            </tbody>
+          </table>
+          <div class="idea">Both <b>release energy</b></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide triple" data-title="Quick check: using the nucleus">
+        <p class="eyebrow">Quick check</p>
+        <h2>Using the nucleus<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">01</span>Two natural sources of background radiation?</p><div class="ans step">Radon from rocks; cosmic rays</div></div>
+          <div class="q"><p><span class="n">02</span>Why do aircrew get a higher dose?</p><div class="ans step">More cosmic rays at high altitude</div></div>
+          <div class="q"><p><span class="n">03</span>Why must a tracer have a short half-life?</p><div class="ans step">Lasts the scan, then decays away</div></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide triple" data-title="Quick check: using the nucleus">
+        <p class="eyebrow">Quick check</p>
+        <h2>Using the nucleus<span>.</span></h2>
+        <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
+          <div class="q"><p><span class="n">04</span>What does uranium absorb before fission?</p><div class="ans step">A neutron</div></div>
+          <div class="q"><p><span class="n">05</span>What do control rods do?</p><div class="ans step">Absorb neutrons: control the chain reaction</div></div>
+          <div class="q"><p><span class="n">06</span>Fusion: where does the energy come from?</p><div class="ans step">Some mass is converted into energy</div></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide triple" data-title="Key words: using the nucleus">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words: Part 4<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Background radiation</b><span>Around us all the time</span><span>Natural and man-made</span></div>
+          <div class="term"><b>Radon</b><span>Radioactive gas</span><span>From rocks</span></div>
+          <div class="term"><b>Radiation dose</b><span>Risk of harm</span><span>Sievert (Sv)</span></div>
+          <div class="term"><b>Tracer</b><span>Gamma emitter in the body</span><span>Short half-life</span></div>
+          <div class="term"><b>Radiotherapy</b><span>Kills unwanted cells</span><span>Gamma beams</span></div>
+          <div class="term"><b>Fission</b><span>Heavy nucleus splits</span><span>After absorbing a neutron</span></div>
+          <div class="term"><b>Chain reaction</b><span>Neutrons cause more fissions</span></div>
+          <div class="term"><b>Control rod</b><span>Absorbs neutrons</span><span>Controls the reaction</span></div>
+          <div class="term"><b>Fusion</b><span>Two light nuclei join</span><span>Mass → energy</span></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="figures.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/teaching-deck.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="deck.js"></script>
+</body>
+</html>
