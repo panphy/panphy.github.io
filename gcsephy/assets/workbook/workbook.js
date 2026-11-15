@@ -16,7 +16,7 @@
      firstDoNow    heading of Lesson 1's Do now
      extension     Triple Science pages, if not UNIT.extension
      Hooks, each given W (this renderer's helpers and state): toolkit(W), side(lesson, W),
-     reviewStart(W), trackerFoot(W), block(b, W) for extra block types, question(b, W) for extra
+     reviewStart(W), block(b, W) for extra block types, question(b, W) for extra
      question parts, beforeRender(W). */
 (function () {
   "use strict";
@@ -63,8 +63,11 @@
   const ansNote = (html) => (html ? `<div class="ans-note">${html}</div>` : "");
   const lines = (n, a) => `<div class="lines" style="--n:${n}">${ans(a)}</div>`;
   const box = (h, a, grid) => `<div class="box${grid ? " grid-bg" : ""}" style="--h:${h}mm">${ans(a)}</div>`;
-  // A Do now or Quick check item: a question with a blank holds its own answer, so it gets no writing lines.
-  const boxItem = (q, a, i) => `<div><b>${i + 1}</b>${marks(q)}${/\[\[/.test(q) ? "" : lines(2, a)}</div>`;
+  // A Do now or Quick check item: every item ends in the same white writing box. A blank in the
+  // sentence prints as a short gap with its options; the answer is written in the box.
+  const gapped = (q) => String(q).replace(/\[\[(.*?)(?:\|([^\]]+))?\]\]/g, (_, a, extra) =>
+    `<span class="gap-dots">…</span>${extra && !/^\d+$/.test(extra) ? ` <span class="opts">(${extra})</span>` : ""}`);
+  const boxItem = (q, a, i) => `<div><b>${i + 1}</b>${marks(gapped(q))}${lines(2, a)}</div>`;
   const keep = (html) => `<div class="keep">${html}</div>`;
   const list = (items, cls) => `<ul${cls ? ` class="${cls}"` : ""}>${items.map((s) => `<li>${s}</li>`).join("")}</ul>`;
 
@@ -437,7 +440,7 @@
       <h2 class="cover-sub">In this booklet</h2>${list(SEL.map((l) => `${lessonName(l)}: ${l.title}${l.rp ? ` (${l.rp.toLowerCase()})` : ""}`), "cover-lessons")}`;
     } else if (REVIEW) {
       middle = `<div class="cover-part"><b>Unit review</b><span>After ${reviewAfter}</span></div>
-      <h2 class="cover-sub">In this booklet</h2>${list(["Mixed exam practice and a fix-it log", ...(EXTENSION.length ? ["Triple Science only pages"] : []), "Toolkit, key words and progress tracker"], "cover-lessons")}`;
+      <h2 class="cover-sub">In this booklet</h2>${list(["Mixed exam practice and a fix-it log", ...(EXTENSION.length ? ["Triple Science only pages"] : []), "Toolkit and key words"], "cover-lessons")}`;
     } else {
       middle = `<p class="lede">${C.lede}</p>${list(U.lessons.map((l) => `${lessonName(l)}: ${l.title}`), "cover-lessons")}`;
     }
@@ -463,14 +466,6 @@
       <div class="glossary${SEL ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong>: ${v}</p>`).join("")}</div>
       ${phrases.length ? keep(`<h4 class="sub">Phrases that pick up marks</h4>
       <table class="compare phrases"><thead><tr><th>Instead of writing…</th><th>Write…</th></tr></thead><tbody>${phrases.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</tbody></table>`) : ""}</section>`;
-  }
-
-  function tracker() {
-    const rows = U.lessons.map((l) => `<tr class="lesson-row"><td colspan="2">${pad(l.n)}${l.last ? `–${pad(l.last)}` : ""}: ${l.title}</td></tr>` +
-      l.cando.map((c) => `<tr><td>${c}</td><td class="rag-cell"><span class="rag"><i></i><i></i><i></i></span></td></tr>`).join("")).join("");
-    return `<section class="new-page"><div class="eyebrow">Finish</div><h2 class="page-title">Progress tracker</h2>
-      <table class="tracker"><thead><tr><th>I can…</th><th>R / A / G</th></tr></thead><tbody>${rows}</tbody></table>
-      ${C.trackerFoot ? C.trackerFoot(W) : ""}</section>`;
   }
 
   function quickAnswers() {
@@ -539,8 +534,8 @@
   const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
   const ext = () => EXTENSION.map(extension).join("");
   book.innerHTML = bar + (SEL ? cover() + LESSONS.map(lesson).join("") + toolkit() + glossary() + quickAnswers()
-    : REVIEW ? cover() + review() + ext() + toolkit() + glossary() + tracker()
-    : cover() + LESSONS.map(lesson).join("") + toolkit() + review() + ext() + glossary() + tracker() + quickAnswers());
+    : REVIEW ? cover() + review() + ext() + toolkit() + glossary()
+    : cover() + LESSONS.map(lesson).join("") + toolkit() + review() + ext() + glossary() + quickAnswers());
   document.body.appendChild(book);
 
   // Typeset the maths, then tell the PDF build the page is ready. Offline, the LaTeX source stays.

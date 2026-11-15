@@ -48,7 +48,7 @@
       <small><a href="${file(name)}">Workbook PDF</a><a href="${file(name, true)}">Answers PDF</a></small></article>`;
     document.getElementById('cards').innerHTML = BOOKLETS.map(([name, title, label, pages, text]) =>
       card(`${label}, ${pages} pages`, title, text, name)).join('') +
-      card('After Lesson 10, 14 pages', 'Unit review', 'Mixed exam practice (42 marks), a fix-it log, the toolkit, all the key words, a progress tracker and extension pages for GCSE Physics: background radiation, medical uses, fission and fusion.', 'Unit Review', true);
+      card('After Lesson 10, 12 pages', 'Unit review', 'Mixed exam practice (42 marks), a fix-it log, the toolkit, all the key words and extension pages for GCSE Physics: background radiation, medical uses, fission and fusion.', 'Unit Review', true);
   </script>
 </body>
 </html>

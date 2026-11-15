@@ -52,7 +52,7 @@
       <small><a href="${file(tag)}">Workbook PDF</a><a href="${file(tag, true)}">Answers PDF</a></small></article>`;
     document.getElementById('cards').innerHTML = BOOKLETS.map(([n, title, label, pages, text]) =>
       card(`${label}, ${pages} pages`, title, text, `Part ${n}`)).join('') +
-      card('After Lesson 12, 12 pages', 'Unit review', 'Mixed exam practice (41 marks), a fix-it log, static electricity (Triple only), the equation toolkit, all the key words and a progress tracker.', 'Unit Review', true);
+      card('After Lesson 12, 10 pages', 'Unit review', 'Mixed exam practice (41 marks), a fix-it log, static electricity (Triple only), the equation toolkit and all the key words.', 'Unit Review', true);
   </script>
 </body>
 </html>

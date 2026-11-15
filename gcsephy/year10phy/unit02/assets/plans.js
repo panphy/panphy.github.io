@@ -25,7 +25,7 @@
         <tr><th>Teaching deck</th><td>53 slides with revision notes (press N). Slides 3–47 are for every class. Slides 48–53, after the Key words slide, are flagged <strong>Triple Science only</strong>: pressure and volume (\\(p\\,V = \\text{constant}\\)) and doing work on a gas.</td></tr>
         <tr><th>Student workbook</th><td>Five booklets (12 pt text, wide writing lines): Part 1 (Lessons 1–2), Part 2 (Lessons 3 and 5), Lesson 4, Part 3 (Lessons 6–7) and Lesson 8, each with the toolkit so far, its key words and quick answers. Every lesson: Do now, explanations, the slide examples to fill in with “Your turn”, graded practice, practical records, exam questions and a revision box.</td></tr>
         <tr><th>Answer edition</th><td>The same pages and page numbers as each booklet, with answers in blue. For marking, or for students to mark their own work.</td></tr>
-        <tr><th>Unit review</th><td>${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks of mixed exam practice, a fix-it log, the toolkit, all the key words and a progress tracker. Its last pages are the Triple Science only extension, matching deck slides 48–53.</td></tr>
+        <tr><th>Unit review</th><td>${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks of mixed exam practice, a fix-it log, the toolkit and all the key words. Its last pages are the Triple Science only extension, matching deck slides 48–53.</td></tr>
         <tr><th>Preps</th><td>Four one-page homework sheets, each out of 10, set after Lessons 2, 4, 6 and 8: three Do Now bank questions on earlier learning, then questions on the two latest lessons.</td></tr>
       </tbody></table>
       <h4 class="sub">Design principles</h4>

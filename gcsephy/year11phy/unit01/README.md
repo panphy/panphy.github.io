@@ -11,7 +11,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all five work
 | File | Use |
 |---|---|
 | `index.html` | Student page linking the five booklets, the booklets' answer editions and the five Preps (not their answers) |
-| `pdf/` | `Y11 - Unit 01 - Atoms and Nuclear Radiation (Part 1).pdf` to `(Part 4)`: the workbook in four parts (Lessons 1–2, 3–4, 5–7 and 8–10), a Unit review (42 marks, extension pages, toolkit, key words, tracker) and an `(Ans)` edition of each with the same page numbers |
+| `pdf/` | `Y11 - Unit 01 - Atoms and Nuclear Radiation (Part 1).pdf` to `(Part 4)`: the workbook in four parts (Lessons 1–2, 3–4, 5–7 and 8–10), a Unit review (42 marks, extension pages, toolkit, key words) and an `(Ans)` edition of each with the same page numbers |
 | `workbook.html` | PDF source: `?part=1`…`4` (`parts` in `assets/book.js`) or `?review`, add `&answers`; `?lesson=N` previews one lesson, and with none it previews the whole unit |
 | `assets/content/helpers.js` | Nuclide notation, nuclear equations, diagrams from the deck's drawing parts |
 | `assets/content/lessons-1-5.js`, `lessons-6-10.js`, `reference.js` | The lessons; toolkit, review, extension pages and glossary (builds `window.UNIT`) |
