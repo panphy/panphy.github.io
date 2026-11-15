@@ -145,6 +145,21 @@
     dots: [[195, 160], [285, 160]], caption: "Diode: add a protective resistor; voltmeter across the diode only.",
   });
 
+  // PanPhyCircuits labs (Lessons 2-4 and 10).
+  const labLoop = D.circuit({
+    w: 340, h: 200, wires: ["M40 40 H300 V150 H40 Z"],
+    parts: [["battery", 170, 40, "h", "power supply"], ["ammeter", 100, 150, "h", "A₁", "b"], ["resistor", 170, 150, "h", "resistor", "b"], ["ammeter", 240, 150, "h", "A₂", "b"], ["ammeter", 300, 95, "v", "A₃", "r"]],
+  });
+  const labMeters = D.circuit({
+    w: 340, h: 230, wires: ["M40 40 H300 V150 H40 Z", "M120 150 V205 H220 V150"],
+    parts: [["battery", 170, 40, "h", "power supply"], ["ammeter", 40, 95, "v"], ["resistor", 170, 150, "h", "10 Ω"], ["voltmeter", 170, 205, "h"]],
+    dots: [[120, 150], [220, 150]],
+  });
+  const labSensor = D.circuit({
+    w: 340, h: 190, wires: ["M40 40 H300 V150 H40 Z"],
+    parts: [["battery", 170, 40, "h", "6.0 V"], ["ammeter", 40, 95, "v"], ["thermistor", 170, 150, "h", "thermistor", "b"]],
+  });
+
   // Lamp curve that passes exactly through (2.0 V, 0.20 A) and (6.0 V, 0.30 A).
   const lampFn = (v) => Math.sign(v) * 0.3155 * (1 - Math.exp(-Math.abs(v) / 1.99));
   const sketch = (fn, xl, yl, caption, extra = {}) => D.graph(Object.assign({ sketch: true, w: 300, h: 200, x: [0, 1, 1], y: [0, 1, 1], xLabel: xl, yLabel: yl, series: [{ fn, from: 0, to: 1 }], caption }, extra));
@@ -210,7 +225,7 @@
     // ============================================================ 2
     {
       n: 2, accent: "cyan", title: "Current and charge",
-      spec: "AQA Combined 6.2.1.2; Physics 4.2.1.2; Virtual Lab 1",
+      spec: "AQA Combined 6.2.1.2; Physics 4.2.1.2",
       mapLine: "Current as a rate of flow of charge, Q = I t, current is not used up",
       big: "Flick a switch and the lamp lights instantly, yet each electron drifts through the wire slower than a snail. How can both be true?",
       goals: ["describe current as the rate of flow of charge", "use Q = I t, with time in seconds", "explain why the current is the same everywhere in a single loop"],
@@ -250,11 +265,21 @@
         { t: "q", type: "Challenge", p: "A phone charger supplies 0.80 A. How long does it take for 240 C to flow? Give your answer in seconds and in minutes.", lines: 2, a: "t = Q ÷ I = 240 ÷ 0.80 = 300 s = 5.0 minutes" },
         { t: "q", say: ["Mia", "The lamp uses up some current, so ammeter A₂ after the lamp will read less than A₁."], fig: D.circuit({ w: 360, h: 170, wires: ["M40 40 H320 V130 H40 Z"], parts: [["cell", 180, 40, "h"], ["ammeter", 90, 130, "h", "A₁ = 0.30 A", "b"], ["lamp", 180, 130, "h"], ["ammeter", 270, 130, "h", "A₂ = ?", "b"]] }), figCls: "fig-small", p: "Predict the reading on A₂. Explain why Mia is wrong.", lines: 3, a: "A₂ = 0.30 A. It is a single loop, so the current is the same everywhere. Charge is not used up: the lamp transfers energy, not charge." },
       ],
-      lab: { title: "Virtual Lab 1: Is current used up?", blocks: [
+      lab: { title: "Lab: is current used up?", blocks: [
+        { t: "p", h: "Use <strong>PanPhyCircuits</strong> (panphy.app/sandboxes/panphycircuits) on a computer or tablet." },
+        { t: "steps", items: ["Add a DC power supply, a resistor and three ammeters. Wire them in one loop, as in the diagram.", "Select a part to change it: supply <strong>6.0 V</strong>, resistor <strong>10 Ω</strong>."] },
+        { t: "fig", cls: "fig-mid", h: labLoop },
+        { t: "q", say: ["Mia", "The resistor uses up some of the current, so A₂ will read less than A₁."], p: "Do you agree with Mia? Explain before you measure.", lines: 2, a: "Any reasoned prediction. The readings show that Mia is wrong: the current is the same everywhere in the loop." },
         { t: "lab", blocks: [
-          { t: "p", h: "Build one loop with a <strong>6 V battery</strong> and a <strong>10 Ω resistor</strong>. Use the non-contact ammeter to measure the current at three places." },
-          { t: "q", p: "Record your readings.", table: { head: ["Position", "Current / A", "Current with 20 Ω / A"], rows: [["Before the resistor", null, null], ["After the resistor", null, null], ["Next to the battery", null, null]], ans: [[null, "0.60", "0.30"], [null, "0.60", "0.30"], [null, "0.60", "0.30"]] } },
-          { t: "q", p: "What do your readings show? Use numbers in your answer.", lines: 2, a: "All three readings are the same (0.60 A), so current is not used up. With 20 Ω the current halves (0.30 A) but is still the same everywhere." },
+          { t: "q", p: "Record the three readings. Then change the resistor to 20 Ω and record them again.", table: { head: ["Ammeter", "Current with 10 Ω / A", "Current with 20 Ω / A"], rows: [["A₁, before the resistor", null, null], ["A₂, after the resistor", null, null], ["A₃, next to the supply", null, null]], ans: [[null, "0.60", "0.30"], [null, "0.60", "0.30"], [null, "0.60", "0.30"]] } },
+          { t: "q", p: "What do your readings show? Use numbers in your answer.", lines: 2, a: "All three ammeters read the same: 0.60 A with 10 Ω and 0.30 A with 20 Ω. The current is not used up in the resistor." },
+          { t: "q", p: "Add a switch to the loop and open it. What do the ammeters read? Explain.", lines: 2, a: "All three read 0 A. The loop is broken, so no charge can flow anywhere in it." },
+        ] },
+        { t: "sub", h: "How much charge passes?" },
+        { t: "lab", blocks: [
+          { t: "q", p: "Close the switch and set the resistor to 10 Ω. Record the current at each supply setting. Calculate the charge that passes A₁ in 10 s and in 20 s.", table: { head: ["Supply / V", "Current / A", "Q in 10 s / C", "Q in 20 s / C"], rows: [["3.0", null, null, null], ["6.0", null, null, null], ["9.0", null, null, null]], ans: [[null, "0.30", "3.0", "6.0"], [null, "0.60", "6.0", "12"], [null, "0.90", "9.0", "18"]] } },
+          { t: "q", p: "Show your calculation for 6.0 V and 20 s.", frame: true, frameA: ["Q = I t", "Q = 0.60 × 20", "12 C"] },
+          { t: "q", p: "Waiting twice as long doubles the charge that passes. Does it double the current? Explain.", lines: 2, a: "No. Current is the charge passing each second, so it stays at 0.60 A. More charge passes only because the time is longer." },
         ] },
       ] },
       exam: [
@@ -270,7 +295,7 @@
     // ============================================================ 3
     {
       n: 3, accent: "copper", title: "Potential difference",
-      spec: "AQA Combined 6.2.1.3, 6.2.4.2; Physics 4.2.1.3, 4.2.4.2; Virtual Lab 2",
+      spec: "AQA Combined 6.2.1.3, 6.2.4.2; Physics 4.2.1.3, 4.2.4.2",
       mapLine: "p.d. as energy per coulomb, voltmeters, E = Q V, p.d.s add in series",
       big: "An AA battery says 1.5 V. A car battery says 12 V. What is that number actually telling you?",
       goals: ["explain p.d. as the energy transferred per coulomb", "connect a voltmeter in parallel across a component", "use E = Q V", "explain why the p.d.s in a loop add up to the supply p.d."],
@@ -310,11 +335,21 @@
         { t: "q", fig: D.circuit({ w: 360, h: 218, wires: ["M40 40 H320 V130 H40 Z", "M75 130 V180 H145 V130", "M215 130 V180 H285 V130"], parts: [["battery", 180, 40, "h", "12 V"], ["lamp", 110, 130, "h"], ["lamp", 250, 130, "h"], ["voltmeter", 110, 180, "h", "V₁ = 7.5 V", "b"], ["voltmeter", 250, 180, "h", "V₂ = ?", "b"]], dots: [[75, 130], [145, 130], [215, 130], [285, 130]] }), figCls: "fig-small", p: "(a) What does voltmeter V₂ read? (b) How much energy does each coulomb transfer in the second lamp?", lines: 2, a: "(a) 12 − 7.5 = 4.5 V. (b) 4.5 J per coulomb." },
         { t: "q", say: ["Leo", "A 9 V battery pushes the charges faster than a 1.5 V battery. That's what volts measure."], p: "Explain what is wrong with Leo's idea.", lines: 3, a: "Volts measure energy transferred per coulomb, not speed. A 9 V battery gives each coulomb 9 J of energy; a 1.5 V battery gives each coulomb only 1.5 J." },
       ],
-      lab: { title: "Virtual Lab 2: What does a volt mean?", blocks: [
+      lab: { title: "Lab: what does a volt mean?", blocks: [
+        { t: "p", h: "Use <strong>PanPhyCircuits</strong> (panphy.app/sandboxes/panphycircuits) on a computer or tablet." },
+        { t: "steps", items: ["Build the circuit: a DC power supply, an ammeter and a <strong>10 Ω</strong> resistor in series, with a voltmeter across the resistor.", "Change only the supply setting."] },
+        { t: "fig", cls: "fig-mid", h: labMeters },
         { t: "lab", blocks: [
-          { t: "p", h: "Use one <strong>10 Ω</strong> resistor. At each battery setting, measure the p.d. across the resistor. Then calculate the energy transferred when 2 C passes." },
-          { t: "q", p: "Record and calculate.", table: { head: ["Battery setting / V", "p.d. across resistor / V", "Energy for 2 C / J"], rows: [["3", null, null], ["6", null, null], ["9", null, null]], ans: [[null, "3.0", "6.0"], [null, "6.0", "12"], [null, "9.0", "18"]] } },
-          { t: "q", p: "Add a second 10 Ω resistor in series (6 V battery). Measure the p.d. across each resistor. What do you notice?", lines: 2, a: "About 3.0 V across each; 3.0 V + 3.0 V = 6.0 V, the battery p.d. The energy from the battery is shared between the resistors." },
+          { t: "q", p: "Record the p.d. across the resistor at each supply setting. Calculate the energy transferred in the resistor when 2.0 C passes through it.", table: { head: ["Supply / V", "p.d. across the resistor / V", "Energy for 2.0 C / J"], rows: [["3.0", null, null], ["6.0", null, null], ["9.0", null, null]], ans: [[null, "3.0", "6.0"], [null, "6.0", "12"], [null, "9.0", "18"]] } },
+          { t: "q", p: "Show your calculation for the 6.0 V setting.", frame: true, frameA: ["E = Q V", "E = 2.0 × 6.0", "12 J"] },
+          { t: "q", p: "Set the supply to 6.0 V. Connect both voltmeter leads to the same wire, then put them back across the resistor.", fill: "Both leads on one wire: [[0|20]] V. Across the resistor: [[6.0|20]] V." },
+          { t: "q", p: "Why do we say the p.d. <em>across</em> the resistor, not <em>at</em> it?", lines: 2, a: "A p.d. compares two points: the energy transferred per coulomb between them. Two points on the same wire give no difference, so the reading is 0 V." },
+        ] },
+        { t: "sub", h: "Follow the energy" },
+        { t: "lab", blocks: [
+          { t: "q", p: "Keep the supply at 6.0 V. Add a second 10 Ω resistor in series. Measure the p.d. across each resistor and the current.", table: { head: ["Supply p.d. / V", "R₁ p.d. / V", "R₂ p.d. / V", "Current / A"], rows: [[null, null, null, null]], ans: [["6.0", "3.0", "3.0", "0.30"]] } },
+          { t: "q", p: "Complete the energy account for 2.0 C of charge.", table: { head: ["Where the energy is transferred", "E = Q V", "Energy / J"], rows: [["Supplied by the power supply", null, null], ["Transferred in R₁", null, null], ["Transferred in R₂", null, null]], ans: [[null, "2.0 × 6.0", "12"], [null, "2.0 × 3.0", "6.0"], [null, "2.0 × 3.0", "6.0"]] } },
+          { t: "q", p: "The current is the same before and after R₁, but energy is transferred in R₁. Explain how both can be true.", lines: 3, a: "Charge is not used up: the charge leaving R₁ each second equals the charge entering it. Each coulomb transfers some of its energy in R₁ and the rest in R₂ (6.0 J + 6.0 J = 12 J)." },
         ] },
       ] },
       exam: [
@@ -329,7 +364,7 @@
     // ============================================================ 4
     {
       n: 4, accent: "violet", title: "Resistance and V = I R",
-      spec: "AQA Combined 6.2.1.3–6.2.1.4; Physics 4.2.1.3–4.2.1.4; Virtual Lab 3",
+      spec: "AQA Combined 6.2.1.3–6.2.1.4; Physics 4.2.1.3–4.2.1.4",
       mapLine: "Resistance, V = I R, ohmic conductors, why heating raises resistance",
       big: "A dimmer switch makes a lamp glow less brightly. What is it actually changing?",
       goals: ["describe resistance and its unit, the ohm (Ω)", "use V = I R, including mA and kΩ", "recognise an ohmic conductor from data or a graph", "explain why heating a metal increases its resistance"],
@@ -370,11 +405,22 @@
           after: [{ t: "p", h: "Is the component an ohmic conductor? Use the table and the graph." }], lines: 2, a: "Yes: V ÷ I is constant (20 Ω) and the graph is a straight line through the origin, so current is directly proportional to p.d." },
         { t: "q", p: "Explain why a resistor only has a constant resistance if its temperature stays the same.", lines: 3, starter: "If the resistor gets hotter, the ions …", a: "If it heats up, the ions vibrate more, so the electrons collide with them more often and the resistance increases. So R is only constant at constant temperature." },
       ],
-      lab: { title: "Virtual Lab 3: Discover the resistance rule", blocks: [
+      lab: { title: "Lab: discover the resistance rule", blocks: [
+        { t: "p", h: "In PanPhyCircuits, build the Lesson 3 circuit: a DC power supply, an ammeter and a <strong>10 Ω</strong> resistor in series, with a voltmeter across the resistor." },
         { t: "lab", blocks: [
-          { t: "p", h: "Set the resistor to <strong>10 Ω</strong>. Change only the battery setting. Measure the p.d. across the resistor and the current." },
-          { t: "q", p: "Record and calculate.", table: { head: ["Battery setting / V", "p.d. / V", "current / A", "V ÷ I / Ω"], rows: [["2", null, null, null], ["4", null, null, null], ["6", null, null, null], ["8", null, null, null], ["10", null, null, null], ["12", null, null, null]], ans: [[null, "2.0", "0.20", "10"], [null, "4.0", "0.40", "10"], [null, "6.0", "0.60", "10"], [null, "8.0", "0.80", "10"], [null, "10", "1.0", "10"], [null, "12", "1.2", "10"]] } },
-          { t: "q", p: "What happens to the current when the p.d. doubles? What stays constant?", lines: 2, a: "The current doubles (current ∝ p.d.). V ÷ I stays constant at 10 Ω, the resistance." },
+          { t: "q", p: "Change only the supply. Record the p.d. and the current, and calculate V ÷ I.", table: { head: ["Supply / V", "p.d. / V", "Current / A", "V ÷ I / Ω"], rows: [["2.0", null, null, null], ["4.0", null, null, null], ["6.0", null, null, null], ["8.0", null, null, null], ["10", null, null, null], ["12", null, null, null]], ans: [[null, "2.0", "0.20", "10"], [null, "4.0", "0.40", "10"], [null, "6.0", "0.60", "10"], [null, "8.0", "0.80", "10"], [null, "10", "1.0", "10"], [null, "12", "1.2", "10"]] } },
+          { t: "q", p: "Plot current (up the side) against p.d. (along the bottom). Draw a line of best fit.", graph: { w: 120, h: 60, x: [1, 2], y: [0.2, 1], xLabel: "p.d. / V", yLabel: "current / A", points: [[2, 0.2], [4, 0.4], [6, 0.6], [8, 0.8], [10, 1], [12, 1.2]], fit: [[0, 0], [12, 1.2]] } },
+          { t: "q", p: "Describe your graph. What does it show about the current and the p.d. for this resistor?", lines: 2, a: "A straight line through the origin: the current is directly proportional to the p.d. V ÷ I stays at 10 Ω, the resistance." },
+        ] },
+        { t: "sub", h: "Change the resistance" },
+        { t: "lab", blocks: [
+          { t: "q", p: "Keep the supply at 6.0 V. Record the current for each resistor.", table: { head: ["Resistance / Ω", "Current / A"], rows: [["5.0", null], ["10", null], ["20", null]], ans: [[null, "1.2"], [null, "0.60"], [null, "0.30"]] } },
+          { t: "q", p: "Describe the pattern in your readings.", lines: 2, a: "At the same p.d., a larger resistance gives a smaller current: doubling the resistance halves the current (I = V ÷ R)." },
+        ] },
+        { t: "sub", h: "Design a circuit to order" },
+        { t: "lab", blocks: [
+          { t: "q", p: "A resistor must transfer 18 J while 3.0 C passes through it in 5.0 s. Work out the current, the p.d. and the resistance before you build the circuit.", table: { head: ["Quantity", "Working", "Answer"], rows: [["Current I", null, null], ["p.d. V", null, null], ["Resistance R", null, null]], ans: [[null, "I = Q ÷ t = 3.0 ÷ 5.0", "0.60 A"], [null, "V = E ÷ Q = 18 ÷ 3.0", "6.0 V"], [null, "R = V ÷ I = 6.0 ÷ 0.60", "10 Ω"]] } },
+          { t: "q", p: "Build your design. Record the meter readings to check it.", fill: "Ammeter: [[0.60|20]] A. Voltmeter: [[6.0|20]] V." },
         ] },
       ] },
       exam: [
@@ -499,6 +545,7 @@
         { t: "p", h: "Measure the p.d. <strong>across the whole combination</strong> and the current <strong>from the supply</strong>. Then the total resistance is <strong>R = V ÷ I</strong>." },
         { t: "steps", items: ["Connect R₁ on its own. Measure V and I. Repeat for R₂ on its own.", "Connect R₁ and R₂ in series. Measure V across both, and I.", "Connect R₁ and R₂ in parallel. Measure V across the pair, and the supply current.", "Calculate R = V ÷ I for each arrangement."] },
         { t: "safety", items: ["Resistors can get hot. Switch off between readings.", "Keep the p.d. low, and check the circuit before switching on."] },
+        { t: "p", h: "<strong>Without lab equipment:</strong> build the same circuits in PanPhyCircuits (panphy.app/sandboxes/panphycircuits) with a 3.0 V DC power supply, two 10 Ω resistors, an ammeter and a voltmeter." },
         { t: "q", p: "<strong>Predict</strong> before you measure. Rank R₁ alone, series and parallel from the <em>largest</em> to the <em>smallest</em> total resistance.", lines: 1, a: "series > one resistor > parallel" },
       ],
       lab: { title: "Results", blocks: [
@@ -585,6 +632,7 @@
         { t: "p", h: "The <strong>variable resistor</strong> changes the p.d. across the test component. To get negative values, <strong>swap the connections</strong> to the power supply so the current flows the other way, and record those readings as negative." },
         { t: "steps", items: ["Set up the circuit with the fixed resistor as the test component.", "Use the variable resistor to set a range of p.d.s, for example from 0 to 6 V. Record V and I each time.", "Reverse the connections to the power supply. Repeat, recording V and I as negative values.", "Repeat for the filament lamp.", "Repeat for the diode with its protective resistor, taking small steps of p.d. from 0 to about 1 V."] },
         { t: "safety", items: ["The lamp gets hot. Do not touch it while it is on or just after.", "Do not go above the lamp's rated p.d. (for example 6 V).", "Always use the protective resistor with the diode, so the current stays small."] },
+        { t: "p", h: "<strong>Without lab equipment:</strong> in PanPhyCircuits (panphy.app/sandboxes/panphycircuits), test a 20 Ω resistor, a filament lamp rated 6.0 V, 0.30 A, and a diode with a 100 Ω protective resistor. Set each p.d. with the DC power supply; to reverse it, swap the supply's connections. Turn on <strong>Plot on graph</strong> for both meters and choose current against p.d. to see the I–V graph." },
       ],
       lab: { title: "Results", blocks: [
         { t: "lab", blocks: [
@@ -643,6 +691,20 @@
         { t: "q", type: "Supported", p: "A 12 V sensor circuit has a total resistance of 300 Ω. Calculate the current.", frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["I = V ÷ R", "I = 12 ÷ 300", "0.040 A"] },
         { t: "q", p: "Which change would <strong>increase</strong> the current through a thermistor in a series circuit?", mcq: { o: ["cooling the thermistor", "heating the thermistor", "covering it with a black cloth", "adding another resistor in series"], c: 1 } },
       ],
+      lab: { title: "Lab: sensors", blocks: [
+        { t: "p", h: "Use <strong>PanPhyCircuits</strong> (panphy.app/sandboxes/panphycircuits) on a computer or tablet." },
+        { t: "steps", items: ["Connect a <strong>6.0 V</strong> DC power supply, an ammeter and a thermistor in series.", "Select the thermistor to change its temperature."] },
+        { t: "fig", cls: "fig-mid", h: labSensor },
+        { t: "lab", blocks: [
+          { t: "q", p: "Record the current at each temperature. Calculate the resistance, R = V ÷ I, with V = 6.0 V.", table: { head: ["Temperature / °C", "Current / mA", "Resistance / Ω"], rows: [["0", null, null], ["25", null, null], ["50", null, null], ["75", null, null], ["100", null, null]], ans: [[null, "0.178", "34 000"], [null, "0.600", "10 000"], [null, "1.67", "3 600"], [null, "4.02", "1 500"], [null, "8.60", "700"]] } },
+          { t: "q", p: "Describe and explain how the current changes as the thermistor gets hotter.", lines: 2, a: "The current increases. The hotter the thermistor, the lower its resistance, so I = V ÷ R increases at the same p.d." },
+        ] },
+        { t: "sub", h: "Light-dependent resistor" },
+        { t: "lab", blocks: [
+          { t: "q", p: "Swap the thermistor for an LDR. Select it to change the light level. Record the current at each setting.", table: { head: ["Light level / lx", "Current / mA"], rows: [["1 (dark room)", null], ["10", null], ["100", null], ["1000", null], ["10 000 (daylight)", null]], ans: [[null, "0.0647"], [null, "0.300"], [null, "1.48"], [null, "7.39"], [null, "37.0"]] } },
+          { t: "q", p: "Use your readings to describe how the resistance of the LDR changes as the light gets brighter.", lines: 2, a: "It decreases. At the same 6.0 V the current rises from 0.0647 mA to 37.0 mA, so R = V ÷ I falls from about 93 000 Ω to about 160 Ω." },
+        ] },
+      ] },
       exam: [
         { p: "A 6.0 V supply is connected to an LDR and a fixed resistor in series. In dim light the total resistance is 1500 Ω. (a) Calculate the current. (b) Explain what happens to the current when the light becomes brighter.", marks: 4, lines: 5, a: "(a) I = V ÷ R (1) = 6.0 ÷ 1500 = 0.0040 A (1). (b) The LDR's resistance decreases (1), so the total resistance decreases and the current increases (1)." },
       ],

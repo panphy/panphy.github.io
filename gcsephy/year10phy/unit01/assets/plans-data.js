@@ -24,29 +24,29 @@
     },
     2: {
       why: "Current is defined as a rate before students calculate with it. The model (bike chain, then ticket barrier) explains the instant switch-on puzzle and why current is conserved, so Q = I t is attached to meaning rather than a triangle.",
-      prep: "Computers or tablets with PhET Circuit Construction Kit: DC (Lab). Virtual Labs worksheet pp. 3–6 for pairs who finish. Optional: a real series loop with two ammeters.",
+      prep: "Computers or tablets with PanPhyCircuits (panphy.app/sandboxes/panphycircuits), one per pair. Optional: a real series loop with two ammeters.",
       timing: [
         [0, 6, "Do now", "Retrieval from Lesson 1. Then pose the big question and take predictions."],
         [6, 18, "Learn", "Free electrons, coulombs, current as a rate (ticket barrier). Slides 10–11: model both examples while students fill in the workbook frames, then each ‘Your turn’ alone. Quick check (slide 14) in the workbook box at the end of the lesson."],
-        [18, 32, "Virtual Lab 1", "Pairs measure current at three points, then change R. Record in the Lab box. Ask: ‘Where did the current go?’"],
+        [18, 32, "Lab", "Pairs test Mia's claim with three ammeters in one loop, then change R and open a switch (Q8–Q11). Then the charge calculations (Q12–Q14). Ask: ‘Where did the current go?’"],
         [32, 44, "Try it", "Q1–Q5 in order: the calculation questions fade from full frame to no frame. Q6 is the challenge. Q7 is the misconception check."],
-        [44, 50, "Exam corner", "Questions 10–11. Peer mark: time conversion, unit."],
+        [44, 50, "Exam corner", "Questions 15–16. Peer mark: time conversion, unit."],
       ],
       hinge: "Q2 (0.60 A means…). Anyone choosing ‘0.60 C in the circuit’ needs the ticket-barrier model again.",
-      misconceptions: [["Current is used up.", "Virtual Lab 1 plus Q7. Language: charge goes round; energy is transferred."], ["Minutes go straight into Q = I t.", "Every supported frame has a ‘Convert’ row first."], ["Electrons flow from + to −.", "Show both arrows on one diagram; exam diagrams use conventional current."]],
+      misconceptions: [["Current is used up.", "The lab (Q8–Q11) plus Q7. Language: charge goes round; energy is transferred."], ["Minutes go straight into Q = I t.", "Every supported frame has a ‘Convert’ row first."], ["Electrons flow from + to −.", "Show both arrows on one diagram; exam diagrams use conventional current."]],
       support: "Keep the frames; give a units card (C, A, s).",
       stretch: "How many electrons pass in 1 s at 1 A? (≈ 6 × 10¹⁸.) Explain why a bigger current does not need faster-moving electrons in a thicker wire.",
-      homework: "Prep 1 (Lessons 1–2). Finish Virtual Lab 1 pp. 4–6 if not done.",
+      homework: "Prep 1 (Lessons 1–2). Finish the lab at home in PanPhyCircuits if not done.",
     },
     3: {
       why: "p.d. is the hardest idea in the unit. It is taught as energy per coulomb, with a model (delivery vans) and an explicit contrast with current, before it is used in V = I R. The voltmeter is introduced here, when students know what it measures.",
-      prep: "PhET (Lab) and Virtual Labs worksheet pp. 7–10. Real demo: 6 V supply, two lamps in series, two voltmeters.",
+      prep: "Computers or tablets with PanPhyCircuits (panphy.app/sandboxes/panphycircuits). Real demo: 6 V supply, two lamps in series, two voltmeters.",
       timing: [
         [0, 6, "Do now", "Retrieval: current, Q = I t, current not used up."],
         [6, 18, "Learn", "Delivery-van model; 1 V = 1 J/C. Worked example and Your turn; slide 16 two-step example in its workbook frame. Voltmeter in parallel: say ‘across’."],
-        [18, 30, "Virtual Lab 2", "Measure resistor p.d. at 3, 6, 9 V; calculate E for 2 C. Add a second resistor and test ‘p.d.s add up’."],
+        [18, 30, "Lab", "Measure the resistor p.d. at 3.0, 6.0 and 9.0 V and calculate E for 2.0 C (Q7–Q10). Add a second resistor: p.d.s add up, and the energy account balances (Q11–Q13)."],
         [30, 43, "Try it", "Q1 (meter placement) as a class hinge first, then Q2–Q6."],
-        [43, 50, "Exam corner", "Questions 9–10; model a two-idea explanation (joules + per coulomb)."],
+        [43, 50, "Exam corner", "Questions 14–15; model a two-idea explanation (joules + per coulomb)."],
       ],
       hinge: "Q1: which circuit measures the p.d. across the lamp? Students who pick B are still thinking of meters as ‘in the loop’.",
       misconceptions: [["Voltage is the speed or ‘strength’ of the current.", "Q6 (Leo). Energy per coulomb, not speed."], ["p.d. ‘at’ a point.", "A p.d. is always between two points; insist on ‘across’."], ["Voltage is used up so current falls.", "Energy is transferred; current stays the same (link to Lesson 2)."]],
@@ -56,13 +56,13 @@
     },
     4: {
       why: "V = I R now joins current and p.d., which students understand separately. The particle picture of resistance (collisions with ions) is taught here so that the lamp curve in Lesson 8 is a consequence, not a new fact.",
-      prep: "PhET (Lab), Virtual Labs pp. 11–14. Demo: dimmer (variable resistor) with a lamp.",
+      prep: "Computers or tablets with PanPhyCircuits (panphy.app/sandboxes/panphycircuits). Demo: dimmer (variable resistor) with a lamp.",
       timing: [
         [0, 6, "Do now", "Retrieval: p.d. meaning, voltmeter, p.d.s add up."],
         [6, 18, "Learn", "Resistance as opposition; two circuits at 6 V. V = I R: fill in the two slide 20 examples together, each with its Your turn, then both worked examples (the second includes mA)."],
-        [18, 30, "Virtual Lab 3", "Change battery only; V ÷ I stays at 10 Ω. Note the axis convention box."],
+        [18, 30, "Lab", "Change the supply only: V ÷ I stays at 10 Ω, and the graph is a straight line through the origin (Q7–Q9). Then change R (Q10–Q11). The design challenge (Q12–Q13) is for pairs who finish."],
         [30, 44, "Try it", "Q1–Q4 (fading calculation support), Q5 table + graph, Q6 temperature."],
-        [44, 50, "Exam corner", "Questions 9–10."],
+        [44, 50, "Exam corner", "Questions 14–15."],
       ],
       hinge: "Q1: same battery, 10 Ω vs 30 Ω. Tests the direction of the relationship before any number work.",
       misconceptions: [["Bigger resistance → bigger current (‘more resistor, more electricity’).", "Two circuits side by side at the same p.d."], ["Any straight line means ohmic.", "Straight line through the origin; check V ÷ I."], ["mA used as A.", "Worked example 2 converts explicitly."]],
@@ -88,7 +88,7 @@
     },
     6: {
       why: "The series/parallel rules are taught as consequences of the Lesson 2–3 ideas: current is conserved (so it splits and rejoins) and energy per coulomb is shared (so p.d.s add in series).",
-      prep: "Per pair: cells, three identical lamps, two resistors, ammeters and voltmeters; or PhET. Mini whiteboards.",
+      prep: "Per pair: cells, three identical lamps, two resistors, ammeters and voltmeters; or PanPhyCircuits. Mini whiteboards.",
       timing: [
         [0, 6, "Do now", "Retrieval: V = I R, wire length, meaning of volt."],
         [6, 18, "Learn", "Build two lamps in series, then in parallel; unscrew one lamp in each. Fill the rules table from observation."],
@@ -104,7 +104,7 @@
     },
     7: {
       why: "The second part of the resistance practical tests the Lesson 6 rules with measurements, and gives evaluation practice (specific error and improvement).",
-      prep: "Per group: low-voltage supply, switch, ammeter, voltmeter, two identical resistors (e.g. 10 Ω), leads.",
+      prep: "Per group: low-voltage supply, switch, ammeter, voltmeter, two identical resistors (e.g. 10 Ω), leads. Without kit: PanPhyCircuits with a 3.0 V supply and two 10 Ω resistors.",
       timing: [
         [0, 6, "Do now", "Retrieval: series total, parallel rules."],
         [6, 12, "Predict", "Q1: rank the three arrangements. Record predictions on the board."],
@@ -136,7 +136,7 @@
     },
     9: {
       why: "Students now know what each graph should look like, so the practical tests predictions and focuses on method: varying p.d., reversing, safety and the diode's extra steps.",
-      prep: "Per group: variable low-voltage supply or supply + variable resistor, ammeter (and milliammeter), voltmeter, fixed resistor, 6 V filament lamp, diode + protective resistor (e.g. 100 Ω), leads.",
+      prep: "Per group: variable low-voltage supply or supply + variable resistor, ammeter (and milliammeter), voltmeter, fixed resistor, 6 V filament lamp, diode + protective resistor (e.g. 100 Ω), leads. Without kit: PanPhyCircuits, which can also plot the I–V graph.",
       timing: [
         [0, 6, "Do now + safety", "Retrieval. Lamp rating, hot lamp, protective resistor."],
         [6, 12, "Set up", "Check ammeter in series and voltmeter across the component only."],
@@ -152,13 +152,14 @@
     },
     10: {
       why: "Thermistors and LDRs are taught as applications of ‘lower total R → bigger current at fixed p.d.’, so they revise V = I R and series circuits while adding two new components.",
-      prep: "Thermistor and LDR with multimeter (resistance range); beaker of warm water; torch; mini whiteboards.",
+      prep: "Thermistor and LDR with multimeter (resistance range); beaker of warm water; torch; mini whiteboards. Computers or tablets with PanPhyCircuits (panphy.app/sandboxes/panphycircuits) for the lab.",
       timing: [
         [0, 6, "Do now", "Retrieval: lamp graph, V = I R direction, diode symbol."],
-        [6, 18, "Learn + demo", "Measure R of the LDR (cover/torch) and thermistor (hand/warm water). Sketch the two graphs."],
-        [18, 28, "Sensor circuits", "LDR in series; worked example and Your turn."],
-        [28, 44, "Try it", "Q1–Q5."],
-        [44, 50, "Exam corner", "Question 6."],
+        [6, 16, "Learn + demo", "Measure R of the LDR (cover/torch) and thermistor (hand/warm water). Sketch the two graphs."],
+        [16, 24, "Sensor circuits", "LDR in series; worked example and Your turn."],
+        [24, 36, "Try it", "Q1–Q5."],
+        [36, 46, "Lab", "Thermistor and LDR readings in PanPhyCircuits (Q6–Q9): the current rises as the resistance falls."],
+        [46, 50, "Exam corner", "Question 10."],
       ],
       hinge: "Q5: which change increases the current through a thermistor?",
       misconceptions: [["Brighter light increases LDR resistance.", "Both are ‘more → less’."], ["Changing resistance changes the supply p.d.", "The supply p.d. is fixed; the current changes."]],

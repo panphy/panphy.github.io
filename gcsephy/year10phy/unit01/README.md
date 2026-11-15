@@ -10,7 +10,7 @@ The Year 10 electricity unit: a workbook in six part booklets with a Unit review
 
 Written for AQA GCSE Combined Science: Trilogy (Higher) 6.2.1–6.2.4, which matches Physics (separate science) 4.2.1–4.2.4, for students with no prior knowledge of electricity. Static electricity (Physics 4.2.5) is on the Triple Science only page of the Unit review.
 
-The deck is organised in missions; the workbook teaches them in twelve lessons, with a full lesson for each required practical (Lessons 5, 7 and 9). Required-practical numbers differ by course: resistance is RP 15 (Trilogy) / RP 3 (Physics); I–V characteristics is RP 16 / RP 4.
+The deck is organised in missions; the workbook teaches them in twelve lessons, with a full lesson for each required practical (Lessons 5, 7 and 9). Lessons 2–4 and 10 have a lab in PanPhyCircuits (`/sandboxes/panphycircuits.html`), printed in the workbook; Lessons 7 and 9 say how to run their practicals there without kit. The answers to those labs are the app's own readings: if its models change, rerun the circuits and update the answer editions. Required-practical numbers differ by course: resistance is RP 15 (Trilogy) / RP 3 (Physics); I–V characteristics is RP 16 / RP 4.
 
 ## Equation sheet
 
