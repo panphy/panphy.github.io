@@ -1,6 +1,6 @@
 # Atoms and Nuclear Radiation — Year 10 workbook (unit 3)
 
-A copy of the Year 11 unit ([`../../year11phy/unit01/`](../../year11phy/unit01/)) for the rearranged Year 10 sequence, which teaches it after the Particle Model unit. Only the year labels and the lime Year 10 accent differ; the two copies are independent, so change both when a fix applies to both.
+Copied from the Year 11 unit (`gcsephy/year11phy/unit01/`) for the rearranged Year 10 sequence, which teaches it after the Particle Model unit. Only the year labels and the lime Year 10 accent differ. This unit and its deck use no Year 11 files, so they keep working when the Year 11 unit and its deck are removed after the 2027 exams. Until then, change both copies when a fix applies to both.
 
 Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation-y10/`](../../decks/atoms-and-radiation-y10/), and reuse its fonts and particle diagrams. The 59-slide deck uses the shared calm GCSE style with the lime Year 10 accent; workbook print colours are separate. See [`../../decks/README.md`](../../decks/README.md) for deck styling and controls.
 

@@ -71,7 +71,8 @@
 }
 :root.deck-y10 { --year-colour: #d8eaa1; --year-ink: #49651f; --year-dark: #c8df85; }
 :root.deck-y11 { --year-colour: #f6e7a5; --year-ink: #78601b; --year-dark: #ecda8e; }
-/* The Year 10 copy of Atoms and Nuclear Radiation keeps the deck-y11 layout rules with the Year 10 colours. */
+/* The Year 10 copy of Atoms and Nuclear Radiation keeps the deck-y11 layout rules with the Year 10 colours.
+   Keep every deck-y11 rule in this file after the Year 11 deck is removed. */
 :root.deck-y11[data-year="10"] { --year-colour: #d8eaa1; --year-ink: #49651f; --year-dark: #c8df85; }
 :root[data-theme="dark"] {
   color-scheme: dark;
