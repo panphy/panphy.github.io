@@ -149,7 +149,7 @@
             <h3 class="rn-head">Fast, slow and instant</h3>
             <p>Three speeds are easy to confuse. The free electrons in a metal move at random at about <span class="equation-inline">\(10^{6}\) m&nbsp;s⁻¹</span>, with or without a current. A current is a slow drift added to that motion: typically a fraction of a millimeter each second. Yet a lamp lights the moment the switch closes, because the electric field that pushes the electrons travels along the wire at nearly the speed of light, and every electron in the circuit starts to drift at once.</p>
             <h3 class="rn-head">Why two directions</h3>
-            <p>The direction of current was fixed, as from positive to negative, long before the electron was discovered. Electrons are negative, so they move the other way. Every rule in the course, including the left-hand rule in D.3, uses conventional current.</p>
+            <p>The direction of current was fixed, as from positive to negative, long before the electron was discovered: in the 1740s Benjamin Franklin called one kind of charge positive and pictured it flowing, and the choice stuck. The electron was discovered in 1897. Electrons are negative, so they move the other way. Every rule in the course, including the left-hand rule in D.3, uses conventional current.</p>
             <h3 class="rn-head">Other carriers</h3>
             <p>In salt solutions and in batteries the carriers are positive and negative ions, moving in opposite directions. Both contribute to the current in the same sense.</p>
           </div>
@@ -779,6 +779,35 @@
           </div>
           <div class="rn-side">
             <p class="tip">Treat \(r\) as one more resistor in series with the rest of the circuit. Nothing else about the method changes.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Closing the switches">
+        <p class="eyebrow">Predict first</p>
+        <h2>Close the switches one by one<span>.</span></h2>
+        <div class="stack center" style="gap: 22px;">
+          <div class="q"><p>A cell, emf 6.0 V and \(r = 0.50 \,\Omega\), lights more and more 12&nbsp;Ω lamps in parallel. What happens to the voltmeter reading across the cell?</p></div>
+          <table class="facts big">
+            <thead><tr><th>Lamps on</th><th>Total \(R\)</th><th>Current</th><th>Terminal p.d.</th></tr></thead>
+            <tbody>
+              <tr class="step"><td class="num">1</td><td class="num">12 Ω</td><td class="num">0.48 A</td><td class="num">5.76 V</td></tr>
+              <tr class="step"><td class="num">2</td><td class="num">6.0 Ω</td><td class="num">0.92 A</td><td class="num">5.54 V</td></tr>
+              <tr class="step"><td class="num">4</td><td class="num">3.0 Ω</td><td class="num">1.71 A</td><td class="num">5.14 V</td></tr>
+            </tbody>
+          </table>
+          <div class="idea step">More lamps, more current, more <b>lost volts</b> \(Ir\): the reading falls.</div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">One row in full</h3>
+            <p>With two lamps on, the external resistance is \(\dfrac{12}{2} = 6.0 \,\Omega\). The current is \(I = \dfrac{\varepsilon}{R + r} = \dfrac{6.0}{6.0 + 0.50} = 0.92\) A. The lost volts are \(Ir = 0.92 \times 0.50 = 0.46\) V, so the terminal p.d. is \(6.0 - 0.46 = 5.54\) V.</p>
+            <h3 class="rn-head">What each lamp does</h3>
+            <p>Each lamp has the terminal p.d. across it, so as more are switched on, every lamp gets a little dimmer. With an ideal cell, \(r = 0\), the reading would stay at 6.0 V and each lamp would stay as bright however many were added.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The same thing happens at home: lights can dim for a moment when a heavy load such as a kettle is switched on.</p>
           </div>
         </aside>
       </section>
