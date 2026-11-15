@@ -16,6 +16,6 @@ window.WORKBOOK = {
     const met = W.U.toolkit.filter((t) => t.lesson <= W.LAST);
     if (!met.length) return "";
     return `<section class="new-page toolkit-page"><div class="eyebrow">Reference</div><h2 class="page-title">Toolkit</h2>
-      <div class="facts">${met.map((t) => `<div class="fact${t.wide ? " wide" : ""}"><span class="lesson-tag">Lesson ${t.lesson}</span><h4>${t.title}</h4>${t.h}</div>`).join("")}</div></section>`;
+      <div class="facts">${met.map((t) => `<div class="fact${t.wide ? " wide" : ""}"><h4>${t.title}</h4>${t.h}</div>`).join("")}</div></section>`;
   },
 };

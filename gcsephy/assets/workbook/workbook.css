@@ -542,8 +542,7 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .facts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3mm; }
 .fact { position: relative; padding: 2.6mm 3mm; border: 1.2px solid var(--line); break-inside: avoid; font-size: 9pt; line-height: 1.35; }
 .fact.wide { grid-column: 1 / -1; }
-.fact h4 { margin: 0 0 1.5mm; padding-right: 18mm; font: 900 8.5pt/1.2 Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
-.fact .lesson-tag { position: absolute; top: 2.6mm; right: 3mm; padding: .3mm 1.8mm; border: 1.2px solid var(--line); font: 900 7pt/1.5 Arial, sans-serif; background: var(--spark-t); }
+.fact h4 { margin: 0 0 1.5mm; font: 900 8.5pt/1.2 Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
 .fact p, .fact li { font-size: 9pt; }
 .fact .compare { margin-bottom: 0; font-size: 8.6pt; }
 .fact .compare th, .fact .compare td { padding: 1.2mm 1.8mm; }
