@@ -51,7 +51,7 @@
         ] },
         { t: "q", type: "Supported", p: "A 0.50 kg ball is lifted 3.0 m. Calculate the energy transferred to its gravitational potential store.", frame: frame3, frameA: [R`\(E_p = m\,g\,h\)`, R`\(E_p = 0.50 \times 9.8 \times 3.0\)`, "14.7 J"] },
         { t: "q", type: "Supported", p: "A 600 g book is lifted 1.2 m onto a shelf. Calculate the energy transferred. <em>Convert the mass first!</em>", frame: frame4, frameA: ["m = 600 ÷ 1000 = 0.600 kg", R`\(E_p = m\,g\,h\)`, R`\(E_p = 0.600 \times 9.8 \times 1.2\)`, "7.1 J"] },
-        { t: "q", p: R`Complete the table. Use \(g = 9.8\) N/kg. Show your working underneath.`, table: { head: ["Object", "Mass / kg", "Height gained / m", R`\(E_p\) / J`], rows: [["Child at the top of a slide", "30", "2.5", null], ["Rock on a cliff", "4.0", null, "196"], ["Crate on a lorry", null, "3.0", "882"], ["Lift with passengers", "800", "12", null]], ans: [[null, null, null, "735"], [null, null, "5.0", null], [null, "30", null, null], [null, null, null, "94 080"]] }, box: 30, grid: true },
+        { t: "q", p: R`Complete the table. Use \(g = 9.8\) N/kg. Show your working underneath.`, table: { head: ["Object", "Mass / kg", "Height gained / m", R`\(E_p\) / J`], rows: [["Child at the top of a slide", "30", "2.5", null], ["Rock on a cliff", "4.0", null, "196"], ["Crate on a lorry", null, "3.0", "882"], ["Lift with passengers", "800", "12", null]], ans: [[null, null, null, "735"], [null, null, "5.0", null], [null, "30", null, null], [null, null, null, "94 080"]] }, lines: 4 },
         { t: "q", type: "Challenge", p: "A 50 kg student gains 4.9 kJ in their gravitational potential store climbing stairs. How high did they climb? <em>Convert kJ to J first.</em>", lines: 3, a: R`\(E_p = 4900\) J; \(h = \dfrac{E_p}{m\,g} = \dfrac{4900}{50 \times 9.8} = 10\) m` },
       ],
       lab: { title: "Activity: lift it", safety: "Lift gently and keep the floor clear.", blocks: [
@@ -193,7 +193,7 @@
       ],
       lab: { title: "Your own spring", blocks: [
         { t: "lab", blocks: [
-          { t: "q", p: R`My spring constant from Lesson 4: \(k\) = [[25|20]] N/m. Calculate the energy stored at each extension.`, table: { head: ["Extension / m", R`\(e^2\) / m²`, R`\(E_e\) / J`], rows: [["0.05", null, null], ["0.10", null, null], ["0.20", null, null]], ans: [[null, "0.0025", "0.031"], [null, "0.010", "0.125"], [null, "0.040", "0.50"]] }, box: 20, grid: true },
+          { t: "q", p: R`My spring constant from Lesson 4: \(k\) = [[25|20]] N/m. Calculate the energy stored at each extension.`, table: { head: ["Extension / m", R`\(e^2\) / m²`, R`\(E_e\) / J`], rows: [["0.05", null, null], ["0.10", null, null], ["0.20", null, null]], ans: [[null, "0.0025", "0.031"], [null, "0.010", "0.125"], [null, "0.040", "0.50"]] }, lines: 3 },
           { t: "q", p: R`Check: did doubling the extension from 0.10 m to 0.20 m give four times the energy? {{yes*|no}} Show how you know.`, lines: 1, a: "0.50 ÷ 0.125 = 4 (sample)." },
           { t: "q", p: R`Could you use \(E_e = \tfrac{1}{2}\,k\,e^2\) for the 700 g reading in Lesson 4? {{yes|no*}} Explain.`, lines: 2, a: "No: that reading was beyond the limit of proportionality, so k was not constant." },
         ] },

@@ -440,7 +440,7 @@
       <h2 class="cover-sub">In this booklet</h2>${list(SEL.map((l) => `${lessonName(l)}: ${l.title}${l.rp ? ` (${l.rp.toLowerCase()})` : ""}`), "cover-lessons")}`;
     } else if (REVIEW) {
       middle = `<div class="cover-part"><b>Unit review</b><span>After ${reviewAfter}</span></div>
-      <h2 class="cover-sub">In this booklet</h2>${list(["Mixed exam practice and a fix-it log", ...(EXTENSION.length ? ["Triple Science only pages"] : []), "Toolkit and key words"], "cover-lessons")}`;
+      <h2 class="cover-sub">In this booklet</h2>${list(["Mixed exam practice", ...(EXTENSION.length ? ["Triple Science only pages"] : []), "Toolkit and key words"], "cover-lessons")}`;
     } else {
       middle = `<p class="lede">${C.lede}</p>${list(U.lessons.map((l) => `${lessonName(l)}: ${l.title}`), "cover-lessons")}`;
     }
@@ -475,7 +475,7 @@
         <h4>Do now</h4>${ol(l.doNow)}<h4>Cover the page</h4>${ol(l.recall)}</div>`).join("")}</div></section>`;
   }
 
-  // Unit review: mixed exam practice, then a fix-it log. A question with parts may break between them.
+  // Unit review: mixed exam practice. A question with parts may break between them.
   function review() {
     qNum = 0;
     return `<section class="lesson" style="--accent:var(--violet);--accent-t:var(--violet-t)">
@@ -484,13 +484,10 @@
       ${U.review.map((q, i) => {
         const html = (i ? "" : secHead("exam", "Mixed exam practice")) + question(q);
         return q.after && i ? html : keep(html); // the heading stays with the first question
-      }).join("")}
-      ${keep(`${secHead("revise", "Fix-it log")}
-      <table class="fix-log"><thead><tr><th style="width:14mm">Q</th><th>What went wrong?</th><th>The correct physics (or method) is…</th><th style="width:26mm">Lesson to revisit</th></tr></thead>
-      <tbody>${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(6)}</tbody></table>`)}</section>`;
+      }).join("")}</section>`;
   }
 
-  // Triple Science only pages, printed in the Unit review after the fix-it log.
+  // Triple Science only pages, printed in the Unit review after the exam practice.
   function extension(x) {
     qNum = 0;
     return `<section class="lesson" style="--accent:var(--leaf);--accent-t:var(--leaf-t)">

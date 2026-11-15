@@ -13,13 +13,15 @@ A unit's `workbook.html` loads its figure styles and scripts, its content, `cove
 ## Booklets
 
 - `?part=N`: a part booklet (`parts` in `book.js`): cover with its contents, the lessons, the toolkit so far, key words and quick answers.
-- `?review`: the Unit review: cover, mixed exam practice and a fix-it log, any Triple Science only pages, the toolkit and all the key words.
+- `?review`: the Unit review: cover, mixed exam practice, any Triple Science only pages, the toolkit and all the key words.
 - `?lesson=N`: one lesson, as a booklet (Particle Model prints its required practicals this way).
 - No query: the whole unit, for previewing. Add `&answers` for the answer edition, which has the same page numbers: answers print only in it, in space the student edition keeps blank.
 
 Each lesson runs opener, Do now, Learn it, Try it, Practical, Quick check, Exam corner, Revise it (`order` or `flow` in a lesson changes the order, and `newPage: ["learn"]` starts the listed parts on a new page; any block with `newPage: true` starts a new page); questions are numbered in print order. Section headings carry no notes or labels: a lab's `safety` text prints as a Stay safe box under its heading.
 
 Page breaks: a heading (section, sub-heading or lab title) never ends a page; it stays with its first block, and a one-paragraph lead (`p`, `list` or `steps`) also keeps the block it introduces. Steps lists and question prompts never split. Where that still leaves an awkward break, use `newPage`.
+
+Writing space: working and written answers get `lines`; a dotted `box` with `grid: true` is only for drawings (circuit diagrams, sketched graphs, Sankey diagrams).
 
 ## Content
 
