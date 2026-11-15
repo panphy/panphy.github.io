@@ -104,6 +104,7 @@
         ["Convert 250 g to kilograms.", "0.250 kg"],
       ],
       learnTitle: "The hidden energy",
+      newPage: ["lab"],
       learn: [
         { t: "p", h: "The energy needed for a substance to change state is called <strong>latent heat</strong>. “Latent” means hidden: the energy goes in, the internal energy increases, but a thermometer shows no change." },
         { t: "key", h: "The <strong>specific latent heat</strong> of a substance is the amount of energy required to change the state of <strong>one kilogram</strong> of the substance with <strong>no change in temperature</strong>." },

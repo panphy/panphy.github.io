@@ -192,19 +192,32 @@
     for (let i = 0; i < items.length; i += 1) {
       const b = items[i];
       let html;
-      if (b && b.t === "sub" && items[i + 1]) { html = keep(renderBlock(b) + renderBlock(items[i + 1])); i += 1; }
-      else html = renderBlock(b);
+      if (b && b.t === "sub" && items[i + 1]) {
+        const n = leads(items, i + 1) && items[i + 2].t !== "sub" ? 3 : 2; // a one-paragraph lead stays with what it introduces
+        html = keep(items.slice(i, i + n).map(renderBlock).join("")); i += n - 1;
+      } else html = renderBlock(b);
       out.push(b && b.newPage ? `<div class="new-page">${html}</div>` : html);
     }
     return out.join("");
   }
+  // A short lead (a paragraph or list) followed by the block it introduces.
+  const LEADS = ["p", "list", "steps"];
+  const leads = (items, i) => {
+    const b = items[i], next = items[i + 1];
+    return !!b && !!next && (typeof b === "string" || LEADS.includes(b.t)) && typeof next === "object" && !next.newPage;
+  };
   // A section heading stays with its first block (and any sub-headings before it), so a heading
-  // never ends a page.
+  // never ends a page; a one-paragraph lead also keeps the block after it.
   function section(key, title, blocks, safety) {
     const items = blocks || [];
     if (!items.length) return "";
     let first = 1;
     while (first < items.length && items[first - 1] && items[first - 1].t === "sub") first += 1;
+    if (leads(items, first - 1)) {
+      first += 1;
+      // A lead followed by a sub-heading keeps that sub-heading and its first block too.
+      while (first < items.length && items[first - 1].t === "sub") first += 1;
+    }
     const warn = safety ? renderBlock({ t: "safety", items: [].concat(safety) }) : "";
     return keep(secHead(key, title) + warn + renderBlocks(items.slice(0, first))) + renderBlocks(items.slice(first));
   }
@@ -241,7 +254,7 @@
       case "table": return dataTable(b);
       case "q": return question(b);
       case "part": return question(Object.assign({}, b, { part: true })); // an unnumbered part of a question
-      case "lab": return `<div class="lab-card">${b.title ? `<h4 class="sub">${b.title}</h4>` : ""}${renderBlocks(b.blocks)}</div>`;
+      case "lab": return `<div class="lab-card">${renderBlocks(b.title ? [{ t: "sub", h: b.title }, ...b.blocks] : b.blocks)}</div>`; // the title keeps its lead
       case "home": return `<div class="home-card"><h4>${b.title || "Take it home"}</h4>${renderBlocks(b.blocks)}</div>`;
       default: {
         const html = C.block && C.block(b, W);
@@ -252,10 +265,17 @@
   }
 
   // Tick-box checklist: items, with one tick column per heading in `head`.
+  // cols: 2 sets the items side by side in two columns, read down each column.
   function checks(b) {
     const head = b.head || ["✓"];
     const ticked = b.a || [];
-    return `<table class="checks${b.cls ? " " + b.cls : ""}"><thead><tr><th>${b.title || "Check"}</th>${head.map((h) => `<th class="tick-col">${h}</th>`).join("")}</tr></thead><tbody>${b.items.map((it, i) => `<tr><td>${it}</td>${head.map((_, j) => `<td class="tick-col"><span class="tickbox${ticked[i] === j ? " on" : ""}"></span></td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    const cols = b.cols || 1, per = Math.ceil(b.items.length / cols);
+    const cell = (i) => (i < b.items.length
+      ? `<td>${b.items[i]}</td>${head.map((_, j) => `<td class="tick-col"><span class="tickbox${ticked[i] === j ? " on" : ""}"></span></td>`).join("")}`
+      : `<td></td>${head.map(() => `<td class="tick-col"></td>`).join("")}`);
+    const th = (c) => `<th>${c ? "" : b.title || "Check"}</th>${head.map((h) => `<th class="tick-col">${h}</th>`).join("")}`;
+    const rows = Array.from({ length: per }, (_, r) => `<tr>${Array.from({ length: cols }, (_, c) => cell(c * per + r)).join("")}</tr>`).join("");
+    return `<table class="checks${cols > 1 ? " cols" : ""}${b.cls ? " " + b.cls : ""}"><thead><tr>${Array.from({ length: cols }, (_, c) => th(c)).join("")}</tr></thead><tbody>${rows}</tbody></table>`;
   }
 
   // Cells: a string is printed (the first as a row heading unless plainFirst); {opts, a} is a blank.
@@ -374,7 +394,7 @@
   function lesson(l) {
     qNum = 0;
     const panel = side(l);
-    const opener = `<header class="opener"><div class="num"><small>${l.last ? "Lessons" : "Lesson"}</small>${pad(l.n)}${l.last ? `<span class="num-to">–${pad(l.last)}</span>` : ""}</div>
+    const opener = `<header class="opener"><div class="num"><small>${l.last ? "Lessons" : "Lesson"}</small>${pad(l.n)}${l.last ? `<span class="num-to">–&thinsp;${pad(l.last)}</span>` : ""}</div>
       <div><h2>${l.title}</h2><div class="spec">${l.spec}</div></div><div class="big-q">${l.big}</div></header>
       <div class="opener-foot${panel ? "" : " solo"}"><div class="goals"><h3>By the end you can</h3>${list(l.goals)}
       <div class="keywords">${l.keywords.map((k) => `<span>${k}</span>`).join("")}</div></div>${panel}</div>`;

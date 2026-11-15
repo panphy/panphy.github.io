@@ -56,7 +56,8 @@
     s += `<circle cx="${fx}" cy="${fy}" r="10" class="ghost"/>` + P.ball(tx, ty, 10, "electron");
     s += P.arrow(fx + 12 * k * Math.cos(a), fy + 12 * k * Math.sin(a), tx - 14 * k * Math.cos(a), ty - 14 * k * Math.sin(a), "brand-accent", 3);
     s += P.text(c - 38, c + 34, "1", "lbl mono small") + P.text(c - 66, c + 50, "2", "lbl mono small") + P.text(c - 94, c + 66, "3", "lbl mono small");
-    return P.svg("0 0 220 220", s, `An electron moves from energy level ${from} to energy level ${to}`);
+    // Wrapped in .dfig so the deck styles reach it (rings stay hollow) inside an answer option.
+    return dfig(P.svg("0 0 220 220", s, `An electron moves from energy level ${from} to energy level ${to}`));
   }
 
   // Three alpha particles heading for a gold nucleus; students draw where each goes next.

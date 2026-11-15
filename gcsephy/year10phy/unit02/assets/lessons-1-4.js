@@ -38,7 +38,7 @@
         ] },
         { t: "tip", h: "Draw a solid with the particles <strong>touching</strong>, in neat rows. Draw a liquid with the particles still <strong>touching</strong>, but in no pattern." },
         { t: "sub", h: "Changes of state" },
-        { t: "fig", cls: "fig-wide", h: F.changes(), cap: "Orange arrows: the substance is heated. Blue arrows: it is cooled." },
+        { t: "fig", cls: "fig-wide fig-states", h: F.changes(), cap: "Orange arrows: the substance is heated. Blue arrows: it is cooled." },
         { t: "p", h: "A liquid can turn into a gas in two ways. <strong>Boiling</strong> happens only at the boiling point, with bubbles all through the liquid. <strong>Evaporating</strong> happens at any temperature, from the surface only. <strong>Sublimating</strong> is when a solid turns straight into a gas: solid carbon dioxide (“dry ice”) does this." },
         { t: "sub", h: "Mass is conserved" },
         { t: "key", h: "When a substance changes state, <strong>no particles are added or taken away</strong>. They are only rearranged. So the mass stays the same: 50 g of ice melts to make 50 g of water." },

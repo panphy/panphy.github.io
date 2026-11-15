@@ -21,7 +21,7 @@
     <text x="94" y="172" font-family="Arial" font-weight="700" font-size="12" fill="#0a1326" text-anchor="middle">battery</text>
     <rect x="196" y="146" width="60" height="12" rx="3" fill="#b9c1ca" stroke="#0a1326" stroke-width="2.5"/>
     <circle cx="204" cy="150" r="4" fill="#0a1326"/><circle cx="248" cy="150" r="4" fill="#0a1326"/>
-    <path d="M204 150 L246 136" stroke="#0a1326" stroke-width="4" stroke-linecap="round"/>
+    <path d="M204 149 L250 149" stroke="#0a1326" stroke-width="4" stroke-linecap="round"/>
     <text x="226" y="176" font-family="Arial" font-weight="700" font-size="12" fill="#0a1326" text-anchor="middle">switch (closed)</text>
     <circle cx="247" cy="46" r="28" fill="#fff5cc" stroke="#0a1326" stroke-width="3"/>
     <path d="M238 70 V56 L243 44 L247 54 L251 44 L256 56 V70" fill="none" stroke="#d9480f" stroke-width="2.5"/>
