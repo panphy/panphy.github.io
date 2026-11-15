@@ -421,7 +421,6 @@ td.blank-cell { height: 10mm; vertical-align: top; }
 .tool .tool-tri { grid-column: 2; grid-row: 2 / span 3; align-self: center; }
 .tool .recall-cover { grid-column: 1; }
 .tool .units { grid-column: 1; }
-.g-lesson { display: inline-block; padding: 0 1.2mm; border: 1.2px solid var(--line); font-size: 7pt; font-weight: 700; }
 .data.wide th { font-size: 8.2pt; }
 .eq-card.stack { grid-template-columns: minmax(0, 1fr) auto; }
 .eq-card.stack .eq { grid-column: 1 / -1; grid-row: auto; white-space: normal; margin-bottom: 1mm; }
