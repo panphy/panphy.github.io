@@ -20,7 +20,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/a5-galilean-and-special-relativity/` | A.5 teaching deck, 41 slides: HL only |
 | `decks/b1-thermal-energy-transfers/` | B.1 teaching deck, 46 slides: SL and HL, with no additional HL content |
 | `decks/b2-greenhouse-effect/` | B.2 teaching deck, 36 slides: SL and HL, with no additional HL content |
-| `decks/b3-gas-laws/` | B.3 teaching deck, 37 slides: SL and HL, with no additional HL content |
+| `decks/b3-gas-laws/` | B.3 teaching deck, 38 slides: SL and HL, with no additional HL content |
 | `decks/b4-thermodynamics/` | B.4 teaching deck, 43 slides: HL only |
 | `decks/b5-current-and-circuits/` | B.5 teaching deck, 38 slides: SL and HL, with no additional HL content |
 | `decks/c1-simple-harmonic-motion/` | C.1 teaching deck, 38 slides: SL and HL, then an additional HL part (slides 28 to 36) |

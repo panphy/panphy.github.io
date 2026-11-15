@@ -651,11 +651,42 @@
           <div class="rn-main">
             <h3 class="rn-head">Why \(v^{2}\)</h3>
             <p>Use final minus initial for the molecule: its momentum changes from \(+mv\) to \(-mv\), giving \(\Delta p_\mathrm{molecule} = -2mv\). The impulse on the wall is opposite, \(+2mv\). Speed counts twice. A faster molecule hits the wall harder: the magnitude of its momentum change, \(2mv\), is proportional to \(v\). It also returns sooner: the time for the round trip, \(\frac{2L}{v}\), is inversely proportional to \(v\). Harder and more often together make the force proportional to \(v^{2}\).</p>
-            <h3 class="rn-head">From one molecule to a gas</h3>
-            <p>Take a cubical box of side \(L\) holding \(N\) molecules. They do not all move at the same speed, so replace \(v^{2}\) by its average over all the molecules, the mean square speed \(v_\mathrm{rms}^{2}\). On average a third of the motion is along each of the three directions, so the total force on one wall is \(\frac{1}{3} N \frac{m v_\mathrm{rms}^{2}}{L}\). The wall has area \(L^{2}\), so the pressure is \(\frac{1}{3} \frac{N m v_\mathrm{rms}^{2}}{L^{3}}\). \(Nm\) is the mass of the gas and \(L^{3}\) its volume, so \(\frac{Nm}{L^{3}}\) is the density, and the result is \(P = \frac{1}{3} \rho v_\mathrm{rms}^{2}\).</p>
           </div>
           <div class="rn-side">
             <p class="tip">You will not be asked to reproduce the derivation in full, but questions do ask for its steps: momentum change, time between collisions, force, then pressure.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="From one molecule to a gas">
+        <p class="eyebrow">The derivation, continued</p>
+        <h2>From one molecule to a gas<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(N\) molecules in a cube of side \(L\), at many speeds</span>
+            <span>\(F_\mathrm{wall} = \dfrac{N m \overline{v_{x}^{2}}}{L}\)</span>
+            <span class="say step">Random directions: \(v^{2} = v_{x}^{2} + v_{y}^{2} + v_{z}^{2}\), a third each</span>
+            <span class="step">\(\overline{v_{x}^{2}} = \dfrac{1}{3} v_\mathrm{rms}^{2}\) &nbsp;so&nbsp; \(F_\mathrm{wall} = \dfrac{1}{3} \dfrac{N m v_\mathrm{rms}^{2}}{L}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Pressure on a wall of area \(L^{2}\):</span>
+            <span>\(P = \dfrac{F_\mathrm{wall}}{L^{2}} = \dfrac{1}{3} \dfrac{N m v_\mathrm{rms}^{2}}{L^{3}}\)</span>
+            <span class="say step">\(Nm\) is the mass and \(L^{3}\) the volume:</span>
+            <span class="step">\(\dfrac{Nm}{L^{3}} = \rho\) &nbsp;so&nbsp; \(\class{res}{P = \dfrac{1}{3} \rho v_\mathrm{rms}^{2}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.3 GAS LAWS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why an average of squares</h3>
+            <p>The molecules have many different speeds, and each one pushes on the wall with a force proportional to the square of its speed towards it. Adding the forces of all \(N\) molecules therefore needs the average of \(v_{x}^{2}\), not the square of the average speed. The average velocity is zero anyway, since as many molecules move left as right.</p>
+            <h3 class="rn-head">Why a third</h3>
+            <p>For each molecule, \(v^{2} = v_{x}^{2} + v_{y}^{2} + v_{z}^{2}\) by Pythagoras in three dimensions. With so many molecules moving at random, no direction is special, so the three averages are equal and each is a third of the average of \(v^{2}\), which is \(v_\mathrm{rms}^{2}\).</p>
+            <h3 class="rn-head">Collisions with other molecules</h3>
+            <p>The derivation ignores collisions between molecules on the way across. Because those collisions are elastic and share momentum without losing any, they change which molecule carries it to the wall but not the total, so the result still holds.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Comparing this with \(PV = N k_\mathrm{B} T\), two slides on, links the kinetic energy of the molecules to the temperature.</p>
           </div>
         </aside>
       </section>
