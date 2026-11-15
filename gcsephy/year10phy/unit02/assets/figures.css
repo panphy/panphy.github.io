@@ -48,3 +48,5 @@
 .answers .pf text.ans { visibility: visible; }
 .pf.on-dark { --pf-ink: #fff; --pf-paper: rgba(255, 255, 255, .08); --pf-hot: #ffd23f; }
 .pf.on-dark .p { stroke: #0a1326; }
+/* The changes-of-state triangle carries five small labels: print it taller than other wide figures. */
+.fig.fig-states .pf { max-height: 82mm; }

@@ -39,8 +39,8 @@
   <script>
     // [part, title, lessons, pages, what it covers]; the PDFs are built by build-pdfs.sh.
     const BOOKLETS = [
-      [1, 'Part 1: Complete circuits and current', 'Lessons 1–2', 17, 'Circuit symbols and drawing rules, ammeters, current as a flow of charge, Q = I t'],
-      [2, 'Part 2: Potential difference and resistance', 'Lessons 3–4', 19, 'Voltmeters, energy per coulomb, E = Q V, resistance and V = I R'],
+      [1, 'Part 1: Complete circuits and current', 'Lessons 1–2', 18, 'Circuit symbols and drawing rules, ammeters, current as a flow of charge, Q = I t'],
+      [2, 'Part 2: Potential difference and resistance', 'Lessons 3–4', 20, 'Voltmeters, energy per coulomb, E = Q V, resistance and V = I R'],
       [3, 'Part 3: Wires, series and parallel', 'Lessons 5–6', 16, 'Resistance of a wire (required practical), the rules for series and parallel circuits'],
       [4, 'Part 4: Combining resistors and I–V graphs', 'Lessons 7–8', 14, 'Resistors in series and parallel (required practical), I–V characteristics'],
       [5, 'Part 5: I–V investigations and sensors', 'Lessons 9–10', 15, 'Investigating I–V characteristics (required practical), thermistors, LDRs and sensing circuits'],
@@ -52,7 +52,7 @@
       <small><a href="${file(tag)}">Workbook PDF</a><a href="${file(tag, true)}">Answers PDF</a></small></article>`;
     document.getElementById('cards').innerHTML = BOOKLETS.map(([n, title, label, pages, text]) =>
       card(`${label}, ${pages} pages`, title, text, `Part ${n}`)).join('') +
-      card('After Lesson 12, 13 pages', 'Unit review', 'Mixed exam practice (41 marks), a fix-it log, static electricity (Triple only), the equation toolkit, all the key words and a progress tracker.', 'Unit Review', true);
+      card('After Lesson 12, 12 pages', 'Unit review', 'Mixed exam practice (41 marks), a fix-it log, static electricity (Triple only), the equation toolkit, all the key words and a progress tracker.', 'Unit Review', true);
   </script>
 </body>
 </html>

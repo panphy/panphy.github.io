@@ -152,7 +152,7 @@
         ] },
         { t: "lab", title: "Teacher checkpoint", blocks: [
           { t: "warn", h: "<strong>Stop here.</strong> Do not collect any data until your teacher has signed this box. In a real lab, no experiment runs without approval." },
-          { t: "checks", title: "Checked by your teacher", head: ["✓"], items: ["Question is clear and testable", "Independent variable is clear", "Dependent variable is measurable", "Control variables are realistic", "Method is safe", "Equipment is available", "Repeats are included", "Graph choice is sensible"] },
+          { t: "checks", title: "Checked by your teacher", head: ["✓"], cols: 2, items: ["Question is clear and testable", "Independent variable is clear", "Dependent variable is measurable", "Control variables are realistic", "Method is safe", "Equipment is available", "Repeats are included", "Graph choice is sensible"] },
           { t: "vars", rows: [["Approved by", ""], ["Date", ""]] },
         ] },
       ] },

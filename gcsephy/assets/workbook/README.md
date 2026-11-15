@@ -19,9 +19,11 @@ A unit's `workbook.html` loads its figure styles and scripts, its content, `cove
 
 Each lesson runs opener, Do now, Learn it, Try it, Practical, Quick check, Exam corner, Revise it (`order` or `flow` in a lesson changes the order, and `newPage: ["learn"]` starts the listed parts on a new page; any block with `newPage: true` starts a new page); questions are numbered in print order. Section headings carry no notes or labels: a lab's `safety` text prints as a Stay safe box under its heading.
 
+Page breaks: a heading (section, sub-heading or lab title) never ends a page; it stays with its first block, and a one-paragraph lead (`p`, `list` or `steps`) also keeps the block it introduces. Steps lists and question prompts never split. Where that still leaves an awkward break, use `newPage`.
+
 ## Content
 
-Block types (`t`): `p`, `html`, `sub`, `key`, `warn`, `tip`, `say`, `model`, `rule`, `eq`, `split`, `fig`, `figs`, `compare`, `worked`, `follow`, `steps`, `list`, `safety`, `vars`, `checks`, `graph`, `table`, `q`, `part`, `lab`, `home`; a unit adds its own with the `block` hook. An unknown type stops the page with an error rather than printing nothing. Question fields and graph options are listed in `workbook.js`. In sentences, `[[answer|a / b / c]]` prints a blank with its options and `{{a|b*|c}}` an AQA-style ring box.
+Block types (`t`): `p`, `html`, `sub`, `key`, `warn`, `tip`, `say`, `model`, `rule`, `eq`, `split`, `fig`, `figs`, `compare`, `worked`, `follow`, `steps`, `list`, `safety`, `vars`, `checks` (`cols: 2` sets the items in two columns), `graph`, `table`, `q`, `part`, `lab`, `home`; a unit adds its own with the `block` hook. An unknown type stops the page with an error rather than printing nothing. Question fields and graph options are listed in `workbook.js`. In sentences, `[[answer|a / b / c]]` prints a blank with its options and `{{a|b*|c}}` an AQA-style ring box.
 
 ## Unit settings (`assets/book.js`)
 

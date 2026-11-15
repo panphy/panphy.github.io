@@ -89,7 +89,7 @@
       `<path class="ink s-hot" d="M128 ${bottom + 3}H198"/>` +
       `<rect class="ink sun-t" x="196" y="24" width="22" height="212"/>${ticks}` +
       t(222, 20, "metre rule", { a: "start", c: "sm" }) + t(150, bottom - 3, "pointer", { a: "start", c: "sm t-hot" }) +
-      t(120, bottom + 36 + n * 9, `${n} × 100 g`, { c: "sm" }) + t(60, 70, "clamp", { a: "start", c: "sm" }));
+      t(120, bottom + 36 + n * 9, `${n} × 100 g`, { c: "sm" }) + t(54, 22, "clamp", { a: "start", c: "sm" }));
   }
   // Two forces stretch a spring: the clamp pulls up at the top, the load pulls down at the bottom.
   const twoForces = () => svg(220, 230, "Two forces on a stretched spring: the clamp pulls up at the top and the load pulls down at the bottom",

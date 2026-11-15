@@ -474,7 +474,7 @@ window.DeckSvgTex = {
       after += shadow(440, 300, 95) + cluster(440, 200, 93, 144, 10);
       after += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + fly(on, -106, 74, cluster(636, 86, 2, 2, 10));
       const afterLabels = text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p, 144 n', 'lbl mono')
-        + text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p, 2 n', 'lbl mono');
+        + text(604, 40, 'alpha particle', 'lbl display') + text(640, 136, '2 p, 2 n', 'lbl mono'); // clear of the daughter nucleus
       s += on ? parentLabels + stepG(on, 1, after + afterLabels) : after + parentLabels + afterLabels;
       return svg('0 0 720 400', s, 'Alpha decay: americium-241 emits an alpha particle of 2 protons and 2 neutrons and becomes neptunium-237');
     },
