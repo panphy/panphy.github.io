@@ -616,6 +616,31 @@
       return svg('0 0 800 460', s, 'A winding path from start to finish, whose length is the distance, and a straight arrow from start to finish, which is the displacement');
     },
 
+    // Two legs at right angles; the straight line from start to finish is left as a question.
+    'a1-two-legs': () => {
+      const [ax, ay, bx, by, cx, cy] = [110, 400, 410, 400, 410, 80];
+      let s = `<path d="M${ax},${ay} L${cx},${cy}" class="guide" style="stroke-width:3.5;stroke-dasharray:12 10"/>`;
+      s += arrow(ax, ay, bx - 16, by, 'brand-primary', 5) + arrow(bx, by, cx, cy + 16, 'brand-primary', 5);
+      s += body(ax, ay, 14) + body(bx, by, 10) + body(cx, cy, 14);
+      s += text(ax - 22, ay + 10, 'A', 'lbl strong', 'end') + text(bx + 22, by + 10, 'B', 'lbl strong', 'start') + text(cx + 22, cy + 10, 'C', 'lbl strong', 'start');
+      s += text((ax + bx) / 2, ay + 44, '6 km east', 'lbl mono') + text(bx + 22, (by + cy) / 2 + 10, '8 km north', 'lbl mono', 'start');
+      s += text(228, 216, '?', 'lbl display a', 'middle');
+      s += arrow(560, 150, 560, 70, 'text-secondary', 2.5) + text(560, 182, 'N', 'lbl small');
+      return svg('0 0 640 470', s, 'A walk from A 6 kilometers east to B, then 8 kilometers north to C, with a dashed line from A to C marked with a question mark');
+    },
+
+    // A 100 m sprint: at rest during the reaction time, uniform acceleration to 10 m/s, then steady.
+    'a1-sprint': () => {
+      const X = t => 110 + t * 46, Y = v => 400 - v * 27;
+      let s = shade(`M${X(0.2)},400 L${X(4.2)},${Y(10)} L${X(12.2)},${Y(10)} L${X(12.2)},400 Z`) + axes(110, 400, 696, 60, '', 'v / m s⁻¹');
+      s += plot(`M${X(0)},398 L${X(0.2)},398 L${X(4.2)},${Y(10)} L${X(12.2)},${Y(10)}`);
+      s += `<path d="M${X(4.2)},${Y(10)} V400 M${X(12.2)},${Y(10)} V400" class="guide"/>`;
+      [[X(4.2), '4.2'], [X(12.2), 'T']].forEach(([x, label]) => { s += `<line x1="${x}" y1="400" x2="${x}" y2="412" class="tick"/>` + text(x, 438, label, 'lbl mono'); });
+      s += `<line x1="98" y1="${Y(10)}" x2="110" y2="${Y(10)}" class="tick"/>` + text(88, Y(10) + 8, '10', 'lbl mono', 'end') + text(96, 438, '0', 'lbl mono', 'end');
+      s += text(706, 408, 't / s', 'lbl mono', 'start');
+      return svg('0 0 790 460', s, 'Velocity against time for a 100 meter sprint: zero for the first 0.2 seconds, rising steadily to 10 meters per second at 4.2 seconds, then constant until the finish at time T');
+    },
+
     'chord-tangent': () => {
       const at = t => [110 + 580 * t, 400 - 300 * t * t];
       let s = axes(110, 400, 740, 40, 'time', 'displacement');

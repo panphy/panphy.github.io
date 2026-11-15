@@ -131,6 +131,37 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="How far from the start?">
+        <p class="eyebrow">Direction matters</p>
+        <h2>How far from the start<span>?</span></h2>
+        <div class="split even">
+          <div class="panel">
+            <div class="panel-head"><span>A WALK IN TWO LEGS</span></div>
+            <div class="fig" data-fig="a1-two-legs"></div>
+          </div>
+          <div class="stack">
+            <div class="q"><p>Walk 6 km east from A to B, then 8 km north to C. How far have you gone?</p><div class="ans step">Distance: \(6 + 8 = 14\) km</div><div class="ans step">Done? How far is C from A, and which way?</div></div>
+            <div class="work">
+              <span class="step">Displacement: \(\sqrt{6^{2} + 8^{2}} = \class{res}{10 \text{ km}}\)</span>
+              <span class="step">Direction: \(\tan \theta = \dfrac{8}{6}\), so \(\theta = \class{res}{53^{\circ}}\) north of east</span>
+            </div>
+            <div class="idea step">Displacement is a <b>vector</b>: size <b>and direction</b>.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why the legs do not simply add</h3>
+            <p>The two legs point in different directions, so part of each one does not add to the other. Only displacements along the same line add like ordinary numbers. At right angles they add like the sides of a right-angled triangle: the displacement is the hypotenuse, so Pythagoras gives its size and trigonometry its direction.</p>
+            <h3 class="rn-head">The same walk, a different path</h3>
+            <p>Walk 8 km north first and then 6 km east, or cut straight across the field: the distance changes each time, but you end at C, so the displacement is still 10 km at 53° north of east. Displacement depends only on where you start and where you finish.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Giving a displacement as a number alone. “10 km” is a distance; “10 km at 53° north of east” is a displacement.</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="Speed and velocity">
         <h2>Speed and velocity<span>.</span></h2>
         <div class="split even">
@@ -410,6 +441,36 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="A 100 m sprint">
+        <p class="eyebrow">Reading a graph</p>
+        <h2>A 100 m sprint<span>.</span></h2>
+        <div class="split" style="grid-template-columns: minmax(0, 1fr) 660px;">
+          <div class="stack" style="gap: 14px;">
+            <div class="q"><p>Why zero for the first 0.2 s?</p><div class="ans step">Reaction time: the runner hears the gun, then pushes off</div></div>
+            <div class="q"><p>Acceleration at the start?</p><div class="ans step">\(a = \dfrac{10 - 0}{4.2 - 0.2} = 2.5 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
+            <div class="q"><p>Finishing time \(T\)?</p><div class="ans step">Area: 20 m speeding up, then 80 m at 10&nbsp;m&nbsp;s⁻¹ takes 8.0 s, so \(T = 12.2\) s</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>VELOCITY AGAINST TIME</span></div>
+            <div class="fig" data-fig="a1-sprint"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Where the reaction time goes</h3>
+            <p>The clock starts with the gun, not when the runner moves. Sound reaches the runner almost at once, but the brain and muscles take a fraction of a second to respond. In athletics a start less than 0.1 s after the gun counts as a false start, because no one can react that fast: the runner must have guessed.</p>
+            <h3 class="rn-head">Splitting the area</h3>
+            <p>The graph has two shapes under it: a triangle while the runner speeds up and a rectangle while the speed is steady. The rectangle’s width is unknown, so find the distance it must cover first: \(100 - 20 = 80\) m. At a steady 10&nbsp;m&nbsp;s⁻¹ that takes \(\dfrac{80}{10} = 8.0\) s, which ends the graph at \(4.2 + 8.0 = 12.2\) s.</p>
+            <h3 class="rn-head">Average against top speed</h3>
+            <p>The average velocity is \(\dfrac{100}{12.2} = 8.2\)&nbsp;m&nbsp;s⁻¹, well below the top speed of 10&nbsp;m&nbsp;s⁻¹. The reaction time and the slow start both count in the total time, which is why sprinters train their starts so hard.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Average velocity is always total displacement over total time, including any time spent at rest.</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="Quick check: describing motion">
         <p class="eyebrow">Quick check</p>
         <h2>Describing motion<span>.</span></h2>
@@ -472,8 +533,9 @@
         <h2>Where the equations come from<span>.</span></h2>
         <div class="split">
           <div class="work">
-            <span class="say">Gradient = acceleration</span>
-            <span>\(a = \dfrac{v - u}{t}\) &nbsp;so&nbsp; \(\class{res}{v = u + at}\)</span>
+            <span class="ask">What can this graph tell us?</span>
+            <span class="say step">Gradient = acceleration</span>
+            <span class="step">\(a = \dfrac{v - u}{t}\) &nbsp;so&nbsp; \(\class{res}{v = u + at}\)</span>
             <span class="say step">Area = displacement: rectangle + triangle</span>
             <span class="step">\(\class{res}{s = ut + \tfrac{1}{2}at^{2}}\)</span>
             <span class="say step">Area = displacement: a trapezium</span>
@@ -489,13 +551,47 @@
           <div class="rn-main">
             <h3 class="rn-head">The triangle</h3>
             <p>Its base is \(t\) and its height is the gain in velocity, \(v - u\), which is \(at\). Half base times height gives \(\frac{1}{2} \times t \times at = \frac{1}{2}at^{2}\).</p>
-            <h3 class="rn-head">The fourth equation</h3>
-            <p>It has no \(t\) in it. From the first, \(t = \frac{v - u}{a}\). Put that into \(s = \frac{u + v}{2}t\): \(s = \frac{(v + u)(v - u)}{2a} = \frac{v^{2} - u^{2}}{2a}\), which rearranges to \(v^{2} - u^{2} = 2as\).</p>
             <h3 class="rn-head">What the trapezium says</h3>
             <p>\(\frac{u + v}{2}\) is the average velocity when the velocity changes steadily. Displacement is average velocity × time.</p>
           </div>
           <div class="rn-side">
             <p class="tip">You do not have to derive these in an examination: all four are in the data booklet. Knowing where they come from tells you when they can be used.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The fourth equation">
+        <p class="eyebrow">No time given</p>
+        <h2>The fourth equation<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Start from two we have</span>
+            <span>\(v = u + at\) &nbsp;(1)</span>
+            <span>\(s = \dfrac{u + v}{2}t\) &nbsp;(2)</span>
+            <span class="say step">From (1):</span>
+            <span class="step">\(t = \dfrac{v - u}{a}\) &nbsp;(A)</span>
+            <span class="say step">From (2):</span>
+            <span class="step">\(t = \dfrac{2s}{u + v}\) &nbsp;(B)</span>
+          </div>
+          <div class="work">
+            <span class="say step">Combine (A) and (B):</span>
+            <span class="step">\(\dfrac{v - u}{a} = \dfrac{2s}{u + v}\)</span>
+            <span class="step">\((v + u)(v - u) = 2as\)</span>
+            <span class="say step">Therefore:</span>
+            <span class="step">\(\class{res}{v^{2} - u^{2} = 2as}\)</span>
+            <div class="idea step">No \(t\) in it: use it when the time is not given or wanted.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why remove \(t\)</h3>
+            <p>Each of the first three equations links four of the five quantities \(s\), \(u\), \(v\), \(a\) and \(t\). Equation (1) leaves out \(s\), and (2) leaves out \(a\). A problem that gives a stopping distance but no time needs an equation that leaves out \(t\). Both (1) and (2) contain \(t\), so making \(t\) the subject of each and setting the two equal removes it.</p>
+            <h3 class="rn-head">The difference of two squares</h3>
+            <p>\((v + u)(v - u)\) multiplies out to \(v^{2} - vu + uv - u^{2} = v^{2} - u^{2}\): the middle terms cancel.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The data booklet prints this equation as \(v^{2} = u^{2} + 2as\). It is the same equation, with \(u^{2}\) moved to the other side.</p>
           </div>
         </aside>
       </section>
@@ -909,6 +1005,36 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="The same throw on the Moon">
+        <p class="eyebrow">What if?</p>
+        <h2>The same throw on the Moon<span>?</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="q"><p>20&nbsp;m&nbsp;s⁻¹ at 30°, on the Moon, where \(g = 1.6 \,\mathrm{m} \,\mathrm{s}^{-2}\). What changes?</p></div>
+          <table class="facts">
+            <thead><tr><th></th><th>Earth</th><th>Moon</th></tr></thead>
+            <tbody>
+              <tr class="step"><td>Horizontal velocity</td><td class="num">17.3&nbsp;m&nbsp;s⁻¹</td><td class="num">17.3&nbsp;m&nbsp;s⁻¹</td></tr>
+              <tr class="step"><td>Time of flight</td><td class="num">2.0 s</td><td class="num">12.5 s</td></tr>
+              <tr class="step"><td>Maximum height</td><td class="num">5.1 m</td><td class="num">31 m</td></tr>
+              <tr class="step"><td>Range</td><td class="num">35 m</td><td class="num">220 m</td></tr>
+            </tbody>
+          </table>
+          <div class="idea step">About six times weaker gravity: about <b>six times</b> the time, height and range.</div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Only the vertical column changes</h3>
+            <p>The launch is the same, so the components are the same: 17.3&nbsp;m&nbsp;s⁻¹ across and 10.0&nbsp;m&nbsp;s⁻¹ up. Only \(g\) changes. The time to the top is \(\dfrac{u_{y}}{g} = \dfrac{10.0}{1.6} = 6.25\) s, so the flight lasts 12.5 s. The height is \(\dfrac{u_{y}^{2}}{2g} = \dfrac{10.0^{2}}{2 \times 1.6} = 31\) m, and the range is \(17.3 \times 12.5 = 216\) m.</p>
+            <h3 class="rn-head">Why everything scales by the same factor</h3>
+            <p>The time of flight, \(\dfrac{2u_{y}}{g}\), the height, \(\dfrac{u_{y}^{2}}{2g}\), and the range, \(\dfrac{2u_{x}u_{y}}{g}\), each have \(g\) once on the bottom. Divide \(g\) by \(\dfrac{9.8}{1.6} \approx 6.1\) and each of them is multiplied by the same 6.1.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The Moon has no air, so these numbers are close to what a real throw there would give. On the Earth, air resistance makes a real throw fall short of them.</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="Projectile: launched downwards at an angle">
         <p class="eyebrow">Worked example</p>
         <h2>Thrown downwards from a height<span>.</span></h2>
@@ -1090,7 +1216,7 @@
   </nav>
   <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
-  <script src="../assets/figures.js"></script>
+  <script src="../assets/figures.js?v=20261115"></script>
   <script src="../assets/deck-math.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/deck-notes.js"></script>
