@@ -1,4 +1,4 @@
-/* Lessons 1-2 of the Work Like a Physicist workbook (assets/workbook.js): Part 1.
+/* Lessons 1-2 of the Work Like a Physicist workbook (/gcsephy/assets/workbook/workbook.js): Part 1.
    In sentences: [[answer|a / b / c]] is a blank followed by its options; {{a|b*|c}} is an AQA-style
    ring box with * on the answer. `a` holds the answer shown only in the answer edition.
    Block and question types are documented in workbook.js. Data match the teaching deck. */
@@ -94,7 +94,7 @@
           "The smallest change an instrument can detect is its [[resolution|30]].",
         ] },
       ],
-      lab: { title: "Measure one thing three times", aside: "Your teacher gives you one task: a dropped-ruler reaction test, a toy car on a ramp, the bounce of a ball, or one object measured with different rulers.", blocks: [
+      lab: { title: "Measure one thing three times", blocks: [
         { t: "lab", blocks: [
           { t: "steps", items: ["Agree exactly what you will measure, and from where to where.", "Take three readings. Write each one down as soon as you take it.", "Calculate the mean and the uncertainty."] },
           { t: "table", head: ["What I measured (with unit)", "Trial 1", "Trial 2", "Trial 3", "Mean", "Uncertainty"], rh: 11, widths: ["30%", "12%", "12%", "12%", "14%", "20%"], rows: [[null, null, null, null, null, null]], ans: [["catch distance / cm (sample)", "14.0", "17.5", "15.5", "15.7", "1.8"]] },
@@ -105,7 +105,7 @@
         ] },
       ] },
       exam: [
-        { tip: "Show the sum before you divide. Give the answer to the same number of decimal places as the readings.", p: "A student times a pendulum swinging 10 times. The readings are 15.2 s, 15.6 s and 15.3 s. Calculate the mean time.", marks: 2, lines: 2, a: "(15.2 + 15.6 + 15.3) ÷ 3 = 46.1 ÷ 3 (1)<br>= 15.4 s (1)" },
+        { p: "A student times a pendulum swinging 10 times. The readings are 15.2 s, 15.6 s and 15.3 s. Calculate the mean time.", marks: 2, lines: 2, a: "(15.2 + 15.6 + 15.3) ÷ 3 = 46.1 ÷ 3 (1)<br>= 15.4 s (1)" },
         { p: "Calculate the uncertainty in the mean. Use uncertainty = (largest − smallest) ÷ 2", marks: 2, lines: 2, a: "(15.6 − 15.2) ÷ 2 (1)<br>= 0.2 s (1)" },
         { p: "The student always starts the stopwatch late, by about the same amount. What type of error is this? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["random error", "systematic error", "anomalous result"], c: 1, cols: 3 } },
         { p: "Explain why repeating the measurement would not reduce this error.", marks: 1, lines: 2, a: "Every reading is shifted by the same amount in the same direction, so the mean is shifted too (1)." },
@@ -187,14 +187,14 @@
         ] },
         { t: "q", type: "Explain", p: "Explain to someone who missed the lesson why the choice of graph depends on the independent variable and not on the dependent one.", lines: 3, a: "The independent variable goes along the x-axis, so it decides whether the x-axis is a number scale (line graph) or a row of separate labels (bar chart). The dependent variable is nearly always a number, so it cannot tell the two cases apart." },
       ],
-      lab: { title: "Demo: which surface slows the car most?", aside: "Your teacher rolls the same car down the same ramp onto different surfaces: bench, carpet, rubber mat, sandpaper.", blocks: [
+      lab: { title: "Demo: which surface slows the car most?", blocks: [
         { t: "lab", blocks: [
           { t: "vars", rows: [["Independent variable", "", "type of surface"], ["Dependent variable (with unit)", "", "distance the car travels / cm"], ["Graph type", "{{line graph|bar chart*}}"]] },
           { t: "q", p: "List three control variables. Put a star by the one that would be hardest to keep the same.", lines: 3, a: "Same car; same ramp height; same release point, with no push*. The release is hardest: it is easy to give a small push or start from a slightly different spot." },
         ] },
       ] },
       exam: [
-        { tip: "The independent variable is the one the student chooses to change.", p: "A student investigates how the length of a wire affects its resistance. Complete the sentence.", marks: 1, fill: "The independent variable is {{the length of the wire*|the resistance|the temperature}}" },
+        { p: "A student investigates how the length of a wire affects its resistance. Complete the sentence.", marks: 1, fill: "The independent variable is {{the length of the wire*|the resistance|the temperature}}" },
         { p: "Give <strong>one</strong> control variable for this investigation.", marks: 1, lines: 1, a: "Any one: the thickness of the wire; the material of the wire; the temperature (1)." },
         { p: "Complete the sentence.", marks: 1, fill: "The results should be shown on a {{bar chart|line graph*}} because the length of the wire is {{categoric|continuous*}}", a: "Both needed (1)." },
         { p: "Which investigation should be shown on a bar chart? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["how the height of a drop affects the time a ball takes to fall", "how the type of shoe affects grip", "how temperature affects how fast sugar dissolves", "how mass affects the stretch of a spring"], c: 1, cols: 1 } },

@@ -1,8 +1,8 @@
 @import url('/gcsephy/assets/fonts/archivo-black.css');
 
-/* A4 print styles for the Electric Circuits student workbook and teacher guide.
-   The look follows the teaching deck (navy, spark yellow, cyan, copper; Arial Black
-   display type; ink outlines) but stays readable when photocopied in greyscale. */
+/* A4 print styles shared by every GCSE unit workbook (assets/workbook/workbook.js): navy, spark
+   yellow, cyan, copper and violet; Arial Black display type; ink outlines. Readable when photocopied
+   in greyscale. Unit figure styles stay in each unit (figures.css, diagrams-print.css, figures-print.css). */
 @page {
   size: A4;
   margin: 13mm 14mm 15mm;
@@ -39,10 +39,11 @@ strong { font-weight: 700; }
 .cover .lede { max-width: 150mm; margin: 7mm 0 0; font-size: 15pt; line-height: 1.45; color: #d5deeb; }
 .cover-sub { margin: 7mm 0 0; font: 900 10pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
 /* The circuit and the name box sit together at the foot of the cover, with a clear gap between them. */
-.cover-foot { margin-top: auto; padding-top: 8mm; }
-.cover-circuit { width: 150mm; margin: 0 0 10mm; }
+.cover-foot { margin-top: auto; padding-top: 4mm; }
+.cover-circuit { width: 96mm; margin: 0 0 6mm; }
 .cover-circuit svg { width: 100%; display: block; }
-.cover .edition { align-self: flex-start; margin-top: 6mm; padding: 1.8mm 4mm; border: 2px solid var(--copper); color: var(--copper); font: 900 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.cover-circuit .ef { --ef-ink: #fff; }
+.cover .edition { align-self: flex-start; margin-top: 4mm; padding: 1.8mm 4mm; border: 2px solid var(--copper); color: var(--copper); font: 900 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 .cover-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; padding: 6mm 8mm; border: 2px solid var(--spark); background: #eef3f9; }
 .cover-fields div { font: 900 9pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--navy); }
 .cover-fields div span { display: block; height: 10mm; border-bottom: 1.5px solid var(--navy); }
@@ -54,15 +55,6 @@ strong { font-weight: 700; }
 .eyebrow { font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
 
 /* how-to page */
-.legend { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2.5mm; margin: 3mm 0 4mm; }
-.legend > div { display: grid; grid-template-columns: 11mm 1fr; gap: 3mm; align-items: start; padding: 3mm; border: 1.5px solid var(--ink); }
-.legend b { display: block; font: 900 9pt/1.2 Arial, sans-serif; text-transform: uppercase; letter-spacing: .06em; }
-.legend p { margin: 1mm 0 0; font-size: 9.3pt; line-height: 1.35; }
-.route { width: 100%; border-collapse: collapse; font-size: 9.3pt; }
-.route th, .route td { padding: 1.1mm 2mm; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
-.route th { font: 900 7.5pt Arial, sans-serif; text-transform: uppercase; letter-spacing: .1em; border-bottom: 2px solid var(--ink); }
-.route td:first-child { width: 10mm; font: 900 12pt "Arial Black", "Archivo Black", Arial, sans-serif; }
-.route .tag { display: inline-block; margin-left: 1.5mm; padding: 0 1.5mm; border: 1px solid var(--ink); font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; background: var(--leaf-t); }
 
 /* section icons */
 .ico { width: 11mm; height: 11mm; border: 2px solid var(--ink); border-radius: 50%; display: grid; place-items: center; background: var(--c, white); flex: none; }
@@ -81,7 +73,6 @@ strong { font-weight: 700; }
 .big-q { grid-column: 1 / -1; margin: 4mm 0 0; padding: 3mm 4mm; background: var(--spark); color: var(--ink); border: 2px solid var(--ink); box-shadow: 1.6mm 1.6mm 0 var(--accent); font-size: 11pt; font-weight: 700; line-height: 1.35; transform: rotate(-.4deg); }
 .big-q::before { content: "Big question  "; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
 .opener-foot { display: grid; grid-template-columns: 1.35fr 1fr; gap: 4mm; margin: 3mm 0 2mm; }
-.opener-foot.solo { grid-template-columns: minmax(0, 1fr); }
 .goals, .online { padding: 3mm 3.5mm; border: 1.5px solid var(--ink); font-size: 9.4pt; }
 .goals h3, .online h3 { margin: 0 0 1.5mm; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
 .goals ul { margin: 0; padding-left: 4.5mm; }
@@ -95,8 +86,6 @@ strong { font-weight: 700; }
 /* ----- section headers ----- */
 .sec { display: flex; align-items: center; gap: 3mm; margin: 4mm 0 2.5mm; padding-bottom: 1.5mm; border-bottom: 2.5px solid var(--ink); break-after: avoid; }
 .sec h3 { margin: 0; font: 900 13pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
-.sec .kind { font: 900 7pt/1 Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 1mm; }
-.sec .aside { margin-left: auto; font-size: 8.5pt; color: var(--muted); text-align: right; max-width: 70mm; line-height: 1.3; }
 .sec.do-now { --c: var(--cyan); }
 .sec.learn { --c: var(--spark); }
 .sec.try { --c: var(--copper); }
@@ -171,6 +160,8 @@ strong { font-weight: 700; }
 .question > .qn { position: absolute; left: 0; top: .6mm; width: 6.6mm; height: 6.6mm; border: 1.6px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font: 900 8.6pt/1 Arial, sans-serif; background: var(--accent); }
 .question .prompt { margin-bottom: 1.5mm; }
 .question .marks { float: right; margin-left: 3mm; font-weight: 700; white-space: nowrap; }
+/* Physics 8463 only, not Combined Science: Trilogy (as the deck's "Triple Science only" flag). */
+.triple-tag { display: inline-block; margin-left: 2mm; padding: .2mm 1.8mm; border: 1px solid currentColor; border-radius: 99px; font: 700 7.5pt/1.5 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; vertical-align: .6mm; }
 .question .type { display: inline-block; margin-right: 1.5mm; padding: .1mm 1.5mm; border: 1px solid var(--ink); font: 700 7.5pt/1.5 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; vertical-align: .3mm; background: white; }
 .lines { position: relative; min-height: calc(var(--n, 2) * 8mm); background: repeating-linear-gradient(to bottom, transparent 0 7.7mm, var(--rule) 7.7mm 8mm); line-height: 8mm; padding-top: .8mm; }
 .box { min-height: var(--h, 30mm); border: 1.5px solid var(--rule); background: #fff; position: relative; padding: 2mm 3mm; }
@@ -213,9 +204,6 @@ strong { font-weight: 700; }
 .sym-bank svg { display: block; width: 100%; height: 12.5mm; }
 .sym-bank figcaption { padding: .8mm .6mm 1.2mm; border-top: 1px solid var(--rule); font: 700 7.4pt/1.2 Arial, sans-serif; }
 .sym-bank figcaption small { display: block; font-weight: 400; color: #333c48; font-size: 6.8pt; margin-top: .4mm; }
-/* Beside text, a short bank fills its column in one row instead of seven narrow slots. */
-.split .sym-bank { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2.5mm; margin: 0; }
-.split .sym-bank svg { height: 16mm; }
 .sym-legend { font-size: 8.4pt; color: var(--muted); margin: -1.5mm 0 3mm; }
 
 /* data tables */
@@ -343,17 +331,6 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .revise-card { break-inside: auto; }
 .revise-card > div { break-inside: avoid; }
 .keep { break-inside: avoid; }
-.route td { font-size: 8.6pt; line-height: 1.3; }
-.route .map-line { color: #56606e; }
-.route-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 6mm; margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--ink); }
-.route-grid li { display: grid; grid-template-columns: 9mm minmax(0, 1fr); align-items: baseline; margin: 0; padding: 1.2mm 0; border-bottom: 1px solid var(--rule); font-size: 8.6pt; line-height: 1.3; color: #8a929c; }
-.route-grid li b { font: 900 10pt "Arial Black", "Archivo Black", Arial, sans-serif; }
-.route-grid li.this { color: var(--ink); background: var(--spark-t); font-weight: 700; }
-.route-grid li.this b { padding-left: 1mm; }
-.route-grid .map-line { display: block; font-weight: 400; color: #333c48; }
-.route-grid .tag { display: inline-block; margin-left: 1.5mm; padding: 0 1.2mm; border: 1px solid currentColor; font-size: 6.8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
-.route td:first-child { font-size: 10pt; }
-.legend p { font-size: 8.6pt; }
 .cover-part { margin-top: 8mm; font: 900 22pt/1.15 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
 .cover-part b { display: inline-block; margin-right: 4mm; padding: 1mm 3mm; background: var(--spark); color: var(--navy); }
 .cover-part span { display: block; margin-top: 3mm; font: 700 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--leaf); }
@@ -393,5 +370,208 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
    shrink the whole print, so the route is inset by the same amount. */
 .circuit-figure.grid-route > ol { margin: 0 8px; }
 
+/* virtual labs booklet (workbook.html?labs) */
+.lab-page { break-before: page; }
+.labs .opener { margin-bottom: 4mm; }
 .key a { color: #0f5f85; }
+.lab-key { margin-bottom: 3mm; font-size: 9pt; line-height: 1.35; }
+.lab-key ol { columns: 2; column-gap: 7mm; margin: 0; padding-left: 6mm; }
+.lab-key li { break-inside: avoid; margin-bottom: 1.2mm; }
+.lab-key li::marker { font-weight: 900; }
 
+
+/* ===== Year 9 Energy additions ===== */
+/* maths */
+mjx-container { line-height: 0; }
+mjx-container[display="true"] { margin: 1mm 0 !important; }
+.eq-card .eq { font-size: 15pt; }
+.tool .eq { font-size: 13pt; }
+/* options straight after a blank, and AQA-style ring boxes */
+.opts { margin-left: 1.2mm; font-size: 8.8pt; font-weight: 700; color: #333c48; white-space: nowrap; }
+.ring-box { display: inline-flex; flex-wrap: wrap; vertical-align: middle; margin: .4mm 1mm; border: 1.4px solid var(--ink); background: white; }
+.ring-box > span { padding: .6mm 2.4mm; border-left: 1px solid var(--rule); font-weight: 700; font-size: 9.4pt; line-height: 1.5; border-radius: 0; }
+.ring-box > span:first-child { border-left: 0; }
+body.answers .ring-box > span.correct { color: var(--ans); outline: 1.6px solid var(--ans); outline-offset: -1.8px; border-radius: 99px; }
+.ring-row { display: grid; gap: 1.6mm; margin: 1mm 0 1.5mm; }
+.ring-row > div { display: flex; flex-wrap: wrap; align-items: center; gap: 1mm 2mm; font-size: 9.6pt; }
+.bank { margin: 1mm 0 1.5mm; padding: 1.6mm 2.4mm; border: 1.4px solid var(--ink); background: white; }
+.bank::before { content: none; }
+.bank-head { display: block; margin-bottom: 1mm; font: 700 8.6pt/1.2 Arial, sans-serif; color: var(--muted); }
+.bank > div { display: flex; flex-wrap: wrap; gap: 1.5mm 4mm; }
+.bank > div span { padding: 0; border: 0; font-size: 9.6pt; font-weight: 700; }
+.cell-opts { display: block; font-size: 7.6pt; color: var(--muted); font-weight: 700; line-height: 1.25; }
+td.blank-cell { height: 10mm; vertical-align: top; }
+/* matching lines */
+.match { display: grid; grid-template-columns: minmax(0, 1fr) 26mm minmax(0, 1fr); align-items: stretch; margin: 1mm 0 2mm; }
+.match > div:not(.match-gap) { display: grid; gap: 1.6mm; }
+.match > div > span { display: flex; align-items: center; min-height: 8mm; padding: 1mm 2.4mm; border: 1.3px solid var(--ink); font-size: 9.2pt; background: white; }
+.match-gap { position: relative; }
+.match-gap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.match-gap line { stroke: var(--ans); stroke-width: .8; vector-effect: non-scaling-stroke; }
+/* figures */
+.fig { margin: 1mm 0 2.5mm; break-inside: avoid; text-align: center; }
+.fig .ef { max-height: 62mm; margin: 0 auto; }
+.fig-small .ef { max-height: 42mm; }
+.fig-mid .ef { max-height: 50mm; }
+.fig .cap { margin: 1mm 0 0; font-size: 8.4pt; color: #333c48; }
+.figs.c4 .ef-panel, .figs.c2 .ef-panel { margin: 0; }
+.ef-panel { margin: 0; text-align: center; }
+.ef-panel figcaption { margin-top: .8mm; font-size: 8.4pt; font-weight: 700; }
+.story-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.5mm; margin: 1mm 0 2.5mm; break-inside: avoid; }
+.bullets { margin: 0 0 2.5mm; padding-left: 5mm; }
+.bullets li { margin-bottom: 1mm; }
+/* opener side box */
+.online.story { background: var(--copper-t); }
+.online.kit { background: var(--leaf-t); }
+.online.story p, .online.kit p { font-size: 9pt; line-height: 1.35; }
+/* toolkit with triangles */
+.toolkit-page .toolkit { grid-template-columns: 1fr 1fr; gap: 2.6mm; margin-bottom: 3mm; }
+.tool { grid-template-columns: minmax(0, 1fr) auto; padding: 2.4mm 3mm; }
+.tool.has-tri { grid-template-columns: minmax(0, 1fr) auto; }
+.tool .tool-tri { grid-column: 2; grid-row: 2 / span 3; align-self: center; }
+.tool .recall-cover { grid-column: 1; }
+.tool .units { grid-column: 1; }
+.g-lesson { display: inline-block; padding: 0 1.2mm; border: 1px solid var(--ink); font-size: 7pt; font-weight: 700; }
+.data.wide th { font-size: 8.2pt; }
+.eq-card.stack { grid-template-columns: minmax(0, 1fr) auto; }
+.eq-card.stack .eq { grid-column: 1 / -1; grid-row: auto; white-space: normal; margin-bottom: 1mm; }
+.eq-card.stack .words, .eq-card.stack .units, .eq-card.stack .re { grid-column: 1; }
+.eq-card.stack .tri-mini { grid-column: 2; grid-row: 2 / span 3; }
+.opts { white-space: normal; }
+/* Practical and Exam corner cards move whole to the next page rather than split. A card taller
+   than a page still breaks between questions, and each piece keeps its own closed border. */
+.lab-card, .exam-card { break-inside: avoid; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.lab-card > .question, .lab-card > .keep { break-inside: avoid; }
+.exam-card { margin-top: 4mm; }
+.exam-card .sec { margin-top: 0; }
+/* The toolkit is the last page and must fit on one sheet, so it prints at normal size. */
+.book:not(.guide) > section.toolkit-page { zoom: 1; }
+.toolkit-page .method-steps { break-inside: avoid; }
+.toolkit-page .tool:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.question.part { padding-left: 0; margin-top: 2mm; }
+
+/* ----- Year 10 Particle Model of Matter additions ----- */
+.fig .pf { max-height: 62mm; margin: 0 auto; }
+.fig-small .pf { max-height: 42mm; }
+.fig-mid .pf { max-height: 50mm; }
+.fig-wide .pf { max-height: 58mm; }
+.split .fig .pf { max-height: 56mm; }
+.cover-circuit .pf { --pf-ink: #fff; }
+.online .deck-line { margin-top: 1.6mm; padding-top: 1.4mm; border-top: 1px solid var(--ink); font-size: 8pt; line-height: 1.3; }
+.draw-box { height: 42mm; aspect-ratio: 1; margin: 1mm auto 2.5mm; border: 1.6px solid var(--ink); background: white; }
+.draw-box .ans-fig { display: none; height: 100%; }
+.answers .draw-box .ans-fig { display: block; }
+.draw-box .ans-fig .pf { height: 100%; width: auto; margin: 0 auto; }
+.draw-box .ans-fig .pf rect.ink { stroke: none; }
+table.data.wide { font-size: 8.6pt; }
+table.data.wide th, table.data.wide td { padding-left: 1mm; padding-right: 1mm; }
+.page-title .triple-tag { font-size: 8pt; vertical-align: 2mm; }
+.tracker-flow { break-inside: avoid; }
+/* Long cards may run on to the next page between their questions, so no page is left half empty.
+   Each question, and each part of a question with parts, still prints whole. */
+.lab-card, .exam-card { break-inside: auto; }
+.question:has(> .question.part) { break-inside: auto; }
+.question:has(> .question.part) > .prompt, .question:has(> .question.part) > .fig { break-after: avoid; }
+
+/* ---------- Shared additions: every unit's blocks in one sheet ---------- */
+:root {
+  --proton: #D45132; --proton-t: #FBE7E1; --electron: #1675BB; --electron-t: #E3EFF8;
+  --alpha: #B5179E; --alpha-t: #F7E3F3; --photon: #7C3AED; --photon-t: #EDE7FB;
+  --positive: #B7791F; --positive-t: #F7EEDC; --object: #5E8C38; --object-t: #EAF2E1;
+  --teal: #0D9488; --teal-t: #E0F2EF;
+}
+.sec h3 { line-height: 1.05; }
+.opener-foot.solo { grid-template-columns: minmax(0, 1fr); }
+.opener .num-to { display: block; margin-top: 1.5mm; font-size: 24pt; letter-spacing: -.04em; }
+.online.story .punch { margin: 1.5mm 0 0; font-weight: 700; }
+.online .sim { margin-top: 1.5mm; }
+.cover-quote { max-width: 150mm; margin: 9mm 0 0; padding-left: 5mm; border-left: 3px solid var(--spark); font-size: 13pt; font-style: italic; line-height: 1.45; color: #d5deeb; }
+.cover-quote span { display: block; margin-top: 2mm; font: 700 8.5pt/1 Arial, sans-serif; font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: #a8b8cc; }
+.key.warn { background: var(--copper-t); }
+.key.warn::before { background: var(--copper); }
+.rule-card { margin: 2mm 1.4mm 3mm 0; border: 2px solid var(--ink); box-shadow: 1.4mm 1.4mm 0 var(--accent); background: white; break-inside: avoid; }
+.rule-head { padding: 1.4mm 3.5mm; background: var(--navy); color: white; font: 900 7.5pt/1.3 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+.rule-body { padding: 2.5mm 3.5mm 1.5mm; font-size: 11.5pt; font-weight: 700; line-height: 1.4; }
+.rule-foot { padding: 0 3.5mm 2.5mm; font-size: 9.2pt; color: #333c48; }
+.toolkit-page .rule-card { --accent: var(--spark); }
+.checks { width: 100%; border-collapse: collapse; margin: 1mm 0 3mm; font-size: 9.3pt; break-inside: avoid; }
+.checks th, .checks td { padding: 1.3mm 2.4mm; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: middle; }
+.checks th { font: 900 7.5pt/1.2 Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; border-bottom: 2px solid var(--ink); }
+.checks .tick-col { width: 19mm; text-align: center; }
+.tickbox { display: inline-block; width: 4.4mm; height: 4.4mm; border: 1.5px solid var(--ink); background: white; vertical-align: middle; }
+body.answers .tickbox.on { background: var(--ans); box-shadow: inset 0 0 0 1mm white; }
+.home-card { margin: 3mm 0; padding: 3mm 3.5mm 1mm; border: 2px solid var(--ink); border-left: 6px solid var(--copper); background: var(--copper-t); break-inside: avoid; }
+.home-card h4 { margin: 0 0 1.5mm; font: 900 8pt/1 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.home-card .lines { background-color: white; }
+.data[style*="--rh"] td { height: var(--rh); }
+.data td.blank-cell { text-align: left; vertical-align: top; }
+.vars.tall td { height: 11mm; }
+.compare.phrases td:first-child { width: 42%; color: #333c48; }
+.ring-tail { font-size: 9.6pt; }
+.graph-paper .bar { fill: rgba(21, 88, 176, .16); stroke: var(--ans); stroke-width: .4; }
+.graph-paper .given-mark { fill: none; stroke: var(--ink); stroke-width: .45; }
+.graph-paper .given-fit { fill: none; stroke: var(--copper); stroke-width: .6; }
+.graph-paper .read { fill: none; stroke: var(--ans); stroke-width: .35; stroke-dasharray: 1 .8; }
+.graph-paper .given-read { stroke: var(--copper); }
+.sentence { margin-top: 5mm; padding: 3mm 4mm; border: 2px solid var(--ink); background: var(--spark-t); text-align: center; break-inside: avoid; }
+.sentence .k { font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 1.5mm; }
+.sentence .v { font-size: 11pt; font-weight: 700; }
+.tk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.6mm; margin-bottom: 3mm; }
+.tk { padding: 2.4mm 3mm; border: 2px solid var(--ink); break-inside: avoid; font-size: 8.9pt; line-height: 1.35; }
+.tk h4 { margin: 0 0 1.4mm; font: 900 8pt/1.2 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.tk h4::before { content: ""; display: inline-block; width: 2.2mm; height: 2.2mm; margin-right: 1.6mm; background: var(--spark); border: 1.2px solid var(--ink); vertical-align: .1mm; }
+.tk p { margin: 0 0 1mm; }
+.tk table { width: 100%; border-collapse: collapse; }
+.tk td { padding: .6mm 1.5mm .6mm 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.tk tr:last-child td { border-bottom: 0; }
+.tk td:first-child { width: 23mm; font-weight: 700; }
+.tk .calc { margin: .8mm 0; padding: 1.2mm 2mm; background: var(--spark-t); border: 1.2px solid var(--ink); font-weight: 700; }
+.tk ul { margin: 0; padding-left: 4mm; }
+.tk li { margin-bottom: .4mm; }
+.tk.wide { grid-column: 1 / -1; }
+.tk.wide ul { columns: 2; column-gap: 6mm; }
+.split.top { align-items: start; }
+
+/* Matching by letter: write the letter of the right-hand item beside each left-hand item. */
+.match.letters { grid-template-columns: minmax(0, 1fr) 16mm minmax(0, 1fr); gap: 1.6mm 0; align-items: center; }
+.match.letters > div { display: flex; align-items: center; gap: 2mm; min-height: 8mm; padding: 1mm 2.4mm; border: 1.3px solid var(--ink); font-size: 9.2pt; background: white; }
+.match.letters > .join-cell, .match.letters > .empty { border: 0; padding: 0; background: none; justify-content: center; }
+.match.letters .join { color: var(--ans); font-weight: 700; }
+body:not(.answers) .match.letters .join { visibility: hidden; }
+
+/* Deck figures (Atoms and Nuclear Radiation): the deck's drawings, sized for print. */
+.dfig { margin: 0; text-align: center; break-inside: avoid; }
+.dfig svg { display: block; width: 100%; height: auto; max-height: var(--mh, 70mm); margin: 0 auto; overflow: visible; }
+.dfig figcaption { margin-top: 1mm; color: #333c48; font-size: 8.3pt; line-height: 1.3; }
+.dfig.framed { padding: 2.5mm; border: 1.5px solid var(--ink); background: white; }
+.dfig .nts { display: block; margin-bottom: 1mm; text-align: right; font: 700 6.5pt Arial, sans-serif; letter-spacing: .12em; color: var(--muted); }
+.fig-small { --mh: 42mm; }
+.fig-mid { --mh: 54mm; }
+.cover-circuit .dfig { width: 70mm; padding: 3mm; background: white; border: 2px solid var(--spark); }
+.cover-circuit .dfig svg { max-height: 52mm; }
+.opt-fig svg { display: block; width: 100%; height: auto; max-height: 34mm; }
+.worked .data { margin: 0 0 1.5mm; }
+.worked .data th, .worked .data td { height: 6.2mm; padding: .8mm 2mm; }
+.worked .data td { white-space: nowrap; }
+
+/* Nuclide notation and nuclear equations */
+.nuc { white-space: nowrap; font-weight: 800; font-size: 1.08em; }
+.nuc .nums { display: inline-block; vertical-align: -.26em; margin: -.25em 1px -.2em 0; text-align: right; font: 700 .56em/.98 Arial, sans-serif; }
+.nuc .nums > span { display: block; }
+.nuc.alpha { color: var(--alpha); } .nuc.electron { color: var(--electron); } .nuc.gamma { color: var(--photon); } .nuc.neutron { color: #56636f; }
+.nuc-eq { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2.5mm; margin: 2mm 0 3mm; padding: 2.5mm 4mm; border: 1.5px solid var(--ink); background: var(--spark-t); font-size: 16pt; }
+.nuc-eq .op { font: 400 14pt Arial, sans-serif; color: var(--muted); }
+.nuc-eq .gap { display: inline-block; min-width: 14mm; min-height: 10mm; border: 1.5px dashed var(--ink); background: white; text-align: center; font-size: 13pt; line-height: 10mm; }
+.nuc-eq .check { flex-basis: 100%; text-align: center; font: 700 8.5pt Arial, sans-serif; color: var(--muted); }
+.tag { display: inline-block; margin-left: 1.5mm; padding: 0 1.5mm; border: 1px solid currentColor; font: 700 6.8pt/1.5 Arial, sans-serif; text-transform: uppercase; letter-spacing: .06em; }
+
+/* A toolkit of facts and methods (no equations): one card each. */
+.facts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3mm; }
+.fact { position: relative; padding: 2.6mm 3mm; border: 2px solid var(--ink); break-inside: avoid; font-size: 9pt; line-height: 1.35; }
+.fact.wide { grid-column: 1 / -1; }
+.fact h4 { margin: 0 0 1.5mm; padding-right: 18mm; font: 900 8.5pt/1.2 Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+.fact .lesson-tag { position: absolute; top: 2.6mm; right: 3mm; padding: .3mm 1.8mm; border: 1.2px solid var(--ink); font: 900 7pt/1.5 Arial, sans-serif; background: var(--spark-t); }
+.fact p, .fact li { font-size: 9pt; }
+.fact .compare { margin-bottom: 0; font-size: 8.6pt; }
+.fact .compare th, .fact .compare td { padding: 1.2mm 1.8mm; }
+.fact .nuc-eq { font-size: 13pt; margin: 1.5mm 0; }

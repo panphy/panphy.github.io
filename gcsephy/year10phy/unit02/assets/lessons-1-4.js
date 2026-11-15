@@ -61,7 +61,7 @@
         { t: "q", p: "A sealed bag holds 120 g of water. It is put in a freezer until all the water is ice. State the mass of the ice, and explain your answer.", lines: 3, a: "120 g. The number of particles has not changed: none were added or removed, they were only rearranged." },
         { t: "q", type: "Challenge", p: "Liquid water can be poured, but a block of ice cannot. Use the particle model to explain why.", lines: 3, a: "In a liquid the particles can move around and slide past each other, so the liquid flows. In a solid the particles are held in fixed positions and can only vibrate." },
       ],
-      lab: { title: "See it: squash it, melt it", aside: "Your teacher will demonstrate. Write what you see.", blocks: [
+      lab: { title: "See it: squash it, melt it", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "<strong>Part 1.</strong> Your teacher blocks the end of a syringe of air and pushes the plunger. Then the same with a syringe of water." },
           { t: "q", p: "Complete the table.", table: { head: ["In the syringe", "Can it be squashed?", "What this tells you about the particles"], rows: [["air (a gas)", null, null], ["water (a liquid)", null, null]], ans: [[null, "yes, easily", "there is a lot of empty space between them"], [null, "no", "they are already touching"]] } },
@@ -71,7 +71,7 @@
         ] },
       ] },
       exam: [
-        { tip: "“Compare” means say something about <strong>both</strong>. Give the arrangement and the motion for each state.", p: "Compare the arrangement and the motion of the particles in a solid with those in a gas.", marks: 4, lines: 6,
+        { p: "Compare the arrangement and the motion of the particles in a solid with those in a gas.", marks: 4, lines: 6,
           a: "Solid: particles very close together (1) in a regular pattern, vibrating about fixed positions (1). Gas: particles far apart (1), moving quickly in random directions (1)." },
         { p: "A student melts 25 g of solid wax in a sealed tube.<br>(a) State the mass of the liquid wax.<br>(b) Explain why melting is a physical change.", marks: 3, lines: 4,
           a: "(a) 25 g (1). (b) No new substance is made (1); the wax recovers its original properties if the change is reversed, by cooling it (1)." },
@@ -127,7 +127,7 @@
         { t: "q", p: "A car is driven for a long time on a hot day. Explain why the pressure of the air in its tyres increases. Assume the volume of a tyre does not change.", lines: 4, a: "The air in the tyre gets hotter, so the molecules move faster (their average kinetic energy increases). They collide with the tyre wall more often and with more force, so the pressure increases." },
         { t: "q", type: "Challenge", p: "A sealed bottle of air is put in a freezer. Mia says, “The pressure falls because some of the air particles disappear.” Explain why Mia is wrong, and give the correct reason.", lines: 4, a: "The bottle is sealed, so the number of particles stays the same. The pressure falls because the molecules move more slowly: they hit the walls less often and with less force." },
       ],
-      lab: { title: "See it: pressure and temperature", aside: "Your teacher will demonstrate. The flask is sealed, so its volume stays the same.", blocks: [
+      lab: { title: "See it: pressure and temperature", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "A sealed flask of air is joined to a pressure gauge and put in water at different temperatures. Record the readings." },
           { t: "q", p: "Record the results.", table: { head: ["Temperature of the air / °C", "Pressure / kPa"], rows: [[null, null], [null, null], [null, null], [null, null]], ans: [["20", "101"], ["40", "108"], ["60", "115"], ["80", "122"]] } },
@@ -136,7 +136,7 @@
         ] },
       ] },
       exam: [
-        { tip: "A 3-mark “explain” about gas pressure needs three linked steps: <strong>faster</strong>, <strong>collisions</strong>, <strong>pressure</strong>.", p: "An aerosol can is left in sunlight and gets hot. Explain, in terms of particles, why the pressure of the gas in the can increases.", marks: 3, lines: 5,
+        { p: "An aerosol can is left in sunlight and gets hot. Explain, in terms of particles, why the pressure of the gas in the can increases.", marks: 3, lines: 5,
           a: "The molecules gain kinetic energy and move faster (1). They collide with the walls of the can more often (1) and with a greater force, so the pressure increases (1)." },
         { p: "Describe the motion of the molecules in a gas.", marks: 2, lines: 2, a: "They are in constant motion (1), in random directions (and with a range of speeds) (1)." },
       ],
@@ -200,7 +200,7 @@
         { t: "q", type: "Challenge", p: "A crown has a mass of 1.9 kg and a volume of 120 cm³. The density of gold is 19.3 g/cm³. Is the crown pure gold? Show your working. <em>Convert the mass to grams first.</em>", lines: 4, a: R`m = 1900 g. \(\rho = \dfrac{m}{V} = \dfrac{1900}{120} = 15.8\) g/cm³. This is less than 19.3 g/cm³, so the crown is not pure gold.` },
       ],
       exam: [
-        { tip: "Write the equation in symbols first, then the numbers. A correct equation often earns a mark even if the arithmetic goes wrong.", p: "A block of ice has a mass of 2760 kg and a volume of 3.0 m³. Calculate the density of ice.", marks: 2, frame: frame3, frameA: [R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{2760}{3.0}\) (1)`, "920 kg/m³ (1)"] },
+        { p: "A block of ice has a mass of 2760 kg and a volume of 3.0 m³. Calculate the density of ice.", marks: 2, frame: frame3, frameA: [R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{2760}{3.0}\) (1)`, "920 kg/m³ (1)"] },
         { p: "A fuel tank holds 0.060 m³ of diesel. The density of diesel is 850 kg/m³. Calculate the mass of the diesel.", marks: 3, frame: frameRe, frameA: [R`\(\rho = \dfrac{m}{V}\)`, R`\(m = \rho\,V\) (1)`, R`\(m = 850 \times 0.060\) (1)`, "51 kg (1)"] },
         { p: "Explain why a gas has a much lower density than a solid.", marks: 2, lines: 3, a: "The particles in a gas are much further apart than in a solid (1), so there is less mass (fewer particles) in the same volume (1)." },
       ],
@@ -242,7 +242,7 @@
         ] },
         { t: "tip", h: "The width of a measuring cylinder matters. A narrow cylinder has scale lines further apart for each cm³, so you can read it more precisely. Use the narrowest one the object will fit into." },
       ],
-      lab: { title: "Required practical: density", aside: "Wipe up spills at once. Carry glassware with two hands.", blocks: [
+      lab: { title: "Required practical: density", blocks: [
         { t: "safety", items: ["Water on the floor is a slip hazard: mop up spills straight away.", "Do not drop metal blocks: keep them in the middle of the bench.", "Report any broken glass to your teacher. Do not pick it up."] },
         { t: "lab", title: "Part A: regular solids", blocks: [
           { t: "steps", items: ["Measure the length, width and height of each block.", "Calculate its volume.", "Measure its mass on the balance.", "Calculate its density."] },
@@ -268,7 +268,7 @@
       ],
       order: ["doNow", "learn", "lab", "try", "check", "exam", "revise"],
       exam: [
-        { tip: "A 6-mark method is marked on <strong>whether someone could follow it</strong>. Name each instrument, say what it measures, and finish with the calculation.", p: "A student has a small, irregularly shaped stone. Describe a method the student could use to determine the density of the stone.", marks: 6, lines: 10,
+        { p: "A student has a small, irregularly shaped stone. Describe a method the student could use to determine the density of the stone.", marks: 6, lines: 10,
           a: "Indicative content: measure the mass of the dry stone with a balance; part fill a measuring cylinder with water and record the volume; lower the stone in on a thread until fully submerged; record the new volume; volume of stone = difference between the two readings (or use a displacement can and collect the water); read the scale at eye level, at the bottom of the meniscus; density = mass ÷ volume; repeat and calculate a mean. Level 3 (5–6): a detailed, logically ordered method that would give a valid result." },
         { p: "A metal cube has sides of 2.0 cm and a mass of 71.2 g. Calculate the density of the metal in g/cm³.", marks: 3, frame: [["Volume"], ["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: [R`\(V = 2.0 \times 2.0 \times 2.0 = 8.0\) cm³ (1)`, R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{71.2}{8.0}\) (1)`, "8.9 g/cm³ (1)"] },
       ],

@@ -1,4 +1,4 @@
-/* Assembles the Work Like a Physicist workbook (assets/workbook.js) from the lesson files
+/* Assembles the Work Like a Physicist workbook (/gcsephy/assets/workbook/workbook.js) from the lesson files
    (lessons-a.js, lessons-b.js, lessons-c.js) and adds the Physicist's toolkit, the key words and the
    "phrases that pick up marks". Key words and phrases carry the lesson that introduces them, so each
    part lists only those met so far (Lessons 7-8 are lesson 7). */

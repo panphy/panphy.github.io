@@ -1,0 +1,58 @@
+// Workbook settings for the shared renderer (/gcsephy/assets/workbook/workbook.js).
+(function () {
+  const D = window.Diagrams;
+  // A standard symbol on a short wire, reusing the site's drawing helper.
+  const symbolSvg = (type) => D.circuit({ w: 104, h: 70, wires: ["M4 45 H100"], extra: `<g transform="translate(52 45)">${D.keySymbol(type)}</g>` })
+    .replace(/<figure[^>]*>/, "").replace("</figure>", "");
+
+  window.WORKBOOK = {
+    file: "Y10 - Unit 01 - Electric Circuits",
+    name: "Electric Circuits",
+    year: 10,
+    coverTitle: "Electric<br><em>Circuits</em>",
+    // A working circuit: the voltmeter is across the lamp, the ammeter is in series, and
+    // the diode points the way conventional current flows (+ terminal on the left).
+    coverArt: () => D.circuit({
+      w: 700, h: 215,
+      wires: ["M30 70 H670 V185 H30 Z", "M455 70 V22 H585 V70", "M300 185 V140 H460 V185"],
+      parts: [["battery", 120, 70, "h"], ["switchClosed", 240, 70, "h"], ["ammeter", 360, 70, "h"], ["lamp", 520, 70, "h"], ["voltmeter", 520, 22, "h"],
+        ["diode", 160, 185, "h"], ["ldr", 380, 140, "h"], ["thermistor", 380, 185, "h"], ["resistor", 570, 185, "h"]],
+      dots: [[455, 70], [585, 70], [300, 185], [460, 185]],
+    }).replace(/<figure[^>]*>/, "").replace("</figure>", "").replace('class="cd"', 'class="cd" style="stroke:#fff"'),
+    coverArtStyle: "--ink:#fff;--diagram-bg:#0a1326;width:150mm;margin:0 0 10mm",
+    lede: "Charge, energy and resistance: from your first circuit to confident exam answers.",
+    parts: [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]],
+    firstDoNow: "What do you already think?",
+    // Only equations of the form A = B × C have a triangle. P = I² R gives I², so a square root follows.
+    triangles: {
+      "Q = I t": ["Q", "I", "t"], "E = Q V": ["E", "Q", "V"], "V = I R": ["V", "I", "R"],
+      "P = V I": ["P", "V", "I"], "E = P t": ["E", "P", "t"], "P = I² R": ["P", "I²", "R"],
+    },
+    toolkit: (W) => W.equationToolkit({
+      note: `Example: to find I from Q = I t, cover I. Q is above t, so I = Q ÷ t.${W.LAST >= 11 ? " For P = I² R, the triangle gives I²: take the square root to find I." : ""}`,
+      convert: "minutes → seconds, kW → W, mA → A",
+      after: `<table class="units-table"><thead><tr><th>Convert</th><th>How</th><th>Example</th></tr></thead><tbody>
+        <tr><td>minutes → seconds</td><td>× 60</td><td>3.0 min = 180 s</td></tr>
+        <tr><td>hours → seconds</td><td>× 3600</td><td>2.0 h = 7200 s</td></tr>
+        <tr><td>milliamps (mA) → amps (A)</td><td>÷ 1000</td><td>250 mA = 0.25 A</td></tr>
+        <tr><td>kilowatts (kW) → watts (W); kilohms (kΩ) → ohms (Ω)</td><td>× 1000</td><td>2.2 kW = 2200 W</td></tr>
+        <tr><td>kilovolts (kV) → volts (V)</td><td>× 1000</td><td>400 kV = 400 000 V</td></tr></tbody></table>`,
+    }),
+    extension: [{ eyebrow: "Triple Science only (AQA 4.2.5)", title: "Static electricity", learn: window.UNIT.staticExt.learn, questions: window.UNIT.staticExt.questions }],
+    // The Unit review opens with every equation to recall in symbols, with its units.
+    reviewStart: (W) => {
+      const eqs = W.U.equations.filter((e) => !e.ht);
+      return W.secHead("doNow", "Equation recall challenge") +
+        W.question({ p: "Write each equation in symbols. Then give the unit of every quantity in it.", table: { head: ["Equation in words", "In symbols", "Units"], rows: eqs.map((e) => [e.words, null, null]), ans: eqs.map((e) => [null, e.eq, e.units]) } });
+    },
+    block: (b) => {
+      if (b.t !== "symbank") return null;
+      const tiles = b.items.map(([type, name, job, later]) => `<figure class="${later ? "later" : ""}">${symbolSvg(type)}<figcaption>${name}${job ? `<small>${job}</small>` : ""}</figcaption></figure>`).join("");
+      return `<div class="sym-bank">${tiles}</div>${b.legend ? `<p class="sym-legend">${b.legend}</p>` : ""}`;
+    },
+    // Symbol quiz: name each symbol, or draw the symbol for each name (drawn in the answer edition).
+    question: (b, W) => (b.symq ? `<div class="symbol-quiz" style="--cols:${b.symq.cols || 6}">${b.symq.items.map(([type, name, mode]) => mode === "draw"
+      ? `<div><div class="draw">${W.answers ? symbolSvg(type) : ""}</div><div class="name">${name}</div></div>`
+      : `<div>${symbolSvg(type)}<div class="name">${W.ans(name)}</div></div>`).join("")}</div>` : ""),
+  };
+})();

@@ -1,4 +1,4 @@
-/* Assembles the Year 9 Energy: Stores and Transfers workbook (assets/workbook.js) from the lesson
+/* Assembles the Year 9 Energy: Stores and Transfers workbook (/gcsephy/assets/workbook/workbook.js) from the lesson
    files (lessons-a.js, lessons-b.js, lessons-c.js) and adds the equation toolkit and key words.
    Maths is LaTeX between \( and \). A triangle's labels are plain text: "E_p" draws a subscript. */
 (function () {

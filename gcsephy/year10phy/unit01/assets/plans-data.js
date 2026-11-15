@@ -30,7 +30,7 @@
         [6, 18, "Learn", "Free electrons, coulombs, current as a rate (ticket barrier). Slides 10–11: model both examples while students fill in the workbook frames, then each ‘Your turn’ alone. Quick check (slide 14) in the workbook box at the end of the lesson."],
         [18, 32, "Virtual Lab 1", "Pairs measure current at three points, then change R. Record in the Lab box. Ask: ‘Where did the current go?’"],
         [32, 44, "Try it", "Q1–Q5 in order: the calculation questions fade from full frame to no frame. Q6 is the challenge. Q7 is the misconception check."],
-        [44, 50, "Exam corner", "Questions 10–11. Peer mark using the tip: time conversion, unit."],
+        [44, 50, "Exam corner", "Questions 10–11. Peer mark: time conversion, unit."],
       ],
       hinge: "Q2 (0.60 A means…). Anyone choosing ‘0.60 C in the circuit’ needs the ticket-barrier model again.",
       misconceptions: [["Current is used up.", "Virtual Lab 1 plus Q7. Language: charge goes round; energy is transferred."], ["Minutes go straight into Q = I t.", "Every supported frame has a ‘Convert’ row first."], ["Electrons flow from + to −.", "Show both arrows on one diagram; exam diagrams use conventional current."]],

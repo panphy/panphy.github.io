@@ -57,7 +57,7 @@
         { t: "q", type: "Challenge", p: `Uranium-238, ${N(238, 92, "U")}, decays by alpha emission. The new nucleus then decays by beta emission, and the next one by beta emission again. Find the final nucleus. What do you notice?`, lines: 3, a: `${N(238, 92, "U")} → ${N(234, 90, "Th")} → ${N(234, 91, "Pa")} → ${N(234, 92, "U")}. The final nucleus is uranium-234: an isotope of the uranium we started with (same 92 protons, 4 fewer neutrons).` },
       ],
       exam: [
-        { tip: "Both numbers earn a mark. Check: top 212 = ? + 4, bottom 83 = ? + 2.", p: `Bismuth-212, ${N(212, 83, "Bi")}, decays by alpha emission to form thallium (Tl). Complete the nuclear equation.`, marks: 2, after: [{ t: "html", h: EQ([N(212, 83, "Bi"), ARROW, `<span class="gap" style="min-width:24mm">${A(N(208, 81, "Tl"))}</span>`, "+", ALPHA]) }], a: "Mass number 208 (1); atomic number 81 (1)." },
+        { p: `Bismuth-212, ${N(212, 83, "Bi")}, decays by alpha emission to form thallium (Tl). Complete the nuclear equation.`, marks: 2, after: [{ t: "html", h: EQ([N(212, 83, "Bi"), ARROW, `<span class="gap" style="min-width:24mm">${A(N(208, 81, "Tl"))}</span>`, "+", ALPHA]) }], a: "Mass number 208 (1); atomic number 81 (1)." },
         { p: "Technetium-99m emits gamma radiation. Explain why the element does not change.", marks: 2, lines: 2, a: "Gamma radiation is electromagnetic radiation with no mass and no charge (1), so the number of protons / atomic number does not change (1)." },
       ],
       summary: ["Symbols: alpha " + ALPHA + ", beta " + BETA + ", gamma " + GAMMA + ", neutron " + NEUTRON + ".", "Top numbers balance; bottom numbers balance.", "Alpha: mass number − 4, atomic number − 2.", "Beta: mass number unchanged, atomic number + 1.", "Gamma: no change to either number."],
@@ -104,7 +104,7 @@
         { t: "q", type: "Challenge", p: "Smoke alarms use americium-241, which has a half-life of 432 years. Suggest why a long half-life is useful here.", lines: 2, a: "The source keeps giving out alpha radiation at an almost steady rate for many years, so the alarm works for its whole lifetime without replacing the source." },
       ],
       exam: [
-        { tip: "Link each property to the reason: ionising → loses energy quickly → short range.", p: "Explain why alpha radiation is more strongly ionising but less penetrating than gamma radiation.", marks: 3, lines: 3, a: "Alpha particles are large with a +2 charge, so they collide with / ionise many atoms (1). Each ionisation transfers energy, so alpha loses its energy quickly (1) and is stopped by a short distance (paper or a few cm of air). Gamma has no charge, ionises weakly, so it loses energy slowly and travels much further (1)." },
+        { p: "Explain why alpha radiation is more strongly ionising but less penetrating than gamma radiation.", marks: 3, lines: 3, a: "Alpha particles are large with a +2 charge, so they collide with / ionise many atoms (1). Each ionisation transfers energy, so alpha loses its energy quickly (1) and is stopped by a short distance (paper or a few cm of air). Gamma has no charge, ionises weakly, so it loses energy slowly and travels much further (1)." },
         { p: "A factory uses a beta source and a detector to control the thickness of aluminium foil. Explain how the count rate shows that the foil has become too thick.", marks: 3, lines: 3, a: "Thicker foil absorbs more beta radiation (1), so fewer beta particles reach the detector (1) and the count rate falls below its normal value (1)." },
       ],
       summary: ["Nuclear radiation ionises atoms by knocking off electrons.", "Alpha: strongly ionising, a few cm in air, stopped by paper.", "Beta: moderately ionising, about 1 m in air, stopped by a few mm of aluminium.", "Gamma: weakly ionising, very far in air, reduced by thick lead or concrete.", "More ionising → less penetrating. Choose a source by penetration, ionising power and half-life."],
@@ -156,7 +156,7 @@
         { t: "q", say: ["Leo", "After two half-lives, all of the sample has decayed."], p: "Explain what is wrong with Leo's statement.", lines: 2, a: "After one half-life half is left; after two half-lives, a quarter (half of a half) is left, not zero." },
         { t: "q", p: "A student has a sample of only 100 nuclei. After one half-life, 44 are left, not 50. Explain why.", lines: 2, a: "Decay is random. In a small sample the number that decay varies a lot around the expected half; a larger sample would be closer to 50%." },
       ],
-      lab: { title: "Virtual lab: modelling half-life", aside: "Nuclear Decay simulation, tab 04 (Half-life). No computer? Use 100 coins: each throw is one half-life; remove the heads.", blocks: [
+      lab: { title: "Virtual lab: modelling half-life", blocks: [
         { t: "lab", blocks: [
           { t: "html", h: "<ul><li>" + ["Open tab <strong>04 Half-life</strong>. Choose <strong>Iodine-131</strong> and <strong>400 nuclei</strong>.", "Before each step, write the number you expect. Then press <strong>Run one half-life</strong> and record the number left.", "Repeat until 5 half-lives have passed."].join("</li><li>") + "</li></ul>" },
           { t: "q", p: "Record your results.", table: { head: ["Half-lives", "0", "1", "2", "3", "4", "5"], rows: [["Expected number left", "400", null, null, null, null, null], ["Number left (your run)", "400", null, null, null, null, null]], ans: [[null, null, "200", "100", "50", "25", "12.5"], [null, null, "e.g. 206", "e.g. 97", "e.g. 51", "e.g. 27", "e.g. 13"]] } },
@@ -165,7 +165,7 @@
         ] },
       ] },
       exam: [
-        { tip: "One definition is enough for 1 mark, but it must say ‘half’ and what is halving.", p: "Define the half-life of a radioactive isotope.", marks: 1, lines: 1, a: "The time taken for the number of unstable nuclei in a sample (or the count rate) to halve." },
+        { p: "Define the half-life of a radioactive isotope.", marks: 1, lines: 1, a: "The time taken for the number of unstable nuclei in a sample (or the count rate) to halve." },
         { p: "Explain why the activity of a radioactive source decreases over time.", marks: 2, lines: 2, a: "As nuclei decay, there are fewer unstable nuclei left (1), so there are fewer decays each second (1)." },
       ],
       summary: ["Decay is random: we cannot predict which nucleus decays, or when.", "A large sample is predictable; small samples vary more.", "Half-life: the time for the number of unstable nuclei, or the count rate, to halve.", "From a graph: start value → halve it → across to the curve → down to the time."],
@@ -215,7 +215,7 @@
         { t: "q", type: "Challenge", p: "Iodine-131 has a half-life of 8 days. (a) What fraction is left after 32 days? (b) How many whole half-lives until less than 1% is left? How many days is that?", lines: 3, a: "(a) 32 ÷ 8 = 4 half-lives: 1/16 (6.25%) is left. (b) (½)<sup>6</sup> = 1.6%, (½)<sup>7</sup> = 0.78%, so 7 half-lives = 56 days." },
       ],
       exam: [
-        { tip: "Show the halvings, not just the answer. Units: keep kBq as kBq.", p: "Cobalt-60 has a half-life of 5.3 years. A source has an activity of 400 kBq. Calculate its activity after 15.9 years.", marks: 2, lines: 2, a: "15.9 ÷ 5.3 = 3 half-lives (1); 400 → 200 → 100 → 50 kBq (1)." },
+        { p: "Cobalt-60 has a half-life of 5.3 years. A source has an activity of 400 kBq. Calculate its activity after 15.9 years.", marks: 2, lines: 2, a: "15.9 ÷ 5.3 = 3 half-lives (1); 400 → 200 → 100 → 50 kBq (1)." },
         { p: "Calculate the net decline in the activity of the cobalt-60 source after 15.9 years, as a ratio of its initial activity.", marks: 2, lines: 2, a: "Net decline = 400 − 50 = 350 kBq (1); 350 : 400 = 7 : 8 (or ⅞) (1)." },
         { p: "The graph shows the count rate from a sample. Determine the half-life. Show on the graph how you found it.", marks: 2, graph: { w: 140, h: 90, x: [1, 1], y: [30, 1], xLabel: "time / days", yLabel: "count rate / counts per second", givenFit: (t) => 240 * Math.pow(2, -t / 3), givenRange: [0, 14], read: [[3, 120], [6, 60]] }, lines: 1, a: "240 → 120 at 3 days, lines drawn on the graph (1); half-life = 3 days (1)." },
       ],
@@ -267,7 +267,7 @@
       ],
       examSplit: true,
       exam: [
-        { tip: "Define both words, and make the difference clear: outside source vs radioactive atoms on or in the object.", p: "Explain the difference between irradiation and contamination.", marks: 2, lines: 2, a: "Irradiation: an object is exposed to radiation from a source outside it and does not become radioactive (1). Contamination: radioactive atoms get onto or into an object, so it keeps emitting radiation (1)." },
+        { p: "Explain the difference between irradiation and contamination.", marks: 2, lines: 2, a: "Irradiation: an object is exposed to radiation from a source outside it and does not become radioactive (1). Contamination: radioactive atoms get onto or into an object, so it keeps emitting radiation (1)." },
         { p: "A technician uses a sealed gamma source. Describe two precautions the technician should take, and explain how each one reduces the risk.", marks: 4, lines: 4, a: "Any two, each with a reason: use tongs / keep a distance (1) so less radiation reaches the body (1); keep exposure time short (1) so the total dose is lower (1); store in a lead-lined box (1) because lead absorbs gamma (1); wear a dosimeter (1) to monitor the dose (1)." },
       ],
       quick: { slide: 41, covers: "Lessons 5–10", items: [

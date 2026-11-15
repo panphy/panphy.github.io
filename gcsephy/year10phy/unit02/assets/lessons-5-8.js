@@ -69,7 +69,7 @@
         ] },
         { t: "q", type: "Challenge", p: "1 kg of steam at 100 °C and 1 kg of water at 100 °C are at the same temperature. Explain which has the greater internal energy.", lines: 3, a: "The steam. The particles have the same average kinetic energy (same temperature), but the particles in the steam are much further apart, so they have more potential energy." },
       ],
-      lab: { title: "Practical: a cooling curve", aside: "Hot liquid: wear eye protection and do not touch the tube.", blocks: [
+      lab: { title: "Practical: a cooling curve", blocks: [
         { t: "safety", items: ["Wear eye protection.", "The tube and the water bath are hot: leave the tube in its clamp.", "Do not stir with the thermometer once the acid starts to set: it may break."] },
         { t: "lab", blocks: [
           { t: "p", h: "A tube of melted stearic acid (a waxy solid at room temperature) is left to cool in air. Record its temperature every minute. If you are not doing the practical, use the sample results your teacher gives you." },
@@ -80,7 +80,7 @@
         ] },
       ] },
       exam: [
-        { tip: "For a flat section, name the change of state, say that energy is still being supplied, and say which energy of the particles changes.", p: "A block of ice at 0 °C is heated. Its temperature does not change until all the ice has melted. Explain why.", marks: 3, lines: 5,
+        { p: "A block of ice at 0 °C is heated. Its temperature does not change until all the ice has melted. Explain why.", marks: 3, lines: 5,
           a: "The energy supplied is used to change the state (melt the ice) (1). It increases the potential energy of the particles (as they break away from their fixed positions) (1), not their kinetic energy, so the temperature stays the same (1)." },
         { p: "State what is meant by the internal energy of a system.", marks: 2, lines: 2, a: "The total kinetic energy and potential energy (1) of all the particles that make up the system (1)." },
       ],
@@ -131,7 +131,7 @@
         { t: "q", p: "Complete the table. Show your working underneath.", table: { head: ["Change of state", "Mass / kg", "Specific latent heat / J/kg", "Energy / J"], rows: [["Lead melting", "2.0", "23 000", null], ["Ethanol boiling", null, "850 000", "425 000"], ["Aluminium melting", "0.50", null, "200 000"]], ans: [[null, null, null, "46 000"], [null, "0.50", null, null], [null, null, "400 000", null]] }, box: 28, grid: true },
         { t: "q", type: "Challenge", p: "A freezer removes 66 800 J from water at 0 °C. Calculate the mass of ice that forms. Specific latent heat of fusion of water = 334 000 J/kg", lines: 3, a: R`\(m = \dfrac{E}{L} = \dfrac{66\,800}{334\,000} = 0.20\) kg` },
       ],
-      lab: { title: "Practical: melting ice", aside: "Measure the specific latent heat of fusion of water.", blocks: [
+      lab: { title: "Practical: melting ice", blocks: [
         { t: "safety", items: ["The heater gets hot: switch it on only when it is surrounded by ice.", "Keep water away from the power supply and wipe up spills."] },
         { t: "lab", blocks: [
           { t: "split", cls: "narrow-fig", left: [{ t: "steps", items: ["Fill two funnels with the same mass of crushed ice. Put a beaker under each.", "Put the heater in one funnel. The other is the <strong>control</strong>: it shows how much ice melts just because the room is warm.", "Switch on the heater and the joulemeter for 5 minutes.", "Measure the mass of water in each beaker.", "Mass melted by the heater = mass from the heated funnel − mass from the control."] }], right: [{ t: "fig", h: F.iceFunnels() }] },
@@ -141,7 +141,7 @@
         ] },
       ] },
       exam: [
-        { tip: "“Calculate” with a mass in grams: convert to kilograms before you substitute.", p: "A 60 g ice cube at 0 °C melts in a drink. Calculate the energy transferred to the ice cube as it melts. Specific latent heat of fusion of water = 334 000 J/kg", marks: 3, frame: frame4, frameA: ["m = 0.060 kg (1)", R`\(E = m\,L\)`, R`\(E = 0.060 \times 334\,000\) (1)`, "20 040 J (accept 20 000 J) (1)"] },
+        { p: "A 60 g ice cube at 0 °C melts in a drink. Calculate the energy transferred to the ice cube as it melts. Specific latent heat of fusion of water = 334 000 J/kg", marks: 3, frame: frame4, frameA: ["m = 0.060 kg (1)", R`\(E = m\,L\)`, R`\(E = 0.060 \times 334\,000\) (1)`, "20 040 J (accept 20 000 J) (1)"] },
         { p: "State what is meant by the specific latent heat of vaporisation of a substance.", marks: 2, lines: 3, a: "The energy needed to change 1 kg of the substance from liquid to vapour (1) with no change in temperature (1)." },
       ],
       quick: { slide: 35, covers: "Lessons 5–6", items: [
@@ -202,7 +202,7 @@
         { t: "q", type: "Challenge", p: "A kettle heats 0.20 kg of water from 20 °C to 100 °C, and then boils all of it away. Calculate the total energy transferred to the water. Use c = 4200 J/kg °C and L = 2 260 000 J/kg", lines: 5, a: R`Heating: \(\Delta E = m\,c\,\Delta\theta = 0.20 \times 4200 \times 80 = 67\,200\) J. Boiling: \(E = m\,L = 0.20 \times 2\,260\,000 = 452\,000\) J. Total = 519 200 J.` },
       ],
       exam: [
-        { tip: R`Work out \(\Delta\theta\) first and write it down. It is the step most often missed.`, p: "A hot-water bottle holds 0.80 kg of water. The water cools from 70 °C to 30 °C. Calculate the energy transferred from the water. Specific heat capacity of water = 4200 J/kg °C", marks: 3, frame: [["Temperature change"], ["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: [R`\(\Delta\theta = 70 - 30 = 40\) °C (1)`, R`\(\Delta E = m\,c\,\Delta\theta\)`, R`\(\Delta E = 0.80 \times 4200 \times 40\) (1)`, "134 400 J (1)"] },
+        { p: "A hot-water bottle holds 0.80 kg of water. The water cools from 70 °C to 30 °C. Calculate the energy transferred from the water. Specific heat capacity of water = 4200 J/kg °C", marks: 3, frame: [["Temperature change"], ["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: [R`\(\Delta\theta = 70 - 30 = 40\) °C (1)`, R`\(\Delta E = m\,c\,\Delta\theta\)`, R`\(\Delta E = 0.80 \times 4200 \times 40\) (1)`, "134 400 J (1)"] },
         { p: "A heater transfers 36 000 J to a 2.0 kg block of aluminium. Calculate the temperature rise of the block. Specific heat capacity of aluminium = 900 J/kg °C", marks: 3, frame: frameRe, frameA: [R`\(\Delta E = m\,c\,\Delta\theta\)`, R`\(\Delta\theta = \dfrac{\Delta E}{m\,c}\) (1)`, R`\(\Delta\theta = \dfrac{36\,000}{2.0 \times 900}\) (1)`, "20 °C (1)"] },
         { p: "Give one difference between specific heat capacity and specific latent heat.", marks: 2, lines: 3, a: "Specific heat capacity is about a change in temperature (energy to raise 1 kg by 1 °C) (1); specific latent heat is about a change of state at constant temperature (energy to change the state of 1 kg) (1)." },
       ],
@@ -238,7 +238,7 @@
         { t: "p", h: R`Not all of the energy supplied stays in the block. Some is transferred to the surroundings, and some heats the heater itself. So the temperature rise is <strong>smaller</strong> than it should be, and \(c = \dfrac{\Delta E}{m\,\Delta\theta}\) comes out <strong>too big</strong>.` },
         { t: "list", items: ["<strong>Insulate</strong> the block (sides, top and underneath) to reduce energy transfer to the surroundings.", "Put a drop of <strong>oil</strong> in the thermometer hole, so the thermometer is in good thermal contact with the block.", "After switching off, keep watching: record the <strong>highest</strong> temperature the thermometer reaches."] },
       ],
-      lab: { title: "Required practical: specific heat capacity", aside: "The heater and block get hot. Do not touch them until they have cooled.", blocks: [
+      lab: { title: "Required practical: specific heat capacity", blocks: [
         { t: "safety", items: ["The immersion heater gets very hot: never switch it on outside the block.", "Stand the block on a heatproof mat and leave it to cool before you move it.", "Do not exceed 12 V. Switch off at the power supply before you change the circuit."] },
         { t: "lab", title: "Method", blocks: [
           { t: "steps", items: ["Measure the mass of the block with a balance.", "Wrap the block in insulation. Put the heater in the large hole and the thermometer, with a drop of oil, in the small hole.", "Connect the ammeter in series with the heater and the voltmeter across it (or connect a joulemeter).", "Record the starting temperature. Switch on and start the stopwatch.", "Record the potential difference and the current. Record the temperature every 2 minutes for 10 minutes.", "Switch off. Record the highest temperature reached."] },
@@ -268,7 +268,7 @@
       ],
       order: ["doNow", "learn", "lab", "try", "check", "exam", "revise"],
       exam: [
-        { tip: "Name what is measured and with what: mass (balance), temperature (thermometer), energy (joulemeter, or ammeter, voltmeter and stopwatch).", p: "Describe a method to determine the specific heat capacity of a metal block. You should include the measurements needed and how they are used.", marks: 6, lines: 10,
+        { p: "Describe a method to determine the specific heat capacity of a metal block. You should include the measurements needed and how they are used.", marks: 6, lines: 10,
           a: "Indicative content: measure the mass of the block with a balance; insulate the block; put an immersion heater and a thermometer in the block; record the starting temperature; switch on the heater for a measured time; measure the energy supplied with a joulemeter (or measure p.d., current and time and use E = V I t); record the highest temperature and calculate the temperature rise; use c = ΔE ÷ (m Δθ); repeat, or plot temperature against energy and use the gradient. Level 3 (5–6): a detailed, logically ordered method that would give a valid result." },
         { p: "A 2.0 kg copper block is heated with an immersion heater. The joulemeter reads 16 400 J and the temperature of the block rises from 21 °C to 41 °C. Calculate the specific heat capacity of copper given by these results.", marks: 4, frame: [["Temperature rise"], ["Equation"], ["Rearrange"], ["Substitute"], ["Answer", "unit:"]], frameA: [R`\(\Delta\theta = 41 - 21 = 20\) °C (1)`, R`\(\Delta E = m\,c\,\Delta\theta\)`, R`\(c = \dfrac{\Delta E}{m\,\Delta\theta}\) (1)`, R`\(c = \dfrac{16\,400}{2.0 \times 20}\) (1)`, "410 J/kg °C (1)"] },
       ],

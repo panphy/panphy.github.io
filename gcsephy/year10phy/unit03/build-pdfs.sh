@@ -14,8 +14,8 @@ pdf() { # output, url, text the PDF title must contain; retries when Chrome prin
   # scripts or fonts are ready, or prints the wrong booklet
   for attempt in 1 2 3; do
     print_once "$1" "$2"
-    # A good print embeds the deck's display font; a fallback to Georgia means the fonts had not loaded.
-    if [ -s "$1" ] && [ "$(wc -c < "$1")" -gt 50000 ] && strings "$1" | grep -q DMSerifDisplay && ! strings "$1" | grep -q "+Georgia" \
+    # The deck figures use web fonts: a fallback to Georgia means they had not loaded.
+    if [ -s "$1" ] && [ "$(wc -c < "$1")" -gt 50000 ] && ! strings "$1" | grep -q "+Georgia" \
       && strings "$1" | grep "/Title" | grep -q "$3"; then sh "$COMPRESS" "$1"; return 0; fi
     echo "Retrying $1"; sleep 3
   done
@@ -48,7 +48,7 @@ booklet() { # key (lesson number or "review"), file name, query, expected title 
   pdf "$OUT/$2 (Ans).pdf" "$BASE/workbook.html?$3&answers" "$4.*Ans"
 }
 
-part() { # number (as PARTS in assets/workbook.js)
+part() { # number (as parts in assets/book.js)
   booklet "p$1" "Y10 - Unit 03 - Atoms and Nuclear Radiation (Part $1)" "part=$1" "Part $1"
 }
 
