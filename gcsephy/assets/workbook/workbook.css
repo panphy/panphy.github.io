@@ -586,3 +586,6 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .cover-circuit:has(.dfig) { padding: 0; background: none; }
 .cover-circuit .dfig { border-color: var(--navy); }
 .cover-fields { border-color: var(--navy); background: white; }
+/* Name runs the full width; Class, Teacher (and Score on the Unit review) share the row below. */
+.cover-fields { grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); }
+.cover-fields div:first-child { grid-column: 1 / -1; }

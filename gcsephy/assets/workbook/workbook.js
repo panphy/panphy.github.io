@@ -422,7 +422,7 @@
       ${answers ? '<div class="edition">Answer edition</div>' : ""}
       <div class="cover-foot">
         <div class="cover-circuit"${C.coverArtStyle ? ` style="${C.coverArtStyle}"` : ""}>${C.coverArt ? C.coverArt(W) : ""}</div>
-        <div class="cover-fields"><div>Name<span></span></div><div>Class<span></span></div><div>Teacher<span></span></div><div>${REVIEW ? "Score" : "Target grade"}<span></span></div></div>
+        <div class="cover-fields" style="--cols:${REVIEW ? 3 : 2}">${["Name", "Class", "Teacher", ...(REVIEW ? ["Score"] : [])].map((f) => `<div>${f}<span></span></div>`).join("")}</div>
       </div></section>`;
   }
 
