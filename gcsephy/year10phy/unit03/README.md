@@ -1,0 +1,70 @@
+# Atoms and Nuclear Radiation — Year 10 workbook (unit 3)
+
+A copy of the Year 11 unit ([`../../year11phy/unit01/`](../../year11phy/unit01/)) for the rearranged Year 10 sequence, which teaches it after the Particle Model unit. Only the year labels and the lime Year 10 accent differ; the two copies are independent, so change both when a fix applies to both.
+
+Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation-y10/`](../../decks/atoms-and-radiation-y10/), and reuse its fonts and particle diagrams. The 59-slide deck uses the shared calm GCSE style with the lime Year 10 accent; workbook print colours are separate. See [`../../decks/README.md`](../../decks/README.md) for deck styling and controls.
+
+**Address:** <https://panphy.app/gcsephy/year10phy/unit03/>
+
+The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all six workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
+
+## Files
+
+| File | Use |
+|---|---|
+| `index.html` | Student page linking the five booklets, the booklets' answer editions and the five Preps (not their answers) |
+| `pdf/` | The workbook in four parts (Part 1, Lessons 1–2, 16 pages; Part 2, Lessons 3–4, 16; Part 3, Lessons 5–7, 25; Part 4, Lessons 8–10, 25), a 16-page Unit review (42 marks, extension pages, key words, tracker) and an answer edition of each with the same page numbers |
+| `workbook.html` | PDF source: `?part=1`…`4` (`PARTS` in `workbook.js`) or `?review`, add `&answers`; `?lesson=N` previews one lesson, and with none it previews the whole unit |
+| `assets/content/helpers.js` | Nuclide notation, nuclear equations, diagrams from the deck's drawing parts |
+| `assets/content/lessons-1-5.js`, `lessons-6-10.js`, `reference.js` | The lessons; toolkit, review, extension pages and glossary (builds `window.UNIT`) |
+| `assets/workbook.js`, `assets/workbook.css` | Renderer (adapted from Electric Circuits) and print styles |
+| `assets/figures-print.css` | Deck figure styles for print; keep in step with `../../decks/atoms-and-radiation-y10/deck.css` |
+| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome; name booklets (`p1 p3 review`) to rebuild only those |
+| `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links the sheets, not the answer editions. See [`../../assets/prep/README.md`](../../assets/prep/README.md) |
+
+Diagrams come from `/gcsephy/decks/atoms-and-radiation-y10/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. The deck's click-through builds are opt-in (`data-animate` on a slide's figure), so figures drawn here are always complete. As in the other Year 10 units, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Physics-only content (AQA 4.4.3–4.4.4) is on the "Triple Science only" extension pages of the Unit review; a single item elsewhere takes `<span class="triple-tag">Triple only</span>` (the medical tracer in Lesson 7). Higher-tier content is not marked. Every worked example on a deck slide (slides 6, 29, 30, 32 and 37) is a `follow` block at the same point in Learn it (`slide` gives its number): the same question, printed blank for students to fill in as the teacher models it, beside a “Your turn” that is on no slide; answers are in the answer editions only. The Quick check slides are `quick` fields, a box before the Exam corner numbered on its own: slide 25 after Lesson 4, slide 41 after Lesson 10, and slide 59 at the end of the Triple Science extension pages. When a slide example or Quick check changes, change its workbook copy too. The other worked examples are not on a slide and stay printed (`worked`). A lesson whose Exam corner would jump to a new page whole can set `examSplit: true` (Lesson 3 does), which gives each exam question its own card so the section can break between them.
+
+The deck has seven story slides (11, 13, 18, 22, 40, 51 and 56) with photographs of the scientists, Thomson's tube, Marie Curie's notebook, Meitner and Hahn, and a drawing of Chicago Pile-1 (the last two shared with the IB E.4 deck), kept in `../../decks/atoms-and-radiation-y10/images/` and not used in the booklets. Each photo has a caption and a credit linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse. Part 4 also has two photo slides copied from the IB E.4 deck, 54 (what a reactor looks like) and 55 (where spent fuel goes): US Nuclear Regulatory Commission photographs, public domain, and the Onkalo tunnel, CC BY-SA 4.0. Their facts follow E.4 in [`ibdpphy/README.md`](../../../ibdpphy/README.md), including Onkalo's depth of about 450 m. Adding or removing a deck slide shifts the numbers below: update `deck.slides` in the lesson files and this table, then rebuild the PDFs.
+
+The Chadwick photo is from Los Alamos National Laboratory, which asks for this notice to accompany copies: "Unless otherwise indicated, this information has been authored by an employee or employees of the Los Alamos National Security, LLC (LANS), operator of the Los Alamos National Laboratory under Contract No. DE-AC52-06NA25396 with the U.S. Department of Energy. The U.S. Government has rights to use, reproduce, and distribute this information. The public may copy and use this information without charge, provided that this Notice and any statement of authorship are reproduced on all copies. Neither the Government nor LANS makes any warranty, express or implied, or assumes any liability or responsibility for the use of this information."
+
+## Sequence
+
+| # | Lesson | Deck slides | Spec (Physics; Combined) |
+|---:|---|---|---|
+| 1 | Inside the atom | 3–6 | 4.4.1.1–2; 6.4.1.1–2 |
+| 2 | Isotopes and ions | 7–8 | 4.4.1.2; 6.4.1.2 |
+| 3 | From plum pudding to the nucleus | 9–17 | 4.4.1.3; 6.4.1.3 |
+| 4 | Energy levels and the nucleus | 18–26 | 4.4.1.1–3; 6.4.1.1–3 |
+| 5 | Radioactive decay (Nuclear Decay sim) | 27–31 | 4.4.2.1; 6.4.2.1 |
+| 6 | Nuclear equations | 29–32 | 4.4.2.2; 6.4.2.2 |
+| 7 | Properties and uses of radiation | 33–35 | 4.4.2.1; 6.4.2.1 |
+| 8 | Half-life and random decay (half-life lab) | 36–38 | 4.4.2.3; 6.4.2.3 |
+| 9 | Half-life calculations (with net decline) | 37 | 4.4.2.3; 6.4.2.3 |
+| 10 | Contamination and irradiation | 39–43 | 4.4.2.4; 6.4.2.4 |
+
+The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4). The deck teaches them in Part 4, slides 44–61, after the Key words slide.
+
+## History dates
+
+Dates in the deck, these booklets and the [Atomic Models sim](../../../simulations/atomic_models.html) follow the laureates' biographical pages on nobelprize.org (checked 12 October 2026). Check any new or changed date against them and keep the three in step, along with the IB deck that reuses these story slides, [`ibdpphy/decks/e1-structure-of-the-atom/`](../../../ibdpphy/decks/e1-structure-of-the-atom/).
+
+| Date used | What it marks | Nobel page |
+|---|---|---|
+| 1897 | Thomson announces the electron (Royal Institution, 30 April). This is the discovery, not the model | [Thomson](https://www.nobelprize.org/prizes/physics/1906/thomson/biographical/) |
+| 1904 | Plum pudding model: Thomson's Yale lectures with "suggestions as to the structure of the atom" | Thomson |
+| 1911 | Nuclear model, dated by Rutherford's paper. The Nobel page dates the idea to his 1910 scattering investigations | [Rutherford](https://www.nobelprize.org/prizes/chemistry/1908/rutherford/biographical/) |
+| 1913 | Bohr model (at Manchester with Rutherford from 1912) | [Bohr](https://www.nobelprize.org/prizes/physics/1922/bohr/biographical/) |
+| 1919 | Protons: Rutherford knocks them out of nitrogen nuclei | Rutherford, [Chadwick](https://www.nobelprize.org/prizes/physics/1935/chadwick/biographical/) |
+| 1926 | Electron cloud (sim only): Schrödinger's wave equation | [Schrödinger](https://www.nobelprize.org/prizes/physics/1933/schrodinger/biographical/) |
+| 1932 | Chadwick proves the neutron exists (Nobel Prize 1935) | Chadwick |
+
+Not dated on those pages, so taken from elsewhere: Geiger and Marsden's 1909 scattering result, and "from 1898" for the Curies' polonium and radium.
+
+## Rebuild
+
+Serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` here. It writes all 22 PDFs to `pdf/` one at a time, retrying any that print blank, lack the deck's display font or carry the wrong title. Check that each booklet and its answer edition have the same page count.
+
+## Hosting
+
+Like the rest of `gcsephy/`: `noindex`, loads `/gcsephy/sw-register.js`, network-only, listed in `gcsephy/index.html`.

@@ -1,6 +1,6 @@
 # GCSE Physics teaching decks
 
-Five browser presentations, available by direct link from the GCSE hub:
+Six browser presentations, available by direct link from the GCSE hub:
 
 | Deck | Year | Slides | Accent |
 | --- | --- | ---: | --- |
@@ -9,6 +9,9 @@ Five browser presentations, available by direct link from the GCSE hub:
 | `electric-circuits/` | 10 | 66 | Lime |
 | `particle-model/` | 10 | 53 | Lime |
 | `atoms-and-radiation/` | 11 | 61 | Light yellow |
+| `atoms-and-radiation-y10/` | 10 | 61 | Lime |
+
+The Year 10 Atoms and Nuclear Radiation deck is a copy of the Year 11 deck for the new Year 10 sequence, with its own workbook in `../year10phy/unit03/`. It keeps the `deck-y11` class for the Year 11 layout rules, and `data-year="10"` on `<html>` switches its accent to lime and its badge to Year 10. The two copies are independent: change both when a fix applies to both.
 
 Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. Each point of a note opens with its question or heading on its own line, `<h3 class="rn-head">`, followed by the explanation in `<p>`; call-outs go in `<div class="rn-side">`. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
 
@@ -18,7 +21,7 @@ Year 11 slides 35, 39, 45 and 48 use generated illustrations from `atoms-and-rad
 
 `assets/teaching-deck.css` provides the shared calm typography, year accents, light/dark palettes and diagram contrast overrides. Load it after the deck's layout and figure styles. `assets/teaching-deck.js` adds year labels, table scrolling, persistent grid borders during answer reveals and the theme control before the viewer builds thumbnails. Both viewers retain answer reveals, keyboard and touch navigation, fullscreen and print layouts. The decks are landscape only: a portrait phone shows the whole 16:9 slide, scaled, and a landscape phone (up to 500px tall) hides the banner and fills the screen with the slide, with slim navigation and Note controls in the side margins (`teaching-deck.css` and each viewer's `fit()`). There is no portrait layout; design and check slides at 16:9 only.
 
-`assets/readable.css` is large-room type for a 75" screen read from the back of a 10 m lab, loaded last by all five decks: student-read text at least 28px on the 1600 × 900 slide, body text 34–40px and narrower side margins. It also enlarges the workbook drawings' labels on the slides only, so the printed workbooks keep theirs. Never shrink text to make a slide fit: shorten it, or split the slide in two with a clear gap above the footer. Workbooks (`slide` fields), lesson plans, unit READMEs and the Year 9 teaching guides cite slide numbers, so after a split update them and rebuild the teaching-guide PDFs.
+`assets/readable.css` is large-room type for a 75" screen read from the back of a 10 m lab, loaded last by all six decks: student-read text at least 28px on the 1600 × 900 slide, body text 34–40px and narrower side margins. It also enlarges the workbook drawings' labels on the slides only, so the printed workbooks keep theirs. Never shrink text to make a slide fit: shorten it, or split the slide in two with a clear gap above the footer. Workbooks (`slide` fields), lesson plans, unit READMEs and the Year 9 teaching guides cite slide numbers, so after a split update them and rebuild the teaching-guide PDFs.
 
 Maths is LaTeX between `\(` and `\)`, typeset by MathJax as in the IB decks; ÷ (`\div`) is allowed. Every equation stays on one line: an equation made of several pieces (text and maths, or a plain-text word equation) goes in `<span class="equation-inline">`. Keep a typeset quantity and its following plain-text unit together in the same `equation-inline` span, including in revision notes; a non-breaking space alone can still wrap after MathJax’s inline container. `assets/deck-math.js` holds the MathJax set-up (load it in the head, and MathJax before the viewer). Diagram labels are SVG text drawn by code the workbooks share, so each deck's `figures.js` lists its maths labels in `window.DeckSvgTex` (plain label, or `figure|label`, mapped to the label with LaTeX). The viewer typesets them before building thumbnails and again whenever a figure redraws; the workbooks keep the plain labels. Add any new maths label to that list.
 
@@ -26,7 +29,7 @@ Slide 1 ends with `<p class="slide-copyright">&copy; 2026 PanPhy Labs. All right
 
 A slide examined only in GCSE Physics (8463), not Combined Science: Trilogy, takes the `triple` class, which adds a "Triple Science only" flag at the bottom edge (the top holds the year badge). Presenting fullscreen on a screen taller than 16:9, such as an iPad, the slide stays pinned to the top and the flag drops to the bottom of the screen. Mark a single item on a mixed slide with `<span class="triple-tag">Triple only</span>`. Check new content against the "(physics only)" headings and statements in the AQA specification. Content beyond both specifications carries no slide label (nor does Higher-tier-only content); instead its revision note has a `<p class="spec">` callout, headed "Beyond the specification", that quotes what the AQA specification actually requires, with its Physics and Combined Science references. A whole physics-only topic goes in its own flagged part after the deck's Key words slide (Electric Circuits Mission 9, static electricity; Particle Model of Matter slides 48–53, pressure and volume; Atoms and Nuclear Radiation Part 4, hazards, uses, fission and fusion), so Combined Science classes stop at Key words and the slide numbers that workbooks cite do not move. The banner's Workbook button opens the unit's workbook hub.
 
-All five decks use `/assets/theme.js` with `data-theme-scope="gcsephy"`, so their preference follows the GCSE hub and remains independent of the main site and IB section. Keep essential labels and outlines high contrast; pastel year colours belong to accents and soft fills. Check both themes, including labels drawn over coloured shapes and 3D models.
+All six decks use `/assets/theme.js` with `data-theme-scope="gcsephy"`, so their preference follows the GCSE hub and remains independent of the main site and IB section. Keep essential labels and outlines high contrast; pastel year colours belong to accents and soft fills. Check both themes, including labels drawn over coloured shapes and 3D models.
 
 `assets/companion-deck.css` and `companion-deck.js` provide the Year 9/10 layouts and navigation. The Particle Model deck's drawings come from its workbook (`../year10phy/unit02/assets/figures.js`), and its own `figures.js` adds three live particle models, which run only while their slide is showing and stay still with reduced motion. Year 11 retains its own `deck.css` and `deck.js`; its history slides have a distinct background to mark non-exam enrichment. `assets/deck-notes.js` and `deck-notes.css` provide the Note panel (N).
 
