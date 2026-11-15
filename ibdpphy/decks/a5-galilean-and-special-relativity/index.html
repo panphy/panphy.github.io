@@ -107,11 +107,14 @@
       <section class="slide hl" data-title="Reference frames and events">
         <h2>Reference frames and events<span>.</span></h2>
         <div class="split wide-fig">
-          <ul class="points small">
-            <li>An <b>event</b>: something that happens at one place and one time</li>
-            <li class="step">A <b>reference frame</b>: axes and clocks used to give it coordinates, \((x, t)\)</li>
-            <li class="step">An <b>inertial</b> frame is one that is <b>not accelerating</b></li>
-          </ul>
+          <div class="stack">
+            <ul class="points small">
+              <li>An <b>event</b>: something that happens at one place and one time</li>
+              <li class="step">A <b>reference frame</b>: axes and clocks used to give it coordinates, \((x, t)\)</li>
+              <li class="step">An <b>inertial</b> frame is one that is <b>not accelerating</b></li>
+            </ul>
+            <div class="q step"><p>Are you in one now?</p><div class="ans step">Nearly: the Earth’s acceleration is tiny</div></div>
+          </div>
           <div class="panel">
             <div class="panel-head"><span>TWO FRAMES, ONE EVENT</span></div>
             <div class="fig" data-fig="a5-frames"></div>
@@ -124,6 +127,8 @@
             <p>Imagine a grid of meter rules filling space, with a clock at every point, all synchronized with each other. An observer “in” that frame reads the position and time of any event from the rule and the clock that are right beside it when it happens. That is what the coordinates \((x, t)\) mean. A second observer, moving relative to the first, carries a grid and clocks of their own and writes \((x', t')\) for the same event.</p>
             <h3 class="rn-head">Why inertial</h3>
             <p>In a frame that is not accelerating, a body with no resultant force on it moves in a straight line at constant speed: Newton’s first law holds. In an accelerating car, a ball on the floor rolls backwards with nothing pushing it. The whole of this topic deals with inertial frames only, moving at constant velocity relative to each other.</p>
+            <h3 class="rn-head">How nearly inertial the Earth is</h3>
+            <p>A point on the equator moves round the Earth’s axis with a centripetal acceleration of about \(0.034 \,\mathrm{m} \,\mathrm{s}^{-2}\), and the Earth accelerates towards the Sun at about \(0.006 \,\mathrm{m} \,\mathrm{s}^{-2}\). Both are tiny compared with \(g\), so a laboratory is treated as an inertial frame. Their effects show only in very large or very long motions, such as the turning of the swing plane of a long pendulum or the spin of hurricanes.</p>
             <h3 class="rn-head">The convention</h3>
             <p>Frame S′ moves at velocity \(v\) along the \(x\) axis of frame S, and the two origins coincide at \(t = t' = 0\).</p>
           </div>
@@ -201,9 +206,10 @@
 
       <section class="slide hl" data-title="The problem with light">
         <h2>The problem with light<span>.</span></h2>
-        <div class="stack center" style="gap: 26px;">
+        <div class="stack center" style="gap: 22px;">
+          <div class="q"><p>A train moving at \(v\) shines a lamp forwards. How fast is the light, measured from the platform?</p></div>
           <div class="cards" style="grid-template-columns: 1fr 1fr;">
-            <div class="card"><p class="eyebrow">Maxwell’s theory, 1860s</p><h3>Light travels at one speed, \(c\)</h3><p>Fixed by the constants of electricity and magnetism. No frame is mentioned</p></div>
+            <div class="card step"><p class="eyebrow">Maxwell’s theory, 1860s</p><h3>Light travels at one speed, \(c\)</h3><p>Fixed by the constants of electricity and magnetism. No frame is mentioned</p></div>
             <div class="card step"><p class="eyebrow">Galilean velocity addition</p><h3>Its speed should depend on the observer</h3><p>\(c - v\) if you chase it, \(c + v\) if you run to meet it</p></div>
           </div>
           <div class="idea step">Both cannot be right. Either there is one special frame in which light has speed \(c\), or the rule for adding velocities is wrong.</div>
@@ -295,6 +301,31 @@
         </div>
         <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Einstein_patentoffice_full.jpg" target="_blank" rel="noopener">Lucien Chavan, 1904 or 1905</a>, public domain.</p>
         <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Newton or Maxwell?">
+        <p class="eyebrow">Something has to give</p>
+        <h2>Newton or Maxwell<span>?</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Choice A</p><h3>Keep Newton’s mechanics</h3><p>Keep the Galilean transformation and change Maxwell’s theory of light</p></div>
+            <div class="card"><p class="eyebrow">Choice B</p><h3>Keep Maxwell’s theory</h3><p>Keep \(c\) the same for everyone and change Newton’s mechanics</p></div>
+          </div>
+          <div class="q"><p>Which would you choose?</p><div class="ans step">Einstein, 1905: <b>B</b>. Michelson and Morley had found no ether, so no special frame for light</div></div>
+          <div class="idea step">The price: time and length are no longer the same for every observer.</div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Why choice A looked safer</h3>
+            <p>Newton’s mechanics had worked for over two hundred years, from falling apples to the orbits of the planets. Maxwell’s theory was barely forty years old. Most physicists tried to save the Galilean transformation by keeping the ether, and Lorentz even found equations, now named after him, that explained the Michelson–Morley result by shrinking objects moving through it.</p>
+            <h3 class="rn-head">Why Einstein chose B</h3>
+            <p>Einstein took the failure to detect the ether as a sign that there is none: no experiment can pick out a special frame, for light or anything else. He kept Maxwell’s theory exactly and asked what space and time must be like if every inertial observer measures the same speed for light. Lorentz’s equations came out of his two postulates, with no ether needed.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Newton’s mechanics was not thrown away. At speeds far below \(c\), the new equations become the old ones, which is why they had worked so well.</p>
+          </div>
+        </aside>
       </section>
 
       <section class="slide hl" data-title="The two postulates">
@@ -543,6 +574,39 @@
           </div>
           <div class="rn-side">
             <p class="trap">Thinking that the crew feel time passing slowly. To them everything is normal, and it is the clocks left behind that run slow.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Where γ comes from">
+        <p class="eyebrow">The light clock, not required in exams</p>
+        <h2>Where \(\gamma\) comes from<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">With the clock, mirrors \(L\) apart:</span>
+            <span>\(c \dfrac{\Delta t_{0}}{2} = L\)</span>
+            <span class="say step">Watching it move at \(v\): the light goes along a slant</span>
+            <span class="step">\(\left(c \dfrac{\Delta t}{2}\right)^{2} = \left(v \dfrac{\Delta t}{2}\right)^{2} + L^{2}\)</span>
+            <span class="say step">Put in \(L\):</span>
+            <span class="step">\(c^{2} \Delta t^{2} = v^{2} \Delta t^{2} + c^{2} \Delta t_{0}^{2}\)</span>
+          </div>
+          <div class="work step">
+            <span>\(\Delta t^{2} \left(1 - \dfrac{v^{2}}{c^{2}}\right) = \Delta t_{0}^{2}\)</span>
+            <span class="say step">Therefore:</span>
+            <span class="step">\(\Delta t = \dfrac{\Delta t_{0}}{\sqrt{1 - \dfrac{v^{2}}{c^{2}}}} = \class{res}{\gamma \Delta t_{0}}\)</span>
+            <div class="idea step">\(\gamma\) is always 1 or more: the moving clock’s tick takes <b>longer</b>.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Where the second postulate comes in</h3>
+            <p>The light on the slant is given the speed \(c\), the same as for the observer moving with the clock. In Galilean physics it would have the faster speed \(\sqrt{c^{2} + v^{2}}\), covering the longer slant in the same time, and there would be no time dilation. Keeping \(c\) fixed is what forces the moving clock to tick more slowly.</p>
+            <h3 class="rn-head">Why the height is the same for both</h3>
+            <p>The mirrors are separated at right angles to the motion. Lengths at right angles to the motion are not contracted, so both observers agree on \(L\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The guide does not require this derivation, but the light clock is the quickest way to remember which time is longer.</p>
           </div>
         </aside>
       </section>
