@@ -444,13 +444,43 @@
         <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE, SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <h3 class="rn-head">Measuring the speed of sound</h3>
-            <p>Hold a tuning fork of known frequency over a tube that stands in water, and raise the tube slowly. The sound swells when the air column is the right length for a standing wave. The first loud position is at a quarter of a wavelength and the next at three quarters, so the distance between the two is exactly half a wavelength. With a 512 Hz fork and positions 33.2 cm apart, <span class="equation-inline">\(\lambda = 0.664\) m</span> and <span class="equation-inline">\(v = 512 \times 0.664 = 340\) m&nbsp;s⁻¹</span>.</p>
-            <h3 class="rn-head">Why use the difference</h3>
-            <p>The antinode at an open end actually sits slightly beyond the end of the tube. Taking the difference between two positions cancels that small shift. The course ignores it elsewhere: no end corrections are needed in calculations.</p>
+            <h3 class="rn-head">Why opening the end raises the note</h3>
+            <p>Closed at one end, the pipe holds a quarter of a wavelength in its fundamental; open at both ends, it holds half a wavelength. The same length now fits a wave half as long, so the fundamental frequency doubles, from 170 Hz to 340 Hz: an octave higher.</p>
+            <h3 class="rn-head">Why the harmonics differ</h3>
+            <p>An open pipe needs an antinode at each end, which any whole number of half wavelengths gives, so it has every harmonic. A closed pipe needs a node at one end and an antinode at the other, which only odd numbers of quarter wavelengths give. That is why the closed pipe skips from 170 Hz to 510 Hz, with nothing at 340 Hz, and why the two pipes sound different even when they play the same note.</p>
           </div>
           <div class="rn-side">
             <p class="tip">A narrow tube closed at the bottom, such as a test tube, is a closed pipe. Add water and the air column shortens, so the note rises.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Measuring the speed of sound">
+        <p class="eyebrow">Worked example: practical</p>
+        <h2>Measuring the speed of sound<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="ask">A 512 Hz tuning fork is held over a tube in water. Raising the tube, the sound is loudest at 16.4 cm of air, and again at 49.6 cm. Find the speed of sound.</span>
+            <span class="say step">Closed at the bottom: odd quarter wavelengths</span>
+            <span class="step">\(L_{1} = \dfrac{\lambda}{4}\), &nbsp;\(L_{2} = \dfrac{3\lambda}{4}\)</span>
+          </div>
+          <div class="work step">
+            <span>\(L_{2} - L_{1} = \dfrac{\lambda}{2}\)</span>
+            <span class="step">\(\lambda = 2(0.496 - 0.164) = 0.664 \,\mathrm{m}\)</span>
+            <span class="step">\(v = f \lambda = 512 \times 0.664 = \class{res}{340 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <div class="q step"><p>Why use the difference, not \(4L_{1}\)?</p><div class="ans step">The antinode sits just above the open end: the difference cancels that</div></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE, SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">What \(4L_{1}\) would give</h3>
+            <p>Using the first length alone, \(\lambda = 4 \times 0.164 = 0.656 \,\mathrm{m}\) and \(v = 512 \times 0.656 = 336 \,\mathrm{m} \,\mathrm{s}^{-1}\), about 1% low. The true air column is a little longer than the tube, by roughly 0.3 times its diameter, because the antinode forms just outside the open end. The same extra length is in both measurements, so it cancels in \(L_{2} - L_{1}\).</p>
+            <h3 class="rn-head">Finding the loudest point</h3>
+            <p>The air column resonates with the fork when a standing wave fits it, and the sound swells. Move the tube slowly through each loud position from above and from below and take the average. That reduces the random uncertainty in each length.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The speed of sound in air rises by about 0.6&nbsp;m&nbsp;s⁻¹ for each degree Celsius, so record the room temperature.</p>
           </div>
         </aside>
       </section>
