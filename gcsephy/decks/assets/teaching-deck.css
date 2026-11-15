@@ -69,11 +69,10 @@
   --rn-label-case: none;
   --rn-tag-font: 600 12px var(--font-mono);
 }
-:root.deck-y10 { --year-colour: #d8eaa1; --year-ink: #49651f; --year-dark: #c8df85; }
-:root.deck-y11 { --year-colour: #f6e7a5; --year-ink: #78601b; --year-dark: #ecda8e; }
-/* The Year 10 copy of Atoms and Nuclear Radiation keeps the deck-y11 layout rules with the Year 10 colours.
-   Keep every deck-y11 rule in this file after the Year 11 deck is removed. */
-:root.deck-y11[data-year="10"] { --year-colour: #d8eaa1; --year-ink: #49651f; --year-dark: #c8df85; }
+:root[data-year="10"] { --year-colour: #d8eaa1; --year-ink: #49651f; --year-dark: #c8df85; }
+:root[data-year="11"] { --year-colour: #f6e7a5; --year-ink: #78601b; --year-dark: #ecda8e; }
+/* Every deck sets its year with data-year on <html> (9 is the default colour above), which also labels the
+   year badge. .deck-atoms is the Atoms and Nuclear Radiation layout, whichever year teaches it. */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg-color: #111110;
@@ -223,7 +222,7 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .reveal-hint { font: 700 24px var(--font-body); color: var(--text-secondary); letter-spacing: .05em; }
 .terms { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); border-radius: 22px; box-shadow: none; }
 /* In Year 11, .terms is a grid of separate .term cards, not one panel. */
-.deck-y11 .terms { background: none; border: 0; border-radius: 0; }
+.deck-atoms .terms { background: none; border: 0; border-radius: 0; }
 .term { border-color: var(--card-border); }
 .term b { font: 400 32px/1.15 var(--font-display); text-transform: none; color: var(--brand-primary); }
 .term span { color: var(--text-secondary); }
@@ -305,7 +304,7 @@ body.is-fullscreen .deck { border-radius: 0; }
 @media (max-width: 900px) {
   .banner { grid-template-columns: auto 1fr auto !important; gap: 8px; }
   .banner-title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 18px; }
-  .deck-y11 .banner-title { display: block; justify-self: stretch; line-height: 48px; } /* its flex title would not truncate */
+  .deck-atoms .banner-title { display: block; justify-self: stretch; line-height: 48px; } /* its flex title would not truncate */
   .nav-pill .wide { display: none; }
 }
 @media print {
@@ -397,8 +396,8 @@ body.is-fullscreen .deck { border-radius: 0; }
 .orbit { stroke: var(--text-secondary); stroke-opacity: 1; stroke-width: 2.2; }
 
 /* History is enrichment: the background is a persistent exam-scope signal. */
-.deck-y11 .slide.history,
-.deck-y11 body.is-fullscreen:has(#deck .slide.history.active) {
+.deck-atoms .slide.history,
+.deck-atoms body.is-fullscreen:has(#deck .slide.history.active) {
   background-color: color-mix(in srgb, var(--brand-primary) 15%, var(--bg-color));
 }
 .symbol-grid .cd { stroke-width: 2.5; }

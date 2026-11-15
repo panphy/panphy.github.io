@@ -78,53 +78,52 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 .slide .pf text.read { font-size: 13px; }
 
 /* Atoms and Nuclear Radiation keeps its own deck.css, built like the IB decks; these rules
-   match ibdpphy/decks/assets/readable.css. Both the Year 11 deck and its Year 10 copy
-   (atoms-and-radiation-y10) use deck-y11: keep the rules after the Year 11 deck is removed. */
-.deck-y11 .not-examined { right: 72px; }
-.deck-y11 .idea { font-size: 35px; padding: 16px 24px; }
-.deck-y11 .equation.small { font-size: 42px; }
-.deck-y11 .panel-head { font-size: 26px; }
-.deck-y11 .pill { font-size: 24px; }
-.deck-y11 .legend > span { font-size: 30px; padding: 4px 16px 4px 5px; }
-.deck-y11 .legend i { width: 36px; height: 36px; font-size: 22px; }
-.deck-y11 .card h3 { font-size: 40px; }
-.deck-y11 .card p:not(.spec-ref) { font-size: 34px; }
-.deck-y11 table.facts { font-size: 34px; }
-.deck-y11 table.facts.big { font-size: 38px; }
-.deck-y11 table.facts.compare { font-size: 34px; }
-.deck-y11 .facts th, .deck-y11 .facts td { padding: 16px 22px; }
-.deck-y11 .facts.big td { padding: 22px 24px; }
-.deck-y11 .facts .num { white-space: nowrap; }
-.deck-y11 .facts thead th, .deck-y11 .facts.big thead th { font-size: 26px; }
-.deck-y11 .obs { gap: 14px; }
-.deck-y11 .obs-row { grid-template-columns: 1fr 44px 1fr; }
-.deck-y11 .obs-row > div { font-size: 34px; padding: 14px 20px; }
-.deck-y11 .obs-row .to { font-size: 40px; }
-.deck-y11 .obs-head { grid-template-columns: 1fr 44px 1fr; font-size: 26px; }
-.deck-y11 .q p { font-size: 34px; }
-.deck-y11 .q .ans { font-size: 33px; }
-.deck-y11 .term b { font-size: 38px; }
-.deck-y11 .term span { font-size: 32px; }
+   match ibdpphy/decks/assets/readable.css. Both its decks (Year 10 and Year 11) use .deck-atoms. */
+.deck-atoms .not-examined { right: 72px; }
+.deck-atoms .idea { font-size: 35px; padding: 16px 24px; }
+.deck-atoms .equation.small { font-size: 42px; }
+.deck-atoms .panel-head { font-size: 26px; }
+.deck-atoms .pill { font-size: 24px; }
+.deck-atoms .legend > span { font-size: 30px; padding: 4px 16px 4px 5px; }
+.deck-atoms .legend i { width: 36px; height: 36px; font-size: 22px; }
+.deck-atoms .card h3 { font-size: 40px; }
+.deck-atoms .card p:not(.spec-ref) { font-size: 34px; }
+.deck-atoms table.facts { font-size: 34px; }
+.deck-atoms table.facts.big { font-size: 38px; }
+.deck-atoms table.facts.compare { font-size: 34px; }
+.deck-atoms .facts th, .deck-atoms .facts td { padding: 16px 22px; }
+.deck-atoms .facts.big td { padding: 22px 24px; }
+.deck-atoms .facts .num { white-space: nowrap; }
+.deck-atoms .facts thead th, .deck-atoms .facts.big thead th { font-size: 26px; }
+.deck-atoms .obs { gap: 14px; }
+.deck-atoms .obs-row { grid-template-columns: 1fr 44px 1fr; }
+.deck-atoms .obs-row > div { font-size: 34px; padding: 14px 20px; }
+.deck-atoms .obs-row .to { font-size: 40px; }
+.deck-atoms .obs-head { grid-template-columns: 1fr 44px 1fr; font-size: 26px; }
+.deck-atoms .q p { font-size: 34px; }
+.deck-atoms .q .ans { font-size: 33px; }
+.deck-atoms .term b { font-size: 38px; }
+.deck-atoms .term span { font-size: 32px; }
 /* Year 11 key words are separate cards: keep room inside each one. */
-.deck-y11 .terms { gap: 22px; padding: 0; }
-.deck-y11 h2:has(+ .terms) { margin-bottom: 40px; }
-.deck-y11 .term { padding: 22px 32px 24px; }
-.deck-y11 .story .points li { font-size: 36px; }
-.deck-y11 .story.band .points li { font-size: 32px; }
-.deck-y11 .story-photos figcaption { font-size: 28px; }
-.deck-y11 .lbl { font-size: 27px; }
-.deck-y11 .lbl.mono { font-size: 24px; }
-.deck-y11 .lbl.small { font-size: 22px; }
-.deck-y11 .lbl.display { font-size: 35px; }
-.deck-y11 .lbl.greek { font-size: 42px; }
+.deck-atoms .terms { gap: 22px; padding: 0; }
+.deck-atoms h2:has(+ .terms) { margin-bottom: 40px; }
+.deck-atoms .term { padding: 22px 32px 24px; }
+.deck-atoms .story .points li { font-size: 36px; }
+.deck-atoms .story.band .points li { font-size: 32px; }
+.deck-atoms .story-photos figcaption { font-size: 28px; }
+.deck-atoms .lbl { font-size: 27px; }
+.deck-atoms .lbl.mono { font-size: 24px; }
+.deck-atoms .lbl.small { font-size: 22px; }
+.deck-atoms .lbl.display { font-size: 35px; }
+.deck-atoms .lbl.greek { font-size: 42px; }
 /* Slightly shorter illustrations on the source and medical cards, so the larger card text fits. */
-.deck-y11 .source-illustration { height: 205px; }
-.deck-y11 .medical-illustration { height: 270px; }
+.deck-atoms .source-illustration { height: 205px; }
+.deck-atoms .medical-illustration { height: 270px; }
 
 /* Energy deck: the drop-test readout keeps a fixed height (so the panel does not jump as its
    text changes), now tall enough for three lines at the larger size. */
 .dk-readout { font-size: 28px; height: 124px; }
-.deck-y11 .terms.fill { align-content: center; }
+.deck-atoms .terms.fill { align-content: center; }
 
 /* Map cards: tighter spacing so the larger text and the spec references stay inside each card. */
 .mission { padding: 14px 18px; }
@@ -149,12 +148,12 @@ table.data, .data.compact { font-size: 30px; }
 .dk-controls button, .pm-controls button { font-size: 28px; }
 .pm-note { font-size: 28px; }
 /* Year 11: timelines, checks and table text. */
-.deck-y11 .tl .year { font-size: 28px; }
-.deck-y11 .tl p { font-size: 29px; }
-.deck-y11 .eq-check { font-size: 28px; }
-.deck-y11 .obs-head { font-size: 28px; }
-.deck-y11 .facts thead th, .deck-y11 .facts.big thead th { font-size: 28px; }
-.deck-y11 .medical-illustration { height: 240px; }
+.deck-atoms .tl .year { font-size: 28px; }
+.deck-atoms .tl p { font-size: 29px; }
+.deck-atoms .eq-check { font-size: 28px; }
+.deck-atoms .obs-head { font-size: 28px; }
+.deck-atoms .facts thead th, .deck-atoms .facts.big thead th { font-size: 28px; }
+.deck-atoms .medical-illustration { height: 240px; }
 /* News-style case slides: a slightly narrower photo column leaves room for the larger story text. */
 .front { grid-template-columns: 600px 1fr; gap: 44px; }
 .news-photo img { max-height: 440px; }

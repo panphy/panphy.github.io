@@ -9,9 +9,11 @@ Six browser presentations, available by direct link from the GCSE hub:
 | `electric-circuits/` | 10 | 66 | Lime |
 | `particle-model/` | 10 | 53 | Lime |
 | `atoms-and-radiation/` | 11 | 61 | Light yellow |
-| `atoms-and-radiation-y10/` | 10 | 61 | Lime |
+| `atoms-and-nuclear-radiation/` | 10 | 61 | Lime |
 
-The Year 10 Atoms and Nuclear Radiation deck is a copy of the Year 11 deck for the new Year 10 sequence, with its own workbook in `../year10phy/unit03/`. It keeps the `deck-y11` class for the Year 11 layout rules, and `data-year="10"` on `<html>` switches its accent to lime and its badge to Year 10. The two copies are independent: change both when a fix applies to both. The Year 11 unit (`atoms-and-radiation/`, `../year11phy/unit01/`) will be removed after its 2027 exams. When removing it, keep the `deck-y11` rules in `assets/teaching-deck.css` and `assets/readable.css`, which the Year 10 copy still uses, and delete only the Year 11 card in `../index.html`.
+`atoms-and-nuclear-radiation/` is a copy of the Year 11 deck for the new Year 10 sequence, with its own workbook in `../year10phy/unit03/`; the two copies are independent, so change both when a fix applies to both. The Year 11 unit (`atoms-and-radiation/`, `../year11phy/unit01/`) will be removed after its 2027 exams: delete those two folders and the Year 11 card in `../index.html`, and leave the shared stylesheets as they are.
+
+Names stay year-neutral, so a unit can move to another year by changing its labels only. Each deck names its year in `data-year` on `<html>` (`9`, `10` or `11`), which sets the accent colour and the year badge. Layout and palette classes name the look, not the year: `deck-atoms` (Atoms and Nuclear Radiation's layout rules in `assets/teaching-deck.css` and `assets/readable.css`), `companion-deck` and `palette-electric` (`assets/companion-deck.css`).
 
 Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. Each point of a note opens with its question or heading on its own line, `<h3 class="rn-head">`, followed by the explanation in `<p>`; call-outs go in `<div class="rn-side">`. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
 
