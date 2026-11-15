@@ -16,7 +16,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all six workb
 | `assets/labs-content.js` | Virtual labs booklet: three labs and their answer key, printed at the back |
 | `assets/workbook.js`, `assets/plans.js` | Renderers |
 | `assets/workbook.css`, `assets/diagrams-print.css` | Print styles; the latter holds the diagram styles for `../assets/diagrams.js` |
-| `build-pdfs.sh` | Rebuilds all PDFs with headless Chrome; name booklets (`3 7 review labs guide`) to rebuild only those |
+| `build-pdfs.sh` | Rebuilds all PDFs with headless Chrome, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`); name booklets (`3 7 review labs guide`) to rebuild only those |
 
 Diagrams use `../assets/diagrams.js`. Each booklet is self-contained: cover, how-to page, lesson, toolkit so far, key words and quick answers. The Unit review adds static electricity (Triple Science only), the full toolkit, all key words and a progress tracker. Every page after the cover prints 1.2× larger (12 pt body text, 1.45 line spacing, ~9.6 mm writing lines) for students with additional learning needs; graph paper is scaled back to keep 2 mm and 1 cm squares, and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Check body text is still 12 pt after changing a layout.
 

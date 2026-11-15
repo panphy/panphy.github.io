@@ -7,6 +7,7 @@
 BASE="${BASE:-http://localhost:8000/gcsephy/year9phy/unit02/workbook}"
 PARTS="1:1-3 2:4-6 3:7-9" # part:lessons, as PARTS in assets/workbook.js
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
+COMPRESS="$(dirname "$0")/../../../assets/compress-pdfs.sh"
 OUT="${OUT:-..}"
 
 pdf() { # output, url, attempt
@@ -21,7 +22,7 @@ pdf() { # output, url, attempt
   kill "$pid" 2>/dev/null
   wait "$pid" 2>/dev/null
   # A print taken before MathJax arrives is tiny; try again (up to three times).
-  if [ "$(wc -c < "$tmp" 2>/dev/null || echo 0)" -gt 200000 ]; then mv "$tmp" "$1"; echo "Wrote $1"; rm -rf "$profile"
+  if [ "$(wc -c < "$tmp" 2>/dev/null || echo 0)" -gt 200000 ]; then mv "$tmp" "$1"; echo "Wrote $1"; sh "$COMPRESS" "$1"; rm -rf "$profile"
   elif [ "${3:-1}" -lt 3 ]; then rm -rf "$profile"; pdf "$1" "$2" $(( ${3:-1} + 1 ))
   else echo "FAILED: $1"; rm -rf "$profile"; fi
 }
