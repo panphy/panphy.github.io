@@ -33,9 +33,9 @@ strong { font-weight: 700; }
 .cover { page: cover; break-after: page; position: relative; display: flex; flex-direction: column; height: 297mm; margin: -13mm -14mm 0; padding: 20mm 20mm 18mm; background: var(--navy); color: white; overflow: hidden; }
 .cover::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 210 297' preserveAspectRatio='none'%3E%3Cpath d='M0 0.1323H210M0 12.1323H210M0 24.1323H210M0 36.1323H210M0 48.1323H210M0 60.1323H210M0 72.1323H210M0 84.1323H210M0 96.1323H210M0 108.1323H210M0 120.1323H210M0 132.1323H210M0 144.1323H210M0 156.1323H210M0 168.1323H210M0 180.1323H210M0 192.1323H210M0 204.1323H210M0 216.1323H210M0 228.1323H210M0 240.1323H210M0 252.1323H210M0 264.1323H210M0 276.1323H210M0 288.1323H210M0.1323 0V297M12.1323 0V297M24.1323 0V297M36.1323 0V297M48.1323 0V297M60.1323 0V297M72.1323 0V297M84.1323 0V297M96.1323 0V297M108.1323 0V297M120.1323 0V297M132.1323 0V297M144.1323 0V297M156.1323 0V297M168.1323 0V297M180.1323 0V297M192.1323 0V297M204.1323 0V297' stroke='%23132b40' stroke-width='.2646' fill='none'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; } /* vector grid: a translucent CSS gradient prints as a blurry 104 dpi bitmap in Preview */
 .cover > * { position: relative; }
-.cover .eyebrow { font: 900 10pt/1 Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--spark); }
+.cover .eyebrow { font: 900 10pt/1 Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--year); }
 .cover h1 { margin: 7mm 0 0; font: 900 58pt/.82 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.06em; }
-.cover h1 em { font-style: normal; color: var(--spark); }
+.cover h1 em { font-style: normal; color: var(--year); }
 .cover .lede { max-width: 150mm; margin: 7mm 0 0; font-size: 15pt; line-height: 1.45; color: #d5deeb; }
 .cover-sub { margin: 7mm 0 0; font: 900 10pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
 /* The circuit and the name box sit together at the foot of the cover, with a clear gap between them. */
@@ -44,7 +44,7 @@ strong { font-weight: 700; }
 .cover-circuit svg { width: 100%; display: block; }
 .cover-circuit .ef { --ef-ink: #fff; }
 .cover .edition { align-self: flex-start; margin-top: 4mm; padding: 1.8mm 4mm; border: 2px solid var(--copper); color: var(--copper); font: 900 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
-.cover-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; padding: 6mm 8mm; border: 2px solid var(--spark); background: #eef3f9; }
+.cover-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; padding: 6mm 8mm; border: 2px solid var(--year); background: #eef3f9; }
 .cover-fields div { font: 900 9pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--navy); }
 .cover-fields div span { display: block; height: 10mm; border-bottom: 1.5px solid var(--navy); }
 
@@ -332,11 +332,11 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .revise-card > div { break-inside: avoid; }
 .keep { break-inside: avoid; }
 .cover-part { margin-top: 8mm; font: 900 22pt/1.15 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
-.cover-part b { display: inline-block; margin-right: 4mm; padding: 1mm 3mm; background: var(--spark); color: var(--navy); }
-.cover-part span { display: block; margin-top: 3mm; font: 700 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--leaf); }
+.cover-part b { display: inline-block; margin-right: 4mm; padding: 1mm 3mm; background: var(--year); color: var(--navy); }
+.cover-part span { display: block; margin-top: 3mm; font: 700 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #d5deeb; }
 .cover-lessons { margin: 3mm 0 0; padding-left: 7mm; font-size: 13pt; line-height: 1.55; color: #fff; }
 .cover-lessons li { margin-bottom: 1.5mm; }
-.cover-lessons li::marker { color: var(--spark); font-weight: 900; }
+.cover-lessons li::marker { color: var(--year); font-weight: 900; }
 .tracker-flow { margin-top: 5mm; }
 .tracker-flow > .eyebrow, .tracker-flow > .page-title, .tracker-flow > .page-intro { break-after: avoid; }
 .tracker-flow .tracker, .tracker-flow .quick-answers > div { break-inside: avoid; }
@@ -479,7 +479,7 @@ table.data.wide th, table.data.wide td { padding-left: 1mm; padding-right: 1mm; 
 .opener .num-to { display: block; margin-top: 1.5mm; font-size: 24pt; letter-spacing: -.04em; }
 .online.story .punch { margin: 1.5mm 0 0; font-weight: 700; }
 .online .sim { margin-top: 1.5mm; }
-.cover-quote { max-width: 150mm; margin: 9mm 0 0; padding-left: 5mm; border-left: 3px solid var(--spark); font-size: 13pt; font-style: italic; line-height: 1.45; color: #d5deeb; }
+.cover-quote { max-width: 150mm; margin: 9mm 0 0; padding-left: 5mm; border-left: 3px solid var(--year); font-size: 13pt; font-style: italic; line-height: 1.45; color: #d5deeb; }
 .cover-quote span { display: block; margin-top: 2mm; font: 700 8.5pt/1 Arial, sans-serif; font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: #a8b8cc; }
 .key.warn { background: var(--copper-t); }
 .key.warn::before { background: var(--copper); }
@@ -541,7 +541,7 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .dfig .nts { display: block; margin-bottom: 1mm; text-align: right; font: 700 6.5pt Arial, sans-serif; letter-spacing: .12em; color: var(--muted); }
 .fig-small { --mh: 42mm; }
 .fig-mid { --mh: 54mm; }
-.cover-circuit .dfig { width: 70mm; padding: 3mm; background: white; border: 2px solid var(--spark); }
+.cover-circuit .dfig { width: 70mm; padding: 3mm; background: white; border: 2px solid var(--year); }
 .cover-circuit .dfig svg { max-height: 52mm; }
 .opt-fig svg { display: block; width: 100%; height: auto; max-height: 34mm; }
 .worked .data { margin: 0 0 1.5mm; }
@@ -570,3 +570,8 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .fact .compare th, .fact .compare td { padding: 1.2mm 1.8mm; }
 .fact .nuc-eq { font-size: 13pt; margin: 1.5mm 0; }
 .eyebrow, .page-title { break-after: avoid; }
+
+/* Covers take the year colour of the GCSE landing page and hubs: Year 9 orange, 10 green, 11 yellow. */
+.cover { --year: #f7a25c; }
+.cover[data-year="10"] { --year: #b4d84e; }
+.cover[data-year="11"] { --year: #f7d23e; }

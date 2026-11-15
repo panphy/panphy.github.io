@@ -415,7 +415,7 @@
     const q = typeof C.quote === "function" ? C.quote(W) : C.quote;
     const quote = q ? `<blockquote class="cover-quote">${q[0]}<span>${q[1]}</span></blockquote>` : "";
     const where = partNo ? `Part ${partNo} of ${PARTS.length}` : ONE ? `${lessonName(ONE)} of ${MAX}` : REVIEW ? "Unit review" : "Unit booklet";
-    return `<section class="cover"><div class="eyebrow">Year ${C.year} Physics, AQA GCSE, ${where}</div>
+    return `<section class="cover" data-year="${C.year}"><div class="eyebrow">Year ${C.year} Physics, AQA GCSE, ${where}</div>
       <h1>${C.coverTitle}</h1>
       ${middle}
       ${quote}
