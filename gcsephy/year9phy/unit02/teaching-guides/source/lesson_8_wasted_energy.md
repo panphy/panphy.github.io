@@ -60,6 +60,8 @@ Rub hands together hard. Then spin two wheels, one with oiled axles. Which spins
 | Air resistance on a vehicle | Streamlined shape | Less force from the air, so less work against it |
 | Conduction through walls and windows | Thermal insulation | Materials with low thermal conductivity slow the transfer |
 
+Then the bike chain case (slide 63): oil keeps a thin layer between the rubbing links, so less energy is dissipated by friction. Ask why oil must never get onto the brakes. Braking needs friction to transfer energy from the kinetic store of the bike to the thermal store of the brakes, so friction is wasteful in the chain but useful in the brakes.
+
 ## Main teaching: Conduction and buildings
 
 Optional demonstration: wax-and-pin rods. The pins fall off the copper rod first, then aluminium, then steel, then glass. Higher thermal conductivity, faster conduction.
@@ -132,7 +134,7 @@ Complete the Eco House. Stretch: estimate which feature would save the most ener
 
 ## Using the workbook
 
-The Quick check (slide 67) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
+The Quick check (slide 68) has its own box before the Exam corner. Students answer each question, then check it as you reveal the answer.
 
 ## Teacher notes
 
