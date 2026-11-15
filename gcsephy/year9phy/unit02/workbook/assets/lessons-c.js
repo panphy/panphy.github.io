@@ -191,7 +191,7 @@
         { p: "Two houses have walls of the same thickness. The bricks of house A have a higher thermal conductivity than the bricks of house B. Which house cools faster? Explain.", marks: 2, lines: 2, a: "House A (1): a higher thermal conductivity means energy is transferred through the walls by conduction faster (1)." },
       ],
       order: ["doNow", "learn", "lab", "try", "check", "exam", "revise"],
-      quick: { slide: 67, items: [
+      quick: { slide: 68, items: [
         ["Where does dissipated energy end up?", "In the thermal store of the surroundings."],
         ["How does oil help a bike chain?", "It reduces friction, so less energy is dissipated."],
         ["Copper or glass: which conducts energy faster?", "Copper: it has a higher thermal conductivity."],
@@ -224,9 +224,9 @@
         { t: "eq", eq: R`\(\text{efficiency} = \dfrac{\text{useful output energy transfer}}{\text{total input energy transfer}}\)`, words: "Energy in joules (J). Efficiency has no unit.", units: R`Answer as a decimal (for example 0.80), or multiply by 100 for a percentage (80%).`, re: R`Rearranged: useful output = efficiency × total input, and \(\text{total input} = \dfrac{\text{useful output}}{\text{efficiency}}\)`, tri: { top: "useful", bottom: ["eff.", "total"] }, stack: true },
         { t: "eq", eq: R`\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)`, stack: true, words: "The same idea, using power in watts (W).", units: "Use whichever pair the question gives you: energies or powers." },
         { t: "key", h: "Efficiency is <strong>never more than 1</strong> (100%). If your answer is bigger than 1, you have divided the wrong way round. To use a percentage in a calculation, change it to a decimal first: 25% = 0.25." },
-        { t: "follow", slide: 69, q: "A motor is supplied with 500 J and transfers 400 J to the kinetic store of its load. Calculate its efficiency.", steps: [["Equation", R`\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)`], ["Substitute", R`\(\text{efficiency} = \dfrac{400}{500}\)`], ["Answer", "0.80, or 80%"]],
+        { t: "follow", slide: 70, q: "A motor is supplied with 500 J and transfers 400 J to the kinetic store of its load. Calculate its efficiency.", steps: [["Equation", R`\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)`], ["Substitute", R`\(\text{efficiency} = \dfrac{400}{500}\)`], ["Answer", "0.80, or 80%"]],
           yt: { q: "A fan is supplied with 300 J and transfers 210 J to the kinetic store of the air. Calculate its efficiency.", steps: [["Equation", R`\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)`], ["Substitute", R`\(\text{efficiency} = \dfrac{210}{300}\)`], ["Answer", "0.70, or 70%"]] } },
-        { t: "follow", slide: 70, q: "A 60 W lamp has an efficiency of 25%. Calculate its useful power output.", steps: [["Convert", "efficiency = 25% = 0.25"], ["Rearrange", "useful = efficiency × total"], ["Substitute", "useful = 0.25 × 60"], ["Answer", "15 W"]],
+        { t: "follow", slide: 71, q: "A 60 W lamp has an efficiency of 25%. Calculate its useful power output.", steps: [["Convert", "efficiency = 25% = 0.25"], ["Rearrange", "useful = efficiency × total"], ["Substitute", "useful = 0.25 × 60"], ["Answer", "15 W"]],
           yt: { q: "A 500 W motor has an efficiency of 40%. Calculate its useful power output.", steps: [["Convert", "efficiency = 40% = 0.40"], ["Rearrange", "useful = efficiency × total"], ["Substitute", "useful = 0.40 × 500"], ["Answer", "200 W"]] } },
         { t: "sub", h: "Sankey diagrams" },
         { t: "split", left: [{ t: "steps", items: ["The <strong>width</strong> of each arrow shows the amount of energy.", "Useful energy goes <strong>straight on</strong>. Wasted energy <strong>bends away</strong>, usually downwards.", "Input = useful + wasted. Here: 100 J = 20 J + 80 J.", "Efficiency = 20 ÷ 100 = 0.20 (20%)."] }], right: [{ t: "fig", h: F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.4, useLabel: "by light", wasteLabel: "heating the room" }), cap: "A lamp: 100 J in, 20 J by light." }] },
@@ -255,7 +255,7 @@
         { tip: "Check: is your efficiency less than 1 (100%)?", p: "A 1200 W hair dryer has a useful power output of 1080 W. Calculate its efficiency as a percentage.", marks: 3, frame: frame3, frameA: [R`\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)`, R`\(\dfrac{1080}{1200} = 0.90\) (1)(1)`, "90% (1)"] },
         { p: "Explain why an LED is more efficient than a filament lamp.", marks: 2, lines: 2, a: "An LED wastes less energy heating the surroundings (1), so a bigger fraction of the input energy is transferred usefully by light (1)." },
       ],
-      quick: { slide: 75, items: [
+      quick: { slide: 76, items: [
         ["A device transfers 300 J usefully from 1200 J. Calculate its efficiency.", "0.25 (25%)"],
         ["Can an efficiency be 1.4? Explain.", "No: that is more than 100%, so more energy would come out than goes in."],
         ["A 400 W motor is 75% efficient. Calculate its useful power.", R`\(0.75 \times 400 = 300\) W`],
