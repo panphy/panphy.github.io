@@ -1,8 +1,8 @@
 # Medical illustrations — slide 48
 
-Generated with the built-in imagegen tool. These slide-only PNGs replace the medical-use illustrations on page 46; the shared SVG figures remain available to the workbooks. Both themes use a white image background to preserve label contrast.
+Generated with the built-in imagegen tool. These slide-only images replace the medical-use illustrations on page 46; the shared SVG figures remain available to the workbooks. Both themes use a white image background to preserve label contrast.
 
-## Medical tracer (`medical-tracer.png`)
+## Medical tracer (`medical-tracer.webp`)
 
 Use case: scientific-educational
 Asset type: single landscape classroom slide illustration, aspect ratio 3:2.
@@ -19,7 +19,7 @@ Change: make the patient a very simple flat 2D textbook cartoon. Generic rounded
 Also simplify equipment into clean flat colour shapes with crisp navy outlines so it harmonises with the cartoon patient. White background, muted teal and navy, yellow radiation arrows. Preserve the existing composition, face-up patient on couch, detector above abdomen, monitor at right, and all three exact labels with their correct leader lines: "Gamma camera", "Gamma rays leave the body", "Tracer in organ".
 Keep three yellow arrows directed OUT of the body UP towards the gamma camera. Replace the anatomical abdomen window with one simple kidney icon containing golden tracer dots, and repeat that kidney icon on the monitor. Maintain scientific meaning, landscape 3:2 proportions, large readable labels, all content within frame. Flat educational illustration, no realism, no gradients, no 3D render, no extra labels.
 
-## Radiotherapy (`radiotherapy.png`)
+## Radiotherapy (`radiotherapy.webp`)
 
 Use case: scientific-educational
 Asset type: single landscape classroom slide illustration, aspect ratio 3:2.

@@ -654,10 +654,10 @@ window.DeckSvgTex = {
       s += xs.map(tile).join('');
 
       const sources = [
-        ['background-radon.png', 'Radon from rocks', 'the biggest share'],
-        ['background-cosmic.png', 'Cosmic rays', 'from space'],
-        ['background-fallout.png', 'Weapons tests', 'fallout settles'],
-        ['background-accident.png', 'Nuclear accidents', 'e.g. Chernobyl']
+        ['background-radon.webp', 'Radon from rocks', 'the biggest share'],
+        ['background-cosmic.webp', 'Cosmic rays', 'from space'],
+        ['background-fallout.webp', 'Weapons tests', 'fallout settles'],
+        ['background-accident.webp', 'Nuclear accidents', 'e.g. Chernobyl']
       ];
       s += sources.map(([file, title, caption], i) => {
         const x = xs[i];
