@@ -5,7 +5,7 @@ window.WORKBOOK = {
   name: "Atoms and Nuclear Radiation",
   year: 11,
   coverTitle: "Atoms &amp; Nuclear<br><em>Radiation</em>",
-  coverArt: () => `<div class="dfig">${window.DeckFigures.figure("hero")}</div>`,
+  coverArt: () => window.CoverArt.atom(),
   lede: "What is inside an atom, how do we know, and what do unstable nuclei do?",
   parts: [[1, 2], [3, 4], [5, 6, 7], [8, 9, 10]],
   deck: "panphy.app/gcsephy/decks/atoms-and-radiation",

@@ -4,8 +4,7 @@ window.WORKBOOK = {
   name: "Work Like a Physicist",
   year: 9,
   coverTitle: "Work like<br><em>a physicist</em>",
-  coverArt: () => window.WLPFigures.coverArt(),
-  coverArtStyle: "width:150mm;margin:0 0 10mm",
+  coverArt: () => window.CoverArt.graph(),
   quote: (W) => (W.REVIEW
     ? ["“It doesn’t matter how beautiful your theory is … If it doesn’t agree with experiment, it’s wrong.”", "Richard Feynman, physicist"]
     : ["“The first principle is that you must not fool yourself, and you are the easiest person to fool.”", "Richard Feynman, physicist"]),

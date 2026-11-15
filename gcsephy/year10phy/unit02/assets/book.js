@@ -4,7 +4,7 @@ window.WORKBOOK = {
   name: "Particle Model of Matter",
   year: 10,
   coverTitle: "Particle<br>Model <em>of<br>Matter</em>",
-  coverArt: () => window.ParticleFigures.coverArt(),
+  coverArt: () => window.CoverArt.particles(),
   lede: "What everything is made of, why ice floats, why a kettle takes so long, and where the energy goes when water boils.",
   // Lessons 1-3 and 5-7 print in three parts; each required practical (Lessons 4 and 8) is a booklet of its own.
   parts: [[1, 2], [3, 5], [6, 7]],

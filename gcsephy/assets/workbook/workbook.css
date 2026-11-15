@@ -40,9 +40,6 @@ strong { font-weight: 700; }
 .cover-sub { margin: 7mm 0 0; font: 900 10pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
 /* The circuit and the name box sit together at the foot of the cover, with a clear gap between them. */
 .cover-foot { margin-top: auto; padding-top: 4mm; }
-.cover-circuit { width: 96mm; margin: 0 0 6mm; }
-.cover-circuit svg { width: 100%; display: block; }
-.cover-circuit .ef { --ef-ink: #fff; }
 .cover .edition { align-self: flex-start; margin-top: 4mm; padding: 1.8mm 4mm; border: 2px solid var(--copper); color: var(--copper); font: 900 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 .cover-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; padding: 6mm 8mm; border: 2px solid var(--year); background: #eef3f9; }
 .cover-fields div { font: 900 9pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--navy); }
@@ -456,7 +453,6 @@ td.blank-cell { height: 10mm; vertical-align: top; }
 .fig-mid .pf { max-height: 50mm; }
 .fig-wide .pf { max-height: 58mm; }
 .split .fig .pf { max-height: 56mm; }
-.cover-circuit .pf { --pf-ink: #fff; }
 .online .deck-line { margin-top: 1.6mm; padding-top: 1.4mm; border-top: 1px solid var(--ink); font-size: 8pt; line-height: 1.3; }
 .draw-box { height: 42mm; aspect-ratio: 1; margin: 1mm auto 2.5mm; border: 1.6px solid var(--ink); background: white; }
 .draw-box .ans-fig { display: none; height: 100%; }
@@ -541,8 +537,6 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .dfig .nts { display: block; margin-bottom: 1mm; text-align: right; font: 700 6.5pt Arial, sans-serif; letter-spacing: .12em; color: var(--muted); }
 .fig-small { --mh: 42mm; }
 .fig-mid { --mh: 54mm; }
-.cover-circuit .dfig { width: 70mm; padding: 3mm; background: white; border: 2px solid var(--year); }
-.cover-circuit .dfig svg { max-height: 52mm; }
 .opt-fig svg { display: block; width: 100%; height: auto; max-height: 34mm; }
 .worked .data { margin: 0 0 1.5mm; }
 .worked .data th, .worked .data td { height: 6.2mm; padding: .8mm 2mm; }
@@ -572,7 +566,7 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .eyebrow, .page-title { break-after: avoid; }
 
 /* Covers are printed in the year colour of the GCSE landing page and hubs (Year 9 orange, 10 green,
-   11 yellow) with navy type. The drawing, made for a dark ground, sits on a navy panel. */
+   11 yellow) with navy type, and a navy and white drawing of the topic (cover-art.js). */
 .cover { --year: #f7a25c; background: var(--year); color: var(--navy); }
 .cover[data-year="10"] { --year: #b4d84e; }
 .cover[data-year="11"] { --year: #f7d23e; }
@@ -582,10 +576,11 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .cover-part b { background: var(--navy); color: var(--year); }
 .cover-quote { border-left-color: var(--navy); }
 .cover .edition { border-color: var(--navy); background: var(--navy); color: white; }
-.cover-circuit { padding: 5mm; background: var(--navy); }
-.cover-circuit:has(.dfig) { padding: 0; background: none; }
-.cover-circuit .dfig { border-color: var(--navy); }
 .cover-fields { border-color: var(--navy); background: white; }
 /* Name runs the full width; Class, Teacher (and Score on the Unit review) share the row below. */
 .cover-fields { grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); }
 .cover-fields div:first-child { grid-column: 1 / -1; }
+/* The drawing fills the space between the contents and the name fields, up to 86 mm high. */
+.cover-foot { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; }
+.cover-circuit { flex: 1 1 0; min-height: 28mm; max-height: 86mm; margin: 0 0 8mm; }
+.cover-circuit .cover-svg { display: block; width: 100%; height: 100%; }

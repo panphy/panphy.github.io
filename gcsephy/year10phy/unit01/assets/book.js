@@ -10,16 +10,7 @@
     name: "Electric Circuits",
     year: 10,
     coverTitle: "Electric<br><em>Circuits</em>",
-    // A working circuit: the voltmeter is across the lamp, the ammeter is in series, and
-    // the diode points the way conventional current flows (+ terminal on the left).
-    coverArt: () => D.circuit({
-      w: 700, h: 215,
-      wires: ["M30 70 H670 V185 H30 Z", "M455 70 V22 H585 V70", "M300 185 V140 H460 V185"],
-      parts: [["battery", 120, 70, "h"], ["switchClosed", 240, 70, "h"], ["ammeter", 360, 70, "h"], ["lamp", 520, 70, "h"], ["voltmeter", 520, 22, "h"],
-        ["diode", 160, 185, "h"], ["ldr", 380, 140, "h"], ["thermistor", 380, 185, "h"], ["resistor", 570, 185, "h"]],
-      dots: [[455, 70], [585, 70], [300, 185], [460, 185]],
-    }).replace(/<figure[^>]*>/, "").replace("</figure>", "").replace('class="cd"', 'class="cd" style="stroke:#fff"'),
-    coverArtStyle: "--ink:#fff;--diagram-bg:#0a1326;width:150mm;margin:0 0 10mm",
+    coverArt: () => window.CoverArt.circuit(),
     lede: "Charge, energy and resistance: from your first circuit to confident exam answers.",
     parts: [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]],
     firstDoNow: "What do you already think?",
