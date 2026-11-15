@@ -1,6 +1,6 @@
 // Interactive figures for the E.1 deck, drawn over the flat pictures of ../assets/figures.js, which
 // stay for print. Controls come from ../assets/sim-control.js.
-//   data-fig="closest-approach"  slide 32  a head-on alpha particle slows as it nears a gold nucleus,
+//   data-fig="closest-approach"  slide 34  a head-on alpha particle slows as it nears a gold nucleus,
 //                                          stops at the distance of closest approach and returns;
 //                                          Play/Pause and Reset buttons
 import { playback, drawn } from '../assets/sim-control.js';
