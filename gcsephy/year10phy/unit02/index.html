@@ -49,7 +49,7 @@
       <small><a href="${file(name)}">Workbook PDF</a><a href="${file(name, true)}">Answers PDF</a></small></article>`;
     document.getElementById('cards').innerHTML = BOOKLETS.map(([name, title, label, pages, text]) =>
       card(`${label}, ${pages} pages`, title, text, name)).join('') +
-      card(`After Lesson 8, ${REVIEW_PAGES} pages`, 'Unit review', 'Mixed exam practice (39 marks), a fix-it log, the equation toolkit, all the key words and extension pages for GCSE Physics: pressure and volume, and doing work on a gas.', 'Unit Review', true);
+      card(`After Lesson 8, ${REVIEW_PAGES} pages`, 'Unit review', 'Mixed exam practice (39 marks), the equation toolkit, all the key words and extension pages for GCSE Physics: pressure and volume, and doing work on a gas.', 'Unit Review', true);
   </script>
 </body>
 </html>
