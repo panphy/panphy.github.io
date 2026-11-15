@@ -37,10 +37,10 @@
   <script>
     // [file name, title, label, pages, what it covers]; the PDFs are built by build-pdfs.sh.
     const BOOKLETS = [
-      ['Part 1', 'Part 1: Inside the atom', 'Lessons 1–2', 16, 'Protons, neutrons and electrons, the size of an atom, atomic and mass numbers; isotopes and ions'],
+      ['Part 1', 'Part 1: Inside the atom', 'Lessons 1–2', 14, 'Protons, neutrons and electrons, the size of an atom, atomic and mass numbers; isotopes and ions'],
       ['Part 2', 'Part 2: How the model changed', 'Lessons 3–4', 16, 'The plum pudding model, alpha scattering and the nuclear model; the Bohr model, energy levels, protons and neutrons'],
-      ['Part 3', 'Part 3: Radioactive decay', 'Lessons 5–7', 25, 'Unstable nuclei, activity and count rate; nuclear equations; ionising power, penetration and choosing a source'],
-      ['Part 4', 'Part 4: Half-life and safety', 'Lessons 8–10', 25, 'Random decay and half-life, half-life calculations and net decline; contamination and irradiation'],
+      ['Part 3', 'Part 3: Radioactive decay', 'Lessons 5–7', 22, 'Unstable nuclei, activity and count rate; nuclear equations; ionising power, penetration and choosing a source'],
+      ['Part 4', 'Part 4: Half-life and safety', 'Lessons 8–10', 23, 'Random decay and half-life, half-life calculations and net decline; contamination and irradiation'],
     ];
     const base = 'pdf/' + encodeURIComponent('Y11 - Unit 01 - Atoms and Nuclear Radiation ');
     const file = (name, answers) => `${base}${encodeURIComponent(`(${name})` + (answers ? ' (Ans)' : ''))}.pdf`;
@@ -48,7 +48,7 @@
       <small><a href="${file(name)}">Workbook PDF</a><a href="${file(name, true)}">Answers PDF</a></small></article>`;
     document.getElementById('cards').innerHTML = BOOKLETS.map(([name, title, label, pages, text]) =>
       card(`${label}, ${pages} pages`, title, text, name)).join('') +
-      card('After Lesson 10, 16 pages', 'Unit review', 'Mixed exam practice (42 marks), a fix-it log, all the key words, a progress tracker and extension pages for GCSE Physics: background radiation, medical uses, fission and fusion.', 'Unit Review', true);
+      card('After Lesson 10, 15 pages', 'Unit review', 'Mixed exam practice (42 marks), a fix-it log, the toolkit, all the key words, a progress tracker and extension pages for GCSE Physics: background radiation, medical uses, fission and fusion.', 'Unit Review', true);
   </script>
 </body>
 </html>
