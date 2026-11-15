@@ -77,8 +77,9 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 .slide .pf text.lg { font-size: 19px; }
 .slide .pf text.read { font-size: 13px; }
 
-/* Year 11 (atoms-and-radiation) keeps its own deck.css, built like the IB decks; these rules
-   match ibdpphy/decks/assets/readable.css. */
+/* Atoms and Nuclear Radiation keeps its own deck.css, built like the IB decks; these rules
+   match ibdpphy/decks/assets/readable.css. Both the Year 11 deck and its Year 10 copy
+   (atoms-and-radiation-y10) use deck-y11: keep the rules after the Year 11 deck is removed. */
 .deck-y11 .not-examined { right: 72px; }
 .deck-y11 .idea { font-size: 35px; padding: 16px 24px; }
 .deck-y11 .equation.small { font-size: 42px; }
