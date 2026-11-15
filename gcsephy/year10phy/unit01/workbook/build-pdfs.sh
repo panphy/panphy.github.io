@@ -7,6 +7,7 @@
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year10phy/unit01/workbook}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
+COMPRESS="$(dirname "$0")/../../../assets/compress-pdfs.sh"
 OUT="pdf"
 mkdir -p "$OUT"
 
@@ -21,7 +22,7 @@ pdf() { # output, url
   sleep 2
   kill "$pid" 2>/dev/null
   wait "$pid" 2>/dev/null
-  if [ -s "$tmp" ]; then mv "$tmp" "$1"; echo "Wrote $1"; else echo "FAILED: $1"; fi
+  if [ -s "$tmp" ]; then mv "$tmp" "$1"; echo "Wrote $1"; sh "$COMPRESS" "$1"; else echo "FAILED: $1"; fi
   rm -rf "$profile"
 }
 

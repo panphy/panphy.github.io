@@ -8,7 +8,7 @@ The nine lesson plans for *Energy: Stores and Transfers* as printable A4 PDFs, p
 | `source/*.md` | Editable text, one file per lesson |
 | `guide.html` | Browser preview: `guide.html?lesson=3` (1 to 9) |
 | `assets/guide.css`, `assets/guide.js` | Print styles and the small Markdown renderer (copied from Unit 1) |
-| `build-pdf.sh` | Prints all nine PDFs with headless Chrome |
+| `build-pdf.sh` | Prints all nine PDFs with headless Chrome, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`) |
 
 To edit: serve the repository root (`python3 -m http.server 8000`), edit `source/`, preview at <http://localhost:8000/gcsephy/year9phy/unit02/teaching-guides/guide.html?lesson=1>, then run `sh build-pdf.sh` here (needs Chrome).
 
