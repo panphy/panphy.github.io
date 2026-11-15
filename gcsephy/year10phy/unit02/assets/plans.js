@@ -1,5 +1,5 @@
-/* Renders the teacher guide from window.UNIT (reference.js) and window.PLANS (plans-data.js).
-   teacher-guide.html shows every plan; ?lesson=N shows one. */
+/* Renders the lesson plans from window.UNIT (reference.js) and window.PLANS (plans-data.js).
+   lesson-plans/plan.html shows every plan; ?lesson=N shows one. */
 (function () {
   "use strict";
 
@@ -8,9 +8,9 @@
   const only = Number(new URLSearchParams(location.search).get("lesson")) || 0;
 
   const style = document.createElement("style");
-  style.textContent = '@page { @bottom-left { content: "Particle Model of Matter, Year 10 teacher guide, © 2026 PanPhy Labs. All rights reserved."; } }';
+  style.textContent = '@page { @bottom-left { content: "Particle Model of Matter, Year 10 lesson plans, © 2026 PanPhy Labs. All rights reserved."; } }';
   document.head.appendChild(style);
-  document.title = only ? `Lesson ${only} plan | Particle Model of Matter` : "Particle Model of Matter - Year 10 Teacher Guide";
+  document.title = `Y10 - Unit 02 - Particle Model of Matter - Lesson Plan${only ? ` ${String(only).padStart(2, "0")}` : "s"}`;
 
   const list = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
 
@@ -18,7 +18,7 @@
     const rows = U.lessons.map((l) => `<tr><td>${l.n}</td><td><strong>${l.title}</strong><br><span style="color:#56606e">${l.mapLine}</span></td><td>${P[l.n].week}</td><td>${l.slides}</td></tr>`).join("");
     return `<section>
       <div class="eyebrow">Year 10 Physics, AQA GCSE Physics (8463) and Combined Science: Trilogy (8464)</div>
-      <h1 class="page-title">Particle Model of Matter: Teacher guide</h1>
+      <h1 class="page-title">Particle Model of Matter: Lesson plans</h1>
       <p class="page-intro">Eight 50-minute lessons over four weeks, for AQA Physics 4.3 (with 4.1.1.3) and Combined Science 6.3 (with 6.1.1.3). The student workbook comes in three part booklets (Lessons 1–2, 3 and 5, 6–7) and a booklet for each required practical (Lessons 4 and 8); each lesson has its own section of the teaching deck.</p>
       <h4 class="sub">How the resources fit together</h4>
       <table class="compare"><thead><tr><th>Resource</th><th>Used for</th></tr></thead><tbody>

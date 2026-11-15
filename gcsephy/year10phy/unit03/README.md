@@ -13,7 +13,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all six workb
 | File | Use |
 |---|---|
 | `index.html` | Student page linking the five booklets, the booklets' answer editions and the five Preps (not their answers) |
-| `pdf/` | The workbook in four parts (Part 1, Lessons 1–2, 16 pages; Part 2, Lessons 3–4, 16; Part 3, Lessons 5–7, 25; Part 4, Lessons 8–10, 25), a 16-page Unit review (42 marks, extension pages, key words, tracker) and an answer edition of each with the same page numbers |
+| `pdf/` | `Y10 - Unit 03 - Atoms and Nuclear Radiation (Part 1).pdf` to `(Part 4)`: the workbook in four parts (Part 1, Lessons 1–2, 16 pages; Part 2, Lessons 3–4, 16; Part 3, Lessons 5–7, 25; Part 4, Lessons 8–10, 25), a 16-page Unit review (42 marks, extension pages, key words, tracker) and an `(Ans)` edition of each with the same page numbers |
 | `workbook.html` | PDF source: `?part=1`…`4` (`PARTS` in `workbook.js`) or `?review`, add `&answers`; `?lesson=N` previews one lesson, and with none it previews the whole unit |
 | `assets/content/helpers.js` | Nuclide notation, nuclear equations, diagrams from the deck's drawing parts |
 | `assets/content/lessons-1-5.js`, `lessons-6-10.js`, `reference.js` | The lessons; toolkit, review, extension pages and glossary (builds `window.UNIT`) |
@@ -63,7 +63,7 @@ Not dated on those pages, so taken from elsewhere: Geiger and Marsden's 1909 sca
 
 ## Rebuild
 
-Serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` here. It writes all 22 PDFs to `pdf/` one at a time, retrying any that print blank, lack the deck's display font or carry the wrong title. Check that each booklet and its answer edition have the same page count.
+Serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` here. It writes all 10 PDFs to `pdf/` one at a time, retrying any that print blank, lack the deck's display font or carry the wrong title. Check that each booklet and its answer edition have the same page count.
 
 ## Hosting
 

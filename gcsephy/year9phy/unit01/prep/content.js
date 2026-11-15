@@ -11,7 +11,7 @@
   window.PREP = {
     year: 9,
     unit: "Work Like a Physicist",
-    file: "Work Like a Physicist - Year 9",
+    file: "Y09 - Unit 01 - Work Like a Physicist",
     preps: [
       /* 1 */
       { lessons: "1–2", title: "Can this data be trusted?", subtitle: "Mean and uncertainty; random and systematic errors; variables and choosing a graph",

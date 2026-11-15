@@ -75,7 +75,7 @@
   const flip = only ? `?n=${only}${answers ? "" : "&answers"}` : `?${answers ? "" : "answers"}`;
   book.innerHTML = `<div class="screen-bar"><a href="?${answers ? "answers" : ""}">All</a>${nav}, <a href="${flip}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>` +
     U.preps.map((p, i) => (!only || only === i + 1 ? page(p, i) : "")).join("");
-  document.title = only ? `${U.file} Prep ${only}${answers ? " (Answers)" : ""}` : `${U.file} Preps`;
+  document.title = only ? `${U.file} - Prep ${String(only).padStart(2, "0")}${answers ? " (Ans)" : ""}` : `${U.file} - Preps`;
   document.body.appendChild(book);
 
   // Typeset any maths, flag overflowing pages, then tell the PDF build the page is ready.
