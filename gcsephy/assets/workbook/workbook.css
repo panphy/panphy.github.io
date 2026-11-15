@@ -571,7 +571,18 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .fact .nuc-eq { font-size: 13pt; margin: 1.5mm 0; }
 .eyebrow, .page-title { break-after: avoid; }
 
-/* Covers take the year colour of the GCSE landing page and hubs: Year 9 orange, 10 green, 11 yellow. */
-.cover { --year: #f7a25c; }
+/* Covers are printed in the year colour of the GCSE landing page and hubs (Year 9 orange, 10 green,
+   11 yellow) with navy type. The drawing, made for a dark ground, sits on a navy panel. */
+.cover { --year: #f7a25c; background: var(--year); color: var(--navy); }
 .cover[data-year="10"] { --year: #b4d84e; }
 .cover[data-year="11"] { --year: #f7d23e; }
+.cover::before { opacity: .14; }
+.cover .eyebrow, .cover h1 em, .cover .lede, .cover-sub, .cover-part span, .cover-lessons, .cover-lessons li::marker,
+.cover-quote, .cover-quote span { color: var(--navy); }
+.cover-part b { background: var(--navy); color: var(--year); }
+.cover-quote { border-left-color: var(--navy); }
+.cover .edition { border-color: var(--navy); background: var(--navy); color: white; }
+.cover-circuit { padding: 5mm; background: var(--navy); }
+.cover-circuit:has(.dfig) { padding: 0; background: none; }
+.cover-circuit .dfig { border-color: var(--navy); }
+.cover-fields { border-color: var(--navy); background: white; }
