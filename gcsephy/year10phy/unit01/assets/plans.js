@@ -19,10 +19,10 @@
     return `<section>
       <div class="eyebrow">Year 10 Physics, AQA GCSE Combined Science: Trilogy (Higher) and Physics</div>
       <h1 class="page-title">Electric Circuits: Lesson plans</h1>
-      <p class="page-intro">Twelve 50-minute lessons, written for students with <strong>no prior knowledge of electricity</strong>. The student workbook comes in six part booklets, two lessons each.</p>
+      <p class="page-intro">Twelve 50-minute lessons, written for students with <strong>no prior knowledge of electricity</strong>. The student workbook comes in three part booklets, four lessons each.</p>
       <h4 class="sub">How the three resources fit together</h4>
       <table class="compare"><thead><tr><th>Resource</th><th>Used for</th></tr></thead><tbody>
-        <tr><th>Student workbook</th><td>Six part booklets, two lessons each (12 pt text, wide writing lines), each with its toolkit, key words and quick answers, plus a Unit review booklet with the static electricity page (Triple only). Every lesson: explanations, worked examples, graded practice, lab records, an exam question and a revision box. It is the students' classwork book and their revision guide.</td></tr>
+        <tr><th>Student workbook</th><td>Three part booklets, four lessons each (12 pt text, wide writing lines), each with its toolkit, key words and quick answers, plus a Unit review booklet with the static electricity page (Triple only). Every lesson: explanations, worked examples, graded practice, lab records, an exam question and a revision box. It is the students' classwork book and their revision guide.</td></tr>
         <tr><th>Answer edition</th><td>Same pages and page numbers as each booklet, with answers in blue. For marking, and for release to students for self-marking if you choose.</td></tr>
         <tr><th>Labs and practicals</th><td>Lessons 2–4 and 10 have a PanPhyCircuits lab in the workbook (panphy.app/sandboxes/panphycircuits); Lesson 4 plots current against p.d., as AQA does. Lessons 5, 7 and 9 are the required practicals and the workbook is the lab sheet; Lessons 7 and 9 can also be done in PanPhyCircuits.</td></tr>
       </tbody></table>

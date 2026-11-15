@@ -2,7 +2,7 @@
 
 **Year 10 Physics, AQA GCSE electricity, twelve lessons**
 
-The Year 10 electricity unit: a workbook in six part booklets with a Unit review, lesson plans, the teaching deck and six Preps. The student hub is `index.html`.
+The Year 10 electricity unit: a workbook in three part booklets with a Unit review, lesson plans, the teaching deck and six Preps. The student hub is `index.html`.
 
 **Address:** <https://panphy.app/gcsephy/year10phy/unit01/>
 
@@ -24,8 +24,8 @@ AQA gives every student the full Physics Equations Sheet as an insert with each 
 
 | Path | Purpose |
 |---|---|
-| `index.html` | Student hub, linked from the GCSE landing page and the deck: the six parts, the Unit review, their answer editions and the six Preps (not their answers). It uses `/gcsephy/assets/workbook-hub.css`, shared by all six workbook hubs, which does not affect the printed workbooks |
-| `pdf/` | `Y10 - Unit 01 - Electric Circuits (Part 1).pdf` to `(Part 6)`, two lessons each, the `(Unit Review)` and an `(Ans)` edition of each with the same page numbers |
+| `index.html` | Student hub, linked from the GCSE landing page and the deck: the three parts, the Unit review, their answer editions and the six Preps (not their answers). It uses `/gcsephy/assets/workbook-hub.css`, shared by all six workbook hubs, which does not affect the printed workbooks |
+| `pdf/` | `Y10 - Unit 01 - Electric Circuits (Part 1).pdf` to `(Part 3)`, four lessons each, the `(Unit Review)` and an `(Ans)` edition of each with the same page numbers |
 | `workbook.html` | PDF source: `?part=1`…`6` (`parts` in `assets/book.js`) or `?review`, add `&answers`; `?lesson=N` previews one lesson, and with none it previews the whole unit |
 | `assets/content.js` | All workbook content |
 | `assets/book.js` | Settings for the shared renderer ([`../../assets/workbook/README.md`](../../assets/workbook/README.md)): file names, parts, cover, equation triangles, the toolkit's unit conversions, the static electricity pages, the review's equation recall and the circuit-symbol blocks |
@@ -35,7 +35,7 @@ AQA gives every student the full Physics Equations Sheet as an insert with each 
 | `lesson-plans/` | One lesson plan per lesson (`pdf/… - Lesson Plan 01.pdf` to `12`), not linked from any page. `plan.html` renders them from `assets/content.js`, `assets/plans-data.js` (teacher notes per lesson) and `assets/plans.js` (`?lesson=N` for one plan, with none an overview and every plan); `build-pdfs.sh` there rebuilds them |
 | `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. See [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 
-Each part is self-contained: cover, two lessons, toolkit so far, key words and quick answers. The Unit review adds static electricity (Triple Science only), the full toolkit and all key words. Every page after the cover prints 1.2× larger (12 pt body text, 1.45 line spacing, ~9.6 mm writing lines) for students with additional learning needs; graph paper is scaled back to keep 2 mm and 1 cm squares, and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Check body text is still 12 pt after changing a layout.
+Each part is self-contained: cover, four lessons, toolkit so far, key words and quick answers. The Unit review adds static electricity (Triple Science only), the full toolkit and all key words. Every page after the cover prints 1.2× larger (12 pt body text, 1.45 line spacing, ~9.6 mm writing lines) for students with additional learning needs; graph paper is scaled back to keep 2 mm and 1 cm squares, and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Check body text is still 12 pt after changing a layout.
 
 The 66-slide teaching deck (`../../decks/electric-circuits/`) uses the shared calm GCSE style with a lime Year 10 accent and the GCSE section theme preference; see [`../../decks/README.md`](../../decks/README.md). Slides 59–66 (Mission 9, static electricity) are GCSE Physics only and come after the Key words slide; the workbook does not cover them. It has three photo slides, the components, the National Grid and the inside of a UK plug, photographs on six mission dividers (8, 15, 19, 33, 43 and 59), and a news-page story of Coulomb’s torsion balance (slide 62, an engraving shared with the IB D.2 deck). The Grid, plug, divider and Coulomb pictures are in the deck's `images/` folder, each with a credit on the slide linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse.
 
@@ -45,18 +45,18 @@ The 66-slide teaching deck (`../../decks/electric-circuits/`) uses the shared ca
 |---:|---:|---|
 | 1 | 1 | Complete circuits and symbols |
 | 1 | 2 | Current and charge |
-| 2 | 3 | Potential difference |
-| 2 | 4 | Resistance and V = I R |
-| 3 | 5 | RP: resistance of a wire |
-| 3 | 6 | Series and parallel circuits |
-| 4 | 7 | RP: resistors in series and parallel |
-| 4 | 8 | I–V graphs |
-| 5 | 9 | RP: I–V characteristics |
-| 5 | 10 | Thermistors, LDRs and sensors |
-| 6 | 11 | Power and energy transfer |
-| 6 | 12 | Mains, safety and the National Grid |
+| 1 | 3 | Potential difference |
+| 1 | 4 | Resistance and V = I R |
+| 2 | 5 | RP: resistance of a wire |
+| 2 | 6 | Series and parallel circuits |
+| 2 | 7 | RP: resistors in series and parallel |
+| 2 | 8 | I–V graphs |
+| 3 | 9 | RP: I–V characteristics |
+| 3 | 10 | Thermistors, LDRs and sensors |
+| 3 | 11 | Power and energy transfer |
+| 3 | 12 | Mains, safety and the National Grid |
 
-After Lesson 12: the Unit review (41 marks). A Prep follows every second lesson, matching the parts.
+After Lesson 12: the Unit review (41 marks). A Prep follows every second lesson.
 
 Each lesson runs: opener → Do now → Learn it (models, diagrams, slide examples to fill in and worked examples, each with "Your turn") → Try it (supported → independent → challenge) → Lab where relevant → Exam corner → Revise it.
 
