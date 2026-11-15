@@ -14,7 +14,7 @@ The student hub, `index.html`, uses `/gcsephy/assets/workbook-hub.css`, shared b
 | `assets/review.js` | Unit review questions (`window.UNIT.review`), 40 marks, in the Exam corner format; `part: true` continues a question without a new number |
 | `assets/workbook.js`, `workbook.css` | Renderer and print styles, adapted from the Year 9 Energy workbook (no MathJax: maths is plain text, with ÷) |
 | `assets/figures.js`, `figures.css` | Line drawings for the workbook. Sample data match the teaching deck |
-| `build-pdfs.sh` | Rebuilds the three parts, the Unit review and their answer editions with headless Chrome (`ONLY_PART=2` for one part, `ONLY_REVIEW=1` for the review), then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`), and warns if an answer edition's page count differs from its student edition |
+| `build-pdfs.sh` | Rebuilds the three parts, the Unit review and their answer editions with headless Chrome (`ONLY_PART=2` for one part, `ONLY_REVIEW=1` for the review) and warns if an answer edition's page count differs from its student edition |
 | `index.html` | Student hub linking the parts, the review, their answers, the slide deck and the four Preps (`../prep/`) |
 
 ## Editing

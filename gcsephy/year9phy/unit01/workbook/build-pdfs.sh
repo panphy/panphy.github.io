@@ -7,7 +7,6 @@
 BASE="${BASE:-http://localhost:8000/gcsephy/year9phy/unit01/workbook}"
 PARTS="1:1-2 2:3-5 3:6-8" # part:lessons, as PARTS in assets/workbook.js
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
-COMPRESS="$(dirname "$0")/../../../assets/compress-pdfs.sh"
 OUT="${OUT:-..}"
 NAME="Work Like a Physicist - Year 9"
 
@@ -25,7 +24,7 @@ pdf() { # output, url, attempt
   kill "$pid" 2>/dev/null
   wait "$pid" 2>/dev/null
   # Now and then Chrome prints before the page is built, giving a one-page PDF: try again (up to three times).
-  if [ -s "$tmp" ] && [ "$(pages "$tmp")" != "1" ]; then mv "$tmp" "$1"; echo "Wrote $1 ($(pages "$1") pages)"; sh "$COMPRESS" "$1"; rm -rf "$profile"
+  if [ -s "$tmp" ] && [ "$(pages "$tmp")" != "1" ]; then mv "$tmp" "$1"; echo "Wrote $1 ($(pages "$1") pages)"; rm -rf "$profile"
   elif [ "${3:-1}" -lt 3 ]; then rm -rf "$profile"; pdf "$1" "$2" $(( ${3:-1} + 1 ))
   else echo "FAILED: $1"; rm -rf "$profile"; fi
 }

@@ -5,7 +5,6 @@
 # Optional: OUT=/some/folder sh build-pdf.sh   (default: this folder)
 BASE="${BASE:-http://localhost:8000/gcsephy/year9phy/unit02/teaching-guides}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
-COMPRESS="$(dirname "$0")/../../../assets/compress-pdfs.sh"
 OUT="${OUT:-.}"
 
 build() { # lesson-number pdf-name
@@ -20,7 +19,7 @@ build() { # lesson-number pdf-name
   kill "$pid" 2>/dev/null
   wait "$pid" 2>/dev/null
   if [ ! -s "$tmp" ]; then echo "FAILED: $2"; rm -rf "$profile"; return 1; fi
-  mv "$tmp" "$OUT/$2" && echo "Wrote $OUT/$2" && sh "$COMPRESS" "$OUT/$2"
+  mv "$tmp" "$OUT/$2" && echo "Wrote $OUT/$2"
   rm -rf "$profile"
 }
 

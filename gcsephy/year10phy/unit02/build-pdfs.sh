@@ -9,7 +9,6 @@
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year10phy/unit02}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
-COMPRESS="$(dirname "$0")/../../assets/compress-pdfs.sh"
 OUT="pdf"
 NAME="Particle Model of Matter - Year 10"
 mkdir -p "$OUT"
@@ -18,7 +17,7 @@ pdf() { # output, url, text the PDF title must contain; retries when Chrome prin
   # has arrived (a small file) or prints the wrong booklet
   for attempt in 1 2 3; do
     print_once "$1" "$2"
-    if [ -s "$1" ] && [ "$(wc -c < "$1")" -gt 150000 ] && strings "$1" | grep "/Title" | grep -q "$3"; then sh "$COMPRESS" "$1"; return 0; fi
+    if [ -s "$1" ] && [ "$(wc -c < "$1")" -gt 150000 ] && strings "$1" | grep "/Title" | grep -q "$3"; then return 0; fi
     echo "Retrying $1"; sleep 3
   done
   echo "FAILED: $1"

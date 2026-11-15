@@ -38,7 +38,7 @@ The Scheme of Work lists P3.1 particle model and motion in gases, P3.2 density a
 | `assets/plans-data.js`, `assets/plans.js` | Teacher notes for each lesson, and their renderer |
 | `assets/workbook.js`, `assets/workbook.css` | Renderer and print styles, adapted from the Year 9 Energy workbook, which is also printed in parts |
 | `assets/figures.js`, `assets/figures.css` | Line drawings (`window.ParticleFigures`), shared with the Preps and the deck |
-| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome, then shrinks each with Ghostscript (`gcsephy/assets/compress-pdfs.sh`); name booklets (`p1 p2 p3 4 8 review guide`) to rebuild only those |
+| `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome; name booklets (`p1 p2 p3 4 8 review guide`) to rebuild only those |
 | `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. See [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 | [`../../decks/particle-model/`](../../decks/particle-model/) | 53-slide teaching deck, with photographs on six lesson dividers (3, 8, 13, 25, 36 and 48) in its `images/` folder, each credited on the slide; see [`../../decks/README.md`](../../decks/README.md) for shared styling and controls |
 
