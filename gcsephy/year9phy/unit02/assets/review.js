@@ -25,7 +25,7 @@
       table: { head: ["Force / N", "0", "1.0", "2.0", "3.0", "4.0", "5.0"], rows: [["Extension / cm", "0", "2.0", "4.0", "6.0", "8.0", "10.9"]] },
       after: [
         { t: "part", p: R`(a) Calculate the spring constant. Use the reading at 2.0 N, and \(F = k\,e\)`, frame: frameRe, frameA: [R`\(F = k\,e\)`, R`\(k = \dfrac{F}{e}\) (1)`, R`\(k = \dfrac{2.0}{0.040}\) (extension in metres) (1)`, "50 N/m (1)"] },
-        { t: "part", p: R`(b) Calculate the energy in the elastic potential store when the extension is 0.060 m. Use \(E_e = \tfrac{1}{2}\,k\,e^2\)`, frame: frame3, frameA: [R`\(E_e = \tfrac{1}{2}\,k\,e^2\)`, R`\(E_e = \tfrac{1}{2} \times 50 \times 0.060^2\) (1)`, "0.09 J (1)"] },
+        { t: "part", p: R`(b) Calculate the energy in the elastic potential store when the extension is 0.060 m. Use \(E_e = \tfrac{1}{2}\,k\,e^2\)`, frame: frame3, frameA: [R`\(E_e = \tfrac{1}{2}\,k\,e^2\)`, R`\(E_e = \tfrac{1}{2} \times 50 \times 0.060^2\) (1)`, "0.090 J (1)"] },
         { t: "part", p: "(c) Explain what the result at 5.0 N shows.", lines: 2, a: "The extension is no longer proportional to the force (it should be 10.0 cm): the limit of proportionality has been exceeded (1)." },
       ] },
 

@@ -36,7 +36,7 @@
           ["Shape and volume", "fixed shape, fixed volume", "takes the shape of its container, fixed volume", "fills its container"],
           ["Can it be squashed?", "no: the particles are already touching", "no: the particles are already touching", "yes: there is empty space between the particles"],
         ] },
-        { t: "tip", h: "Draw a solid with the particles <strong>touching</strong>, in neat rows. Draw a liquid with the particles still <strong>touching</strong>, but in no pattern. Leaving gaps in a liquid is the most common mistake in the exam." },
+        { t: "tip", h: "Draw a solid with the particles <strong>touching</strong>, in neat rows. Draw a liquid with the particles still <strong>touching</strong>, but in no pattern." },
         { t: "sub", h: "Changes of state" },
         { t: "fig", cls: "fig-wide", h: F.changes(), cap: "Orange arrows: the substance is heated. Blue arrows: it is cooled." },
         { t: "p", h: "A liquid can turn into a gas in two ways. <strong>Boiling</strong> happens only at the boiling point, with bubbles all through the liquid. <strong>Evaporating</strong> happens at any temperature, from the surface only. <strong>Sublimating</strong> is when a solid turns straight into a gas: solid carbon dioxide (“dry ice”) does this." },
@@ -269,7 +269,7 @@
       order: ["doNow", "learn", "lab", "try", "check", "exam", "revise"],
       exam: [
         { p: "A student has a small, irregularly shaped stone. Describe a method the student could use to determine the density of the stone.", marks: 6, lines: 10,
-          a: "Indicative content: measure the mass of the dry stone with a balance; part fill a measuring cylinder with water and record the volume; lower the stone in on a thread until fully submerged; record the new volume; volume of stone = difference between the two readings (or use a displacement can and collect the water); read the scale at eye level, at the bottom of the meniscus; density = mass ÷ volume; repeat and calculate a mean. Level 3 (5–6): a detailed, logically ordered method that would give a valid result." },
+          a: "Indicative content: measure the mass of the dry stone with a balance; part fill a measuring cylinder with water and record the volume; lower the stone in on a thread until fully submerged; record the new volume; volume of stone = difference between the two readings (or use a displacement can and collect the water); read the scale at eye level, at the bottom of the meniscus; density = mass ÷ volume; repeat and calculate a mean. Level 3 (5–6): a detailed, logically ordered method that would give a valid result. Level 2 (3–4): the main steps, with some detail missing or out of order. Level 1 (1–2): one or two relevant steps, with little detail." },
         { p: "A metal cube has sides of 2.0 cm and a mass of 71.2 g. Calculate the density of the metal in g/cm³.", marks: 3, frame: [["Volume"], ["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: [R`\(V = 2.0 \times 2.0 \times 2.0 = 8.0\) cm³ (1)`, R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{71.2}{8.0}\) (1)`, "8.9 g/cm³ (1)"] },
       ],
       quick: { slide: 23, covers: "Lessons 3–4", items: [

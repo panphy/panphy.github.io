@@ -63,6 +63,8 @@
   const ansNote = (html) => (html ? `<div class="ans-note">${html}</div>` : "");
   const lines = (n, a) => `<div class="lines" style="--n:${n}">${ans(a)}</div>`;
   const box = (h, a, grid) => `<div class="box${grid ? " grid-bg" : ""}" style="--h:${h}mm">${ans(a)}</div>`;
+  // A Do now or Quick check item: a question with a blank holds its own answer, so it gets no writing lines.
+  const boxItem = (q, a, i) => `<div><b>${i + 1}</b>${marks(q)}${/\[\[/.test(q) ? "" : lines(2, a)}</div>`;
   const keep = (html) => `<div class="keep">${html}</div>`;
   const list = (items, cls) => `<ul${cls ? ` class="${cls}"` : ""}>${items.map((s) => `<li>${s}</li>`).join("")}</ul>`;
 
@@ -281,7 +283,7 @@
 
   // The deck's Quick check slide, numbered on its own so that lesson question numbers do not move.
   const quickCheck = (qc) => keep(secHead("check") +
-    `<div class="do-now-box quick-box">${qc.items.map(([q, a], i) => `<div><b>${i + 1}</b>${marks(q)}${lines(2, a)}</div>`).join("")}</div>`);
+    `<div class="do-now-box quick-box">${qc.items.map(([q, a], i) => boxItem(q, a, i)).join("")}</div>`);
 
   function question(b) {
     if (!b.part) qNum += 1;
@@ -378,7 +380,7 @@
     // Each part is built when it is placed, so questions are numbered in the order they are printed.
     const parts = {
       doNow: () => keep(`${secHead("doNow", l.n === 1 ? C.firstDoNow || "What do you already know?" : "Do now")}
-        <div class="do-now-box">${l.doNow.map(([q, a], i) => `<div><b>${i + 1}</b>${marks(q)}${lines(2, a)}</div>`).join("")}</div>`),
+        <div class="do-now-box">${l.doNow.map(([q, a], i) => boxItem(q, a, i)).join("")}</div>`),
       learn: () => section("learn", l.learnTitle, l.learn),
       try: () => (l.try ? section("try", l.tryTitle, l.try) : ""),
       lab: () => (l.lab ? section("lab", l.lab.title, l.lab.blocks, l.lab.safety) : ""),
