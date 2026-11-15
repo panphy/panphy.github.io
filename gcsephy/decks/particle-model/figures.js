@@ -46,14 +46,15 @@ window.DeckSvgTex = {
   function shcGraph() {
     const L = 52, T = 12, W = 300, H = 170, B = T + H;
     const pts = [[0, 20], [5760, 24.6], [11520, 30.8], [17280, 37], [23040, 43], [28800, 49]];
-    const X = e => L + (e / 30000) * W, Y = c => B - ((c - 15) / 40) * H;
+    const X = e => L + (e / 30000) * W, Y = c => B - ((c - 10) / 45) * H;
     let b = `<path class="axis" d="M${L} ${T - 6} V${B} H${L + W + 8}"/>`;
     [0, 10000, 20000, 30000].forEach(e => { b += `<text class="sm" x="${f(X(e))}" y="${B + 15}" text-anchor="middle">${e ? e / 1000 + ' 000' : 0}</text>`; });
     [20, 30, 40, 50].forEach(c => { b += `<text class="sm" x="${L - 6}" y="${f(Y(c) + 4)}" text-anchor="end">${c}</text><path class="ink thin dash" d="M${L} ${f(Y(c))} H${L + W}"/>`; });
-    // A curved start from (0, 20) that joins the straight part at 5760 J along its gradient, then the straight part.
-    b += `<path class="curve" d="M${f(X(0))} ${f(Y(20))} Q${f(X(2880))} ${f(Y(21.55))} ${f(X(5760))} ${f(Y(24.6))} L${f(X(28800))} ${f(Y(49))}"/>` + pts.map(([e, c]) => `<circle class="pt" cx="${f(X(e))}" cy="${f(Y(c))}" r="4.5"/>`).join('');
+    // The straight line of best fit through the straight part, as the workbook asks (from 0 J at 18.5 °C).
+    // The first point sits just above it: the heater and block are still warming up.
+    b += `<path class="curve" d="M${f(X(0))} ${f(Y(18.5))} L${f(X(28800))} ${f(Y(49))}"/>` + `<text class="sm" x="${f(X(1200))}" y="${f(Y(14.6))}" text-anchor="start">warming up</text>` + pts.map(([e, c]) => `<circle class="pt" cx="${f(X(e))}" cy="${f(Y(c))}" r="4.5"/>`).join('');
     b += `<text class="b" x="${L + W / 2}" y="${B + 32}" text-anchor="middle">Energy supplied / J</text><text class="b" text-anchor="middle" transform="translate(14 ${T + H / 2}) rotate(-90)">Temperature / °C</text>`;
-    return `<svg class="pf" viewBox="0 0 ${L + W + 16} ${B + 40}" role="img" aria-label="Graph of temperature against energy supplied: a straight line after a curved start">${b}</svg>`;
+    return `<svg class="pf" viewBox="0 0 ${L + W + 16} ${B + 40}" role="img" aria-label="Graph of temperature against energy supplied: a straight line of best fit, with the first point just above it while the heater warms up">${b}</svg>`;
   }
 
   // ---------- live models ----------
