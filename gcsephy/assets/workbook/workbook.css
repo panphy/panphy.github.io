@@ -168,7 +168,7 @@ strong { font-weight: 700; }
 .frame > span { display: flex; align-items: center; min-height: 9mm; padding: 0 2.5mm; border-bottom: 1px solid var(--rule); font-size: 9.4pt; }
 .frame > span:nth-child(odd) { font: 900 7.5pt/1.2 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: #f5f6f2; }
 .frame > span:nth-last-child(-n+2) { border-bottom: 0; }
-.frame .unit { margin-left: auto; padding-left: 3mm; color: var(--muted); font-size: 8pt; }
+.frame .unit { margin-left: auto; padding-left: 3mm; min-width: 30mm; box-sizing: border-box; color: var(--muted); font-size: 8pt; }
 .starter { margin: 0 0 1mm; font-size: 9pt; color: #333c48; font-style: italic; }
 .mcq { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 1.5mm 4mm; margin: 1mm 0 0; padding: 0; list-style: none; }
 .mcq li { display: flex; gap: 2.5mm; align-items: flex-start; margin: 0; font-size: 9.8pt; }
