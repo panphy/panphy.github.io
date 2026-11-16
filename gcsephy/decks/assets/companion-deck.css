@@ -395,7 +395,6 @@ table.data { width: 100%; border-collapse: collapse; background: #fff; font-size
 .q .ans { margin-top: auto; padding: 9px 14px; border: 2px solid var(--ink); background: #e5f2ea; color: #1f4a2f; font-size: 27px; font-weight: 800; }
 .step { transition: opacity .3s ease, transform .3s ease; }
 .step:not(.shown) { opacity: 0; transform: translateY(8px); }
-.reveal-hint { font: 900 20px Arial, sans-serif; letter-spacing: .16em; color: var(--muted); }
 
 /* Vocabulary panel */
 .terms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 34px; padding: 26px 34px; border: 2px solid var(--ink); background: var(--navy); color: #fff; box-shadow: 9px 9px 0 var(--accent); }
@@ -448,7 +447,6 @@ table.data { width: 100%; border-collapse: collapse; background: #fff; font-size
   .slide { position: relative; width: 1600px; height: 900px; visibility: visible; opacity: 1; break-after: page; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .step:not(.shown) { opacity: 1; transform: none; }
   .worked .step:not(.shown) dt, .worked .step:not(.shown) dd { opacity: 1; }
-  .reveal-hint { visibility: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {

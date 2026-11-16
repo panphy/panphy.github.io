@@ -509,7 +509,6 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 [data-theme="dark"] .q .ans { background: #183324; color: #BBF7D0; border-color: #4ADE80; }
 .step { transition: opacity .3s ease, transform .3s ease; }
 .step:not(.shown) { opacity: 0; transform: translateY(8px); }
-.reveal-hint { font: 600 20px var(--font-mono); letter-spacing: .08em; color: var(--text-secondary); }
 
 /* Summary */
 /* Bottom margin keeps the last row of cards clear of the slide footer. */
@@ -653,7 +652,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   .deck { position: static; transform: none !important; width: 1600px; height: auto; border: 0; border-radius: 0; box-shadow: none; overflow: visible; background: none; }
   .slide { position: relative; width: 1600px; height: 900px; visibility: visible; opacity: 1; break-after: page; background-color: var(--bg-color); background-image: radial-gradient(var(--bg-pattern) 1.5px, transparent 1.5px); background-size: 36px 36px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .step:not(.shown) { opacity: 1; transform: none; }
-  .reveal-hint, .mover { display: none; }
+  .mover { display: none; }
   .scatter-playing .scatter-static { display: inline; }
   .scatter-playing .scatter-live { display: none; }
 }
