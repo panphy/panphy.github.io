@@ -106,8 +106,8 @@ window.DeckFigures.add(P => {
       let s = arrow(x0, 460, x0, 40, 'text-secondary', 2.5) + arrow(x0, y0, x1 + 40, y0, 'text-secondary', 2.5) + line(wave(x0, x1, y0, amp, 1.5, 0), 'brand-primary', 6) + line(wave(x0, x1, y0, amp, 1.5, phi), 'hl', 6);
       const lead = per * phi / TAU;
       s += `<line x1="${f(x0 + per - lead)}" y1="${y0}" x2="${f(x0 + per - lead)}" y2="${y0 + 190}" class="guide"/><line x1="${f(x0 + per)}" y1="${y0}" x2="${f(x0 + per)}" y2="${y0 + 190}" class="guide"/>` + both(f(x0 + per - lead), y0 + 176, f(x0 + per), y0 + 176) + text(f(x0 + per - lead / 2), y0 + 216, 'φ = π/3: a sixth of a cycle', 'lbl', 'middle');
-      s += text(x0 - 18, 259, 'x', 'lbl display', 'end') + text(f((x0 + x1 + 40) / 2), 506, 'time', 'lbl mono') + text(350, 60, 'x₀ sin(ωt + φ)', 'lbl mono strong halo', 'start', 'style="fill:var(--hl-text)"') + text(350, 100, 'x₀ sin ωt', 'lbl mono strong halo', 'start', 'style="fill:var(--brand-primary)"');
-      return svg('80 20 760 510', s, 'Two sine curves of the same amplitude and period. The second reaches each peak a sixth of a cycle before the first: it leads by a phase angle of pi over 3 radians');
+      s += text(x0 - 18, 259, 'x', 'lbl display', 'end') + text(f((x0 + x1 + 40) / 2), 504, 'time', 'lbl mono') + text(350, 60, 'x₀ sin(ωt + φ)', 'lbl mono strong halo', 'start', 'style="fill:var(--hl-text)"') + text(350, 100, 'x₀ sin ωt', 'lbl mono strong halo', 'start', 'style="fill:var(--brand-primary)"');
+      return svg('80 28 760 484', s, 'Two sine curves of the same amplitude and period. The second reaches each peak a sixth of a cycle before the first: it leads by a phase angle of pi over 3 radians');
     },
 
     // The position of a bobbing mass marked at equal time steps; joining the dots, on a step,
@@ -118,7 +118,7 @@ window.DeckFigures.add(P => {
       let s = axes(x0, y0, x1 + 20, 50, 410, 'time', 'position');
       s += `<g class="step">${line(sampled(at, 120), 'brand-primary', 5)}</g>`;
       for (let i = 0; i <= steps; i++) { const [x, y] = at(i / steps); s += `<circle cx="${f(x)}" cy="${f(y)}" r="10" style="fill:var(--brand-accent-strong)"/>`; }
-      return svg('20 30 900 440', s, 'Dots marking the position of a bobbing mass at equal time intervals; joined up they make a cosine curve');
+      return svg('40 30 880 430', s, 'Dots marking the position of a bobbing mass at equal time intervals; joined up they make a cosine curve');
     }
   };
 });

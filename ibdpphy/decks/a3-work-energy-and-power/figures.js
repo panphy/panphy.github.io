@@ -58,7 +58,7 @@ window.DeckFigures.add(P => {
         s = shade(`M110,400 L${sampled(at).slice(1)} L670,400 Z`, 'brand-primary', 0.22) + axes(110, 400, 760, 40, on ? 'displacement' : '', on ? 'force' : '') + plot(sampled(at)) + `<line x1="670" y1="${f(at(1)[1])}" x2="670" y2="400" class="guide"/>`;
         if (on) s += text(390, 320, 'area = work done', 'lbl strong halo');
       }
-      return svg(isSpring ? '0 20 800 470' : '40 20 760 440', s, isSpring ? 'Graph of force against extension for a spring: a straight line through the origin. The area of the triangle under it, half of k times the extension squared, is the elastic potential energy stored' : 'Graph of a varying force against displacement. The shaded area under the curve is the work done by the force');
+      return svg(isSpring ? '20 20 760 470' : '40 20 760 440', s, isSpring ? 'Graph of force against extension for a spring: a straight line through the origin. The area of the triangle under it, half of k times the extension squared, is the elastic potential energy stored' : 'Graph of a varying force against displacement. The shaded area under the curve is the work done by the force');
     },
 
     // The same gain in height by two routes: straight up, and along a ramp.

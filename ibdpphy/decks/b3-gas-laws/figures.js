@@ -56,7 +56,7 @@ window.DeckFigures.add(P => {
         let s = axes(110, 430, 790, 40, 'volume V', 'pressure P', { xGap: 76, yGap: 56 }) + iso(1.6, 'electron') + iso(3.2, 'proton');
         s += `<path d="M${X(1)},430 V${Y(3.2)} H110 M${X(2)},430 V${Y(1.6)} H110" class="guide"/>` + `<circle cx="${X(1)}" cy="${Y(3.2)}" r="8" style="fill:var(--text-main)"/><circle cx="${X(2)}" cy="${Y(1.6)}" r="8" style="fill:var(--text-main)"/>`;
         s += text(X(1), 466, 'V', 'lbl mono') + text(X(2), 466, '2V', 'lbl mono') + text(96, Y(3.2) + 9, '2P', 'lbl mono', 'end') + text(96, Y(1.6) + 9, 'P', 'lbl mono', 'end') + text(X(3.3), Y(1.15), 'hotter', 'lbl strong halo', 'start') + text(X(3.3), Y(0.18) - 26, 'cooler', 'lbl strong halo', 'start');
-        return svg('10 20 810 500', s, 'A graph of pressure against volume at constant temperature: a curve that falls as the volume increases. Doubling the volume halves the pressure. A second curve for a lower temperature lies below the first');
+        return svg('26 20 780 500', s, 'A graph of pressure against volume at constant temperature: a curve that falls as the volume increases. Doubling the volume halves the pressure. A second curve for a lower temperature lies below the first');
       }
       const charles = kind === 'charles', yl = charles ? 'volume V' : 'pressure P';
       const X = c => 420 + 1.1 * c, Y = c => 400 - 300 * (c + 273) / 573;

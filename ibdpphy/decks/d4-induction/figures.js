@@ -43,10 +43,10 @@ window.DeckFigures.add(P => {
     // Flux against time above, induced emf below: the emf is minus the gradient.
     'd4-flux-graphs': () => {
       let s = axes(110, 210, 760, 40, 'time', 'flux') + line('M110,210 L290,80 H500 L590,210 H720', 'brand-primary');
-      s += arrow(110, 470, 110, 250, 'text-secondary', 2.5) + arrow(110, 380, 760, 380, 'text-secondary', 2.5) + P.yAxisLabel(88, 360, 'emf') + text(435, 506, 'time', 'lbl mono');
+      s += arrow(110, 470, 110, 250, 'text-secondary', 2.5) + arrow(110, 380, 760, 380, 'text-secondary', 2.5) + P.yAxisLabel(88, 360, 'emf') + text(435, 500, 'time', 'lbl mono');
       s += line('M110,410 H290 V380 H500 V320 H590 V380 H720', 'hl') + `<path d="M290,40 V470 M500,40 V470 M590,40 V470" class="guide"/>`;
       s += text(200, 450, 'small emf', 'lbl halo') + text(395, 360, 'zero', 'lbl halo') + text(600, 306, 'large emf,', 'lbl halo', 'start') + text(600, 338, 'opposite sign', 'lbl halo', 'start');
-      return svg('0 0 800 520', s, 'Two graphs against the same time axis. The flux rises steadily, stays constant, then falls quickly to zero. The induced emf is small and constant while the flux rises, zero while the flux is constant, and larger and of opposite sign while the flux falls');
+      return svg('0 0 800 510', s, 'Two graphs against the same time axis. The flux rises steadily, stays constant, then falls quickly to zero. The induced emf is small and constant while the flux rises, zero while the flux is constant, and larger and of opposite sign while the flux falls');
     },
 
     // Lenz's law for a magnet approaching and leaving a coil.
@@ -93,14 +93,14 @@ window.DeckFigures.add(P => {
       const T = 6, n = 60, left = i => 60 + 620 * i / n, gx = xl => 110 + (xl - 60) / 620 * 620;
       let s = `<rect x="300" y="50" width="260" height="170" style="fill:var(--brand-accent-strong);opacity:.08"/>` + fieldGrid(330, 76, 4, 3, 66) + text(430, 36, 'region of uniform field', 'lbl');
       const emf = xl => (xl > 180 && xl < 300 ? 1 : xl > 440 && xl < 560 ? -1 : 0);
-      s += arrow(110, 470, 110, 270, 'text-secondary', 2.5) + arrow(110, 380, 770, 380, 'text-secondary', 2.5) + P.yAxisLabel(88, 370, 'emf') + text(440, 506, 'time', 'lbl mono');
-      s += line(`M${gx(60)},380 H${gx(180)} V320 H${gx(300)} V380 H${gx(440)} V440 H${gx(560)} V380 H${gx(680)}`, 'hl');
-      s += text(gx(240), 304, 'entering', 'lbl halo') + text(gx(370), 350, 'all inside: zero', 'lbl halo') + text(gx(500), 470, 'leaving', 'lbl halo');
+      s += arrow(110, 450, 110, 270, 'text-secondary', 2.5) + arrow(110, 368, 770, 368, 'text-secondary', 2.5) + P.yAxisLabel(88, 360, 'emf') + text(440, 488, 'time', 'lbl mono');
+      s += line(`M${gx(60)},368 H${gx(180)} V313 H${gx(300)} V368 H${gx(440)} V423 H${gx(560)} V368 H${gx(680)}`, 'hl');
+      s += text(gx(240), 298, 'entering', 'lbl halo') + text(gx(370), 342, 'all inside: zero', 'lbl halo') + text(gx(500), 452, 'leaving', 'lbl halo');
       const loop = `<rect x="0" y="86" width="120" height="98" style="fill:none;stroke:var(--brand-accent);stroke-width:6"/>` + arrow(126, 135, 196, 135, 'brand-accent', 4) + text(160, 112, 'v', 'lbl display');
       const marker = `<circle r="10" style="fill:var(--hl)"/>`;
-      const still = `<g transform="translate(240 0)">${loop}</g><g transform="translate(${gx(240)} 320)">${marker}</g>`;
-      const mover = `<g>${track(Array.from({ length: n + 1 }, (_, i) => [left(i), 0]), T)}${loop}</g><g>${track(Array.from({ length: n + 1 }, (_, i) => [gx(left(i)), 380 - 60 * emf(left(i))]), T)}${marker}</g>`;
-      return svg('40 0 760 520', s + twoState(still, mover), 'A rectangular coil is pulled at constant speed through a region of uniform magnetic field. An emf is induced while the coil is entering the field and an emf of the opposite sign while it is leaving. While the whole coil is inside the field the flux through it is not changing and the emf is zero');
+      const still = `<g transform="translate(240 0)">${loop}</g><g transform="translate(${gx(240)} 313)">${marker}</g>`;
+      const mover = `<g>${track(Array.from({ length: n + 1 }, (_, i) => [left(i), 0]), T)}${loop}</g><g>${track(Array.from({ length: n + 1 }, (_, i) => [gx(left(i)), 368 - 55 * emf(left(i))]), T)}${marker}</g>`;
+      return svg('40 8 760 490', s + twoState(still, mover), 'A rectangular coil is pulled at constant speed through a region of uniform magnetic field. An emf is induced while the coil is entering the field and an emf of the opposite sign while it is leaving. While the whole coil is inside the field the flux through it is not changing and the emf is zero');
     },
 
     // A magnet bouncing on a spring above a coil, and the alternating emf it induces.
@@ -145,10 +145,10 @@ window.DeckFigures.add(P => {
 
     // Doubling the rotation frequency doubles the peak emf and halves the period.
     'd4-frequency': () => {
-      let s = arrow(110, 450, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 770, 240, 'text-secondary', 2.5) + text(440, 488, 'time', 'lbl mono') + P.yAxisLabel(88, 240, 'emf');
+      let s = arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 770, 240, 'text-secondary', 2.5) + text(440, 466, 'time', 'lbl mono') + P.yAxisLabel(88, 230, 'emf');
       s += line(wave(110, 710, 240, 90, 1.5), 'brand-primary') + line(wave(110, 710, 240, 180, 3), 'hl');
       s += text(470, 190, 'frequency f', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(560, 70, 'frequency 2f', 'lbl strong halo', 'start', 'style="fill:var(--hl-text)"');
-      return svg('60 10 740 490', s, 'Two graphs of induced emf against time. Doubling the frequency of rotation gives a curve with twice the peak emf and half the period');
+      return svg('60 10 740 470', s, 'Two graphs of induced emf against time. Doubling the frequency of rotation gives a curve with twice the peak emf and half the period');
     }
   };
 });

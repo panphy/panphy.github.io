@@ -36,10 +36,10 @@ window.DeckFigures.add(P => {
     'e4-curve': () => {
       const X = A => 110 + 2.75 * A, Y = b => 430 - 44 * (b - 0.5);
       let s = arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 430, 810, 430, 'text-secondary', 2.5) + line(sampled(t => { const A = 6 + 236 * t; return [X(A), Y(bind(A))]; }, 120), 'brand-primary', 6);
-      s += P.yAxisLabel(50, 230, 'binding energy per nucleon / MeV', 'lbl') + text(460, 510, 'nucleon number A', 'lbl mono') + [50, 100, 150, 200].map(A => `<line x1="${X(A)}" y1="430" x2="${X(A)}" y2="442" class="tick"/>` + text(X(A), 470, A, 'lbl mono')).join('') + [2, 4, 6, 8].map(b => `<line x1="98" y1="${Y(b)}" x2="110" y2="${Y(b)}" class="tick"/>` + text(88, Y(b) + 9, b, 'lbl mono', 'end')).join('');
+      s += P.yAxisLabel(55, 244, 'binding energy per nucleon / MeV', 'lbl') + text(460, 510, 'nucleon number A', 'lbl mono') + [50, 100, 150, 200].map(A => `<line x1="${X(A)}" y1="430" x2="${X(A)}" y2="442" class="tick"/>` + text(X(A), 470, A, 'lbl mono')).join('') + [2, 4, 6, 8].map(b => `<line x1="98" y1="${Y(b)}" x2="110" y2="${Y(b)}" class="tick"/>` + text(88, Y(b) + 9, b, 'lbl mono', 'end')).join('');
       const mark = (A, color) => `<circle cx="${f(X(A))}" cy="${f(Y(bind(A)))}" r="11" style="fill:var(--${color})"/>`;
       s += mark(235, 'proton') + mark(141, 'brand-accent') + mark(92, 'brand-accent') + arrow(X(229), Y(bind(229)) - 34, X(147), Y(bind(147)) - 34, 'brand-accent', 4) + text(X(235), Y(bind(235)) + 50, '²³⁵U', 'lbl strong') + text(X(141), Y(bind(141)) + 50, '¹⁴¹Ba', 'lbl strong') + text(X(92), Y(bind(92)) + 50, '⁹²Kr', 'lbl strong') + text(X(150), 250, 'fission: the fragments are', 'lbl halo') + text(X(150), 284, 'more tightly bound', 'lbl strong halo');
-      return svg('10 10 830 520', s, 'The curve of binding energy per nucleon against nucleon number. It rises steeply for light nuclei, peaks at about 8.8 MeV near nucleon number 60 and falls slowly to about 7.6 MeV for uranium. The two fragments of a fission lie higher on the curve than the uranium nucleus, at about 8.4 MeV: they are more tightly bound');
+      return svg('26 10 800 510', s, 'The curve of binding energy per nucleon against nucleon number. It rises steeply for light nuclei, peaks at about 8.8 MeV near nucleon number 60 and falls slowly to about 7.6 MeV for uranium. The two fragments of a fission lie higher on the curve than the uranium nucleus, at about 8.4 MeV: they are more tightly bound');
     },
 
     // A chain reaction drawn like the textbook picture. At each fission: the uranium-235 nucleus,

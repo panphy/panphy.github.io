@@ -68,10 +68,10 @@ window.DeckFigures.add(P => {
       const x0 = 110, x1 = 770, lambda = 330, amp = 40, n = 21, step = (x1 - x0) / (n - 1), gy = 370, row = 110;
       const d = x => amp * Math.sin(TAU * (x - x0) / lambda);
       let s = Array.from({ length: n }, (_, i) => { const x = x0 + i * step; return `<line x1="${x}" y1="${row - 26}" x2="${x}" y2="${row + 26}" class="guide"/><circle cx="${f(x + d(x))}" cy="${row}" r="10" style="fill:var(--brand-primary)"/>`; }).join('');
-      s += graphAxes(x0, gy, 800, 250, 480, 'position', 'displacement') + line(sampled(t => { const x = x0 + (x1 - x0) * t; return [x, gy - 2 * d(x)]; }, 100), 'brand-primary', 6);
+      s += graphAxes(x0, gy, 800, 250, 480, 'position', 'displacement', 32) + line(sampled(t => { const x = x0 + (x1 - x0) * t; return [x, gy - 2 * d(x)]; }, 100), 'brand-primary', 6);
       const comp = x0 + lambda / 2, rare = x0 + lambda;
       s += `<line x1="${comp}" y1="${row + 36}" x2="${comp}" y2="${gy}" class="guide accent"/><line x1="${rare}" y1="${row + 36}" x2="${rare}" y2="${gy}" class="guide accent"/>` + text(comp, row - 44, 'compression', 'lbl strong') + text(rare, row + 70, 'rarefaction', 'lbl strong halo');
-      return svg('60 30 780 510', s, 'A longitudinal wave. Above, each particle is shown displaced to the right or left of its undisturbed position, marked by a dashed line. Below, a graph of displacement against position. A compression lies where the displacement falls through zero, because the particles on either side have moved towards it; a rarefaction lies where it rises through zero');
+      return svg('60 30 780 490', s, 'A longitudinal wave. Above, each particle is shown displaced to the right or left of its undisturbed position, marked by a dashed line. Below, a graph of displacement against position. A compression lies where the displacement falls through zero, because the particles on either side have moved towards it; a rarefaction lies where it rises through zero');
     },
 
     // An electromagnetic wave: electric and magnetic fields at right angles to each other and to the direction of travel.

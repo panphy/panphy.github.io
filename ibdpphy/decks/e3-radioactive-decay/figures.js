@@ -112,7 +112,7 @@ window.DeckFigures.add(P => {
       let d = '';
       for (let t = 0; t <= 32; t += 0.5) d += `${t ? 'L' : 'M'}${f(X(t))},${f(Y(400 * Math.pow(2, -t / 8)))}`;
       s += `<path d="${d}" class="curve draw"/>`;
-      return svg('-14 0 734 490', s, 'Decay curve: 400 undecayed nuclei fall to 200 after 8 days, 100 after 16 days and 50 after 24 days');
+      return svg('-10 0 724 486', s, 'Decay curve: 400 undecayed nuclei fall to 200 after 8 days, 100 after 16 days and 50 after 24 days');
     },
 
     'e3-random': el => {
