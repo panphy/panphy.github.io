@@ -340,7 +340,7 @@
     if (b.frame) {
       const rows = b.frame === true ? [["Equation", ""], ["Substitute", ""], ["Answer", ""]] : b.frame;
       const fa = b.frameA || [];
-      body += `<div class="frame">${rows.map(([k, unit], i) => `<span>${k}</span><span>${ans(fa[i])}${unit ? `<span class="unit">${unit}</span>` : ""}</span>`).join("")}</div>`;
+      body += `<div class="frame${rows.some(([k]) => k.split(/\s+/).some((w) => w.length > 10)) ? " wide" : ""}">${rows.map(([k, unit], i) => `<span>${k}</span><span>${ans(fa[i])}${unit ? `<span class="unit">${unit}</span>` : ""}</span>`).join("")}</div>`;
     }
     if (b.after) body += renderBlocks(b.after);
     if (b.lines) body += lines(b.lines, b.a);

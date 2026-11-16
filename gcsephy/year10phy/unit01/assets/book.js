@@ -39,7 +39,7 @@
     block: (b) => {
       if (b.t !== "symbank") return null;
       const tiles = b.items.map(([type, name, job, later]) => `<figure class="${later ? "later" : ""}">${symbolSvg(type)}<figcaption>${name}${job ? `<small>${job}</small>` : ""}</figcaption></figure>`).join("");
-      return `<div class="sym-bank">${tiles}</div>${b.legend ? `<p class="sym-legend">${b.legend}</p>` : ""}`;
+      return `<div class="sym-bank" style="--n:${b.items.length}">${tiles}</div>${b.legend ? `<p class="sym-legend">${b.legend}</p>` : ""}`;
     },
     // Symbol quiz: name each symbol, or draw the symbol for each name (drawn in the answer edition).
     question: (b, W) => (b.symq ? `<div class="symbol-quiz" style="--cols:${b.symq.cols || 6}">${b.symq.items.map(([type, name, mode]) => mode === "draw"
