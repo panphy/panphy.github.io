@@ -132,7 +132,7 @@
             ["Graph 2", "force", "extension", { opts: "how stretchy the spring is / how stiff the spring is", a: "how stiff the spring is: its spring constant k" }],
           ] }] },
           { t: "q", p: "A stiffer spring is tested. Draw a ring around the correct answer in each box.", ring: [["On graph 1, its line would be", ["steeper", "less steep"], 1], ["On graph 2, its line would be", ["steeper", "less steep"], 0]] },
-          { t: "q", p: "Which reading is beyond the limit of proportionality? How can you tell from the graphs?", lines: 2, a: "The 700 g (7 N) reading: its point is off the straight line on both graphs." },
+          { t: "q", p: "Is any reading beyond the limit of proportionality? If so, which one, and how can you tell from the graphs? If not, write “none”.", lines: 2, a: "The 700 g (7 N) reading: its point is off the straight line on both graphs." },
         ] },
       ] },
       try: [
@@ -195,7 +195,7 @@
         { t: "lab", blocks: [
           { t: "q", p: R`My spring constant from Lesson 4: \(k\) = [[25|20]] N/m. Calculate the energy stored at each extension.`, table: { head: ["Extension / m", R`\(e^2\) / m²`, R`\(E_e\) / J`], rows: [["0.05", null, null], ["0.10", null, null], ["0.20", null, null]], ans: [[null, "0.0025", "0.031"], [null, "0.010", "0.125"], [null, "0.040", "0.50"]] }, lines: 3 },
           { t: "q", p: R`Check: did doubling the extension from 0.10 m to 0.20 m give four times the energy? {{yes*|no}} Show how you know.`, lines: 1, a: "0.50 ÷ 0.125 = 4 (sample)." },
-          { t: "q", p: R`Could you use \(E_e = \tfrac{1}{2}\,k\,e^2\) for the 700 g reading in Lesson 4? {{yes|no*}} Explain.`, lines: 2, a: "No: that reading was beyond the limit of proportionality, so k was not constant." },
+          { t: "q", p: R`Could you use \(E_e = \tfrac{1}{2}\,k\,e^2\) for a reading beyond the limit of proportionality? {{yes|no*}} Explain.`, lines: 2, a: "No: that reading was beyond the limit of proportionality, so k was not constant." },
         ] },
       ] },
       try: [

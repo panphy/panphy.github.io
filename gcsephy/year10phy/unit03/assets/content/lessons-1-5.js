@@ -187,7 +187,7 @@
       deck: { slides: "18–26", text: "The Bohr model, energy levels, protons then neutrons, and why models change.", sim: SIM_ATOMS },
       doNow: [
         ["Which experiment showed that atoms have a tiny nucleus?", "The alpha scattering experiment."],
-        ["What is the charge on an alpha particle?", "Positive (+2)."],
+        ["Alpha particles have a [[positive|positive / negative / zero]] charge.", "Positive."],
         ["In the nuclear model, where are the electrons?", "Outside the nucleus."],
       ],
       learnTitle: "Filling in the details",
