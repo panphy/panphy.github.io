@@ -112,7 +112,7 @@
        answer edition only: points, points2, fit ([[x1,y1],[x2,y2]] or fn over fitRange), fit2, curve
        ([[x, y], ...]), bars ([[label, value]]), rings, guide ([x, y]), read ([[x, y]]) } */
   function graphPaper(spec) {
-    const W = spec.w || 150, H = spec.h || 90, L = 12, T = 6;
+    const W = spec.w || 150, H = spec.h || 90, L = 18, T = 6;
     const centre = spec.origin === "centre" || spec.origin === "center";
     const ox = centre ? W / 2 : 0, oy = centre ? H / 2 : H;
     const X = (v) => L + ox + (v / spec.x[0]) * 10;
@@ -140,8 +140,9 @@
       }
     }
     if (show()) {
-      out += `<text class="axis-label" x="${L + W}" y="${T + oy + (centre ? -1.6 : 8)}" text-anchor="end">${spec.xLabel || ""}</text>`;
-      out += `<text class="axis-label" x="${L + ox + 1.5}" y="${T - 1.8}" text-anchor="start">${spec.yLabel || ""}</text>`;
+      // Axis labels sit at the middle of each axis, outside the grid; the y label reads bottom to top.
+      out += `<text class="axis-label" x="${L + W / 2}" y="${T + H + 8}" text-anchor="middle">${spec.xLabel || ""}</text>`;
+      out += `<text class="axis-label" x="4.5" y="${T + H / 2}" text-anchor="middle" transform="rotate(-90 4.5 ${T + H / 2})">${spec.yLabel || ""}</text>`;
     }
     if (spec.given) out += spec.given.map((p) => cross(p, "given-mark")).join("");
     if (spec.givenFit) out += curve(spec.givenFit, spec.givenRange, "given-fit");
