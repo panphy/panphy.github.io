@@ -435,11 +435,20 @@
   // ---------- front and back matter ----------
   const EXTENSION = C.extension || U.extension || [];
 
+  // On a part's cover, name the lessons inside or just after its range that print as booklets of their own.
+  function elsewhere() {
+    const own = (C.booklets || []).map(([q]) => +(/^lesson=(\d+)$/.exec(q) || [])[1]).filter(Boolean);
+    const ns = SEL.map((l) => l.n);
+    const lo = Math.min(...ns), hi = Math.max(...ns) + 1;
+    return U.lessons.filter((l) => own.includes(l.n) && l.n > lo && l.n <= hi && !ns.includes(l.n))
+      .map((l) => `<p class="cover-note">${lessonName(l)}, ${l.title}, is in its own booklet.</p>`).join("");
+  }
+
   function cover() {
     let middle;
     if (SEL) {
       middle = `<div class="cover-part"><b>${partNo ? `Part ${partNo} of ${PARTS.length}` : lessonName(ONE)}</b><span>${partNo ? lessonsLabel(SEL) : ONE.title}</span></div>
-      <h2 class="cover-sub">In this booklet</h2>${list(SEL.map((l) => `${lessonName(l)}: ${l.title}${l.rp ? ` (${l.rp.toLowerCase()})` : ""}`), "cover-lessons")}`;
+      <h2 class="cover-sub">In this booklet</h2>${list(SEL.map((l) => `${lessonName(l)}: ${l.title}${l.rp ? ` (${l.rp.toLowerCase()})` : ""}`), "cover-lessons")}${partNo ? elsewhere() : ""}`;
     } else if (REVIEW) {
       middle = `<div class="cover-part"><b>Unit review</b><span>After ${reviewAfter}</span></div>
       <h2 class="cover-sub">In this booklet</h2>${list(["Mixed exam practice", ...(EXTENSION.length ? ["Triple Science only pages"] : []), "Toolkit and key words"], "cover-lessons")}`;

@@ -418,7 +418,7 @@
         ] },
         { t: "sub", h: "Design a circuit to order" },
         { t: "lab", blocks: [
-          { t: "q", p: "A resistor must transfer 18 J while 3.0 C passes through it in 5.0 s. Work out the current, the p.d. and the resistance before you build the circuit.", table: { head: ["Quantity", "Working", "Answer"], rows: [["Current I", null, null], ["p.d. V", null, null], ["Resistance R", null, null]], ans: [[null, "I = Q ÷ t = 3.0 ÷ 5.0", "0.60 A"], [null, "V = E ÷ Q = 18 ÷ 3.0", "6.0 V"], [null, "R = V ÷ I = 6.0 ÷ 0.60", "10 Ω"]] } },
+          { t: "q", type: "Challenge", p: "A resistor must transfer 18 J while 3.0 C passes through it in 5.0 s. Work out the current, the p.d. and the resistance before you build the circuit.", table: { head: ["Quantity", "Working", "Answer"], rows: [["Current I", null, null], ["p.d. V", null, null], ["Resistance R", null, null]], ans: [[null, "I = Q ÷ t = 3.0 ÷ 5.0", "0.60 A"], [null, "V = E ÷ Q = 18 ÷ 3.0", "6.0 V"], [null, "R = V ÷ I = 6.0 ÷ 0.60", "10 Ω"]] } },
           { t: "q", p: "Build your design. Record the meter readings to check it.", fill: "Ammeter: [[0.60|20]] A. Voltmeter: [[6.0|20]] V." },
         ] },
       ] },
@@ -466,7 +466,7 @@
         { t: "q", p: "Use your graph to find the resistance of 75 cm of the wire.", lines: 1, a: "About 3.75 Ω (from the example line)." },
         { t: "q", p: "Circle any anomalous result in your table. Suggest one possible cause.", lines: 2, a: "e.g. 60 cm in the example. Causes: the wire heated up; a poor clip contact; the length or a meter was misread." },
         { t: "q", p: "Why is the circuit switched off between readings? Tick <strong>one</strong> box.", mcq: { o: ["to save the battery", "to stop the wire heating up and changing its resistance", "to reset the ammeter", "to make the voltmeter more accurate"], c: 1, cols: 2 } },
-        { t: "q", p: "A student's line of best fit crosses the resistance axis a little above zero. Suggest why.", lines: 2, a: "The clips and connections add a small extra resistance to every reading (or the length was not measured from the contact point of the fixed clip): a systematic error." },
+        { t: "q", type: "Challenge", p: "A student's line of best fit crosses the resistance axis a little above zero. Suggest why.", lines: 2, a: "The clips and connections add a small extra resistance to every reading (or the length was not measured from the contact point of the fixed clip): a systematic error." },
       ],
       exam: [
         { p: "Describe how you would investigate how the resistance of a wire depends on its length.", marks: 6, lines: 9, a: "Any six: ammeter in series with the wire and voltmeter across the measured length (circuit); change the length by moving a clip along a metre ruler; record V and I for each length; calculate R = V ÷ I; keep material and diameter the same; keep p.d. low and switch off between readings so the temperature stays constant; repeat readings and plot R against length." },

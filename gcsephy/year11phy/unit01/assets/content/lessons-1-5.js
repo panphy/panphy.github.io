@@ -285,7 +285,7 @@
       ],
       lab: { title: "Virtual lab: watch a nucleus decay", blocks: [
         { t: "lab", blocks: [
-          { t: "p", h: "Open the <strong>Nuclear Decay</strong> simulation. For each tab, press <strong>Decay this nucleus</strong> and read the equation it shows." },
+          { t: "p", h: "Open the <strong>Nuclear Decay</strong> simulation (panphy.app/simulations/nuclear_decay.html). For each tab, press <strong>Decay this nucleus</strong> and read the equation it shows." },
           { t: "q", p: "Record what happens.", table: { head: ["Tab", "Parent nucleus", "What leaves the nucleus?", "Change in mass number", "Change in atomic number", "New nucleus"], rows: [["01 α", "americium-241", null, null, null, null], ["02 β", "carbon-14", null, null, null, null], ["03 γ", "technetium-99m", null, null, null, null]], ans: [[null, null, "alpha particle (He nucleus)", "−4", "−2", "neptunium-237"], [null, null, "beta particle (electron)", "0", "+1", "nitrogen-14"], [null, null, "gamma ray", "0", "0", "technetium-99"]] } },
           { t: "q", p: "Which decays make a new element? Explain using your table.", lines: 2, a: "Alpha and beta: the atomic number (number of protons) changes. Gamma does not change the atomic number, so the element stays the same." },
         ] },
