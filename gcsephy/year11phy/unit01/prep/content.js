@@ -103,7 +103,7 @@
           { stem: "A sample has an activity of 640 Bq. Its half-life is 3 days.",
             parts: [
               { q: "Calculate its activity after 9 days.", m: 2, lines: 2, a: "9 ÷ 3 = 3 half-lives ✓<br>640 → 320 → 160 → 80 Bq ✓" },
-              { q: "Calculate the net decline after 9 days, as a ratio of the initial activity.", m: 1, lines: 1, a: "640 − 80 = 560 Bq; 560 : 640 = 7 : 8 ✓" },
+              { q: "Calculate the net decline after 9 days, as a ratio of the initial activity.", m: 1, lines: 1, a: "640 − 80 = 560 Bq; 560 ÷ 640 = ⅞ ✓" },
             ] },
           { q: "What is radioactive contamination?", m: 1, lines: 1, a: "The unwanted presence of radioactive atoms on or in other materials ✓" },
           { q: "Give two precautions that protect people against irradiation.", m: 1, lines: 1, a: "Any two: shielding, keeping a distance from the source, limiting the exposure time ✓" },

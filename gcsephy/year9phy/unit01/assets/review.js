@@ -29,7 +29,7 @@
     { p: "<strong>Random or systematic?</strong>",
       after: [
         { t: "part", p: "(a) Tick <strong>one</strong> box in each row.", marks: 3, after: [
-          { t: "checks", title: "Problem", head: ["Random error", "Systematic error"], a: [1, 0, 1], items: ["A newtonmeter reads 0.5 N with nothing hanging on it.", "The person timing reacts a little differently in each trial.", "A scale is always read from slightly above, at the same angle."] },
+          { t: "checks", title: "Problem", head: ["Random error", "Systematic error"], a: [1, 0, 1], items: ["A newtonmeter reads 0.5 N with nothing hanging on it.", "The person timing reacts a little differently in each trial.", "The length is measured from the very end of the ruler, not from the zero mark."] },
         ], a: "One mark for each correct row (3)." },
         { t: "part", p: "(b) How should the student correct every reading from the newtonmeter?", marks: 1, lines: 1, a: "Subtract 0.5 N from each reading (or zero the newtonmeter first) (1)." },
       ] },

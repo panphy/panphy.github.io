@@ -43,7 +43,7 @@
     let body = (o.stem ? `<p class="stem">${marks(o.stem)}</p>` : "") + (o.fig ? `<div class="fig">${marks(o.fig)}</div>` : "");
     if (o.q) body += ask(o);
     if (o.parts) {
-      const parts = o.parts.map((p, i) => `<div class="part"><span class="l">${"abcdef"[i]}</span><div>${ask(p)}</div></div>`).join("");
+      const parts = o.parts.map((p, i) => `<div class="part"><span class="l">${o.parts.length > 1 ? "abcdef"[i] : ""}</span><div>${ask(p)}</div></div>`).join("");
       body += o.side ? `<div class="split" style="--cols:${o.cols || "1fr 1fr"}"><div>${parts}</div><div>${marks(o.side)}</div></div>` : parts;
     }
     return `<div class="q"><span class="n">${n}</span><div class="q-body">${body}</div></div>`;
