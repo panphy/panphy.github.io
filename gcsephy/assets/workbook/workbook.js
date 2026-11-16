@@ -385,7 +385,7 @@
   function side(l) {
     if (C.side) return C.side(l, W);
     if (l.story) return `<div class="online story"><div><h3>${l.story.title}</h3><p>${l.story.text}</p></div></div>`;
-    if (l.kit) {
+    if (l.kit && C.kitPanel !== false) {
       const deck = l.slides && C.deck ? `<p class="deck-line"><strong>Teaching deck, slides ${l.slides}</strong><br>${C.deck}/#${l.slides.split(/[–-]/)[0]}</p>` : "";
       return `<div class="online kit"><div><h3>You will need</h3><p>${l.kit}</p>${deck}</div></div>`;
     }

@@ -29,4 +29,4 @@ Block types (`t`): `p`, `html`, `sub`, `key`, `warn`, `tip`, `say`, `model`, `ru
 
 ## Unit settings (`assets/book.js`)
 
-`file` (PDF name stem), `name`, `year`, `coverTitle`, `coverArt`, `lede`, `parts`, optional `booklets`, `deck`, `quote`, `firstDoNow`, `triangles`, `extension`, and hooks `toolkit`, `side`, `reviewStart`, `block`, `question` and `beforeRender`. `W.equationToolkit()` prints the standard equation toolkit with formula triangles.
+`file` (PDF name stem), `name`, `year`, `coverTitle`, `coverArt`, `lede`, `parts`, optional `booklets`, `deck`, `kitPanel` (false hides the kit list beside the goals), `quote`, `firstDoNow`, `triangles`, `extension`, and hooks `toolkit`, `side`, `reviewStart`, `block`, `question` and `beforeRender`. `W.equationToolkit()` prints the standard equation toolkit with formula triangles.
