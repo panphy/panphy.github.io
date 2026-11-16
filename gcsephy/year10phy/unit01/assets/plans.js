@@ -8,7 +8,7 @@
   const only = Number(new URLSearchParams(location.search).get("lesson")) || 0;
 
   const style = document.createElement("style");
-  style.textContent = '@page { @bottom-left { content: "Electric Circuits, Year 10 lesson plans, © 2026 PanPhy Labs. All rights reserved."; } }';
+  style.textContent = '@page { @bottom-left { content: "Electric Circuits, Year 10 lesson plans, © PanPhy Labs. All rights reserved."; } }';
   document.head.appendChild(style);
   document.title = `Y10 - Unit 01 - Electric Circuits - Lesson Plan${only ? ` ${String(only).padStart(2, "0")}` : "s"}`;
 
