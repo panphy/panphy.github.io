@@ -309,7 +309,7 @@
   }
 
   // The deck's Quick check slide, numbered on its own so that lesson question numbers do not move.
-  const quickCheck = (qc) => keep(secHead("check") +
+  const quickCheck = (qc) => keep(secHead("check", qc.title) +
     `<div class="do-now-box quick-box">${qc.items.map(([q, a], i) => boxItem(q, a, i)).join("")}</div>`);
 
   function question(b) {

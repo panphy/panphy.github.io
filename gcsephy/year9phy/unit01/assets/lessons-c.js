@@ -68,6 +68,7 @@
           { t: "q", p: "Any trials you repeated, and why:", lines: 2, a: "e.g. 6 cm, trial 2: the helicopter hit the bench, so I noted it and dropped it again." },
         ] },
       ] },
+      flow: ["doNow", "learn", "lab", "lab2", "try", "check", "exam", "home", "revise"],
       tryTitle: "Graph, conclude, predict",
       try: [
         { t: "q", p: "Graph your results: title, axes, units, scale, accurate crosses, best-fit line, anomalous results noted.", graph: { w: 110, h: 100, blank: true, x: [1, 1], y: [0.2, 1], xLabel: "Wing length / cm", yLabel: "Mean fall time / s", points: [[4, 1.10], [5, 1.32], [6, 1.50], [7, 1.71], [8, 1.88]], fit: [[3.4, 0.996], [8.6, 2.016]], guide: [6.5, 1.6] } },

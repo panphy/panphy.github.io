@@ -32,14 +32,14 @@
         { t: "key", h: "In every nuclear equation, the <strong>top numbers add up to the same total</strong> on both sides, and so do the <strong>bottom numbers</strong>. If the atomic number changes, a <strong>new element</strong> forms." },
 
         { t: "sub", h: "Writing an equation" },
-        { t: "follow", slide: 29, q: `Americium-241, ${N(241, 95, "Am")}, emits an alpha particle and becomes neptunium (Np). Write the equation.`, steps: [["Top", "241 − 4 = 237"], ["Bottom", "95 − 2 = 93"], ["New nucleus", N(237, 93, "Np")], ["Equation", `${N(241, 95, "Am")} → ${N(237, 93, "Np")} + ${ALPHA}`]],
-          yt: { q: `Thorium-230, ${N(230, 90, "Th")}, emits an alpha particle and becomes radium (Ra). Write the equation.`, steps: [["Top", "230 − 4 = 226"], ["Bottom", "90 − 2 = 88"], ["New nucleus", N(226, 88, "Ra")], ["Equation", `${N(230, 90, "Th")} → ${N(226, 88, "Ra")} + ${ALPHA}`]] } },
-        { t: "follow", slide: 30, q: `Carbon-14, ${N(14, 6, "C")}, emits a beta particle and becomes nitrogen (N). Write the equation.`, steps: [["Top", "14 − 0 = 14"], ["Bottom", "6 + 1 = 7"], ["New nucleus", N(14, 7, "N")], ["Equation", `${N(14, 6, "C")} → ${N(14, 7, "N")} + ${BETA}`]],
-          yt: { q: `Strontium-90, ${N(90, 38, "Sr")}, emits a beta particle and becomes yttrium (Y). Write the equation.`, steps: [["Top", "90 − 0 = 90"], ["Bottom", "38 + 1 = 39"], ["New nucleus", N(90, 39, "Y")], ["Equation", `${N(90, 38, "Sr")} → ${N(90, 39, "Y")} + ${BETA}`]] } },
+        { t: "follow", slide: 29, q: `Americium-241, ${N(241, 95, "Am")}, emits an alpha particle and becomes neptunium (Np). Write the equation.`, steps: [["Top numbers", "241 − 4 = 237"], ["Bottom numbers", "95 − 2 = 93"], ["New nucleus", N(237, 93, "Np")], ["Equation", `${N(241, 95, "Am")} → ${N(237, 93, "Np")} + ${ALPHA}`]],
+          yt: { q: `Thorium-230, ${N(230, 90, "Th")}, emits an alpha particle and becomes radium (Ra). Write the equation.`, steps: [["Top numbers", "230 − 4 = 226"], ["Bottom numbers", "90 − 2 = 88"], ["New nucleus", N(226, 88, "Ra")], ["Equation", `${N(230, 90, "Th")} → ${N(226, 88, "Ra")} + ${ALPHA}`]] } },
+        { t: "follow", slide: 30, q: `Carbon-14, ${N(14, 6, "C")}, emits a beta particle and becomes nitrogen (N). Write the equation.`, steps: [["Top numbers", "14 − 0 = 14"], ["Bottom numbers", "6 + 1 = 7"], ["New nucleus", N(14, 7, "N")], ["Equation", `${N(14, 6, "C")} → ${N(14, 7, "N")} + ${BETA}`]],
+          yt: { q: `Strontium-90, ${N(90, 38, "Sr")}, emits a beta particle and becomes yttrium (Y). Write the equation.`, steps: [["Top numbers", "90 − 0 = 90"], ["Bottom numbers", "38 + 1 = 39"], ["New nucleus", N(90, 39, "Y")], ["Equation", `${N(90, 38, "Sr")} → ${N(90, 39, "Y")} + ${BETA}`]] } },
         { t: "html", h: EQ([N("99m", 43, "Tc"), ARROW, N(99, 43, "Tc"), "+", GAMMA], "Gamma (slide 31). The ‘m’ means the nucleus has extra energy; A and Z do not change") },
         { t: "sub", h: "Finding the missing particle" },
-        { t: "follow", slide: 32, q: `Complete the equation: ${N(226, 88, "Ra")} → ${N(222, 86, "Rn")} + ?`, steps: [["Top", "226 − 222 = 4"], ["Bottom", "88 − 86 = 2"], ["Particle", `${ALPHA}: an alpha particle`]],
-          yt: { q: `Complete the equation: ${N(214, 83, "Bi")} → ${N(214, 84, "Po")} + ?`, steps: [["Top", "214 − 214 = 0"], ["Bottom", "83 − 84 = −1"], ["Particle", `${BETA}: a beta particle`]] } },
+        { t: "follow", slide: 32, q: `Complete the equation: ${N(226, 88, "Ra")} → ${N(222, 86, "Rn")} + ?`, steps: [["Top numbers", "226 − 222 = 4"], ["Bottom numbers", "88 − 86 = 2"], ["Particle", `${ALPHA}: an alpha particle`]],
+          yt: { q: `Complete the equation: ${N(214, 83, "Bi")} → ${N(214, 84, "Po")} + ?`, steps: [["Top numbers", "214 − 214 = 0"], ["Bottom numbers", "83 − 84 = −1"], ["Particle", `${BETA}: a beta particle`]] } },
       ],
       try: [
         { t: "q", p: "Fill in the missing particle. Check that the top and bottom numbers balance.", after: [
