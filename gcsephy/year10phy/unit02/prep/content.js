@@ -77,7 +77,7 @@
       /* 4 */
       { lessons: "7–8", title: "Specific heat capacity", subtitle: R`\(\Delta E = m\,c\,\Delta\theta\); measuring specific heat capacity (required practical)`,
         doNow: [
-          [190, "Define internal energy.", "The total energy stored by the particles that make up a system."],
+          [190, "Define internal energy.", "The total kinetic energy and potential energy of all the particles that make up a system."],
           [202, "Define specific latent heat.", "The energy needed to change the state of 1 kg of a substance with no change in temperature."],
           [698, "Describe how to read a measuring cylinder accurately.", "Read the bottom of the meniscus at eye level."],
         ],

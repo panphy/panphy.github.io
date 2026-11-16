@@ -40,7 +40,7 @@
         doNow: [
           [90, "Define electric current.", "The rate of flow of electrical charge."],
           [91, "State the standard units of charge, current and time.", "Charge: coulomb (C); current: ampere (A); time: second (s)"],
-          [81, "State the function of a fuse.", "To melt and break the circuit if the current becomes too large."],
+          [670, "State the equation linking charge flow, current and time.", "charge flow = current × time (Q = I t)"],
         ],
         questions: [
           { q: "A voltmeter is connected in {{series|parallel*}} with the component it measures.", m: 1, lines: 0 },
@@ -72,6 +72,9 @@
             cols: "1.2fr 1fr",
             parts: [
               { q: "Calculate the reading on V₂.", m: 1, lines: 1, a: "12 − 7.5 = 4.5 V ✓" },
+            ] },
+          { stem: "Use the rules for series and parallel circuits.",
+            parts: [
               { q: "Two resistors, 4 Ω and 8 Ω, are in series. Total resistance: [[12 Ω|18]]", m: 1, lines: 0 },
               { q: "Describe the potential difference across components in parallel.", m: 1, lines: 1, a: "It is the same across each component ✓" },
               { q: "In a parallel circuit, the total current is 0.90 A. One branch has 0.40 A. The other branch has [[0.50 A|18]]", m: 1, lines: 0 },
