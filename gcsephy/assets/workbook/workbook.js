@@ -54,7 +54,7 @@
   const which = partNo ? `Part ${partNo}, ${lessonsLabel(SEL)}` : ONE ? lessonName(ONE) : REVIEW ? "Unit review" : "";
   const footer = `${C.name}, Year ${C.year} workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
-  pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
+  pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
   document.title = `${C.file}${partNo ? ` (Part ${partNo})` : ONE ? ` (Lesson ${pad(ONE.n)})` : REVIEW ? " (Unit Review)" : ""}${answers ? " (Ans)" : ""}`;
 

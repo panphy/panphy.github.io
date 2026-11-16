@@ -60,7 +60,7 @@ For editing conventions, caching rules, and verification commands, see [AGENTS.m
 
 ## License
 
-Copyright © 2026 PanPhy Labs. All rights reserved.
+Copyright © PanPhy Labs. All rights reserved.
 
 You're welcome to use the site in lessons, link to it, and print or download pages for your own study or teaching your own students, free of charge, with the copyright notice left in place. The source is public to read but is not open source. Copying, adapting, or republishing the code or content beyond those uses needs written permission. Third-party libraries, fonts, and credited images keep their own licenses. See [LICENSE](LICENSE).
 

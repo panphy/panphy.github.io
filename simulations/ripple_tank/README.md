@@ -120,4 +120,4 @@ The HTML entry point is [../ripple_tank.html](../ripple_tank.html). [app.js](app
 
 There is no build step. From the repository root, run `python3 -m http.server 8000`, then open [the local simulation](http://localhost:8000/simulations/ripple_tank.html) in a clean browser context. For physics changes, check phase/path-difference overlays, refraction and total reflection, straight fronts in an empty solver tank, all three barrier presets, point sources, pulses, and both supported texture precisions. Follow the repository's verification and cache-version rules in [AGENTS.md](../../AGENTS.md).
 
-© 2026 PanPhy Labs. All rights reserved.
+© PanPhy Labs. All rights reserved.
