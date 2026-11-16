@@ -71,12 +71,12 @@
             ["D Braking", { opts: "kinetic / thermal", a: "kinetic" }, { opts: "thermal / chemical", a: "thermal (brakes and surroundings)" }],
           ] },
         ] },
-        { t: "q", type: "Supported", p: "Complete each sentence. The choices are after each gap.", fill: [
+        { t: "q", p: "Complete each sentence. The choices are after each gap.", fill: [
           R`A ball is thrown upwards. Energy is transferred from the [[kinetic|kinetic / chemical]] store to the [[gravitational potential|gravitational potential / thermal]] store.`,
           R`A fireplace warms a person. Energy is transferred by infrared waves from the [[chemical|chemical / kinetic]] store of the fuel to the [[thermal|thermal / kinetic]] store of the person.`,
           R`A child lands on a trampoline. Energy is transferred mechanically from the child's [[kinetic|kinetic / chemical]] store to the trampoline's [[elastic potential|elastic potential / thermal]] store.`,
         ] },
-        { t: "q", type: "On your own", p: "A bungee jumper falls, and the cord stretches until the jumper stops at the bottom. Describe the energy transfers. Use the three steps.", lines: 3, a: "As the jumper falls, energy is transferred from the gravitational potential store of the jumper to the kinetic store. As the cord stretches, energy is transferred from the kinetic store to the elastic potential store of the cord." },
+        { t: "q", p: "A bungee jumper falls, and the cord stretches until the jumper stops at the bottom. Describe the energy transfers. Use the three steps.", lines: 3, a: "As the jumper falls, energy is transferred from the gravitational potential store of the jumper to the kinetic store. As the cord stretches, energy is transferred from the kinetic store to the elastic potential store of the cord." },
         { t: "q", say: ["Sam", "When the car stopped, its energy was used up."], p: "Explain what is wrong with what Sam says.", lines: 3, a: "Energy cannot be used up (destroyed). The energy in the car's kinetic store was transferred to the thermal store of the brakes and the surroundings." },
       ],
       exam: [
@@ -131,10 +131,10 @@
           ["Doubling the mass makes the kinetic energy", ["stay the same", "2 times bigger", "4 times bigger"], 1],
           ["Doubling the speed makes the kinetic energy", ["stay the same", "2 times bigger", "4 times bigger"], 2],
         ] },
-        { t: "q", type: "Supported", p: "A 2.0 kg ball rolls at 3.0 m/s. Calculate the energy in its kinetic store.", frame: frame3, frameA: [R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 2.0 \times 3.0^2\)`, "9.0 J"] },
-        { t: "q", type: "Supported", p: "A 400 g ball is kicked at 15 m/s. Calculate the energy in its kinetic store. <em>Convert the mass first!</em>", frame: frame4, frameA: ["m = 400 ÷ 1000 = 0.400 kg", R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 0.400 \times 15^2\)`, "45 J"] },
+        { t: "q", p: "A 2.0 kg ball rolls at 3.0 m/s. Calculate the energy in its kinetic store.", frame: frame3, frameA: [R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 2.0 \times 3.0^2\)`, "9.0 J"] },
+        { t: "q", p: "A 400 g ball is kicked at 15 m/s. Calculate the energy in its kinetic store. <em>Convert the mass first!</em>", frame: frame4, frameA: ["m = 400 ÷ 1000 = 0.400 kg", R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 0.400 \times 15^2\)`, "45 J"] },
         { t: "q", p: "Complete the table. Show your working underneath.", table: { head: ["Object", "Mass", "Speed", R`\(E_k\) / J`], rows: [["Lorry", "30 000 kg", "2.0 m/s", null], ["Cyclist and bike", "80 kg", "6.0 m/s", null], ["Tennis ball", "58 g", "50 m/s", null], ["Bullet", "20 g", "300 m/s", null]], ans: [[null, null, null, "60 000"], [null, null, null, "1440"], [null, null, null, "72.5"], [null, null, null, "900"]] }, lines: 3 },
-        { t: "q", type: "On your own", p: "A 0.16 kg cricket ball is bowled at 40 m/s. Calculate the energy in its kinetic store.", lines: 2, a: R`\(E_k = 0.5 \times 0.16 \times 40^2 = 128\) J` },
+        { t: "q", p: "A 0.16 kg cricket ball is bowled at 40 m/s. Calculate the energy in its kinetic store.", lines: 2, a: R`\(E_k = 0.5 \times 0.16 \times 40^2 = 128\) J` },
         { t: "q", type: "Challenge", p: "A car speeds up from 10 m/s to 30 m/s. How many times bigger is the energy in its kinetic store? Explain without calculating the energy.", lines: 2, a: R`9 times bigger. The speed is 3 times bigger, and the speed is squared: \(3^2 = 9\).` },
         { t: "q", say: ["Ava", "At 4 m/s my bike has twice as much kinetic energy as at 2 m/s."], p: "Explain what is wrong with what Ava says.", lines: 2, a: R`The speed is squared, so doubling the speed gives \(2^2 = 4\) times as much kinetic energy, not twice as much.` },
       ],
