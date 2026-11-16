@@ -148,9 +148,9 @@ body {
   background-color: var(--intro-bg);
   background-image: radial-gradient(var(--intro-pattern) 1.5px, transparent 1.5px);
 }
-/* Presenting fullscreen on a screen taller than 16:9, these slides carry their ground down to the bottom of the screen.
-   The band belongs to the slide, so it fades in and out with it. */
-body.is-fullscreen .slide:is(.dark, .title, .section, .history)::before { content: ""; position: absolute; top: 100%; left: 0; right: 0; height: var(--fs-extra, 0px); background: inherit; pointer-events: none; }
+/* Presenting fullscreen on a screen taller than 16:9, every slide carries its ground down to the bottom of the screen,
+   so the band cross-fades exactly as the slide does (the 12px offset keeps the dots in step below the year bar). */
+body.is-fullscreen .slide::before { content: ""; position: absolute; top: 100%; left: 0; right: 0; height: var(--fs-extra, 0px); background: inherit; background-position: 0 12px; pointer-events: none; }
 .year-badge { position: absolute; top: 36px; right: 84px; border-radius: 999px; padding: 7px 16px; background: var(--year-colour); color: var(--year-ink); font: 600 24px var(--font-mono); }
 /* .triple marks a slide examined only in GCSE Physics (8463), never in Combined Science: Trilogy;
    .triple-tag marks one item on a mixed slide. The flag hangs from the bottom edge, below the year badge's top. */
