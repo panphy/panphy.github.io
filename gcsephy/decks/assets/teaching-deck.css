@@ -142,13 +142,17 @@ body {
   color: var(--text-main);
 }
 /* Title and divider slides take a year-tinted ground so they stand out in the thumbnails. */
-.slide.dark, .slide.title, .slide.section {
-  background-color: color-mix(in srgb, var(--year-colour) 30%, #ebe6db);
-  background-image: radial-gradient(color-mix(in srgb, var(--year-colour) 40%, #ddd7c9) 1.5px, transparent 1.5px);
+:root { --intro-bg: color-mix(in srgb, var(--year-colour) 30%, #ebe6db); --intro-pattern: color-mix(in srgb, var(--year-colour) 40%, #ddd7c9); }
+:root[data-theme="dark"] { --intro-bg: color-mix(in srgb, var(--year-dark) 10%, #1b1b19); --intro-pattern: color-mix(in srgb, var(--year-dark) 14%, #262623); }
+.slide:is(.dark, .title, .section) {
+  background-color: var(--intro-bg);
+  background-image: radial-gradient(var(--intro-pattern) 1.5px, transparent 1.5px);
 }
-:root[data-theme="dark"] .slide:is(.dark, .title, .section) {
-  background-color: color-mix(in srgb, var(--year-dark) 10%, #1b1b19);
-  background-image: radial-gradient(color-mix(in srgb, var(--year-dark) 14%, #262623) 1.5px, transparent 1.5px);
+/* Presenting fullscreen on a screen that is not 16:9, the space around the slide takes the same tint. */
+body.is-fullscreen:has(#deck .slide:is(.dark, .title, .section).active),
+body.is-fullscreen #deck:has(.slide:is(.dark, .title, .section).active) {
+  background-color: var(--intro-bg);
+  background-image: radial-gradient(var(--intro-pattern) 1.5px, transparent 1.5px);
 }
 .year-badge { position: absolute; top: 36px; right: 84px; border-radius: 999px; padding: 7px 16px; background: var(--year-colour); color: var(--year-ink); font: 600 24px var(--font-mono); }
 /* .triple marks a slide examined only in GCSE Physics (8463), never in Combined Science: Trilogy;
