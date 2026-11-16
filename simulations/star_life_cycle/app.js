@@ -860,7 +860,7 @@ function applyVisuals(st, dt, time) {
 const context = st => ({ M: state.mass, life: state.life, ms: state.life.ms, stage: st.stage, st, gas: state.gas });
 const compactYears = y => fmt.years(y).replace(' years', ' yr');
 const chipDuration = stage => {
-  if (stage.id === 'sn') return 'seconds + months';
+  if (stage.id === 'sn') return 'seconds, then months';
   if (stage.id === 'bh') return 'the end';
   if (stage.id === 'wd' || stage.id === 'ns') return 'the end';
   return compactYears(stage.years);
@@ -1508,12 +1508,36 @@ function drawMiniHR(st) {
     : id === 'cloud' ? 'too cold to plot yet' : id === 'sn' ? 'off the top' : id === 'ns' ? 'off the left edge' : 'nothing to plot'}`;
 }
 
+// Bring the layer's description into view beside the 3D view, where the notes scroll on their own. The notes
+// pane is as tall as the 3D view's column, which can be taller than the window, so the pane scrolls first and
+// the page makes up the rest, but never by so much that it hides more than the top third of the 3D view.
+// On narrow screens the notes are below the 3D view, and scrolling to them would carry it off the screen.
+function showLayerNotes() {
+  const aside = $('notes');
+  if (!/auto|scroll/.test(getComputedStyle(aside).overflowY)) return;
+  const pane = aside.getBoundingClientRect();
+  const box = $('layers-box').getBoundingClientRect();
+  const view3d = viewer.getBoundingClientRect();
+  const margin = 16;
+  const top = Math.max(pane.top, view3d.top, 0);
+  if (box.top >= top && box.bottom <= Math.min(pane.bottom, window.innerHeight)) return;
+  const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  const paneShift = clamp(box.top - top - margin, -aside.scrollTop, aside.scrollHeight - aside.clientHeight - aside.scrollTop);
+  if (paneShift) aside.scrollBy({ top: paneShift, behavior });
+  const below = box.bottom - paneShift + margin - window.innerHeight;
+  const banner = Math.max(document.querySelector('.banner').getBoundingClientRect().bottom, 0);
+  const pageShift = Math.min(below, view3d.top - banner + view3d.height / 3);
+  if (pageShift > 0 && !workspace.classList.contains('is-fullscreen')) window.scrollBy({ top: pageShift, behavior });
+}
+
 let downAt = null;
 viewer.addEventListener('pointerdown', event => { downAt = [event.clientX, event.clientY]; });
 viewer.addEventListener('pointerup', event => {
   if (!downAt || Math.hypot(event.clientX - downAt[0], event.clientY - downAt[1]) > 6) return;
   const index = pickLayer(event);
-  if (index >= 0) selectLayer(index);
+  if (index < 0) return;
+  selectLayer(index);
+  if (state.layer >= 0) showLayerNotes();
 });
 viewer.addEventListener('pointermove', event => { if (event.pointerType === 'mouse') viewer.classList.toggle('is-hovering', pickLayer(event) >= 0); });
 

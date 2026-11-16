@@ -21,6 +21,7 @@ function sci(x, digits = 2) {
   return `${rounded.toFixed(digits - 1)} × 10${superscript(exponent)}`;
 }
 
+// The model's times are estimates, so two significant figures is as much as they can support.
 function years(y) {
   if (y === 0) return '0 years';
   if (y < 1 / 365 / 24 / 3600 * 60) return `${sig(y * 3.156e7)} s`;
@@ -28,11 +29,11 @@ function years(y) {
   if (y < 2 / 365) return `${sig(y * 365 * 24)} hours`;
   if (y < 0.2) return `${sig(y * 365)} days`;
   if (y < 1) return `${sig(y * 12)} months`;
-  if (y < 1e4) return `${sig(y, 3)} years`;
-  if (y < 1e6) return `${sig(y / 1e3, 3)} thousand years`;
-  if (y < 1e9) return `${sig(y / 1e6, 3)} million years`;
-  if (y < 1e12) return `${sig(y / 1e9, 3)} billion years`;
-  return `${sig(y / 1e12, 3)} trillion years`;
+  if (y < 1e4) return `${sig(y)} years`;
+  if (y < 1e6) return `${sig(y / 1e3)} thousand years`;
+  if (y < 1e9) return `${sig(y / 1e6)} million years`;
+  if (y < 1e12) return `${sig(y / 1e9)} billion years`;
+  return `${sig(y / 1e12)} trillion years`;
 }
 
 function temp(kelvin) {
