@@ -326,6 +326,7 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .cover-part span { display: block; margin-top: 3mm; font: 700 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #d5deeb; }
 .cover-lessons { margin: 3mm 0 0; padding-left: 7mm; font-size: 13pt; line-height: 1.55; color: #fff; }
 .cover-lessons li { margin-bottom: 1.5mm; }
+.cover-note { margin: 2mm 0 0 7mm; font-size: 11pt; color: #fff; }
 .cover-lessons li::marker { color: var(--year); font-weight: 900; }
 .tracker-flow { margin-top: 5mm; }
 .tracker-flow > .eyebrow, .tracker-flow > .page-title, .tracker-flow > .page-intro { break-after: avoid; }
@@ -557,7 +558,7 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .cover[data-year="10"] { --year: #b4d84e; }
 .cover[data-year="11"] { --year: #f7d23e; }
 .cover::before { opacity: .14; }
-.cover .eyebrow, .cover h1 em, .cover .lede, .cover-sub, .cover-part span, .cover-lessons, .cover-lessons li::marker,
+.cover .eyebrow, .cover h1 em, .cover .lede, .cover-sub, .cover-part span, .cover-lessons, .cover-lessons li::marker, .cover-note,
 .cover-quote, .cover-quote span { color: var(--navy); }
 .cover-part b { background: var(--navy); color: var(--year); }
 .cover-quote { border-left-color: var(--navy); }
@@ -577,7 +578,7 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .cover[data-year="10"] { --year-soft: #e6f2c6; --year-ink: #557716; }
 .cover[data-year="11"] { --year-soft: #fcefb6; --year-ink: #856804; }
 .cover::before { display: none; }
-.cover .eyebrow, .cover .lede, .cover-sub, .cover-part span, .cover-lessons, .cover-quote, .cover-quote span { color: var(--cover-ink); }
+.cover .eyebrow, .cover .lede, .cover-sub, .cover-part span, .cover-lessons, .cover-note, .cover-quote, .cover-quote span { color: var(--cover-ink); }
 .cover h1 em, .cover-lessons li::marker { color: var(--year-ink); }
 .cover-part b { padding: 1.2mm 4mm; border-radius: 3mm; background: var(--year); color: var(--cover-ink); }
 .cover-quote { border-left-color: var(--year); }

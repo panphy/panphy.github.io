@@ -10,6 +10,8 @@ window.WORKBOOK = {
   parts: [[1, 2], [3, 5], [6, 7]],
   booklets: [["lesson=4", "RP 4"], ["lesson=8", "RP 8"]],
   deck: "panphy.app/gcsephy/decks/particle-model",
+  // Students get no kit or deck panel beside the goals; the lesson plans list both.
+  side: () => "",
   toolkit: (W) => W.equationToolkit({
     note: "Example: to find \\(V\\) from \\(\\rho = \\dfrac{m}{V}\\), cover \\(V\\). \\(m\\) is above \\(\\rho\\), so \\(V = \\dfrac{m}{\\rho}\\).",
     convert: `g → kg, cm³ → m³, kJ → J${W.LAST >= 8 ? ", min → s" : ""}`,

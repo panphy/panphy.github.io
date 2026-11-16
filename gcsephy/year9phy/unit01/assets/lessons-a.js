@@ -76,7 +76,6 @@
           ["A balance reads 0.5 g with nothing on it.", RS, 1],
           ["The height of a fast bounce is judged by eye.", RS, 0],
           ["A draught from an open window comes and goes.", RS, 0],
-          ["A scale is always read from above, at the same angle.", RS, 1],
         ] },
         { t: "q", p: "Explain why taking more repeats cannot remove a systematic error.", lines: 2, a: "A systematic error shifts every reading by the same amount in the same direction, so the mean of many repeats is shifted by that amount too. Random errors go both ways, so they partly cancel in a mean." },
         { t: "q", p: "Complete the table.", table: { head: ["Instrument", "Resolution", "Could it show a change of 0.5 mm?"], rows: [["Ruler marked every 1 cm", { opts: "1 cm / 1 mm / 0.1 mm", a: "1 cm" }, { opts: "yes / no", a: "no" }], ["Ruler marked every 1 mm", { opts: "1 cm / 1 mm / 0.1 mm", a: "1 mm" }, { opts: "yes / no", a: "no" }], ["Digital calipers reading to 0.1 mm", { opts: "1 cm / 1 mm / 0.1 mm", a: "0.1 mm" }, { opts: "yes / no", a: "yes" }]] },
@@ -107,7 +106,7 @@
       exam: [
         { p: "A student times a pendulum swinging 10 times. The readings are 15.2 s, 15.6 s and 15.3 s. Calculate the mean time.", marks: 2, lines: 2, a: "(15.2 + 15.6 + 15.3) ÷ 3 = 46.1 ÷ 3 (1)<br>= 15.4 s (1)" },
         { p: "Calculate the uncertainty in the mean. Use uncertainty = (largest − smallest) ÷ 2", marks: 2, lines: 2, a: "(15.6 − 15.2) ÷ 2 (1)<br>= 0.2 s (1)" },
-        { p: "The student always starts the stopwatch late, by about the same amount. What type of error is this? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["random error", "systematic error", "anomalous result"], c: 1, cols: 3 } },
+        { p: "The student always starts the stopwatch late, by about the same amount. What type of error is this? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["random error", "systematic error"], c: 1, cols: 2 } },
         { p: "Explain why repeating the measurement would not reduce this error.", marks: 1, lines: 2, a: "Every reading is shifted by the same amount in the same direction, so the mean is shifted too (1)." },
       ],
       home: { title: "Take it home", blocks: [{ t: "q", p: "Find a claim with a number in it: an advert, a headline or a sports statistic. Write it down, then write one question you would have to ask before you believed it. Bring it to Lesson 2.", lines: 3, a: "Open. A good question asks what is missing: how many people or trials, how it was measured, or what it was compared with." }] },

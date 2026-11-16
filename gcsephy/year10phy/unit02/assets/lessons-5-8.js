@@ -252,6 +252,8 @@
           { t: "q", p: "Plot temperature against energy supplied. Draw a straight line of best fit through the part of the graph that is straight.", graph: { w: 120, h: 100, xLabel: "Energy supplied / J", yLabel: "Temperature / °C", x: [2500, 2], y: [5, 1], points: SHC.map(([, e, c]) => [e, Number(c)]), fit: [[0, 18.5], [28800, 49.0]] } },
         ] },
         { t: "lab", blocks: [
+          { t: "worked", q: "The line of best fit for a 1.0 kg block passes through (5000 J, 25 °C) and (25 000 J, 47 °C). Find the specific heat capacity.", steps: [["Two points", "far apart: (5000 J, 25 °C), (25 000 J, 47 °C)"], ["Gradient", R`\(\dfrac{47 - 25}{25\,000 - 5000} = 0.0011\,{}^\circ\mathrm{C/J}\)`], ["Equation", R`\(c = \dfrac{1}{m \times \text{gradient}}\)`], ["Substitute", R`\(c = \dfrac{1}{1.0 \times 0.0011}\)`], ["Answer", "c ≈ 910 J/kg °C"]],
+            yt: { q: "The line for a 2.0 kg block passes through (4000 J, 22 °C) and (24 000 J, 32 °C). Find the specific heat capacity.", steps: [["Two points", "(4000 J, 22 °C), (24 000 J, 32 °C)"], ["Gradient", R`\(\dfrac{32 - 22}{24\,000 - 4000} = 0.0005\,{}^\circ\mathrm{C/J}\)`], ["Equation", R`\(c = \dfrac{1}{m \times \text{gradient}}\)`], ["Substitute", R`\(c = \dfrac{1}{2.0 \times 0.0005}\)`], ["Answer", "c = 1000 J/kg °C"]] } },
           { t: "q", p: R`Find the gradient of your line. Then use \(c = \dfrac{1}{m \times \text{gradient}}\)`, lines: 4, a: R`Gradient \(= \dfrac{49.0 - 24.6}{28\,800 - 5760} = 0.00106\) °C/J. \(c = \dfrac{1}{1.00 \times 0.00106} = 940\) J/kg °C` },
           { t: "q", p: "The graph curves at the start. Suggest why.", lines: 2, a: "At first the heater itself is warming up, and it takes time for energy to spread through the block to the thermometer." },
         ] },
