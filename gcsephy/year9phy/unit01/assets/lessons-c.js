@@ -182,7 +182,7 @@
           ] },
         ] },
         { sec: "try", title: "Conclude and evaluate (Lesson 8)", blocks: [
-          { t: "q", p: "Interrogate your own results.", after: [
+          { t: "q", p: "Look closely at your own results.", after: [
             { t: "vars", cls: "tall", rows: [["The pattern: the dependent variable…", "{{increases|decreases|stays about the same}}"], ["The pattern is", "{{strong and clear|weak and scattered}} because"], ["Possible anomalous results (or “none”)", ""], ["The one number a doubter would find hardest to argue with", ""]] },
           ] },
           { t: "q", p: "Conclusion. Use the frame that matches your graph.", after: [

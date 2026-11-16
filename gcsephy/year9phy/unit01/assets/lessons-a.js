@@ -81,7 +81,7 @@
         { t: "q", p: "Complete the table.", table: { head: ["Instrument", "Resolution", "Could it show a change of 0.5 mm?"], rows: [["Ruler marked every 1 cm", { opts: "1 cm / 1 mm / 0.1 mm", a: "1 cm" }, { opts: "yes / no", a: "no" }], ["Ruler marked every 1 mm", { opts: "1 cm / 1 mm / 0.1 mm", a: "1 mm" }, { opts: "yes / no", a: "no" }], ["Digital calipers reading to 0.1 mm", { opts: "1 cm / 1 mm / 0.1 mm", a: "0.1 mm" }, { opts: "yes / no", a: "yes" }]] },
           after: [{ t: "part", p: "A stopwatch reads to 0.01 s. Its resolution is {{0.01 s*|0.1 s|1 s}}" }] },
         { t: "q", say: ["Sam", "My digital balance shows two decimal places, so my results must be accurate."], p: "Explain what is wrong with what Sam says.", lines: 2, a: "More decimal places means a finer resolution, not accuracy. A balance with a zero error gives precise but wrong readings; check it with a known mass." },
-        { t: "q", type: "Challenge", p: "Data detective. For each claim, write what you would need to know before believing it, and the error you suspect.", table: { head: ["The claim", "What I would need to know first", "Error I suspect"], widths: ["38%", "42%", "20%"], rh: 16, rows: [
+        { t: "q", type: "Challenge", p: "For each claim, write what you would need to know before believing it, and the error you suspect.", table: { head: ["The claim", "What I would need to know first", "Error I suspect"], widths: ["38%", "42%", "20%"], rh: 16, rows: [
           ["“Our reaction times improved after training.” The two tests were timed by different people.", null, { opts: "random / systematic", a: "systematic" }],
           ["“The room is exactly 6.000 m long.” Measured once, with the tape held slightly slack.", null, { opts: "random / systematic", a: "systematic" }],
           ["“This spring stretches 4.0 cm for each 100 g.” One reading was taken for each mass.", null, { opts: "random / systematic", a: "random" }],
@@ -173,7 +173,7 @@
           ["How does pendulum length affect the time of a swing?", { opts: "line / bar", a: "line" }, { opts: "continuous / categoric", a: "length: continuous" }],
           ["Which material is the best sound absorber?", { opts: "line / bar", a: "bar" }, { opts: "continuous / categoric", a: "material: categoric" }],
         ] } },
-        { t: "q", type: "Challenge", p: "Fix the broken plan. A student writes: <em>“I will test whether expensive tennis balls bounce better. I’ll drop an expensive ball from the window and a cheap one from my hand, and see which bounces higher.”</em>", after: [
+        { t: "q", type: "Challenge", p: "A student writes: <em>“I will test whether expensive tennis balls bounce better. I’ll drop an expensive ball from the window and a cheap one from my hand, and see which bounces higher.”</em>", after: [
           { t: "part", p: "<b>a</b> Name two things wrong with this plan.", lines: 2, a: "Any two: two things change (the ball and the drop height); “better” is vague: measure the bounce height in cm; only one drop of each, so no repeats; the release is different." },
           { t: "part", p: "<b>b</b> Rewrite it as a question in the form “How does X affect Y?”", lines: 1, a: "How does the type of tennis ball affect its bounce height when it is dropped from 1.0 m?" },
           { t: "part", p: "<b>c</b> Your question needs a {{bar chart*|line graph}} because the independent variable is {{continuous|categoric*}}" },
@@ -185,7 +185,7 @@
           "Use a line graph when the independent variable is [[continuous|30]].",
           "Use a bar chart when the independent variable is [[categoric|30]].",
         ] },
-        { t: "q", type: "Explain", p: "Explain to someone who missed the lesson why the choice of graph depends on the independent variable and not on the dependent one.", lines: 3, a: "The independent variable goes along the x-axis, so it decides whether the x-axis is a number scale (line graph) or a row of separate labels (bar chart). The dependent variable is nearly always a number, so it cannot tell the two cases apart." },
+        { t: "q", type: "Explain", p: "Explain why the choice of graph depends on the independent variable and not on the dependent one.", lines: 3, a: "The independent variable goes along the x-axis, so it decides whether the x-axis is a number scale (line graph) or a row of separate labels (bar chart). The dependent variable is nearly always a number, so it cannot tell the two cases apart." },
       ],
       lab: { title: "Demo: which surface slows the car most?", blocks: [
         { t: "lab", blocks: [

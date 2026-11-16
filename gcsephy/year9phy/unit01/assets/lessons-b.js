@@ -230,7 +230,7 @@
             { t: "part", p: "<b>b</b> Give two things that could cause a reading like this in the ramp practical.", lines: 2, a: "Any two: the trolley was pushed; it was released from higher up the ramp; the ramp was set to the wrong height; 66 was written down as 96." },
           ] },
         { t: "q", p: "What is a dot-to-dot line claiming about the measurements? Why is that claim untrue?", lines: 2, a: "It claims every measurement is exactly right. Every measurement has some uncertainty (random error), so the points scatter around the true pattern." },
-        { t: "q", type: "Challenge", p: "Mark someone else's graph. A student plotted the spring results below. Tick the <strong>four</strong> problems with the graph.", after: [
+        { t: "q", type: "Challenge", p: "A student plotted the spring results below. Tick the <strong>four</strong> problems with the graph.", after: [
           { t: "split", left: [
             { t: "checks", title: "Problem", head: ["✓"], a: [0, 0, 0, 0], items: ["Axes not labelled", "No units", "Points joined dot-to-dot", "Scale squashes the data into one corner", "Too few points", "Dependent variable on the x-axis"] },
           ], right: [
