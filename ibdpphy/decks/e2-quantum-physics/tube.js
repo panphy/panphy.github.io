@@ -3,7 +3,7 @@
 // where they make two bright rings round a central spot. The accelerating p.d. can be set: a higher
 // p.d. gives the electrons more momentum, a shorter de Broglie wavelength and smaller rings, seen
 // face on in the inset beside the tube. Built, turned and zoomed by ../assets/model3d.js.
-import { model3d } from '../assets/model3d.js';
+import { model3d } from '../assets/model3d.js?v=20261116';
 import { control } from '../assets/sim-control.js';
 
 const L = 3.0;                 // graphite to screen
