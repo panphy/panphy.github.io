@@ -134,9 +134,9 @@ strong { font-weight: 700; }
 .compare td.blank { height: 9mm; }
 
 /* worked example + your turn */
-.worked { display: grid; grid-template-columns: 1fr 1fr; margin: 2mm 0 3.5mm; border: 1.2px solid var(--line); break-inside: avoid; }
+.worked { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin: 2mm 0 3.5mm; border: 1.2px solid var(--line); break-inside: avoid; }
 .worked > div { padding: 3mm 3.5mm; }
-.worked > div + div { border-left: 1.2px dashed var(--line); background: #fffdf6; }
+.worked > div + div { border-left: 1.2px dashed var(--line); background: #fffdf6; border-radius: 0 3mm 3mm 0; }
 .worked h4 { margin: 0 0 1.5mm; font: 900 8pt/1 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
 .worked > div:first-child h4 { color: var(--ink); }
 .worked .q { margin-bottom: 2mm; font-size: 9.6pt; font-weight: 700; line-height: 1.35; }
