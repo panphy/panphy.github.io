@@ -288,7 +288,7 @@
       out += `<text class="axis-label" x="${x0 + 9}" y="${Y(ymax) + 4}" text-anchor="start">${spec.yLabel || ""}</text>`;
     } else {
       out += `<text class="axis-label" x="${(X(xmin) + X(xmax)) / 2}" y="${h - 8}" text-anchor="middle">${spec.xLabel || ""}</text>`;
-      out += `<text class="axis-label" transform="translate(13 ${(Y(ymin) + Y(ymax)) / 2}) rotate(-90)" text-anchor="middle">${spec.yLabel || ""}</text>`;
+      out += `<text class="axis-label" transform="translate(16 ${(Y(ymin) + Y(ymax)) / 2}) rotate(-90)" text-anchor="middle">${spec.yLabel || ""}</text>`;
     }
 
     (spec.series || []).forEach((s) => {
