@@ -222,10 +222,10 @@ window.DeckFigures.add(P => {
     // Potential against distance for a positive and a negative point charge.
     'd2-potential-graph': () => {
       const x = r => 110 + 150 * r, at = k => sampled(t => [x(0.55 + 3.8 * t), 240 - k * 110 / (0.55 + 3.8 * t)]);
-      let s = arrow(110, 450, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(796, 250, 'r', 'lbl display', 'start') + text(126, 44, 'potential', 'lbl mono', 'start') + text(96, 248, '0', 'lbl mono', 'end');
+      let s = arrow(110, 450, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(445, 494, 'r', 'lbl display') + P.yAxisLabel(66, 240, 'potential') + text(96, 248, '0', 'lbl mono', 'end');
       s += `<path d="${at(1)}" class="curve" style="stroke:var(--proton)"/><path d="${at(-1)}" class="curve" style="stroke:var(--electron)"/>`;
       s += text(300, 110, 'positive charge', 'lbl strong', 'start') + text(300, 142, 'potential is positive', 'lbl', 'start') + text(300, 362, 'negative charge', 'lbl strong', 'start') + text(300, 394, 'potential is negative', 'lbl', 'start');
-      return svg('0 0 840 470', s, 'Graph of electric potential against distance from a point charge. For a positive charge the potential is positive and falls towards zero far away. For a negative charge it is negative and rises towards zero');
+      return svg('0 0 840 510', s, 'Graph of electric potential against distance from a point charge. For a positive charge the potential is positive and falls towards zero far away. For a negative charge it is negative and rises towards zero');
     },
 
     // Equipotentials and field lines of a positive point charge, at equal steps of potential.
@@ -248,13 +248,13 @@ window.DeckFigures.add(P => {
     // A charged conducting sphere, solid or hollow: field strength and potential against distance from its center.
     'd2-sphere-graphs': () => {
       const x = r => 120 + 150 * r, part = (y0, k, label, inside) => {
-        let g = arrow(120, y0, 120, y0 - 190, 'text-secondary', 2.5) + arrow(120, y0, 780, y0, 'text-secondary', 2.5) + text(136, y0 - 174, label, 'lbl mono', 'start') + `<line x1="${x(1)}" y1="${y0}" x2="${x(1)}" y2="${y0 - 160}" class="guide"/>`;
+        let g = arrow(120, y0, 120, y0 - 190, 'text-secondary', 2.5) + arrow(120, y0, 780, y0, 'text-secondary', 2.5) + P.yAxisLabel(98, y0 - 95, label) + `<line x1="${x(1)}" y1="${y0}" x2="${x(1)}" y2="${y0 - 160}" class="guide"/>`;
         g += `<path d="${inside ? `M120,${y0 - 150} H${x(1)}` : `M120,${y0} H${x(1)} V${y0 - 150}`} ${sampled(t => [x(1 + 3.3 * t), y0 - 150 / (1 + 3.3 * t) ** k]).replace('M', 'L')}" class="curve" style="stroke:var(--hl)"/>`;
         return g;
       };
       let s = `<rect x="120" y="30" width="150" height="460" style="fill:var(--neutron);opacity:.14"/>` + part(230, 2, 'field strength', false) + part(490, 1, 'potential', true);
-      s += text(x(1), 520, 'R', 'lbl mono') + text(770, 520, 'distance from the center', 'lbl mono', 'end') + text(195, 130, 'zero', 'lbl strong') + text(195, 162, 'inside', 'lbl') + text(195, 420, 'constant', 'lbl strong') + text(195, 452, 'inside', 'lbl');
-      return svg('0 0 820 540', s, 'Two graphs for a charged conducting sphere of radius R. The field strength is zero inside, jumps to its greatest value at the surface and falls as one over r squared outside. The potential is constant inside, equal to its value at the surface, and falls as one over r outside');
+      s += text(x(1), 520, 'R', 'lbl mono') + text(450, 558, 'distance from the center', 'lbl mono') + text(195, 130, 'zero', 'lbl strong') + text(195, 162, 'inside', 'lbl') + text(195, 420, 'constant', 'lbl strong') + text(195, 452, 'inside', 'lbl');
+      return svg('0 0 820 570', s, 'Two graphs for a charged conducting sphere of radius R. The field strength is zero inside, jumps to its greatest value at the surface and falls as one over r squared outside. The potential is constant inside, equal to its value at the surface, and falls as one over r outside');
     }
   };
 });

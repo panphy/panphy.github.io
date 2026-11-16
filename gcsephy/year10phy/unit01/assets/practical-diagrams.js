@@ -92,11 +92,11 @@
       ${grid}
       <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="${INK}" stroke-width="2.2"/><line x1="${L}" y1="${B}" x2="${L}" y2="${T}" stroke="${INK}" stroke-width="2.2"/>
       ${ticks}
-      ${t(L, T - 12, "resistance / Ω", { size: 11, anchor: "start" })}${t((L + R) / 2, B + 32, "length / cm", { size: 11 })}
+      ${t(L - 38, (T + B) / 2, "resistance / Ω", { size: 11 }).replace("<text ", `<text transform="rotate(-90 ${L - 38} ${(T + B) / 2})" `)}${t((L + R) / 2, B + 32, "length / cm", { size: 11 })}
       <line x1="${X(0)}" y1="${Y(0)}" x2="${X(100)}" y2="${Y(5.5)}" stroke="${RED}" stroke-width="2.4"/>
       ${pts.map(cross).join("")}
       <circle cx="${X(50)}" cy="${Y(3.4)}" r="11" fill="none" stroke="${BLUE}" stroke-width="2"/>
-      ${tag(1, L - 38, T - 16)}${tag(2, L - 44, Y(3) - 12)}${tag(3, X(30) - 16, Y(1.66) - 10)}${tag(4, X(50) - 22, Y(3.4) - 12)}${tag(5, X(90) + 12, Y(4.94) + 22)}${tag(6, R - 44, T + 6)}
+      ${tag(1, L - 42, (T + B) / 2 - 58)}${tag(2, L - 20, T - 16)}${tag(3, X(30) - 16, Y(1.66) - 10)}${tag(4, X(50) - 22, Y(3.4) - 12)}${tag(5, X(90) + 12, Y(4.94) + 22)}${tag(6, R - 44, T + 6)}
       ${note(1, 350, 40, ["Label both axes with", "quantity / unit"])}
       ${note(2, 350, 82, ["Even scales: equal", "steps, easy numbers"])}
       ${note(3, 350, 124, ["Plot small, neat", "crosses (×)"])}

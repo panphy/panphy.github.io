@@ -12,7 +12,7 @@ window.DeckFigures.add(P => {
   const moving = (x0, x1, y, amp, loops, color, T, fn = Math.sin, width = 5) => `<path style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round" d="${shape(x0, x1, y, amp, loops, 1, fn)}">${anim('d', frames(a => shape(x0, x1, y, amp, loops, Math.cos(a), fn)), T)}</path>`;
   const envelope = (x0, x1, y, amp, loops, fn = Math.sin) => line(shape(x0, x1, y, amp, loops, 1, fn), 'brand-primary', 2, 'stroke-dasharray="8 7" opacity=".6"') + line(shape(x0, x1, y, amp, loops, -1, fn), 'brand-primary', 2, 'stroke-dasharray="8 7" opacity=".6"');
   const post = (x, y) => `<rect x="${x - 7}" y="${y - 44}" width="14" height="88" rx="4" style="fill:var(--brand-accent-strong)"/>`;
-  const axes = (x0, y0, x1, y1, xl, yl) => arrow(x0, y0, x0, y1, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(x1 - 6, y0 + 40, xl, 'lbl mono', 'end') + text(x0 + 16, y1 + 14, yl, 'lbl mono', 'start');
+  const axes = P.axes;
   // The steady amplitude of a driven oscillator, for a driving frequency r times the natural frequency.
   const response = (r, z) => 1 / Math.sqrt((1 - r * r) ** 2 + (2 * z * r) ** 2);
 
@@ -85,10 +85,10 @@ window.DeckFigures.add(P => {
       const x0 = 120, y0 = 250, x1 = 770, amp = 180, tmax = 8;
       const light = t => Math.exp(-0.35 * t) * Math.cos(TAU * t / 1.6), critical = t => (1 + 3.2 * t) * Math.exp(-3.2 * t), heavy = t => 1.07 * Math.exp(-0.42 * t) - 0.07 * Math.exp(-6 * t);
       const curve = (fn, color) => line(sampled(u => [x0 + (x1 - x0) * u, y0 - amp * fn(u * tmax)], 200), color, 5);
-      let s = arrow(x0, 460, x0, 40, 'text-secondary', 2.5) + arrow(x0, y0, x1 + 30, y0, 'text-secondary', 2.5) + text(x0 + 16, 54, 'displacement', 'lbl mono', 'start') + text(x1 + 30, y0 + 40, 'time', 'lbl mono', 'end');
+      let s = arrow(x0, 460, x0, 40, 'text-secondary', 2.5) + arrow(x0, y0, x1 + 30, y0, 'text-secondary', 2.5) + P.yAxisLabel(x0 - 22, 250, 'displacement') + text(f((x0 + x1 + 30) / 2), 500, 'time', 'lbl mono');
       s += line(sampled(u => [x0 + (x1 - x0) * u, y0 - amp * Math.exp(-0.35 * u * tmax)], 60), 'brand-primary', 2, 'stroke-dasharray="8 7" opacity=".6"') + curve(light, 'brand-primary') + curve(heavy, 'brand-accent-strong') + curve(critical, 'brand-accent');
       s += text(330, 430, 'light: oscillates, dying away', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(330, 150, 'heavy: creeps back slowly', 'lbl strong halo', 'start') + text(400, 90, 'critical: quickest, no overshoot', 'lbl strong halo', 'start', 'style="fill:var(--brand-accent)"');
-      return svg('60 20 780 460', s, 'Graphs of displacement against time for an oscillator released from rest with three amounts of damping. With light damping it oscillates with an amplitude that dies away gradually. With critical damping it returns to equilibrium in the shortest time without oscillating. With heavy damping it also does not oscillate, but takes much longer to return');
+      return svg('60 20 780 500', s, 'Graphs of displacement against time for an oscillator released from rest with three amounts of damping. With light damping it oscillates with an amplitude that dies away gradually. With critical damping it returns to equilibrium in the shortest time without oscillating. With heavy damping it also does not oscillate, but takes much longer to return');
     }
   };
 });

@@ -275,7 +275,10 @@
 
   // ---- A.1: kinematics helpers ----
   // Graph axes from the origin (x0, y0), a plotted line in a palette color, and the moving body.
-  const axes = (x0, y0, x1, y1, xLabel, yLabel) => arrow(x0, y0, x0, y1, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(x1 - 6, y0 + 36, xLabel, 'lbl mono', 'end') + text(x0 + 16, y1 + 14, yLabel, 'lbl mono', 'start');
+  // Axis labels sit at the middle of each axis: the x label below it, the y label beside it reading upwards.
+  // xGap and yGap move them clear of any values marked along the axes.
+  const yAxisLabel = (x, y, label, cls = 'lbl mono') => label ? text(f(x), f(y), label, cls, 'middle', `transform="rotate(-90 ${f(x)} ${f(y)})"`) : '';
+  const axes = (x0, y0, x1, y1, xLabel, yLabel, { xGap = 46, yGap = 22 } = {}) => arrow(x0, y0, x0, y1, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + (xLabel ? text(f((x0 + x1) / 2), y0 + xGap, xLabel, 'lbl mono') : '') + yAxisLabel(x0 - yGap, (y0 + y1) / 2, yLabel);
   const plot = (d, color = 'brand-primary', extra = '') => `<path d="${d}" class="curve" style="stroke:var(--${color})" ${extra}/>`;
   const shade = (d, color = 'brand-primary', opacity = 0.16) => `<path d="${d}" style="fill:var(--${color});opacity:${opacity}"/>`;
   const body = (x, y, r = 15) => ball(x, y, r, 'brand-accent-strong', '');
@@ -632,13 +635,12 @@
     // A 100 m sprint: at rest during the reaction time, uniform acceleration to 10 m/s, then steady.
     'a1-sprint': () => {
       const X = t => 110 + t * 46, Y = v => 400 - v * 27;
-      let s = shade(`M${X(0.2)},400 L${X(4.2)},${Y(10)} L${X(12.2)},${Y(10)} L${X(12.2)},400 Z`) + axes(110, 400, 696, 60, '', 'v / m s⁻¹');
+      let s = shade(`M${X(0.2)},400 L${X(4.2)},${Y(10)} L${X(12.2)},${Y(10)} L${X(12.2)},400 Z`) + axes(110, 400, 696, 60, 't / s', 'v / m s⁻¹', { xGap: 80, yGap: 72 });
       s += plot(`M${X(0)},398 L${X(0.2)},398 L${X(4.2)},${Y(10)} L${X(12.2)},${Y(10)}`);
       s += `<path d="M${X(4.2)},${Y(10)} V400 M${X(12.2)},${Y(10)} V400" class="guide"/>`;
       [[X(4.2), '4.2'], [X(12.2), 'T']].forEach(([x, label]) => { s += `<line x1="${x}" y1="400" x2="${x}" y2="412" class="tick"/>` + text(x, 438, label, 'lbl mono'); });
       s += `<line x1="98" y1="${Y(10)}" x2="110" y2="${Y(10)}" class="tick"/>` + text(88, Y(10) + 8, '10', 'lbl mono', 'end') + text(96, 438, '0', 'lbl mono', 'end');
-      s += text(706, 408, 't / s', 'lbl mono', 'start');
-      return svg('0 0 790 460', s, 'Velocity against time for a 100 meter sprint: zero for the first 0.2 seconds, rising steadily to 10 meters per second at 4.2 seconds, then constant until the finish at time T');
+      return svg('0 0 790 500', s, 'Velocity against time for a 100 meter sprint: zero for the first 0.2 seconds, rising steadily to 10 meters per second at 4.2 seconds, then constant until the finish at time T');
     },
 
     // Galileo's ramps: a ball released at height h rises to h on any second ramp; on a flat one it never stops.
@@ -680,12 +682,11 @@
     // Used twice: as the general graph, and with data-numbers as the worked example's journey.
     'vt-graph': el => {
       const numbers = 'numbers' in el.dataset;
-      let s = shade('M110,400 L286,130 L550,130 L682,400 Z') + axes(110, 400, 760, 40, numbers ? '' : 'time', numbers ? 'v / m s⁻¹' : 'velocity');
+      let s = shade('M110,400 L286,130 L550,130 L682,400 Z') + axes(110, 400, 760, 40, numbers ? 't / s' : 'time', numbers ? 'v / m s⁻¹' : 'velocity', numbers ? { xGap: 80, yGap: 72 } : {});
       s += plot('M110,400 L286,130 L550,130 L682,400');
       if (numbers) {
         [[286, '4'], [550, '10'], [682, '13']].forEach(([x, label]) => { s += `<line x1="${x}" y1="400" x2="${x}" y2="412" class="tick"/>` + text(x, 438, label, 'lbl mono'); });
         s += `<line x1="98" y1="130" x2="110" y2="130" class="tick"/>` + text(88, 138, '12', 'lbl mono', 'end') + text(96, 438, '0', 'lbl mono', 'end');
-        s += text(772, 408, 't / s', 'lbl mono', 'start');
         s += `<path d="M286,130 V400 M550,130 V400" class="guide"/>`;
         // The areas are part of the worked answer, so they appear on the last click.
         s += `<g class="step">${text(226, 340, '24 m', 'lbl strong') + text(418, 280, '72 m', 'lbl strong') + text(594, 340, '18 m', 'lbl strong')}</g>`;
@@ -694,7 +695,7 @@
         s += text(400, 335, 'area = displacement', 'lbl strong') + text(418, 112, 'constant velocity', 'lbl small');
         s += text(636, 226, 'slowing', 'lbl small', 'start') + text(636, 250, 'down', 'lbl small', 'start');
       }
-      return svg(numbers ? '0 0 850 460' : '0 0 800 460', s, numbers ? 'Velocity against time: rising from 0 to 12 meters per second in 4 seconds, steady until 10 seconds, then falling to zero at 13 seconds; the areas are 24, 72 and 18 meters' : 'Velocity against time: the gradient is the acceleration and the area under the graph is the displacement');
+      return svg(numbers ? '0 0 800 500' : '0 0 800 460', s, numbers ? 'Velocity against time: rising from 0 to 12 meters per second in 4 seconds, steady until 10 seconds, then falling to zero at 13 seconds; the areas are 24, 72 and 18 meters' : 'Velocity against time: the gradient is the acceleration and the area under the graph is the displacement');
     },
 
     'three-graphs': () => {
@@ -722,11 +723,11 @@
 
     'suvat-area': () => {
       let s = shade('M110,300 H640 V400 H110 Z', 'brand-accent-strong', 0.2) + shade('M110,300 L640,110 V300 Z', 'brand-accent', 0.34);
-      s += `<path d="M110,110 H640 M640,110 V400" class="guide"/>` + axes(110, 400, 760, 40, 'time', 'velocity') + plot('M110,300 L640,110');
+      s += `<path d="M110,110 H640 M640,110 V400" class="guide"/>` + axes(110, 400, 760, 40, 'time', 'velocity', { xGap: 76, yGap: 52 }) + plot('M110,300 L640,110');
       s += text(92, 310, 'u', 'lbl display', 'end') + text(92, 120, 'v', 'lbl display', 'end') + text(640, 438, 't', 'lbl display');
       s += text(375, 362, 'area = ut', 'lbl strong') + text(470, 262, 'area = ½ × t × at', 'lbl strong');
       s += both(672, 296, 672, 114, 'text-secondary', 2.5) + text(688, 200, 'v − u', 'lbl mono', 'start') + text(688, 228, '= at', 'lbl mono', 'start');
-      return svg('0 0 860 460', s, 'Velocity against time for uniform acceleration from u to v in time t: the area is a rectangle u t plus a triangle of half t times a t');
+      return svg('0 0 860 500', s, 'Velocity against time for uniform acceleration from u to v in time t: the area is a rectangle u t plus a triangle of half t times a t');
     },
 
     'free-fall': () => {
@@ -743,13 +744,13 @@
 
     'throw-up': () => {
       let s = shade('M110,70 L390,230 H110 Z') + shade('M390,230 L670,390 V230 Z', 'brand-accent', 0.3);
-      s += arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 230, 760, 230, 'text-secondary', 2.5) + text(754, 266, 'time', 'lbl mono', 'end') + text(126, 44, 'velocity', 'lbl mono', 'start');
+      s += arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 230, 760, 230, 'text-secondary', 2.5) + text(435, 476, 'time', 'lbl mono') + yAxisLabel(50, 230, 'velocity');
       s += `<path d="M670,230 V390" class="guide"/>` + plot('M110,70 L670,390');
       s += text(94, 78, '+u', 'lbl display', 'end') + text(684, 398, '−u', 'lbl display', 'start') + text(94, 238, '0', 'lbl mono', 'end');
       // The two hints are part of the method, so they appear after the worked example's last step.
       s += `<g class="step"><circle cx="390" cy="230" r="9" style="fill:var(--brand-accent-strong)"/>${text(404, 208, 'top: v = 0', 'lbl strong', 'start') + text(440, 110, 'gradient = −g all the way', 'lbl', 'start')}</g>`;
       s += text(122, 212, 'going up', 'lbl small', 'start') + text(660, 262, 'coming down', 'lbl small', 'end');
-      return svg('0 0 800 460', s, 'Velocity against time for a ball thrown straight up: a straight line of gradient minus g from plus u, through zero at the top, to minus u; the areas above and below the time axis are equal');
+      return svg('0 0 800 490', s, 'Velocity against time for a ball thrown straight up: a straight line of gradient minus g from plus u, through zero at the top, to minus u; the areas above and below the time axis are equal');
     },
 
     'drop-launch': () => {
@@ -890,7 +891,7 @@
     },
 
     'friction-graph': () => {
-      let s = axes(110, 400, 760, 40, 'applied force', 'friction') + `<line x1="110" y1="140" x2="370" y2="140" class="guide accent"/><line x1="110" y1="178" x2="384" y2="178" class="guide accent"/>`;
+      let s = axes(110, 400, 760, 40, 'applied force', 'friction', { yGap: 80 }) + `<line x1="110" y1="140" x2="370" y2="140" class="guide accent"/><line x1="110" y1="178" x2="384" y2="178" class="guide accent"/>`;
       s += plot('M110,400 L370,140 L384,178 L720,178');
       s += text(98, 144, sub('μ', 's') + sub('F', 'N'), 'lbl mono', 'end') + text(98, 190, sub('μ', 'd') + sub('F', 'N'), 'lbl mono', 'end');
       s += text(384, 128, 'starts to slide', 'lbl small', 'start') + text(560, 160, 'dynamic: constant', 'lbl strong');
@@ -947,7 +948,7 @@
       };
       // Speed against time for the same fall: 5 s across the time axis, time constant 0.9 s, as in deck.css.
       const curve = plot(sampled(t => [460 + 340 * t, 440 - 190 * (1 - Math.exp(-5 * t / 0.9))], 80));
-      const graph = axes(460, 440, 836, 170, '', '') + text(830, 478, 'time', 'lbl', 'end') + text(476, 184, 'velocity', 'lbl', 'start') + `<line x1="460" y1="250" x2="800" y2="250" class="guide accent"/>` + text(800, 230, 'terminal velocity', 'lbl', 'end');
+      const graph = axes(460, 440, 836, 170, '', '') + text(648, 480, 'time', 'lbl') + yAxisLabel(436, 305, 'velocity', 'lbl') + `<line x1="460" y1="250" x2="800" y2="250" class="guide accent"/>` + text(800, 230, 'terminal velocity', 'lbl', 'end');
       const marker = `<circle cx="800" cy="250.7" r="8" style="fill:var(--brand-accent-strong)"/>`;
       const play = `<g class="sinker" style="--drop:320px">${sphere(130, true)}</g><g class="trace">${curve}</g><g class="trace-dot" style="--span:340px"><g class="grow-head" style="--len:189.3px">${marker}</g></g><g class="step k2"></g>`;
       return svg('0 0 860 640', `${tank}${graph}<g class="still">${sphere(450, false)}${curve}${marker}</g><g class="mover">${play}</g>`, 'A small sphere falling through a deep column of fluid. Its weight acts downwards; the buoyancy force and the viscous drag act upwards. The drag grows with the speed until buoyancy and drag together equal the weight, and the sphere then falls at a constant terminal velocity. Beside it, a graph of velocity against time rises steeply at first, then curves over and levels off at the terminal velocity');
@@ -956,12 +957,12 @@
     // Also the small picture for part 3, with data-plain.
     'impulse-graph': el => {
       const on = labeled(el), at = t => [200 + 400 * t, 400 - 260 * Math.sin(Math.PI * t) ** 2];
-      let s = shade(`${sampled(at)} Z`) + axes(110, 400, 760, 40, on ? 'time' : '', on ? 'force' : '') + `<path d="M200,400 V270 H600 V400" class="guide accent"/>` + plot(sampled(at));
+      let s = shade(`${sampled(at)} Z`) + axes(110, 400, 760, 40, on ? 'time' : '', on ? 'force' : '', { xGap: 92 }) + `<path d="M200,400 V270 H600 V400" class="guide accent"/>` + plot(sampled(at));
       if (on) {
         s += text(400, 350, 'area = impulse', 'lbl strong halo') + text(616, 264, 'average', 'lbl small', 'start') + text(616, 290, 'force', 'lbl small', 'start') + text(400, 116, 'peak force', 'lbl small');
         s += both(206, 428, 594, 428, 'text-secondary', 2.5) + text(400, 456, 'Δt: time of contact', 'lbl small halo');
       }
-      return svg('0 0 800 460', s, 'Force against time during a collision: the force rises to a peak and falls back to zero. The area under the curve is the impulse, equal to the area of a rectangle whose height is the average force and whose width is the time of contact');
+      return svg(on ? '0 0 800 510' : '0 0 800 460', s, 'Force against time during a collision: the force rises to a peak and falls back to zero. The area under the curve is the impulse, equal to the area of a rectangle whose height is the average force and whose width is the time of contact');
     },
 
     bounce: () => {
@@ -1077,7 +1078,7 @@
 
     'emax-graph': () => {
       let s = arrow(110, 440, 110, 40, 'text-secondary', 2.5) + arrow(110, 300, 720, 300, 'text-secondary', 2.5);
-      s += text(700, 336, 'frequency f', 'lbl mono', 'end') + text(126, 52, 'E<tspan dy="6" font-size="70%">max</tspan>', 'lbl mono', 'start');
+      s += text(415, 476, 'frequency f', 'lbl mono') + text(96, 236, 'E<tspan dy="6" font-size="70%">max</tspan>', 'lbl mono', 'end');
       s += `<line x1="110" y1="420" x2="300" y2="300" class="guide"/><path d="M300,300 L660,72" class="curve" style="stroke:var(--brand-primary)"/>`;
       s += `<path d="M470,300 L700,154" class="curve" style="stroke:var(--text-secondary);stroke-width:3;stroke-dasharray:10 8"/>`;
       s += `<circle cx="300" cy="300" r="8" style="fill:var(--hl)"/>` + text(300, 344, 'f₀', 'lbl display', 'middle', 'style="fill:var(--hl)"') + text(300, 384, 'threshold', 'lbl mono small');
@@ -1085,7 +1086,7 @@
       s += text(470, 150, 'gradient = h', 'lbl strong', 'end');
       s += text(596, 262, 'another metal:', 'lbl small', 'start') + text(596, 288, 'same gradient', 'lbl small', 'start');
       s += text(205, 280, 'no emission', 'lbl italic small');
-      return svg('0 0 800 460', s, 'Graph of maximum kinetic energy against frequency: a straight line of gradient h that meets the frequency axis at the threshold frequency and, extended back, the energy axis at minus the work function');
+      return svg('0 0 800 490', s, 'Graph of maximum kinetic energy against frequency: a straight line of gradient h that meets the frequency axis at the threshold frequency and, extended back, the energy axis at minus the work function');
     },
 
     stopping: () => {
@@ -1185,7 +1186,7 @@
 
   // A deck's own figures.js adds its diagrams with DeckFigures.add(parts => ({ name: el => svg }));
   // the shared drawing helpers arrive as parts. Prefix the names with the topic (d1-…).
-  const PARTS = { svg, spectrumColor, ball, cluster, shadow, arrow, fline, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU };
+  const PARTS = { svg, spectrumColor, ball, cluster, shadow, arrow, fline, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, yAxisLabel, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU };
   const add = make => Object.assign(FIGURES, make(PARTS));
 
   window.DeckFigures = { render, orbitPoint, add };

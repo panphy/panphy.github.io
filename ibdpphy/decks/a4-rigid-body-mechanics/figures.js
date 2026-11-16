@@ -50,9 +50,9 @@ window.DeckFigures.add(P => {
 
     // Angular velocity against time: the gradient is the angular acceleration and the area is the angular displacement.
     'a4-wt': () => {
-      let s = P.shade('M130,420 L130,300 L690,110 L690,420 Z', 'hl', 0.18) + P.axes(130, 420, 790, 50, 'time', 'angular velocity ω') + line('M130,300 L690,110', 'hl', 6);
+      let s = P.shade('M130,420 L130,300 L690,110 L690,420 Z', 'hl', 0.18) + P.axes(130, 420, 790, 50, 'time', 'angular velocity ω', { xGap: 76, yGap: 60 }) + line('M130,300 L690,110', 'hl', 6);
       s += `<path d="M690,110 V420 M130,110 H690" class="guide"/>` + text(116, 308, sub('ω', 'i'), 'lbl mono', 'end') + text(116, 118, sub('ω', 'f'), 'lbl mono', 'end') + text(690, 456, 't', 'lbl mono') + text(410, 330, 'area = Δθ', 'lbl strong halo') + text(330, 190, 'gradient = α', 'lbl strong halo', 'end');
-      return svg('40 30 780 450', s, 'A graph of angular velocity against time for a constant angular acceleration: a straight line rising from the initial to the final angular velocity. Its gradient is the angular acceleration, and the area under it is the angular displacement');
+      return svg('40 30 780 490', s, 'A graph of angular velocity against time for a constant angular acceleration: a straight line rising from the initial to the final angular velocity. Its gradient is the angular acceleration, and the area under it is the angular displacement');
     },
 
     // The same mass, near the axis and far from it. Also drawn plain.

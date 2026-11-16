@@ -61,7 +61,7 @@ window.DeckFigures.add(P => {
       // in kelvin, and each dashed guide appears with the stage that first reaches its temperature.
       const on = labeled(el), go = animated(el), pts = [[120, 430], [156, 340], [276, 340], [426, 150], [756, 150], [788, 70]];
       let s = arrow(120, 470, 120, 40, 'text-secondary', 2.5) + arrow(120, 470, 830, 470, 'text-secondary', 2.5);
-      if (on) s += text(136, 54, 'temperature / K', 'lbl mono', 'start') + text(824, 506, 'energy supplied', 'lbl mono', 'end');
+      if (on) s += P.yAxisLabel(48, 255, 'temperature / K') + text(475, 512, 'energy supplied', 'lbl mono');
       const guide = (x, y, value) => on ? `<line x1="120" y1="${y}" x2="${x}" y2="${y}" class="guide"/>` + text(106, y + 10, value, 'lbl mono', 'end') : '';
       const seg = k => line(through(pts.slice(k, k + 2)), k % 2 ? 'brand-accent' : 'brand-primary', k % 2 ? 8 : 6);
       const labels = on ? [text(168, 420, 'ice', 'lbl halo', 'start'), text(216, 320, 'melting', 'lbl strong halo'), text(372, 270, 'water', 'lbl halo', 'start'), text(591, 130, 'boiling', 'lbl strong halo') + text(591, 194, 'temperature constant', 'lbl small'), text(770, 130, 'steam', 'lbl halo', 'start')] : ['', '', '', '', ''];
@@ -143,7 +143,7 @@ window.DeckFigures.add(P => {
       const X = l => 110 + 230 * l, Y = v => 440 - 380 * v / top;
       let s = `<rect x="${X(0.4)}" y="12" width="${X(0.7) - X(0.4)}" height="428" style="fill:var(--sand);opacity:.28"/>` + arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 440, 840, 440, 'text-secondary', 2.5);
       temps.forEach(([T, color]) => { s += line(sampled(t => { const l = 0.08 + 2.95 * t; return [X(l), Y(planck(l, T))]; }, 140), color); if (on) { const l = 2898 / T; s += `<line x1="${f(X(l))}" y1="${f(Y(planck(l, T)))}" x2="${f(X(l))}" y2="440" class="guide"/>` + text(f(X(l)) + 30, f(Y(planck(l, T))) + 26, `${T} K`, 'lbl mono strong halo', 'start'); } });
-      if (on) s += text(126, 44, 'intensity', 'lbl mono', 'start') + text(834, 530, 'wavelength / nm', 'lbl mono', 'end') + [0.5, 1, 1.5, 2, 2.5, 3].map(l => `<line x1="${X(l)}" y1="440" x2="${X(l)}" y2="450" class="tick"/>` + text(X(l), 478, l * 1000, 'lbl mono')).join('') + text(X(0.55), 0, 'visible', 'lbl small') + text(700, 250, 'hotter: more at', 'lbl halo') + text(700, 284, 'every wavelength,', 'lbl halo') + text(700, 318, 'a shorter peak', 'lbl halo');
+      if (on) s += P.yAxisLabel(88, 235, 'intensity') + text(475, 522, 'wavelength / nm', 'lbl mono') + [0.5, 1, 1.5, 2, 2.5, 3].map(l => `<line x1="${X(l)}" y1="440" x2="${X(l)}" y2="450" class="tick"/>` + text(X(l), 478, l * 1000, 'lbl mono')).join('') + text(X(0.55), 0, 'visible', 'lbl small') + text(700, 250, 'hotter: more at', 'lbl halo') + text(700, 284, 'every wavelength,', 'lbl halo') + text(700, 318, 'a shorter peak', 'lbl halo');
       return svg(on ? '40 -30 820 580' : '90 30 760 420', s, 'Black-body spectra at 4000, 5000 and 6000 kelvin: graphs of intensity against wavelength. Each rises steeply to a peak and falls away slowly. The hotter the body, the higher the whole curve and the shorter the wavelength of its peak: about 720 nanometers at 4000 kelvin, 580 at 5000 and 480 at 6000');
     }
   };

@@ -6,7 +6,7 @@ window.DeckFigures.add(P => {
   const { svg, arrow, text, sub, through, sampled, labeled, seeded, track, anim, twoState, PLAY, f } = P;
   // Pressure–volume axes, in arbitrary units: X(V) and Y(P) place a point.
   const X = v => 110 + 190 * v, Y = p => 420 - 60 * p;
-  const pvAxes = on => arrow(110, 420, 110, 30, 'text-secondary', 2.5) + arrow(110, 420, 790, 420, 'text-secondary', 2.5) + (on ? text(126, 46, 'pressure', 'lbl mono', 'start') + text(784, 492, 'volume', 'lbl mono', 'end') : '');
+  const pvAxes = on => arrow(110, 420, 110, 30, 'text-secondary', 2.5) + arrow(110, 420, 790, 420, 'text-secondary', 2.5) + (on ? P.yAxisLabel(88, 225, 'pressure') + text(450, 492, 'volume', 'lbl mono') : '');
   const path = (points, color, width = 5) => `<path d="${through(points)}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round"/>`;
   // n points along PV^gamma = constant from volume v1 to v2, starting at pressure p1.
   const curve = (v1, p1, v2, gamma, n = 40) => Array.from({ length: n + 1 }, (_, i) => { const v = v1 + (v2 - v1) * i / n; return [X(v), Y(p1 * (v1 / v) ** gamma)]; });
@@ -86,11 +86,11 @@ window.DeckFigures.add(P => {
       const X = v => 110 + 150 * v, Y = p => 420 - 100 * p;
       const point = (v, p, label, dx = 14, dy = -12) => `<circle cx="${X(v)}" cy="${Y(p)}" r="8" style="fill:var(--text-main)"/>` + text(X(v) + dx, Y(p) + dy, label, 'lbl display', dx < 0 ? 'end' : 'start');
       const a = [1, 3], b = [4, 3], c = [4, 1], d = [1, 1], corners = [a, b, c, d].map(([v, p]) => [X(v), Y(p)]);
-      let s = `<path d="${through(corners)} Z" style="fill:var(--brand-primary);opacity:.2"/>` + pvAxes(false) + text(126, 46, 'P / 10⁵ Pa', 'lbl mono', 'start') + text(784, 492, 'V / 10⁻³ m³', 'lbl mono', 'end') + text(98, 450, '0', 'lbl mono', 'end') + `<path d="M110,${Y(3)} H${X(1)} M110,${Y(1)} H${X(1)} M${X(1)},${Y(1)} V420 M${X(4)},${Y(1)} V420" class="guide"/>`;
+      let s = `<path d="${through(corners)} Z" style="fill:var(--brand-primary);opacity:.2"/>` + pvAxes(false) + P.yAxisLabel(44, 225, 'P / 10⁵ Pa') + text(450, 492, 'V / 10⁻³ m³', 'lbl mono') + text(98, 450, '0', 'lbl mono', 'end') + `<path d="M110,${Y(3)} H${X(1)} M110,${Y(1)} H${X(1)} M${X(1)},${Y(1)} V420 M${X(4)},${Y(1)} V420" class="guide"/>`;
       [[a, b], [b, c], [c, d], [d, a]].forEach(([p, q]) => { const seg = [[X(p[0]), Y(p[1])], [(X(p[0]) + X(q[0])) / 2, (Y(p[1]) + Y(q[1])) / 2], [X(q[0]), Y(q[1])]]; s += path(seg, 'brand-primary') + head(seg, 0.6, 'brand-primary'); });
       s += point(1, 3, 'A', -14, -12) + point(4, 3, 'B') + point(4, 1, 'C', 14, 36) + point(1, 1, 'D', -14, 36);
       s += text(98, Y(3) + 9, '3.0', 'lbl mono', 'end') + text(98, Y(1) + 9, '1.0', 'lbl mono', 'end') + text(X(1), 456, '1.0', 'lbl mono') + text(X(4), 456, '4.0', 'lbl mono') + text(X(2.5), Y(2) + 10, 'net work', 'lbl strong');
-      return svg('20 20 800 490', s, 'A pressure–volume diagram of a cycle A B C D round a rectangle, clockwise. The pressure is 3.0 along the top and 1.0 along the bottom, in units of 10 to the 5 pascals; the volume is 1.0 on the left and 4.0 on the right, in units of 10 to the minus 3 cubic meters. The shaded area inside the rectangle is the net work done by the gas in one cycle');
+      return svg('10 20 810 490', s, 'A pressure–volume diagram of a cycle A B C D round a rectangle, clockwise. The pressure is 3.0 along the top and 1.0 along the bottom, in units of 10 to the 5 pascals; the volume is 1.0 on the left and 4.0 on the right, in units of 10 to the minus 3 cubic meters. The shaded area inside the rectangle is the net work done by the gas in one cycle');
     },
 
     // A gas released into the empty half of a box: its atoms never stop moving. Played with →.

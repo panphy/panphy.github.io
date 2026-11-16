@@ -251,8 +251,11 @@
     const w = spec.w || 360;
     const h = spec.h || 250;
     const sketch = !!spec.sketch;
-    const m = sketch ? { l: 22, r: 22, t: 22, b: 22 } : { l: 54, r: 18, t: 16, b: 46 };
     const [xmin, xmax, xstep] = spec.x;
+    // A sketch whose axes cross in the middle (four quadrants) keeps its labels at the arrow tips;
+    // otherwise the labels sit at the middle of each axis, the y label reading upwards.
+    const tips = sketch && xmin < 0;
+    const m = tips ? { l: 22, r: 22, t: 22, b: 22 } : sketch ? { l: 32, r: 22, t: 22, b: 34 } : { l: 54, r: 18, t: 16, b: 46 };
     const [ymin, ymax, ystep] = spec.y;
     const X = (v) => m.l + ((v - xmin) / (xmax - xmin)) * (w - m.l - m.r);
     const Y = (v) => h - m.b - ((v - ymin) / (ymax - ymin)) * (h - m.t - m.b);
@@ -278,6 +281,8 @@
     if (sketch) {
       out += arrowHead(X(xmax) + 6, y0, 1, 0, 9, 4.5);
       out += arrowHead(x0, Y(ymax) - 6, 0, -1, 9, 4.5);
+    }
+    if (tips) {
       // xLabelAbove keeps the label clear of a curve that dips below the axis at the right-hand end.
       out += `<text class="axis-label" x="${X(xmax)}" y="${spec.xLabelAbove ? y0 - 8 : y0 + 18}" text-anchor="end">${spec.xLabel || ""}</text>`;
       out += `<text class="axis-label" x="${x0 + 9}" y="${Y(ymax) + 4}" text-anchor="start">${spec.yLabel || ""}</text>`;
