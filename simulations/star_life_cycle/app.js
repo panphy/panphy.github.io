@@ -326,6 +326,8 @@ const cloud = additivePoints(15000, v => {
     float grain = step(0.82, aSeed.x*0.5 + aSeed.z*0.5);
     vAlpha = uOpacity*mix(0.034, 0.26, grain)*(1. + 0.5*heat)*mix(1., mix(0.8, 1.7, grain), c)*(1. - s)*(1. - gone);
     vec4 mv = modelViewMatrix*vec4(p, 1.);
+    // A cold cloud only scatters a little starlight. It brightens as the collapse heats it, and the disk is denser still.
+    vAlpha *= mix(0.5, 1., smoothstep(0., .6, c))*mix(1., 1.5, smoothstep(.85, 1., c));
     float pointSize = mix(0.5, 0.11, grain)*mix(1., 0.5, c)*(0.5 + aSeed.y)*uPx/-mv.z;
     // Keep point rasterization at least one pixel wide, preserving subpixel coverage in alpha.
     vAlpha *= min(pointSize*pointSize, 1.);
@@ -335,8 +337,8 @@ const cloud = additivePoints(15000, v => {
 
 const OUTFLOW_VERTEX = `
   attribute vec3 aSeed;
-  uniform float uR0, uR1, uFlow, uPhase, uOpacity, uSize, uPx, uThick, uLumpy;
-  uniform vec3 uColA, uColB, uSquash;
+  uniform float uR0, uR1, uFlow, uPhase, uOpacity, uSize, uPx, uThick, uLumpy, uIon;
+  uniform vec3 uColA, uColB, uSquash, uDust;
   varying vec3 vCol; varying float vAlpha;
   void main(){
     float f; float rad; float fade;
@@ -354,8 +356,12 @@ const OUTFLOW_VERTEX = `
     float knot = uFlow > 0.5 ? 1. : step(0.78, aSeed.y);
     fade *= mix(0.16, 1., knot);
     vec3 p = position*rad*uSquash;
-    vCol = mix(uColA, uColB, f);
-    vAlpha = uOpacity*fade;
+    // Gas glows in its own colors only once ultraviolet light has ionized it. The ionization front
+    // moves outward from the star; gas beyond it just scatters a little of the star's light.
+    float front = 1.2 - 1.5*uIon;
+    float lit = smoothstep(front - .15, front + .15, f);
+    vCol = mix(uDust, mix(uColA, uColB, f), lit);
+    vAlpha = uOpacity*fade*mix(.3, 1., lit);
     vec4 mv = modelViewMatrix*vec4(p, 1.);
     float pointSize = uSize*mix(4.2, 1., knot)*(0.5 + aSeed.y)*uPx/-mv.z;
     vAlpha *= min(pointSize*pointSize, 1.);
@@ -365,7 +371,7 @@ const OUTFLOW_VERTEX = `
 const outflowUniforms = (extra = {}) => ({
   uR0: { value: 1 }, uR1: { value: 5 }, uFlow: { value: 1 }, uPhase: { value: 0 }, uOpacity: { value: 0 }, uSize: { value: 0.1 },
   uThick: { value: 0.5 }, uLumpy: { value: 0 }, uColA: { value: new THREE.Color(1, 1, 1) }, uColB: { value: new THREE.Color(1, 1, 1) },
-  uSquash: { value: new THREE.Vector3(1, 1, 1) }, ...extra
+  uSquash: { value: new THREE.Vector3(1, 1, 1) }, uIon: { value: 1 }, uDust: { value: new THREE.Color(1, 1, 1) }, ...extra
 });
 const wind = additivePoints(2200, randomDirection, OUTFLOW_VERTEX, outflowUniforms());
 const shell = additivePoints(9000, randomDirection, OUTFLOW_VERTEX, outflowUniforms({ uFlow: { value: 0 } }));
@@ -397,11 +403,33 @@ const starMaterial = new THREE.ShaderMaterial({
     varying vec3 vObj; varying vec3 vNormal; varying vec3 vView;
     uniform vec3 uColor; uniform float uTime, uSpin, uCells, uContrast, uSpots, uGain, uCut, uOpacity;
     ${NOISE_GLSL}
+    vec3 hash3(vec3 p){ p = fract(p*vec3(.1031,.1030,.0973)); p += dot(p,p.yxz+33.33); return fract((p.xxy+p.yxx)*p.zyx); }
+    // Convection cells: distance to the nearest cell wall (0 in the lanes between cells). The cell centers
+    // wander, so cells grow, shrink and are replaced, as granules do.
+    float granules(vec3 p, float t, out float center){
+      vec3 i = floor(p), f = fract(p); float d1 = 8., d2 = 8.;
+      for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) for (int z = -1; z <= 1; z++) {
+        vec3 g = vec3(float(x), float(y), float(z));
+        vec3 h = hash3(i + g);
+        vec3 r = g + .5 + .42*sin(t*(.6 + .8*h.yzx) + 6.283*h) - f;
+        float d = dot(r, r);
+        if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) { d2 = d; }
+      }
+      center = sqrt(d1);
+      return sqrt(d2) - center;
+    }
     void main(){
       if (uCut > .5 && vObj.x > 0. && vObj.y > 0. && vObj.z > 0.) discard;
       float cs = cos(uSpin), sn = sin(uSpin);
       vec3 p = vec3(cs*vObj.x + sn*vObj.z, vObj.y, -sn*vObj.x + cs*vObj.z);
-      float cells = 0.62*fbm(p*uCells + vec3(0., uTime*0.11, uTime*0.07)) + 0.38*fbm(p*uCells*2.6 - uTime*0.16);
+      // Hot gas rises in the bright middle of each cell and sinks in the darker lanes around it.
+      // The cell pattern is bent by slower, larger swirls so that no two cells have the same outline.
+      vec3 q = p*uCells*0.8;
+      vec3 swirl = vec3(fbm(q*1.3 + vec3(0., uTime*0.09, 0.)), fbm(q*1.3 + 5.2), fbm(q*1.3 + vec3(9.1, 0., uTime*0.07))) - .5;
+      float center;
+      float wall = granules(q + 1.1*swirl, uTime*0.5, center);
+      float cell = smoothstep(-0.06, 0.5, wall)*(1.1 - 0.45*center);
+      float cells = 0.42*cell + 0.58*fbm(p*uCells*0.6 + vec3(0., uTime*0.11, uTime*0.07)) + 0.1;
       float bright = 1. + uContrast*2.4*(cells - 0.5);
       float spots = uSpots*smoothstep(0.66, 0.74, fbm(p*1.7 + 11.));
       float mu = max(dot(normalize(vNormal), normalize(vView)), 0.);
@@ -480,7 +508,7 @@ const makeSprite = stops => {
   return sprite;
 };
 // The halo is hollow so that it hugs the limb without washing out the surface or the cutaway.
-const halo = makeSprite([[0, 0], [0.3, 0], [0.335, 0.8], [0.4, 0.42], [0.55, 0.14], [0.8, 0.03], [1, 0]]);
+const halo = makeSprite([[0, 0], [0.29, 0], [0.335, 0.55], [0.38, 0.4], [0.46, 0.22], [0.6, 0.09], [0.8, 0.025], [1, 0]]);
 const flash = makeSprite([[0, 1], [0.12, 0.7], [0.3, 0.28], [0.6, 0.07], [1, 0]]);
 
 // Pulsar: a dipole field tilted away from the spin axis, with a beam from each magnetic pole.
@@ -494,8 +522,9 @@ scene.add(pulsar);
 const beamGeometry = new THREE.ConeGeometry(2.6, 34, 32, 1, true).rotateX(Math.PI).translate(0, 17, 0);
 const beamMaterial = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, uniforms: { uOpacity: { value: 1 } },
-  vertexShader: 'varying float vY; void main(){ vY = abs(position.y)/34.; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-  fragmentShader: 'varying float vY; uniform float uOpacity; void main(){ float a = pow(1. - vY, 1.6)*0.42*uOpacity; gl_FragColor = vec4(vec3(.55,.9,1.), a); }'
+  vertexShader: 'varying float vY; varying vec3 vN; varying vec3 vV; void main(){ vY = abs(position.y)/34.; vec4 mv = modelViewMatrix*vec4(position,1.); vN = normalMatrix*normal; vV = -mv.xyz; gl_Position = projectionMatrix*mv; }',
+  // The beam has no surface, so it fades toward its outline instead of ending at a sharp edge.
+  fragmentShader: 'varying float vY; varying vec3 vN; varying vec3 vV; uniform float uOpacity; void main(){ float face = abs(dot(normalize(vN), normalize(vV))); float a = pow(1. - vY, 1.6)*0.62*uOpacity*face*face; gl_FragColor = vec4(vec3(.55,.9,1.), a); }'
 });
 const beamUp = new THREE.Mesh(beamGeometry, beamMaterial);
 const beamDown = new THREE.Mesh(beamGeometry, beamMaterial);
@@ -523,7 +552,7 @@ const view = {
   // Eased copies of the stage targets, so that nothing snaps when a stage changes.
   star: 0, cells: 9, contrast: 0.2, spots: 0, flow: 1, spinRate: 0.15, pulse: 0, gain: 1, halo: 0,
   cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, pulsar: 0,
-  shell: 0, shellRadius: 3, shellKind: 'pn', flash: 0, flashScale: 5, flashColor: new THREE.Color(1, 1, 1),
+  shell: 0, shellRadius: 3, shellKind: 'pn', ion: 1, flash: 0, flashScale: 5, flashColor: new THREE.Color(1, 1, 1),
   layerRad: [], layerCol: [], layerCount: 0
 };
 const targetColor = new THREE.Color();
@@ -566,11 +595,10 @@ function stageTargets(st) {
   const mainWind = M > 15 ? 0.3 : 0;
   const v = {
     star: 0, radius: st.R ? visualRadius(st.R) : 1, surface: main, spinRate: 0.15, pulse: 0,
-    cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, shell: null, flash: null, pulsar: 0, hole: 0, disk: 0, halo: 0.7
+    cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, shell: null, ion: 1, flash: null, pulsar: 0, hole: 0, disk: 0, halo: 0.7
   };
   const debris = { radius: 10 + 40 * p, opacity: 0.55 * (1 - smoothstep(0, 0.5, p)), kind: 'sn' };
   const afterglow = { scale: 22, opacity: 0.19 * (1 - smoothstep(0, 0.15, p)), color: [1, 0.66, 0.4] };
-  const ignition = at => ({ scale: 7, opacity: 0.7 * Math.exp(-(((p - at) / 0.03) ** 2)), color: [1, 0.95, 0.8] });
 
   if (id === 'cloud') {
     v.cloud = 1;
@@ -586,14 +614,12 @@ function stageTargets(st) {
     v.collapse = 0.85 + 0.15 * smoothstep(0, 0.25, p);
     v.clear = p * 1.05;
     v.jets = smoothstep(0, 0.08, p) * (1 - smoothstep(0.5, 0.78, p));
-    // The glow of the collapsing core fades; hydrogen fusion switches on at the very end.
-    const glow = { scale: 5.5, opacity: 0.4 * (1 - smoothstep(0, 0.2, p)), color: [1, 0.3, 0.12] };
-    const spark = ignition(1);
-    v.flash = spark.opacity > glow.opacity ? spark : glow;
+    // The glow of the collapsing core fades. Nothing marks the start of hydrogen fusion from outside:
+    // it takes over gradually from the heat of contraction.
+    v.flash = { scale: 5.5, opacity: 0.4 * (1 - smoothstep(0, 0.2, p)), color: [1, 0.3, 0.12] };
   } else if (id === 'ms') {
     v.star = 1;
     v.wind = mainWind;
-    v.flash = ignition(0);
   } else if (id === 'blue') {
     v.star = 1;
   } else if (id === 'rgb') {
@@ -620,6 +646,8 @@ function stageTargets(st) {
     v.spinRate = 0.05;
     v.wind = 1 - smoothstep(0, 0.3, p);
     v.shell = { radius: 2.6 + 4.2 * p, opacity: smoothstep(0, 0.12, p) * (1 - 0.4 * p), kind: 'pn' };
+    // The shell lights up only when the bare core is hot enough (about 25 000 K) for its ultraviolet light to ionize the gas.
+    v.ion = smoothstep(Math.log(18000), Math.log(60000), Math.log(st.T));
   } else if (id === 'wd') {
     v.star = 1;
     v.surface = SMOOTH_SURFACE;
@@ -636,7 +664,9 @@ function stageTargets(st) {
       const t = (p - SN_BREAKOUT) / (1 - SN_BREAKOUT);
       const burst = Math.exp(-((t / 0.07) ** 2));
       v.star = 0; v.wind = 0; v.halo = 0;
-      v.shell = { radius: 1.5 + 8.5 * t ** 0.75, opacity: 1 - 0.45 * t, kind: 'sn' };
+      // The debris starts at the surface the shock has just reached.
+      const surface = visualRadius(stage.pre.R);
+      v.shell = { radius: surface + (10 - surface) * t ** 0.75, opacity: 1 - 0.45 * t, kind: 'sn' };
       v.flash = { scale: lerp(8 + 14 * t, 60, burst), opacity: Math.max(burst, 0.75 * (1 - 0.75 * t)), color: [1, lerp(0.66, 0.97, burst), lerp(0.4, 0.92, burst)] };
     }
   } else if (id === 'ns') {
@@ -777,6 +807,7 @@ function applyVisuals(st, dt, time) {
     ease('shellRadius', v.shell.radius, medium);
   }
   ease('shell', v.shell ? v.shell.opacity : 0, medium);
+  ease('ion', v.ion, view.shell < 0.01 ? 1 : slow);
   shell.visible = view.shell > 0.005;
   const hu = shell.material.uniforms;
   const pn = view.shellKind === 'pn';
@@ -787,6 +818,8 @@ function applyVisuals(st, dt, time) {
   hu.uSize.value = pn ? 0.14 : 0.12;
   hu.uColA.value.copy(pn ? PN_OUTER : SN_OUTER);
   hu.uColB.value.copy(pn ? PN_INNER : SN_INNER);
+  hu.uIon.value = view.ion;
+  hu.uDust.value.copy(view.color).multiplyScalar(0.6);
   hu.uSquash.value.set(pn ? 0.82 : 1, pn ? 1.22 : 1, pn ? 0.82 : 1);
 
   // Glows and flashes.
@@ -804,7 +837,8 @@ function applyVisuals(st, dt, time) {
 
   ease('pulsar', v.pulsar, slow);
   pulsar.visible = view.pulsar > 0.01;
-  pulsar.rotation.y = view.spin;
+  // Negative: a positive rotation about y in Three.js turns the other way from the cloud's and the star's spin.
+  pulsar.rotation.y = -view.spin;
   beamMaterial.uniforms.uOpacity.value = view.pulsar;
   fieldMaterial.opacity = 0.4 * view.pulsar;
 
