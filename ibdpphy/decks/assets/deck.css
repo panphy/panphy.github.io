@@ -154,10 +154,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline
   font-size: 1.4rem;
   letter-spacing: -0.5px;
   white-space: nowrap;
-  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--brand-primary);
 }
 .banner-actions { justify-self: end; display: flex; gap: 6px; align-items: center; }
 #theme-button { --panphy-theme-button-size: 44px; }
