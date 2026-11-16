@@ -9,7 +9,7 @@
 //   data-rod          slide 16  a rod sliding along rails across a vertical field
 //   data-spring       slide 19  a magnet bouncing on a spring into a coil, with its emf traced
 //   data-generator    slide 24  a rectangular coil turning between two poles, with its emf graph
-import { model3d } from '../assets/model3d.js';
+import { model3d } from '../assets/model3d.js?v=20261116';
 
 const TAU = Math.PI * 2;
 // Labels sit over field lines and wires: a soft halo in the panel's color keeps them legible.

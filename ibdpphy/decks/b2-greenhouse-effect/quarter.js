@@ -2,7 +2,7 @@
 // parallel sunlight of intensity S meets a planet of radius R. It intercepts the light crossing a
 // disk of area πR², and as the planet turns that power is shared over the whole sphere, 4πR².
 // Built, turned and zoomed by ../assets/model3d.js.
-import { model3d } from '../assets/model3d.js';
+import { model3d } from '../assets/model3d.js?v=20261116';
 
 const R = 1.2;                 // the planet's radius
 const DISK = -2.2;             // where the intercepting disk is drawn, on the sunward side

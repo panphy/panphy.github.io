@@ -4,7 +4,7 @@
 // patch of sky as seen from the Earth. When the slide's "six months" step is shown, the Earth
 // stops at one side of its orbit and a ghost Earth marks the other side, with the parallax angle
 // p at the star. Built, turned and zoomed by ../assets/model3d.js.
-import { model3d } from '../assets/model3d.js';
+import { model3d } from '../assets/model3d.js?v=20261116';
 
 const R = 1.6;          // the radius of the Earth's orbit, 1 AU
 const D = 4.5;          // the distance of the nearby star from the Sun
