@@ -148,7 +148,10 @@ body {
   background-color: var(--intro-bg);
   background-image: radial-gradient(var(--intro-pattern) 1.5px, transparent 1.5px);
 }
-/* Presenting fullscreen on a screen that is not 16:9, the space around the slide takes the same tint. */
+/* Presenting fullscreen on a screen that is not 16:9, the space around the slide takes the same tint,
+   fading with the slides (.3s, .35s in the Atoms decks) so it never changes ahead of them. */
+.companion-deck body.is-fullscreen, body.is-fullscreen #deck { transition: background-color .3s ease; }
+.deck-atoms body.is-fullscreen #deck { transition-duration: .35s; }
 body.is-fullscreen:has(#deck .slide:is(.dark, .title, .section).active),
 body.is-fullscreen #deck:has(.slide:is(.dark, .title, .section).active) {
   background-color: var(--intro-bg);
