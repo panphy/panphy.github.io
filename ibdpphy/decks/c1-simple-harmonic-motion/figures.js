@@ -8,7 +8,8 @@ window.DeckFigures.add(P => {
   // The path of a coiled spring lying along y from x1 to x2.
   const zig = (x1, x2, y, turns = 8, amp = 22) => { const lead = 14, n = turns * 2, w = (x2 - x1 - 2 * lead) / n; let d = `M${f(x1)},${y} H${f(x1 + lead)}`; for (let i = 0; i < n; i++) d += ` L${f(x1 + lead + w * (i + 0.5))},${y + (i % 2 ? amp : -amp)}`; return d + ` L${f(x2 - lead)},${y} H${f(x2)}`; };
   const block = (x, y, w = 80, h = 70) => `<rect x="${f(x - w / 2)}" y="${y - h / 2}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--brand-accent-strong) 35%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3"/>`;
-  const axes = (x0, y0, x1, yTop, yBottom, xl, yl) => arrow(x0, yBottom, x0, yTop, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(x1 - 4, y0 + 36, xl, 'lbl mono', 'end') + text(x0 + 14, yTop + 14, yl, 'lbl mono', 'start');
+  // The time axis crosses the middle, so its label goes below the whole plot.
+  const axes = (x0, y0, x1, yTop, yBottom, xl, yl) => arrow(x0, yBottom, x0, yTop, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(f((x0 + x1) / 2), yBottom + 40, xl, 'lbl mono') + P.yAxisLabel(x0 - 22, (yTop + yBottom) / 2, yl);
   const wave = (x0, x1, y0, amp, cycles, phase, n = 120) => sampled(t => [x0 + (x1 - x0) * t, y0 - amp * Math.sin(phase + t * cycles * TAU)], n);
 
   return {
@@ -48,8 +49,8 @@ window.DeckFigures.add(P => {
     'c1-xva': () => {
       const x0 = 120, x1 = 760, rows = [[110, 'displacement', 'brand-primary', Math.PI / 2], [270, 'velocity', 'brand-accent', Math.PI], [430, 'acceleration', 'brand-accent-strong', -Math.PI / 2]];
       let s = rows.map(([y, name, color, ph]) => arrow(x0, y, x1 + 30, y, 'text-secondary', 2.5) + `<line x1="${x0}" y1="${y - 62}" x2="${x0}" y2="${y + 62}" class="tick"/>` + line(wave(x0, x1, y, 54, 2, ph), color) + text(x0 - 14, y + 9, name, 'lbl strong', 'end', `style="fill:var(--${color})"`)).join('');
-      s += [0.25, 0.5, 0.75, 1].map(k => `<line x1="${x0 + 320 * k}" y1="40" x2="${x0 + 320 * k}" y2="500" class="guide"/>`).join('') + text(x1 + 30, 536, 'time', 'lbl mono', 'end') + text(x0, 536, '0', 'lbl mono') + text(x0 + 160, 536, 'T/2', 'lbl mono') + text(x0 + 320, 536, 'T', 'lbl mono');
-      return svg('-130 20 940 530', s, 'Three graphs against time for simple harmonic motion starting from the greatest displacement. Displacement is a cosine curve. Velocity is zero when the displacement is greatest and greatest when the displacement is zero. Acceleration is always opposite to the displacement: greatest and negative when the displacement is greatest and positive');
+      s += [0.25, 0.5, 0.75, 1].map(k => `<line x1="${x0 + 320 * k}" y1="40" x2="${x0 + 320 * k}" y2="500" class="guide"/>`).join('') + text(f((x0 + x1 + 30) / 2), 576, 'time', 'lbl mono') + text(x0, 536, '0', 'lbl mono') + text(x0 + 160, 536, 'T/2', 'lbl mono') + text(x0 + 320, 536, 'T', 'lbl mono');
+      return svg('-130 20 940 570', s, 'Three graphs against time for simple harmonic motion starting from the greatest displacement. Displacement is a cosine curve. Velocity is zero when the displacement is greatest and greatest when the displacement is zero. Acceleration is always opposite to the displacement: greatest and negative when the displacement is greatest and positive');
     },
 
     // A simple pendulum swinging through a small angle. Also drawn plain.
@@ -86,17 +87,17 @@ window.DeckFigures.add(P => {
     'c1-energy-x': () => {
       const cx = 430, base = 420, top = 110, A = 280, H = base - top;
       let s = arrow(110, base, 780, base, 'text-secondary', 2.5) + arrow(cx, base, cx, 50, 'text-secondary', 2.5) + line(`M${cx - A},${top} H${cx + A}`, 'text-main', 4) + line(sampled(t => { const u = -1 + 2 * t; return [cx + A * u, base - H * u * u]; }, 60), 'brand-primary', 6) + line(sampled(t => { const u = -1 + 2 * t; return [cx + A * u, base - H * (1 - u * u)]; }, 60), 'brand-accent', 6);
-      s += `<path d="M${cx - A},${base} V${top} M${cx + A},${base} V${top}" class="guide"/>` + text(cx + 16, 64, 'energy', 'lbl mono', 'start') + text(784, base - 16, 'displacement', 'lbl mono', 'end') + text(cx - A, base + 40, sub('−x', '0'), 'lbl mono') + text(cx + A, base + 40, sub('x', '0'), 'lbl mono') + text(cx, base + 40, '0', 'lbl mono');
+      s += `<path d="M${cx - A},${base} V${top} M${cx + A},${base} V${top}" class="guide"/>` + P.yAxisLabel(cx - 22, 250, 'energy') + text(445, base + 80, 'displacement', 'lbl mono') + text(cx - A, base + 40, sub('−x', '0'), 'lbl mono') + text(cx + A, base + 40, sub('x', '0'), 'lbl mono') + text(cx, base + 40, '0', 'lbl mono');
       s += text(cx + A + 14, top + 8, 'total', 'lbl strong', 'start') + text(cx + 206, top + 190, 'potential', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(cx - 60, top + 50, 'kinetic', 'lbl strong halo', 'end', 'style="fill:var(--brand-accent)"');
-      return svg('90 30 800 460', s, 'A graph of energy against displacement for simple harmonic motion. The potential energy is a parabola, zero at the center and greatest at each end. The kinetic energy is an upside-down parabola, greatest at the center and zero at each end. Their sum, the total energy, is a horizontal line');
+      return svg('90 30 800 490', s, 'A graph of energy against displacement for simple harmonic motion. The potential energy is a parabola, zero at the center and greatest at each end. The kinetic energy is an upside-down parabola, greatest at the center and zero at each end. Their sum, the total energy, is a horizontal line');
     },
 
     // Kinetic and potential energy against time: each goes through two cycles in one period.
     'c1-energy-t': () => {
       const x0 = 120, x1 = 760, base = 420, H = 280;
-      let s = P.axes(x0, base, 800, 60, '', 'energy') + text(800, base - 16, 'time', 'lbl mono', 'end') + line(`M${x0},${base - H} H${x1}`, 'text-main', 4) + line(sampled(t => [x0 + (x1 - x0) * t, base - H * Math.cos(t * TAU) ** 2], 120), 'brand-primary', 6) + line(sampled(t => [x0 + (x1 - x0) * t, base - H * Math.sin(t * TAU) ** 2], 120), 'brand-accent', 6);
+      let s = P.axes(x0, base, 800, 60, 'time', 'energy', { xGap: 80 }) + line(`M${x0},${base - H} H${x1}`, 'text-main', 4) + line(sampled(t => [x0 + (x1 - x0) * t, base - H * Math.cos(t * TAU) ** 2], 120), 'brand-primary', 6) + line(sampled(t => [x0 + (x1 - x0) * t, base - H * Math.sin(t * TAU) ** 2], 120), 'brand-accent', 6);
       s += [0.5, 1].map(k => `<line x1="${x0 + (x1 - x0) * k}" y1="${base}" x2="${x0 + (x1 - x0) * k}" y2="${base - H}" class="guide"/>`).join('') + text(x0 + (x1 - x0) / 2, base + 40, 'T/2', 'lbl mono') + text(x1, base + 40, 'T', 'lbl mono') + text(x1 + 10, base - H + 8, 'total', 'lbl strong', 'start') + text(x0 + 30, base - H - 16, 'potential', 'lbl strong', 'start', 'style="fill:var(--brand-primary)"') + text(x0 + 190, base - H - 16, 'kinetic', 'lbl strong', 'start', 'style="fill:var(--brand-accent)"');
-      return svg('60 40 820 440', s, 'A graph of kinetic and potential energy against time over one period, starting from the greatest displacement. Each varies between zero and the total energy and goes through two complete cycles in one period of the oscillation. When one is greatest the other is zero, and their sum is constant');
+      return svg('60 40 820 480', s, 'A graph of kinetic and potential energy against time over one period, starting from the greatest displacement. Each varies between zero and the total energy and goes through two complete cycles in one period of the oscillation. When one is greatest the other is zero, and their sum is constant');
     },
 
     // Two oscillations with a phase difference (HL).
@@ -105,8 +106,8 @@ window.DeckFigures.add(P => {
       let s = arrow(x0, 460, x0, 40, 'text-secondary', 2.5) + arrow(x0, y0, x1 + 40, y0, 'text-secondary', 2.5) + line(wave(x0, x1, y0, amp, 1.5, 0), 'brand-primary', 6) + line(wave(x0, x1, y0, amp, 1.5, phi), 'hl', 6);
       const lead = per * phi / TAU;
       s += `<line x1="${f(x0 + per - lead)}" y1="${y0}" x2="${f(x0 + per - lead)}" y2="${y0 + 190}" class="guide"/><line x1="${f(x0 + per)}" y1="${y0}" x2="${f(x0 + per)}" y2="${y0 + 190}" class="guide"/>` + both(f(x0 + per - lead), y0 + 176, f(x0 + per), y0 + 176) + text(f(x0 + per - lead / 2), y0 + 216, 'φ = π/3: a sixth of a cycle', 'lbl', 'middle');
-      s += text(x0 + 16, 54, 'x', 'lbl display', 'start') + text(x1 + 40, y0 + 40, 'time', 'lbl mono', 'end') + text(350, 60, 'x₀ sin(ωt + φ)', 'lbl mono strong halo', 'start', 'style="fill:var(--hl-text)"') + text(350, 100, 'x₀ sin ωt', 'lbl mono strong halo', 'start', 'style="fill:var(--brand-primary)"');
-      return svg('80 20 760 470', s, 'Two sine curves of the same amplitude and period. The second reaches each peak a sixth of a cycle before the first: it leads by a phase angle of pi over 3 radians');
+      s += text(x0 - 18, 259, 'x', 'lbl display', 'end') + text(f((x0 + x1 + 40) / 2), 504, 'time', 'lbl mono') + text(350, 60, 'x₀ sin(ωt + φ)', 'lbl mono strong halo', 'start', 'style="fill:var(--hl-text)"') + text(350, 100, 'x₀ sin ωt', 'lbl mono strong halo', 'start', 'style="fill:var(--brand-primary)"');
+      return svg('80 28 760 484', s, 'Two sine curves of the same amplitude and period. The second reaches each peak a sixth of a cycle before the first: it leads by a phase angle of pi over 3 radians');
     },
 
     // The position of a bobbing mass marked at equal time steps; joining the dots, on a step,
@@ -117,7 +118,7 @@ window.DeckFigures.add(P => {
       let s = axes(x0, y0, x1 + 20, 50, 410, 'time', 'position');
       s += `<g class="step">${line(sampled(at, 120), 'brand-primary', 5)}</g>`;
       for (let i = 0; i <= steps; i++) { const [x, y] = at(i / steps); s += `<circle cx="${f(x)}" cy="${f(y)}" r="10" style="fill:var(--brand-accent-strong)"/>`; }
-      return svg('40 30 880 400', s, 'Dots marking the position of a bobbing mass at equal time intervals; joined up they make a cosine curve');
+      return svg('40 30 880 430', s, 'Dots marking the position of a bobbing mass at equal time intervals; joined up they make a cosine curve');
     }
   };
 });

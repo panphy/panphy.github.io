@@ -51,7 +51,7 @@ window.DeckFigures.add(P => {
   const round = (corners, step = 8) => { const out = []; corners.forEach(([x1, y1], i) => { const [x2, y2] = corners[(i + 1) % corners.length], n = Math.round(Math.hypot(x2 - x1, y2 - y1) / step); for (let j = 0; j < n; j++) out.push([x1 + (x2 - x1) * j / n, y1 + (y2 - y1) * j / n]); }); return out; };
   const electron = `<circle r="8" style="fill:var(--electron)"/>`;
   const electrons = (corners, n, dur) => { const pts = round(corners); return Array.from({ length: n }, (_, k) => { const s = Math.round(k * pts.length / n), loop = [...pts.slice(s), ...pts.slice(0, s)]; loop.push(loop[0]); return `<g>${track(loop, dur)}${electron}</g>`; }).join(''); };
-  const axes = (x0, y0, x1, y1, xl, yl) => arrow(x0, y0, x0, y1, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(x1 - 6, y0 + 40, xl, 'lbl mono', 'end') + text(x0 + 16, y1 + 14, yl, 'lbl mono', 'start');
+  const axes = P.axes;
   // A bracket showing a potential difference between two points beside the circuit.
   let clips = 0;
   const pd = (x1, y1, x2, y2, label, lx, ly, anchor = 'middle') => both(x1, y1, x2, y2, 'brand-primary', 3) + text(lx, ly, label, 'lbl mono strong', anchor, 'style="fill:var(--brand-primary)"');
@@ -163,7 +163,7 @@ window.DeckFigures.add(P => {
 
     // How the resistance of a thermistor and of an LDR changes.
     'b5-sensor-curves': () => {
-      const one = (x0, xl, name, kind) => axes(x0, 400, x0 + 330, 90, xl, 'R') + line(sampled(t => [x0 + 14 + 300 * t, 380 - 270 * Math.exp(-3.4 * t)], 50), 'brand-primary', 6) + branch(x0 + 90, 50, x0 + 250, 50, [{ kind, at: 0.5 }]) + text(x0 + 170, 480, name, 'lbl strong');
+      const one = (x0, xl, name, kind) => axes(x0, 400, x0 + 330, 90, xl, '') + text(x0 - 18, 254, 'R', 'lbl mono', 'end') + line(sampled(t => [x0 + 14 + 300 * t, 380 - 270 * Math.exp(-3.4 * t)], 50), 'brand-primary', 6) + branch(x0 + 90, 50, x0 + 250, 50, [{ kind, at: 0.5 }]) + text(x0 + 170, 480, name, 'lbl strong');
       return svg('40 0 880 500', one(90, 'temperature', 'thermistor (NTC)', 'thermistor') + one(540, 'light intensity', 'LDR', 'ldr'), 'Two graphs. The resistance of a thermistor falls steeply, then more gently, as its temperature rises. The resistance of a light-dependent resistor falls in the same way as the light falling on it gets brighter');
     }
   };

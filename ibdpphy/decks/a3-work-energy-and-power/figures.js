@@ -51,14 +51,14 @@ window.DeckFigures.add(P => {
       const on = labeled(el), isSpring = el.dataset.kind === 'spring';
       let s = '';
       if (isSpring) {
-        s = shade('M110,400 L620,120 V400 Z', 'brand-primary', 0.22) + axes(110, 400, 760, 40, '', on ? 'force' : '') + plot('M110,400 L620,120') + `<path d="M110,120 H620 V400" class="guide"/>`;
-        if (on) s += text(360, 436, 'extension', 'lbl mono') + text(620, 436, 'Δx', 'lbl mono strong') + text(98, 128, 'kΔx', 'lbl mono strong', 'end') + text(470, 330, 'area = ½ k(Δx)²', 'lbl strong halo');
+        s = shade('M110,400 L620,120 V400 Z', 'brand-primary', 0.22) + axes(110, 400, 760, 40, on ? 'extension' : '', on ? 'force' : '', { xGap: 76, yGap: 60 }) + plot('M110,400 L620,120') + `<path d="M110,120 H620 V400" class="guide"/>`;
+        if (on) s += text(620, 436, 'Δx', 'lbl mono strong') + text(98, 128, 'kΔx', 'lbl mono strong', 'end') + text(470, 330, 'area = ½ k(Δx)²', 'lbl strong halo');
       } else {
         const at = t => [110 + 560 * t, 400 - 250 * Math.sin(Math.PI * (0.12 + 0.76 * t)) - 30 * Math.sin(t * 9)];
         s = shade(`M110,400 L${sampled(at).slice(1)} L670,400 Z`, 'brand-primary', 0.22) + axes(110, 400, 760, 40, on ? 'displacement' : '', on ? 'force' : '') + plot(sampled(at)) + `<line x1="670" y1="${f(at(1)[1])}" x2="670" y2="400" class="guide"/>`;
         if (on) s += text(390, 320, 'area = work done', 'lbl strong halo');
       }
-      return svg('40 20 760 440', s, isSpring ? 'Graph of force against extension for a spring: a straight line through the origin. The area of the triangle under it, half of k times the extension squared, is the elastic potential energy stored' : 'Graph of a varying force against displacement. The shaded area under the curve is the work done by the force');
+      return svg(isSpring ? '20 20 760 470' : '40 20 760 440', s, isSpring ? 'Graph of force against extension for a spring: a straight line through the origin. The area of the triangle under it, half of k times the extension squared, is the elastic potential energy stored' : 'Graph of a varying force against displacement. The shaded area under the curve is the work done by the force');
     },
 
     // The same gain in height by two routes: straight up, and along a ramp.
@@ -129,7 +129,7 @@ window.DeckFigures.add(P => {
       let s = '';
       panels.forEach(([name, against, color, fn], k) => {
         const x0 = 40 + k * (W + gap);
-        s += axes(x0, y0, x0 + W, y0 - H - 20, '', '') + text(x0 + W / 2, 40, name, 'lbl strong') + text(x0 + W - 4, y0 + 40, against, 'lbl', 'end');
+        s += axes(x0, y0, x0 + W, y0 - H - 20, '', '') + text(x0 + W / 2, 40, name, 'lbl strong') + text(x0 + W / 2, y0 + 40, against, 'lbl');
         s += `<g class="step">${plot(sampled(t => [x0 + (W - 30) * t, y0 - (H - 20) * fn(t)]), color)}</g>`;
       });
       return svg('0 0 1440 360', s, 'Four graphs for a ball dropped from rest: kinetic energy against time rises as a curve, potential energy against time falls as a curve, and against distance fallen kinetic energy rises and potential energy falls in straight lines');

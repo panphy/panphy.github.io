@@ -582,8 +582,8 @@ window.DeckSvgTex = {
       let s = `<line x1="90" y1="400" x2="700" y2="400" class="axis"/><line x1="90" y1="400" x2="90" y2="44" class="axis"/>`;
       [0, 8, 16, 24, 32].forEach(t => { s += `<line x1="${X(t)}" y1="400" x2="${X(t)}" y2="408" class="axis"/>` + text(X(t), 432, t, 'lbl mono small'); });
       [0, 100, 200, 300, 400].forEach(n => { s += `<line x1="82" y1="${Y(n)}" x2="90" y2="${Y(n)}" class="axis"/>` + text(74, Y(n) + 6, n, 'lbl mono small', 'end'); });
-      s += text(395, 462, 'time (days)', 'lbl');
-      s += text(22, 222, 'undecayed nuclei', 'lbl', 'middle', 'transform="rotate(-90 22 222)"');
+      s += text(395, 472, 'time (days)', 'lbl');
+      s += text(18, 222, 'undecayed nuclei', 'lbl', 'middle', 'transform="rotate(-90 18 222)"');
       // Deck build: one halving per click, read across from the axis and then down.
       [[8, 200, '½'], [16, 100, '¼'], [24, 50, '⅛']].forEach(([t, n, frac], i) => {
         let mark = `<path d="M90,${Y(n)} H${X(t)} V400" class="guide accent"/>` + `<circle cx="${X(t)}" cy="${Y(n)}" r="6" style="fill:var(--brand-accent)"/>`;
@@ -593,7 +593,7 @@ window.DeckSvgTex = {
       let d = '';
       for (let t = 0; t <= 32; t += 0.5) d += `${t ? 'L' : 'M'}${f(X(t))},${f(Y(400 * Math.pow(2, -t / 8)))}`;
       s += `<path d="${d}" class="curve draw"/>`;
-      return svg('0 0 720 480', s, 'Decay curve: 400 undecayed nuclei fall to 200 after 8 days, 100 after 16 days and 50 after 24 days');
+      return svg('-10 0 724 486', s, 'Decay curve: 400 undecayed nuclei fall to 200 after 8 days, 100 after 16 days and 50 after 24 days');
     },
 
     random: el => {

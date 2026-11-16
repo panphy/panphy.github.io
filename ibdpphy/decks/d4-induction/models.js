@@ -611,15 +611,15 @@ model3d('spring', ({ THREE, scene, css, label: plain, holder }) => {
   label('coil', [-0.85, 0.5, 0]);
 
   // The emf graph, traced as the magnet moves.
-  const NS = 'http://www.w3.org/2000/svg', gx = s => 30 + 345 * s / RUN, gy = e => 160 - 100 * e;
+  const NS = 'http://www.w3.org/2000/svg', gx = s => 30 + 345 * s / RUN, gy = e => 140 - 85 * e;
   const graph = document.createElementNS(NS, 'svg');
   graph.setAttribute('viewBox', '0 0 400 320');
   graph.setAttribute('aria-hidden', 'true');
   graph.style.cssText = 'position:absolute;inset:0 0 0 46%;width:54%;height:100%;overflow:visible;pointer-events:none;';
-  graph.innerHTML = `<path d="M30,290 V30 M30,160 H385" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5"/><path d="M24,40 L30,26 L36,40 Z M375,154 L389,160 L375,166 Z" style="fill:var(--text-secondary)"/>`
-    + `<text x="44" y="40" class="lbl mono" style="font-size:22px">emf</text><text x="385" y="200" class="lbl mono" text-anchor="end" style="font-size:22px">time</text>`
+  graph.innerHTML = `<path d="M30,250 V30 M30,140 H385" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5"/><path d="M24,40 L30,26 L36,40 Z M375,134 L389,140 L375,146 Z" style="fill:var(--text-secondary)"/>`
+    + `<text x="12" y="140" class="lbl mono" text-anchor="middle" transform="rotate(-90 12 140)" style="font-size:22px">emf</text><text x="207" y="276" class="lbl mono" text-anchor="middle" style="font-size:22px">time</text>`
     + `<path class="emf-line" style="fill:none;stroke:var(--hl);stroke-width:4;stroke-linecap:round;stroke-linejoin:round"/><circle r="8" style="fill:var(--brand-accent-strong)"/>`
-    + `<text x="205" y="292" class="lbl" text-anchor="middle" style="font-size:22px">the oscillation dies away:</text><text x="205" y="320" class="lbl" text-anchor="middle" style="font-size:22px">energy goes to the circuit</text>`;
+    + `<text x="205" y="302" class="lbl" text-anchor="middle" style="font-size:22px">the oscillation dies away:</text><text x="205" y="328" class="lbl" text-anchor="middle" style="font-size:22px">energy goes to the circuit</text>`;
   holder.appendChild(graph);
   const trace = graph.querySelector('.emf-line'), dot = graph.querySelector('circle');
 
@@ -689,15 +689,15 @@ model3d('generator', ({ THREE, scene, css, label: plain, holder }) => {
   const normalLabel = label('normal', [1.7, 0, 0]);
 
   // The emf graph, flat, beside the model: one turn of the coil is one cycle.
-  const NS = 'http://www.w3.org/2000/svg', gx = u => 30 + 330 * u, gy = u => 160 - 105 * Math.sin(u * TAU);
+  const NS = 'http://www.w3.org/2000/svg', gx = u => 30 + 330 * u, gy = u => 140 - 90 * Math.sin(u * TAU);
   const graph = document.createElementNS(NS, 'svg');
   graph.setAttribute('viewBox', '0 0 400 320');
   graph.setAttribute('aria-hidden', 'true');
   graph.style.cssText = 'position:absolute;inset:0 0 0 57%;width:43%;height:100%;overflow:visible;pointer-events:none;';
   const curve = Array.from({ length: 121 }, (_, i) => `${i ? 'L' : 'M'}${gx(i / 120).toFixed(1)},${gy(i / 120).toFixed(1)}`).join(' ');
-  graph.innerHTML = `<path d="M30,290 V30 M30,160 H385" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5"/><path d="M24,40 L30,26 L36,40 Z M375,154 L389,160 L375,166 Z" style="fill:var(--text-secondary)"/>`
-    + `<text x="44" y="40" class="lbl mono" style="font-size:22px">emf</text><text x="385" y="146" class="lbl mono" text-anchor="end" style="font-size:22px">time</text>`
-    + `<path d="${curve}" style="fill:none;stroke:var(--hl);stroke-width:4.5;stroke-linecap:round"/><text x="195" y="312" class="lbl" text-anchor="middle" style="font-size:22px">one turn of the coil</text>`
+  graph.innerHTML = `<path d="M30,250 V30 M30,140 H385" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5"/><path d="M24,40 L30,26 L36,40 Z M375,134 L389,140 L375,146 Z" style="fill:var(--text-secondary)"/>`
+    + `<text x="12" y="140" class="lbl mono" text-anchor="middle" transform="rotate(-90 12 140)" style="font-size:22px">emf</text><text x="207" y="276" class="lbl mono" text-anchor="middle" style="font-size:22px">time</text>`
+    + `<path d="${curve}" style="fill:none;stroke:var(--hl);stroke-width:4.5;stroke-linecap:round"/><text x="195" y="306" class="lbl" text-anchor="middle" style="font-size:22px">one turn of the coil</text>`
     + `<circle r="10" style="fill:var(--brand-accent-strong)"/>`;
   holder.appendChild(graph);
   const dot = graph.querySelector('circle');

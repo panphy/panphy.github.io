@@ -101,8 +101,8 @@ window.DeckFigures.add(P => {
       let s = `<line x1="90" y1="400" x2="700" y2="400" class="axis"/><line x1="90" y1="400" x2="90" y2="44" class="axis"/>`;
       [0, 8, 16, 24, 32].forEach(t => { s += `<line x1="${X(t)}" y1="400" x2="${X(t)}" y2="408" class="axis"/>` + text(X(t), 432, t, 'lbl mono small'); });
       [0, 100, 200, 300, 400].forEach(n => { s += `<line x1="82" y1="${Y(n)}" x2="90" y2="${Y(n)}" class="axis"/>` + text(74, Y(n) + 6, n, 'lbl mono small', 'end'); });
-      s += text(395, 462, 'time (days)', 'lbl');
-      s += text(22, 222, 'undecayed nuclei', 'lbl', 'middle', 'transform="rotate(-90 22 222)"');
+      s += text(395, 472, 'time (days)', 'lbl');
+      s += text(18, 222, 'undecayed nuclei', 'lbl', 'middle', 'transform="rotate(-90 18 222)"');
       // Deck build: one halving per click, read across from the axis and then down.
       [[8, 200, '½'], [16, 100, '¼'], [24, 50, '⅛']].forEach(([t, n, frac], i) => {
         let mark = `<path d="M90,${Y(n)} H${X(t)} V400" class="guide accent"/>` + `<circle cx="${X(t)}" cy="${Y(n)}" r="6" style="fill:var(--brand-accent)"/>`;
@@ -112,7 +112,7 @@ window.DeckFigures.add(P => {
       let d = '';
       for (let t = 0; t <= 32; t += 0.5) d += `${t ? 'L' : 'M'}${f(X(t))},${f(Y(400 * Math.pow(2, -t / 8)))}`;
       s += `<path d="${d}" class="curve draw"/>`;
-      return svg('0 0 720 480', s, 'Decay curve: 400 undecayed nuclei fall to 200 after 8 days, 100 after 16 days and 50 after 24 days');
+      return svg('-10 0 724 486', s, 'Decay curve: 400 undecayed nuclei fall to 200 after 8 days, 100 after 16 days and 50 after 24 days');
     },
 
     'e3-random': el => {
@@ -154,12 +154,12 @@ window.DeckFigures.add(P => {
     // The forces between two protons a distance apart: a sketch, not to scale.
     'e3-strong': () => {
       const x = r => 110 + 180 * r;
-      let s = arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(774, 214, 'separation / fm', 'lbl mono', 'end') + text(126, 48, 'repulsion', 'lbl mono', 'start') + text(126, 432, 'attraction', 'lbl mono', 'start');
+      let s = arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(445, 482, 'separation / fm', 'lbl mono') + text(126, 48, 'repulsion', 'lbl mono', 'start') + text(126, 432, 'attraction', 'lbl mono', 'start');
       [1, 2, 3].forEach(r => { s += `<line x1="${x(r)}" y1="234" x2="${x(r)}" y2="246" class="tick"/>` + text(x(r), 278, r, 'lbl mono halo'); });
       s += `<path d="${sampled(t => { const r = 0.56 + 3.1 * t; return [x(r), 240 - 60 / (r * r)]; })}" class="curve" style="stroke:var(--proton)"/>`;
       s += `<path d="${sampled(t => { const r = 0.7 + 2.9 * t, u = Math.exp(-3 * (r - 1)); return [x(r), 240 + 180 * (2 * u - u * u)]; }, 120)}" class="curve" style="stroke:var(--brand-primary)"/>`;
       s += text(330, 120, 'electric repulsion: long range', 'lbl strong', 'start', 'style="fill:var(--proton)"') + text(470, 344, 'strong nuclear force:', 'lbl strong', 'start', 'style="fill:var(--brand-primary)"') + text(470, 378, 'only within about 3 fm', 'lbl', 'start');
-      return svg('40 10 780 450', s, 'Sketch graph of the forces between two protons against their separation in femtometers. The electric repulsion falls slowly with distance. The strong nuclear force is a much larger attraction at about 1 femtometer, becomes negligible beyond about 3 femtometers, and is repulsive at very small separations');
+      return svg('40 10 780 490', s, 'Sketch graph of the forces between two protons against their separation in femtometers. The electric repulsion falls slowly with distance. The strong nuclear force is a much larger attraction at about 1 femtometer, becomes negligible beyond about 3 femtometers, and is repulsive at very small separations');
     },
 
     // Four separate nucleons have more mass than the helium nucleus they make.
@@ -243,7 +243,7 @@ window.DeckFigures.add(P => {
         const k = Math.max(t, 1e-4), e = k + 0.511, p = Math.sqrt(e * e - 0.511 ** 2), x = 2 * Math.PI * 84 / 137 * e / p;
         return [110 + 560 * t, 420 - 147 * x / (1 - Math.exp(-x)) * p * e * (1 - k) ** 2];
       };
-      let s = arrow(110, 420, 110, 40, 'text-secondary', 2.5) + arrow(110, 420, 780, 420, 'text-secondary', 2.5) + text(126, 456, 'kinetic energy', 'lbl mono', 'start') + text(126, 54, 'number of beta particles', 'lbl mono', 'start');
+      let s = arrow(110, 420, 110, 40, 'text-secondary', 2.5) + arrow(110, 420, 780, 420, 'text-secondary', 2.5) + text(445, 466, 'kinetic energy', 'lbl mono') + P.yAxisLabel(88, 230, 'number of beta particles');
       s += `<path d="${sampled(at, 100)} L110,420 Z" style="fill:var(--electron);opacity:.16"/><path d="${sampled(at, 100)}" class="curve" style="stroke:var(--electron)"/>`;
       s += `<line x1="670" y1="420" x2="670" y2="150" style="stroke:var(--hl);stroke-width:4;stroke-dasharray:10 7"/>` + text(660, 136, 'expected:', 'lbl', 'end') + text(660, 168, 'one energy', 'lbl strong', 'end', 'style="fill:var(--hl-text)"') + text(700, 460, sub('E', 'max'), 'lbl display') + text(150, 120, 'observed:', 'lbl', 'start') + text(150, 152, 'a continuous spread', 'lbl strong', 'start', 'style="fill:var(--electron)"');
       return svg('40 20 780 470', s, 'Graph of the number of beta particles against their kinetic energy. The beta particles have a continuous spread of energies from zero up to a maximum, where a single sharp energy had been expected');
@@ -251,11 +251,11 @@ window.DeckFigures.add(P => {
 
     // The natural logarithm of the activity against time: a straight line of gradient −λ.
     'e3-ln-graph': () => {
-      let s = arrow(110, 430, 110, 40, 'text-secondary', 2.5) + arrow(110, 430, 780, 430, 'text-secondary', 2.5) + text(774, 466, 'time', 'lbl mono', 'end') + text(126, 54, 'ln A', 'lbl mono', 'start');
+      let s = arrow(110, 430, 110, 40, 'text-secondary', 2.5) + arrow(110, 430, 780, 430, 'text-secondary', 2.5) + text(445, 476, 'time', 'lbl mono') + text(96, 244, 'ln A', 'lbl mono', 'end');
       const pts = [[150, 98], [230, 136], [310, 170], [390, 212], [470, 244], [550, 286], [630, 318], [710, 358]];
       s += `<line x1="110" y1="80" x2="750" y2="376" class="curve" style="stroke:var(--hl);stroke-width:4"/>` + pts.map(([x, y]) => `<path d="M${x - 8},${y - 8} l16,16 m0,-16 l-16,16" class="tick" style="stroke-width:3"/>`).join('');
       s += `<path d="M300,168 H560 V288" class="guide accent"/>` + text(430, 150, 'Δt', 'lbl mono strong') + text(574, 236, 'Δ(ln A)', 'lbl mono strong', 'start') + text(96, 88, sub('ln A', '0'), 'lbl mono', 'end') + text(430, 340, 'gradient = −λ', 'lbl strong', 'end');
-      return svg('0 20 800 460', s, 'Graph of the natural logarithm of activity against time. The measured points lie on a straight line that slopes downwards. Its gradient is minus the decay constant, and its intercept is the logarithm of the initial activity');
+      return svg('0 20 800 480', s, 'Graph of the natural logarithm of activity against time. The measured points lie on a straight line that slopes downwards. Its gradient is minus the decay constant, and its intercept is the logarithm of the initial activity');
     }
   };
 });

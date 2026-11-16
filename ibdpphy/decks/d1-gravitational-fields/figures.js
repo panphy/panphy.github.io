@@ -77,11 +77,11 @@ window.DeckFigures.add(P => {
 
     'd1-inverse-square': () => {
       const at = r => [110 + 150 * r, 400 - 320 / (r * r)];
-      let s = axes(110, 400, 770, 40, 'separation', 'force');
+      let s = axes(110, 400, 770, 40, 'separation', 'force', { xGap: 76 });
       [1, 2, 3].forEach(r => { const [x, y] = at(r); s += `<path d="M110,${f(y)} H${x} V400" class="guide"/>` + text(x, 436, r === 1 ? 'r' : `${r}r`, 'lbl mono'); });
       s += plot(sampled(t => at(0.94 + 3.3 * t)));
       [[1, 'F'], [2, 'F / 4'], [3, 'F / 9']].forEach(([r, label]) => { const [x, y] = at(r); s += `<circle cx="${x}" cy="${f(y)}" r="9" style="fill:var(--brand-accent-strong)"/>` + text(x + 20, f(y) - 14, label, 'lbl mono strong', 'start'); });
-      return svg('0 0 800 460', s, 'Graph of gravitational force against separation, falling steeply and then leveling off. At separation r the force is F, at 2 r it is a quarter of F and at 3 r it is one ninth of F');
+      return svg('0 0 800 490', s, 'Graph of gravitational force against separation, falling steeply and then leveling off. At separation r the force is F, at 2 r it is a quarter of F and at 3 r it is one ninth of F');
     },
 
     // Outside a uniform sphere the field is the same as that of a point mass at its center.
@@ -105,7 +105,7 @@ window.DeckFigures.add(P => {
     'd1-g-graph': () => {
       const at = r => [110 + 140 * r, 400 - 34 * 9.8 / (r * r)];
       let s = `<rect x="110" y="50" width="140" height="350" style="fill:var(--brand-primary);opacity:.12"/>` + text(180, 240, 'inside', 'lbl small') + text(180, 268, 'the Earth', 'lbl small');
-      s += axes(110, 400, 780, 30, '', '') + text(445, 484, 'distance from the center', 'lbl mono') + text(96, 8, 'g / N kg⁻¹', 'lbl mono', 'start');
+      s += axes(110, 400, 780, 30, '', '') + text(445, 484, 'distance from the center', 'lbl mono') + P.yAxisLabel(88, 215, 'g / N kg⁻¹');
       [[1, '9.8'], [2, '2.5'], [3, '1.1']].forEach(([r, g]) => { const [x, y] = at(r); s += `<path d="M110,${f(y)} H${x} V400" class="guide"/>` + text(x, 436, r === 1 ? 'R' : `${r}R`, 'lbl mono') + `<circle cx="${x}" cy="${f(y)}" r="9" style="fill:var(--brand-accent-strong)"/>` + text(x + 18, f(y) - 14, g, 'lbl mono strong', 'start'); });
       s += plot(sampled(t => at(1 + 3.6 * t)));
       return svg('0 -24 800 524', s, 'Graph of the gravitational field strength of the Earth against distance from its center, starting at the surface. It is 9.8 newtons per kilogram at the surface, distance R, 2.5 at 2 R and 1.1 at 3 R');
@@ -128,8 +128,8 @@ window.DeckFigures.add(P => {
     // version and data-tangent adds the tangent at 2R.
     'd1-potential': el => {
       const energy = el.dataset.quantity === 'Ep', at = r => [110 + 140 * r, 70 + 325 / r];
-      let s = arrow(110, 70, 110, 440, 'text-secondary', 2.5) + arrow(110, 70, 780, 70, 'text-secondary', 2.5) + text(774, 12, 'distance from the center', 'lbl mono', 'end');
-      s += text(20, 478, energy ? 'potential energy' : 'potential / MJ kg⁻¹', 'lbl mono', 'start') + text(96, 78, '0', 'lbl mono', 'end');
+      let s = arrow(110, 70, 110, 440, 'text-secondary', 2.5) + arrow(110, 70, 780, 70, 'text-secondary', 2.5) + text(445, 12, 'distance from the center', 'lbl mono');
+      s += P.yAxisLabel(68, 255, energy ? 'potential energy' : 'potential / MJ kg⁻¹') + text(96, 78, '0', 'lbl mono', 'end');
       [[1, '−62.5'], [2, '−31.3'], [3, '−20.8']].forEach(([r, v]) => {
         const [x, y] = at(r);
         s += `<path d="M110,${f(y)} H${x} V70" class="guide"/>` + text(x, 50, r === 1 ? 'R' : `${r}R`, 'lbl mono');
@@ -172,10 +172,10 @@ window.DeckFigures.add(P => {
     'd1-orbit-energy': () => {
       const x = r => 110 + 140 * r, line = (k, color) => `<path d="${sampled(t => [x(1 + 3.6 * t), 230 + k / (1 + 3.6 * t)])}" class="curve" style="stroke:var(--${color})"/>`;
       let s = `<rect x="110" y="30" width="140" height="420" style="fill:var(--brand-primary);opacity:.12"/>` + arrow(110, 450, 110, 26, 'text-secondary', 2.5) + arrow(110, 230, 790, 230, 'text-secondary', 2.5);
-      s += text(812, 240, 'r', 'lbl display') + text(126, 44, 'energy', 'lbl mono', 'start') + text(96, 238, '0', 'lbl mono', 'end') + text(250, 214, 'R', 'lbl mono');
+      s += text(450, 494, 'r', 'lbl display') + P.yAxisLabel(66, 238, 'energy') + text(96, 238, '0', 'lbl mono', 'end') + text(250, 214, 'R', 'lbl mono');
       s += line(-100, 'brand-accent') + line(200, 'brand-primary') + line(100, 'hl');
       s += text(420, 168, 'kinetic', 'lbl strong', 'start') + text(420, 300, 'total', 'lbl strong', 'start', 'style="fill:var(--hl-text)"') + text(330, 400, 'potential', 'lbl strong', 'start');
-      return svg('0 0 840 470', s, 'Graph of the energies of a satellite against the radius of its circular orbit. The kinetic energy is positive and falls with radius. The potential energy is negative and twice as large. The total energy is negative, equal in size to the kinetic energy, and rises towards zero for larger orbits');
+      return svg('0 0 840 510', s, 'Graph of the energies of a satellite against the radius of its circular orbit. The kinetic energy is positive and falls with radius. The potential energy is negative and twice as large. The total energy is negative, equal in size to the kinetic energy, and rises towards zero for larger orbits');
     },
 
     // Launched horizontally from the same point at four speeds, after Newton's picture.

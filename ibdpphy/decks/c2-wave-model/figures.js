@@ -8,7 +8,8 @@ window.DeckFigures.add(P => {
   const dot = (r, color = 'brand-primary') => `<circle r="${r}" style="fill:var(--${color})"/>`;
   const at = (x, y, body) => `<g transform="translate(${f(x)} ${f(y)})">${body}</g>`;
   const sine = (x0, x1, y0, amp, lambda, phase = 0, n = 120) => sampled(t => { const x = x0 + (x1 - x0) * t; return [x, y0 - amp * Math.sin(TAU * (x - x0) / lambda - phase)]; }, n);
-  const graphAxes = (x0, y0, x1, top, bottom, xl, yl) => arrow(x0, bottom, x0, top, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(x1, y0 + 40, xl, 'lbl mono', 'end') + text(x0 + 14, top + 14, yl, 'lbl mono', 'start');
+  // The position or time axis crosses the middle, so its label goes below the whole plot.
+  const graphAxes = (x0, y0, x1, top, bottom, xl, yl, gap = 40) => arrow(x0, bottom, x0, top, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(f((x0 + x1) / 2), bottom + gap, xl, 'lbl mono') + P.yAxisLabel(x0 - 22, (top + bottom) / 2, yl);
 
   return {
     // A transverse wave on a line of particles: each moves up and down while the pattern moves along. Also the title picture.
@@ -47,9 +48,9 @@ window.DeckFigures.add(P => {
     // The two graphs of a wave. data-kind: position (a snapshot) or time (one particle).
     'c2-graph': el => {
       const time = el.dataset.kind === 'time', x0 = 120, y0 = 250, amp = 130, lambda = 280;
-      let s = graphAxes(x0, y0, 800, 60, 440, '', 'displacement') + text(800, y0 - 16, time ? 'time' : 'position', 'lbl mono', 'end') + line(sine(x0, x0 + 2 * lambda, y0, amp, lambda), time ? 'brand-accent-strong' : 'brand-primary', 6);
+      let s = graphAxes(x0, y0, 800, 60, 440, time ? 'time' : 'position', 'displacement', 56) + line(sine(x0, x0 + 2 * lambda, y0, amp, lambda), time ? 'brand-accent-strong' : 'brand-primary', 6);
       s += both(x0 + 3 * lambda / 4, y0 + amp + 26, x0 + 7 * lambda / 4, y0 + amp + 26) + text(x0 + 5 * lambda / 4, y0 + amp + 66, time ? 'period T' : 'wavelength λ', 'lbl strong') + `<line x1="${x0}" y1="${y0 - amp}" x2="${x0 + lambda / 4}" y2="${y0 - amp}" class="guide"/>` + text(x0 - 12, y0 - amp + 9, sub('x', '0'), 'lbl mono', 'end');
-      return svg('40 40 780 440', s, time ? 'A graph of displacement against time for one particle of the medium: a sine curve. The time from one peak to the next is the period' : 'A graph of displacement against position along the wave at one instant: a sine curve. The distance from one peak to the next is the wavelength');
+      return svg('40 40 780 480', s, time ? 'A graph of displacement against time for one particle of the medium: a sine curve. The time from one peak to the next is the period' : 'A graph of displacement against position along the wave at one instant: a sine curve. The distance from one peak to the next is the wavelength');
     },
 
     // Which way each particle is moving: the wave now and a moment later.
@@ -67,10 +68,10 @@ window.DeckFigures.add(P => {
       const x0 = 110, x1 = 770, lambda = 330, amp = 40, n = 21, step = (x1 - x0) / (n - 1), gy = 370, row = 110;
       const d = x => amp * Math.sin(TAU * (x - x0) / lambda);
       let s = Array.from({ length: n }, (_, i) => { const x = x0 + i * step; return `<line x1="${x}" y1="${row - 26}" x2="${x}" y2="${row + 26}" class="guide"/><circle cx="${f(x + d(x))}" cy="${row}" r="10" style="fill:var(--brand-primary)"/>`; }).join('');
-      s += graphAxes(x0, gy, 800, 250, 480, 'position', 'displacement') + line(sampled(t => { const x = x0 + (x1 - x0) * t; return [x, gy - 2 * d(x)]; }, 100), 'brand-primary', 6);
+      s += graphAxes(x0, gy, 800, 250, 480, 'position', 'displacement', 32) + line(sampled(t => { const x = x0 + (x1 - x0) * t; return [x, gy - 2 * d(x)]; }, 100), 'brand-primary', 6);
       const comp = x0 + lambda / 2, rare = x0 + lambda;
       s += `<line x1="${comp}" y1="${row + 36}" x2="${comp}" y2="${gy}" class="guide accent"/><line x1="${rare}" y1="${row + 36}" x2="${rare}" y2="${gy}" class="guide accent"/>` + text(comp, row - 44, 'compression', 'lbl strong') + text(rare, row + 70, 'rarefaction', 'lbl strong halo');
-      return svg('60 30 780 480', s, 'A longitudinal wave. Above, each particle is shown displaced to the right or left of its undisturbed position, marked by a dashed line. Below, a graph of displacement against position. A compression lies where the displacement falls through zero, because the particles on either side have moved towards it; a rarefaction lies where it rises through zero');
+      return svg('60 30 780 490', s, 'A longitudinal wave. Above, each particle is shown displaced to the right or left of its undisturbed position, marked by a dashed line. Below, a graph of displacement against position. A compression lies where the displacement falls through zero, because the particles on either side have moved towards it; a rarefaction lies where it rises through zero');
     },
 
     // An electromagnetic wave: electric and magnetic fields at right angles to each other and to the direction of travel.

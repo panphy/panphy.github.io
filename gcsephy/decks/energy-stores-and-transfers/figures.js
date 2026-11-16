@@ -187,7 +187,7 @@ window.DeckSvgTex = {
     for (let i = 0, v = xs[0]; v <= xs[1] + 1e-9; i++, v += xs[2]) s += `<path class="dk-grid" d="M${X(v)} ${gy}V${gy + gh}"/>` + (i % 2 ? '' : t(X(v), gy + gh + 28, lab(v)[0], 'dk-tick'));
     for (let i = 0, v = ys[0]; v <= ys[1] + 1e-9; i++, v += ys[2]) s += `<path class="dk-grid" d="M${gx} ${Y(v)}H${gx + gw}"/>` + (i % 2 || !v ? '' : t(gx - 10, Y(v) + 7, lab(v)[1], 'dk-tick', 'end'));
     s += `<path class="dk-ink" d="M${gx} ${gy - 8}V${gy + gh}H${gx + gw + 8}"/>`;
-    s += t(gx + gw, gy + gh + 60, g1 ? 'force / N' : 'extension / m', 'dk-label', 'end') + t(gx + 4, gy - 18, g1 ? 'extension / m' : 'force / N', 'dk-label', 'start');
+    s += t(gx + gw / 2, gy + gh + 60, g1 ? 'force / N' : 'extension / m', 'dk-label') + t(gx - 74, gy + gh / 2, g1 ? 'extension / m' : 'force / N', 'dk-label').replace('<text', `<text transform="rotate(-90 ${gx - 74} ${gy + gh / 2})"`);
     const pt = i => (g1 ? [X(i), Y(SPRING[i] / 100)] : [X(SPRING[i] / 100), Y(i)]);
     const fit = g1 ? [X(0), Y(0), X(8), Y(0.32)] : [X(0), Y(0), X(0.32), Y(8)];
     return { s, pt, fit };
@@ -437,7 +437,7 @@ window.DeckSvgTex = {
   function springLimit() {
     return `<svg class="dk" viewBox="0 0 780 490" role="img" aria-label="A force–extension graph is a straight line through the origin up to the marked limit of proportionality, then curves away from the straight-line continuation">
       <path class="dk-axis" d="M110 65V400H740"/>
-      ${t(110, 38, 'force F / N', 'dk-big', 'start')}${t(738, 454, 'extension e / m', 'dk-big', 'end')}${t(92, 433, '0', 'dk-label', 'end')}
+      ${t(76, 232, 'force F / N', 'dk-big').replace('<text', '<text transform="rotate(-90 76 232)"')}${t(425, 454, 'extension e / m', 'dk-big')}${t(92, 433, '0', 'dk-label', 'end')}
       <path class="dk-guide" d="M400 180L590 36"/>
       <path class="dk-fit" d="M110 400L400 180C470 127 560 110 710 90"/>
       <circle class="dk-dot" cx="400" cy="180" r="9"/>
@@ -480,7 +480,7 @@ window.DeckSvgTex = {
     let s = `<path class="dk-ink" d="M${x0} ${y0 - 6}V${y0 + h}H${x0 + w}"/>`;
     for (let v = 0; v <= 14; v += 2) s += `<path class="dk-grid" d="M${x0} ${y0 + h - v / 14 * h}H${x0 + w}"/>` + t(x0 - 10, y0 + h - v / 14 * h + 6, v, 'dk-tick', 'end');
     data.forEach(([m, d], i) => { const bh = d / 14 * h, cx = x0 + i * bw + bw / 2; s += `<rect class="dk-bar b1" x="${x0 + i * bw + 18}" y="${y0 + h - bh}" width="${bw - 36}" height="${bh}"/>` + m.split(' ').map((w, j) => t(cx, y0 + h + 30 + j * 26, w, 'dk-small')).join(''); });
-    s += t(24, y0 + h / 2, 'drop / °C', 'dk-label', 'middle').replace('<text', `<text transform="rotate(-90 24 ${y0 + h / 2})"`);
+    s += t(30, y0 + h / 2, 'drop / °C', 'dk-label', 'middle').replace('<text', `<text transform="rotate(-90 30 ${y0 + h / 2})"`);
     return `<svg class="dk" viewBox="0 0 720 360" role="img" aria-label="Bar chart of the temperature drop in 10 minutes for each wrapping: none 13, newspaper 8, felt 7, bubble wrap 6, cotton wool 5 degrees">${s}</svg>`;
   }
 

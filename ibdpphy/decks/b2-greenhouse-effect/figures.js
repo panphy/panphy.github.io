@@ -42,7 +42,7 @@ window.DeckFigures.add(P => {
       const X = l => 110 + 230 * Math.log10(l / 0.1), curve = (T, color) => { const top = planck(2898 / T, T); return line(sampled(t => { const l = 0.1 * 10 ** (3 * t); return [X(l), 420 - 320 * planck(l, T) / top]; }, 160), color); };
       let s = `<rect x="${f(X(0.4))}" y="34" width="${f(X(0.7) - X(0.4))}" height="386" style="fill:var(--sand);opacity:.3"/>` + arrow(110, 420, 110, 40, 'text-secondary', 2.5) + arrow(110, 420, 840, 420, 'text-secondary', 2.5);
       s += curve(5800, 'positive') + curve(288, 'alpha', 3) + [0.1, 1, 10, 100].map(l => `<line x1="${X(l)}" y1="420" x2="${X(l)}" y2="432" class="tick"/>` + text(X(l), 462, String(l), 'lbl mono')).join('');
-      s += text(90, 230, 'intensity', 'lbl mono', 'middle', 'transform="rotate(-90 90 230)"') + text(834, 500, 'wavelength / μm', 'lbl mono', 'end') + text(X(0.53), 22, 'visible', 'lbl small') + text(X(1.1), 130, 'from the Sun,', 'lbl strong halo', 'start', 'style="fill:var(--positive)"') + text(X(1.1), 164, '5800 K', 'lbl mono halo', 'start') + text(X(22), 130, 'from the Earth,', 'lbl strong halo', 'start', 'style="fill:var(--alpha)"') + text(X(22), 164, '288 K', 'lbl mono halo', 'start');
+      s += text(90, 230, 'intensity', 'lbl mono', 'middle', 'transform="rotate(-90 90 230)"') + text(475, 504, 'wavelength / μm', 'lbl mono') + text(X(0.53), 22, 'visible', 'lbl small') + text(X(1.1), 130, 'from the Sun,', 'lbl strong halo', 'start', 'style="fill:var(--positive)"') + text(X(1.1), 164, '5800 K', 'lbl mono halo', 'start') + text(X(22), 130, 'from the Earth,', 'lbl strong halo', 'start', 'style="fill:var(--alpha)"') + text(X(22), 164, '288 K', 'lbl mono halo', 'start');
       return svg('60 -10 800 530', s, 'Two black-body spectra on a logarithmic wavelength scale, each drawn to the same height. Radiation from the Sun at 5800 kelvin peaks at 0.5 micrometers, in the visible, and lies almost entirely below 3 micrometers. Radiation from the Earth at 288 kelvin peaks at 10 micrometers, in the infrared, and lies almost entirely above 3 micrometers. The two hardly overlap');
     },
 
@@ -111,10 +111,10 @@ window.DeckFigures.add(P => {
     'b2-keeling': () => {
       const X = year => 130 + (year - 1958) * 10, Y = ppm => 430 - (ppm - 300) * 2.8;
       const ppm = year => { const t = year - 1958; return 315 + 0.819 * t + 0.0125 * t * t + 3 * Math.sin(TAU * (t + 0.1)); };
-      let s = arrow(130, 430, 130, 40, 'text-secondary', 2.5) + arrow(130, 430, 830, 430, 'text-secondary', 2.5) + text(146, 54, 'CO₂ / parts per million', 'lbl mono', 'start');
+      let s = arrow(130, 430, 130, 40, 'text-secondary', 2.5) + arrow(130, 430, 830, 430, 'text-secondary', 2.5) + P.yAxisLabel(47, 235, 'CO₂ / parts per million');
       s += [1960, 1980, 2000, 2020].map(y => `<line x1="${X(y)}" y1="430" x2="${X(y)}" y2="442" class="tick"/>` + text(X(y), 472, y, 'lbl mono')).join('') + [320, 360, 400].map(p => `<line x1="118" y1="${f(Y(p))}" x2="130" y2="${f(Y(p))}" class="tick"/>` + text(108, f(Y(p)) + 9, p, 'lbl mono', 'end')).join('');
       s += line(sampled(t => { const y = 1958 + 66 * t; return [X(y), Y(ppm(y))]; }, 800), 'proton', 3) + text(X(1960), Y(348), 'about 315 in 1958', 'lbl halo', 'start') + text(X(2022), Y(432), 'over 420', 'lbl strong halo', 'end') + text(X(1988), Y(320), 'the ripple: plants take in CO₂', 'lbl small halo', 'start') + text(X(1988), Y(309), 'each northern summer', 'lbl small halo', 'start');
-      return svg('40 20 810 480', s, 'A graph of the concentration of carbon dioxide in the air at Mauna Loa against year. It rises from about 315 parts per million in 1958 to over 420 today, more and more steeply, with a small ripple up and down every year');
+      return svg('20 20 820 480', s, 'A graph of the concentration of carbon dioxide in the air at Mauna Loa against year. It rises from about 315 parts per million in 1958 to over 420 today, more and more steeply, with a small ripple up and down every year');
     }
   };
 });
