@@ -64,7 +64,7 @@ window.DeckFigures.add(P => {
       if (on) s += P.yAxisLabel(48, 255, 'temperature / K') + text(475, 512, 'energy supplied', 'lbl mono');
       const guide = (x, y, value) => on ? `<line x1="120" y1="${y}" x2="${x}" y2="${y}" class="guide"/>` + text(106, y + 10, value, 'lbl mono', 'end') : '';
       const seg = k => line(through(pts.slice(k, k + 2)), k % 2 ? 'brand-accent' : 'brand-primary', k % 2 ? 8 : 6);
-      const labels = on ? [text(168, 420, 'ice', 'lbl halo', 'start'), text(216, 320, 'melting', 'lbl strong halo'), text(372, 270, 'water', 'lbl halo', 'start'), text(591, 130, 'boiling', 'lbl strong halo') + text(591, 194, 'temperature constant', 'lbl small'), text(770, 130, 'steam', 'lbl halo', 'start')] : ['', '', '', '', ''];
+      const labels = on ? [text(168, 420, 'ice', 'lbl halo', 'start'), text(216, 320, 'melting', 'lbl strong halo'), text(372, 270, 'water', 'lbl halo', 'start'), text(591, 130, 'boiling', 'lbl strong halo') + text(591, 194, 'temperature constant', 'lbl small'), text(746, 96, 'steam', 'lbl halo', 'end')] : ['', '', '', '', ''];
       const guides = [guide(156, 340, '273'), '', guide(426, 150, '373'), '', ''];
       const stage = k => guides[k] + seg(k) + labels[k];
       // Drawn in this order so the thicker plateaus sit on top of the slopes beside them.
