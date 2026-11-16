@@ -666,7 +666,7 @@
       [0.3, 0.9].forEach(t => { s += `<circle cx="${at(t)[0]}" cy="${at(t)[1]}" r="8" style="fill:var(--brand-accent)"/>`; });
       s += `<circle cx="458" cy="292" r="8" style="fill:var(--brand-accent-strong)"/>`;
       s += text(420, 200, 'gradient of chord', 'lbl strong', 'end') + text(420, 230, '= average velocity', 'lbl', 'end');
-      s += text(480, 345, 'gradient of tangent', 'lbl strong', 'start') + text(480, 375, '= instantaneous velocity', 'lbl', 'start');
+      s += text(450, 345, 'gradient of tangent', 'lbl strong', 'start') + text(450, 375, '= instantaneous velocity', 'lbl', 'start');
       return svg('0 0 800 460', s, 'Displacement against time for a body speeding up: the gradient of a chord between two points is the average velocity and the gradient of the tangent at one point is the instantaneous velocity');
     },
 
@@ -891,9 +891,9 @@
     },
 
     'friction-graph': () => {
-      let s = axes(110, 400, 760, 40, 'applied force', 'friction', { yGap: 80 }) + `<line x1="110" y1="140" x2="370" y2="140" class="guide accent"/><line x1="110" y1="178" x2="384" y2="178" class="guide accent"/>`;
+      let s = axes(110, 400, 760, 40, 'applied force', 'friction') + `<line x1="110" y1="140" x2="370" y2="140" class="guide accent"/><line x1="110" y1="178" x2="384" y2="178" class="guide accent"/>`;
       s += plot('M110,400 L370,140 L384,178 L720,178');
-      s += text(98, 144, sub('μ', 's') + sub('F', 'N'), 'lbl mono', 'end') + text(98, 190, sub('μ', 'd') + sub('F', 'N'), 'lbl mono', 'end');
+      s += text(122, 128, sub('μ', 's') + sub('F', 'N'), 'lbl mono', 'start') + text(122, 210, sub('μ', 'd') + sub('F', 'N'), 'lbl mono', 'start');
       s += text(384, 128, 'starts to slide', 'lbl small', 'start') + text(560, 160, 'dynamic: constant', 'lbl strong');
       s += text(300, 300, 'static', 'lbl strong', 'start') + text(300, 332, 'grows to match the applied force', 'lbl small', 'start');
       return svg('0 0 800 460', s, 'Friction against applied force: static friction rises in step with the applied force up to a maximum of mu s times the normal force, then the body slides and friction drops a little to a constant dynamic value of mu d times the normal force');
