@@ -228,7 +228,6 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .q p { font-weight: 600; }
 .q .n { border: 0; color: var(--year-ink); font: 600 24px var(--font-mono); }
 .q .ans { border: 0; border-left: 4px solid var(--brand-primary); border-radius: 0 12px 12px 0; background: var(--formula); color: var(--text-main); font-weight: 600; }
-.reveal-hint { font: 700 24px var(--font-body); color: var(--text-secondary); letter-spacing: .05em; }
 .terms { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); border-radius: 22px; box-shadow: none; }
 /* In Year 11, .terms is a grid of separate .term cards, not one panel. */
 .deck-atoms .terms { background: none; border: 0; border-radius: 0; }
