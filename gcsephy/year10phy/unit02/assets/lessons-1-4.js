@@ -52,7 +52,7 @@
           ["The particles in a liquid are", ["far apart", "in a regular pattern", "close together"], 2],
           ["A gas can be squashed because its particles", ["are far apart", "are soft", "are small"], 0],
         ] },
-        { t: "q", type: "Supported", p: "Complete the sentences.", fill: [
+        { t: "q", p: "Complete the sentences.", fill: [
           "When a solid is heated enough, it turns into a liquid. This is called [[melting|melting / freezing / condensing]].",
           "When a gas is cooled enough, it turns into a liquid. This is called [[condensing|boiling / condensing / sublimating]].",
           "When a solid turns straight into a gas, it is called [[sublimating|evaporating / freezing / sublimating]].",
@@ -118,7 +118,7 @@
           ["When a gas is heated, its molecules", ["get bigger", "move faster", "move closer together"], 1],
           ["The temperature of a gas is related to the molecules'", ["average kinetic energy", "size", "mass"], 0],
         ] },
-        { t: "q", type: "Supported", p: "Complete the sentences.", fill: [
+        { t: "q", p: "Complete the sentences.", fill: [
           "Gas pressure is caused by molecules [[colliding with|colliding with / sticking to / passing through]] the walls of the container.",
           "When a gas in a sealed can is cooled, the pressure [[decreases|increases / decreases / stays the same]].",
         ] },
@@ -192,8 +192,8 @@
           ["The unit of density is", ["kg", "kg/m³", "m³/kg"], 1],
           ["A gas has a low density because its particles are", ["very light", "far apart", "moving quickly"], 1],
         ] },
-        { t: "q", type: "Supported", p: "A stone has a mass of 240 g and a volume of 80 cm³. Calculate its density in g/cm³.", frame: frame3, frameA: [R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{240}{80}\)`, "3.0 g/cm³"] },
-        { t: "q", type: "Supported", p: "A concrete beam has a mass of 4800 kg and a volume of 2.0 m³. Calculate the density of the concrete.", frame: frame3, frameA: [R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{4800}{2.0}\)`, "2400 kg/m³"] },
+        { t: "q", p: "A stone has a mass of 240 g and a volume of 80 cm³. Calculate its density in g/cm³.", frame: frame3, frameA: [R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{240}{80}\)`, "3.0 g/cm³"] },
+        { t: "q", p: "A concrete beam has a mass of 4800 kg and a volume of 2.0 m³. Calculate the density of the concrete.", frame: frame3, frameA: [R`\(\rho = \dfrac{m}{V}\)`, R`\(\rho = \dfrac{4800}{2.0}\)`, "2400 kg/m³"] },
         { t: "q", p: "Complete the table. Show your working underneath.", table: { head: ["Object", "Mass", "Volume", "Density"], rows: [["Wooden block", "360 g", "600 cm³", null], ["Copper pipe", null, "50 cm³", "8.9 g/cm³"], ["Air in a room", "60 kg", null, "1.2 kg/m³"], ["Petrol in a tank", "36 kg", "0.050 m³", null]], ans: [[null, null, null, "0.60 g/cm³"], [null, "445 g", null, null], [null, null, "50 m³", null], [null, null, null, "720 kg/m³"]] }, lines: 4 },
         { t: "q", p: "The density of sea water is 1.03 g/cm³. Write this density in kg/m³.", lines: 1, a: "1.03 × 1000 = 1030 kg/m³" },
         { t: "q", p: "Explain, using the particle model, why 1 cm³ of liquid water has a much greater mass than 1 cm³ of steam.", lines: 3, a: "In liquid water the particles are close together, but in steam they are far apart. So 1 cm³ of water contains many more particles, and more mass, than 1 cm³ of steam." },

@@ -54,7 +54,7 @@
       try: [
         { t: "q", p: "A ball has 20 J in its G.P.E. store at the top. Ignore air resistance. Draw the bars at each moment.", after: [{ t: "figs", cols: 3, items: [bars("at the top", [20, 0, 0]), bars("half-way down", [10, 10, 0]), bars("just before landing", [0, 20, 0])] }] },
         { t: "q", p: "Complete the sentences. The choices are after each gap.", fill: [R`At the top of its swing, a pendulum has most energy in its [[gravitational potential|kinetic / gravitational potential]] store.`, R`At the bottom of its swing, it has most energy in its [[kinetic|kinetic / gravitational potential]] store.`, R`The total energy [[stays the same|goes up / goes down / stays the same]] if we ignore air resistance.`] },
-        { t: "q", type: "On your own", p: "A 0.20 kg apple falls 2.5 m from a tree. Calculate the energy in its kinetic store just before it lands. Ignore air resistance.", lines: 3, a: R`\(E_k = E_p = 0.20 \times 9.8 \times 2.5 = 4.9\) J` },
+        { t: "q", p: "A 0.20 kg apple falls 2.5 m from a tree. Calculate the energy in its kinetic store just before it lands. Ignore air resistance.", lines: 3, a: R`\(E_k = E_p = 0.20 \times 9.8 \times 2.5 = 4.9\) J` },
         { t: "q", type: "Challenge", p: "A toy launcher has a spring with k = 200 N/m, squashed by 0.050 m. It fires a 10 g ball straight up. Calculate the greatest height the ball could reach.", lines: 4, a: R`\(E_e = 0.5 \times 200 \times 0.050^2 = 0.25\) J. At the top, \(E_p = 0.25\) J. \(h = \dfrac{0.25}{0.010 \times 9.8} = 2.6\) m` },
         { t: "q", say: ["Mo", "The pendulum swings lower each time, so energy is being destroyed."], p: "Explain why Mo is wrong.", lines: 2, a: "Energy cannot be destroyed. It is dissipated: transferred to the thermal store of the surroundings by air resistance and friction." },
       ],
@@ -115,7 +115,7 @@
       ] },
       try: [
         { t: "q", p: "Draw a ring around the correct answer in each box.", ring: [["Power is measured in", ["joules", "watts", "newtons"], 1], ["A more powerful motor transfers energy", ["faster", "slower"], 0], ["1 W is the same as", ["1 J per second", "1 J per minute", "1 N per metre"], 0]] },
-        { t: "q", type: "Supported", p: "A 30 W fan runs for 5.0 minutes. Calculate the energy transferred. <em>Convert the time first!</em>", frame: frame4, frameA: ["t = 5.0 × 60 = 300 s", R`\(E = P\,t\)`, R`\(E = 30 \times 300\)`, "9000 J"] },
+        { t: "q", p: "A 30 W fan runs for 5.0 minutes. Calculate the energy transferred. <em>Convert the time first!</em>", frame: frame4, frameA: ["t = 5.0 × 60 = 300 s", R`\(E = P\,t\)`, R`\(E = 30 \times 300\)`, "9000 J"] },
         { t: "q", p: "Complete the table. Show your working underneath.", table: { head: ["Appliance", "Energy / J", "Time / s", "Power / W"], rows: [["Fan", "1200", "30", null], ["Kettle", null, "60", "2000"], ["Lamp", "5000", null, "100"]], ans: [[null, null, null, "40"], [null, "120 000", null, null], [null, null, "50", null]] }, lines: 3 },
         { t: "q", type: "Challenge", p: "A 3.0 kW heater transfers 540 kJ. How many minutes was it on for?", lines: 3, a: R`\(t = \dfrac{E}{P} = \dfrac{540\,000}{3000} = 180\) s = 3.0 minutes` },
       ],
