@@ -470,6 +470,12 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
    reaches the screen edges when the screen is not 16:9. */
 body.is-fullscreen { transition: background-color .35s ease; }
 body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1px, transparent 1px); }
+/* Title and section slides take a darker sand ground (warmer than the history teal),
+   so they stand out in the thumbnails. */
+:root { --intro-bg: color-mix(in srgb, var(--sand) 26%, #ebe6db); --intro-pattern: color-mix(in srgb, var(--sand) 36%, #ddd7c9); }
+[data-theme="dark"] { --intro-bg: color-mix(in srgb, var(--sand) 10%, #1b1b19); --intro-pattern: color-mix(in srgb, var(--sand) 14%, #262623); }
+.slide:is(.title, .section) { background-color: var(--intro-bg); background-image: radial-gradient(var(--intro-pattern) 1.5px, transparent 1.5px); background-size: 36px 36px; }
+body.is-fullscreen:has(#deck .slide:is(.title, .section).active) { background-color: var(--intro-bg); background-image: radial-gradient(var(--intro-pattern) 1px, transparent 1px); }
 .not-examined { position: absolute; top: 56px; right: 88px; margin: 0; padding: 3px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 700 20px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--text-secondary); }
 
 /* Story slides: photographs of the scientists and their apparatus (images/) beside a short
