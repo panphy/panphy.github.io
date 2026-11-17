@@ -629,7 +629,7 @@ button:hover {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-1);
-  --present-zoom: 1;
+  --present-zoom: 2;
 }
 
 #inputPane {

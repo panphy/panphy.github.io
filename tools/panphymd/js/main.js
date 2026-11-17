@@ -2162,7 +2162,7 @@ if (presentZoomButton && presentZoomPanel) {
       presentZoomButton.focus({ preventScroll: true });
     }
   });
-  applyPresentZoom(100);
+  applyPresentZoom(200);
 }
 // ---------------------------------------------------------------------- //
 // Mobile tab bar — switch between Edit / Preview on narrow screens        //
