@@ -86,52 +86,106 @@
     });
   }
 
-  // Moving figures marked data-controls wait at the start with Play/Pause and Reset under them,
-  // so a teacher runs them when ready. Leaving the slide puts them back at the start. Two kinds:
-  // SMIL loops (A.5), run by the SVG's own clock, and CSS figures that play once when their k2
-  // step is shown (A.2's collisions and falling sphere), which then becomes the Play button's.
+  // Every moving figure on a content slide waits at the start with Play/Pause and Reset (icons)
+  // under it, so a teacher runs it when ready; leaving the slide puts it back at the start. Small
+  // pictures (data-plain, data-still, title and section slides) keep moving on their own, and
+  // data-controls="off" opts a figure out. Kinds, any of which a figure may combine:
+  //   loops: SMIL animations that repeat, run by the SVG's own clock;
+  //   orbits: [data-orbit] nodes moved by animateOrbits, run by a clock of the figure's own;
+  //   k2: CSS animations that run when the figure's k2 step is shown (A.2's collisions);
+  //   play: SMIL animations with begin="indefinite", begun when its empty .step.play is shown.
+  // The k2 and play steps leave the click order: the Play button shows them instead.
+  const ICONS = {
+    play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5h3.6v13H7zM13.4 5.5H17v13h-3.6z"/></svg>',
+    reset: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.05-4.95" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round"/><path d="M5.5 3.5v4.5H10" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"/></svg>',
+  };
+  const LOOPING = 'animate[repeatCount="indefinite"], animateTransform[repeatCount="indefinite"], animateMotion[repeatCount="indefinite"], [data-orbit]';
+  const orbitClocks = new WeakMap();
+
   function buildLoopControls() {
-    deck.querySelectorAll('.fig[data-controls]').forEach(fig => {
-      const svg = fig.querySelector('svg');
-      if (!svg || !svg.pauseAnimations || !svg.querySelector('.mover')) return;
-      const k2 = svg.querySelector('.mover .k2');
-      if (k2) k2.classList.remove('step');
+    if (reduceMotion.matches) return;
+    deck.querySelectorAll('.fig').forEach(fig => {
+      if (fig.dataset.controls === 'off' || 'plain' in fig.dataset || 'still' in fig.dataset || fig.closest('.slide.title, .slide.section')) return;
+      const svgOf = () => fig.querySelector('svg');
+      if (!svgOf() || !svgOf().pauseAnimations) return;
+      const k2s = [...fig.querySelectorAll('.k2')];
+      const isPlay = !!fig.querySelector('.step.play');
+      if (!k2s.length && !isPlay && !fig.querySelector(LOOPING)) return;
+      k2s.forEach(node => node.classList.remove('step'));
+      if (isPlay) fig.querySelector('.step.play').classList.remove('step');
+      const clock = { t: 0, playing: false };
+      if (fig.querySelector('[data-orbit]')) orbitClocks.set(fig, clock);
+
       const row = document.createElement('div');
       row.className = 'sim-buttons loop-buttons';
-      row.innerHTML = '<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset"><span aria-hidden="true">↺</span> Reset</button>';
+      row.innerHTML = `<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset" aria-label="Reset" title="Reset">${ICONS.reset}</button>`;
       const play = row.querySelector('[data-k="play"]');
-      let playing = false, run = 0;
+      let playing = false, started = false, finished = false, run = 0;
       const label = on => {
         playing = on;
-        play.innerHTML = on ? '<span aria-hidden="true">❚❚</span> Pause' : '<span aria-hidden="true">▶</span> Play';
+        clock.playing = on;
+        play.innerHTML = on ? ICONS.pause : ICONS.play;
+        play.setAttribute('aria-label', on ? 'Pause' : 'Play');
+        play.title = on ? 'Pause' : 'Play';
       };
-      const running = () => fig.getAnimations({ subtree: true });
+      const css = () => fig.getAnimations({ subtree: true });
+      const done = () => { if (playing) label(false); finished = true; };
       const reset = () => {
         label(false);
         run += 1;
-        if (k2) k2.classList.remove('shown');
-        else { svg.pauseAnimations(); svg.setCurrentTime(0); }
+        started = false;
+        finished = false;
+        clock.t = 0;
+        k2s.forEach(node => node.classList.remove('shown'));
+        if (isPlay && fig.querySelector('.play.shown')) {
+          // Parsed afresh from its markup: a played SMIL animation keeps its begin time.
+          fig.querySelector('.play.shown').classList.remove('shown');
+          const holder = document.createElement('div');
+          holder.innerHTML = svgOf().outerHTML;
+          svgOf().replaceWith(holder.firstElementChild);
+        }
+        svgOf().pauseAnimations();
+        svgOf().setCurrentTime(0);
       };
       const start = () => {
-        if (!k2) { svg.unpauseAnimations(); return; }
-        if (!k2.classList.contains('shown')) {
-          running(); // settle the reset styles first, so a replay starts afresh
-          k2.classList.add('shown');
-          // Once every part has finished, Play runs it again from the start.
-          const mine = run;
-          Promise.all(running().map(anim => anim.finished)).then(() => { if (mine === run && playing) { label(false); run += 1; } }, () => {});
-        } else running().forEach(anim => anim.play());
+        started = true;
+        const mine = run;
+        svgOf().unpauseAnimations();
+        if (k2s.length) {
+          css(); // settle the reset styles first, so a replay starts afresh
+          k2s.forEach(node => node.classList.add('shown'));
+          const parts = css();
+          if (parts.length && !isPlay && !fig.querySelector(LOOPING)) Promise.all(parts.map(anim => anim.finished)).then(() => { if (mine === run) done(); }, () => {});
+        }
+        if (isPlay) {
+          fig.querySelector('.play').classList.add('shown');
+          const once = [...svgOf().querySelectorAll('[begin="indefinite"]')];
+          let left = once.length;
+          once.forEach(node => {
+            node.addEventListener('endEvent', () => { left -= 1; if (!left && mine === run && !fig.querySelector('[repeatCount="indefinite"]')) done(); }, { once: true });
+            node.beginElement?.();
+          });
+        }
       };
-      const pause = () => (k2 ? running().forEach(anim => anim.pause()) : svg.pauseAnimations());
       play.addEventListener('click', () => {
-        if (playing) { pause(); label(false); return; }
-        if (k2 && k2.classList.contains('shown') && !running().some(anim => anim.playState === 'paused')) reset();
+        if (playing) {
+          svgOf().pauseAnimations();
+          css().forEach(anim => anim.pause());
+          label(false);
+          return;
+        }
+        if (finished) reset();
         label(true);
-        start();
+        if (!started) start();
+        else { svgOf().unpauseAnimations(); css().forEach(anim => anim.play()); }
       });
       row.querySelector('[data-k="reset"]').addEventListener('click', reset);
+      label(false);
       reset();
-      fig.after(row);
+      // data-controls="head": in the panel's heading, for a panel of fixed height.
+      const head = fig.dataset.controls === 'head' && fig.closest('.panel')?.querySelector('.panel-head');
+      if (head) head.append(row); else fig.after(row);
       state.loops.push({ slide: fig.closest('.slide'), reset });
     });
   }
@@ -389,9 +443,16 @@
     if (reduceMotion.matches) return;
     animateScatter(time);
     const slide = state.slides[state.index];
-    slide.querySelectorAll('[data-orbit]').forEach(node => {
+    // A figure with Play/Pause keeps its own time, which runs only while it plays.
+    const step = time - (state.orbitLast ?? time);
+    state.orbitLast = time;
+    const nodes = [...slide.querySelectorAll('[data-orbit]')];
+    new Set(nodes.map(node => orbitClocks.get(node.closest('.fig')))).forEach(clock => { if (clock && clock.playing) clock.t += step; });
+    nodes.forEach(node => {
+      const clock = orbitClocks.get(node.closest('.fig'));
+      const at = clock ? clock.t : time;
       const [cx, cy, rx, ry, phase, period, tilt] = node.dataset.orbit.split(',').map(Number);
-      const [x, y] = window.DeckFigures.orbitPoint(cx, cy, rx, ry, phase + (time / 1000) * (Math.PI * 2 / period), tilt);
+      const [x, y] = window.DeckFigures.orbitPoint(cx, cy, rx, ry, phase + (at / 1000) * (Math.PI * 2 / period), tilt);
       node.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
     });
   }
