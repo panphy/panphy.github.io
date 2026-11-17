@@ -391,7 +391,7 @@ function initializeUi() {
 		if (state.positionChart) {
 			replotCurrentView();
 		}
-		setMessage("Scale cleared. Positions are now in pixels.");
+		setMessage("Scale reset. Positions are now in pixels.");
 	});
 
 	clearOriginButton.addEventListener("click", () => {
@@ -401,7 +401,7 @@ function initializeUi() {
 		drawOverlay();
 		replotCurrentView();
 		renderPointRows();
-		setMessage("Origin cleared. Positions are measured from the bottom-left corner.");
+		setMessage("Origin reset. Positions are measured from the bottom-left corner.");
 	});
 
 	[[calibrationPrompt, cancelCalibrationButton], [exportPrompt, cancelExportButton], [frameRatePrompt, cancelFrameRateButton]].forEach(([dialog, cancel]) => {
