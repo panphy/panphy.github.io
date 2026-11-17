@@ -3,7 +3,7 @@
 (() => {
   const SLIDE_W = 1600;
   const SLIDE_H = 900;
-  const state = { index: 0, slides: [], orbitFrame: 0, scatter: null };
+  const state = { index: 0, slides: [], orbitFrame: 0, scatter: null, loops: [] };
 
   const deck = document.getElementById('deck');
   const stage = document.getElementById('stage');
@@ -47,6 +47,7 @@
     const slide = state.slides[state.index];
     slide.querySelectorAll('.step').forEach(step => step.classList.toggle('shown', fromEnd));
     syncPlays(slide);
+    state.loops.forEach(loop => { if (loop.slide !== slide) loop.reset(); });
     const n = state.index + 1;
     const total = state.slides.length;
     counter.innerHTML = `<b>${String(n).padStart(2, '0')}</b> / ${String(total).padStart(2, '0')}`;
@@ -82,6 +83,31 @@
         holder.innerHTML = figure.outerHTML;
         figure.replaceWith(holder.firstElementChild);
       }
+    });
+  }
+
+  // Looping figures marked data-controls wait at the start with Play/Pause and Reset under them,
+  // so a teacher runs them when ready. Leaving the slide puts them back at the start.
+  function buildLoopControls() {
+    deck.querySelectorAll('.fig[data-controls]').forEach(fig => {
+      const svg = fig.querySelector('svg');
+      if (!svg || !svg.pauseAnimations || !svg.querySelector('.mover')) return;
+      const row = document.createElement('div');
+      row.className = 'sim-buttons loop-buttons';
+      row.innerHTML = '<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset"><span aria-hidden="true">↺</span> Reset</button>';
+      const play = row.querySelector('[data-k="play"]');
+      let playing = false;
+      const set = on => {
+        playing = on;
+        play.innerHTML = on ? '<span aria-hidden="true">❚❚</span> Pause' : '<span aria-hidden="true">▶</span> Play';
+        if (on) svg.unpauseAnimations(); else svg.pauseAnimations();
+      };
+      const reset = () => { set(false); svg.setCurrentTime(0); };
+      play.addEventListener('click', () => set(!playing));
+      row.querySelector('[data-k="reset"]').addEventListener('click', reset);
+      reset();
+      fig.after(row);
+      state.loops.push({ slide: fig.closest('.slide'), reset });
     });
   }
 
@@ -384,6 +410,7 @@
       if (foot) foot.textContent = String(i + 1).padStart(2, '0');
     });
     buildThumbs();
+    buildLoopControls();
     let thumbsHidden = false;
     try { thumbsHidden = !!localStorage.getItem(THUMBS_KEY); } catch (error) {}
     setThumbs(!thumbsHidden, false);

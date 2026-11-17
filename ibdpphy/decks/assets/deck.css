@@ -679,6 +679,9 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .sim-button { min-width: 170px; height: 56px; padding: 0 24px; border: 1px solid var(--input-border); border-radius: 14px; background: var(--card-bg); color: var(--brand-primary); font: 700 28px/1 var(--font-body); white-space: nowrap; cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 .sim-button span { display: inline-block; min-width: 1.2em; }
 .sim-button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+/* Play/Pause and Reset under a looping figure (deck.js, data-controls): fixed widths, so the row never shifts. */
+.loop-buttons { margin-top: 14px; }
+.loop-buttons .sim-button { width: 190px; min-width: 0; }
 @keyframes pulse { 50% { transform: scale(1.08); opacity: .75; } }
 /* A sphere falling through a fluid (A.2): position and speed at steps of the fall, for a speed
    that rises as 1 − e^(−t/τ) with τ = 0.9 s over a 5 s fall. */
@@ -775,7 +778,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 @media print {
   @page { size: 1600px 900px; margin: 0; }
   html, body { height: auto; overflow: visible; background: var(--bg-color); }
-  .banner, .controls, .progress, .thumbs { display: none !important; }
+  .banner, .controls, .progress, .thumbs, .loop-buttons { display: none !important; }
   .stage { position: static; }
   .deck { position: static; transform: none !important; width: 1600px; height: auto; border: 0; border-radius: 0; box-shadow: none; overflow: visible; background: none; }
   .slide { position: relative; width: 1600px; height: 900px; visibility: visible; opacity: 1; break-after: page; background-color: var(--bg-color); background-image: radial-gradient(var(--bg-pattern) 1.5px, transparent 1.5px); background-size: 36px 36px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
