@@ -12,6 +12,7 @@ window.DeckFigures.add(P => {
   const OX = 150, OY = 440, U = 76, SX = x => OX + U * x, SY = t => OY - U * t;
   const stAxes = (on, n = 5) => arrow(OX, OY, OX, SY(n) - 10, 'text-secondary', 3) + arrow(OX, OY, SX(n + 0.3), OY, 'text-secondary', 3) + (on ? text(OX - 14, SY(n) + 6, 'ct', 'lbl display italic', 'end') + text(SX(n + 0.3), OY + 40, 'x', 'lbl display italic', 'end') : '');
   const lightLine = (n = 4.9) => line(`M${OX},${OY} L${SX(n)},${SY(n)}`, 'brand-accent', 3, 'stroke-dasharray="10 8"');
+  let clockTrails = 0;
   const event = (x, t, name, dx = 14, dy = -12, color = 'text-main') => `<circle cx="${f(SX(x))}" cy="${f(SY(t))}" r="9" style="fill:var(--${color})"/>` + (name ? text(f(SX(x)) + dx, f(SY(t)) + dy, name, 'lbl strong halo', dx < 0 ? 'end' : 'start') : '');
 
   return {
@@ -55,10 +56,13 @@ window.DeckFigures.add(P => {
       // Each loop is two ticks of its own clock, so both pulses move at c and the moving clock takes γ times as long.
       const rest = [[xs, bot], [xs, top], [xs, bot], [xs, top], [xs, bot]], Tr = 2 * T0 * K, Tm = 2 * g * T0 * K;
       const half = g * T0 / 2, zig = [0, 1, 2, 3, 4].map(i => [xm + v * half * i, i % 2 ? top : bot]);
-      let s = at(xs, 0, mirrors) + line(through(zig), 'brand-accent', 2, 'stroke-dasharray="8 7" opacity=".7"');
+      // The zigzag path: drawn in full on the still picture, traced behind the pulse when it moves.
+      const path = extra => line(through(zig), 'brand-accent', 2, 'stroke-dasharray="8 7" opacity=".7"' + extra), id = `a5-clock-trail-${++clockTrails}`;
+      const trail = `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="2000" height="600"><path d="${through(zig)}" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" style="fill:none;stroke:#fff;stroke-width:12">${anim('stroke-dashoffset', [1, 0], Tm)}</path></mask>` + path(` mask="url(#${id})"`);
+      let s = at(xs, 0, mirrors);
       if (on) s += text(xs, 100, 'at rest', 'lbl strong') + text(xm + 250, 100, 'moving at 0.6 c', 'lbl strong', 'middle', 'style="fill:var(--hl-text)"') + text(xs, bot + 60, 'one tick:', 'lbl') + text(xs, bot + 94, sub('Δt', '0'), 'lbl mono strong') + text(xm + 250, bot + 60, 'the light goes further at the same speed c:', 'lbl') + text(xm + 250, bot + 94, 'one tick takes γ ' + sub('Δt', '0'), 'lbl strong') + arrow(xm + 410, top - 30, xm + 490, top - 30, 'hl', 5);
-      const still = flash(xs, top + 50) + at(zig[1][0] + 40, 0, mirrors) + flash(zig[1][0] + 40, top + 40);
-      const mover = `<g>${track(rest, Tr)}${flash(0, 0)}</g><g>${track([[xm, 0], [zig[4][0], 0]], Tm)}${mirrors}</g><g>${track(zig, Tm)}${flash(0, 0)}</g>`;
+      const still = path('') + flash(xs, top + 50) + at(zig[1][0] + 40, 0, mirrors) + flash(zig[1][0] + 40, top + 40);
+      const mover = trail + `<g>${track(rest, Tr)}${flash(0, 0)}</g><g>${track([[xm, 0], [zig[4][0], 0]], Tm)}${mirrors}</g><g>${track(zig, Tm)}${flash(0, 0)}</g>`;
       return svg(on ? '40 60 840 420' : '60 120 800 220', s + twoState(still, mover), 'Two identical light clocks, each a pulse of light bouncing between two mirrors. In the clock at rest the light goes straight up and down. In the clock moving sideways at 0.6 c, the light follows a longer zigzag path at the same speed c, so each tick takes longer: gamma times as long');
     },
 
