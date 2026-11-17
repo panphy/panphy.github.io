@@ -492,6 +492,10 @@ body.is-fullscreen:has(#deck .slide:is(.title, .section).active) { background-co
 /* A caption wraps to its photo's width. */
 .story-photos figcaption { width: 0; min-width: 100%; margin-top: 12px; font-size: 24px; line-height: 1.3; color: var(--text-secondary); }
 .story-photos figcaption b { color: var(--text-main); }
+/* A grid of photos revealed one by one; the caption arrives with the first. */
+.story-photos .photo-grid { display: grid; grid-template-columns: auto auto; gap: 14px; }
+.story-photos figure:has(.photo-grid) figcaption { transition: opacity .3s ease; }
+.story-photos figure:has(.photo-grid .step):not(:has(.photo-grid .step.shown)) figcaption { opacity: 0; }
 /* A wide, shallow picture (a photographed spectrum) set above the text. */
 .story-strip { margin: 0; }
 .story-strip img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--card-border); box-shadow: var(--card-shadow); }
