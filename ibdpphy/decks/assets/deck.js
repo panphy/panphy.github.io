@@ -86,24 +86,49 @@
     });
   }
 
-  // Looping figures marked data-controls wait at the start with Play/Pause and Reset under them,
-  // so a teacher runs them when ready. Leaving the slide puts them back at the start.
+  // Moving figures marked data-controls wait at the start with Play/Pause and Reset under them,
+  // so a teacher runs them when ready. Leaving the slide puts them back at the start. Two kinds:
+  // SMIL loops (A.5), run by the SVG's own clock, and CSS figures that play once when their k2
+  // step is shown (A.2's collisions and falling sphere), which then becomes the Play button's.
   function buildLoopControls() {
     deck.querySelectorAll('.fig[data-controls]').forEach(fig => {
       const svg = fig.querySelector('svg');
       if (!svg || !svg.pauseAnimations || !svg.querySelector('.mover')) return;
+      const k2 = svg.querySelector('.mover .k2');
+      if (k2) k2.classList.remove('step');
       const row = document.createElement('div');
       row.className = 'sim-buttons loop-buttons';
       row.innerHTML = '<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset"><span aria-hidden="true">↺</span> Reset</button>';
       const play = row.querySelector('[data-k="play"]');
-      let playing = false;
-      const set = on => {
+      let playing = false, run = 0;
+      const label = on => {
         playing = on;
         play.innerHTML = on ? '<span aria-hidden="true">❚❚</span> Pause' : '<span aria-hidden="true">▶</span> Play';
-        if (on) svg.unpauseAnimations(); else svg.pauseAnimations();
       };
-      const reset = () => { set(false); svg.setCurrentTime(0); };
-      play.addEventListener('click', () => set(!playing));
+      const running = () => fig.getAnimations({ subtree: true });
+      const reset = () => {
+        label(false);
+        run += 1;
+        if (k2) k2.classList.remove('shown');
+        else { svg.pauseAnimations(); svg.setCurrentTime(0); }
+      };
+      const start = () => {
+        if (!k2) { svg.unpauseAnimations(); return; }
+        if (!k2.classList.contains('shown')) {
+          running(); // settle the reset styles first, so a replay starts afresh
+          k2.classList.add('shown');
+          // Once every part has finished, Play runs it again from the start.
+          const mine = run;
+          Promise.all(running().map(anim => anim.finished)).then(() => { if (mine === run && playing) { label(false); run += 1; } }, () => {});
+        } else running().forEach(anim => anim.play());
+      };
+      const pause = () => (k2 ? running().forEach(anim => anim.pause()) : svg.pauseAnimations());
+      play.addEventListener('click', () => {
+        if (playing) { pause(); label(false); return; }
+        if (k2 && k2.classList.contains('shown') && !running().some(anim => anim.playState === 'paused')) reset();
+        label(true);
+        start();
+      });
       row.querySelector('[data-k="reset"]').addEventListener('click', reset);
       reset();
       fig.after(row);
