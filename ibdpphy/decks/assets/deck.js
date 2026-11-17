@@ -243,6 +243,7 @@
     scatter.active = active;
     scatter.svg.classList.toggle('scatter-playing', active);
     scatter.group.replaceChildren();
+    scatter.labels.replaceChildren();
     scatter.particles = [];
     scatter.lastSpawn = null;
   }
@@ -286,10 +287,10 @@
       label.setAttribute('x', labelX);
       label.setAttribute('y', labelY);
       label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('class', 'lbl scatter-label');
+      label.setAttribute('class', 'lbl scatter-label halo');
       label.textContent = kind === 'bounce' ? 'bounce back' : 'small deflection';
       label.style.visibility = 'hidden';
-      scatter.group.append(label);
+      scatter.labels.append(label);
     }
     const length = path.getTotalLength();
     path.style.strokeDasharray = String(length);
@@ -377,7 +378,7 @@
     state.slides = [...deck.querySelectorAll('.slide')];
     if (window.DeckNotes) window.DeckNotes.collect(state.slides);
     const scatterSvg = deck.querySelector('[data-fig="scatter"] svg');
-    if (scatterSvg) state.scatter = { svg: scatterSvg, group: scatterSvg.querySelector('.scatter-live'), particles: [], lastSpawn: null, count: 0, active: false };
+    if (scatterSvg) state.scatter = { svg: scatterSvg, group: scatterSvg.querySelector('.scatter-live'), labels: scatterSvg.querySelector('.scatter-labels'), particles: [], lastSpawn: null, count: 0, active: false };
     state.slides.forEach((slide, i) => {
       const foot = slide.querySelector('.slide-foot [data-page]');
       if (foot) foot.textContent = String(i + 1).padStart(2, '0');

@@ -408,23 +408,25 @@
       paths.forEach(([d, kind]) => {
         s += `<path d="${d}" class="alpha-path ${kind}" marker-end="url(#m-alpha)"/>`;
       });
-      s += text(330, 132, 'bounce back', 'lbl', 'middle', 'style="fill:var(--alpha)"');
-      s += text(760, 152, 'small', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 182, 'deflection', 'lbl', 'start', 'style="fill:var(--alpha)"');
+      s += text(330, 132, 'bounce back', 'lbl scatter-label halo', 'middle');
+      s += text(760, 152, 'small', 'lbl scatter-label halo', 'start') + text(760, 182, 'deflection', 'lbl scatter-label halo', 'start');
       s += '</g><g class="scatter-live"></g>';
       s += `<rect x="516" y="96" width="8" height="268" rx="3" style="fill:var(--gold)"/>` + text(520, 84, 'thin gold foil', 'lbl strong');
-      s += text(760, 232, 'straight', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 262, 'through', 'lbl', 'start', 'style="fill:var(--alpha)"');
+      // Live labels go above the foil so it never hides them.
+      s += '<g class="scatter-labels"></g>';
+      s += text(760, 232, 'straight', 'lbl scatter-label halo', 'start') + text(760, 262, 'through', 'lbl scatter-label halo', 'start');
       return svg('0 0 900 460', s, 'Alpha scattering: alpha particles fired at thin gold foil. Most pass straight through, some are deflected, a very few bounce back');
     },
 
     'scatter-zoom': el => {
       const on = animated(el);
-      let s = ball(350, 230, 42, 'positive') + text(350, 318, 'gold nucleus (+)', 'lbl strong');
+      let s = ball(350, 230, 42, 'positive') + text(350, 340, 'gold nucleus (+)', 'lbl strong');
       const paths = [
         ['M20,410 L600,410', 'far away: straight on', 600, 396, 'end'],
         ['M20,168 L220,168 C300,168 330,146 380,104 L470,32', 'close: repelled, deflected', 462, 22, 'end'],
         // A still picture needs the return leg drawn to one side; on the live slide the
         // alpha particle slows, stops and goes straight back along the line it came in on.
-        [on ? 'M20,230 L292,230 L40,230' : 'M20,236 L278,236 Q306,229 278,222 L40,190', 'head-on: bounces back', 20, 272, 'start']
+        [on ? 'M20,230 L292,230 L40,230' : 'M20,236 L278,236 Q306,229 278,222 L40,190', 'head-on: bounces back', 20, 298, 'start']
       ];
       // The head-on particle fades out on its way back and the track stays empty for a moment,
       // so the next one coming in does not look like the same particle bouncing off the left edge.
@@ -437,7 +439,7 @@
         const headOn = on && i === 2;
         const begin = `-${i * 0.9}s`;
         track += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="${headOn ? 4 : 3}s" begin="${begin}" repeatCount="indefinite" path="${d}"${headOn ? ' ' + slowTurn : ''}/>${headOn ? fadeOut(begin) : ''}</g>`;
-        track += text(x, y, label, 'lbl', anchor, 'style="fill:var(--alpha)"');
+        track += text(x, y, label, 'lbl scatter-label halo', anchor);
         // In the deck each track appears with its row of the observation table.
         s += on ? `<g class="with-row with-row-${i}">${track}</g>` : track;
       });
