@@ -237,6 +237,135 @@ check("Deck units");
   }
 }
 
+// Pages, and where this branch left the base (empty without --base).
+const pages = git("ls-files", "-z", "*.html").split("\0").filter((file) => file && !/^googl/.test(file));
+const fork = base ? git("merge-base", base, "HEAD").trim() : "";
+const changedFiles = fork ? new Set(git("diff", "--name-only", fork).split("\n").filter(Boolean)) : new Set();
+const addedFiles = fork ? new Set(git("diff", "--name-only", "--diff-filter=A", fork).split("\n").filter(Boolean)) : new Set();
+const headOf = (source) => (source.match(/<head\b[\s\S]*?<\/head>/i) || [""])[0];
+// Build sources rendered to PDF, not pages for visitors.
+const isBuildSource = (source) => /<meta\s+name="robots"\s+content="noindex/i.test(source);
+const sitemapPages = [...read("sitemap.xml").matchAll(/<loc>([^<]*)<\/loc>/g)]
+  .map(([, loc]) => loc).filter((loc) => loc.startsWith(`${SITE}/`)).map((loc) => [loc, servedFile(loc.slice(SITE.length))]);
+
+check("Copyright");
+{
+  // Only pages added on this branch: some older pages render the line from script or predate the rule.
+  for (const file of pages.filter((page) => addedFiles.has(page))) {
+    if (!/(&copy;|©) PanPhy Labs\. All rights reserved\./.test(read(file))) fail(`${file} has no "© PanPhy Labs. All rights reserved."`);
+  }
+}
+
+check("Theme script");
+{
+  for (const file of pages) {
+    const source = read(file);
+    const tag = (source.match(/<script\b[^>]*\/assets\/theme\.js[^>]*>/) || [])[0];
+    if (!tag) continue;
+    const head = headOf(source);
+    const scope = (file.match(/^(gcsephy|ibdpphy)\//) || [])[1];
+    const tagScope = (tag.match(/data-theme-scope="([^"]*)"/) || [])[1];
+    if (!head.includes(tag)) fail(`${file}: load /assets/theme.js in the head`);
+    else if (/\b(defer|async|type="module")/.test(tag)) fail(`${file}: load /assets/theme.js synchronously (no defer, async or module)`);
+    else if (head.search(/<link\b[^>]*rel="stylesheet"|<style\b/) > -1 && head.search(/<link\b[^>]*rel="stylesheet"|<style\b/) < head.indexOf(tag)) {
+      fail(`${file}: load /assets/theme.js before any stylesheet`);
+    }
+    if (scope && tagScope !== scope) fail(`${file}: theme.js needs data-theme-scope="${scope}"`);
+    if (!scope && tagScope) fail(`${file}: data-theme-scope is only for gcsephy/ and ibdpphy/ pages`);
+  }
+}
+
+check("Published page metadata");
+{
+  for (const [loc, file] of sitemapPages) {
+    if (!isFile(file)) continue;
+    const source = read(file);
+    const canonical = (source.match(/<link\s+rel="canonical"\s+href="([^"]*)"/) || [])[1];
+    if (canonical !== loc) fail(`${file}: canonical link should be ${loc}${canonical ? `, not ${canonical}` : ""}`);
+    if (!/<meta\s+name="description"\s+content="[^"]+"/.test(source)) fail(`${file}: no meta description`);
+    if (!source.includes("/assets/standalone-top.css")) fail(`${file}: does not link /assets/standalone-top.css`);
+    const status = (source.match(/apple-mobile-web-app-status-bar-style"\s+content="([^"]*)"/) || [])[1];
+    if (status && status !== "default") fail(`${file}: apple-mobile-web-app-status-bar-style should be "default"`);
+    const [fonts, design] = [source.indexOf("/assets/fonts/fonts.css"), source.indexOf("/assets/design.css")];
+    if (design > -1 && (fonts < 0 || fonts > design)) fail(`${file}: load /assets/fonts/fonts.css before /assets/design.css`);
+  }
+  if (fork) {
+    const lastmod = (xml) => new Map([...xml.matchAll(/<loc>([^<]*)<\/loc>\s*<lastmod>([^<]*)<\/lastmod>/g)].map(([, loc, date]) => [loc, date]));
+    const [now, before] = [lastmod(read("sitemap.xml")), lastmod(git("show", `${fork}:sitemap.xml`))];
+    for (const [loc, file] of sitemapPages) {
+      if (changedFiles.has(file) && before.has(loc) && now.get(loc) === before.get(loc)) fail(`${file} changed but its sitemap <lastmod> did not`);
+    }
+  }
+}
+
+check("Section pages");
+{
+  for (const file of pages) {
+    const section = (file.match(/^(gcsephy|ibdpphy)\//) || [])[1];
+    const source = read(file);
+    if (section && !isBuildSource(source) && !source.includes(`/${section}/sw-register.js`)) {
+      fail(`${file}: include <script src="/${section}/sw-register.js" defer></script>`);
+    }
+    if (/^(gcsephy|ibdpphy)\/decks\/[^/]+\/index\.html$/.test(file) && !/(?:\.\.\/|\/decks\/)assets\/readable\.css/.test(source)) {
+      fail(`${file}: load the section's decks/assets/readable.css`);
+    }
+  }
+  const scoped = (file, section) => read(file).split("\n").slice(1).join("\n").replaceAll(section, "SECTION");
+  for (const name of ["sw.js", "sw-register.js"]) {
+    if (scoped(`gcsephy/${name}`, "gcsephy") !== scoped(`ibdpphy/${name}`, "ibdpphy")) {
+      fail(`gcsephy/${name} and ibdpphy/${name} differ beyond their scope (and first line)`);
+    }
+  }
+}
+
+check("Inventories and network-only sections");
+{
+  for (const folder of ["beta", "misc"]) {
+    const index = read(`${folder}/index.html`);
+    for (const file of pages.filter((page) => page.startsWith(`${folder}/`) && page.split("/").length === 2 && page !== `${folder}/index.html`)) {
+      const name = file.slice(folder.length + 1);
+      if (!index.includes(`href="${name}"`) && !index.includes(`href="/${file}"`)) fail(`${file} is not listed in ${folder}/index.html`);
+    }
+  }
+  for (const file of pages.filter((page) => /^(beta|misc|fun)\//.test(page))) {
+    if (read(file).includes("/assets/sw-register.js")) fail(`${file}: ${file.split("/")[0]}/ is network-only; remove /assets/sw-register.js`);
+  }
+}
+
+check("App groups");
+{
+  // getAssetGroup (sw.js) versions each app's files; getAppGroup (assets/sw-register.js) picks the page's version.
+  const assetGroup = vm.runInNewContext(`(${(swSource.match(/function getAssetGroup\(pathname\) \{[\s\S]*?\n\}/) || ["() => null"])[0]})`);
+  const register = read("assets/sw-register.js");
+  const appGroup = vm.runInNewContext(`(${(register.match(/\(pathname\) => \{[\s\S]*?\n  \}/) || ["() => null"])[0]})`);
+  const groups = new Set(cachedLocal.map((url) => assetGroup(new URL(url, SITE).pathname)));
+  for (const file of pages.filter((page) => read(page).includes("/assets/sw-register.js"))) {
+    const pathname = file === "index.html" ? "/" : `/${file}`;
+    const [asset, app] = [assetGroup(pathname), appGroup(pathname)];
+    if (asset !== app) fail(`${file}: getAssetGroup gives "${asset}" but getAppGroup gives "${app}"`);
+    else if (!groups.has(app)) fail(`${file}: no cached file is in its app group "${app}", so it prompts on every build`);
+  }
+}
+
+check("Teaching conventions");
+{
+  // Wording the course has settled. A line ending with a `check-ok` comment is exempt (a quoted data booklet form, say).
+  const RULES = [
+    [/terminal speed/i, "say \"terminal velocity\""],
+    [/\bv(?:\^\{?2\}?|²)\s*=\s*u(?:\^\{?2\}?|²)\s*\+\s*2\s*a\s*s\b/, "write v² − u² = 2as"],
+    [/\bQ\s*=\s*(?:\\Delta|Δ)\s*U\s*\+\s*W\b/, "write the first law as ΔU = Q − W"],
+    [/\s(?:·|&middot;)\s/, "separate items with commas, not ·"],
+  ];
+  const IB_RULES = [[/÷|&divide;|\\div\b/, "write division as a fraction"]];
+  for (const file of git("ls-files", "-z", "gcsephy/*.html", "gcsephy/*.js", "ibdpphy/*.html", "ibdpphy/*.js").split("\0").filter(Boolean)) {
+    const rules = file.startsWith("ibdpphy/") ? [...RULES, ...IB_RULES] : RULES;
+    read(file).split("\n").forEach((line, i) => {
+      if (/check-ok/.test(line)) return;
+      for (const [pattern, advice] of rules) if (pattern.test(line)) fail(`${file}:${i + 1}: ${advice}`);
+    });
+  }
+}
+
 check("Agent instructions");
 {
   const body = (file) => read(file).split("\n").slice(1).join("\n");
