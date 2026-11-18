@@ -1,5 +1,6 @@
 #!/bin/sh
-# Rebuild the student workbook (three parts), the Unit review and their answer editions with headless Chrome.
+# Rebuild the student workbook (three parts), the Unit review and their answer editions with headless Chrome,
+# and the Revision exercises (one PDF, mark scheme on the last page) with a landscape 2-up copy.
 # Serve the repository root first:  python3 -m http.server 8000
 # Then run from this folder:        sh build-pdfs.sh
 # MathJax is fetched from a CDN, so the build needs a network connection.
@@ -29,6 +30,15 @@ pdf() { # output, url, attempt
   else echo "FAILED: $1"; rm -rf "$profile"; fi
 }
 
+revision() { # the Revision exercises, then two pages to each landscape A4 sheet (pdfjam, from TeX Live)
+  pdf "$OUT/$NAME (Revision Exercises).pdf" "$BASE/workbook.html?revision"
+  if command -v pdfjam >/dev/null; then
+    pdfjam --nup 2x1 --landscape --a4paper --quiet "$OUT/$NAME (Revision Exercises).pdf" -o "$OUT/$NAME (Revision Exercises) (2-up).pdf" && echo "Wrote $OUT/$NAME (Revision Exercises) (2-up).pdf"
+  else echo "pdfjam not found: skipped the 2-up Revision exercises"; fi
+}
+
+# ONLY_REVISION=1 builds just the Revision exercises and their 2-up copy.
+if [ -n "$ONLY_REVISION" ]; then revision; exit 0; fi
 # ONLY_REVIEW=1 builds just the Unit review and its answers; ONLY_ANSWERS=1 skips both student editions.
 # ONLY_PART=2 builds just that part of the workbook.
 if [ -z "$ONLY_REVIEW" ]; then
@@ -42,3 +52,5 @@ fi
 [ -n "$ONLY_PART" ] && exit 0
 [ -z "$ONLY_ANSWERS" ] && pdf "$OUT/$NAME (Unit Review).pdf" "$BASE/workbook.html?review"
 pdf "$OUT/$NAME (Unit Review) (Ans).pdf" "$BASE/workbook.html?review&answers"
+[ -z "$ONLY_REVIEW" ] && [ -z "$ONLY_ANSWERS" ] && revision
+exit 0

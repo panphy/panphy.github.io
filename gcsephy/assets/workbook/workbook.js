@@ -171,6 +171,7 @@
   // ---------- formula triangles ----------
   // tri: { top, bottom: [two or three labels] } or [top, left, right]. "E_p" draws E with a subscript p.
   // Subscripts after "_"; a squared or cubed label (I², v²) gets a real raised digit at full letter size.
+  // A top word longer than six letters (distance) is narrowed to fit inside the apex.
   const svgLabel = (s) => s.replace(/_(\w+)/, '<tspan baseline-shift="sub" font-size="70%">$1</tspan>')
     .replace(/[²³]/g, (c) => `<tspan baseline-shift="super" font-size="62%">${c === "²" ? 2 : 3}</tspan>`);
   function triangleSvg(tri, size) {
@@ -183,7 +184,7 @@
       <path d="M60 5 L6 99 H114 Z" fill="var(--spark-t)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
       <path d="${dividers}" stroke="var(--ink)" stroke-width="2.4"/>
       <g font-family="Arial Black, Arial, sans-serif" font-weight="900" fill="var(--ink)" text-anchor="middle">
-        <text x="60" y="${/_/.test(top) ? 37 : top.length > 4 ? 50 : 45}" font-size="${/_/.test(top) ? 16 : font(top)}">${svgLabel(top)}</text>
+        <text x="60" y="${/_/.test(top) ? 37 : top.length > 6 ? 51 : top.length > 4 ? 50 : 45}" font-size="${/_/.test(top) ? 16 : top.length > 6 ? 10 : font(top)}"${top.length > 6 && !/_/.test(top) ? ' textLength="44" lengthAdjust="spacingAndGlyphs"' : ""}>${svgLabel(top)}</text>
         ${bottom.map((b, i) => `<text x="${cells[i][0]}" y="${cells[i][1]}" font-size="${three ? Math.min(font(b), 17) : font(b)}">${svgLabel(b)}</text>`).join("")}
       </g></svg>`;
   }
