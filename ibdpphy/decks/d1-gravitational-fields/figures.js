@@ -29,7 +29,41 @@ window.DeckFigures.add(P => {
   const sector = (t1, t2) => `M${ORBIT.sun.join(',')} L${through(Array.from({ length: 25 }, (_, i) => keplerPoint(t1 + (t2 - t1) * i / 24))).slice(1)} Z`;
   const orbitPath = `<ellipse cx="${ORBIT.cx}" cy="${ORBIT.cy}" rx="${ORBIT.a}" ry="${f(ORBIT.b)}" class="orbit" style="stroke-opacity:.6;stroke-width:2.5"/>`;
 
+  // Retrograde motion of Mars from the real orbits (radii 1 and 1.524 AU, periods 1 and 1.881 years,
+  // Mars tilted 1.85° with its node 90° behind opposition); retrograde.js uses the same numbers.
+  const MARS = { period: 1.881, radius: 1.524, tilt: 1.85 * Math.PI / 180 };
+  const earthAt = t => [Math.cos(TAU * t), Math.sin(TAU * t), 0];
+  const marsAt = t => { const u = TAU * t / MARS.period + TAU / 4, x = MARS.radius * Math.cos(u), y = MARS.radius * Math.sin(u); return [y * Math.cos(MARS.tilt), -x, y * Math.sin(MARS.tilt)]; };
+  const marsSeen = t => { const e = earthAt(t), m = marsAt(t), d = m.map((v, k) => v - e[k]); return [Math.atan2(d[1], d[0]) * 180 / Math.PI, Math.asin(d[2] / Math.hypot(...d)) * 180 / Math.PI]; };
+
   return {
+    // Why Mars goes backwards: a top view of the orbits at five equally spaced times around
+    // opposition, numbered at the Earth, with the line of sight from the Earth through Mars at each, and beside it the path
+    // as seen from the Earth (east on the left, latitude at twice the scale) with the same five times
+    // marked. The flat picture under retrograde.js's model, for print and reduced motion.
+    'd1-retrograde': () => {
+      const cx = 250, cy = 235, k = 92, SPAN = 0.32, five = [-0.24, -0.12, 0, 0.12, 0.24];
+      const top = ([x, y]) => [cx + x * k, cy - y * k];
+      let s = sun(cx, cy, 20) + `<circle cx="${cx}" cy="${cy}" r="${k}" class="orbit" style="stroke-opacity:.6;stroke-width:2.5"/><circle cx="${cx}" cy="${cy}" r="${f(k * MARS.radius)}" class="orbit" style="stroke-opacity:.6;stroke-width:2.5"/>`;
+      five.forEach((t, i) => {
+        const [ex, ey] = top(earthAt(t)), [mx, my] = top(marsAt(t)), len = Math.hypot(mx - ex, my - ey), ux = (mx - ex) / len, uy = (my - ey) / len;
+        s += `<line x1="${f(ex)}" y1="${f(ey)}" x2="${f(ex + ux * 300)}" y2="${f(ey + uy * 300)}" style="stroke:var(--brand-accent);stroke-width:2.5;opacity:.8"/>`;
+        // Each Earth is numbered on the Sun's side, to match the numbered points of the path.
+        const [ox, oy] = [cx - ex, cy - ey], o = Math.hypot(ox, oy);
+        s += ball(ex, ey, 9, 'electron', '') + ball(mx, my, 8, 'proton', '') + text(f(ex + ox / o * 30), f(ey + oy / o * 30 + 10), String(i + 1), 'lbl mono strong');
+      });
+      s += text(cx, cy + k * MARS.radius + 50, 'Earth inside, Mars outside', 'lbl');
+      // The sky, to the right.
+      const X0 = 780, sx = lon => X0 + 280 - lon * 11, sy = lat => 360 - lat * 34;
+      const path = Array.from({ length: 241 }, (_, i) => marsSeen(-SPAN + 2 * SPAN * i / 240));
+      s += `<rect x="${X0 + 2}" y="2" width="556" height="466" rx="16" style="fill:var(--card-bg);stroke:var(--card-border);stroke-width:2"/>` + text(X0 + 24, 44, 'SEEN FROM EARTH', 'lbl mono', 'start');
+      s += path.filter((_, i) => i % 4 === 0).map(([lon, lat]) => `<circle cx="${f(sx(lon))}" cy="${f(sy(lat))}" r="5" style="fill:var(--proton);opacity:.75"/>`).join('');
+      five.forEach((t, i) => { const [lon, lat] = marsSeen(t); s += ball(sx(lon), sy(lat), 11, 'proton', '') + text(f(sx(lon)), f(sy(lat) - 22), String(i + 1), 'lbl mono strong'); });
+      s += text(X0 + 24, 448, 'east', 'lbl', 'start') + text(X0 + 536, 448, 'west', 'lbl', 'end');
+      const run = `<g>${track(path.map(([lon, lat]) => [sx(lon), sy(lat)]), 14)}${ball(0, 0, 12, 'proton', '')}</g>`;
+      return svg('0 0 1340 470', s + twoState('', run), 'Mars and the Earth orbiting the Sun, the Earth on the inside, shown at five equally spaced times around the moment the Earth overtakes Mars. The lines of sight from the Earth through Mars first swing one way, then back, then on again. Beside it, the path of Mars seen from the Earth against the stars: it moves east, loops back west for about ten weeks, then moves east again');
+    },
+
     // Kepler's first law. Also drawn small, with data-plain.
     'd1-ellipse': el => {
       const on = labeled(el), [sx, sy] = ORBIT.sun, [px, py] = keplerPoint(0.3);
