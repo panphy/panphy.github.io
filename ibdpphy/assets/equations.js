@@ -23,7 +23,7 @@
         {
           id: 'A.1', title: 'Kinematics', level: SL,
           syms: { s: 'displacement (m)', u: 'initial velocity (m s⁻¹)', v: 'final velocity (m s⁻¹)', a: 'acceleration, which must be constant (m s⁻²)', t: 'time taken (s)' },
-          eqs: ['s=\\dfrac{u+v}{2}t', 'v=u+at', 's=ut+\\tfrac{1}{2}at^{2}', 'v^{2}=u^{2}+2as']
+          eqs: ['s=\\dfrac{u+v}{2}t', 'v=u+at', 's=ut+\\tfrac{1}{2}at^{2}', 'v^{2}=u^{2}+2as'] // check-ok: as the data booklet prints it
         },
         {
           id: 'A.2', title: 'Forces and momentum', level: SL,
