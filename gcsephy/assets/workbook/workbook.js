@@ -31,8 +31,9 @@
   const ONE = partNo ? null : U.lessons.find((l) => l.n === Number(params.get("lesson"))) || null;
   const SEL = partNo ? U.lessons.filter((l) => PARTS[partNo - 1].includes(l.n)) : ONE ? [ONE] : null;
   const SOLO = !!SEL && SEL.length === 1;
-  const REVIEW = !SEL && params.has("review");
-  const LESSONS = SEL || (REVIEW ? [] : U.lessons);
+  const REVISION = !SEL && params.has("revision") && U.revision ? U.revision : null;
+  const REVIEW = !SEL && !REVISION && params.has("review");
+  const LESSONS = SEL || (REVIEW || REVISION ? [] : U.lessons);
   const LAST = SEL ? SEL[SEL.length - 1].last || SEL[SEL.length - 1].n : MAX;
   const inSel = (n) => !!SEL && SEL.some((l) => l.n === n);
   const pad = (n) => String(n).padStart(2, "0");
@@ -51,12 +52,12 @@
   const reviewAfter = C.reviewAfter || lessonName(U.lessons[U.lessons.length - 1]);
   if (answers) document.body.classList.add("answers");
 
-  const which = partNo ? `Part ${partNo}, ${lessonsLabel(SEL)}` : ONE ? lessonName(ONE) : REVIEW ? "Unit review" : "";
-  const footer = `${C.name}, Year ${C.year} workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
+  const which = partNo ? `Part ${partNo}, ${lessonsLabel(SEL)}` : ONE ? lessonName(ONE) : REVIEW ? "Unit review" : REVISION ? "Revision exercises" : "";
+  const footer = REVISION ? `${C.name}, Year ${C.year}: Revision exercises` : `${C.name}, Year ${C.year} workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}, © PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
-  document.title = `${C.file}${partNo ? ` (Part ${partNo})` : ONE ? ` (Lesson ${pad(ONE.n)})` : REVIEW ? " (Unit Review)" : ""}${answers ? " (Ans)" : ""}`;
+  document.title = `${C.file}${partNo ? ` (Part ${partNo})` : ONE ? ` (Lesson ${pad(ONE.n)})` : REVIEW ? " (Unit Review)" : REVISION ? " (Revision Exercises)" : ""}${answers ? " (Ans)" : ""}`;
 
   // ---------- small helpers ----------
   const ans = (html) => (html ? `<span class="ans">${html}</span>` : "");
@@ -499,6 +500,42 @@
       }).join("")}</section>`;
   }
 
+  /* Revision exercises (?revision, UNIT.revision): no cover. Page 1 has the name fields and the
+     equations, then the questions; the mark scheme is printed last, on a new page, in the same
+     booklet. revision: { eyebrow, title, minutes, upTo (last lesson whose equations are listed),
+     questions }. A question's parts (after: [{ t: "part" }]) carry the marks; each top-level
+     question or part has ms, its mark scheme entry, and an optional label ("(a)" is read from the prompt). */
+  function revision() {
+    const R = REVISION;
+    const partsOf = (q) => (q.after || []).filter((b) => b.t === "part");
+    const markOf = (q) => (q.marks || 0) + partsOf(q).reduce((s, p) => s + (p.marks || 0), 0);
+    const total = R.questions.reduce((s, q) => s + markOf(q), 0);
+    const eqs = U.equations.filter((e) => e.lesson <= (R.upTo || MAX) && !e.ht && !e.triple);
+    const field = (f, cls, val) => `<div class="${cls || ""}">${f}<span>${val || ""}</span></div>`;
+    qNum = 0;
+    const page = `<section class="lesson revision" style="--accent:var(--leaf);--accent-t:var(--leaf-t)">
+      <div class="sheet-fields">${field("Name", "wide")}${field("Class")}${field("Teacher", "half")}${field("Date", "half")}${field("Score", "half", `/ ${total}`)}</div>
+      <div class="sheet-head"><div><div class="eyebrow">${R.eyebrow}</div><h2 class="page-title">${R.title}</h2></div>
+      <div class="sheet-meta">${R.minutes} minutes<br>${total} marks</div></div>
+      ${keep(secHead("learn", "Equations") + compareTable({ head: ["In words", "In symbols", "Units"], plainFirst: true, cls: "sheet-eqs",
+        rows: eqs.map((e) => [e.words, `<strong>${e.eq}</strong>`, e.units]) }))}
+      ${R.questions.map((q, i) => {
+        // A question with parts may break between them; the heading never ends a page (.sec).
+        const html = (i ? "" : secHead("exam", "Questions")) + question(q);
+        return q.after ? html : keep(html);
+      }).join("")}</section>`;
+    const label = (p) => p.label || (/^\(([a-z]+)\)/.exec(p.p || "") || [])[0] || "";
+    // Two columns of questions, each part with its answer and marks, so the scheme fits on one page.
+    const blocks = R.questions.map((q, i) => {
+      const ps = partsOf(q);
+      const rows = (ps.length ? ps : [q]).map((p) => `<div class="ms-row"><b>${ps.length ? label(p) : ""}</b><div>${p.ms || ""}</div><span class="mk">[${p.marks || 0}]</span></div>`).join("");
+      return `<div class="ms-q"><span class="qn">${i + 1}</span>${rows}</div>`;
+    }).join("");
+    const scheme = `<section class="new-page mark-scheme"><div class="sheet-head"><div><div class="eyebrow">Answers</div><h2 class="page-title">Mark scheme</h2></div>
+      <div class="sheet-meta">Total: ${total} marks</div></div><div class="ms-cols">${blocks}</div></section>`;
+    return page + scheme;
+  }
+
   // Triple Science only pages, printed in the Unit review after the exam practice.
   function extension(x) {
     qNum = 0;
@@ -537,12 +574,12 @@
   const book = document.createElement("main");
   book.className = "book";
   const link = (key, a) => `?${[key, a ? "answers" : ""].filter(Boolean).join("&")}`;
-  const here = partNo ? `part=${partNo}` : ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
-  const nav = [["", "all"], ...PARTS.map((_, i) => [`part=${i + 1}`, `part ${i + 1}`]), ...(C.booklets || []), ["review", "review"]]
+  const here = partNo ? `part=${partNo}` : ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : REVISION ? "revision" : "";
+  const nav = [["", "all"], ...PARTS.map((_, i) => [`part=${i + 1}`, `part ${i + 1}`]), ...(C.booklets || []), ["review", "review"], ...(U.revision ? [["revision", "revision"]] : [])]
     .map(([key, name]) => (key === here ? `<b>${name}</b>` : `<a href="${link(key, answers)}">${name}</a>`)).join(" ");
   const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
   const ext = () => EXTENSION.map(extension).join("");
-  book.innerHTML = bar + (SEL ? cover() + LESSONS.map(lesson).join("") + toolkit() + glossary() + quickAnswers()
+  book.innerHTML = bar + (REVISION ? revision() : SEL ? cover() + LESSONS.map(lesson).join("") + toolkit() + glossary() + quickAnswers()
     : REVIEW ? cover() + review() + ext() + toolkit() + glossary()
     : cover() + LESSONS.map(lesson).join("") + toolkit() + review() + ext() + glossary() + quickAnswers());
   document.body.appendChild(book);

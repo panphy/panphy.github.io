@@ -608,3 +608,27 @@ body:not(.answers) .match.letters .join { visibility: hidden; }
 .rule-head { background: var(--accent-t); color: var(--ink); }
 .steps li::before, .tri-steps b { background: var(--cyan); color: var(--ink); }
 .question > .qn { border-width: 1.2px; border-color: var(--line); }
+
+/* ---------- Revision exercises (?revision): no cover; name fields and equations on page 1, mark scheme last ---------- */
+.sheet-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2.5mm 6mm; margin: 0 0 4mm; padding: 2.5mm 4mm 3mm; border: 1.2px solid var(--line); border-radius: 3mm; }
+.sheet-fields > div { grid-column: span 2; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.sheet-fields > div.wide { grid-column: span 4; }
+.sheet-fields > div span { display: block; height: 8mm; border-bottom: 1.2px solid var(--line-strong); font: 700 10pt/9mm Arial, sans-serif; letter-spacing: 0; text-align: right; color: var(--ink); }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; margin-bottom: 1mm; }
+.sheet-meta { font: 700 9.4pt/1.4 Arial, sans-serif; text-align: right; white-space: nowrap; }
+/* A smaller circuit diagram where space is tight. */
+.fig-xs .circuit-figure svg { max-height: 30mm; }
+/* A part answered on the figure (no writing space) need not stay with the next part. */
+.revision .question.part > .prompt:last-child { break-after: auto; }
+.sheet-eqs th, .sheet-eqs td { padding: 1.1mm 2.4mm; }
+.sheet-eqs td:nth-child(2) { white-space: nowrap; }
+/* The mark scheme: two columns of questions, each part with its answer and marks, at normal size so it fits on the last page. */
+.book:not(.guide) > section.mark-scheme { zoom: 1; }
+.ms-cols { columns: 2; column-gap: 6mm; margin-top: 2mm; font-size: 8.8pt; line-height: 1.32; }
+.ms-q { position: relative; break-inside: avoid; margin: 0 0 2.4mm; padding: 1.6mm 2.4mm 1.6mm 9mm; border: 1.2px solid var(--line); border-radius: 2.5mm; }
+.ms-q > .qn { position: absolute; left: 1.8mm; top: 1.6mm; width: 5.4mm; height: 5.4mm; border: 1.2px solid var(--line); border-radius: 50%; display: grid; place-items: center; font: 900 7.8pt/1 Arial, sans-serif; background: var(--leaf); }
+.ms-row { display: grid; grid-template-columns: 6mm minmax(0, 1fr) auto; gap: 1.5mm; padding: .8mm 0; }
+.ms-row + .ms-row { border-top: 1px solid var(--rule); }
+.ms-row .mk { font-weight: 700; white-space: nowrap; }
+.ms-row p { margin: 0 0 .8mm; }
+.ms-row ul { margin: .4mm 0 0; padding-left: 3.6mm; }
