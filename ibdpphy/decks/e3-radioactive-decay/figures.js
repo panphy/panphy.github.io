@@ -82,14 +82,14 @@ window.DeckFigures.add(P => {
       // The lane lines belong to the printed figure only.
       const lane = (x2, y, color) => on ? '' : `<line x1="90" y1="${y}" x2="${x2}" y2="${y}" class="lane" style="stroke:var(--${color})"/>`;
       const alpha = lane(294, 125, 'alpha') + still(ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha')) + stream(125, 300, 14, 'alpha', 1.6, 4)
-        + onArrival(1.4, text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"'));
+        + onArrival(1.4, text(318, 110, 'stopped', 'lbl', 'start', 'style="fill:var(--alpha);font-size:33px"'));
       const beta = lane(514, 215, 'electron') + still([160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('')) + stream(215, 520, 10, 'electron', 1.2, 4)
-        + onArrival(1.0, text(550, 200, 'stopped', 'lbl small', 'start', 'style="fill:var(--electron)"'));
+        + onArrival(1.0, text(552, 200, 'stopped', 'lbl', 'start', 'style="fill:var(--electron);font-size:33px"'));
       // On the slide the wave beyond the lead has no arrowhead and the same wavelength as before it.
       const beyond = on ? wave(786, 305, 931, 305, { cycles: 2.5, amp: 6, head: false, opacity: .45 }) : wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 });
       let gamma = still(wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false }) + beyond);
       if (on) gamma += `<g class="mover">${running('gamma-in', 90, 728, 10, 1, 0)}${running('gamma-out', 786, 940, 6, .45, 1.65)}</g>`;
-      gamma += onArrival(1.8, text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"'));
+      gamma += onArrival(1.8, text(860, 340, 'reduced', 'lbl', 'middle', 'style="fill:var(--photon);font-size:33px"'));
       const labels = [greek(100, 'α', 'alpha'), greek(196, 'β', 'electron'), greek(282, 'γ', 'photon')];
       s += on ? [alpha, beta, gamma].map((lane, i) => stepG(on, i + 1, lane + labels[i])).join('') + `<rect x="20" y="70" width="64" height="290" rx="12" style="fill:var(--lead)"/>` : alpha + beta + gamma + labels.join('');
       return svg('0 -24 960 434', s, 'Penetration: paper stops alpha, a few millimeters of aluminum stops beta, several centimeters of lead reduce gamma');
