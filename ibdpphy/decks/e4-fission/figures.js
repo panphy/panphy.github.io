@@ -72,7 +72,8 @@ window.DeckFigures.add(P => {
       const gen1 = next(g0, g1) + g1.map(p => fission(...p)).join('') + label(405, '2 split');
       const gen2 = next(g1, g2) + g2.map(p => fission(...p)).join('') + label(680, '4 split');
       const gen3 = g2.map(([x, y]) => [-0.5, 0, 0.5].map(k => fly(x, y, x + 400, y + 260 * k, !k)).join('')).join('') + label(820, '8 next');
-      s += stepG(on, 1, gen1, 'wipe') + stepG(on, 2, gen2, 'wipe') + stepG(on, 3, gen3, 'wipe');
+      // Each generation fades in on its click.
+      s += stepG(on, 1, gen1) + stepG(on, 2, gen2) + stepG(on, 3, gen3);
       return svg(named ? '0 0 880 620' : '0 0 880 565', s, 'A chain reaction. A neutron hits a uranium-235 nucleus, which splits into two fragments, barium-141 and krypton-92, releasing energy and three neutrons. Two of the neutrons split two more uranium-235 nuclei, whose neutrons split four more, and so on; the third neutron from each fission flies on');
     },
 

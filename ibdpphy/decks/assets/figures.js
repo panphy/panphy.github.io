@@ -1172,7 +1172,29 @@
       if (fixed) el.querySelectorAll('.still').forEach(node => node.classList.remove('still'));
       // Lines that draw themselves in and shapes that pulse are motion too.
       if (fixed) el.querySelectorAll('.draw, .pulse').forEach(node => node.classList.remove('draw', 'pulse'));
+      if (('startOnClick' in el.dataset || 'once' in el.dataset) && !reduce && !fixed) startOnClick(el, 'once' in el.dataset);
     });
+  }
+
+  // data-start-on-click: a looping figure waits at its first frame, and its loops start when its
+  // PLAY step is shown (a click, in the slide's order). data-once: a figure whose loop is a single
+  // run (a race, a pulse, a spiral) plays it once from the deck's Play button and stops on its
+  // last frame until Reset. Each moving part is set to where its loop begins, so that nothing
+  // jumps when it starts.
+  function startOnClick(el, once = false) {
+    const svg = el.querySelector('svg'), loops = svg ? [...svg.querySelectorAll('[repeatCount="indefinite"]')] : [];
+    if (!loops.length) return;
+    loops.forEach(node => {
+      node.setAttribute('begin', 'indefinite');
+      if (once) { node.removeAttribute('repeatCount'); node.setAttribute('fill', 'freeze'); }
+      const first = (node.getAttribute('values') || node.getAttribute('from') || '').split(';')[0].trim(), target = node.parentElement;
+      if (!first) return;
+      if (node.localName === 'animateTransform') target.setAttribute('transform', `${node.getAttribute('type')}(${first.replace(/,/g, ' ')})`);
+      else if (node.localName === 'animate') target.setAttribute(node.getAttribute('attributeName'), first);
+    });
+    svg.insertAdjacentHTML('beforeend', PLAY);
+    // Parsed afresh: the loops' timing was set when the figure was first drawn.
+    el.innerHTML = el.innerHTML;
   }
 
   // Moving pictures drawn with SMIL. A figure shows .still in thumbnails, print and reduced motion

@@ -66,11 +66,11 @@ function build(THREE, fig, index) {
   const lower = disk(LOWER), upper = disk(UPPER);
   scene.add(lower.group, upper.group);
 
-  // The axis: a dashed line drawn over everything, so the disks never hide it.
-  const axisMaterial = new THREE.LineDashedMaterial({ dashSize: 0.13, gapSize: 0.09, depthTest: false, transparent: true });
+  // The axis: a dashed line through the centers of the disks, hidden where it passes inside them,
+  // so that it reads in depth: it comes out of each face and runs on above and below.
+  const axisMaterial = new THREE.LineDashedMaterial({ dashSize: 0.13, gapSize: 0.09 });
   const axis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -0.95, 0), new THREE.Vector3(0, 2.25, 0)]), axisMaterial);
   axis.computeLineDistances();
-  axis.renderOrder = 10;
   scene.add(axis);
 
   // What has happened so far, one line per stage, in the deck's fonts. Earlier lines stay, in a

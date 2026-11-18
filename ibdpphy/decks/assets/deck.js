@@ -3,7 +3,7 @@
 (() => {
   const SLIDE_W = 1600;
   const SLIDE_H = 900;
-  const state = { index: 0, slides: [], orbitFrame: 0, scatter: null, loops: [] };
+  const state = { index: 0, slides: [], orbitFrame: 0, scatter: null, loops: [], clocks: [] };
 
   const deck = document.getElementById('deck');
   const stage = document.getElementById('stage');
@@ -91,7 +91,10 @@
   // Every moving figure on a content slide waits at the start with Play/Pause and Reset (icons)
   // under it, so a teacher runs it when ready; leaving the slide puts it back at the start. Small
   // pictures (data-plain, data-still, title and section slides) keep moving on their own, and
-  // data-controls="off" opts a figure out. Kinds, any of which a figure may combine:
+  // data-controls="off" opts a figure out, and data-controls="run" also shows all its numbered
+  // builds at once, running from when the slide opens. A 3D model over a figure with controls
+  // takes its time from the figure's clock (fig.deckClock), and calls fig.deckDone when a run
+  // with an end finishes. Kinds, any of which a figure may combine:
   //   loops: SMIL animations that repeat, run by the SVG's own clock;
   //   orbits: [data-orbit] nodes moved by animateOrbits, run by a clock of the figure's own;
   //   builds: the figure's numbered steps (k1, k2, ...), with the CSS transitions and animations
@@ -112,6 +115,10 @@
   function buildLoopControls() {
     if (reduceMotion.matches) return;
     deck.querySelectorAll('.fig').forEach(fig => {
+      if (fig.dataset.controls === 'run') {
+        fig.querySelectorAll('svg .step').forEach(node => { const k = buildNumber(node); if (k) { node.dataset.build = k; node.classList.add('shown'); } });
+        return;
+      }
       if (fig.dataset.controls === 'off' || 'plain' in fig.dataset || 'still' in fig.dataset || fig.closest('.slide.title, .slide.section')) return;
       const svgOf = () => fig.querySelector('svg');
       if (!svgOf() || !svgOf().pauseAnimations) return;
@@ -123,6 +130,10 @@
       if (isPlay) fig.querySelector('.step.play').classList.remove('step');
       const clock = { t: 0, playing: false };
       if (fig.querySelector('[data-orbit]')) orbitClocks.set(fig, clock);
+      fig.deckClock = clock;
+      // A 3D model whose run has an end (model3d.js `once`) stops the figure there.
+      fig.deckDone = () => done();
+      state.clocks.push({ slide: fig.closest('.slide'), clock });
 
       const row = document.createElement('div');
       row.className = 'sim-buttons loop-buttons';
@@ -490,7 +501,7 @@
     const step = time - (state.orbitLast ?? time);
     state.orbitLast = time;
     const nodes = [...slide.querySelectorAll('[data-orbit]')];
-    new Set(nodes.map(node => orbitClocks.get(node.closest('.fig')))).forEach(clock => { if (clock && clock.playing) clock.t += step; });
+    state.clocks.forEach(({ slide: home, clock }) => { if (home === slide && clock.playing) clock.t += step; });
     nodes.forEach(node => {
       const clock = orbitClocks.get(node.closest('.fig'));
       const at = clock ? clock.t : time;

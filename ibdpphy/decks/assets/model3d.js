@@ -12,9 +12,12 @@
 //   sway   how far the camera swings to and fro until someone turns the model (radians)
 //   alt    the canvas's description for screen readers
 //   paint  () => void  sets the colors from the theme
-//   tick   (t, still) => void  moves the model to time t in seconds (optional); still is true
+//   tick   (t, still) => void  moves the model to time t in seconds (optional), the figure's
+//          Play/Pause clock when it has one; still is true
 //          when the thumbnail is being drawn
 //   still  the time drawn for the thumbnail (optional)
+//   once   the length of the run in seconds, for a figure with Play/Pause: the model stops there
+//          instead of starting again (optional)
 //   frame  CSS that places the canvas in part of the figure, such as 'width:55%' (optional), so
 //          that a flat graph added to `holder` can sit beside the model
 // css('--name') reads a color from the theme; label(html, [x, y, z]) places a label at a point of
@@ -96,8 +99,13 @@ function mount(THREE, fig, index, attr, make) {
   function frame(time) {
     requestAnimationFrame(frame);
     if (!slide.classList.contains('active') || document.hidden) return;
-    // A slow sway, so that the model reads in depth, until someone turns it.
-    draw(time / 1000, turn ?? swayed(time));
+    // A slow sway, so that the model reads in depth, until someone turns it. A figure with
+    // Play/Pause and Reset (deck.js) runs the model, sway and all, by its own clock, which stops
+    // while paused; a model with an end (`once`) stops there and tells the deck.
+    const clock = fig.deckClock, now = clock ? clock.t : time;
+    let t = now / 1000;
+    if (clock && model.once && t >= model.once) { t = model.once; if (clock.playing) fig.deckDone?.(); }
+    draw(t, turn ?? swayed(now));
   }
   requestAnimationFrame(frame);
 

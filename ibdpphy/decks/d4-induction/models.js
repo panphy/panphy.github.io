@@ -3,13 +3,14 @@
 // reduced motion and a failed load. Colors follow figures.js: field lines and their symbols slate,
 // velocities and wires apricot, forces teal, induced currents and emf terracotta, N red and S blue.
 //   data-magnet-coil  slide 5   a magnet moved in and out of a coil, with a meter
-//   data-flux         slide 6   a loop turned in a uniform field, threaded by its field lines
+//   data-flux         slide 6   a loop in a uniform field at an angle set by a control, threaded by its field lines
 //   data-lenz         slide 14  the current induced in a coil by an approaching or leaving magnet
 //   data-tube         slide 15  a magnet dropped through a plastic and a copper tube (a play step)
 //   data-rod          slide 16  a rod sliding along rails across a vertical field
 //   data-spring       slide 19  a magnet bouncing on a spring into a coil, with its emf traced
 //   data-generator    slide 24  a rectangular coil turning between two poles, with its emf graph
-import { model3d } from '../assets/model3d.js?v=20261116';
+import { model3d } from '../assets/model3d.js?v=20261118';
+import { control, typeset } from '../assets/sim-control.js';
 
 const TAU = Math.PI * 2;
 // Labels sit over field lines and wires: a soft halo in the panel's color keeps them legible.
@@ -209,22 +210,13 @@ model3d('magnet-coil', ({ THREE, scene, css, label: plain }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Slide 6: a loop in a uniform field, turned so that its normal is at 0°, 60° and 90° to the field
-// in turn. The field lines that pass through the loop are drawn strongly, the rest faintly, and the
-// caption gives Φ as a fraction of BA.
-model3d('flux', ({ THREE, scene, css, label: plain, caption }) => {
+// Slide 6: a loop in a uniform field, its normal at an angle θ to the field set by the control
+// under the model. The field lines that pass through the loop are drawn strongly, the rest faintly,
+// and the caption gives Φ as a fraction of BA.
+model3d('flux', ({ THREE, scene, css, label: plain, caption, holder }) => {
   const k = kit(THREE, scene), { V } = k, label = haloed(plain);
   const R = 0.78, SPACE = 0.3, HALF = 3, X = 2.7;
-  // θ in degrees over one cycle: [time, angle] at each corner of the schedule.
-  const SCHEDULE = [[0, 0], [2.2, 0], [3.8, 60], [6.6, 60], [7.8, 90], [10, 90], [12, 0]];
-  const angleAt = t => {
-    const s = ((t % 12) + 12) % 12;
-    for (let i = 1; i < SCHEDULE.length; i++) {
-      const [t1, a1] = SCHEDULE[i], [t0, a0] = SCHEDULE[i - 1];
-      if (s <= t1) return a0 + (a1 - a0) * ease((s - t0) / (t1 - t0));
-    }
-    return 0;
-  };
+  let degrees = 0;
 
   const strong = k.mat(), weak = k.mat({ transparent: true, opacity: 0.12, depthWrite: false });
   const lines = [];
@@ -255,22 +247,22 @@ model3d('flux', ({ THREE, scene, css, label: plain, caption }) => {
   const normalLabel = label('normal', [1.6, 0, 0]);
   const thetaLabel = label('\\(\\theta\\)', [0.7, 0, 0]);
   const areaLabel = label('area \\(A\\)', [0, 0, 0]);
-  // A caption for each angle the loop rests at, and one while it turns.
-  const captions = {
-    0: caption('\\(\\theta = 0^{\\circ}\\): \\(\\Phi = BA \\cos 0^{\\circ} = BA\\)'),
-    60: caption('\\(\\theta = 60^{\\circ}\\): \\(\\Phi = BA \\cos 60^{\\circ} = 0.50 \\, BA\\)'),
-    90: caption('\\(\\theta = 90^{\\circ}\\): \\(\\Phi = BA \\cos 90^{\\circ} = 0\\)'),
-    turning: caption('\\(\\Phi = BA \\cos \\theta\\)')
-  };
+  // The flux as a fraction of BA, above the angle control.
+  const fluxCaption = caption('\\(\\Phi = BA \\cos \\theta =\\) <span class="flux-k" style="font-family:var(--font-mono)"></span> \\(BA\\)');
+  fluxCaption.style.bottom = '76px';
+  const fraction = fluxCaption.querySelector('.flux-k');
+  const row = control({ label: 'Angle \\(\\theta\\)', name: 'angle between the normal and the field', min: 0, max: 90, step: 1, value: degrees, format: v => `${v}°`, onChange: v => { degrees = v; } });
+  row.style.cssText = 'position:absolute;left:0;right:0;bottom:0;--sim-label-w:150px;--sim-value-w:90px;';
+  holder.appendChild(row);
+  typeset(row);
   const Z = V(0, 0, 1);
-  let shown = null;
 
   return {
     look: [0, -0.15, 0],
     view: { turn: -0.62, lift: 0.32, far: 8.6 },
     sway: 0.08,
-    alt: 'A circular loop in a uniform magnetic field whose field lines run from left to right. The loop tips back so that its normal is first along the field, then at 60 degrees to it, then at right angles. The field lines that pass through the loop are drawn darker: all of them when the loop faces the field, half as many at 60 degrees and none when the loop lies along the field',
-    still: 5,
+    alt: 'A circular loop in a uniform magnetic field whose field lines run from left to right, with its normal at an angle theta to the field, set by the control below. The field lines that pass through the loop are drawn darker: all of them when the loop faces the field, half as many at 60 degrees and none when the loop lies along the field',
+    frame: 'height:calc(100% - 70px);',
     paint() {
       k.color(strong, css, '--brand-accent-strong');
       k.color(weak, css, '--brand-accent-strong');
@@ -279,8 +271,8 @@ model3d('flux', ({ THREE, scene, css, label: plain, caption }) => {
       k.color(normalMaterial, css, '--hl');
       arcMaterial.color.set(css('--text-secondary'));
     },
-    tick(t) {
-      const degrees = angleAt(t), theta = degrees * Math.PI / 180, n = V(Math.cos(theta), Math.sin(theta), 0);
+    tick() {
+      const theta = degrees * Math.PI / 180, n = V(Math.cos(theta), Math.sin(theta), 0);
       loop.rotation.z = theta;
       // A line along x at (y, z) crosses the plane of the loop where x = −y tan θ.
       lines.forEach(line => {
@@ -296,11 +288,7 @@ model3d('flux', ({ THREE, scene, css, label: plain, caption }) => {
       thetaLabel.anchor.set(0.8 * Math.cos(theta / 2), 0.8 * Math.sin(theta / 2), 0);
       thetaLabel.style.opacity = degrees > 12 ? 1 : 0;
       areaLabel.anchor.set(0, -R * 0.55, R + 0.3).applyAxisAngle(Z, theta);
-      const held = [0, 60, 90].find(a => Math.abs(degrees - a) < 0.05) ?? 'turning';
-      if (held !== shown) {
-        shown = held;
-        Object.entries(captions).forEach(([key, el]) => { el.style.opacity = key === String(held) ? 1 : 0; });
-      }
+      fraction.textContent = Math.cos(theta).toFixed(2);
     }
   };
 });
@@ -546,6 +534,7 @@ model3d('rod', ({ THREE, scene, css, label: plain }) => {
     view: { turn: -0.3, lift: 0.78, far: 9.4 },
     alt: 'A metal rod of length L slides at speed v along two horizontal rails joined at one end by a resistor R. The magnetic field B points vertically downwards. Field, velocity and rod are all at right angles. As the rod moves, the shaded area of the circuit grows and the flux through it increases; the induced current I flows along the rod towards the far rail, counterclockwise round the circuit seen from above',
     still: 1.6,
+    once: T * 0.999,
     paint() {
       k.color(railMaterial, css, '--text-secondary');
       k.color(resistorMaterial, css, '--neutron', ['--card-bg', 0.3]);
@@ -630,6 +619,7 @@ model3d('spring', ({ THREE, scene, css, label: plain, holder }) => {
     frame: 'width:46%;',
     alt: 'A bar magnet hangs from a spring with its north pole down, above a coil joined to a resistor. Pulled down and released, it oscillates in and out of the top of the coil. Beside it, a graph of emf against time is traced as it moves: an alternating emf, greatest when the magnet moves fastest, whose amplitude dies away along with the oscillation because the induced current takes energy from it',
     still: PULL + 6.2,
+    once: CYCLE * 0.999,
     paint() {
       bar.userData.paint(css);
       k.color(supportMaterial, css, '--text-secondary');
