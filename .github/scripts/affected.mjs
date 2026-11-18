@@ -14,8 +14,11 @@
        (a '../' path in the test, such as sw.js, index.html or assets/graph-range.js);
      - the accessibility check on its pages that are in sitemap.xml.
    Changes to assets/, .github/, manifest.json or any file not covered below run everything.
+   Teaching decks (gcsephy/decks/, ibdpphy/decks/) get the text size check when their page or a
+   local file it loads (a <link href> or <script src>, such as a unit's figures.js) changes.
 
-   No dependencies. In GitHub Actions it writes `tests`, `a11y` (all, pages or none) and `pages` outputs. */
+   No dependencies. In GitHub Actions it writes `tests`, `a11y` (all, pages or none), `pages` and
+   `decks` (all, none or a list) outputs. */
 import { execFileSync } from "node:child_process";
 import { appendFileSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -90,6 +93,26 @@ function changedFiles(base) {
   return { fork, files: [...new Set(lines(git("diff", "--name-only", "--no-renames", fork)))] };
 }
 
+// Every teaching deck and the local files its page loads.
+function findDecks() {
+  return lines(git("ls-files", "gcsephy/decks/*/index.html", "ibdpphy/decks/*/index.html")).map((deck) => {
+    const uses = new Set([deck]);
+    for (const [, ref] of read(deck).matchAll(/<(?:link|script)\b[^>]*?\b(?:href|src)="([^"]+)"/g)) {
+      if (/^([a-z][a-z0-9+.-]*:|\/\/|#|data:)/i.test(ref)) continue;
+      const clean = ref.split(/[?#]/)[0];
+      uses.add(clean.startsWith("/") ? clean.slice(1) : path.posix.normalize(path.posix.join(path.posix.dirname(deck), clean)));
+    }
+    return { deck, uses };
+  });
+}
+
+export function selectDecks(files, { all = false } = {}) {
+  const decks = findDecks();
+  if (all || files.some((file) => RUN_ALL.some((pattern) => pattern.test(file)))) return "all";
+  const chosen = decks.filter(({ uses }) => files.some((file) => uses.has(file))).map(({ deck }) => deck);
+  return chosen.length ? chosen.sort() : "none";
+}
+
 export function selectChecks(files, { fork = null, all = false } = {}) {
   const suites = findSuites();
   const allTests = [...suites.values()].flatMap((suite) => suite.tests).sort();
@@ -144,10 +167,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const { fork, files } = changedFiles(option("--base") || "origin/main");
     result = selectChecks(files, { fork });
   }
+  const files = args.includes("--files") ? args.slice(args.indexOf("--files") + 1) : args.includes("--all") ? [] : changedFiles(option("--base") || "origin/main").files;
+  const decks = selectDecks(files, { all: args.includes("--all") });
   for (const reason of result.reasons) console.log(reason);
   console.log(`Tests: ${result.tests.length ? result.tests.join(" ") : "none"}`);
   console.log(`Accessibility: ${result.a11y === "all" ? "every sitemap page" : result.pages.join(" ") || "none"}`);
+  console.log(`Deck text size: ${decks === "all" ? "every deck" : decks === "none" ? "none" : decks.join(" ")}`);
   if (process.env.GITHUB_OUTPUT) {
-    appendFileSync(process.env.GITHUB_OUTPUT, `tests=${result.tests.join(" ")}\na11y=${result.a11y}\npages=${result.pages.join(" ")}\n`);
+    appendFileSync(process.env.GITHUB_OUTPUT, `tests=${result.tests.join(" ")}\na11y=${result.a11y}\npages=${result.pages.join(" ")}\ndecks=${Array.isArray(decks) ? decks.join(" ") : decks}\n`);
   }
 }

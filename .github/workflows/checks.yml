@@ -49,3 +49,13 @@ jobs:
         env:
           PAGES: ${{ steps.pick.outputs.pages }}
         run: node .github/scripts/a11y-smoke.mjs $PAGES
+      - name: Deck text size
+        if: steps.pick.outputs.decks != 'none'
+        env:
+          DECKS: ${{ steps.pick.outputs.decks }}
+        run: |
+          if [ "$DECKS" = "all" ]; then
+            node .github/scripts/deck-text.mjs
+          else
+            node .github/scripts/deck-text.mjs $DECKS
+          fi
