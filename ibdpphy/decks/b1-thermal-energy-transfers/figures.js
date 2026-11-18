@@ -110,17 +110,26 @@ window.DeckFigures.add(P => {
       const on = labeled(el);
       // The loop runs up the left side above the heater, across the top and down the right side.
       const way = t => { const a = TAU * t; return [400 - 150 * Math.cos(a), 270 - 120 * Math.sin(a)]; };
-      let s = `<path d="M200,110 V420 H600 V110" style="fill:color-mix(in srgb, var(--electron) 14%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:5;stroke-linejoin:round"/><rect x="215" y="424" width="110" height="22" rx="6" style="fill:var(--proton)"/>`;
+      let s = `<path d="M200,110 V420 H600 V110" style="fill:color-mix(in srgb, var(--electron) 14%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:5;stroke-linejoin:round"/>`;
       s += `<ellipse cx="400" cy="270" rx="150" ry="120" class="guide"/>`;
-      if (on) s += text(270, 482, 'heater', 'lbl') + text(180, 250, 'warm fluid:', 'lbl', 'end') + text(180, 284, 'less dense,', 'lbl', 'end') + text(180, 318, 'rises', 'lbl strong', 'end') + text(620, 250, 'cooler fluid:', 'lbl', 'start') + text(620, 284, 'denser,', 'lbl', 'start') + text(620, 318, 'sinks', 'lbl strong', 'start');
+      if (on) s += text(212, 482, 'heater', 'lbl', 'end') + text(180, 250, 'warm fluid:', 'lbl', 'end') + text(180, 284, 'less dense,', 'lbl', 'end') + text(180, 318, 'rises', 'lbl strong', 'end') + text(620, 250, 'cooler fluid:', 'lbl', 'start') + text(620, 284, 'denser,', 'lbl', 'start') + text(620, 318, 'sinks', 'lbl strong', 'start');
       // How cool the fluid is at a point of the loop (0 warm, 1 cool): warmest as it leaves the heater and
       // starts to rise, cooling gradually across the top and down the far side, coolest at the bottom,
       // then warming quickly as it passes back over the heater.
       const coolness = t => { const u = ((t % 1) + 1) % 1; return u < 0.75 ? u / 0.75 : (1 - u) / 0.25; };
       const n = 10, blob = k => `<circle r="13" style="fill:var(--proton)"/><circle r="13" style="fill:var(--electron);opacity:${f(coolness(k))}"/>`;
-      const still = Array.from({ length: n }, (_, k) => at(...way(k / n), blob(k / n))).join('') + arrow(250, 300, 250, 220, 'proton', 5) + arrow(550, 240, 550, 320, 'electron', 5);
-      const mover = Array.from({ length: n }, (_, k) => `<g>${track(Array.from({ length: 61 }, (_, i) => way(k / n + i / 60)), 8)}<circle r="13" style="fill:var(--proton)"/><circle r="13" style="fill:var(--electron)">${anim('opacity', Array.from({ length: 61 }, (_, i) => f(coolness(k / n + i / 60))), 8)}</circle></g>`).join('');
-      return svg(on ? '-40 90 880 410' : '180 90 440 370', s + twoState(still, mover), 'A convection current in a liquid heated at the bottom on one side. The warm liquid above the heater expands, becomes less dense and rises; cooler, denser liquid sinks on the other side and moves in to take its place, so the liquid circulates');
+      // The heater: a flame under the left of the tank, its base on a short burner. On screen its three
+      // tongues flicker, each at its own pace; the still picture keeps them at full height.
+      const B = 486, tongue = (x, w, h) => `M${f(x - w / 2)},${B} Q${f(x - w / 2)},${f(B - h * 0.45)} ${f(x)},${f(B - h)} Q${f(x + w / 2)},${f(B - h * 0.45)} ${f(x + w / 2)},${B} Q${x},${f(B + w * 0.3)} ${f(x - w / 2)},${B} Z`;
+      const tongues = [[240, 38, 44, 0.7], [272, 46, 58, 0.55], [304, 38, 44, 0.8]];
+      const flame = moving => `<rect x="216" y="${B + 2}" width="112" height="7" rx="3" style="fill:var(--text-secondary)"/>` + tongues.map(([x, w, h, dur]) => [['var(--proton)', 1], ['var(--gold)', 0.55]].map(([paint, k]) => {
+        const shape = scale => tongue(x, w * k, h * k * scale);
+        const flicker = moving ? `<animate attributeName="d" values="${[1, 0.8, 0.95, 0.75, 1].map(shape).join(';')}" dur="${dur}s" repeatCount="indefinite"/>` : '';
+        return `<path d="${shape(1)}" style="fill:${paint}">${flicker}</path>`;
+      }).join('')).join('');
+      const still = flame(false) + Array.from({ length: n }, (_, k) => at(...way(k / n), blob(k / n))).join('') + arrow(250, 300, 250, 220, 'proton', 5) + arrow(550, 240, 550, 320, 'electron', 5);
+      const mover = flame(true) + Array.from({ length: n }, (_, k) => `<g>${track(Array.from({ length: 61 }, (_, i) => way(k / n + i / 60)), 8)}<circle r="13" style="fill:var(--proton)"/><circle r="13" style="fill:var(--electron)">${anim('opacity', Array.from({ length: 61 }, (_, i) => f(coolness(k / n + i / 60))), 8)}</circle></g>`).join('');
+      return svg(on ? '-40 90 880 410' : '180 90 440 410', s + twoState(still, mover), 'A convection current in a liquid heated by a flame under one side of its base. The warm liquid above the heater expands, becomes less dense and rises; cooler, denser liquid sinks on the other side and moves in to take its place, so the liquid circulates');
     },
 
     // The inverse square law: the same power spread over a sphere of radius d, then 2d.
