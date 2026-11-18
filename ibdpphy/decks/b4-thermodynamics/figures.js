@@ -147,7 +147,9 @@ window.DeckFigures.add(P => {
       }
       const marker = `<circle r="12" style="fill:var(--text-main);stroke:var(--viewer-bg);stroke-width:3"/>`;
       const [mx, my] = CARNOT[0][24];
-      return svg(on ? '40 0 780 510' : '150 0 660 440', s + twoState(`<g transform="translate(${f(mx)} ${f(my)})">${marker}</g>`, `<g>${track(all, 8)}${marker}</g>`), 'The Carnot cycle on a pressure–volume diagram. From A to B the gas expands isothermally at the hot temperature. From B to C it expands adiabatically and cools. From C to D it is compressed isothermally at the cold temperature. From D to A it is compressed adiabatically and warms. The area enclosed is the net work done');
+      // Labeled, the marker waits at A until the figure's PLAY step is shown, then goes round and round.
+      const round = on ? `<g transform="translate(${f(all[0][0])} ${f(all[0][1])})">${track(all, 8, { extra: 'begin="indefinite"' })}${marker}</g>${PLAY}` : `<g>${track(all, 8)}${marker}</g>`;
+      return svg(on ? '40 0 780 510' : '150 0 660 440', s + twoState(`<g transform="translate(${f(mx)} ${f(my)})">${marker}</g>`, round), 'The Carnot cycle on a pressure–volume diagram. From A to B the gas expands isothermally at the hot temperature. From B to C it expands adiabatically and cools. From C to D it is compressed isothermally at the cold temperature. From D to A it is compressed adiabatically and warms. The area enclosed is the net work done');
     }
   };
 });

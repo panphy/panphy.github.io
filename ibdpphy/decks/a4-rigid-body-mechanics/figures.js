@@ -100,11 +100,12 @@ window.DeckFigures.add(P => {
 
     // A solid sphere and a hoop rolling down the same slope: the sphere wins. Also drawn plain.
     'a4-rolling': el => {
-      const on = labeled(el), x0 = 130, y0 = 130, x1 = 730, y1 = 390, T = 3.4, n = 40, r = 30, len = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / len, uy = (y1 - y0) / len;
-      const along = (s, lane) => [x0 + ux * s + uy * (r + lane), y0 + uy * s - ux * (r + lane)];
+      const on = labeled(el), x0 = 130, y0 = 130, x1 = 730, y1 = 390, T = 3.4, n = 40, r = 32, len = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / len, uy = (y1 - y0) / len;
+      // r is the outer radius of both bodies, strokes included; each rests on the ramp's stroke (1.5 thick on the outside).
+      const along = (s, lane) => [x0 + ux * s + uy * (r + 1.5 + lane), y0 + uy * s - ux * (r + 1.5 + lane)];
       // Accelerations in the ratio 5/7 (solid sphere) to 1/2 (hoop): the hoop has covered 0.7 of the slope when the sphere arrives.
       const path = (k, lane) => Array.from({ length: n + 1 }, (_, i) => along(Math.min(1, k * (i / n) ** 2) * (len - 70) + 30, lane));
-      const ball = `<circle r="${r}" style="${BODY}"/><line x1="${-r}" y1="0" x2="${r}" y2="0" style="stroke:var(--brand-accent-strong);stroke-width:3"/>`, hoop = `<circle r="${r}" style="fill:none;stroke:var(--brand-accent);stroke-width:8"/><line x1="${-r}" y1="0" x2="${r}" y2="0" style="stroke:var(--brand-accent);stroke-width:3"/>`;
+      const ball = `<circle r="${r - 1.5}" style="${BODY}"/><line x1="${-(r - 1.5)}" y1="0" x2="${r - 1.5}" y2="0" style="stroke:var(--brand-accent-strong);stroke-width:3"/>`, hoop = `<circle r="${r - 4}" style="fill:none;stroke:var(--brand-accent);stroke-width:8"/><line x1="${-(r - 4)}" y1="0" x2="${r - 4}" y2="0" style="stroke:var(--brand-accent);stroke-width:3"/>`;
       // The angle turned is the distance rolled divided by the radius, sampled like the path, so nothing slips.
       const rolling = (body, k) => `<g><animateTransform attributeName="transform" type="rotate" values="${Array.from({ length: n + 1 }, (_, i) => f(Math.min(1, k * (i / n) ** 2) * (len - 70) / r * 180 / Math.PI)).join(';')}" dur="${T}s" repeatCount="indefinite"/>${body}</g>`;
       let s = `<path d="M${x0},${y0} L${x1},${y1} L${x0},${y1} Z" style="fill:color-mix(in srgb, var(--neutron) 22%, transparent);stroke:var(--text-secondary);stroke-width:3"/>`;
