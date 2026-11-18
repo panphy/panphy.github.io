@@ -1,9 +1,10 @@
 #!/bin/sh
-# Rebuild the workbook PDFs (three part booklets, the Unit review and their answer editions)
+# Rebuild the workbook PDFs (three part booklets, the Unit review and their answer editions, and the
+# Revision exercises, one PDF with its mark scheme on the last page, and a landscape 2-up copy of it)
 # from workbook.html with headless Chrome. The lesson plans have their own script in lesson-plans/.
 # Serve the repository root first:  python3 -m http.server 8000
 # Then run from this folder:        sh build-pdfs.sh
-# To rebuild only some booklets, name them: sh build-pdfs.sh p1 p3 review (p1-p3 are the parts)
+# To rebuild only some booklets, name them: sh build-pdfs.sh p1 p3 review revision (p1-p3 are the parts)
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year10phy/unit01}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
@@ -54,4 +55,11 @@ part() { # number (as parts in assets/book.js)
 ONLY="$*"
 for n in 1 2 3; do part "$n"; done
 booklet review "$NAME (Unit Review)" "review" "Unit Review"
+if wanted revision; then
+  pdf "$OUT/$NAME (Revision Exercises).pdf" "$BASE/workbook.html?revision" "Revision Exercises"
+  # A landscape copy with two pages on each A4 sheet (pdfjam, from TeX Live).
+  if command -v pdfjam >/dev/null; then
+    pdfjam --nup 2x1 --landscape --a4paper --quiet "$OUT/$NAME (Revision Exercises).pdf" -o "$OUT/$NAME (Revision Exercises) (2-up).pdf" && echo "Wrote $OUT/$NAME (Revision Exercises) (2-up).pdf"
+  else echo "pdfjam not found: skipped the 2-up Revision exercises"; fi
+fi
 exit 0

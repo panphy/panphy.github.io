@@ -14,6 +14,7 @@ A unit's `workbook.html` loads its figure styles and scripts, its content, `cove
 
 - `?part=N`: a part booklet (`parts` in `book.js`): cover with its contents, the lessons, the toolkit so far, key words and quick answers.
 - `?review`: the Unit review: cover, mixed exam practice, any Triple Science only pages, the toolkit and all the key words.
+- `?revision`: Revision exercises, when the unit sets `UNIT.revision` (fields in `workbook.js`): no cover; page 1 has name, class, teacher, date and score fields and the equations met so far, then the questions, with marks on each part; the mark scheme (each part's `ms`) prints in two columns on the last page. One PDF, with no answer edition.
 - `?lesson=N`: one lesson, as a booklet (Particle Model prints its required practicals this way).
 - No query: the whole unit, for previewing. Add `&answers` for the answer edition, which has the same page numbers: answers print only in it, in space the student edition keeps blank.
 
