@@ -34,7 +34,9 @@
     root.setProperty('--deck-gap-x', `${Math.max(0, box.left + left).toFixed(1)}px`);
   }
 
-  const hiddenSteps = slide => [...slide.querySelectorAll('.step:not(.shown)')];
+  // A figure's numbered builds (data-build) are steps run by its Play button, not by clicks.
+  const CLICK_STEP = '.step:not([data-build])';
+  const hiddenSteps = slide => [...slide.querySelectorAll(`${CLICK_STEP}:not(.shown)`)];
 
   function show(index, { fromEnd = false } = {}) {
     state.index = Math.max(0, Math.min(state.slides.length - 1, index));
@@ -45,7 +47,7 @@
       slide.inert = !active;
     });
     const slide = state.slides[state.index];
-    slide.querySelectorAll('.step').forEach(step => step.classList.toggle('shown', fromEnd));
+    slide.querySelectorAll(CLICK_STEP).forEach(step => step.classList.toggle('shown', fromEnd));
     syncPlays(slide);
     state.loops.forEach(loop => { if (loop.slide !== slide) loop.reset(); });
     const n = state.index + 1;
@@ -92,9 +94,11 @@
   // data-controls="off" opts a figure out. Kinds, any of which a figure may combine:
   //   loops: SMIL animations that repeat, run by the SVG's own clock;
   //   orbits: [data-orbit] nodes moved by animateOrbits, run by a clock of the figure's own;
-  //   k2: CSS animations that run when the figure's k2 step is shown (A.2's collisions);
+  //   builds: the figure's numbered steps (k1, k2, ...), with the CSS transitions and animations
+  //     they set off (wipes, A.2's collisions). Play shows them in order, each once the last has
+  //     run and been held for a moment; steps of the same number show together;
   //   play: SMIL animations with begin="indefinite", begun when its empty .step.play is shown.
-  // The k2 and play steps leave the click order: the Play button shows them instead.
+  // The numbered and play steps leave the click order: the Play button shows them instead.
   const ICONS = {
     play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
     pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5h3.6v13H7zM13.4 5.5H17v13h-3.6z"/></svg>',
@@ -102,6 +106,8 @@
   };
   const LOOPING = 'animate[repeatCount="indefinite"], animateTransform[repeatCount="indefinite"], animateMotion[repeatCount="indefinite"], [data-orbit]';
   const orbitClocks = new WeakMap();
+  const BUILD_HOLD = 900;
+  const buildNumber = node => +((node.getAttribute('class') || '').match(/(?:^|\s)k(\d+)(?=\s|$)/) || [])[1] || 0;
 
   function buildLoopControls() {
     if (reduceMotion.matches) return;
@@ -109,10 +115,11 @@
       if (fig.dataset.controls === 'off' || 'plain' in fig.dataset || 'still' in fig.dataset || fig.closest('.slide.title, .slide.section')) return;
       const svgOf = () => fig.querySelector('svg');
       if (!svgOf() || !svgOf().pauseAnimations) return;
-      const k2s = [...fig.querySelectorAll('.k2')];
+      // Numbered steps are marked data-build, which survives the fresh copy a reset makes.
+      fig.querySelectorAll('svg .step').forEach(node => { const k = buildNumber(node); if (k) node.dataset.build = k; });
+      const hasBuilds = !!fig.querySelector('[data-build]');
       const isPlay = !!fig.querySelector('.step.play');
-      if (!k2s.length && !isPlay && !fig.querySelector(LOOPING)) return;
-      k2s.forEach(node => node.classList.remove('step'));
+      if (!hasBuilds && !isPlay && !fig.querySelector(LOOPING)) return;
       if (isPlay) fig.querySelector('.step.play').classList.remove('step');
       const clock = { t: 0, playing: false };
       if (fig.querySelector('[data-orbit]')) orbitClocks.set(fig, clock);
@@ -121,7 +128,7 @@
       row.className = 'sim-buttons loop-buttons';
       row.innerHTML = `<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset" aria-label="Reset" title="Reset">${ICONS.reset}</button>`;
       const play = row.querySelector('[data-k="play"]');
-      let playing = false, started = false, finished = false, run = 0;
+      let playing = false, started = false, finished = false, run = 0, stage = 0, hold = null, buildsDone = false, smilDone = false;
       const label = on => {
         playing = on;
         clock.playing = on;
@@ -131,13 +138,51 @@
       };
       const css = () => fig.getAnimations({ subtree: true });
       const done = () => { if (playing) label(false); finished = true; };
+      const settle = () => { if (buildsDone && smilDone && !fig.querySelector(LOOPING)) done(); };
+      const stages = () => {
+        const groups = new Map();
+        fig.querySelectorAll('[data-build]').forEach(node => { const k = +node.dataset.build; groups.set(k, [...(groups.get(k) || []), node]); });
+        return [...groups.keys()].sort((a, b) => a - b).map(k => groups.get(k));
+      };
+      // The pause between builds runs only while playing.
+      const resumeHold = () => {
+        if (!hold || hold.id) return;
+        hold.since = performance.now();
+        hold.id = setTimeout(() => { const { then } = hold; hold = null; then(); }, Math.max(0, hold.left));
+      };
+      const pauseHold = () => {
+        if (!hold?.id) return;
+        clearTimeout(hold.id);
+        hold.id = 0;
+        hold.left -= performance.now() - hold.since;
+      };
+      const nextBuild = mine => {
+        if (mine !== run) return;
+        const groups = stages();
+        if (stage >= groups.length) { buildsDone = true; settle(); return; }
+        const before = new Set(css()); // also settles the styles, so each transition starts afresh
+        groups[stage].forEach(node => node.classList.add('shown'));
+        stage += 1;
+        const parts = css().filter(anim => !before.has(anim) && anim.effect?.getComputedTiming().endTime !== Infinity);
+        Promise.all(parts.map(anim => anim.finished)).then(() => {
+          if (mine !== run) return;
+          if (stage >= groups.length) { buildsDone = true; settle(); return; }
+          hold = { left: BUILD_HOLD, id: 0, then: () => nextBuild(mine) };
+          if (playing) resumeHold();
+        }, () => {});
+      };
       const reset = () => {
         label(false);
         run += 1;
         started = false;
         finished = false;
+        stage = 0;
+        if (hold?.id) clearTimeout(hold.id);
+        hold = null;
         clock.t = 0;
-        k2s.forEach(node => node.classList.remove('shown'));
+        fig.querySelectorAll('[data-build].shown').forEach(node => node.classList.remove('shown'));
+        // Straight back to the start, without fading out.
+        css().forEach(anim => { if (anim instanceof CSSTransition) anim.finish(); });
         if (isPlay && fig.querySelector('.play.shown')) {
           // Parsed afresh from its markup: a played SMIL animation keeps its begin time.
           fig.querySelector('.play.shown').classList.remove('shown');
@@ -151,19 +196,16 @@
       const start = () => {
         started = true;
         const mine = run;
+        buildsDone = !hasBuilds;
+        smilDone = !isPlay;
         svgOf().unpauseAnimations();
-        if (k2s.length) {
-          css(); // settle the reset styles first, so a replay starts afresh
-          k2s.forEach(node => node.classList.add('shown'));
-          const parts = css();
-          if (parts.length && !isPlay && !fig.querySelector(LOOPING)) Promise.all(parts.map(anim => anim.finished)).then(() => { if (mine === run) done(); }, () => {});
-        }
+        if (hasBuilds) nextBuild(mine);
         if (isPlay) {
           fig.querySelector('.play').classList.add('shown');
           const once = [...svgOf().querySelectorAll('[begin="indefinite"]')];
           let left = once.length;
           once.forEach(node => {
-            node.addEventListener('endEvent', () => { left -= 1; if (!left && mine === run && !fig.querySelector('[repeatCount="indefinite"]')) done(); }, { once: true });
+            node.addEventListener('endEvent', () => { left -= 1; if (!left && mine === run && !fig.querySelector('[repeatCount="indefinite"]')) { smilDone = true; settle(); } }, { once: true });
             node.beginElement?.();
           });
         }
@@ -172,13 +214,14 @@
         if (playing) {
           svgOf().pauseAnimations();
           css().forEach(anim => anim.pause());
+          pauseHold();
           label(false);
           return;
         }
         if (finished) reset();
         label(true);
         if (!started) start();
-        else { svgOf().unpauseAnimations(); css().forEach(anim => anim.play()); }
+        else { svgOf().unpauseAnimations(); css().forEach(anim => anim.play()); resumeHold(); }
       });
       row.querySelector('[data-k="reset"]').addEventListener('click', reset);
       label(false);
@@ -204,7 +247,7 @@
 
   function prev() {
     const slide = state.slides[state.index];
-    const shown = slide.querySelectorAll('.step.shown');
+    const shown = slide.querySelectorAll(`${CLICK_STEP}.shown`);
     if (shown.length) {
       shown[shown.length - 1].classList.remove('shown');
       syncPlays(slide);
