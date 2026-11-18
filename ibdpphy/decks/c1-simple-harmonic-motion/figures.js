@@ -29,7 +29,7 @@ window.DeckFigures.add(P => {
       const cx = 430, cy = 250;
       let s = arrow(110, cy, 770, cy, 'text-secondary', 2.5) + arrow(cx, 460, cx, 40, 'text-secondary', 2.5) + line(`M${cx - 240},${cy - 170} L${cx + 240},${cy + 170}`, 'brand-accent-strong', 6);
       s += `<path d="M${cx - 240},${cy} V${cy - 170} M${cx + 240},${cy} V${cy + 170}" class="guide"/>` + text(cx + 16, 54, 'a', 'lbl display', 'start') + text(766, cy - 16, 'x', 'lbl display', 'end') + text(cx - 240, cy + 40, sub('−x', '0'), 'lbl mono') + text(cx + 240, cy - 22, sub('x', '0'), 'lbl mono');
-      s += text(cx + 60, cy - 110, 'gradient = −ω²', 'lbl strong halo', 'start') + text(cx - 30, cy - 190, 'displaced left: accelerates right', 'lbl small', 'end') + text(cx + 170, cy + 210, 'displaced right: accelerates left', 'lbl small', 'middle');
+      s += text(cx + 60, cy - 110, 'gradient = −ω²', 'lbl strong halo', 'start') + text(cx - 30, cy - 190, 'displaced left: accelerates right', 'lbl small', 'end') + text(cx + 30, cy + 210, 'displaced right: accelerates left', 'lbl small', 'start');
       return svg('40 0 780 490', s, 'A graph of acceleration against displacement for simple harmonic motion: a straight line through the origin with a negative gradient equal to minus omega squared. It runs only between minus the amplitude and plus the amplitude');
     },
 
