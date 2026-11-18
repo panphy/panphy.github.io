@@ -3,6 +3,7 @@
 // apricot. Nothing here is terracotta, because B.1 has no additional higher level content.
 window.DeckFigures.add(P => {
   const { svg, arrow, text, sub, through, sampled, labeled, animated, stepG, seeded, track, anim, twoState, PLAY, f, TAU } = P;
+  let conductionCount = 0;   // ids for the SMIL runs of data-settle conduction figures
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const atom = (r, color = 'brand-primary') => `<circle r="${r}" style="fill:var(--${color})"/>`;
   const at = (x, y, body) => `<g transform="translate(${f(x)} ${f(y)})">${body}</g>`;
@@ -95,6 +96,22 @@ window.DeckFigures.add(P => {
       const size = (c, t) => { const u = Math.min(1, Math.max(0, (t * (cols + 1) / 6 - c) / 2)), k = u * u * (3 - 2 * u); return small + (final(c) - small) * k; };
       const warmth = (c, t) => (size(c, t) - small) / (7 - small);
       const still = spots.map(([x, y, c]) => at(x, y, atom(11) + `<circle r="11" style="fill:var(--proton);opacity:${f(0.7 * warmth(c, T))}"/>`)).join('');
+      // data-settle: the front crosses once from Play, then the bar keeps vibrating in its steady
+      // state until Reset (deck.js). Each particle's run ends in a loop of its steady vibration.
+      if ('settle' in el.dataset) {
+        const RUN = 6, id = `conduction${++conductionCount}`;
+        const settled = spots.map(([x, y, c], i) => {
+          const a = rand() * TAU, b = rand() * TAU, period = 0.36 + 0.12 * rand(), m = 120;
+          const wobble = (A, tm) => { const w = TAU * tm / period; return [A * Math.cos(a + w), A * Math.sin(b + 1.3 * w)]; };
+          const times = Array.from({ length: m + 1 }, (_, k) => k / m * RUN);
+          const cycle = Array.from({ length: 25 }, (_, k) => wobble(final(c), RUN + k / 24 * period));
+          const run = `<animateTransform id="${id}p${i}" attributeName="transform" type="translate" values="${times.map(tm => wobble(size(c, tm), tm).map(f).join(',')).join(';')}" dur="${RUN}s" begin="indefinite" fill="freeze"/>`;
+          const steady = `<animateTransform attributeName="transform" type="translate" values="${cycle.map(p => p.map(f).join(',')).join(';')}" dur="${f(period)}s" begin="${id}p${i}.end" repeatCount="indefinite"/>`;
+          const glow = anim('opacity', times.map(tm => f(0.7 * warmth(c, tm))), RUN, { loop: false });
+          return at(x, y, `<g>${run}${steady}${atom(11)}<circle r="11" style="fill:var(--proton)" opacity="0">${glow}</circle></g>`);
+        }).join('') + PLAY;
+        return svg(on ? '40 90 720 400' : '40 130 720 240', s + twoState(still, settled), 'A bar joining a hot body to a cold body. At first only the particles next to the hot body vibrate strongly. Each passes some of its vibration to its neighbor, so the strong vibration spreads along the bar towards the cold end while the particles stay in place, until the vibration falls steadily from the hot end to the cold end');
+      }
       const mover = spots.map(([x, y, c]) => {
         const a = rand() * TAU, b = rand() * TAU, period = 0.36 + 0.12 * rand();
         const times = Array.from({ length: n + 1 }, (_, i) => i / n * T);
