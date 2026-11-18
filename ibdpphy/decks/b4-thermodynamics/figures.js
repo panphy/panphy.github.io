@@ -157,8 +157,24 @@ window.DeckFigures.add(P => {
 // Move the free-expansion atoms in fixed coordinates. The deck replaces the figure when its
 // PLAY step is undone; use the saved starting coordinates because that copy's cx/cy may
 // already have moved. Print and reduced motion have no data-free-gas group to animate.
+// The atoms are equal hard spheres: they bounce elastically off the walls and off each other,
+// trading the parts of their velocities along the line between their centers, so momentum and
+// kinetic energy are conserved in every collision.
 (() => {
-  const states = new WeakMap();
+  const states = new WeakMap(), R = 9;
+  // Elastic collisions between equal spheres: overlapping atoms that are closing exchange the
+  // components of their velocities along the line of centers, and are moved apart to touching.
+  function collide(atoms) {
+    for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) {
+      const a = atoms[i], b = atoms[j], dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+      if (d2 >= 4 * R * R || d2 === 0) continue;
+      const d = Math.sqrt(d2), nx = dx / d, ny = dy / d, push = (2 * R - d) / 2;
+      a.x -= nx * push; a.y -= ny * push; b.x += nx * push; b.y += ny * push;
+      const closing = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+      if (closing <= 0) continue;
+      a.vx -= closing * nx; a.vy -= closing * ny; b.vx += closing * nx; b.vy += closing * ny;
+    }
+  }
   function frame(now) {
     requestAnimationFrame(frame);
     document.querySelectorAll('#deck .slide.active [data-free-gas]').forEach(group => {
@@ -175,6 +191,9 @@ window.DeckFigures.add(P => {
       state.atoms.forEach(atom => {
         atom.x += atom.vx * dt;
         atom.y += atom.vy * dt;
+      });
+      collide(state.atoms);
+      state.atoms.forEach(atom => {
         if (atom.x < 105) { atom.x = 210 - atom.x; atom.vx = Math.abs(atom.vx); }
         if (atom.x > right) { atom.x = 2 * right - atom.x; atom.vx = -Math.abs(atom.vx); }
         if (atom.y < 105) { atom.y = 210 - atom.y; atom.vy = Math.abs(atom.vy); }

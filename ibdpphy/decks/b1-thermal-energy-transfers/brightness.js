@@ -1,7 +1,7 @@
 // The inverse square law in three dimensions, over the flat b1-inverse-square figure of slide 38:
 // the power of a source spreads over the whole of every sphere around it, of area 4πr². Built,
 // turned and zoomed by ../assets/model3d.js.
-import { model3d } from '../assets/model3d.js?v=20261116';
+import { model3d } from '../assets/model3d.js?v=20261118';
 
 const D = 1.5;                  // the radius d of the inner sphere; the outer one is 2d
 const CONE = 0.3;               // half the angle of the patch each sphere shows lit, in radians
