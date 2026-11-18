@@ -177,7 +177,7 @@
   /* Sankey diagram. input, useful, wasted in the same unit; s = pixels per unit.
      Useful energy goes straight on; wasted energy bends down. */
   let sankeyId = 0;
-  function sankey({ blend = false, input, useful, wasted, s = 1.6, unit = "J", inLabel = "input", useLabel = "useful", wasteLabel = "wasted" }) {
+  function sankey({ blend = true, input, useful, wasted, s = 1.6, unit = "J", inLabel = "input", useLabel = "useful", wasteLabel = "wasted" }) {
     const x0 = 100, xs = 190, xe = 330, y0 = 30, H = input * s, U = useful * s, Wd = wasted * s, r = 18, head = 16;
     const yc = y0 + H + r, R = r + Wd, yEnd = yc + 40;
     const use = `<path class="ink cool-t s-cool" d="M${xs} ${y0}H${xe}L${xe + head} ${y0 + U / 2}L${xe} ${y0 + U}H${xs}Z"/>`;

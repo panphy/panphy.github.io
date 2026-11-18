@@ -142,7 +142,7 @@
         { t: "lab", blocks: [
           { t: "steps", items: ["Measure the trolley's mass on the balance in grams. Convert it to kilograms.", "Mark a 1.00 m section of the track with tape.", "Give the trolley a gentle push so it rolls through the section. Time how long it takes to cross the 1.00 m.", "Repeat twice more with the same push, and find the mean time.", "Calculate the speed, then the kinetic energy."] },
           { t: "q", p: "Record your results.", table: { head: ["Mass / g", "Mass / kg", "Time 1 / s", "Time 2 / s", "Time 3 / s", "Mean time / s"], rows: [[null, null, null, null, null, null]], ans: [["500", "0.500", "1.62", "1.55", "1.59", "1.59"]] } },
-          { t: "q", p: R`Calculate the speed: \(\text{speed} = \dfrac{\text{distance}}{\text{time}}\).`, frame: frame3, frameA: [R`\(v = \dfrac{s}{t}\)`, R`\(v = \dfrac{1.00}{1.59}\)`, "0.63 m/s (sample)"] },
+          { t: "q", p: R`Calculate the speed: \(\text{speed} = \dfrac{\text{distance}}{\text{time}}\).`, frame: frame3, frameA: [R`\(\text{speed} = \dfrac{\text{distance}}{\text{time}}\)`, R`\(\text{speed} = \dfrac{1.00}{1.59}\)`, "0.63 m/s (sample)"] },
           { t: "q", p: "Calculate the energy in the trolley's kinetic store.", frame: frame3, frameA: [R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, R`\(E_k = 0.5 \times 0.500 \times 0.63^2\)`, "0.10 J (sample)"] },
           { t: "q", p: R`Which measurement has the biggest effect on your answer? {{the mass|the time*}} Explain why.`, lines: 2, a: "The time: the speed is worked out from it, and the speed is squared, so any error in the time is made bigger." },
         ] },

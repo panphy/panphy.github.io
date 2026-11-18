@@ -8,7 +8,7 @@
 
   const equations = [
     { lesson: 2, eq: R`\(E_k = \tfrac{1}{2}\,m\,v^2\)`, words: "kinetic energy = 0.5 × mass × (speed)²", units: "J, kg, m/s", re: "Use it to calculate the energy. Only the speed is squared." },
-    { lesson: 2, eq: R`\(s = v\,t\)`, words: "distance travelled = speed × time", units: "m, m/s, s", re: R`\(v = \dfrac{s}{t}\) and \(t = \dfrac{s}{v}\)`, tri: { top: "s", bottom: ["v", "t"] } },
+    { lesson: 2, eq: R`\(\text{speed} = \dfrac{\text{distance}}{\text{time}}\)`, words: "speed = distance ÷ time", units: "m/s, m, s", re: R`\(\text{distance} = \text{speed} \times \text{time}\) and \(\text{time} = \dfrac{\text{distance}}{\text{speed}}\)`, tri: { top: "distance", bottom: ["speed", "time"] } },
     { lesson: 3, eq: R`\(E_p = m\,g\,h\)`, words: "gravitational potential energy = mass × gravitational field strength × height", units: "J, kg, N/kg, m", re: R`\(h = \dfrac{E_p}{m\,g}\) and \(m = \dfrac{E_p}{g\,h}\)`, tri: { top: "E_p", bottom: ["m", "g", "h"] } },
     { lesson: 4, eq: R`\(F = k\,e\)`, words: "force = spring constant × extension", units: "N, N/m, m", re: R`\(k = \dfrac{F}{e}\) and \(e = \dfrac{F}{k}\)`, tri: { top: "F", bottom: ["k", "e"] } },
     { lesson: 5, eq: R`\(E_e = \tfrac{1}{2}\,k\,e^2\)`, words: "elastic potential energy = 0.5 × spring constant × (extension)²", units: "J, N/m, m", re: "Use it to calculate the energy. Only the extension is squared." },
