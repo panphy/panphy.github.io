@@ -82,6 +82,8 @@ body.is-fullscreen .notes, .notes[hidden] { display: none; }
 .rn-side .more { border-left-color: var(--rn-more); }
 .rn-side .more::before { content: "Go further"; color: var(--rn-more); }
 .rn-side .spec { border-left-color: var(--rn-more); }
+.rn-side .nos { border-left-color: var(--rn-nos, var(--rn-more)); }
+.rn-side .nos::before { content: "Nature of science"; color: var(--rn-nos, var(--rn-more)); }
 .rn-side .spec::before { content: "Beyond the specification"; color: var(--rn-more); }
 .revision-note sub, .revision-note sup { line-height: 0; }
 

@@ -255,6 +255,7 @@ body.is-fullscreen .stage { left: 0; }
   --rn-trap: var(--brand-primary);
   --rn-tip: var(--brand-accent-strong);
   --rn-more: var(--photon);
+  --rn-nos: var(--electron);
   --rn-font: 16px/1.45 var(--font-body);
   --rn-label-font: 700 15px var(--font-body);
   --rn-tag-font: 600 12px var(--font-mono);
