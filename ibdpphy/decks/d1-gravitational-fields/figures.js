@@ -37,6 +37,25 @@ window.DeckFigures.add(P => {
   const marsSeen = t => { const e = earthAt(t), m = marsAt(t), d = m.map((v, k) => v - e[k]); return [Math.atan2(d[1], d[0]) * 180 / Math.PI, Math.asin(d[2] / Math.hypot(...d)) * 180 / Math.PI]; };
 
   return {
+    // The two models of slide 4, kept simple: circles about the center body, with Mars, the Earth
+    // (blue) and the Sun (amber) marked. Earth-centered, Mars rides a small circle on its big one.
+    'd1-geocentric': () => {
+      const c = 150, ring = r => `<circle cx="${c}" cy="${c}" r="${r}" class="orbit" style="stroke-opacity:.7;stroke-width:3"/>`;
+      const [sx, sy] = polar(c, c, 66, -40), [dx, dy] = polar(c, c, 108, 205), [mx, my] = polar(dx, dy, 26, 300);
+      let s = ring(36) + ring(66) + ring(108) + `<circle cx="${f(dx)}" cy="${f(dy)}" r="26" class="orbit" style="stroke-opacity:.9;stroke-width:3"/>`;
+      s += ball(c, c, 15, 'electron', '') + sun(sx, sy, 14) + ball(mx, my, 10, 'proton', '');
+      s += text(f(sx + 22), f(sy - 10), 'Sun', 'lbl strong halo', 'start', 'style="font-size:36px"') + text(f(dx), f(dy + 70), 'Mars', 'lbl strong halo', 'middle', 'style="font-size:36px"');
+      return svg('0 0 330 310', s, 'The Earth-centered model: the Earth at the center, with the Sun and the planets on circles around it. Mars moves on a small circle whose center moves round the Earth on a big circle');
+    },
+    'd1-heliocentric': () => {
+      const c = 150, ring = r => `<circle cx="${c}" cy="${c}" r="${r}" class="orbit" style="stroke-opacity:.7;stroke-width:3"/>`;
+      const [ex, ey] = polar(c, c, 66, -40), [mx, my] = polar(c, c, 108, 205);
+      let s = ring(36) + ring(66) + ring(108);
+      s += sun(c, c, 18) + ball(ex, ey, 11, 'electron', '') + ball(mx, my, 10, 'proton', '');
+      s += text(f(ex + 20), f(ey - 10), 'Earth', 'lbl strong halo', 'start', 'style="font-size:36px"') + text(f(mx), f(my + 50), 'Mars', 'lbl strong halo', 'middle', 'style="font-size:36px"');
+      return svg('0 0 330 310', s, 'The Sun-centered model: the Sun at the center, with the Earth and the other planets on circles around it, Mars outside the Earth');
+    },
+
     // Why Mars goes backwards: a top view of the orbits at five equally spaced times around
     // opposition, numbered at the Earth, with the line of sight from the Earth through Mars at each, and beside it the path
     // as seen from the Earth (east on the left, latitude at twice the scale) with the same five times
@@ -208,7 +227,7 @@ window.DeckFigures.add(P => {
       let s = `<rect x="110" y="30" width="140" height="420" style="fill:var(--brand-primary);opacity:.12"/>` + arrow(110, 450, 110, 26, 'text-secondary', 2.5) + arrow(110, 230, 790, 230, 'text-secondary', 2.5);
       s += text(450, 494, 'r', 'lbl display') + P.yAxisLabel(66, 238, 'energy') + text(96, 238, '0', 'lbl mono', 'end') + text(250, 214, 'R', 'lbl mono');
       s += line(-100, 'brand-accent') + line(200, 'brand-primary') + line(100, 'hl');
-      s += text(420, 168, 'kinetic', 'lbl strong', 'start') + text(420, 300, 'total', 'lbl strong', 'start', 'style="fill:var(--hl-text)"') + text(330, 400, 'potential', 'lbl strong', 'start');
+      s += text(420, 168, 'kinetic', 'lbl strong', 'start', 'style="font-size:37px"') + text(420, 300, 'total', 'lbl strong', 'start', 'style="fill:var(--hl-text);font-size:37px"') + text(330, 400, 'potential', 'lbl strong', 'start', 'style="font-size:37px"');
       return svg('0 0 840 510', s, 'Graph of the energies of a satellite against the radius of its circular orbit. The kinetic energy is positive and falls with radius. The potential energy is negative and twice as large. The total energy is negative, equal in size to the kinetic energy, and rises towards zero for larger orbits');
     },
 
