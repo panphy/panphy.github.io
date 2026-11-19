@@ -8,7 +8,7 @@
   const frame4 = [["Convert"], ["Equation"], ["Substitute"], ["Answer", "unit:"]];
   const frameRe = [["Equation"], ["Rearrange"], ["Substitute"], ["Answer", "unit:"]];
   // Sample spring results used in Lesson 4: force / N, length / cm, extension / cm.
-  const SPRING = [[0, "5.0", "0.0"], [1, "9.0", "4.0"], [2, "13.1", "8.1"], [3, "17.0", "12.0"], [4, "21.0", "16.0"], [5, "25.1", "20.1"], [6, "29.0", "24.0"], [7, "34.5", "29.5"]];
+  const SPRING = [[0, "5.0", "0.0"], [1, "9.0", "4.0"], [2, "13.1", "8.1"], [3, "17.0", "12.0"], [4, "21.0", "16.0"], [5, "25.1", "20.1"], [6, "29.0", "24.0"]];
 
   const lessons = [
     // ============================================================ 3
@@ -116,7 +116,7 @@
         { t: "vars", rows: [["Question", "", "How does the extension of a spring depend on the force pulling it?"], ["Independent variable", "", "the force (the load we add)"], ["Dependent variable", "", "the extension"], ["Control variable", "", "the same spring for every reading"]] },
         { t: "split", cls: "narrow-fig", left: [
           { t: "safety", items: ["Wear safety goggles: a spring that slips off can whip.", "Keep your feet out from under the masses.", "Add masses gently. Do not let them drop."] },
-          { t: "steps", items: ["Line the pointer up with the metre rule. Record the original length.", "Add a 100 g mass. Record the new length.", "Repeat in 100 g steps up to 700 g.", "Work out the force and the extension for each load.", "Take the masses off one at a time. Does the spring go back to its original length?"] },
+          { t: "steps", items: ["Line the pointer up with the metre rule. Record the original length.", "Add a 100 g mass. Record the new length.", "Repeat in 100 g steps up to 600 g.", "Work out the force and the extension for each load.", "Take the masses off one at a time. Does the spring go back to its original length?"] },
         ], right: [{ t: "fig", h: F.springRig(3) }] },
         { t: "lab", blocks: [
           { t: "q", p: "Record your results. The force is about 1 N for each 100 g.", table: { head: ["Mass added / g", "Force / N", "Length / cm", "Extension / cm"], rows: SPRING.map(([f]) => [String(f * 100), null, null, null]), ans: SPRING.map(([f, len, ext]) => [null, String(f), len, ext]) } },
@@ -132,7 +132,7 @@
             ["Graph 2", "force", "extension", { opts: "how stretchy the spring is / how stiff the spring is", a: "how stiff the spring is: its spring constant k" }],
           ] }] },
           { t: "q", p: "A stiffer spring is tested. Draw a ring around the correct answer in each box.", ring: [["On graph 1, its line would be", ["steeper", "less steep"], 1], ["On graph 2, its line would be", ["steeper", "less steep"], 0]] },
-          { t: "q", p: "Is any reading beyond the limit of proportionality? If so, which one, and how can you tell from the graphs? If not, write “none”.", lines: 2, a: "The 700 g (7 N) reading: its point is off the straight line on both graphs." },
+          { t: "q", p: "Your teacher keeps adding masses to a spring until it passes its limit of proportionality. How do the points on graph 1 change after that?", lines: 2, a: "They leave the straight line: each extra newton gives more extension than before." },
         ] },
       ] },
       try: [

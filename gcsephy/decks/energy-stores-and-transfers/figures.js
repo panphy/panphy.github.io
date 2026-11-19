@@ -175,10 +175,10 @@ window.DeckSvgTex = {
   }
 
   // ---------- 3. Spring lab: add masses, read the extension, plot either graph ----------
-  // The sample spring of Lesson 4: about 4.0 cm per newton up to 6 N, then past its limit.
+  // The sample spring of Lesson 4: about 4.0 cm per newton up to 6 N (students stop at 600 g).
   // Both graphs use the same scales (0 to 8 N, 0 to 0.40 m), so swapping the axes reflects the line:
   // graph 1 (extension against force) is shallow, graph 2 (force against extension) is steep.
-  const SPRING = [0, 4.0, 8.1, 12.0, 16.0, 20.1, 24.0, 29.5];
+  const SPRING = [0, 4.0, 8.1, 12.0, 16.0, 20.1, 24.0];
   function graphAxes(gx, gy, gw, gh, g1) {
     const xs = g1 ? [0, 8, 1] : [0, 0.4, 0.05], ys = g1 ? [0, 0.4, 0.05] : [0, 8, 1];
     const X = v => gx + (v - xs[0]) / (xs[1] - xs[0]) * gw, Y = v => gy + gh - (v - ys[0]) / (ys[1] - ys[0]) * gh;
@@ -221,12 +221,12 @@ window.DeckSvgTex = {
       const a = graphAxes(gx, gy, gw, gh, g1);
       let s = a.s;
       if (fit) s += `<path class="dk-fit" d="M${a.fit[0]} ${a.fit[1]}L${a.fit[2]} ${a.fit[3]}"/>` + t(gx + gw / 2, gy + 30, g1 ? 'gradient = 0.04 m per N' : 'gradient = k = 25 N/m', 'dk-label hot');
-      done.forEach(i => { const [px, py] = a.pt(i); s += `<path class="dk-cross${i === 7 ? ' odd' : ''}" d="M${px - 9} ${py - 9}l18 18m0 -18l-18 18"/>`; });
+      done.forEach(i => { const [px, py] = a.pt(i); s += `<path class="dk-cross" d="M${px - 9} ${py - 9}l18 18m0 -18l-18 18"/>`; });
       s += t(gx + gw, gy - 18, g1 ? 'Graph 1' : 'Graph 2', 'dk-label', 'end');
       gr.innerHTML = s;
     }
     const update = () => { done.add(n); drawSpring(); drawGraph(); };
-    host.querySelector('[data-act="plus"]').addEventListener('click', () => { if (n < 7) { n++; update(); } });
+    host.querySelector('[data-act="plus"]').addEventListener('click', () => { if (n < SPRING.length - 1) { n++; update(); } });
     host.querySelector('[data-act="minus"]').addEventListener('click', () => { if (n > 0) { n--; update(); } });
     swapBtn.addEventListener('click', () => { g1 = !g1; swapBtn.textContent = g1 ? 'Show graph 2' : 'Show graph 1'; drawGraph(); });
     const fb = host.querySelector('[data-act="fit"]');

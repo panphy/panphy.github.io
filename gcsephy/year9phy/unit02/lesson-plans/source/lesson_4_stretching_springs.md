@@ -58,7 +58,7 @@ Use this rule **only** at the bench. Students record force in newtons, never in 
 ## Equipment and resources (per group)
 
 - Clamp stand, boss and clamp, with a heavy weight or G-clamp on the base
-- Spring, mass hanger and 100 g slotted masses (up to 700 g in total)
+- Spring, mass hanger and 100 g slotted masses (up to 600 g in total)
 - Metre rule clamped vertically beside the spring
 - A pointer (a pin or a strip of card taped to the bottom of the spring)
 - Safety goggles
@@ -98,7 +98,7 @@ Investigation question: how does the extension of a spring depend on the force p
 
 1. Clamp the spring and metre rule; line the pointer up with the scale. Record the original length (with the empty hanger, counted as the zero load, or with the hanger's mass included: decide as a class).
 2. Add 100 g. Record the new length.
-3. Repeat in 100 g steps up to 700 g.
+3. Repeat in 100 g steps up to 600 g.
 4. For each load, calculate the force (about 1 N per 100 g) and the extension.
 5. Remove the masses one at a time and check that the spring returns to its original length.
 
@@ -113,11 +113,10 @@ Sample results (original length 5.0 cm):
 | 400 | 4 | 21.0 | 16.0 |
 | 500 | 5 | 25.1 | 20.1 |
 | 600 | 6 | 29.0 | 24.0 |
-| 700 | 7 | 34.5 | 29.5 |
 
 ## Two graphs of the same results
 
-**Graph 1: extension against force.** Force is the independent variable (we choose it by adding masses), so, as in Unit 1, it goes on the x-axis and extension on the y-axis. Students plot the points and draw a straight best-fit line through the origin for the first six points.
+**Graph 1: extension against force.** Force is the independent variable (we choose it by adding masses), so, as in Unit 1, it goes on the x-axis and extension on the y-axis. Students plot the points and draw a straight best-fit line through the origin.
 
 > This graph answers the question we asked: what happens to the extension when the force increases? It increases in proportion, up to the limit of proportionality.
 
@@ -136,7 +135,7 @@ Sample results (original length 5.0 cm):
 
 Physicists draw graph 2 because its gradient is the spring constant, the number we need for elastic potential energy in Lesson 5. AQA exam questions usually show graph 2. A stiffer spring gives a steeper line on graph 2, but a shallower line on graph 1.
 
-On both graphs the 700 g point lies off the line: the spring has passed its limit of proportionality. Check whether it returned to 5.0 cm; if not, it was also inelastically deformed.
+Students stop at 600 g, so every point lies on the line and no spring is wasted. **Teacher demo: beyond the limit.** Keep adding masses to one demonstration spring and plot each point on the class graph 1: the points leave the straight line once the spring passes its limit of proportionality. Unload it and check whether it returns to its original length; if not, it was also inelastically deformed.
 
 Worked example (no graph):
 
