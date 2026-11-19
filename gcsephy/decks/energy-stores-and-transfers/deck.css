@@ -53,7 +53,6 @@ mjx-container { line-height: 0; }
 .dk .dk-motor { fill: var(--alt); stroke: var(--ink); stroke-width: 3; }
 .dk .dk-pointer { stroke: #c2410c; stroke-width: 3; }
 .dk .dk-cross { stroke: #1479a8; stroke-width: 4; stroke-linecap: round; fill: none; }
-.dk .dk-cross.odd { stroke: #c2410c; }
 .dk .dk-fit { stroke: #1479a8; stroke-width: 3; fill: none; }
 .dk .dk-rod { fill: #c9ced6; stroke: var(--ink); stroke-width: 3; }
 .dk .dk-pin { stroke: var(--ink); stroke-width: 3; }

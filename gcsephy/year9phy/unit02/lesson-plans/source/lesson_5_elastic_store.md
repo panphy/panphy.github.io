@@ -99,7 +99,7 @@ Each group uses its own k from Lesson 4:
 
 1. Calculate Eₑ when the spring is stretched by 0.10 m, then 0.20 m.
 2. Check that doubling the extension gave four times the energy.
-3. Could you use the equation for the 700 g reading? Explain.
+3. Could you use the equation for the demonstration spring beyond its limit of proportionality? Explain.
 
 Sample answers with k = 25 N/m: 0.125 J and 0.50 J; no, it was beyond the limit of proportionality.
 
