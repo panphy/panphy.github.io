@@ -3,6 +3,7 @@
 //   data-fig="a2-galileo-ramps"  slide 7  a ball released at height h rolls down one ramp and up a
 //                                         second whose angle the viewer sets; with no friction it
 //                                         stops at height h, and on the flat it rolls on for ever;
+//                                         bars show the potential and kinetic energy as it goes;
 //                                         angle control, Play/Pause and Reset buttons
 import { control, playback, typeset, drawn } from '../assets/sim-control.js';
 
@@ -60,7 +61,7 @@ function galileoRamps(fig) {
     control({ label: 'Angle', name: 'angle of the second ramp', min: 0, max: 60, step: 5, value: angle, format: x => `${x}°`, onChange: x => { angle = x; playing = false; buttons.set(false); build(); reset(); } }),
     buttons
   ];
-  const svg = mount(fig, `0 60 ${VIEW} 330`, 'A ball released from height h rolls down a ramp and up a second ramp whose angle you set; with no friction it rises to the same height h, rolling further on a gentler ramp, and on a flat track it rolls on for ever', rows);
+  const svg = mount(fig, `0 -70 ${VIEW} 460`, 'A ball released from height h rolls down a ramp and up a second ramp whose angle you set; with no friction it rises to the same height h, rolling further on a gentler ramp, and on a flat track it rolls on for ever. Bars show its gravitational potential and kinetic energy, which always add up to the same total', rows);
   fig.style.setProperty('--sim-label-w', '110px');
   fig.style.setProperty('--sim-value-w', '90px');
 
@@ -93,7 +94,19 @@ function galileoRamps(fig) {
   const world = document.createElementNS(NS, 'g');
   const fixed = document.createElementNS(NS, 'g');
   svg.append(world, fixed);
-  fixed.innerHTML = P.text(16, LEVEL - 16, 'h', 'lbl display', 'start');
+  // A small bar chart above the first ramp, clear of the track however the view moves: the energy in
+  // the gravitational potential and kinetic stores as fractions of the total, which stays the same.
+  const CX = 100, BASE = 56, TALL = 106, BW = 52, GAP = 34;
+  const barX = i => CX + 18 + i * (BW + GAP);
+  let chart = `<path d="M${CX} ${BASE - TALL - 14}V${BASE}H${CX + 2 * (BW + GAP) + 18}" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5"/>`;
+  chart += `<path d="M${CX} ${BASE - TALL}H${CX + 2 * (BW + GAP) + 18}" class="guide"/>`;  // the dashed line is the total
+  [['p', 'brand-accent'], ['k', 'brand-primary']].forEach(([k, color], i) => {
+    chart += `<rect data-bar="${k}" x="${barX(i)}" y="${BASE}" width="${BW}" height="0" style="fill:var(--${color})"/>`;
+    chart += P.text(barX(i) + BW / 2, BASE + 40, P.sub('E', k), 'lbl display');
+  });
+  fixed.innerHTML = chart + P.text(16, LEVEL - 16, 'h', 'lbl display', 'start');
+  const bars = { p: fixed.querySelector('[data-bar="p"]'), k: fixed.querySelector('[data-bar="k"]') };
+  const LOW = FLOOR - R;                             // the ball's center on the floor: no potential energy above it
 
   function build() {
     track();
@@ -117,6 +130,9 @@ function galileoRamps(fig) {
     const { p, x, y } = at(s);
     world.querySelector('[data-k="ball"]').setAttribute('transform', `translate(${(x + p.normal[0] * R).toFixed(1)} ${(y + p.normal[1] * R).toFixed(1)})`);
     world.setAttribute('transform', `translate(${(-Math.max(0, x - FOLLOW)).toFixed(1)} 0)`);
+    // With no friction the kinetic energy is whatever the potential energy has lost.
+    const ep = Math.min(1, Math.max(0, (LOW - (y + p.normal[1] * R)) / (LOW - LEVEL)));
+    [[bars.p, ep], [bars.k, 1 - ep]].forEach(([bar, frac]) => { bar.setAttribute('y', (BASE - frac * TALL).toFixed(1)); bar.setAttribute('height', (frac * TALL).toFixed(1)); });
   }
   function reset() { s = 0; v = 0; done = false; draw(); }
 
