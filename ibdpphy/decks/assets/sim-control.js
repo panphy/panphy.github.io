@@ -53,18 +53,25 @@ export function control({ label, name, min, max, step, value, format = String, o
   return row;
 }
 
-// A row of animation buttons: Play/Pause and Reset. onToggle(playing) runs on each press of the
-// first button and onReset() on the second; `row.set(playing)` updates the first button from code
-// (when a run ends, say). Keys and swipes on the buttons never turn the slide.
+// A row of animation buttons: Play/Pause and Reset, as icons like the deck's own (deck.js). onToggle(playing)
+// runs on each press of the first button and onReset() on the second; `row.set(playing)` updates the
+// first button from code (when a run ends, say). Keys and swipes on the buttons never turn the slide.
+const ICONS = {
+  play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5h3.6v13H7zM13.4 5.5H17v13h-3.6z"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.05-4.95" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round"/><path d="M5.5 3.5v4.5H10" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"/></svg>'
+};
 export function playback({ onToggle, onReset }) {
   const row = document.createElement('div');
-  row.className = 'sim-buttons';
-  row.innerHTML = '<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset"><span aria-hidden="true">↺</span> Reset</button>';
+  row.className = 'sim-buttons loop-buttons';
+  row.innerHTML = `<button type="button" class="sim-button" data-k="play"></button><button type="button" class="sim-button" data-k="reset" aria-label="Reset" title="Reset">${ICONS.reset}</button>`;
   const play = row.querySelector('[data-k="play"]');
   let playing = false;
   const set = on => {
     playing = on;
-    play.innerHTML = on ? '<span aria-hidden="true">❚❚</span> Pause' : '<span aria-hidden="true">▶</span> Play';
+    play.innerHTML = on ? ICONS.pause : ICONS.play;
+    play.setAttribute('aria-label', on ? 'Pause' : 'Play');
+    play.title = on ? 'Pause' : 'Play';
   };
   play.addEventListener('click', () => { set(!playing); onToggle?.(playing); });
   row.querySelector('[data-k="reset"]').addEventListener('click', () => { set(false); onReset?.(); });

@@ -44,7 +44,7 @@ function run(fig, step) {
 
 // ---- Slide 7: Galileo's ramps ----
 function galileoRamps(fig) {
-  const FLOOR = 330, TOP = 150, H = FLOOR - TOP;    // the floor, the release height and h (px)
+  const FLOOR = 330, TOP = 150, H = FLOOR - TOP;    // the floor, the top of the first ramp and its height (px)
   const A = [70, TOP], B = [200, FLOOR], C = [260, FLOOR];
   const G = 600;                                     // gravity along the track scale (px/s²)
   const R = 16;                                      // ball radius
@@ -83,12 +83,17 @@ function galileoRamps(fig) {
       d -= p.length;
     }
   }
-  const stopAt = () => pieces[0].length + pieces[1].length + H / Math.sin(angle * Math.PI / 180);
+  // The ball's center starts at LEVEL and, with no friction, rises back to it on the second ramp.
+  const LEVEL = TOP - R * (B[0] - A[0]) / Math.hypot(B[0] - A[0], B[1] - A[1]);
+  const stopAt = () => {
+    const t = angle * Math.PI / 180;
+    return pieces[0].length + pieces[1].length + (FLOOR - R * Math.cos(t) - LEVEL) / Math.sin(t);
+  };
 
   const world = document.createElementNS(NS, 'g');
   const fixed = document.createElementNS(NS, 'g');
   svg.append(world, fixed);
-  fixed.innerHTML = P.text(16, TOP - 16, 'h', 'lbl display', 'start');
+  fixed.innerHTML = P.text(16, LEVEL - 16, 'h', 'lbl display', 'start');
 
   function build() {
     track();
@@ -96,7 +101,7 @@ function galileoRamps(fig) {
     let html = `<line x1="-50" y1="${FLOOR}" x2="${FAR}" y2="${FLOOR}" class="tick"/>`;
     // Short marks under the floor show the view moving when it follows the ball.
     html += `<line x1="-50" y1="${FLOOR + 9}" x2="${FAR}" y2="${FLOOR + 9}" style="stroke:var(--text-secondary);stroke-width:14;stroke-dasharray:2.5 57.5;opacity:.45"/>`;
-    html += `<line x1="-50" y1="${TOP}" x2="${FAR}" y2="${TOP}" class="guide accent"/>`;
+    html += `<line x1="-50" y1="${LEVEL.toFixed(1)}" x2="${FAR}" y2="${LEVEL.toFixed(1)}" class="guide accent"/>`;
     html += `<path d="M${A[0]},${A[1]} L${B[0]},${B[1]} H${C[0]}" class="curve" style="stroke:var(--text-main)"/>`;
     html += `<path d="M${C[0]},${C[1]} L${end.x.toFixed(1)},${end.y.toFixed(1)}" class="curve" style="stroke:var(--brand-primary)"/>`;
     if (angle) {
