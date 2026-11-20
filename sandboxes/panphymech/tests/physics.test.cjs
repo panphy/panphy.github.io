@@ -169,25 +169,27 @@ test('an inelastic collision separates at e times the closing speed', () => {
   assert.ok(Math.abs(sim.readBody(b.id).vx - 1) < 0.005, `vb ${sim.readBody(b.id).vx}`);
 });
 
-test('a ball hitting a ceiling rebounds at e times its speed', () => {
-  const scene = emptyScene();
-  const ceiling = S.makeBody(scene, 'box', 0, 3);
-  ceiling.w = 4; ceiling.h = 0.2; ceiling.fixed = true; ceiling.restitution = 0;
-  const ball = S.makeBody(scene, 'ball', 0, 1);
-  ball.r = 0.1; ball.restitution = 0.9; ball.friction = 0; ball.vy = 8;
-  scene.bodies.push(ceiling, ball);
-  const sim = P.createSim(scene);
-  let before = sim.readBody(ball.id).vy;
-  while (sim.t < 1) {
-    sim.step();
-    const v = sim.readBody(ball.id).vy;
-    if (before > 0 && v <= 0) {
-      assert.ok(Math.abs(-v / before - 0.9) < 0.001, `rebound ratio ${(-v / before).toFixed(4)}`);
-      return;
+// Gravity slows the approach to a ceiling, so the bounce correction scales e above 1 there.
+test('a ball hitting a ceiling rebounds at e times its speed, e = 1 included', () => {
+  for (const e of [1, 0.9]) {
+    const scene = emptyScene();
+    const ceiling = S.makeBody(scene, 'box', 0, 3);
+    ceiling.w = 4; ceiling.h = 0.2; ceiling.fixed = true; ceiling.restitution = 0;
+    const ball = S.makeBody(scene, 'ball', 0, 1);
+    ball.r = 0.1; ball.restitution = e; ball.friction = 0; ball.vy = 8;
+    scene.bodies.push(ceiling, ball);
+    const sim = P.createSim(scene);
+    let before = sim.readBody(ball.id).vy;
+    let ratio = null;
+    while (sim.t < 1 && ratio === null) {
+      sim.step();
+      const v = sim.readBody(ball.id).vy;
+      if (before > 0 && v <= 0) ratio = -v / before;
+      before = v;
     }
-    before = v;
+    assert.ok(ratio !== null, `e = ${e}: the ball never reached the ceiling`);
+    assert.ok(Math.abs(ratio - e) < 0.001, `e = ${e}: rebound ratio ${ratio.toFixed(4)}`);
   }
-  assert.fail('the ball never reached the ceiling');
 });
 
 test('block on a ramp accelerates at g(sin θ − μ cos θ)', () => {
