@@ -75,11 +75,43 @@
   {
     "file": "ramp.ppmech",
     "title": "Block on a ramp",
-    "text": "A block slides down a 30° slope with \\(\\mu = 0.25\\). Compare its acceleration with \\(g(\\sin\\theta - \\mu\\cos\\theta)\\).",
-    "plain": "A block slides down a 30° slope with μ = 0.25. Compare its acceleration with g(sin θ − μ cos θ).",
+    "text": "A block slides down a 30° slope with \\(\\mu_\\mathrm{s} = 0.4\\) and \\(\\mu_\\mathrm{d} = 0.25\\). Compare its acceleration with \\(g(\\sin\\theta - \\mu_\\mathrm{d}\\cos\\theta)\\).",
+    "plain": "A block slides down a 30° slope with μs = 0.4 and μd = 0.25. Compare its acceleration with g(sin θ − μd cos θ).",
     "track": {
       "name": "Block",
       "group": "velocity"
+    }
+  },
+  {
+    "file": "friction.ppmech",
+    "title": "Static and dynamic friction",
+    "text": "Both blocks have \\(\\mu_\\mathrm{d} = 0.3\\) on 25° slopes, where \\(\\tan\\theta = 0.47\\). Static friction \\(\\mu_\\mathrm{s} = 0.6\\) holds the left one; with \\(\\mu_\\mathrm{s} = 0.4\\) the right one slides. Compare its acceleration with \\(g(\\sin\\theta - \\mu_\\mathrm{d}\\cos\\theta)\\).",
+    "plain": "Both blocks have μd = 0.3 on 25° slopes, where tan θ = 0.47. Static friction μs = 0.6 holds the left one; with μs = 0.4 the right one slides. Compare its acceleration with g(sin θ − μd cos θ).",
+    "track": {
+      "name": "Sliding block",
+      "group": "velocity"
+    },
+    "view": {
+      "minX": -7,
+      "maxX": 7,
+      "minY": 0,
+      "maxY": 3
+    }
+  },
+  {
+    "file": "rolling-race.ppmech",
+    "title": "Rolling race",
+    "text": "A solid sphere, a disk and a hollow sphere of equal mass and radius roll down identical 20° ramps. Compare each acceleration with \\(\\dfrac{g\\sin\\theta}{1 + k}\\), where \\(I = kmr^2\\).",
+    "plain": "A solid sphere, a disk and a hollow sphere of equal mass and radius roll down identical 20° ramps. Compare each acceleration with g sin θ / (1 + k), where I = kmr².",
+    "track": {
+      "name": "Solid sphere",
+      "group": "velocity"
+    },
+    "view": {
+      "minX": -5,
+      "maxX": 5,
+      "minY": 0,
+      "maxY": 7.8
     }
   },
   {
