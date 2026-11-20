@@ -500,14 +500,27 @@
         app.setHint(t.join ? `Joined to ${t.join.link.name}. Now click the second end. Right-click or Esc cancels.` : 'Now click the second end. Right-click or Esc cancels.');
         return;
       }
-      const p = ed.pending;
+      if (!makeLinkBetween(kind, ed.pending, t)) return;
+      ed.pending = null;
+      if (!keep) ed.setTool('select');
+      else app.setHint(HINTS[kind]);
+    }
+
+    // Why a spring, rod or rope cannot join end p (as kept in pending) to target t, or ''.
+    function linkCheck(kind, p, t) {
       const b = t.body ? t.body.id : null;
       const j = newJoin(kind, p, t, b);
-      if (j && j.problem) { app.toast(j.problem); return; }
-      if (!j && !p.a && !b) { app.toast('Attach at least one end to an object.'); return; }
-      if (p.a && p.a === b) { app.toast('Connect two different objects, or an object and the background.'); return; }
+      if (j && j.problem) return { j, problem: j.problem };
+      if (!j && !p.a && !b) return { j, problem: 'Attach at least one end to an object.' };
+      if (p.a && p.a === b) return { j, problem: 'Connect two different objects, or an object and the background.' };
+      return { j, problem: '' };
+    }
+
+    function makeLinkBetween(kind, p, t) {
+      const { j, problem } = linkCheck(kind, p, t);
+      if (problem) { app.toast(problem); return false; }
       app.edit(() => {
-        const l = S.makeLink(app.scene, kind, p.a, p.la, b, t.local);
+        const l = S.makeLink(app.scene, kind, p.a, p.la, t.body ? t.body.id : null, t.local);
         app.scene.links.push(l);
         if (!attachJoin(l, j)) {
           if (kind === 'spring') l.rest = Math.max(0.05, Math.round(S.linkLength(app.scene, l) * 100) / 100);
@@ -515,9 +528,16 @@
         }
         app.select({ type: 'link', id: l.id });
       });
-      ed.pending = null;
-      if (!keep) ed.setTool('select');
-      else app.setHint(HINTS[kind]);
+      return true;
+    }
+
+    // A spring, rod or rope dragged in from Parts comes whole: DROP_LENGTH long, hanging from
+    // the pointer, each end attached to whatever is under it.
+    const DROP_LENGTH = 1;
+    function droppedLinkEnds(kind, w) {
+      const ta = endTarget(w, kind);
+      const tb = endTarget({ x: ta.world.x, y: ta.world.y - DROP_LENGTH }, kind);
+      return { p: { a: ta.body ? ta.body.id : null, la: ta.local, world: ta.world, join: ta.join || null }, t: tb };
     }
 
     // ---------- Pulleys ----------
@@ -712,12 +732,21 @@
           const b = S.makeBody({ ...app.scene, bodies: app.scene.bodies.slice(), links: [], nextId: 0 }, type, w.x, w.y);
           positionBody(b, { ...app.scene, bodies: [...app.scene.bodies, b], links: [] });
           connectorDropPreview = { body: b, drop: true };
-        } else if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w, type).world, ok: true };
-        else if (type === 'pulley') connectorDropPreview = { pulley: { c: wheelPoint(w), radius: PULLEY_R } };
-        else if (type === 'gear') { const ball = gearBall(w); connectorDropPreview = { point: ball ? app.poseOf(ball) : w, ok: !!ball }; }
-        else {
-          const bs = bodiesAt(w);
-          connectorDropPreview = { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
+        } else if (['spring', 'rod', 'rope'].includes(type)) {
+          // The whole connector, as it will be placed.
+          const { p, t } = droppedLinkEnds(type, w);
+          connectorDropPreview = { link: { kind: type, from: p.world, to: t.world, fixedA: !p.a && !p.join, fixedB: !t.body && !t.join }, ok: !linkCheck(type, p, t).problem, drop: true };
+        } else if (type === 'pulley') connectorDropPreview = { pulley: { c: wheelPoint(w), radius: PULLEY_R }, drop: true };
+        else if (type === 'gear') {
+          const ball = gearBall(w);
+          connectorDropPreview = ball ? { gearBall: ball, ring: S.freeRing(app.scene, ball), drop: true } : { point: w, ok: false };
+        } else {
+          // The joint itself, where it will be pinned.
+          const bs = jointBodies(w);
+          const ok = bs.length > 0 && !(bs[0].fixed && (!bs[1] || bs[1].fixed));
+          connectorDropPreview = ok
+            ? { joint: { kind: type === 'weld' ? 'weld' : 'hinge', motor: type === 'motor', dir: -1, b: bs[1] ? bs[1].id : null }, point: jointPoint(w, bs[0]), drop: true }
+            : { point: bs.length ? jointPoint(w, bs[0]) : w, ok: false };
         }
       }
       app.requestDraw();
@@ -734,11 +763,17 @@
       ed.clearConnectorDropPreview();
       const rect = canvas.getBoundingClientRect();
       if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
-      ed.setTool(type);
       const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
+      if (['spring', 'rod', 'rope'].includes(type)) {
+        ed.setTool('select');
+        const { p, t } = droppedLinkEnds(type, w);
+        makeLinkBetween(type, p, t);
+        app.requestDraw();
+        return true;
+      }
+      ed.setTool(type);
       ed.cursorWorld = w;
-      if (['spring', 'rod', 'rope'].includes(type)) placeLinkEnd(w, false);
-      else if (type === 'pulley') placePulleyPoint(w, false);
+      if (type === 'pulley') placePulleyPoint(w, false);
       else if (type === 'gear') placeGear(w, false);
       else placeJoint(w, false);
       app.requestDraw();
@@ -1011,9 +1046,11 @@
       if (ed.tool === 'pulley') { placePulleyPoint(w, e.shiftKey); app.requestDraw(); return; }
       if (ed.tool === 'gear') { placeGear(w, e.shiftKey); app.requestDraw(); return; }
       const hit = hitTest(sp);
+      const multi = e.shiftKey || app.multiMode;
       // Shift, or Select several, turns a drag from empty space (or a connector's line) into
-      // a selection box. A press on an object still adds or removes that object.
-      if ((e.shiftKey || app.multiMode) && (!hit || hit.type === 'link')) {
+      // a selection box, except on a connector attached to the selection, which moves it.
+      // A press on an object still adds or removes that object.
+      if (multi && (!hit || (hit.type === 'link' && (app.running || !attachedToSelection(hit.link))))) {
         startGesture('box', e, sp, { keep: e.shiftKey });
         return;
       }
@@ -1032,8 +1069,9 @@
         // With objects selected, dragging a connector attached to them moves the whole group;
         // a click without a drag still selects the connector.
         if (!app.running && attachedToSelection(hit.link)) {
-          startGesture('move', e, sp, { bodyId: app.selection.id, linkClick: hit.link.id });
-          armHold(e, { type: 'link', id: hit.link.id });
+          // Selecting several, a click leaves the selection as it is.
+          startGesture('move', e, sp, { bodyId: app.selection.id, linkClick: multi ? null : hit.link.id });
+          if (!multi) armHold(e, { type: 'link', id: hit.link.id });
           return;
         }
         app.select({ type: 'link', id: hit.link.id });
@@ -1046,9 +1084,13 @@
         return;
       }
       // Shift-click (or the Select several tool) adds or removes objects from the selection.
-      if (e.shiftKey || app.multiMode) {
-        app.toggleInSelection(hit.body.id);
-        startGesture('none', e, sp);
+      // Dragging a selected object, or one just added, moves the whole selection instead; a
+      // selected object comes out only on a click without a drag.
+      if (multi) {
+        if (app.running) { app.toggleInSelection(hit.body.id); startGesture('none', e, sp); return; }
+        const was = app.isSelected('body', hit.body.id);
+        if (!was) app.toggleInSelection(hit.body.id);
+        startGesture('move', e, sp, { bodyId: hit.body.id, toggleClick: was ? hit.body.id : null });
         return;
       }
       // Pressing a selected object keeps the whole selection (and whatever a selection box
@@ -1196,6 +1238,7 @@
       if (g.kind === 'pan' && !g.moved && g.deselect) app.select(null);
       if (['move', 'rotate', 'resize'].includes(g.kind) && g.moved) app.endGesture(true);
       if (g.kind === 'move' && !g.moved && g.linkClick) app.select({ type: 'link', id: g.linkClick });
+      if (g.kind === 'move' && !g.moved && g.toggleClick) app.toggleInSelection(g.toggleClick);
       app.requestDraw();
     }
 

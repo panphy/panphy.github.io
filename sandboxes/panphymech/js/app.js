@@ -348,7 +348,7 @@
   app.setMultiMode = function setMultiMode(on) {
     app.multiMode = on;
     app.ui.syncToolbar();
-    app.setHint(on ? 'Select several: click objects or drag a box round them to add them. Turn this off, then drag any selected object to move them all. Two fingers pan.' : app.editor.HINTS.select);
+    app.setHint(on ? 'Select several: click objects or drag a box round them to add them. Drag any selected object to move them all. Two fingers pan.' : app.editor.HINTS.select);
   };
 
   // Add what a selection box caught (S.boxContents) to the selection. Fixed connector ends
