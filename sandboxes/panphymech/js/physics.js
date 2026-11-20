@@ -374,15 +374,15 @@
     // ---------- Free motors ----------
     // A motor on one object alone, pinned to nothing: as if its casing were a heavy mass inside
     // the object, it holds the object's spin at the motor speed with up to its maximum torque,
-    // and the object moves freely. The object starts at that spin, like a motorized wheel
-    // released already turning, so no spin appears from nothing in mid-air. A one-body angular
+    // and the object moves freely. The object's starting spin is the motor speed (the editor
+    // stores it, S.setFreeMotorSpin), like a motorized wheel released already turning, so no
+    // spin appears from nothing in mid-air, and a new start keeps the spin it had. A one-body angular
     // constraint (on a motor joint whose own solver is replaced), so it acts within the same
     // solver passes as contacts and friction.
     function buildFreeMotor(l) {
       const A = bodies.get(l.a);
       if (!A || !A.isDynamic()) return;
       const st = { speed: l.speed || 0, torque: l.torque || 0, impulse: 0 };
-      A.setAngularVelocity(st.speed);
       A.setSleepingAllowed(false);
       const joint = new pl.MotorJoint({ maxForce: 0, maxTorque: 0, collideConnected: true }, ground, A);
       joint.initVelocityConstraints = function initVelocityConstraints(step) {
@@ -732,9 +732,13 @@
         jn += impulse.normalImpulses[i]; jt += impulse.tangentImpulses[i];
       }
       const n = wm.normal; const inv = 1 / sim.lastStep;
+      // A fast collision also reports the impulses of Box2D's time-of-impact sub-steps: add
+      // them to the step's, so the force is the whole impulse of the step over its length.
+      const prev = contactForces.get(contact);
       contactForces.set(contact, {
         A: contact.getFixtureA().getBody(), B: contact.getFixtureB().getBody(), x: px, y: py,
-        nx: n.x * jn * inv, ny: n.y * jn * inv, tx: n.y * jt * inv, ty: -n.x * jt * inv
+        nx: n.x * jn * inv + (prev ? prev.nx : 0), ny: n.y * jn * inv + (prev ? prev.ny : 0),
+        tx: n.y * jt * inv + (prev ? prev.tx : 0), ty: -n.x * jt * inv + (prev ? prev.ty : 0)
       });
     });
 
@@ -1138,6 +1142,11 @@
     sim.updateLink = function updateLink(l) {
       sim.probe = null; // the starting forces change too
       const j = joints.get(l.id);
+      if (l.free && !(sim.t > 0)) {
+        // Before time runs, the object follows the starting spin the motor's speed set.
+        const pb = bodies.get(l.a), b = S.bodyById(scene, l.a);
+        if (pb && b && pb.isDynamic() && !b.lockRotation) pb.setAngularVelocity(b.omega || 0);
+      }
       if (j && l.kind === 'hinge') {
         j.enableMotor(!!l.motor);
         j.setMotorSpeed(l.speed || 0);

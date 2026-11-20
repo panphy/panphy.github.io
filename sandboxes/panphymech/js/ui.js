@@ -594,10 +594,12 @@
 
     // Motor direction and speed: speed is entered as a size, the direction chosen apart.
     const motorDir = (x) => (x.dir === 1 || x.dir === -1 ? x.dir : x.speed > 0 ? 1 : -1);
+    // Before time runs, a free motor's speed is also its object's starting spin.
+    const startSpin = (x) => { if (x.free && !(app.sim && app.sim.t > 0)) S.setFreeMotorSpin(app.scene, x); };
     function motorFields(l, param, help) {
       return [
-        choiceField('Direction', [{ v: -1, label: 'CW', title: 'Clockwise', icon: 'rotate' }, { v: 1, label: 'CCW', title: 'Counterclockwise', icon: 'rotateCcw' }], () => motorDir(l()), (d) => app.editParam(() => { const x = l(); x.dir = d; x.speed = d * Math.abs(x.speed); }, null)),
-        numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => Math.abs(l().speed), set: param((x, v) => { x.speed = motorDir(x) * v; }), min: 0, max: L.speed[1], slider: [0, 30], step: 0.1, help: !help ? '' : l().free ? 'How fast the object spins. It starts at this speed, and the motor holds it there. Clockwise drives a wheel to the right.' : 'How fast the part turns relative to what it is hinged to. Clockwise drives a wheel to the right.' })
+        choiceField('Direction', [{ v: -1, label: 'CW', title: 'Clockwise', icon: 'rotate' }, { v: 1, label: 'CCW', title: 'Counterclockwise', icon: 'rotateCcw' }], () => motorDir(l()), (d) => app.editParam(() => { const x = l(); x.dir = d; x.speed = d * Math.abs(x.speed); startSpin(x); }, null)),
+        numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => Math.abs(l().speed), set: param((x, v) => { x.speed = motorDir(x) * v; startSpin(x); }), min: 0, max: L.speed[1], slider: [0, 30], step: 0.1, help: !help ? '' : l().free ? 'How fast the object spins. It starts at this speed, and the motor holds it there. Clockwise drives a wheel to the right.' : 'How fast the part turns relative to what it is hinged to. Clockwise drives a wheel to the right.' })
       ];
     }
 

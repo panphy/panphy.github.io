@@ -614,6 +614,14 @@
   }
 
   // A hinge to the background at a wheel's center, unless it has an axle already.
+  // A free motor's object starts at the motor speed (still, if its rotation is locked), held
+  // as that object's own starting spin so a new start mid-run keeps the spin it had then.
+  // Taking the motor away before time runs (on = false) returns the object to rest.
+  function setFreeMotorSpin(scene, l, on = true) {
+    const b = bodyById(scene, l.a);
+    if (b && !b.fixed) b.omega = on && !b.lockRotation ? l.speed || 0 : 0;
+  }
+
   function ensureAxle(scene, b) {
     if (gearAxles(scene, b).length) return null;
     const l = makeLink(scene, 'hinge', b.id, { x: 0, y: 0 }, null, { x: b.x, y: b.y });
@@ -1255,7 +1263,7 @@
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, centerSnap, closestSurface, copyFragment, pasteFragment,
     pulleyWinding, pulleyGeometry, pulleyPath, pulleyProblem, PULLEY_CLEARANCE, PULLEY_RADIUS,
     GEAR_PITCH, MAX_RINGS, RING_GAP, gearRadius, rimTeeth, gearRings, ringTeeth, gearsOf, isGearWheel, gearAxles, gearMesh, gearProblem,
-    gearPhases, freeRing, gearPairProblem, meshGear, ensureAxle, tidyGears,
+    gearPhases, freeRing, gearPairProblem, meshGear, ensureAxle, setFreeMotorSpin, tidyGears,
     bodyById, linkById, endPoint, rigidGroup,
     JOIN_KINDS, joinedEnd, joinPair, pairGeometry, joinProblem, joinLinks, fitJoin, unjoin, minPulleyLength, tidyLinks, refitLink, transformBodies, boxContents, mirrorBodies, linkLength, refitLengths,
     removeBody, removeLink, bounds, fitBox, serialize, defaultSolidMass, parse, clamp
