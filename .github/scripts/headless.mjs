@@ -43,6 +43,55 @@ function findChrome() {
   return candidates.find((path) => path && existsSync(path));
 }
 
+const LAUNCH_ATTEMPTS = 3;
+const LAUNCH_TIMEOUT_MS = 20000;
+
+// Starts Chrome on a free debugging port (it writes the port to DevToolsActivePort in its profile)
+// and connects to its tab. Resolves { chrome, profile, socket }, or rejects with the reason and the
+// end of Chrome's own error output, having killed it and removed its profile.
+async function launchChrome(chromePath) {
+  const profile = mkdtempSync(join(tmpdir(), 'panphy-check-'));
+  const chrome = spawn(chromePath, [
+    '--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
+    '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', '--mute-audio',
+    '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
+    ...(process.env.CI ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
+    'about:blank'
+  ], { stdio: ['ignore', 'ignore', 'pipe'] });
+  let stderr = '';
+  chrome.stderr.on('data', (chunk) => { stderr = (stderr + chunk).slice(-4000); });
+  let exited = null;
+  chrome.on('exit', (code, signal) => { exited = signal ? `signal ${signal}` : `code ${code}`; });
+  chrome.on('error', (error) => { exited = error.message; });
+
+  const started = Date.now();
+  let socket = null;
+  let reason = 'no response';
+  while (!socket) {
+    if (exited) { reason = `Chrome exited (${exited})`; break; }
+    if (Date.now() - started > LAUNCH_TIMEOUT_MS) { reason = `no response in ${LAUNCH_TIMEOUT_MS / 1000} s`; break; }
+    try {
+      const portFile = join(profile, 'DevToolsActivePort');
+      if (existsSync(portFile)) {
+        const port = Number(readFileSync(portFile, 'utf8').split('\n')[0]);
+        const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+        const target = targets.find((t) => t.type === 'page');
+        if (target) {
+          const candidate = new WebSocket(target.webSocketDebuggerUrl);
+          await new Promise((done, fail) => { candidate.onopen = done; candidate.onerror = fail; });
+          socket = candidate;
+        }
+      }
+    } catch { /* not up yet */ }
+    if (!socket) await sleep(200);
+  }
+  if (socket) return { chrome, profile, socket };
+  chrome.kill('SIGKILL');
+  try { rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold it */ }
+  const tail = stderr.trim().split('\n').slice(-15).join('\n');
+  throw new Error(tail ? `${reason}. Chrome said:\n${tail}` : reason);
+}
+
 // Runs `task` with a browser: { send, open(path) → load problems, evaluate(fn) → value, errors() }.
 // Exits 2 when Chrome is missing or fails; otherwise returns what `task` returns.
 export async function withBrowser(task) {
@@ -53,17 +102,23 @@ export async function withBrowser(task) {
   }
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
-  const profile = mkdtempSync(join(tmpdir(), 'panphy-check-'));
-  const debugPort = 9300 + Math.floor(Math.random() * 500);
-  const chrome = spawn(chromePath, [
-    '--headless=new', `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`,
-    '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', '--mute-audio',
-    '--enable-unsafe-swiftshader', '--use-angle=swiftshader',
-    ...(process.env.CI ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
-    'about:blank'
-  ], { stdio: 'ignore' });
 
-  let socket;
+  // Chrome occasionally fails to come up on a busy CI runner; a fresh launch usually works.
+  let launched = null;
+  for (let attempt = 1; attempt <= LAUNCH_ATTEMPTS && !launched; attempt++) {
+    try {
+      launched = await launchChrome(chromePath);
+    } catch (error) {
+      console.error(`Chrome launch ${attempt} of ${LAUNCH_ATTEMPTS} failed: ${error.message}`);
+    }
+  }
+  if (!launched) {
+    console.error('Chrome did not start');
+    server.close();
+    process.exit(2);
+  }
+  const { chrome, profile, socket } = launched;
+
   let nextId = 1;
   const pending = new Map();
   let errors = [];
@@ -73,27 +128,13 @@ export async function withBrowser(task) {
     return new Promise((done, fail) => pending.set(id, { done, fail, method }));
   };
   const cleanUp = () => {
-    try { socket?.close(); } catch { /* already closed */ }
+    try { socket.close(); } catch { /* already closed */ }
     chrome.kill();
     server.close();
     try { rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold it */ }
   };
 
   try {
-    for (let attempt = 0; !socket; attempt++) {
-      try {
-        const targets = await (await fetch(`http://127.0.0.1:${debugPort}/json/list`)).json();
-        const target = targets.find((t) => t.type === 'page');
-        if (target) {
-          socket = new WebSocket(target.webSocketDebuggerUrl);
-          await new Promise((done, fail) => { socket.onopen = done; socket.onerror = fail; });
-        }
-      } catch { /* not up yet */ }
-      if (!socket) {
-        if (attempt > 75) throw new Error('Chrome did not start');
-        await sleep(200);
-      }
-    }
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data);
       if (data.id && pending.has(data.id)) {
