@@ -59,10 +59,9 @@
     <link rel="stylesheet" href="/assets/theme-toggle.css">
     <link rel="stylesheet" href="/assets/fullscreen-button.css">
     <script src="/assets/theme-toggle.js"></script>
-    <script src="/assets/fullscreen-button.js"></script>
     <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <link rel="stylesheet" href="/assets/design.css">
-    <link rel="stylesheet" href="/simulations/collision/styles.css">
+    <link rel="stylesheet" href="/simulations/collision/styles.css?v=20261120">
     <link rel="stylesheet" href="/assets/footer.css">
 </head>
 
@@ -74,7 +73,10 @@
         </div>
         <div class="cl-appbar-actions">
             <button id="theme-button" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
-            <button type="button" class="panphy-fullscreen-button" data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
+            <button id="fullscreenBtn" type="button" class="panphy-fullscreen-button" aria-label="Enter full screen" title="Enter full screen">
+                <svg class="panphy-fs-icon enter-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+                <svg class="panphy-fs-icon exit-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="display:none"><path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/></svg>
+            </button>
         </div>
     </header>
 
@@ -103,6 +105,10 @@
                         <canvas id="tipCanvas" class="media-layer"></canvas>
 
                         <div id="dataPanel" class="data-panel mono" aria-live="off" hidden></div>
+                        <div class="cl-paused" aria-hidden="true">
+                            <svg class="cl-icon" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg>
+                            <span>Paused</span>
+                        </div>
 
                         <!-- Shown while there are no balls and the camera is off; explains camera problems. -->
                         <div id="startCard" class="cl-start" data-state="idle">
@@ -314,9 +320,8 @@
                             <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
                             <span class="cl-label">Settings</span>
                         </button>
-                        <button id="fullscreenBtn" class="cl-tool" type="button" aria-label="Enter full screen" data-tooltip="Full screen">
-                            <svg class="cl-icon enter-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
-                            <svg class="cl-icon exit-icon" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/></svg>
+                        <button id="fullscreenExitBtn" class="cl-tool" type="button" aria-label="Exit full screen" data-tooltip="Exit full screen" hidden>
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/></svg>
                         </button>
                     </div>
                 </div>
@@ -332,7 +337,7 @@
       <span class="panphy-footer-legal">&copy; <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
         <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
     </footer>
-    <script type="module" src="/simulations/collision/app.js"></script>
+    <script type="module" src="/simulations/collision/app.js?v=20261120"></script>
 </body>
 
 </html>

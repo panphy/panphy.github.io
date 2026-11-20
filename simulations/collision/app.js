@@ -19,6 +19,7 @@ const ui = {
     controlsPanel: document.getElementById('controlsPanel'),
     controlsClose: document.getElementById('controlsClose'),
     fullscreenBtn: document.getElementById('fullscreenBtn'),
+    fullscreenExitBtn: document.getElementById('fullscreenExitBtn'),
     cameraSelect: document.getElementById('cameraSelect'),
     statusMetrics: document.getElementById('statusMetrics'),
     wallsToggle: document.getElementById('wallsToggle'),
@@ -173,10 +174,12 @@ function updateFullscreenUI() {
     placeDataPanel();
     const active = isFullscreenActive();
     ui.stage.classList.toggle('is-fullscreen', active);
+    // The app-bar button sits outside the stage, so in full screen the toolbar shows an exit button.
     ui.fullscreenBtn.querySelector('.enter-icon').style.display = active ? 'none' : '';
     ui.fullscreenBtn.querySelector('.exit-icon').style.display = active ? '' : 'none';
     ui.fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
-    ui.fullscreenBtn.setAttribute('data-tooltip', active ? 'Exit full screen' : 'Full screen');
+    ui.fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
+    ui.fullscreenExitBtn.hidden = !active;
     scheduleResizeStage();
 }
 
@@ -267,6 +270,8 @@ const state = {
     editedSphere: null,
     lastDrawVideoTime: -1,
     nextHandDetectAt: 0,
+    // VIDEO mode needs strictly increasing timestamps across the tracker's whole life.
+    lastDetectTimestamp: 0,
     lastHudUpdateAt: 0,
     lastHudText: '',
     tipOverlayVisible: false
@@ -3398,7 +3403,7 @@ function detectHands(now) {
     // Time tip velocities by the video frame time, not the render frame time.
     state.tipTimeMs = currentVideoTime * 1000;
     try {
-        const result = state.handLandmarker.detectForVideo(ui.video, now);
+        const result = state.handLandmarker.detectForVideo(ui.video, nextDetectTimestamp(now));
         const hands = extractReliableHands(result);
         state.lastHandIds = assignHandIds(hands);
         state.lastHands = hands;
@@ -3902,15 +3907,34 @@ function removeAllSpheres() {
     renderDataPanel(true);
 }
 
+function nextDetectTimestamp(now) {
+    state.lastDetectTimestamp = Math.max(now, state.lastDetectTimestamp + 1);
+    return state.lastDetectTimestamp;
+}
+
+// Waits until the camera has a frame, so the tracker has something to warm up on.
+function waitForVideoFrame() {
+    if (ui.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+        ui.video.addEventListener('loadeddata', resolve, { once: true });
+        setTimeout(resolve, 3000);
+    });
+}
+
+// Tracking runs on the GPU where it can: on the CPU each frame's detection takes longer than a
+// 60 fps frame, which makes the whole view stutter. The first GPU detection compiles shaders and
+// can block for a few seconds, so it runs once here, behind the loading status, not mid-session.
 async function createHandLandmarker() {
     await ensureHandTrackingDeps();
     const vision = await filesetResolverCtor.forVisionTasks(
         mediapipeWasmBaseUrl
     );
-
-    return handLandmarkerCtor.createFromOptions(vision, {
+    const create = (delegate) => handLandmarkerCtor.createFromOptions(vision, {
         baseOptions: {
-            modelAssetPath: LOCAL_MODEL_PATH
+            modelAssetPath: LOCAL_MODEL_PATH,
+            delegate
         },
         runningMode: 'VIDEO',
         numHands: 2,
@@ -3918,6 +3942,32 @@ async function createHandLandmarker() {
         minHandPresenceConfidence: HAND_MIN_PRESENCE_CONFIDENCE,
         minTrackingConfidence: HAND_MIN_TRACKING_CONFIDENCE
     });
+    const warmUp = async (landmarker) => {
+        await waitForVideoFrame();
+        // Let the status paint before the blocking first detection (a hidden tab paints nothing).
+        await new Promise((resolve) => {
+            requestAnimationFrame(() => setTimeout(resolve, 0));
+            setTimeout(resolve, 100);
+        });
+        if (ui.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            landmarker.detectForVideo(ui.video, nextDetectTimestamp(performance.now()));
+        }
+    };
+
+    let gpu = null;
+    try {
+        gpu = await create('GPU');
+        await warmUp(gpu);
+        console.info('[Collision Lab] Hand tracking runs on the GPU.');
+        return gpu;
+    } catch (error) {
+        console.warn('[Collision Lab] GPU hand tracking unavailable; using the CPU.', error);
+        try { gpu?.close(); } catch { /* already gone */ }
+    }
+    const cpu = await create('CPU');
+    await warmUp(cpu);
+    console.info('[Collision Lab] Hand tracking runs on the CPU.');
+    return cpu;
 }
 
 async function populateCameraList() {
@@ -4185,10 +4235,11 @@ async function startCameraAndTracking() {
         return;
     }
 
-    setStatus('Loading hand tracker...');
+    setStatus('Preparing hand tracking...');
 
     try {
-        state.handLandmarker = await createHandLandmarker();
+        // The tracker outlives a camera stop, so restarting skips its slow first detection.
+        state.handLandmarker ??= await createHandLandmarker();
     } catch (error) {
         ui.startBtn.disabled = false;
         ui.startCardBtn.disabled = false;
@@ -4246,15 +4297,6 @@ function stopCameraAndTracking() {
     for (const sphere of spheres) {
         sphere.contactCount = 0;
     }
-
-    if (state.handLandmarker && typeof state.handLandmarker.close === 'function') {
-        try {
-            state.handLandmarker.close();
-        } catch (error) {
-            console.warn('Could not close hand landmarker cleanly:', error);
-        }
-    }
-    state.handLandmarker = null;
 
     if (state.stream) {
         state.stream.getTracks().forEach((track) => track.stop());
@@ -4359,6 +4401,7 @@ if (window.PanPhyThemeToggle) {
 }
 ui.controlsClose.addEventListener('click', closeControls);
 ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
+ui.fullscreenExitBtn.addEventListener('click', toggleFullscreen);
 
 ui.stage.addEventListener('pointerdown', handleStageClick);
 ui.removeTargetBtn.addEventListener('click', removeSelectedSphere);
