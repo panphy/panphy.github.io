@@ -30,7 +30,10 @@ export class Flight {
     this.turn = 0;                     // smoothed manual turn input
     this.throttle = 1;
     this.pitchInput = 0;               // +1 tilts east
-    this.hold = 'off';                 // 'off' | 'prograde' | 'retrograde'
+    this.hold = 'off';                 // 'off' | 'prograde' | 'retrograde' | 'guide'
+    this.guideAngle = null;            // direction held by 'guide', set by the guidance each frame
+    this.payloadMass = this.info.payload.mass;
+    this.deployed = null;              // the orbit the payload was released into
     this.stage = 0;
     this.prop = this.info.stages.map((stage) => stage.prop);
     this.phase = 'pad';                // 'pad' | 'flying' | 'landed' | 'crashed' | 'breakup' | 'burnup'
@@ -55,7 +58,7 @@ export class Flight {
   get stageInfo() { return this.info.stages[this.stage]; }
 
   updateMass() {
-    let mass = this.info.payload.mass;
+    let mass = this.payloadMass;
     let diameter = this.info.payload.diameter;
     for (let i = this.stage; i < this.info.stages.length; i += 1) {
       mass += this.info.stages[i].dry + this.prop[i];
@@ -92,6 +95,25 @@ export class Flight {
     this.emit('stage', { dropped: this.stage - 1 });
   }
 
+  // Release the payload into whatever path the rocket is on.
+  deployPayload() {
+    if (this.phase !== 'flying' || this.deployed) return false;
+    const tel = this.telemetry();
+    this.deployed = { t: this.t, altitude: tel.altitude, apoapsis: tel.apoapsis, periapsis: tel.periapsis, bound: tel.orbit.bound };
+    this.throttle = 0;
+    const payload = this.info.payload;
+    this.debris.push({
+      stage: 'payload', x: this.x, y: this.y,
+      vx: this.vx + Math.cos(this.heading), vy: this.vy + Math.sin(this.heading),
+      mass: payload.mass, area: Math.PI * payload.diameter ** 2 / 4,
+      heading: this.heading, spin: 0, age: 0
+    });
+    this.payloadMass = 0;
+    this.updateMass();
+    this.emit('deploy');
+    return true;
+  }
+
   setWarp(index) {
     const clamped = Math.max(0, Math.min(WARPS.length - 1, index));
     if (WARPS[clamped] > MAX_PHYSICS_WARP && !this.canRailsWarp()) {
@@ -121,6 +143,7 @@ export class Flight {
   holdTarget() {
     if (this.hold === 'prograde') return this.progradeAngle();
     if (this.hold === 'retrograde') return this.progradeAngle() + Math.PI;
+    if (this.hold === 'guide') return this.guideAngle;
     return null;
   }
 
@@ -295,7 +318,7 @@ export class Flight {
     const orbit = orbitOf(this);
     const rho = airDensity(r - R_EARTH);
     const surfaceSpeed = Math.hypot(rvx, rvy);
-    let dv = 0, massAbove = this.info.payload.mass;
+    let dv = 0, massAbove = this.payloadMass;
     for (let i = this.info.stages.length - 1; i >= this.stage; i -= 1) {
       const stage = this.info.stages[i];
       const wet = massAbove + stage.dry + this.prop[i];

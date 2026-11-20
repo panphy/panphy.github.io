@@ -1,4 +1,4 @@
-// Parts catalog and rocket design analysis. Pure functions, SI units, no DOM.
+// Engines, the fleet of ready-made rockets and their analysis. Pure functions, SI units, no DOM.
 import { G0, deltaV } from './physics.js';
 
 // thrust is the vacuum thrust in newtons; isp in seconds at sea level and in vacuum.
@@ -10,15 +10,26 @@ export const ENGINES = {
   colossus: { name: 'Colossus', role: 'Heavy booster', thrust: 2300e3, ispSL: 327, ispVac: 350, mass: 1700, bell: 1.3, vacuum: false }
 };
 
-export const PAYLOADS = {
-  probe: { name: 'Instrument probe', mass: 200, diameter: 0.9, length: 1.6 },
-  satellite: { name: 'Satellite', mass: 1000, diameter: 1.6, length: 2.6 },
-  observatory: { name: 'Observatory', mass: 4000, diameter: 2.8, length: 5 },
-  station: { name: 'Station module', mass: 12000, diameter: 4.2, length: 8 }
-};
+// Ready-made rockets, smallest first. cost is the price of one launch and price the
+// one-time license, both in millions of dollars. Stages are listed from the ground up.
+export const FLEET = [
+  { id: 'wren', name: 'Wren', role: 'Sounding rocket', cost: 0.4, price: 0,
+    stages: [{ engine: 'spark', count: 1, prop: 1000 }] },
+  { id: 'kestrel', name: 'Kestrel', role: 'Small launcher', cost: 6, price: 0,
+    stages: [{ engine: 'torch', count: 1, prop: 45000 }, { engine: 'wisp', count: 9, prop: 12000 }] },
+  { id: 'osprey', name: 'Osprey', role: 'Medium launcher', cost: 18, price: 30,
+    stages: [{ engine: 'torch', count: 3, prop: 130000 }, { engine: 'halo', count: 1, prop: 30000 }] },
+  { id: 'condor', name: 'Condor', role: 'Heavy launcher', cost: 45, price: 100,
+    stages: [{ engine: 'torch', count: 9, prop: 400000 }, { engine: 'halo', count: 1, prop: 95000 }] },
+  { id: 'albatross', name: 'Albatross', role: 'Super heavy, three stages', cost: 90, price: 200,
+    stages: [{ engine: 'colossus', count: 5, prop: 620000 }, { engine: 'halo', count: 2, prop: 140000 }, { engine: 'wisp', count: 3, prop: 12000 }] }
+];
 
-export const MAX_STAGES = 3;
-export const MAX_ENGINES = 9;
+// A rocket of the fleet carrying a payload {name, mass, diameter, length}.
+export function designFor(rocket, payload) {
+  return { payload, stages: rocket.stages };
+}
+
 export const PROPELLANT_DENSITY = 1000;   // kg/m^3, bulk
 const STRUCTURE_FRACTION = 0.065;
 const STRUCTURE_FIXED = 50;               // kg of avionics and interstage per stage
@@ -42,7 +53,7 @@ export function engineRing(count) {
 
 // Stages are listed from the ground up: design.stages[0] fires first.
 export function analyze(design) {
-  const payload = PAYLOADS[design.payload];
+  const payload = design.payload;
   const stages = [];
   let massAbove = payload.mass;
   for (let i = design.stages.length - 1; i >= 0; i -= 1) {
@@ -83,8 +94,4 @@ export function analyze(design) {
     maxDiameter,
     canLiftOff: stages.length > 0 && stages[0].twr > 1
   };
-}
-
-export function cloneDesign(design) {
-  return { payload: design.payload, stages: design.stages.map((stage) => ({ ...stage })) };
 }

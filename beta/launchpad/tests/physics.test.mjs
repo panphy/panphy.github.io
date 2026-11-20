@@ -4,10 +4,14 @@ import assert from 'node:assert/strict';
 import {
   MU, R_EARTH, OMEGA, G0, ATMO_TOP, airDensity, rk4Step, keplerStep, orbitOf, circularSpeed, deltaV
 } from '../physics.js';
-import { analyze } from '../rocket.js';
+import { FLEET, analyze, designFor } from '../rocket.js';
 import { Flight, WARPS } from '../flight.js';
-import { MISSIONS } from '../missions.js';
-import { flyToOrbit } from './autopilot.mjs';
+import { CONTRACTS, rocketFits, judge } from '../contracts.js';
+import { Guidance } from '../guidance.js';
+import { flyContract } from './pilot.mjs';
+
+const SATELLITE = { name: 'Satellite', mass: 1000, diameter: 1.6, length: 2.6 };
+const KESTREL = designFor(FLEET.find((rocket) => rocket.id === 'kestrel'), SATELLITE);
 
 const circular = (altitude) => {
   const r = R_EARTH + altitude;
@@ -64,7 +68,7 @@ test('orbit elements match the orbit they came from', () => {
 
 test('the rocket equation and stage figures are consistent', () => {
   assert.ok(Math.abs(deltaV(300, Math.E * 1000, 1000) - 300 * G0) < 1e-9);
-  const info = analyze(MISSIONS[1].design);
+  const info = analyze(KESTREL);
   const [first, second] = info.stages;
   assert.equal(info.liftoffMass, first.m0);
   assert.ok(Math.abs(first.mf - (second.m0 + first.dry)) < 1e-9);
@@ -73,7 +77,7 @@ test('the rocket equation and stage figures are consistent', () => {
 });
 
 test('a rocket too heavy for its engines stays on the pad', () => {
-  const flight = new Flight({ payload: 'station', stages: [{ engine: 'spark', count: 1, prop: 20000 }] });
+  const flight = new Flight({ payload: { ...SATELLITE, mass: 12000 }, stages: [{ engine: 'spark', count: 1, prop: 20000 }] });
   assert.equal(flight.info.canLiftOff, false);
   flight.activateStage();
   for (let i = 0; i < 100; i += 1) flight.advance(0.1);
@@ -81,32 +85,54 @@ test('a rocket too heavy for its engines stays on the pad', () => {
   assert.ok(Math.abs(Math.hypot(flight.vx, flight.vy) - OMEGA * R_EARTH) < 1e-6);
 });
 
-test('mission 1: straight up reaches space', () => {
-  const flight = new Flight(MISSIONS[0].design);
+for (const contract of CONTRACTS) {
+  test(`contract ${contract.id}: the cheapest rocket that fits delivers it by following the guidance`, () => {
+    const rocket = FLEET.find((item) => rocketFits(item, contract));
+    assert.ok(rocket, 'no rocket fits');
+    const flight = new Flight(designFor(rocket, contract.payload));
+    const result = flyContract(flight, new Guidance(contract.target));
+    const verdict = judge(contract, flight.deployed);
+    assert.equal(flight.over, false);
+    assert.equal(verdict.grade, 'delivered', `ap ${result.tel.apoapsis} pe ${result.tel.periapsis}`);
+    assert.ok(verdict.accuracy > 0.5, `accuracy ${verdict.accuracy}`);
+    assert.ok(result.peakStress < 5000 && result.peakHeat < 0.5);
+  });
+}
+
+test('each rocket has work and every contract is offered a rocket', () => {
+  for (const rocket of FLEET) {
+    assert.ok(CONTRACTS.some((contract) => FLEET.find((item) => rocketFits(item, contract)) === rocket), `${rocket.id} is never the cheapest fit`);
+  }
+});
+
+test('a delivery is paid by how close the orbit is', () => {
+  const contract = CONTRACTS.find((item) => item.id === 'ocean');
+  const orbit = (apoapsis, periapsis) => ({ altitude: periapsis, apoapsis, periapsis, bound: true });
+  const exact = judge(contract, orbit(400e3, 400e3));
+  assert.equal(exact.grade, 'delivered');
+  assert.equal(exact.pay + exact.bonus, contract.fee * 1.2);
+  assert.equal(judge(contract, orbit(425e3, 395e3)).bonus < exact.bonus, true);
+  assert.equal(judge(contract, orbit(470e3, 400e3)).pay, contract.fee * 0.5);
+  assert.equal(judge(contract, orbit(900e3, 400e3)).pay, contract.fee * 0.2);
+  assert.equal(judge(contract, orbit(400e3, 90e3)).pay, 0);
+  assert.equal(judge(contract, null).grade, 'lost');
+});
+
+test('releasing the payload lightens the rocket and records the orbit', () => {
+  const flight = new Flight(KESTREL);
+  assert.equal(flight.deployPayload(), false);
   flight.activateStage();
-  while (flight.t < 600 && !flight.reachedSpace && !flight.over) flight.advance(0.1);
-  assert.ok(MISSIONS[0].done(flight, flight.telemetry()));
-});
-
-test('mission 2: the default rocket reaches orbit with propellant to spare', () => {
-  const flight = new Flight(MISSIONS[1].design);
-  const result = flyToOrbit(flight, { apoapsis: 200e3, periapsis: 160e3 });
-  assert.equal(flight.over, false);
-  assert.ok(MISSIONS[1].done(flight, result.tel), `ap ${result.tel.apoapsis} pe ${result.tel.periapsis}`);
-  assert.ok(result.tel.dv > 400, `only ${result.tel.dv} m/s left`);
-  assert.ok(result.peakStress < 5000 && result.peakHeat < 0.5);
-});
-
-test('mission 3: the default rocket reaches a 400 km circular orbit', () => {
-  const flight = new Flight(MISSIONS[2].design);
-  const result = flyToOrbit(flight, { apoapsis: 395e3, periapsis: 385e3 });
-  assert.equal(flight.over, false);
-  assert.ok(MISSIONS[2].done(flight, result.tel), `ap ${result.tel.apoapsis} pe ${result.tel.periapsis}`);
-  assert.ok(result.tel.dv > 300, `only ${result.tel.dv} m/s left`);
+  flight.advance(1);
+  const before = flight.mass;
+  assert.equal(flight.deployPayload(), true);
+  assert.equal(before - flight.mass, SATELLITE.mass);
+  assert.equal(flight.throttle, 0);
+  assert.ok(flight.deployed.altitude >= 0 && flight.deployed.periapsis < 0);
+  assert.equal(flight.deployPayload(), false);
 });
 
 test('fast time warp is refused under thrust and stops at the atmosphere', () => {
-  const flight = new Flight(MISSIONS[1].design);
+  const flight = new Flight(KESTREL);
   flight.activateStage();
   flight.advance(1);
   flight.setWarp(WARPS.length - 1);
@@ -122,7 +148,7 @@ test('fast time warp is refused under thrust and stops at the atmosphere', () =>
 });
 
 test('flying sideways through thick air breaks the rocket up', () => {
-  const flight = new Flight(MISSIONS[1].design);
+  const flight = new Flight(KESTREL);
   flight.activateStage();
   while (flight.altitude < 6000) flight.advance(0.1);
   flight.heading = flight.angle + Math.PI / 2;
@@ -131,7 +157,7 @@ test('flying sideways through thick air breaks the rocket up', () => {
 });
 
 test('coming back from orbit without a heat shield burns up', () => {
-  const flight = new Flight(MISSIONS[1].design);
+  const flight = new Flight(KESTREL);
   flight.activateStage();
   flight.advance(1);
   const rp = R_EARTH + 40000, ra = R_EARTH + 200000, a = (rp + ra) / 2;
