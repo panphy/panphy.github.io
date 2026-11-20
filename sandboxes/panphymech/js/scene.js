@@ -62,6 +62,8 @@
   const GEAR_PITCH = 0.1; // m
   const MAX_RINGS = 2; // smaller rings on one wheel, besides its rim
   const RING_GAP = 4; // an inner ring has at least this many teeth fewer than the rim
+  // A ball's moment of inertia, I = k m r²: a 2D disk, or the 3D solid or hollow sphere it stands for.
+  const BALL_INERTIA = { disk: 0.5, solid: 0.4, hollow: 2 / 3 };
   const AXLE_TOLERANCE = 0.01; // m: an axle's hinge sits this close to the wheel's center
   const MESH_TOLERANCE = 0.01; // m: meshing axles are this close to the sum of the radii
 
@@ -72,7 +74,7 @@
     return {
       format: FORMAT,
       version: VERSION,
-      world: { gravity: 9.81, dragModel: 'none', linearDragSource: 'coefficient', linearDrag: 1, drag: 0.1, viscosity: 0, floor: true, floorFriction: 0.5, gpeZero: 0, accuracy: 'standard' },
+      world: { gravity: 9.81, dragModel: 'none', linearDragSource: 'coefficient', linearDrag: 1, drag: 0.1, viscosity: 0, floor: true, floorFriction: 0.5, floorStaticFriction: 0.5, floorRestitution: 1, gpeZero: 0, accuracy: 'standard' },
       bodies: [],
       links: [],
       nextId: 1,
@@ -106,8 +108,11 @@
       x, y, angle: 0,
       ...JSON.parse(JSON.stringify(def.size)),
       mass: def.mass,
-      friction: 0.4,
-      restitution: kind === 'ball' ? 0.6 : 0.2,
+      // friction is the dynamic coefficient μd (sliding), staticFriction μs (holding still).
+      friction: 0.4, staticFriction: 0.4,
+      // Two surfaces bounce with the product of their restitutions; fixed parts default to 1,
+      // like the floor, so the moving object's restitution sets the bounce.
+      restitution: fixed ? 1 : kind === 'ball' ? 0.6 : 0.2,
       drag: 0.1, dragModel: 'world', linearDragSource: 'coefficient', linearDrag: 1, viscosity: 0,
       fixed,
       lockRotation: false,
@@ -115,6 +120,7 @@
       color: fixed ? 'slate' : COLOR_CYCLE[dynamicCount % COLOR_CYCLE.length],
       vx: 0, vy: 0, omega: 0
     };
+    if (kind === 'ball') body.inertia = 'disk';
     return body;
   }
 
@@ -257,15 +263,16 @@
   function dragCoefficients(scene, b, radius) {
     const model = effectiveDragModel(scene, b);
     const params = b && objectDragModel(b) !== 'world' ? b : scene.world;
-    let linear = 0, quadratic = 0;
+    let linear = 0, quadratic = 0, stokes = false;
     if (model === 'linear') {
       const source = params.linearDragSource || (params.viscosity > 0 ? 'stokes' : 'coefficient');
       if (source === 'stokes') {
+        stokes = true;
         if (radius === undefined) radius = b ? b.kind === 'ball' ? b.r : Math.sqrt(area(b) / Math.PI) : 0;
         linear = 6 * Math.PI * radius * clamp(num(params.viscosity, 0), ...LIMITS.viscosity);
       } else linear = clamp(num(params.linearDrag, 1), ...LIMITS.linearDrag);
     } else if (model === 'quadratic') quadratic = clamp(num(params.drag, 0), ...LIMITS.drag);
-    return { model, linear, quadratic };
+    return { model, linear, quadratic, stokes };
   }
   function dragOverrideNote(scene, b) {
     if (b.fixed || objectDragModel(b) === 'world') return '';
@@ -1176,6 +1183,8 @@
     scene.world.gravity = clamp(num(w.gravity, 9.81), ...LIMITS.gravity);
     scene.world.floor = w.floor !== false;
     scene.world.floorFriction = clamp(num(w.floorFriction, 0.5), ...LIMITS.friction);
+    scene.world.floorStaticFriction = clamp(num(w.floorStaticFriction, scene.world.floorFriction), ...LIMITS.friction);
+    scene.world.floorRestitution = clamp(num(w.floorRestitution, 1), ...LIMITS.restitution);
     scene.world.viscosity = clamp(num(w.viscosity, 0), ...LIMITS.viscosity);
     scene.world.dragModel = worldDragModel({ world: w });
     scene.world.linearDragSource = w.linearDragSource === 'stokes' || (!w.linearDragSource && w.viscosity > 0) ? 'stokes' : 'coefficient';
@@ -1195,6 +1204,7 @@
         id: src.id, kind: src.kind, name: String(src.name || 'Object').slice(0, 40),
         x: clamp(num(src.x, 0), ...LIMITS.coord), y: clamp(num(src.y, 0), ...LIMITS.coord), angle: num(src.angle, 0),
         mass: clamp(num(src.mass, 1), ...LIMITS.mass), friction: clamp(num(src.friction, 0.4), ...LIMITS.friction),
+        staticFriction: clamp(num(src.staticFriction, num(src.friction, 0.4)), ...LIMITS.friction),
         restitution: clamp(num(src.restitution, 0.2), ...LIMITS.restitution), drag: clamp(num(src.drag, 0), ...LIMITS.drag),
         dragModel: objectDragModel(src),
         linearDragSource: src.linearDragSource === 'stokes' ? 'stokes' : 'coefficient',
@@ -1205,6 +1215,7 @@
       };
       if (b.kind === 'ball') {
         b.r = clamp(num(src.r, 0.25), ...LIMITS.r);
+        b.inertia = BALL_INERTIA[src.inertia] ? src.inertia : 'disk';
         if (Array.isArray(src.rings)) b.rings = src.rings.slice(0, MAX_RINGS).map((n) => Math.round(clamp(num(n, 0), 0, LIMITS.teeth[1])));
       }
       else if (b.kind === 'polygon') { b.r = clamp(num(src.r, 0.3), ...LIMITS.r); b.sides = Math.round(clamp(num(src.sides, 6), ...LIMITS.sides)); }
@@ -1259,7 +1270,7 @@
     DRAG_MODELS, worldDragModel, objectDragModel, effectiveDragModel, dragCoefficients, dragOverrideNote,
     ACCURACY, worldAccuracy, accuracyNote,
     FORMAT, VERSION, COLORS, COLOR_CYCLE, BODY_KINDS, LINK_KINDS, LIMITS,
-    createScene, makeBody, makeLink, newId, nextName,
+    createScene, makeBody, makeLink, newId, nextName, BALL_INERTIA,
     vertices, area, extent, toWorld, toLocal, containsPoint, contactSnap, centerSnap, closestSurface, copyFragment, pasteFragment,
     pulleyWinding, pulleyGeometry, pulleyPath, pulleyProblem, PULLEY_CLEARANCE, PULLEY_RADIUS,
     GEAR_PITCH, MAX_RINGS, RING_GAP, gearRadius, rimTeeth, gearRings, ringTeeth, gearsOf, isGearWheel, gearAxles, gearMesh, gearProblem,

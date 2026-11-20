@@ -159,7 +159,8 @@ test('an inelastic collision separates at e times the closing speed', () => {
   scene.world.gravity = 0;
   const a = S.makeBody(scene, 'ball', -1, 5);
   const b = S.makeBody(scene, 'ball', 1, 5);
-  [a, b].forEach((x) => { x.r = 0.2; x.restitution = 0.5; x.friction = 0; });
+  [a, b].forEach((x) => { x.r = 0.2; x.friction = 0; });
+  a.restitution = 1; b.restitution = 0.5; // the pair bounces with e = 1 × 0.5
   a.mass = 1; b.mass = 2; a.vx = 2;
   scene.bodies.push(a, b);
   const sim = P.createSim(scene);
@@ -174,7 +175,7 @@ test('a ball hitting a ceiling rebounds at e times its speed, e = 1 included', (
   for (const e of [1, 0.9]) {
     const scene = emptyScene();
     const ceiling = S.makeBody(scene, 'box', 0, 3);
-    ceiling.w = 4; ceiling.h = 0.2; ceiling.fixed = true; ceiling.restitution = 0;
+    ceiling.w = 4; ceiling.h = 0.2; ceiling.fixed = true; ceiling.restitution = 1;
     const ball = S.makeBody(scene, 'ball', 0, 1);
     ball.r = 0.1; ball.restitution = e; ball.friction = 0; ball.vy = 8;
     scene.bodies.push(ceiling, ball);
@@ -274,7 +275,7 @@ test("Newton's cradle passes the momentum along the row, then the balls swing to
     }));
     return reach;
   };
-  // Ball 1 starts 1 m out. With e = 0.95, ball 5 swings out most of the way while the middle three barely move.
+  // Ball 1 starts 1 m out. With e = 0.975² ≈ 0.95 between balls, ball 5 swings out most of the way while the middle three barely move.
   const first = reachOver(1.4);
   assert.ok(first[4] > 0.8, `ball 5 reached ${first[4].toFixed(3)} m`);
   [1, 2, 3].forEach((i) => assert.ok(first[i] < 0.05, `ball ${i + 1} moved ${first[i].toFixed(3)} m`));
@@ -929,4 +930,95 @@ test('force arrows keep the whole contact impulse when a fast ball hits a restin
   run(sim, 0.25, () => sim.forcesOn(box.id).forEach((f) => { if ((f.label === 'N' && f.y < 0.01) || f.label === 'W') J += f.fy * sim.lastH; }));
   // The box stays on the floor, so the floor's push and its weight cancel over the run.
   assert.ok(Math.abs(J - box.mass * sim.readBody(box.id).vy) < 1e-6, `vertical impulse ${J}`);
+});
+
+test('total energy stays flat in free fall and in flight, and gravitational energy is mgh at the start', () => {
+  for (const [vx, vy] of [[0, 0], [6, 9]]) {
+    const scene = emptyScene();
+    const b = S.makeBody(scene, 'box', 0, 50); b.vx = vx; b.vy = vy; b.omega = 2;
+    scene.bodies.push(b);
+    const sim = P.createSim(scene);
+    const r0 = sim.readBody(b.id);
+    assert.ok(Math.abs(r0.GPE - b.mass * 9.81 * 50) < 1e-9);
+    const e0 = sim.totals().E;
+    run(sim, 3);
+    assert.ok(Math.abs(sim.totals().E - e0) < 1e-6 * e0, `drift ${sim.totals().E - e0} J`);
+  }
+});
+
+function rampRoll(theta, inertia) {
+  const scene = emptyScene();
+  const ramp = S.makeBody(scene, 'plank', 0, 0);
+  ramp.w = 20; ramp.h = 0.5; ramp.fixed = true; ramp.angle = -theta; ramp.friction = ramp.staticFriction = 0.8;
+  const ball = S.makeBody(scene, 'ball', 0, 0);
+  ball.inertia = inertia; ball.friction = ball.staticFriction = 0.8; ball.restitution = 0;
+  const n = { x: Math.sin(theta), y: Math.cos(theta) }, along = { x: -Math.cos(theta), y: Math.sin(theta) };
+  ball.x = n.x * (0.25 + ball.r) + along.x * 6; ball.y = n.y * (0.25 + ball.r) + along.y * 6;
+  scene.bodies.push(ramp, ball);
+  const sim = P.createSim(scene);
+  run(sim, 0.5);
+  const v0 = sim.readBody(ball.id).speed, t0 = sim.t;
+  run(sim, 1.5);
+  return (sim.readBody(ball.id).speed - v0) / (sim.t - t0);
+}
+
+test('a ball rolls down a slope at g sin θ / (1 + k) for a disk, solid sphere or hollow sphere', () => {
+  const theta = Math.PI / 6;
+  for (const [inertia, k] of [['disk', 1 / 2], ['solid', 2 / 5], ['hollow', 2 / 3]]) {
+    const a = rampRoll(theta, inertia);
+    const expected = 9.81 * Math.sin(theta) / (1 + k);
+    assert.ok(Math.abs(a - expected) / expected < 0.01, `${inertia}: a ${a} vs ${expected}`);
+  }
+});
+
+test('static friction holds a block until tan θ exceeds μs; it then slides with dynamic friction μd', () => {
+  const theta = 25 * Math.PI / 180; // tan θ = 0.466
+  const slide = (mus, mud) => {
+    const scene = emptyScene();
+    const ramp = S.makeBody(scene, 'plank', 0, 0);
+    ramp.w = 20; ramp.h = 0.5; ramp.fixed = true; ramp.angle = -theta;
+    const block = S.makeBody(scene, 'box', 0, 0);
+    block.restitution = 0; block.angle = -theta;
+    [ramp, block].forEach((x) => { x.staticFriction = mus; x.friction = mud; });
+    const n = { x: Math.sin(theta), y: Math.cos(theta) }, along = { x: -Math.cos(theta), y: Math.sin(theta) };
+    block.x = n.x * 0.5 + along.x * 6; block.y = n.y * 0.5 + along.y * 6;
+    scene.bodies.push(ramp, block);
+    const sim = P.createSim(scene);
+    run(sim, 0.5);
+    const v0 = sim.readBody(block.id).speed, t0 = sim.t;
+    run(sim, 1.5);
+    return { v: sim.readBody(block.id).speed, a: (sim.readBody(block.id).speed - v0) / (sim.t - t0) };
+  };
+  assert.ok(slide(0.6, 0.3).v < 1e-3, 'μs = 0.6 holds it, though μd = 0.3 alone would not');
+  const { a } = slide(0.4, 0.3);
+  const expected = 9.81 * (Math.sin(theta) - 0.3 * Math.cos(theta));
+  assert.ok(Math.abs(a - expected) / expected < 0.02, `sliding a ${a} vs ${expected}`);
+  // Old files have one friction value: it becomes both.
+  const parsed = S.parse(JSON.stringify({ format: 'panphy-mech', version: 1, world: { floorFriction: 0.7 }, bodies: [{ id: 'b1', kind: 'box', friction: 0.3 }], links: [] }));
+  assert.equal(parsed.scene.bodies[0].staticFriction, 0.3);
+  assert.equal(parsed.scene.world.floorStaticFriction, 0.7);
+});
+
+test('in a viscous fluid a spinning ball slows as ω = ω0 e^(−t / τ), τ = I / 8πηr³', () => {
+  const scene = emptyScene();
+  scene.world.gravity = 0;
+  const ball = S.makeBody(scene, 'ball', 0, 0);
+  ball.omega = 10; ball.dragModel = 'linear'; ball.linearDragSource = 'stokes'; ball.viscosity = 0.05; ball.inertia = 'solid';
+  scene.bodies.push(ball);
+  const sim = P.createSim(scene);
+  run(sim, 1);
+  const tau = (0.4 * ball.mass * ball.r ** 2) / (8 * Math.PI * 0.05 * ball.r ** 3);
+  const expected = 10 * Math.exp(-1 / tau);
+  assert.ok(Math.abs(sim.readBody(ball.id).omega - expected) / expected < 0.01, `ω ${sim.readBody(ball.id).omega} vs ${expected}`);
+});
+
+test('the floor has its own restitution, multiplied by the object’s', () => {
+  const scene = emptyScene(true);
+  scene.world.floorRestitution = 0.5;
+  const ball = S.makeBody(scene, 'ball', 0, 2); ball.restitution = 1; ball.friction = ball.staticFriction = 0;
+  scene.bodies.push(ball);
+  const sim = P.createSim(scene);
+  let before = 0, ratio = null;
+  while (sim.t < 2 && ratio === null) { sim.step(); const v = sim.readBody(ball.id).vy; if (before < 0 && v >= 0) ratio = -v / before; before = v; }
+  assert.ok(Math.abs(ratio - 0.5) < 0.005, `rebound ratio ${ratio}`);
 });

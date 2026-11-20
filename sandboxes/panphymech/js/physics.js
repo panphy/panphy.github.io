@@ -14,6 +14,9 @@
   const POSITION_ITERATIONS = 5;
   const MAX_TRANSLATION = 20; // m per step: 4800 m/s at Standard accuracy
   const MAX_ROTATION = 40; // rad per step: about 9600 rad/s at Standard accuracy
+  // Contacts slipping slower than this (m/s) hold with static friction. Below it, a sliding
+  // object stops within a step; a resting one never creeps.
+  const SLIP_SPEED = 0.01;
 
   function createSim(scene) {
     const pl = root.planck;
@@ -75,23 +78,33 @@
     // Where gravity slows the approach instead (a ball rising into a ceiling), the scale
     // exceeds 1. It is capped at 2, which still covers approaches faster than 2·g·h (8 cm/s at
     // Standard accuracy); slower ones bounce slightly less and cannot gain energy.
+    //
+    // Each pair of surfaces also gets its own friction and restitution here. Friction uses the
+    // geometric mean of the two surfaces' static coefficients μs while the contact does not
+    // slip (rolling included), and of their dynamic coefficients μd while it slides. Restitution
+    // is the product of the two, so a surface with e = 0 never bounces and the floor (e = 1 by
+    // default) leaves the bounce to the object.
     world.on('pre-solve', (contact) => {
-      contact.resetRestitution();
-      const e = contact.getRestitution();
-      if (!(e > 0)) return;
-      const A = contact.getFixtureA().getBody();
-      const B = contact.getFixtureB().getBody();
+      const fA = contact.getFixtureA(), fB = contact.getFixtureB();
+      const A = fA.getBody();
+      const B = fB.getBody();
+      const e = fA.getRestitution() * fB.getRestitution();
+      contact.setRestitution(e);
       const wm = contact.getWorldManifold(null);
       const count = contact.getManifold().pointCount;
       if (!wm || !count) return;
       const n = wm.normal;
-      let vn = 0;
+      let vn = 0, slip = 0;
       for (let i = 0; i < count; i++) {
         const p = wm.points[i];
         const va = A.getLinearVelocityFromWorldPoint(p);
         const vb = B.getLinearVelocityFromWorldPoint(p);
         vn += ((vb.x - va.x) * n.x + (vb.y - va.y) * n.y) / count;
+        slip = Math.max(slip, Math.abs((vb.x - va.x) * n.y - (vb.y - va.y) * n.x));
       }
+      const dA = fA.getFriction(), dB = fB.getFriction();
+      contact.setFriction(slip < SLIP_SPEED ? Math.sqrt(staticFriction(fA) * staticFriction(fB)) : Math.sqrt(dA * dB));
+      if (!(e > 0)) return;
       if (vn >= 0) { contact.setRestitution(0); return; }
       const g = world.getGravity();
       const ga = A.isDynamic() ? A.getGravityScale() : 0;
@@ -100,6 +113,14 @@
       if (vnAfter >= 0) return;
       contact.setRestitution(Math.min(2, e * vn / vnAfter));
     });
+    const num = (v, d) => (Number.isFinite(v) ? v : d);
+    const staticOf = (b) => num(b.staticFriction, b.friction);
+    const floorRestitution = () => num(scene.world.floorRestitution, 1);
+    // A surface's static coefficient, never below its dynamic one.
+    function staticFriction(f) {
+      const d = f.getUserData();
+      return Math.max(f.getFriction(), d && d.mus >= 0 ? d.mus : 0);
+    }
     const ground = world.createBody();
     let floorFixture = null;
     if (scene.world.floor) {
@@ -108,7 +129,7 @@
       // the ground body, and Box2D stops joined bodies colliding, so a floor on the ground
       // body would let anything hung from the background (or grabbed) fall through it.
       // Its top sits inset below y = 0 like every object, so objects rest on the drawn floor.
-      floorFixture = world.createBody().createFixture(new pl.Box(2000, 10, pl.Vec2(0, -10 - INSET), 0), { friction: scene.world.floorFriction, restitution: 0 });
+      floorFixture = world.createBody().createFixture(new pl.Box(2000, 10, pl.Vec2(0, -10 - INSET), 0), { friction: scene.world.floorFriction, restitution: floorRestitution(), userData: { mus: scene.world.floorStaticFriction } });
     }
 
     const bodies = new Map(); // scene id → planck body
@@ -154,9 +175,9 @@
 
     function fixtureFor(pb, b) {
       const density = b.mass / Math.max(S.area(b), 1e-9);
-      const opts = { density, friction: b.friction, restitution: b.restitution };
+      const opts = { density, friction: b.friction, restitution: b.restitution, userData: { mus: staticOf(b) } };
       if (S.isGearWheel(scene, b)) opts.filterGroupIndex = GEAR_GROUP;
-      if (b.kind === 'ball') return pb.createFixture(new pl.Circle(b.r), opts);
+      if (b.kind === 'ball') { const f = pb.createFixture(new pl.Circle(b.r), opts); setTrueMass(pb, b); return f; }
       // A custom shape is one rigid body made of its convex pieces. They collide slightly
       // inset, so that with Box2D's skin the object rests exactly on its drawn outline.
       collisionPieces(b).map(planckPolygon).filter(Boolean).forEach((shape) => pb.createFixture(shape, opts));
@@ -164,9 +185,15 @@
       return pb.getFixtureList();
     }
 
-    // Mass, center and rotational inertia of the shape as drawn, not of the inset pieces.
+    // Mass, center and rotational inertia of the shape as drawn, not of the inset pieces. A
+    // ball's inertia is that of the disk, solid sphere or hollow sphere it stands for.
     function setTrueMass(pb, b) {
-      if (b.fixed || b.kind === 'ball') return;
+      if (b.fixed) return;
+      if (b.kind === 'ball') {
+        const k = S.BALL_INERTIA[b.inertia] || S.BALL_INERTIA.disk;
+        pb.setMassData({ mass: b.mass, center: pl.Vec2(0, 0), I: k * b.mass * b.r * b.r });
+        return;
+      }
       const pieces = polygonPieces(b).map(planckPolygon).filter(Boolean);
       const density = b.mass / Math.max(S.area(b), 1e-9);
       let mass = 0, cx = 0, cy = 0, I = 0;
@@ -181,9 +208,14 @@
 
     // Planck integrates linear damping implicitly: v /= 1 + h*c/m. This
     // implements linear drag without reversing velocity at high damping/low mass.
+    // In a viscous fluid (Stokes drag) a spinning object also feels the torque 8πηr³ω, which
+    // is (4/3)r² times its Stokes coefficient 6πηr; Planck applies it implicitly too.
     function setViscousDamping(pb, radius, b = null, share = 1) {
-      const c = S.dragCoefficients(scene, b, radius).linear / share;
+      const d = S.dragCoefficients(scene, b, radius);
+      const c = d.linear / share;
       pb.setLinearDamping(pb.isStatic() ? 0 : c / pb.getMass());
+      const invI = pb.isStatic() || !b ? 0 : invInertiaOf(pb);
+      pb.setAngularDamping(d.stokes && invI > 0 ? (4 / 3) * radius * radius * d.linear * invI : 0);
     }
     const dragRadius = (b) => b.kind === 'ball' ? b.r : Math.sqrt(S.area(b) / Math.PI);
 
@@ -247,7 +279,7 @@
         const p = pts[i];
         const q = pts[i + 1];
         const body = world.createBody({ type: 'dynamic', position: pl.Vec2((p.x + q.x) / 2, (p.y + q.y) / 2), angle: Math.atan2(q.y - p.y, q.x - p.x) });
-        body.createFixture(new pl.Box(seg / 2, th / 2), { density: mass / n / (seg * th), friction: 0.4, restitution: 0.1, filterGroupIndex: solidGroup });
+        body.createFixture(new pl.Box(seg / 2, th / 2), { density: mass / n / (seg * th), friction: 0.4, restitution: 1, filterGroupIndex: solidGroup });
         // Share one connector's total drag across its segments, so changing the
         // rope discretization does not change the total resistance.
         setViscousDamping(body, Math.sqrt(l.length * th / Math.PI), null, n);
@@ -288,7 +320,7 @@
     const pulleys = new Map(); // link id → { joint, wind, turn, L, lambda, ua, ub }
     function buildPulley(l, A, B) {
       const c = { x: l.px, y: l.py };
-      world.createBody({ position: pl.Vec2(c.x, c.y) }).createFixture(new pl.Circle(l.r), { friction: 0.4, restitution: 0 });
+      world.createBody({ position: pl.Vec2(c.x, c.y) }).createFixture(new pl.Circle(l.r), { friction: 0.4, restitution: 1 });
       if (isStatic(A) && isStatic(B)) return;
       const pa0 = anchorWorld(l.a, l.la), pb0 = anchorWorld(l.b, l.lb);
       const wind = S.pulleyWinding(c, pa0, pb0);
@@ -422,7 +454,7 @@
       if (pair.other.kind === 'pulley') {
         const g = S.pairGeometry(scene, pair, null);
         st.wind = g.wind; st.turn = g.turn;
-        world.createBody({ position: pl.Vec2(pair.other.px, pair.other.py) }).createFixture(new pl.Circle(pair.other.r), { friction: 0.4, restitution: 0 });
+        world.createBody({ position: pl.Vec2(pair.other.px, pair.other.py) }).createFixture(new pl.Circle(pair.other.r), { friction: 0.4, restitution: 1 });
       }
       pairs.set(pair.spring.id, st);
       pairs.set(pair.other.id, st);
@@ -819,6 +851,17 @@
       return { x: p.x, y: p.y, angle: pb.getAngle() };
     };
 
+    // Box2D updates each velocity before the position (semi-implicit Euler), so in free fall an
+    // object ends each step ½gh² lower than the exact path, and kinetic plus gravitational
+    // energy would fall by ½mg²h per second. Gravitational energy is therefore read at the
+    // height half a step earlier, measured from the object's starting velocity, y − ½h(vy − vy0):
+    // exact for free fall at every step, and the same as y at the start.
+    const startVy = new Map(); // planck body → vertical velocity at the start
+    bodies.forEach((pb) => startVy.set(pb, pb.getLinearVelocity().y));
+    function energyLag(pb, vy) {
+      return sim.t > 0 ? 0.5 * sim.lastH * (vy - (startVy.get(pb) || 0)) : 0;
+    }
+
     sim.readBody = function readBody(id) {
       const pb = bodies.get(id);
       const b = S.bodyById(scene, id);
@@ -838,7 +881,7 @@
       const KEr = 0.5 * I * w * w;
       return {
         x: c.x, y: c.y, angle: pb.getAngle(), vx: v.x, vy: v.y, speed: Math.hypot(v.x, v.y), omega: w,
-        KE: KEt + KEr, KEt, KEr, GPE: m * g * h, px: m * v.x, py: m * v.y, fixed: false
+        KE: KEt + KEr, KEt, KEr, GPE: m * g * (h - energyLag(pb, v.y)), px: m * v.x, py: m * v.y, fixed: false
       };
     };
 
@@ -1051,7 +1094,7 @@
         const m = pb.getMass();
         const lc = pb.getLocalCenter();
         KE += 0.5 * m * (v.x * v.x + v.y * v.y) + 0.5 * (pb.getInertia() - m * (lc.x * lc.x + lc.y * lc.y)) * w * w;
-        GPE += m * g * (pb.getWorldCenter().y - (scene.world.gpeZero || 0));
+        GPE += m * g * (pb.getWorldCenter().y - (scene.world.gpeZero || 0) - energyLag(pb, v.y));
       }));
       return { KE, GPE };
     };
@@ -1118,7 +1161,11 @@
 
     sim.setFloorFriction = function setFloorFriction(mu) {
       sim.probe = null; // the starting forces change too
-      if (floorFixture) floorFixture.setFriction(mu);
+      if (floorFixture) {
+        floorFixture.setFriction(mu);
+        floorFixture.setUserData({ mus: num(scene.world.floorStaticFriction, mu) });
+        floorFixture.setRestitution(floorRestitution());
+      }
       refreshContacts();
     };
 
@@ -1128,6 +1175,7 @@
       if (!pb) return;
       for (let f = pb.getFixtureList(); f; f = f.getNext()) {
         f.setFriction(b.friction);
+        f.setUserData({ mus: staticOf(b) });
         f.setRestitution(b.restitution);
         if (!b.fixed) f.setDensity(b.mass / Math.max(S.area(b), 1e-9));
       }
