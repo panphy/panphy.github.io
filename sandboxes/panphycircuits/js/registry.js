@@ -454,10 +454,19 @@
       out.unshift({ key: 'state', label: 'Fuse wire', text: c.props.blown ? 'melted (open circuit)' : 'intact' });
       return out;
     },
-    // Checked after every solve: a current above the rating melts the wire.
-    blows: (c, r) => !c.props.blown && Math.abs(r.i('a')) > c.props.rating,
+    // A fuse melts from heating, so its rating is an r.m.s. current. While time runs, heat is
+    // the wire's I² averaged over thermalTime (the solver keeps it, step by step): AC blows it by
+    // its r.m.s. value, a brief surge such as a capacitor's inrush does not, and a 2× overload
+    // takes about 0.3 s, a 10× one about 10 ms. A steady current (no heat given) is its own
+    // r.m.s. value.
+    thermalTime: 1,
+    blows: (c, r, heat) => {
+      if (c.props.blown) return false;
+      if (Number.isFinite(heat)) return heat > c.props.rating * c.props.rating;
+      return Math.abs(r.i('a')) > c.props.rating;
+    },
     valueText: (c) => `${fmtSI(c.props.rating, 'A', 3, { trim: true })}${c.props.blown ? ', blown' : ''}`,
-    help: `A thin wire (${FUSE_R} Ω) that melts when the current is above its rating, which breaks the circuit. Here it blows as soon as the current goes over the rating; real fuses take a moment, longer for a small overload. Switch off “Blown” to fit a new fuse.`
+    help: `A thin wire (${FUSE_R} Ω) that melts when the current is above its rating, which breaks the circuit. Its rating is an r.m.s. current: the wire heats as I², so an AC current blows it by its r.m.s. value, and a brief surge is survived. A large overload blows it at once; a small one takes a moment (about 0.3 s at twice the rating). Switch off “Blown” to fit a new fuse.`
   });
 
   define('motor', {

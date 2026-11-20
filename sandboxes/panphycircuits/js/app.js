@@ -420,7 +420,8 @@
     if (!res) return;
     const blown = app.doc.components.filter((c) => {
       const def = registry.get(c.type);
-      return def.blows && def.blows(c, solver.reader(res, c));
+      // While time runs, a fuse blows by its heating (r.m.s. current); a steady circuit's current is its own r.m.s.
+      return def.blows && def.blows(c, solver.reader(res, c), app.needsTime() ? (app.sim.heat[c.id] ?? 0) : undefined);
     });
     if (!blown.length) return;
     for (const c of blown) c.props.blown = true;

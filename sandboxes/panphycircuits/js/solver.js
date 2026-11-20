@@ -169,11 +169,16 @@
     // ideal sources) count as one point, so a resistor behind an ammeter or switch still sets
     // the capacitor's time constant. A filament lamp counts at its rated (hot) resistance,
     // which governs while it carries most of the charge; its cold resistance only matters at
-    // small p.d.s and would make the step needlessly short.
+    // small p.d.s and would make the step needlessly short. The small series resistances inside
+    // diodes, LEDs and transistors are left out: they only carry current while the junction
+    // conducts, when a source drives the capacitor, so resolving them (0.1 Ω behind a rectifier
+    // diode) would force the 1 µs floor for no visible gain.
     const zParent = nodes.map((_, i) => i);
     const zFind = (i) => { while (zParent[i] !== i) { zParent[i] = zParent[zParent[i]]; i = zParent[i]; } return i; };
     for (const p of prims) if (p.k === 'V') { const ra = zFind(p.a.n), rb = zFind(p.b.n); if (ra !== rb) zParent[ra] = rb; }
+    const junctionOwners = new Set(prims.filter((p) => p.k === 'N' && !(p.model.params && p.model.params.Rhot > 0)).map((p) => p.owner));
     const resistanceOf = (q) => {
+      if (q.k === 'G' && junctionOwners.has(q.owner)) return Infinity;
       if (q.k === 'G' && typeof q.g === 'number') return 1 / q.g;
       if (q.k === 'N' && q.model.params && q.model.params.Rhot > 0) return q.model.params.Rhot;
       return Infinity;
@@ -190,25 +195,52 @@
       }
       if (Number.isFinite(rMin)) need((p.c * rMin) / 100, [p.owner]);
     }
+    // An inductor's time constant is L / R, with R the resistance it sees between its ends:
+    // every resistance in the circuit (a lamp at its rated value), with ideal sources, meters and
+    // closed switches as joins, and other inductors, capacitors, junctions and current sources
+    // as breaks. A voltmeter as the only path counts too, so its fast decay is resolved.
     for (const p of prims) {
       if (p.k !== 'L') continue;
       const net = networks[networkOf[p.a.n]];
-      // Prefer the series sum of passive resistances (typical RL loops). When the
-      // only discharge path is a voltmeter, use that meter's resistance instead.
-      const resistors = net.prims.filter((q) => q.k === 'G' && typeof q.g === 'number' && !q.hidden);
-      const passive = resistors.filter((q) => circuit.getComp(doc, q.owner)?.type !== 'voltmeter');
-      let resistance = passive.reduce((sum, q) => sum + 1 / q.g, 0);
-      if (!(resistance > 0)) {
-        const gTouch = resistors.filter((q) => [q.a.n, q.b.n].some((n) => n === p.a.n || n === p.b.n))
-          .reduce((sum, q) => sum + q.g, 0);
-        if (gTouch > 0) resistance = 1 / gTouch;
-      }
-      if (resistance > 0) need(p.l / resistance / 100, [p.owner]);
+      const resistance = resistanceBetween(net, p.a.n, p.b.n, zFind, resistanceOf);
+      if (resistance > 0 && Number.isFinite(resistance)) need(p.l / resistance / 100, [p.owner]);
       for (const q of net.prims) if (q.k === 'C') need(Math.sqrt(p.l * q.c) / 100, [p.owner, q.owner], true);
     }
     dtSuggest = Math.min(0.01, Math.max(MIN_DT, dtSuggest));
 
     return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, dtNeed, dtNeedComps, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T') };
+  }
+
+  // Resistance between nodes a and b of a network through its resistances alone (Infinity
+  // when there is no path), with nodes joined by zero-resistance links merged first.
+  function resistanceBetween(net, a, b, zFind, resistanceOf) {
+    const ra = zFind(a), rb = zFind(b);
+    if (ra === rb) return 0;
+    const index = new Map();
+    for (const i of net.nodes) { const r = zFind(i); if (r !== rb && !index.has(r)) index.set(r, index.size); }
+    const n = index.size;
+    const A = new Float64Array(n * n), z = new Float64Array(n);
+    let any = false;
+    for (const q of net.prims) {
+      const R = resistanceOf(q);
+      if (!(R > 0) || !Number.isFinite(R)) continue;
+      const ns = q.nodes || [q.a, q.b];
+      const x = zFind(ns[0].n), y = zFind(ns[ns.length - 1].n);
+      if (x === y) continue;
+      const g = 1 / R, i = index.get(x), j = index.get(y);
+      if (i !== undefined) A[i * n + i] += g;
+      if (j !== undefined) A[j * n + j] += g;
+      if (i !== undefined && j !== undefined) { A[i * n + j] -= g; A[j * n + i] -= g; }
+      any = true;
+    }
+    if (!any) return Infinity;
+    // A tiny leak to b keeps nodes off every path solvable; a result near 1/leak means no path.
+    const LEAK = 1e-12;
+    for (let i = 0; i < n; i++) A[i * n + i] += LEAK;
+    z[index.get(ra)] = 1;
+    const x = solveLinear(A, z, n);
+    const R = x ? x[index.get(ra)] : Infinity;
+    return R > 0.01 / LEAK ? Infinity : R;
   }
 
   // ---------- Linear algebra ----------
@@ -818,6 +850,7 @@
       dt: 0.005,
       capHist: {},
       indHist: {},
+      heat: {},
       logic: {},
       inputs: {},
       warm: new Map(),
@@ -840,6 +873,7 @@
       const ids = new Set(doc.components.map((c) => c.id));
       for (const id of Object.keys(sim.capHist)) if (!ids.has(id)) delete sim.capHist[id];
       for (const id of Object.keys(sim.indHist)) if (!ids.has(id)) delete sim.indHist[id];
+      for (const id of Object.keys(sim.heat)) if (!ids.has(id)) delete sim.heat[id];
       for (const p of sim.compiled.prims) if ((p.k === 'L' || p.k === 'T') && !sim.indHist[p.owner]) sim.indHist[p.owner] = { i1: p.i0 || 0, j1: 0 };
       for (const p of sim.compiled.prims) if (p.k === 'C' && !sim.capHist[p.owner]) sim.capHist[p.owner] = { v1: p.v0 };
       sim.dt = doc.settings.dt === 'auto' ? sim.compiled.dtSuggest : doc.settings.dt;
@@ -879,6 +913,7 @@
       sim.running = false;
       sim.capHist = {};
       sim.indHist = {};
+      sim.heat = {};
       sim.logic = {};
       sim.inputs = {};
       sim.nlState = {};
@@ -959,6 +994,17 @@
           const v = r.V[info.p.a.n] - r.V[info.p.b.n];
           sim.capHist[info.p.owner] = { v1: v, v2: h ? h.v1 : undefined };
         }
+      }
+      // Parts that heat (fuses): I² averaged over their thermal time, exact for steady current.
+      for (const c of sim.doc.components) {
+        const def = registry.get(c.type);
+        if (!(def.thermalTime > 0)) continue;
+        if (c.props.blown) { delete sim.heat[c.id]; continue; }
+        const entry = result.comp[c.id];
+        const i = entry ? entry.i[def.terminals[0].id] : NaN;
+        if (!Number.isFinite(i)) continue;
+        const h = sim.heat[c.id];
+        sim.heat[c.id] = h === undefined ? i * i : h + (i * i - h) * (1 - Math.exp(-dt / def.thermalTime));
       }
       sim.logic = ctx.logic;
       sim.inputs = ctx.inputs;
