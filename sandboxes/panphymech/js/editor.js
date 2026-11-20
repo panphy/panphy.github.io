@@ -604,8 +604,12 @@
       return best;
     }
 
+    // Before time has run, an edit sets up the start; afterwards it keeps the motion it found.
+    const atStart = () => !(app.sim && app.sim.t > 0);
+
     function swapJoint(old, keep) {
       const kind = ed.tool;
+      const fresh = atStart();
       app.edit(() => {
         const i = app.scene.links.findIndex((l) => l.id === old.id);
         // A free motor's background end is stale once its object has moved: pin where it is now.
@@ -615,6 +619,7 @@
         // A name the user chose stays; a default one follows the new kind.
         if (!/^(Hinge|Motor) \d+$/.test(old.name)) l.name = old.name;
         app.scene.links[i] = l;
+        if (old.free && fresh) S.setFreeMotorSpin(app.scene, old, false);
         app.select({ type: 'link', id: l.id });
       });
       if (!keep) ed.setTool('select');
@@ -636,8 +641,8 @@
         const la = free ? { x: 0, y: 0 } : S.toLocal(app.poseOf(top), p);
         const lb = base ? S.toLocal(app.poseOf(base), p) : { x: p.x, y: p.y };
         const l = S.makeLink(app.scene, kind, top.id, la, base ? base.id : null, lb);
-        if (free) l.free = true;
         app.scene.links.push(l);
+        if (free) { l.free = true; S.setFreeMotorSpin(app.scene, l); }
         app.select({ type: 'link', id: l.id });
       });
       if (!keep) ed.setTool('select');

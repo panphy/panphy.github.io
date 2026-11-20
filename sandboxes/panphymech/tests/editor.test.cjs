@@ -430,12 +430,14 @@ test('a motor on one object is free at its center; on a hinge it stays pinned; a
   let l = h.app.scene.links[0];
   assert.equal(l.free, true); assert.equal(l.b, null);
   assert.equal(JSON.stringify(l.la), JSON.stringify({ x: 0, y: 0 }), 'snapped to the center');
+  assert.equal(h.body.omega, l.speed, 'the object starts at the motor speed');
   h.ed.dropConnector('motor', 300, 200);
   assert.equal(h.app.scene.links.length, 1, 'one free motor per object');
   // A hinge dropped on it swaps it for a pinned hinge, and a motor on that hinge stays pinned.
   h.ed.dropConnector('hinge', 300, 200);
   l = h.app.scene.links[0];
   assert.equal(h.app.scene.links.length, 1); assert.equal(l.motor, false); assert.equal(l.free, undefined);
+  assert.equal(h.body.omega, 0, 'a pinned hinge starts at rest');
   h.ed.dropConnector('motor', 300, 200);
   l = h.app.scene.links[0];
   assert.equal(h.app.scene.links.length, 1); assert.equal(l.motor, true); assert.equal(l.free, undefined);

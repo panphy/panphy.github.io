@@ -862,6 +862,7 @@ test('a free motor spins a lone ball from the start, keeps it spinning in free f
   const motor = S.makeLink(scene, 'motor', ball.id, { x: 0, y: 0 }, null, { x: 0, y: 3 });
   motor.free = true; // clockwise at 3 rad/s by default
   scene.links.push(motor);
+  S.setFreeMotorSpin(scene, motor); // as the editor does on placing it
   const sim = P.createSim(scene);
   assert.ok(Math.abs(sim.readBody(ball.id).omega - motor.speed) < 1e-9, 'spinning at the motor speed at t = 0');
   run(sim, 0.4);
@@ -887,4 +888,45 @@ test('a motor without the free flag still pins a lone ball to the background', (
   const r = sim.readBody(ball.id);
   assert.ok(Math.abs(r.y - 3) < 1e-3 && Math.abs(r.x) < 1e-3, 'stays where it was pinned');
   assert.ok(Math.abs(r.omega + 3) < 1e-3);
+});
+
+test('a stalled free motor keeps its stall after a new start, and a locked object never turns', () => {
+  // A weak free motor drives a ball into a wall, where it stalls.
+  const scene = emptyScene(true);
+  const ball = S.makeBody(scene, 'ball', 0, 0); ball.y = ball.r;
+  const wall = S.makeBody(scene, 'wall', 1, 1); wall.fixed = true;
+  scene.bodies.push(ball, wall);
+  const motor = S.makeLink(scene, 'motor', ball.id, { x: 0, y: 0 }, null, { x: 0, y: ball.r });
+  motor.free = true; motor.torque = 0.5;
+  scene.links.push(motor);
+  S.setFreeMotorSpin(scene, motor);
+  let sim = P.createSim(scene);
+  run(sim, 4);
+  const stalled = sim.capture()[ball.id];
+  assert.ok(Math.abs(stalled.omega) < 0.05, 'stalled against the wall');
+  // Editing mid-run makes the current state the new start: no spin appears from nothing.
+  Object.assign(ball, stalled);
+  sim = P.createSim(scene);
+  assert.equal(sim.readBody(ball.id).omega, stalled.omega);
+  // With Lock rotation, the motor never turns the object.
+  const s2 = emptyScene(false); s2.world.gravity = 0;
+  const box = S.makeBody(s2, 'box', 0, 0); box.lockRotation = true; s2.bodies.push(box);
+  const m2 = S.makeLink(s2, 'motor', box.id, { x: 0, y: 0 }, null, { x: 0, y: 0 }); m2.free = true; s2.links.push(m2);
+  S.setFreeMotorSpin(s2, m2);
+  const sim2 = P.createSim(s2);
+  run(sim2, 1);
+  assert.equal(sim2.readBody(box.id).angle, 0);
+});
+
+test('force arrows keep the whole contact impulse when a fast ball hits a resting box', () => {
+  // The hit runs a Box2D time-of-impact sub-step that reports the box's floor contact again.
+  const scene = emptyScene(true);
+  const box = S.makeBody(scene, 'box', 0, 0); box.y = box.h / 2; box.friction = 0;
+  const ball = S.makeBody(scene, 'ball', -6, 0); ball.y = box.h / 2; ball.vx = 300; ball.restitution = 0.5;
+  scene.bodies.push(box, ball);
+  const sim = P.createSim(scene);
+  let J = 0;
+  run(sim, 0.25, () => sim.forcesOn(box.id).forEach((f) => { if ((f.label === 'N' && f.y < 0.01) || f.label === 'W') J += f.fy * sim.lastH; }));
+  // The box stays on the floor, so the floor's push and its weight cancel over the run.
+  assert.ok(Math.abs(J - box.mass * sim.readBody(box.id).vy) < 1e-6, `vertical impulse ${J}`);
 });

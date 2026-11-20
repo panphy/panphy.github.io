@@ -321,7 +321,10 @@
     const sel = app.selection;
     if (!sel) return;
     const ids = app.selectedBodies();
+    const freeMotor = sel.type === 'link' && !(app.sim && app.sim.t > 0) ? S.linkById(app.scene, sel.id) : null;
     app.edit(() => {
+      // A free motor deleted before time runs takes its starting spin with it.
+      if (freeMotor && freeMotor.free) S.setFreeMotorSpin(app.scene, freeMotor, false);
       if (sel.type === 'body') ids.forEach((id) => S.removeBody(app.scene, id)); else S.removeLink(app.scene, sel.id);
       app.selection = null;
       app.extra = [];
