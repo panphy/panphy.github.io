@@ -849,3 +849,40 @@ test('a short circuit across an AC supply is reported at t = 0 and at zero cross
   c.sim.trial();
   assert.ok(c.result().errors.some((e) => /Short circuit/.test(e.msg)));
 });
+
+test('a rectifier diode does not force the 1 µs step on its smoothing capacitor', () => {
+  // The diode's 0.1 Ω inside its model only conducts while the supply drives the capacitor:
+  // the step follows the 50 Hz supply (0.2 ms), and the smoothed p.d. matches a much finer step.
+  const spec = () => ({
+    comps: { S: ['acsupply', { peak: 10, freq: 50 }], D: ['diode'], C1: ['capacitor', { C: 1e-3, v0: 0 }], R1: ['resistor', { R: 100 }] },
+    wires: [['S.p', 'D.a'], ['D.k', 'C1.p'], ['C1.p', 'R1.a'], ['R1.b', 'S.n'], ['C1.n', 'S.n']]
+  });
+  const range = (c) => {
+    let lo = Infinity, hi = -Infinity;
+    while (c.sim.t < 0.5) c.sim.step();
+    while (c.sim.t < 0.6) { c.sim.step(); const v = c.read('C1').v('p', 'n'); lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    return [lo, hi];
+  };
+  const auto = build(spec());
+  close(auto.sim.dt, 2e-4, 1e-9, 'automatic step');
+  const fine = build(spec());
+  fine.doc.settings.dt = 1e-5; fine.sim.setDoc(fine.doc);
+  const [a, b] = [range(auto), range(fine)];
+  close(a[0], b[0], 5e-3, 'lowest smoothed p.d.'); close(a[1], b[1], 5e-3, 'highest smoothed p.d.');
+});
+
+test('an inductor’s step follows the resistance it sees, not unrelated resistors', () => {
+  // 10 Ω and 1 H: τ = 0.1 s, so a 1 ms step. A 10 kΩ resistor across the ideal battery changes nothing.
+  for (const extra of [false, true]) {
+    const comps = { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 10 }], L1: ['inductor', { L: 1 }] };
+    const wires = [['B1.p', 'R1.a'], ['R1.b', 'L1.a'], ['L1.b', 'B1.n']];
+    if (extra) { comps.R2 = ['resistor', { R: 10000 }]; wires.push(['B1.p', 'R2.a'], ['R2.b', 'B1.n']); }
+    close(build({ comps, wires }).sim.dt, 1e-3, 1e-6, extra ? 'with a 10 kΩ across the battery' : 'alone');
+  }
+  // A 10 Ω ∥ 10 Ω pair in the loop halves the resistance, so τ doubles.
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 10 }], R2: ['resistor', { R: 10 }], L1: ['inductor', { L: 1 }] },
+    wires: [['B1.p', 'R1.a'], ['B1.p', 'R2.a'], ['R1.b', 'L1.a'], ['R2.b', 'L1.a'], ['L1.b', 'B1.n']]
+  });
+  close(c.sim.dt, 2e-3, 1e-6, 'parallel pair');
+});

@@ -48,7 +48,9 @@ function wire(doc, a, at, b, bt) {
   assert.ok(result.wire, result.error);
 }
 
-test('AC fuse overloads are caught inside frames, independently of frame-end phase', () => {
+test('AC fuses blow by r.m.s. heating, at the same time whatever the frame length', () => {
+  // 10 V peak across 1 Ω: 7.07 A r.m.s. heats a 5 A fuse past its rating after ln 2 ≈ 0.69 s
+  // (heat = I² averaged over 1 s). Steps are checked inside frames, so the frame length does not matter.
   for (const frameMs of [10, 20, 40]) {
     const doc = circuit.createDoc();
     const source = circuit.addComponent(doc, 'acsupply', { props: { peak: 10, freq: 50 } });
@@ -56,12 +58,22 @@ test('AC fuse overloads are caught inside frames, independently of frame-end pha
     const load = circuit.addComponent(doc, 'resistor', { props: { R: 1 } });
     wire(doc, source, 'p', fuse, 'a'); wire(doc, fuse, 'b', load, 'a'); wire(doc, load, 'b', source, 'n');
     const { app, frame } = setup(doc);
-    frame(frameMs);
-    assert.equal(fuse.props.blown, true, `${frameMs} ms frame`);
+    let blownAt = null, now = 0;
+    while (app.sim.t < 2 && blownAt === null) { frame(now += frameMs); if (fuse.props.blown) blownAt = app.sim.t; }
+    assert.ok(blownAt !== null, `${frameMs} ms frame: the fuse never blew`);
+    assert.ok(Math.abs(blownAt - Math.LN2) < 0.01 + frameMs / 1000, `${frameMs} ms frame: blew at ${blownAt} s`);
     assert.ok(app.sim.result.ok);
     assert.ok(Math.abs(solver.reader(app.sim.result, load).i('a')) < 1e-8);
-    assert.ok(app.sim.t >= frameMs / 1000 - app.sim.dt);
   }
+  // 0.8 A r.m.s. (peak 1.13 A) through a 1 A fuse: the peak is over the rating, the r.m.s. is not.
+  const doc = circuit.createDoc();
+  const source = circuit.addComponent(doc, 'acsupply', { props: { peak: 0.8 * Math.SQRT2 * 10, freq: 50 } });
+  const fuse = circuit.addComponent(doc, 'fuse', { props: { rating: 1 } });
+  const load = circuit.addComponent(doc, 'resistor', { props: { R: 10 } });
+  wire(doc, source, 'p', fuse, 'a'); wire(doc, fuse, 'b', load, 'a'); wire(doc, load, 'b', source, 'n');
+  const { app, frame } = setup(doc);
+  for (let now = 40; app.sim.t < 3; now += 40) frame(now);
+  assert.equal(fuse.props.blown, false);
 });
 
 test('initial-energy slider updates apply the newest signed value without advancing time', () => {
