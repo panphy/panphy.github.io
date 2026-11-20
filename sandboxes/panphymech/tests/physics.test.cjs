@@ -227,7 +227,10 @@ test('quadratic drag gives terminal velocity √(mg/k)', () => {
 
 test('every example builds and runs without errors', () => {
   E.list.forEach((ex) => {
-    const { scene } = S.parse(S.serialize(ex.build()));
+    const built = ex.build();
+    const { scene, skipped } = S.parse(S.serialize(built));
+    assert.equal(skipped, 0, `${ex.title}: every object and connector loads`);
+    assert.equal(scene.bodies.length, JSON.parse(ex.text).bodies.length, `${ex.title}: every object loads`);
     const sim = P.createSim(scene);
     run(sim, 1);
     scene.bodies.forEach((b) => {
@@ -1021,4 +1024,30 @@ test('the floor has its own restitution, multiplied by the object’s', () => {
   let before = 0, ratio = null;
   while (sim.t < 2 && ratio === null) { sim.step(); const v = sim.readBody(ball.id).vy; if (before < 0 && v >= 0) ratio = -v / before; before = v; }
   assert.ok(Math.abs(ratio - 0.5) < 0.005, `rebound ratio ${ratio}`);
+});
+
+test('Rolling race and Static and dynamic friction examples show their textbook results', () => {
+  const speedsAt = (sim, ids, t) => { run(sim, t); return ids.map((id) => sim.readBody(id).speed); };
+  {
+    const scene = E.list.find((e) => e.id === 'rolling-race').build();
+    const balls = ['Solid sphere', 'Disk', 'Hollow sphere'].map((n) => scene.bodies.find((b) => b.name === n));
+    const sim = P.createSim(scene);
+    const v0 = speedsAt(sim, balls.map((b) => b.id), 0.5);
+    const v1 = speedsAt(sim, balls.map((b) => b.id), 1.5);
+    const th = 20 * Math.PI / 180;
+    [0.4, 0.5, 2 / 3].forEach((k, i) => {
+      const expected = 9.81 * Math.sin(th) / (1 + k);
+      assert.ok(Math.abs(v1[i] - v0[i] - expected) / expected < 0.01, `${balls[i].name}: a ${v1[i] - v0[i]} vs ${expected}`);
+    });
+  }
+  {
+    const scene = E.list.find((e) => e.id === 'friction').build();
+    const held = scene.bodies.find((b) => b.name === 'Held block'), sliding = scene.bodies.find((b) => b.name === 'Sliding block');
+    const sim = P.createSim(scene);
+    const [h0, s0] = speedsAt(sim, [held.id, sliding.id], 0.5);
+    const [h1, s1] = speedsAt(sim, [held.id, sliding.id], 1.5);
+    const th = 25 * Math.PI / 180, expected = 9.81 * (Math.sin(th) - 0.3 * Math.cos(th));
+    assert.ok(h0 < 1e-3 && h1 < 1e-3, 'μs = 0.6 holds the left block');
+    assert.ok(Math.abs(s1 - s0 - expected) / expected < 0.02, `sliding a ${s1 - s0} vs ${expected}`);
+  }
 });
