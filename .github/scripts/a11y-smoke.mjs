@@ -77,7 +77,7 @@ async function main() {
   const pages = process.argv.slice(2).length ? process.argv.slice(2) : sitemapPages();
   let failed = 0;
   await checkPages(pages, {
-    tabs: 3,
+    tabs: 2,
     setup: async ({ send }) => {
       await send('Emulation.setDeviceMetricsOverride', { ...VIEWPORT, deviceScaleFactor: 2, mobile: true });
       await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });

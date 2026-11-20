@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
-const LOAD_TIMEOUT_MS = 20000;
+const LOAD_TIMEOUT_MS = 45000; // catches hangs; pages sharing the CPU can load slowly
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
