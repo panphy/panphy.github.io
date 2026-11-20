@@ -125,6 +125,71 @@ test('elastic collision of carts conserves momentum and kinetic energy', () => {
   assert.ok(Math.abs(rb.vx - 5 / 3) < 0.05, `vb ${rb.vx}`);
 });
 
+// Peak heights of a ball dropped onto the floor, as fractions of the drop height.
+function bounceHeights(e, count) {
+  const scene = emptyScene(true);
+  const ball = S.makeBody(scene, 'ball', 0, 2.1);
+  ball.r = 0.1; ball.restitution = e; ball.friction = 0;
+  scene.bodies.push(ball);
+  const sim = P.createSim(scene);
+  const peaks = [];
+  let prev = sim.readBody(ball.id);
+  while (sim.t < 10 && peaks.length < count) {
+    sim.step();
+    const r = sim.readBody(ball.id);
+    if (prev.vy > 0 && r.vy <= 0) peaks.push((Math.max(prev.y, r.y) - ball.r) / 2);
+    prev = r;
+  }
+  return peaks;
+}
+
+test('bounce heights below restitution 1 fall as e^2n', () => {
+  for (const e of [0.8, 0.5]) {
+    const peaks = bounceHeights(e, 3);
+    assert.equal(peaks.length, 3, `e = ${e}: three bounces`);
+    peaks.forEach((h, i) => {
+      const expected = e ** (2 * (i + 1));
+      assert.ok(Math.abs(h - expected) < 0.005, `e = ${e}, bounce ${i + 1}: ${h.toFixed(4)} vs ${expected.toFixed(4)}`);
+    });
+  }
+});
+
+test('an inelastic collision separates at e times the closing speed', () => {
+  const scene = emptyScene();
+  scene.world.gravity = 0;
+  const a = S.makeBody(scene, 'ball', -1, 5);
+  const b = S.makeBody(scene, 'ball', 1, 5);
+  [a, b].forEach((x) => { x.r = 0.2; x.restitution = 0.5; x.friction = 0; });
+  a.mass = 1; b.mass = 2; a.vx = 2;
+  scene.bodies.push(a, b);
+  const sim = P.createSim(scene);
+  run(sim, 3);
+  // 1-D result for e = 0.5: v1 = [(m1 − e m2) u1] / (m1 + m2) = 0, v2 = (1 + e) m1 u1 / (m1 + m2) = 1 m/s.
+  assert.ok(Math.abs(sim.readBody(a.id).vx) < 0.005, `va ${sim.readBody(a.id).vx}`);
+  assert.ok(Math.abs(sim.readBody(b.id).vx - 1) < 0.005, `vb ${sim.readBody(b.id).vx}`);
+});
+
+test('a ball hitting a ceiling rebounds at e times its speed', () => {
+  const scene = emptyScene();
+  const ceiling = S.makeBody(scene, 'box', 0, 3);
+  ceiling.w = 4; ceiling.h = 0.2; ceiling.fixed = true; ceiling.restitution = 0;
+  const ball = S.makeBody(scene, 'ball', 0, 1);
+  ball.r = 0.1; ball.restitution = 0.9; ball.friction = 0; ball.vy = 8;
+  scene.bodies.push(ceiling, ball);
+  const sim = P.createSim(scene);
+  let before = sim.readBody(ball.id).vy;
+  while (sim.t < 1) {
+    sim.step();
+    const v = sim.readBody(ball.id).vy;
+    if (before > 0 && v <= 0) {
+      assert.ok(Math.abs(-v / before - 0.9) < 0.001, `rebound ratio ${(-v / before).toFixed(4)}`);
+      return;
+    }
+    before = v;
+  }
+  assert.fail('the ball never reached the ceiling');
+});
+
 test('block on a ramp accelerates at g(sin θ − μ cos θ)', () => {
   const scene = emptyScene();
   const theta = 30 * Math.PI / 180;

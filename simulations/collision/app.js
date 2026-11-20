@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 import { radialTexture } from '/assets/three-textures.js';
+import { advanceAxis, normalSpeed, applyPairImpulse } from '/simulations/collision/physics.js';
 
 const ui = {
     startBtn: document.getElementById('startBtn'),
@@ -2827,6 +2828,40 @@ function applyTipForces(dt, simDt, profile) {
     return totalContacts;
 }
 
+// Where a ball's center meets each wall.
+function getWallLimits() {
+    const bounds = getViewBounds();
+    return {
+        xLimit: Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS),
+        yLimit: Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS)
+    };
+}
+
+// Moves a free ball through one substep. Gravity acts exactly over the step, and with walls on,
+// each wall bounce happens at the moment of contact, so e = 1 keeps a bouncing ball's height at
+// any frame rate. constrainSphereToView still catches balls the solvers push into a wall.
+function integrateSphere(sphere, dt) {
+    const g = state.oneD ? 0 : state.gravity;
+    if (state.boundaryMode === 'walls') {
+        const { xLimit, yLimit } = getWallLimits();
+        const e = clampRestitution(state.wallRestitution);
+        const x = advanceAxis(sphere.position.x, sphere.velocity.x, 0, dt, -xLimit, xLimit, e);
+        sphere.position.x = x.p;
+        sphere.velocity.x = x.v;
+        if (!state.oneD) {
+            const y = advanceAxis(sphere.position.y, sphere.velocity.y, -g, dt, -yLimit, yLimit, e);
+            sphere.position.y = y.p;
+            sphere.velocity.y = y.v;
+        }
+        return;
+    }
+    sphere.position.x += sphere.velocity.x * dt;
+    if (!state.oneD) {
+        sphere.position.y += (sphere.velocity.y * dt) - (0.5 * g * dt * dt);
+        sphere.velocity.y -= g * dt;
+    }
+}
+
 function constrainSphereToView(sphere, profile) {
     const bounds = getViewBounds();
     if (state.boundaryMode === 'wrap') {
@@ -2861,8 +2896,7 @@ function constrainSphereToView(sphere, profile) {
         return;
     }
 
-    const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
-    const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
+    const { xLimit, yLimit } = getWallLimits();
     const restitution = clampRestitution(state.wallRestitution);
 
     // Only bounce a ball that is moving into the wall. A ball pushed past the wall by the
@@ -3237,7 +3271,7 @@ function resolveSphereCollisions(applyVelocity = true) {
             }
 
             // Resolve normal velocity with inverse-mass impulse.
-            const relVelN = (b.velocity.x - a.velocity.x) * nx + (is1D ? 0 : (b.velocity.y - a.velocity.y) * ny);
+            const relVelN = normalSpeed(a.velocity, b.velocity, nx, ny);
 
             // Only resolve if spheres are approaching
             if (relVelN >= 0) {
@@ -3256,13 +3290,7 @@ function resolveSphereCollisions(applyVelocity = true) {
 
             const pairRestitution = clampRestitution(state.ballRestitution);
             const isSignificant = -relVelN >= COLLISION_LOG_MIN_SPEED;
-            const impulse = (-(1 + pairRestitution) * relVelN) / velInvMassSum;
-            a.velocity.x -= impulse * nx * velInvMassA;
-            b.velocity.x += impulse * nx * velInvMassB;
-            if (!is1D) {
-                a.velocity.y -= impulse * ny * velInvMassA;
-                b.velocity.y += impulse * ny * velInvMassB;
-            }
+            applyPairImpulse(a.velocity, b.velocity, nx, ny, velInvMassA, velInvMassB, pairRestitution);
             recordCollisionImpulse(a, b, aPinned || bPinned, isSignificant);
         }
     }
@@ -3293,18 +3321,12 @@ function updatePhysics(dt, profile) {
                 continue;
             }
 
-            if (!state.oneD) {
-                sphere.velocity.y -= state.gravity * subDt;
-            }
             const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
             if (speed > MAX_SPHERE_SPEED) {
                 sphere.velocity.x *= MAX_SPHERE_SPEED / speed;
                 sphere.velocity.y *= MAX_SPHERE_SPEED / speed;
             }
-            sphere.position.x += sphere.velocity.x * subDt;
-            if (!state.oneD) {
-                sphere.position.y += sphere.velocity.y * subDt;
-            }
+            integrateSphere(sphere, subDt);
             constrainSphereToView(sphere, profile);
             sphere.integratedSubstepX = sphere.position.x;
 
