@@ -205,8 +205,13 @@
             }
             ui.closePanels();
           }
-          if (drag.ghost) drag.ghost.style.transform = `translate(${e.clientX - 32}px, ${e.clientY - 22}px)`;
-          if (drag.moved && !isBody) app.editor.previewConnectorDrop(kind, e.clientX, e.clientY);
+          if (!drag.moved) return;
+          const onCanvas = app.editor.previewConnectorDrop(kind, e.clientX, e.clientY);
+          if (drag.ghost) {
+            // Over the canvas the object itself is drawn; the icon follows the pointer elsewhere.
+            drag.ghost.hidden = onCanvas;
+            drag.ghost.style.transform = `translate(${e.clientX - 32}px, ${e.clientY - 22}px)`;
+          }
         });
         const end = (e) => {
           if (!drag || drag.id !== e.pointerId) return;
@@ -214,7 +219,7 @@
           drag = null;
           if (d.moved) {
             if (d.ghost) d.ghost.remove();
-            if (!isBody) app.editor.clearConnectorDropPreview();
+            app.editor.clearConnectorDropPreview();
             // Set before dropping, so the click that follows never arms the part.
             btn.dataset.suppressClick = '1';
             if (e.type === 'pointerup') {

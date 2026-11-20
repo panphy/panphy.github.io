@@ -10,7 +10,7 @@ test('clicking a library part and then dragging it drops once without rearming o
   const listeners = new Map(); let drops = 0, ghosts = 0;
   const btn = { dataset: { part: 'box' }, setPointerCapture() {}, addEventListener: (name, fn) => listeners.set(name, fn) };
   const list = { innerHTML: '', querySelectorAll: () => [btn] };
-  const editor = { armed: null, arm(kind) { this.armed = kind; }, dropBody() { drops++; } };
+  const editor = { armed: null, arm(kind) { this.armed = kind; }, previewConnectorDrop() { return true; }, clearConnectorDropPreview() {}, dropBody() { drops++; } };
   vm.runInNewContext('(' + source.slice(start, end) + ')()', {
     $: () => list, PART_GROUPS: [{ title: 'Objects', items: ['box'] }], S: { BODY_KINDS: { box: { label: 'Box' } } },
     esc: x => x, PART_TITLES: { box: 'Box' }, partSvg: () => '', app: { editor }, ui: { closePanels() {} },
@@ -33,7 +33,7 @@ test('a drop that throws still leaves the part unarmed after the click that foll
   const listeners = new Map();
   const btn = { dataset: { part: 'box' }, setPointerCapture() {}, addEventListener: (name, fn) => listeners.set(name, fn) };
   const list = { innerHTML: '', querySelectorAll: () => [btn] };
-  const editor = { armed: null, arm(kind) { this.armed = kind; }, dropBody() { throw new Error('inspector failed'); } };
+  const editor = { armed: null, arm(kind) { this.armed = kind; }, previewConnectorDrop() { return true; }, clearConnectorDropPreview() {}, dropBody() { throw new Error('inspector failed'); } };
   vm.runInNewContext('(' + source.slice(start, end) + ')()', {
     $: () => list, PART_GROUPS: [{ title: 'Objects', items: ['box'] }], S: { BODY_KINDS: { box: { label: 'Box' } } },
     esc: x => x, PART_TITLES: { box: 'Box' }, partSvg: () => '', app: { editor }, ui: { closePanels() {} },
