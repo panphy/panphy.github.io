@@ -541,7 +541,7 @@
         }
         return;
       }
-      if (!l.b) {
+      if (!l.b && !l.free) {
         // Pinned to the background: a small mount behind the pin.
         ctx.fillStyle = r.colors.ink3;
         ctx.globalAlpha = 0.5;

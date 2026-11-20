@@ -130,6 +130,9 @@
     if (kind === 'gear') Object.assign(link, { ra: 0, rb: 0 });
     // A motor turns clockwise (dir −1) or counterclockwise (dir +1); speed carries the same sign.
     if (kind === 'hinge') Object.assign(link, { motor: type === 'motor', speed: type === 'motor' ? -3 : 0, dir: -1, torque: type === 'motor' ? 50 : 0 });
+    // A motor on one object can be free (free: true, set by the editor): nothing pins it, and it
+    // keeps the object spinning about its center, as a motorized wheel does. Without the flag a
+    // motor with no second object is pinned to the background.
     return link;
   }
 
@@ -496,7 +499,7 @@
   function gearAxles(scene, b, poseOf) {
     const pose = poseOf ? poseOf(b) : b;
     return scene.links.filter((l) => {
-      if (l.kind !== 'hinge' || (l.a !== b.id && l.b !== b.id)) return false;
+      if (l.kind !== 'hinge' || l.free || (l.a !== b.id && l.b !== b.id)) return false;
       const p = endPoint(scene, l.a, l.la, poseOf);
       return Math.hypot(p.x - pose.x, p.y - pose.y) <= AXLE_TOLERANCE;
     }).map((l) => ({ link: l, base: l.a === b.id ? l.b : l.a }));
@@ -807,6 +810,8 @@
         && (l.a || l.b));
       if (scene.links.length === before) break;
     }
+    // Only a motor on one object, with no other end, can be free.
+    scene.links.forEach((l) => { if (l.free && (l.kind !== 'hinge' || !l.motor || l.b)) delete l.free; });
     tidyGears(scene);
     syncJoinPoints(scene);
   }
@@ -1227,6 +1232,7 @@
         l.motor = !!src.motor; l.speed = clamp(num(src.speed, 0), ...LIMITS.speed); l.torque = clamp(num(src.torque, 50), ...LIMITS.torque);
         l.dir = src.dir === 1 || src.dir === -1 ? src.dir : l.speed > 0 ? 1 : -1;
         l.speed = l.dir * Math.abs(l.speed);
+        if (src.free === true) l.free = true;
       }
       linkIds.add(l.id); track(l.id);
       scene.links.push(l);

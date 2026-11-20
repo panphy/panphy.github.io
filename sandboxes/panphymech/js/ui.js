@@ -597,7 +597,7 @@
     function motorFields(l, param, help) {
       return [
         choiceField('Direction', [{ v: -1, label: 'CW', title: 'Clockwise', icon: 'rotate' }, { v: 1, label: 'CCW', title: 'Counterclockwise', icon: 'rotateCcw' }], () => motorDir(l()), (d) => app.editParam(() => { const x = l(); x.dir = d; x.speed = d * Math.abs(x.speed); }, null)),
-        numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => Math.abs(l().speed), set: param((x, v) => { x.speed = motorDir(x) * v; }), min: 0, max: L.speed[1], slider: [0, 30], step: 0.1, help: help ? 'How fast the part turns relative to what it is hinged to. Clockwise drives a wheel to the right.' : '' })
+        numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => Math.abs(l().speed), set: param((x, v) => { x.speed = motorDir(x) * v; }), min: 0, max: L.speed[1], slider: [0, 30], step: 0.1, help: !help ? '' : l().free ? 'How fast the object spins. It starts at this speed, and the motor holds it there. Clockwise drives a wheel to the right.' : 'How fast the part turns relative to what it is hinged to. Clockwise drives a wheel to the right.' })
       ];
     }
 
@@ -909,6 +909,7 @@
       const between = document.createElement('p');
       between.className = 'icard-note';
       between.textContent = l().kind === 'gear' ? `Meshes ${endName(l().a)} with ${endName(l().b)}.`
+        : l().free ? `Spins ${endName(l().a)} about its center, with nothing holding it in place.`
         : l().kind === 'hinge' || l().kind === 'weld'
         ? `Joins ${endName(l().a)} to ${endName(l().b)}.`
         : l().kind === 'pulley' ? `Over the wheel from ${endName(l().a)} to ${endName(l().b)}.`
@@ -948,9 +949,9 @@
         if (l().motor) {
           motorFields(l, param, true).forEach((el) => main.appendChild(el));
           main.appendChild(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
-          rows.push({ key: 'rate', label: 'Relative angular velocity', plain: 'Angular velocity' }, { key: 'torque', label: 'Motor torque', plain: 'Motor torque' });
+          rows.push({ key: 'rate', label: l().free ? 'Angular velocity' : 'Relative angular velocity', plain: 'Angular velocity' }, { key: 'torque', label: 'Motor torque', plain: 'Motor torque' });
         }
-        rows.push({ key: 'force', label: 'Force on the pin', plain: 'Force on the pin' });
+        if (!l().free) rows.push({ key: 'force', label: 'Force on the pin', plain: 'Force on the pin' });
       } else if (l().kind === 'weld') {
         rows.push({ key: 'force', label: 'Force on the joint', plain: 'Force on the joint' });
       } else if (l().kind === 'gear') {

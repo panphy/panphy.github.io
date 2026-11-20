@@ -16,7 +16,7 @@
     rod: 'Rod: click the first end on an object or the background, then the second end. A rod keeps its length. Right-click or Esc cancels.',
     rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack. Right-click or Esc cancels.',
     hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background. Click a motor to replace it with a hinge. Right-click or Esc cancels.',
-    motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle). Click a hinge to replace it with a motor. Right-click or Esc cancels.',
+    motor: 'Motor: click on a wheel where it overlaps another object, or on one object to keep it spinning about its center. Click a hinge to replace it with a motor on a fixed axle. Right-click or Esc cancels.',
     weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background. Right-click or Esc cancels.',
     pulley: 'Pulley: click where the wheel goes, then the first end of the rope, then the second end. Right-click or Esc cancels.',
     gear: 'Gear: click a ball, then a second ball to mesh with it. Each turns on a hinge at its center (added if missing), and the second slides into mesh. Right-click or Esc cancels.'
@@ -353,7 +353,7 @@
         const swap = swapTarget(w);
         if (swap) return { point: S.endPoint(app.scene, swap.a, swap.la, app.poseOf), ok: true };
         const bs = jointBodies(w);
-        return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
+        return { point: bs.length ? jointSpot(ed.tool, w, bs) : w, ok: bs.length > 0 };
       }
       if (ed.tool === 'gear') {
         const ball = gearBall(w);
@@ -459,6 +459,13 @@
         if (t.body) bs.push(t.body);
       }
       return bs;
+    }
+
+    // Where a new joint goes: a motor on one object alone is free and sits at its center.
+    const freeMotor = (kind, bs) => kind === 'motor' && bs.length === 1;
+    function jointSpot(kind, w, bs) {
+      if (freeMotor(kind, bs)) { const pose = app.poseOf(bs[0]); return { x: pose.x, y: pose.y }; }
+      return jointPoint(w, bs[0]);
     }
 
     function jointPoint(w, b) {
@@ -584,12 +591,12 @@
 
     // A hinge under the pointer when placing a motor, or a motor when placing a hinge: clicking
     // it swaps it for the new joint in the same spot, on the same objects.
-    function swapTarget(w) {
-      if (ed.tool !== 'hinge' && ed.tool !== 'motor') return null;
+    function swapTarget(w, kind = ed.tool) {
+      if (kind !== 'hinge' && kind !== 'motor') return null;
       const sp = rr().toScreen(w);
       let best = null, bestD = 10;
       app.scene.links.forEach((l) => {
-        if (l.kind !== 'hinge' || !!l.motor === (ed.tool === 'motor')) return;
+        if (l.kind !== 'hinge' || !!l.motor === (kind === 'motor')) return;
         const p = rr().toScreen(S.endPoint(app.scene, l.a, l.la, app.poseOf));
         const d = Math.hypot(sp.x - p.x, sp.y - p.y);
         if (d <= bestD) { bestD = d; best = l; }
@@ -601,7 +608,9 @@
       const kind = ed.tool;
       app.edit(() => {
         const i = app.scene.links.findIndex((l) => l.id === old.id);
-        const l = S.makeLink(app.scene, kind, old.a, { ...old.la }, old.b, old.lb && { ...old.lb });
+        // A free motor's background end is stale once its object has moved: pin where it is now.
+        const lb = old.free ? S.endPoint(app.scene, old.a, old.la, app.poseOf) : old.lb && { ...old.lb };
+        const l = S.makeLink(app.scene, kind, old.a, { ...old.la }, old.b, lb);
         l.id = old.id;
         // A name the user chose stays; a default one follows the new kind.
         if (!/^(Hinge|Motor) \d+$/.test(old.name)) l.name = old.name;
@@ -619,12 +628,15 @@
       const top = bs[0];
       const base = bs[1] || null;
       if (top.fixed && (!base || base.fixed)) { app.toast('A fixed object is already fixed in place. Use a hinge to pin a movable object.'); return; }
-      const p = jointPoint(w, top);
       const kind = ed.tool;
+      const free = freeMotor(kind, bs);
+      if (free && app.scene.links.some((l) => l.free && l.a === top.id)) { app.toast(`${top.name} already has a motor.`); return; }
+      const p = jointSpot(kind, w, bs);
       app.edit(() => {
-        const la = S.toLocal(app.poseOf(top), p);
+        const la = free ? { x: 0, y: 0 } : S.toLocal(app.poseOf(top), p);
         const lb = base ? S.toLocal(app.poseOf(base), p) : { x: p.x, y: p.y };
         const l = S.makeLink(app.scene, kind, top.id, la, base ? base.id : null, lb);
+        if (free) l.free = true;
         app.scene.links.push(l);
         app.select({ type: 'link', id: l.id });
       });
@@ -669,7 +681,7 @@
         l.rb = S.freeRing(scene, B);
         scene.links.push(l);
         // A wheel already joined to something keeps its joints; the inspector says what it needs.
-        [A, B].forEach((b) => { if (!scene.links.some((x) => (x.kind === 'hinge' || x.kind === 'weld') && (x.a === b.id || x.b === b.id))) S.ensureAxle(scene, b); });
+        [A, B].forEach((b) => { if (!scene.links.some((x) => (x.kind === 'hinge' || x.kind === 'weld') && !x.free && (x.a === b.id || x.b === b.id))) S.ensureAxle(scene, b); });
         S.tidyLinks(scene);
         if (!S.meshGear(scene, l, B.id)) S.meshGear(scene, l, A.id);
         made = l;
@@ -744,8 +756,10 @@
           // The joint itself, where it will be pinned.
           const bs = jointBodies(w);
           const ok = bs.length > 0 && !(bs[0].fixed && (!bs[1] || bs[1].fixed));
+          const swap = ok && swapTarget(w, type);
+          const free = !swap && freeMotor(type, bs);
           connectorDropPreview = ok
-            ? { joint: { kind: type === 'weld' ? 'weld' : 'hinge', motor: type === 'motor', dir: -1, b: bs[1] ? bs[1].id : null }, point: jointPoint(w, bs[0]), drop: true }
+            ? { joint: { kind: type === 'weld' ? 'weld' : 'hinge', motor: type === 'motor', dir: -1, b: bs[1] ? bs[1].id : null, free }, point: swap ? S.endPoint(app.scene, swap.a, swap.la, app.poseOf) : jointSpot(free ? type : 'hinge', w, bs), drop: true }
             : { point: bs.length ? jointPoint(w, bs[0]) : w, ok: false };
         }
       }
@@ -1076,7 +1090,8 @@
         }
         app.select({ type: 'link', id: hit.link.id });
         const joint = hit.link.kind === 'hinge' || hit.link.kind === 'weld';
-        if (app.running || hit.link.kind === 'gear') startGesture('none', e, sp);
+        // A free motor stays at its object's center.
+        if (app.running || hit.link.kind === 'gear' || hit.link.free) startGesture('none', e, sp);
         // A joined connector moves by its end handles; dragging its line would pull it apart.
         else if (hit.link.kind !== 'pulley' && !joint && S.joinPair(app.scene, hit.link)) startGesture('none', e, sp);
         else startGesture(joint ? 'jointMove' : hit.link.kind === 'pulley' ? 'pulleyMove' : 'linkMove', e, sp, { linkId: hit.link.id });

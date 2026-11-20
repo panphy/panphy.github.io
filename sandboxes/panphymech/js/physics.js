@@ -371,6 +371,42 @@
       pulleys.set(l.id, st);
     }
 
+    // ---------- Free motors ----------
+    // A motor on one object alone, pinned to nothing: as if its casing were a heavy mass inside
+    // the object, it holds the object's spin at the motor speed with up to its maximum torque,
+    // and the object moves freely. The object starts at that spin, like a motorized wheel
+    // released already turning, so no spin appears from nothing in mid-air. A one-body angular
+    // constraint (on a motor joint whose own solver is replaced), so it acts within the same
+    // solver passes as contacts and friction.
+    function buildFreeMotor(l) {
+      const A = bodies.get(l.a);
+      if (!A || !A.isDynamic()) return;
+      const st = { speed: l.speed || 0, torque: l.torque || 0, impulse: 0 };
+      A.setAngularVelocity(st.speed);
+      A.setSleepingAllowed(false);
+      const joint = new pl.MotorJoint({ maxForce: 0, maxTorque: 0, collideConnected: true }, ground, A);
+      joint.initVelocityConstraints = function initVelocityConstraints(step) {
+        if (step.warmStarting) { st.impulse *= step.dtRatio; A.c_velocity.w += A.m_invI * st.impulse; } else st.impulse = 0;
+      };
+      joint.solveVelocityConstraints = function solveVelocityConstraints(step) {
+        const invI = A.m_invI;
+        if (!(invI > 0)) return; // Lock rotation: nothing to turn
+        const max = st.torque * step.dt;
+        const old = st.impulse;
+        st.impulse = Math.min(max, Math.max(-max, old - (A.c_velocity.w - st.speed) / invI));
+        A.c_velocity.w += invI * (st.impulse - old);
+      };
+      joint.solvePositionConstraints = () => true;
+      joint.getReactionForce = () => pl.Vec2(0, 0);
+      joint.getReactionTorque = (inv) => st.impulse * inv;
+      joint.getMotorTorque = (inv) => st.impulse * inv;
+      joint.getJointSpeed = () => A.getAngularVelocity();
+      joint.enableMotor = () => {};
+      joint.setMotorSpeed = (v) => { st.speed = v; };
+      joint.setMaxMotorTorque = (t) => { st.torque = t; };
+      joints.set(l.id, world.createJoint(joint));
+    }
+
     // ---------- Joined pairs ----------
     // A spring joined to another connector at a massless point acts with it as one connector
     // between the two outer ends (S.pairGeometry). Both parts carry one pull, applied as a
@@ -394,6 +430,7 @@
 
     scene.links.forEach((l) => {
       if (pairs.has(l.id)) return;
+      if (l.free) { buildFreeMotor(l); return; }
       const A = bodyFor(l.a);
       const B = bodyFor(l.b);
       if (!A || !B) return;
@@ -856,6 +893,7 @@
         });
       });
       scene.links.forEach((l) => {
+        if (l.free) return; // a free motor only twists its object: no force
         const atA = bodyFor(l.a) === pb; const atB = bodyFor(l.b) === pb;
         if (!atA && !atB) return;
         if (l.kind === 'gear') {
@@ -993,7 +1031,7 @@
         }
       } else if (l.kind === 'hinge') {
         out.torque = 0;
-        out.rate = 0;
+        out.rate = l.free && j ? j.getJointSpeed() : 0; // a free motor's object starts spinning
       }
       return out;
     };
