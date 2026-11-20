@@ -854,3 +854,37 @@ test('the fastest allowed start speed and spin are not capped by Box2D’s per-s
   assert.ok(Math.abs(r.x - S.LIMITS.velocity[1] * sim.t) < 1e-6, `x ${r.x}`);
   assert.ok(Math.abs(sim.readBody(box.id).omega - S.LIMITS.omega[1]) < 1e-9);
 });
+
+test('a free motor spins a lone ball from the start, keeps it spinning in free fall, and rolls it on landing', () => {
+  const scene = emptyScene(true);
+  const ball = S.makeBody(scene, 'ball', 0, 3);
+  scene.bodies.push(ball);
+  const motor = S.makeLink(scene, 'motor', ball.id, { x: 0, y: 0 }, null, { x: 0, y: 3 });
+  motor.free = true; // clockwise at 3 rad/s by default
+  scene.links.push(motor);
+  const sim = P.createSim(scene);
+  assert.ok(Math.abs(sim.readBody(ball.id).omega - motor.speed) < 1e-9, 'spinning at the motor speed at t = 0');
+  run(sim, 0.4);
+  const falling = sim.readBody(ball.id);
+  assert.ok(falling.y < 3 && falling.y > ball.r, 'still in the air');
+  assert.ok(Math.abs(falling.vx) < 1e-9, 'falls straight down: nothing pins or pushes it sideways');
+  assert.ok(Math.abs(falling.omega - motor.speed) < 1e-6, 'keeps its spin');
+  assert.equal(sim.forcesOn(ball.id).filter((f) => f.label === 'R').length, 0, 'no reaction force from the motor');
+  run(sim, 4);
+  const rolling = sim.readBody(ball.id);
+  assert.ok(Math.abs(rolling.y - ball.r) < 0.02, 'on the floor');
+  assert.ok(rolling.vx > 0, 'a clockwise wheel drives to the right');
+  assert.ok(Math.abs(rolling.vx + rolling.omega * ball.r) < 0.02, 'rolling without slipping at the motor speed');
+});
+
+test('a motor without the free flag still pins a lone ball to the background', () => {
+  const scene = emptyScene(false);
+  const ball = S.makeBody(scene, 'ball', 0, 3);
+  scene.bodies.push(ball);
+  scene.links.push(S.makeLink(scene, 'motor', ball.id, { x: 0, y: 0 }, null, { x: 0, y: 3 }));
+  const sim = P.createSim(scene);
+  run(sim, 1);
+  const r = sim.readBody(ball.id);
+  assert.ok(Math.abs(r.y - 3) < 1e-3 && Math.abs(r.x) < 1e-3, 'stays where it was pinned');
+  assert.ok(Math.abs(r.omega + 3) < 1e-3);
+});

@@ -423,3 +423,25 @@ test('with Select several on, dragging a selected object moves the selection; a 
   h.emit('pointerup', { clientX: 350, clientY: 150, pointerType: 'mouse' });
   assert.deepEqual(toggled, [h.body.id]);
 });
+
+test('a motor on one object is free at its center; on a hinge it stays pinned; a hinge on a free motor pins it', () => {
+  const h = setup();
+  h.ed.dropConnector('motor', 310, 205); // off center, on the lone box
+  let l = h.app.scene.links[0];
+  assert.equal(l.free, true); assert.equal(l.b, null);
+  assert.equal(JSON.stringify(l.la), JSON.stringify({ x: 0, y: 0 }), 'snapped to the center');
+  h.ed.dropConnector('motor', 300, 200);
+  assert.equal(h.app.scene.links.length, 1, 'one free motor per object');
+  // A hinge dropped on it swaps it for a pinned hinge, and a motor on that hinge stays pinned.
+  h.ed.dropConnector('hinge', 300, 200);
+  l = h.app.scene.links[0];
+  assert.equal(h.app.scene.links.length, 1); assert.equal(l.motor, false); assert.equal(l.free, undefined);
+  h.ed.dropConnector('motor', 300, 200);
+  l = h.app.scene.links[0];
+  assert.equal(h.app.scene.links.length, 1); assert.equal(l.motor, true); assert.equal(l.free, undefined);
+  // The drag preview tells the two apart.
+  const g = setup();
+  g.ed.previewConnectorDrop('motor', 310, 205);
+  assert.equal(g.ed.preview().joint.free, true);
+  assert.equal(JSON.stringify(g.ed.preview().point), JSON.stringify({ x: 0, y: 0 }));
+});
