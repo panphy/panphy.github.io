@@ -72,6 +72,9 @@
     // bounce reflects an approach speed that is too large by g·h and every bounce gains height.
     // Scale each contact's restitution so it reflects the approach speed before that gravity.
     // Resting contacts, which approach only through gravity, then get no bounce at all.
+    // Where gravity slows the approach instead (a ball rising into a ceiling), the scale
+    // exceeds 1. It is capped at 2, which still covers approaches faster than 2·g·h (8 cm/s at
+    // Standard accuracy); slower ones bounce slightly less and cannot gain energy.
     world.on('pre-solve', (contact) => {
       contact.resetRestitution();
       const e = contact.getRestitution();
@@ -95,7 +98,7 @@
       const gb = B.isDynamic() ? B.getGravityScale() : 0;
       const vnAfter = vn + sim.h * ((gb - ga) * (g.x * n.x + g.y * n.y));
       if (vnAfter >= 0) return;
-      contact.setRestitution(Math.min(1, e * vn / vnAfter));
+      contact.setRestitution(Math.min(2, e * vn / vnAfter));
     });
     const ground = world.createBody();
     let floorFixture = null;
