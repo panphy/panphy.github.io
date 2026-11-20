@@ -707,6 +707,24 @@
     const L = S.LIMITS;
     const deg = 180 / Math.PI;
 
+    // Static μs holds an object still (and rolls a ball); dynamic μd slows a sliding one.
+    function frictionFields(b, param) {
+      return [
+        numField({ label: 'Static friction \\(\\mu_\\mathrm{s}\\)', plain: 'Static friction μs', unit: '', get: () => b().staticFriction ?? b().friction, set: param((x, v) => { x.staticFriction = v; }), min: L.friction[0], max: L.friction[1], slider: [0, 1.5], step: 0.01, help: 'Holds the object still until the pull exceeds μs N; a pair of surfaces uses the geometric mean of their values.' }),
+        numField({ label: 'Dynamic friction \\(\\mu_\\mathrm{d}\\)', plain: 'Dynamic friction μd', unit: '', get: () => b().friction, set: param((x, v) => { x.friction = v; }), min: L.friction[0], max: L.friction[1], slider: [0, 1.5], step: 0.01, help: 'Slows the object while it slides. Static friction is never taken below it.' })
+      ];
+    }
+    const RESTITUTION_HELP = '1 is perfectly bouncy, 0 does not bounce. Two surfaces bounce with the product of their restitutions.';
+    // A ball stands for a disk, a solid sphere or a hollow sphere: I = k m r².
+    const INERTIA_KINDS = ['disk', 'solid', 'hollow'];
+    function inertiaField(b, param) {
+      return choiceField('Moment of inertia', [
+        { v: 0, label: 'Disk', title: 'Disk: I = ½mr²' },
+        { v: 1, label: 'Solid', title: 'Solid sphere: I = ⅖mr²' },
+        { v: 2, label: 'Hollow', title: 'Hollow sphere: I = ⅔mr²' }
+      ], () => Math.max(0, INERTIA_KINDS.indexOf(b().inertia)), (i) => param((x) => { x.inertia = INERTIA_KINDS[i]; })(null, null));
+    }
+
     function bodyInspector(body, body2) {
       const b = () => S.bodyById(app.scene, body.id) || body;
       const param = (fn) => (v, key) => app.editParam(() => fn(b(), v), key);
@@ -716,8 +734,9 @@
       const main = card('');
       main.appendChild(head(kindLabel, b().name, bodyArt(b()), (v) => app.editParam(() => { b().name = v; }, null, true)));
       main.appendChild(numField({ label: 'Mass \\(m\\)', plain: 'Mass m', unit: 'kg', get: () => b().mass, set: param((x, v) => { x.mass = v; }), min: L.mass[0], max: L.mass[1], slider: [0.01, 100], log: true, disabled: () => b().fixed }));
-      main.appendChild(numField({ label: 'Friction \\(\\mu\\)', plain: 'Friction μ', unit: '', get: () => b().friction, set: param((x, v) => { x.friction = v; }), min: L.friction[0], max: L.friction[1], slider: [0, 1.5], step: 0.01 }));
-      main.appendChild(numField({ label: 'Restitution \\(e\\)', plain: 'Restitution e', unit: '', get: () => b().restitution, set: param((x, v) => { x.restitution = v; }), min: 0, max: 1, slider: [0, 1], step: 0.01, help: '1 is perfectly bouncy, 0 does not bounce.' }));
+      frictionFields(b, param).forEach((el) => main.appendChild(el));
+      main.appendChild(numField({ label: 'Restitution \\(e\\)', plain: 'Restitution e', unit: '', get: () => b().restitution, set: param((x, v) => { x.restitution = v; }), min: 0, max: 1, slider: [0, 1], step: 0.01, help: RESTITUTION_HELP }));
+      if (b().kind === 'ball' && !b().fixed) main.appendChild(inertiaField(b, param));
       main.appendChild(toggleField('Fixed in place', () => b().fixed, (v) => app.edit(() => { b().fixed = v; if (v && b().color !== 'slate') b().color = 'slate'; else if (!v && b().color === 'slate') b().color = S.COLOR_CYCLE[0]; })));
       if (!b().fixed) main.appendChild(toggleField('Lock rotation', () => b().lockRotation, (v) => app.edit(() => { b().lockRotation = v; }), 'The object slides without turning, like a cart.'));
       const sw = document.createElement('div');
@@ -1070,7 +1089,9 @@
       drag.appendChild(dragFields(w, true));
       const floor = section('Floor');
       floor.appendChild(toggleField('Floor at y = 0', () => w().floor, (v) => app.edit(() => { w().floor = v; })));
-      floor.appendChild(numField({ label: 'Friction \\(\\mu\\)', plain: 'Floor friction μ', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
+      floor.appendChild(numField({ label: 'Static friction \\(\\mu_\\mathrm{s}\\)', plain: 'Floor static friction μs', unit: '', get: () => w().floorStaticFriction ?? w().floorFriction, set: (v, key) => app.editParam(() => { w().floorStaticFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
+      floor.appendChild(numField({ label: 'Dynamic friction \\(\\mu_\\mathrm{d}\\)', plain: 'Floor dynamic friction μd', unit: '', get: () => w().floorFriction, set: (v, key) => app.editParam(() => { w().floorFriction = v; }, key), min: 0, max: 2, slider: [0, 1.5], step: 0.01, disabled: () => !w().floor }));
+      floor.appendChild(numField({ label: 'Restitution \\(e\\)', plain: 'Floor restitution e', unit: '', get: () => w().floorRestitution ?? 1, set: (v, key) => app.editParam(() => { w().floorRestitution = v; }, key), min: 0, max: 1, slider: [0, 1], step: 0.01, disabled: () => !w().floor, help: RESTITUTION_HELP }));
       const accuracy = section('Accuracy');
       const current = S.worldAccuracy(app.scene);
       const name = 'r' + Math.random().toString(36).slice(2, 9);
@@ -1148,7 +1169,7 @@
         if (!b()) return items;
         const param = (fn) => (v, key) => app.editParam(() => fn(b(), v), key);
         items.push(numField({ label: 'Mass \\(m\\)', plain: 'Mass m', unit: 'kg', get: () => b().mass, set: param((x, v) => { x.mass = v; }), min: L.mass[0], max: L.mass[1], slider: [0.01, 100], log: true, disabled: () => b().fixed }));
-        items.push(numField({ label: 'Friction \\(\\mu\\)', plain: 'Friction μ', unit: '', get: () => b().friction, set: param((x, v) => { x.friction = v; }), min: L.friction[0], max: L.friction[1], slider: [0, 1.5], step: 0.01 }));
+        frictionFields(b, param).forEach((el) => items.push(el));
         items.push(numField({ label: 'Restitution \\(e\\)', plain: 'Restitution e', unit: '', get: () => b().restitution, set: param((x, v) => { x.restitution = v; }), min: 0, max: 1, slider: [0, 1], step: 0.01 }));
         items.push(toggleField('Fixed in place', () => b().fixed, (v) => app.edit(() => { b().fixed = v; if (v && b().color !== 'slate') b().color = 'slate'; else if (!v && b().color === 'slate') b().color = S.COLOR_CYCLE[0]; })));
         return items;

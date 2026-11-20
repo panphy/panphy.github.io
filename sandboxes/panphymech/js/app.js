@@ -145,7 +145,7 @@
   app.canRedo = () => redoStack.length > 0;
 
   // Fields that can change while time runs, without starting again from t = 0.
-  const PARAM_KEYS = { body: ['mass', 'friction', 'restitution', 'drag', 'dragModel', 'linearDragSource', 'linearDrag', 'viscosity', 'color', 'name'], link: ['k', 'rest', 'damping', 'speed', 'dir', 'torque', 'motor', 'name', 'length'], world: ['gravity', 'floorFriction', 'gpeZero', 'viscosity', 'dragModel', 'linearDragSource', 'linearDrag', 'drag', 'accuracy'] };
+  const PARAM_KEYS = { body: ['mass', 'friction', 'staticFriction', 'restitution', 'inertia', 'drag', 'dragModel', 'linearDragSource', 'linearDrag', 'viscosity', 'color', 'name'], link: ['k', 'rest', 'damping', 'speed', 'dir', 'torque', 'motor', 'name', 'length'], world: ['gravity', 'floorFriction', 'floorStaticFriction', 'floorRestitution', 'gpeZero', 'viscosity', 'dragModel', 'linearDragSource', 'linearDrag', 'drag', 'accuracy'] };
   function setupSignature(data) {
     const strip = (o, keys) => { const c = { ...o }; keys.forEach((k) => delete c[k]); return c; };
     // A solid rod or rope is rebuilt from bodies, so its length and mass belong to the setup.
@@ -402,7 +402,7 @@
     app.scene.links = keep;
   }
 
-  const SHAPE_FIELDS = ['w', 'h', 'r', 'sides', 'flip', 'paths'];
+  const SHAPE_FIELDS = ['w', 'h', 'r', 'sides', 'flip', 'paths', 'inertia'];
   function asCustom(b, placed) {
     SHAPE_FIELDS.forEach((k) => delete b[k]);
     return Object.assign(b, { kind: 'custom', x: placed.x, y: placed.y, angle: 0, paths: placed.paths });
