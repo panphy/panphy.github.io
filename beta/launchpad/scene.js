@@ -485,6 +485,16 @@ export class Scene {
       this.debris.set(this.shownStage, { holder });
       this.shownStage += 1;
     }
+    if (state.deployed && rocket.fairing.parent === rocket.root) {
+      // The payload, still in its fairing, leaves from where it sat on the current stage.
+      const base = rocket.stages[Math.min(state.stage, rocket.stages.length - 1)].base;
+      rocket.root.remove(rocket.fairing);
+      const holder = new THREE.Group();
+      rocket.fairing.position.y = -base;
+      holder.add(rocket.fairing);
+      this.debrisPivot.add(holder);
+      this.debris.set('payload', { holder });
+    }
   }
 
   updatePlumes(state, altitude) {

@@ -1,42 +1,45 @@
 // Launchpad: game flow, input and the flight display.
 import { Scene, loadTextures } from './scene.js';
 import { Flight, MAX_PHYSICS_WARP } from './flight.js';
-import { MISSIONS, SANDBOX } from './missions.js';
-import { ENGINES, PAYLOADS, MAX_STAGES, MAX_ENGINES, analyze, cloneDesign } from './rocket.js';
-import { R_EARTH, OMEGA, keplerStep, circularSpeed, pressureRatio } from './physics.js';
+import { CONTRACTS, rocketFits, judge } from './contracts.js';
+import { Guidance } from './guidance.js';
+import { FLEET, analyze, designFor } from './rocket.js';
+import { R_EARTH, OMEGA, SPACE_EDGE, keplerStep, circularSpeed, pressureRatio } from './physics.js';
 import { Sound } from './audio.js';
 
 const $ = (id) => document.getElementById(id);
-const SAVE_KEY = 'launchpad-save';
+const SAVE_KEY = 'launchpad-company';
 const DEG = 180 / Math.PI;
-const ALL_MISSIONS = [...MISSIONS, SANDBOX];
-const DV_NEED = { space: 2000, orbit: 9300, circular: 9500, sandbox: 9300 };
-const DV_NOTE = {
-  space: 'Reaching 100 km takes about 2,000 m/s.',
-  orbit: 'Reaching low orbit takes about 9,300 m/s.',
-  circular: 'Reaching a 400 km orbit takes about 9,500 m/s.',
-  sandbox: 'Reaching low orbit takes about 9,300 m/s.'
+const START_FUNDS = 10;
+const FREE_FLIGHT = {
+  id: 'free', free: true, customer: 'No customer, no bill', fee: 0,
+  payload: { name: 'Free flight', mass: 1000, diameter: 1.6, length: 2.6 },
+  target: null
 };
 
 // ---------- saved progress ----------
 
+// best holds each delivered contract's best accuracy; owned the rockets licensed so far.
 function loadSave() {
+  const fresh = { funds: START_FUNDS, best: {}, owned: FLEET.filter((rocket) => rocket.price === 0).map((rocket) => rocket.id), sound: true };
   try {
-    const save = JSON.parse(localStorage.getItem(SAVE_KEY)) || {};
-    return { done: save.done || [], designs: save.designs || {}, sound: save.sound !== false };
-  } catch { return { done: [], designs: {}, sound: true }; }
+    const save = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!save || typeof save.funds !== 'number') return fresh;
+    return { funds: save.funds, best: save.best || {}, owned: [...new Set([...fresh.owned, ...(save.owned || [])])], sound: save.sound !== false };
+  } catch { return fresh; }
 }
 const save = loadSave();
 function storeSave() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* play on without saving */ }
 }
+const deliveredCount = () => Object.keys(save.best).length;
 
 // ---------- formatting ----------
 
 const number = (value, digits = 0) => value.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).replace('-', '−');
 function distance(meters) {
   if (!Number.isFinite(meters)) return '∞';
-  return Math.abs(meters) < 10000 ? `${number(Math.round(meters))} m` : `${number(meters / 1000, 1)} km`;
+  return Math.abs(meters) < 10000 ? `${number(Math.round(meters) || 0)} m` : `${number(meters / 1000, 1)} km`;
 }
 function duration(seconds) {
   if (!Number.isFinite(seconds)) return '';
@@ -46,62 +49,84 @@ function duration(seconds) {
 }
 const tonnes = (kg) => (kg >= 1000 ? `${number(kg / 1000, kg < 10000 ? 2 : 1)} t` : `${number(Math.round(kg))} kg`);
 
+function money(millions) {
+  const value = Math.round(millions * 10) / 10;
+  return `${value < 0 ? '−' : ''}$${number(Math.abs(value), Number.isInteger(value) ? 0 : 1)}M`;
+}
+const kmText = (meters) => `${number(Math.round(meters / 1000))} km`;
+function targetText(target) {
+  if (!target) return 'Fly anywhere';
+  if (target.kind === 'space') return 'Release above 100 km';
+  if (target.ap === target.pe) return `${kmText(target.ap)} circular orbit, ±${kmText(target.apTol)}`;
+  return `${kmText(target.pe)} × ${kmText(target.ap)} transfer orbit, ±${kmText(target.apTol)} at the top`;
+}
+
 // ---------- state ----------
 
 const sound = new Sound();
 sound.enabled = save.sound;
 let scene = null;
-let mode = 'loading';        // 'menu' | 'build' | 'flight'
-let mission = null;
-let design = null;
+let mode = 'loading';        // 'menu' | 'prep' | 'flight'
+let contract = null;
+let rocket = null;           // the fleet rocket chosen for this contract
 let flight = null;
+let guidance = null;
+let advice = null;           // the guidance's latest word
 let power = 0;
 let paused = false;
-let missionDone = false;
 let wreck = null;            // { time } once the rocket is lost
 const keys = new Set();
 const touchPitch = { west: false, east: false };
 const demo = { t: 0, x: 0, y: 0, vx: 0, vy: 0 };
 
 function updateShift() {
-  if (scene) scene.setShift(mode === 'build' && innerWidth > 760 ? 198 : 0);
+  if (scene) scene.setShift(mode === 'prep' && innerWidth > 760 ? 198 : 0);
 }
 
 function setMode(next) {
   mode = next;
   document.body.dataset.mode = next;
   $('menu').hidden = next !== 'menu';
-  $('builder').hidden = next !== 'build';
+  $('prep').hidden = next !== 'prep';
   $('hud').hidden = next !== 'flight';
   $('markers').hidden = next !== 'flight';
   updateShift();
   hideOverlay();
 }
 
-// ---------- mission select ----------
+// ---------- contracts ----------
 
 function showMenu() {
   flight = null;
-  mission = null;
+  contract = null;
   setMode('menu');
-  const list = $('mission-list');
+  $('funds').textContent = money(save.funds);
+  $('funds').classList.toggle('debt', save.funds < 0);
+  const count = deliveredCount();
+  $('delivered').textContent = `${count} of ${CONTRACTS.length}`;
+  const list = $('contract-list');
   list.replaceChildren();
-  ALL_MISSIONS.forEach((item, index) => {
+  for (const item of [...CONTRACTS, FREE_FLIGHT]) {
     const li = document.createElement('li');
     const button = document.createElement('button');
     button.type = 'button';
-    const done = save.done.includes(item.id);
-    button.className = `mission-card${done ? ' done' : ''}`;
-    const order = item === SANDBOX ? 'Open' : `Mission ${index + 1}`;
-    button.innerHTML = `<span class="order"></span><span class="name"></span><span class="what"></span><span class="state"></span>`;
-    button.children[0].textContent = order;
-    button.children[1].textContent = item.title;
-    button.children[2].textContent = item.goal;
-    button.children[3].textContent = done ? 'Complete ✓' : 'Start →';
-    button.addEventListener('click', () => { sound.start(); sound.click(); showBuilder(item); });
+    const best = save.best[item.id];
+    const locked = !item.free && item.rank > count;
+    button.className = `contract-card${best !== undefined ? ' done' : ''}`;
+    button.disabled = locked;
+    button.innerHTML = '<span class="order"></span><span class="name"></span><span class="what"></span><span class="state"><b class="num"></b><i></i></span>';
+    button.children[0].textContent = item.customer;
+    button.children[1].textContent = item.payload.name;
+    button.children[2].textContent = targetText(item.target);
+    const [fee, status] = button.children[3].children;
+    fee.textContent = item.free ? '' : money(item.fee);
+    if (locked) status.textContent = `After ${item.rank - count} more ${item.rank - count === 1 ? 'delivery' : 'deliveries'}`;
+    else if (best !== undefined) status.textContent = `Delivered ✓ ${Math.round(best * 100)}%`;
+    else status.textContent = item.free ? 'Fly →' : 'Open →';
+    button.addEventListener('click', () => { sound.start(); sound.click(); showPrep(item); });
     li.append(button);
     list.append(li);
-  });
+  }
   // A quiet orbit to watch behind the menu.
   const radius = R_EARTH + 420000;
   const angle = 0.2;
@@ -119,125 +144,90 @@ function showMenu() {
   scene.autoRotate = 0;
 }
 
-// ---------- builder ----------
+// ---------- launch preparation ----------
 
-function showBuilder(item) {
-  mission = item;
-  design = cloneDesign(save.designs[item.id] || item.design);
-  if (item.payload) design.payload = item.payload;
-  setMode('build');
-  $('builder-title').textContent = item.title;
-  $('builder-goal').textContent = item.goal;
-  $('builder-brief').textContent = item.brief;
-  $('builder-brief').hidden = !item.brief;
-  $('dv-note').textContent = DV_NOTE[item.id];
-  const select = $('payload-select');
-  select.replaceChildren(...Object.entries(PAYLOADS).map(([id, payload]) => new Option(payload.name, id)));
-  select.disabled = Boolean(item.payload);
+const fits = (item) => (contract.free ? analyze(designFor(item, contract.payload)).canLiftOff : rocketFits(item, contract));
+const owned = (item) => contract.free || save.owned.includes(item.id);
+
+function showPrep(item) {
+  contract = item;
+  // The cheapest rocket that can do the job; one still to be licensed is shown but cannot fly.
+  const able = FLEET.filter(fits);
+  rocket = able.find(owned) || able[0];
+  setMode('prep');
+  $('prep-title').textContent = item.payload.name;
+  $('prep-customer').textContent = item.customer;
+  $('prep-goal').textContent = targetText(item.target);
+  $('prep-mass').textContent = tonnes(item.payload.mass);
+  $('prep-fee').textContent = item.free ? '—' : money(item.fee);
   scene.setMap(false);
   scene.view.blend = 0;
   scene.view.yaw = 0.6;
   scene.setTargetOrbit(0);
-  renderBuilder(true);
+  renderPrep(true);
 }
 
-function propStep(prop) {
-  if (prop < 5000) return 250;
-  if (prop < 20000) return 1000;
-  if (prop < 100000) return 5000;
-  return 10000;
-}
-
-function renderBuilder(reframe) {
-  const info = analyze(design);
-  $('payload-select').value = design.payload;
-  $('payload-mass').textContent = tonnes(info.payload.mass);
-  const list = $('stage-list');
+function renderPrep(reframe) {
+  $('prep-funds').textContent = money(save.funds);
+  $('prep-funds').classList.toggle('debt', save.funds < 0);
+  const list = $('rocket-list');
   list.replaceChildren();
-  // Listed from the top of the rocket down, as it stands.
-  for (let i = design.stages.length - 1; i >= 0; i -= 1) {
-    const stage = design.stages[i];
-    const facts = info.stages[i];
+  for (const item of FLEET) {
     const card = document.createElement('div');
-    card.className = 'stage-card';
-    card.innerHTML = `
-      <header><strong>Stage ${i + 1}</strong><button type="button" class="link-button" data-act="remove">Remove</button></header>
-      <label class="row"><span>Engine</span><select data-act="engine" aria-label="Stage ${i + 1} engine"></select></label>
-      <div class="row"><span>Engines</span><div class="stepper">
-        <button type="button" data-act="count-" aria-label="Fewer engines">−</button><output></output><button type="button" data-act="count+" aria-label="More engines">+</button></div></div>
-      <div class="row"><span>Propellant</span><div class="stepper">
-        <button type="button" data-act="prop-" aria-label="Less propellant">−</button>
-        <span class="unit"><input type="number" inputmode="decimal" min="0.25" max="600" step="0.25" aria-label="Stage ${i + 1} propellant in tonnes"></span>
-        <button type="button" data-act="prop+" aria-label="More propellant">+</button></div></div>
-      <p class="stage-facts"><span>Δv <b></b></span><span class="twr">Thrust ÷ weight <b></b></span><span>Burn <b></b></span></p>`;
-    const select = card.querySelector('select');
-    select.replaceChildren(...Object.entries(ENGINES).map(([id, engine]) => new Option(`${engine.name}: ${engine.role}, ${number(engine.thrust / 1000)} kN`, id)));
-    select.value = stage.engine;
-    card.querySelector('output').textContent = stage.count;
-    const input = card.querySelector('input');
-    input.value = stage.prop / 1000;
-    const [dv, twr, burn] = card.querySelectorAll('.stage-facts b');
-    dv.textContent = `${number(Math.round(facts.dv))} m/s`;
-    twr.textContent = number(facts.twr, 2);
-    burn.textContent = `${number(Math.round(facts.burnTime))} s`;
-    card.querySelector('.twr').classList.toggle('bad', i === 0 && facts.twr <= 1);
-    card.querySelector('[data-act="remove"]').hidden = design.stages.length < 2;
-    card.addEventListener('click', (event) => {
-      const act = event.target.closest('[data-act]')?.dataset.act;
-      if (!act || act === 'engine') return;
-      if (act === 'remove') design.stages.splice(i, 1);
-      if (act === 'count-') stage.count = Math.max(1, stage.count - 1);
-      if (act === 'count+') stage.count = Math.min(MAX_ENGINES, stage.count + 1);
-      if (act === 'prop-') stage.prop = Math.max(250, stage.prop - propStep(stage.prop - 1));
-      if (act === 'prop+') stage.prop = Math.min(600000, stage.prop + propStep(stage.prop));
-      sound.click();
-      designChanged(act === 'remove');
-    });
-    select.addEventListener('change', () => { stage.engine = select.value; designChanged(false); });
-    input.addEventListener('change', () => {
-      const value = Number(input.value);
-      if (Number.isFinite(value) && value > 0) stage.prop = Math.min(600000, Math.max(250, value * 1000));
-      designChanged(false);
-    });
+    const able = fits(item), mine = owned(item);
+    card.className = `rocket-card${item === rocket ? ' picked' : ''}`;
+    const pick = document.createElement('button');
+    pick.type = 'button';
+    pick.className = 'rocket-pick';
+    pick.disabled = !able;
+    pick.setAttribute('aria-pressed', String(item === rocket));
+    pick.innerHTML = '<strong></strong><span></span><b class="num"></b>';
+    pick.children[0].textContent = item.name;
+    pick.children[1].textContent = able ? item.role : 'Too small for this payload and orbit';
+    pick.children[2].textContent = contract.free ? '' : `${money(item.cost)} a launch`;
+    pick.addEventListener('click', () => { rocket = item; sound.click(); renderPrep(true); });
+    card.append(pick);
+    if (!mine) {
+      const buy = document.createElement('button');
+      buy.type = 'button';
+      buy.className = 'rocket-buy';
+      buy.textContent = `Buy license ${money(item.price)}`;
+      buy.disabled = save.funds < item.price;
+      buy.addEventListener('click', () => {
+        save.funds -= item.price;
+        save.owned.push(item.id);
+        storeSave();
+        if (able) rocket = item;
+        sound.success();
+        renderPrep(true);
+      });
+      card.append(buy);
+    }
     list.append(card);
   }
-  $('add-stage').hidden = design.stages.length >= MAX_STAGES;
+  const info = analyze(designFor(rocket, contract.payload));
   $('total-mass').textContent = tonnes(info.liftoffMass);
-  $('total-dv').textContent = `${number(Math.round(info.totalDv))} m/s`;
-  const need = DV_NEED[mission.id];
-  $('dv-fill').style.width = `${Math.min(100, info.totalDv / 12000 * 100)}%`;
-  $('dv-fill').classList.toggle('short', info.totalDv < need);
-  $('dv-need').style.left = `${need / 12000 * 100}%`;
-  $('builder-warning').textContent = info.canLiftOff ? '' : 'Too heavy to lift off: stage 1 needs more thrust than weight.';
-  $('launch-button').disabled = !info.canLiftOff;
-  flight = new Flight(design);
+  $('total-profit').textContent = contract.free ? '—' : money(contract.fee - rocket.cost);
+  $('launch-button').disabled = !owned(rocket);
   scene.setRocket(info);
   $('total-height').textContent = `${number(scene.rocket.height, 1)} m`;
   if (reframe) scene.frameRocket();
   scene.autoRotate = 0.07;
+  // Shown standing on the pad behind the panel.
+  flight = new Flight(designFor(rocket, contract.payload));
 }
 
-function designChanged(reframe) {
-  save.designs[mission.id] = cloneDesign(design);
-  storeSave();
-  renderBuilder(reframe);
-}
-
-$('payload-select').addEventListener('change', (event) => { design.payload = event.target.value; designChanged(true); });
-$('add-stage').addEventListener('click', () => {
-  const below = design.stages[design.stages.length - 1];
-  design.stages.push({ engine: below.prop > 20000 ? 'halo' : 'wisp', count: 1, prop: Math.max(500, Math.round(below.prop / 4000) * 1000) });
-  designChanged(true);
-});
-$('builder-reset').addEventListener('click', () => { design = cloneDesign(mission.design); designChanged(true); });
-$('builder-back').addEventListener('click', showMenu);
+$('prep-back').addEventListener('click', showMenu);
 $('launch-button').addEventListener('click', startFlight);
 
 // ---------- flight ----------
 
 function startFlight() {
   sound.start();
-  flight = new Flight(design);
+  flight = new Flight(designFor(rocket, contract.payload));
+  guidance = contract.target ? new Guidance(contract.target) : null;
+  advice = null;
+  if (guidance) flight.hold = 'guide';
   setMode('flight');
   scene.setRocket(flight.info);
   scene.frameRocket();
@@ -245,14 +235,15 @@ function startFlight() {
   scene.view.blend = 0;
   scene.view.yaw = 0.35;
   scene.autoRotate = 0;
-  scene.setTargetOrbit(mission.target ? R_EARTH + mission.target : 0);
+  scene.setTargetOrbit(contract.target && contract.target.ap ? R_EARTH + contract.target.ap : 0);
   power = 0;
   paused = false;
-  missionDone = false;
   wreck = null;
   keys.clear();
-  $('hud-title').textContent = mission.title;
-  $('hud-goal').textContent = mission.goal;
+  $('hud-title').textContent = contract.payload.name;
+  $('hud-goal').textContent = targetText(contract.target);
+  $('hud-cue').textContent = '';
+  $('hold-guide').hidden = !guidance;
   document.querySelector('.hud-mission').classList.remove('done');
   $('throttle').value = 100;
   $('map-button').setAttribute('aria-pressed', 'false');
@@ -274,7 +265,7 @@ function toggleMap() {
 }
 
 function setHold(kind) {
-  if (!flight || flight.over) return;
+  if (!flight || flight.over || (kind === 'guide' && !guidance)) return;
   flight.hold = flight.hold === kind ? 'off' : kind;
 }
 
@@ -289,12 +280,23 @@ function stageAction() {
   flight.activateStage();
 }
 
+function deployAction() {
+  if (!flight || flight.over || paused || flight.deployed || flight.phase !== 'flying') return;
+  if (flight.altitude < SPACE_EDGE) { showAlert('The payload can only be released above 100 km'); return; }
+  flight.deployPayload();
+}
+
 function handleEvents() {
   for (const event of flight.events.splice(0)) {
-    if (event.type === 'liftoff') { scene.kick(0.6); showAlert('Liftoff', 'good', 2); }
+    if (event.type === 'liftoff') {
+      scene.kick(0.6);
+      showAlert('Liftoff', 'good', 2);
+      if (!contract.free) { save.funds -= rocket.cost; storeSave(); }
+    }
     if (event.type === 'stage') { sound.thump(); scene.kick(0.5); hideAlert(); }
     if (event.type === 'burnout') showAlert(event.last ? 'Out of propellant' : 'Stage empty: press Space to drop it', event.last ? 'danger' : '', 6);
     if (event.type === 'space') showAlert('You are in space', 'good');
+    if (event.type === 'deploy') { sound.thump(); settle(); }
     if (event.type === 'warp-limited') showAlert('Faster time needs engines off, above 140 km');
     if (event.type === 'warp-stop' && event.reason === 'atmosphere') showAlert('Entering the atmosphere');
     if (event.type === 'crashed' || event.type === 'breakup' || event.type === 'burnup') {
@@ -308,21 +310,40 @@ function handleEvents() {
   }
 }
 
-function completeMission() {
-  missionDone = true;
-  if (!save.done.includes(mission.id)) { save.done.push(mission.id); storeSave(); }
-  document.querySelector('.hud-mission').classList.add('done');
-  sound.success();
-  const tel = flight.telemetry();
-  const next = MISSIONS[MISSIONS.indexOf(mission) + 1] || SANDBOX;
+// The payload is away: pay for where it was left.
+function settle() {
+  if (contract.free) { showAlert('Payload released', 'good'); return; }
+  const verdict = judge(contract, flight.deployed);
+  const count = deliveredCount();
+  save.funds += verdict.pay + verdict.bonus;
+  if (verdict.grade === 'delivered') {
+    save.best[contract.id] = Math.max(save.best[contract.id] || 0, verdict.accuracy);
+    document.querySelector('.hud-mission').classList.add('done');
+    sound.success();
+  }
+  storeSave();
+  const fresh = deliveredCount() > count && CONTRACTS.some((item) => item.rank === count + 1);
+  const words = {
+    delivered: `${contract.customer} has its payload where it asked.${fresh ? ' A new contract is open.' : ''}`,
+    off: 'The orbit is outside the agreed limits. The customer pays half and will spend its own propellant to fix it.',
+    stranded: 'The orbit is far from the one agreed. The customer pays a fifth of the fee.',
+    lost: flight.deployed.bound ? 'Released too low: the payload will fall back into the atmosphere.' : 'Released on a path that leaves the Earth: the payload is gone.'
+  };
+  if (contract.target.kind === 'space') words.lost = 'Released below 100 km.';
   showOverlay({
     soft: true,
-    title: 'Mission complete',
-    text: mission.id === 'space' ? 'You crossed the edge of space. Staying up there is the next problem.' : 'You are in orbit: falling around the Earth, and missing it.',
-    stats: [['Time', duration(flight.t - flight.liftoffTime)], ['Altitude', distance(tel.altitude)], ['Δv left', `${number(Math.round(tel.dv))} m/s`]],
+    title: { delivered: 'Payload delivered', off: 'Off target', stranded: 'Wrong orbit', lost: 'Payload lost' }[verdict.grade],
+    text: words[verdict.grade],
+    stats: [
+      ['Fee paid', money(verdict.pay)],
+      ['Accuracy bonus', money(verdict.bonus)],
+      ['Launch cost', money(-rocket.cost)],
+      ['Profit', money(verdict.pay + verdict.bonus - rocket.cost)],
+      ['Funds', money(save.funds)]
+    ],
     actions: [
       { label: 'Keep flying', run: hideOverlay },
-      { label: `Next: ${next.title}`, primary: true, run: () => showBuilder(next) }
+      { label: 'Contracts', primary: true, run: showMenu }
     ]
   });
 }
@@ -333,12 +354,14 @@ function showWreck() {
     breakup: 'The airflow tore the rocket apart. Low down, keep the nose along your path.',
     burnup: 'Burned up coming back into the atmosphere.'
   };
+  const cargoLost = !flight.deployed && !contract.free;
   showOverlay({
-    title: missionDone ? 'Flight over' : 'Rocket lost',
+    title: cargoLost ? 'Rocket and payload lost' : 'Flight over',
     text: reasons[wreck.type],
+    stats: cargoLost ? [['Launch cost', money(-rocket.cost)], ['Funds', money(save.funds)]] : [],
     actions: [
-      { label: 'Missions', run: showMenu },
-      { label: 'Change the rocket', run: () => showBuilder(mission) },
+      { label: 'Contracts', run: showMenu },
+      { label: 'Change the rocket', run: () => showPrep(contract) },
       { label: 'Fly again', primary: true, run: startFlight }
     ]
   });
@@ -351,8 +374,8 @@ function showPause() {
     title: 'Paused',
     text: '',
     actions: [
-      { label: 'Missions', run: showMenu },
-      { label: 'Change the rocket', run: () => showBuilder(mission) },
+      { label: 'Contracts', run: showMenu },
+      { label: 'Change the rocket', run: () => showPrep(contract) },
       { label: 'Restart', run: startFlight },
       { label: 'Resume', primary: true, run: () => { paused = false; hideOverlay(); } }
     ]
@@ -387,6 +410,19 @@ function showOverlay({ title, text, stats = [], actions, soft = false }) {
 }
 function hideOverlay() { $('overlay').hidden = true; }
 
+// What the guidance says now, and time warp eased down so a burn is not flown past.
+function consultGuidance(tel) {
+  if (!guidance) return;
+  advice = guidance.update(flight, tel);
+  flight.guideAngle = advice.heading;
+  if (flight.hold === 'guide' && advice.heading === null) flight.hold = 'off';
+  if (advice.burnIn !== null) {
+    while (flight.warp > MAX_PHYSICS_WARP && advice.burnIn < 20 + flight.warp * 0.4) flight.warpIndex -= 1;
+  }
+  const cue = flight.over ? '' : advice.cue;
+  if ($('hud-cue').textContent !== cue) $('hud-cue').textContent = cue;
+}
+
 // ---------- input ----------
 
 window.addEventListener('keydown', (event) => {
@@ -400,6 +436,8 @@ window.addEventListener('keydown', (event) => {
   if (key === 'm') toggleMap();
   if (key === 'z' && flight) flight.throttle = 1;
   if (key === 'x' && flight) flight.throttle = 0;
+  if (key === 'p') deployAction();
+  if (key === 'g') setHold('guide');
   if (key === 'q') setHold('prograde');
   if (key === 'e') setHold('retrograde');
   if (key === '.' || key === '>') changeWarp(1);
@@ -419,6 +457,8 @@ function holdButton(id, side) {
 holdButton('pitch-west', 'west');
 holdButton('pitch-east', 'east');
 $('stage-button').addEventListener('click', stageAction);
+$('deploy-button').addEventListener('click', deployAction);
+$('hold-guide').addEventListener('click', () => setHold('guide'));
 $('map-button').addEventListener('click', toggleMap);
 $('menu-button').addEventListener('click', showPause);
 $('hold-prograde').addEventListener('click', () => setHold('prograde'));
@@ -488,6 +528,9 @@ function drawHud(tel, dt) {
   $('dial-prograde').setAttribute('transform', `rotate(${prograde.toFixed(1)})`);
   $('dial-retrograde').setAttribute('transform', `rotate(${(prograde + 180).toFixed(1)})`);
   $('dial-prograde').style.display = $('dial-retrograde').style.display = moving ? '' : 'none';
+  const guide = advice && advice.heading !== null && !flight.over ? (advice.heading - flight.angle) * DEG : null;
+  $('dial-guide').style.display = guide === null ? 'none' : '';
+  if (guide !== null) $('dial-guide').setAttribute('transform', `rotate(${guide.toFixed(1)})`);
   $('fuel-fill').style.transform = `scaleX(${tel.propFraction.toFixed(4)})`;
   if (document.activeElement !== $('throttle')) $('throttle').value = Math.round(flight.throttle * 100);
 
@@ -500,6 +543,9 @@ function drawHud(tel, dt) {
   $('r-speed').textContent = `${number(Math.round(surface ? tel.surfaceSpeed : tel.orbitalSpeed))} m/s`;
   $('r-ap').textContent = tel.orbit.bound ? distance(tel.apoapsis) : 'Escape';
   $('r-pe').textContent = distance(tel.periapsis);
+  const target = contract.target && contract.target.ap ? contract.target : null;
+  $('r-ap').classList.toggle('on', Boolean(target) && tel.orbit.bound && Math.abs(tel.apoapsis - target.ap) <= target.apTol);
+  $('r-pe').classList.toggle('on', Boolean(target) && Math.abs(tel.periapsis - target.pe) <= target.peTol);
   const flying = flight.phase === 'flying';
   $('r-ap-time').textContent = flying && tel.orbit.bound && tel.apoapsis > tel.altitude + 1 ? `in ${duration(tel.toAp)}` : '';
   $('r-pe-time').textContent = flying && tel.periapsis > 0 ? `in ${duration(tel.toPe)}` : '';
@@ -519,10 +565,15 @@ function drawHud(tel, dt) {
   $('stage-button-text').textContent = flight.phase === 'pad' ? 'Launch' : 'Drop stage';
   $('stage-button').disabled = !canStage;
   $('stage-button').classList.toggle('pulse', flight.phase === 'pad' || (empty && canStage));
+  const ready = Boolean(advice && advice.ready) && !flight.thrusting();
+  $('deploy-button').disabled = flight.phase !== 'flying' || Boolean(flight.deployed);
+  $('deploy-button').classList.toggle('primary', ready);
+  $('deploy-button').classList.toggle('pulse', ready);
   const launched = flight.liftoffTime !== null;
   $('hud-time').textContent = launched ? `T+ ${duration(flight.t - flight.liftoffTime)}` : 'T− 00:00';
   $('warp-value').textContent = `${number(flight.warp)}×`;
   $('warp-value').classList.toggle('fast', flight.warp > MAX_PHYSICS_WARP);
+  $('hold-guide').setAttribute('aria-pressed', String(flight.hold === 'guide'));
   $('hold-prograde').setAttribute('aria-pressed', String(flight.hold === 'prograde'));
   $('hold-retrograde').setAttribute('aria-pressed', String(flight.hold === 'retrograde'));
 
@@ -554,6 +605,7 @@ function update(dt) {
     sound.update(0, 0, 0, 1e6);
   } else if (flight) {
     if (mode === 'flight' && !paused && !flight.over) {
+      consultGuidance(flight.telemetry());
       readInput(dt);
       const before = flight.t;
       flight.advance(dt);
@@ -566,7 +618,6 @@ function update(dt) {
     const air = pressureRatio(tel.altitude);
     if (mode === 'flight') {
       if (power > 0.01 && !paused) scene.kick(0.012 * power * (0.3 + air) * Math.cbrt(flight.info.liftoffMass / 1000));
-      if (!missionDone && !flight.over && mission.done(flight, tel)) completeMission();
       if (wreck) {
         wreck.time += dt;
         if (wreck.time > 1.6 && $('overlay').hidden) showWreck();
@@ -580,7 +631,7 @@ function update(dt) {
     state = {
       t: flight.t, x: flight.x, y: flight.y, vx: still ? -OMEGA * flight.y : flight.vx, vy: still ? OMEGA * flight.x : flight.vy, heading: flight.heading,
       stage: flight.stage, power: flight.over ? 0 : power, heat: flight.heat, debris: flight.debris,
-      orbit: tel.orbit, showRocket: !flight.over
+      orbit: tel.orbit, showRocket: !flight.over, deployed: Boolean(flight.deployed)
     };
     lastState = state;
     scene.render(state, dt, paused ? 0 : simDt);
@@ -616,7 +667,10 @@ start();
 window.launchpad = {
   get flight() { return flight; },
   get scene() { return scene; },
-  showBuilder, startFlight, MISSIONS,
+  get guidance() { return guidance; },
+  get advice() { return advice; },
+  get save() { return save; },
+  showMenu, showPrep, startFlight, CONTRACTS, FLEET,
   // Run n frames of the real game loop with a fixed time step.
   tick(n = 1, dt = 1 / 60) { for (let i = 0; i < n; i += 1) update(dt); },
   // Milliseconds to draw one frame, measured over n frames.
