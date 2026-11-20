@@ -196,13 +196,11 @@
           if (!drag || drag.id !== e.pointerId) return;
           if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
             drag.moved = true;
-            if (isBody) {
-              app.editor.arm(null);
-              drag.ghost = document.createElement('div');
-              drag.ghost.className = 'drag-ghost';
-              drag.ghost.innerHTML = partSvg(kind);
-              document.body.appendChild(drag.ghost);
-            }
+            if (isBody) app.editor.arm(null);
+            drag.ghost = document.createElement('div');
+            drag.ghost.className = 'drag-ghost';
+            drag.ghost.innerHTML = partSvg(kind);
+            document.body.appendChild(drag.ghost);
             ui.closePanels();
           }
           if (!drag.moved) return;

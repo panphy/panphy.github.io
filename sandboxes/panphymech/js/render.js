@@ -879,10 +879,40 @@
         ctx.globalAlpha = 1;
         return;
       }
+      // A connector dragged in from Parts, drawn as it will look once dropped (dashed and gray
+      // where it cannot go).
+      if (pv.drop && pv.link) {
+        const { kind, from, to, fixedA, fixedB } = pv.link;
+        const no = pv.ok ? null : r.colors.ink3;
+        if (kind === 'spring') drawSpring(from, to, no || r.colors.link, 1.7, !pv.ok);
+        else if (kind === 'rod') drawRod(from, to, no || r.colors.link, !pv.ok);
+        else drawRope(from, to, Math.hypot(to.x - from.x, to.y - from.y), no || r.colors.rope, !pv.ok);
+        if (fixedA) anchorMount(from, no || r.colors.link);
+        if (fixedB) anchorMount(to, no || r.colors.link);
+        ctx.globalAlpha = 1;
+        return;
+      }
+      if (pv.joint) {
+        drawHinge(pv.joint, pv.point, false);
+        ctx.globalAlpha = 1;
+        return;
+      }
+      if (pv.gearBall) {
+        // The teeth the ball will mesh with.
+        const b = pv.gearBall, pose = app.poseOf(b), n = S.ringTeeth(b, pv.ring);
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        gearRingPath(pose, S.gearRadius(n), n, ringAngle(b, pose, pv.ring));
+        ctx.strokeStyle = r.colors.accent;
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        return;
+      }
       if (pv.pulley) {
         // Placing a pulley: the wheel, then the rope to the first end, then over to the cursor.
         const { c, radius, from, to } = pv.pulley;
-        drawWheel(c, radius, r.colors.accent, true);
+        drawWheel(c, radius, pv.drop ? r.colors.ink2 : r.colors.accent, !pv.drop);
         if (to) {
           const pa = from || to;
           const g = S.pulleyGeometry(c, radius, pa, to, from ? S.pulleyWinding(c, pa, to) : 1);

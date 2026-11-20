@@ -36,12 +36,15 @@ test('every connector can be dropped directly without choosing a tool first', ()
   for (const type of ['spring', 'rod', 'rope', 'hinge', 'motor', 'weld']) {
     const h = setup();
     assert.equal(h.ed.dropConnector(type, 300, 200), true);
-    if (['spring', 'rod', 'rope'].includes(type)) {
-      assert.equal(h.ed.pending.a, h.body.id);
-      h.emit('pointerdown', { clientX: 400, pointerType: 'mouse' });
-      h.emit('pointerup', { clientX: 400, pointerType: 'mouse' });
-    }
+    assert.equal(h.ed.pending, null, 'one drop places the whole connector');
     assert.equal(h.app.scene.links.length, 1, type);
+    if (['spring', 'rod', 'rope'].includes(type)) {
+      // Hanging 1 m from the pointer: the top on the object, the bottom on the background.
+      const l = h.app.scene.links[0];
+      assert.equal(l.a, h.body.id); assert.equal(l.b, null);
+      assert.equal(JSON.stringify(l.lb), JSON.stringify({ x: 0, y: -1 }));
+      assert.equal(type === 'spring' ? l.rest : l.length, 1);
+    }
     assert.equal(h.ed.tool, 'select');
     assert.equal(h.app.scene.links[0].kind, type === 'motor' ? 'hinge' : type);
   }
@@ -71,36 +74,51 @@ test('a motor dropped on a hinge replaces it in place, and a hinge dropped on a 
 
 test('dropping outside the canvas preserves the active tool and pending endpoint', () => {
   const h = setup(); h.ed.setTool('rope');
-  h.ed.dropConnector('rope', 300, 200);
+  h.emit('pointerdown', { clientX: 300, pointerType: 'mouse' });
+  h.emit('pointerup', { clientX: 300, pointerType: 'mouse' });
   const pending = h.ed.pending;
+  assert.ok(pending);
   assert.equal(h.ed.dropConnector('spring', -1, 200), false);
   assert.equal(h.ed.tool, 'rope');
   assert.equal(h.ed.pending, pending);
   h.ed.cancel(); assert.equal(h.ed.pending, null);
 });
 
-test('library drag previews the exact snapped starting point without placing or selecting', () => {
+test('library drag previews each connector as it will be dropped, without placing or selecting', () => {
   for (const kind of ['spring', 'rod', 'rope', 'hinge', 'motor', 'weld']) {
     const h = setup();
     h.ed.previewConnectorDrop(kind, 305, 200);
     const preview = h.ed.preview();
-    assert.equal(preview.point.x, 0, 'marker snaps to the body center');
-    assert.equal(preview.point.y, 0);
-    assert.equal(preview.link, undefined, 'only the starting point is shown');
     assert.equal(h.app.selection, null);
     assert.equal(h.app.scene.links.length, 0);
     h.ed.dropConnector(kind, 305, 200);
-    const point = h.ed.pending ? h.ed.pending.world : S.endPoint(h.app.scene, h.app.scene.links[0].a, h.app.scene.links[0].la);
-    assert.equal(point.x, preview.point.x);
-    assert.equal(point.y, preview.point.y);
+    const l = h.app.scene.links[0];
+    const a = S.endPoint(h.app.scene, l.a, l.la, (b) => b);
+    if (['spring', 'rod', 'rope'].includes(kind)) {
+      assert.equal(preview.ok, true);
+      assert.equal(JSON.stringify(preview.link.from), JSON.stringify(a), 'the top end snaps to the body center');
+      assert.equal(JSON.stringify(preview.link.to), JSON.stringify(S.endPoint(h.app.scene, l.b, l.lb, (b) => b)));
+      assert.equal(preview.link.fixedB, true);
+    } else {
+      assert.equal(preview.joint.kind, kind === 'weld' ? 'weld' : 'hinge');
+      assert.equal(preview.joint.motor, kind === 'motor');
+      assert.equal(JSON.stringify(preview.point), JSON.stringify(a));
+    }
   }
+  // A whole connector with both ends on the background cannot be dropped.
+  const h = setup();
+  h.ed.previewConnectorDrop('spring', 500, 50);
+  assert.equal(h.ed.preview().ok, false);
+  // Off any object, a joint shows only where it cannot go.
+  h.ed.previewConnectorDrop('hinge', 500, 50);
+  assert.equal(h.ed.preview().ok, false); assert.equal(h.ed.preview().joint, undefined);
 });
 
 test('leaving the canvas hides the endpoint marker and cancellation restores the previous preview', () => {
   const h = setup();
   h.ed.arm('ball'); h.ed.cursorWorld = { x: 1, y: 1 };
   h.ed.previewConnectorDrop('spring', 300, 200);
-  assert.ok(h.ed.preview().point);
+  assert.ok(h.ed.preview().link);
   h.ed.previewConnectorDrop('spring', -1, 200);
   assert.equal(h.ed.preview(), null);
   h.ed.clearConnectorDropPreview();
@@ -385,4 +403,23 @@ test('with objects selected, dragging a connector attached to them moves the gro
   press([300, 50], [300, 30]);
   assert.equal(h.app.selection.id, other.id);
   assert.ok(Math.abs(S.bodyById(h.app.scene, h.body.id).y - 0.5) < 1e-9, 'the group stayed put');
+});
+
+test('with Select several on, dragging a selected object moves the selection; a click takes it out', () => {
+  const h = setup();
+  const toggled = [];
+  h.app.multiMode = true;
+  h.app.selection = { type: 'body', id: h.body.id };
+  h.app.isSelected = (type, id) => type === 'body' && id === h.body.id;
+  h.app.anchors = { ends: [], wheels: [] };
+  h.app.toggleInSelection = (id) => toggled.push(id);
+  h.emit('pointerdown', { clientX: 300, clientY: 200, pointerType: 'mouse' });
+  h.emit('pointermove', { clientX: 350, clientY: 150, pointerType: 'mouse' });
+  h.emit('pointerup', { clientX: 350, clientY: 150, pointerType: 'mouse' });
+  const body = S.bodyById(h.app.scene, h.body.id);
+  assert.ok(Math.abs(body.x - 0.5) < 1e-9 && Math.abs(body.y - 0.5) < 1e-9, 'the drag moved it');
+  assert.equal(toggled.length, 0, 'and kept it selected');
+  h.emit('pointerdown', { clientX: 350, clientY: 150, pointerType: 'mouse' });
+  h.emit('pointerup', { clientX: 350, clientY: 150, pointerType: 'mouse' });
+  assert.deepEqual(toggled, [h.body.id]);
 });
