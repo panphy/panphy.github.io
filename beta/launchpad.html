@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#05070c">
+  <title>Launchpad: Build a Rocket and Reach Orbit — PanPhy Labs</title>
+  <meta name="description" content="Build a staged rocket, launch it from Earth and fly it to orbit with real orbital mechanics.">
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="launchpad/style.css">
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+  <script type="module" src="launchpad/main.js"></script>
+</head>
+
+<body data-mode="loading">
+  <canvas id="view" aria-label="Rocket and Earth"></canvas>
+  <div id="markers" aria-hidden="true"></div>
+
+  <div id="loading" role="status">
+    <div class="wordmark">Launchpad</div>
+    <div class="loading-bar"><span id="loading-fill"></span></div>
+    <p id="loading-text">Loading Earth</p>
+  </div>
+
+  <!-- Mission select -->
+  <main id="menu" hidden>
+    <header class="menu-head">
+      <a class="home-link" href="/beta/">← Beta</a>
+      <h1 class="wordmark">Launchpad</h1>
+      <p class="tagline">Build a rocket. Reach orbit.</p>
+    </header>
+    <ol id="mission-list" class="mission-list"></ol>
+    <p class="copyright">&copy; PanPhy Labs. All rights reserved. Earth imagery: NASA Blue Marble and Black Marble.</p>
+  </main>
+
+  <!-- Rocket builder -->
+  <section id="builder" class="panel" hidden aria-label="Rocket builder">
+    <button type="button" class="link-button" id="builder-back">← Missions</button>
+    <h2 id="builder-title"></h2>
+    <p id="builder-goal" class="goal"></p>
+    <p id="builder-brief" class="brief"></p>
+    <div class="payload-row">
+      <label for="payload-select">Payload</label>
+      <select id="payload-select"></select>
+      <span id="payload-mass" class="num"></span>
+    </div>
+    <button type="button" class="ghost" id="add-stage">+ Add a stage on top</button>
+    <div id="stage-list"></div>
+    <dl class="totals">
+      <div><dt>Liftoff mass</dt><dd id="total-mass" class="num"></dd></div>
+      <div><dt>Height</dt><dd id="total-height" class="num"></dd></div>
+      <div><dt>Total Δv</dt><dd id="total-dv" class="num"></dd></div>
+    </dl>
+    <div class="dv-meter" id="dv-meter"><span id="dv-fill"></span><i id="dv-need"></i></div>
+    <p id="dv-note" class="brief"></p>
+    <p id="builder-warning" class="warning" role="status"></p>
+    <div class="builder-actions">
+      <button type="button" class="ghost" id="builder-reset">Reset design</button>
+      <button type="button" class="primary" id="launch-button">To the pad</button>
+    </div>
+  </section>
+
+  <!-- Flight display -->
+  <div id="hud" hidden>
+    <div class="hud-left">
+    <div class="hud-mission panel">
+      <strong id="hud-title"></strong>
+      <span id="hud-goal"></span>
+    </div>
+
+    <dl class="readouts panel">
+      <div><dt>Altitude</dt><dd id="r-altitude" class="num"></dd></div>
+      <div><dt id="r-speed-label">Speed</dt><dd id="r-speed" class="num"></dd></div>
+      <div><dt>Apoapsis <small id="r-ap-time" class="num"></small></dt><dd id="r-ap" class="num"></dd></div>
+      <div><dt>Periapsis <small id="r-pe-time" class="num"></small></dt><dd id="r-pe" class="num"></dd></div>
+    </dl>
+    </div>
+
+    <div class="hud-clock panel">
+      <span id="hud-time" class="num">T− 00:00</span>
+      <div class="warp">
+        <button type="button" id="warp-down" aria-label="Slower time"><kbd>,</kbd></button>
+        <span id="warp-value" class="num">1×</span>
+        <button type="button" id="warp-up" aria-label="Faster time"><kbd>.</kbd></button>
+      </div>
+    </div>
+
+    <div class="hud-buttons">
+      <button type="button" class="chip" id="map-button" aria-pressed="false">Map <kbd>M</kbd></button>
+      <button type="button" class="chip" id="sound-button" aria-pressed="true">Sound</button>
+      <button type="button" class="chip" id="menu-button">Menu <kbd>Esc</kbd></button>
+    </div>
+
+    <div id="alert" class="alert" role="status" aria-live="polite"></div>
+
+    <div class="attitude panel">
+      <svg id="dial" viewBox="-60 -60 120 120" role="img" aria-label="Attitude: nose direction against the horizon">
+        <defs><clipPath id="dial-clip"><circle r="50" /></clipPath></defs>
+        <g clip-path="url(#dial-clip)">
+          <rect x="-60" y="-60" width="120" height="60" class="dial-sky" />
+          <rect x="-60" y="0" width="120" height="60" class="dial-ground" />
+          <line x1="-60" y1="0" x2="60" y2="0" class="dial-horizon" />
+        </g>
+        <circle r="50" class="dial-rim" />
+        <g id="dial-ticks"></g>
+        <g id="dial-prograde"><circle cy="-42" r="4.5" class="dial-pro" /><circle cy="-42" r="0.9" class="dial-pro-dot" /></g>
+        <g id="dial-retrograde"><circle cy="-42" r="4.5" class="dial-retro" /><path d="M-3.2 -45.2 L3.2 -38.8 M3.2 -45.2 L-3.2 -38.8" class="dial-retro" /></g>
+        <g id="dial-needle"><path d="M0 -40 L5 -6 L5 14 L-5 14 L-5 -6 Z" class="dial-craft" /><path d="M-5 14 L-8 20 L8 20 L5 14 Z" class="dial-craft-base" /></g>
+      </svg>
+      <span id="r-pitch" class="num"></span>
+      <div class="hold">
+        <button type="button" class="chip" id="hold-prograde" aria-pressed="false">Prograde <kbd>Q</kbd></button>
+        <button type="button" class="chip" id="hold-retrograde" aria-pressed="false">Retrograde <kbd>E</kbd></button>
+      </div>
+    </div>
+
+    <div class="stage-block panel">
+      <div class="stage-head">
+        <strong id="stage-name"></strong>
+        <span id="stage-engine"></span>
+      </div>
+      <div class="fuel" aria-hidden="true"><span id="fuel-fill"></span></div>
+      <dl class="stage-stats">
+        <div><dt>Propellant</dt><dd id="r-fuel" class="num"></dd></div>
+        <div><dt>Δv left</dt><dd id="r-dv" class="num"></dd></div>
+        <div><dt>Thrust ÷ weight</dt><dd id="r-twr" class="num"></dd></div>
+        <div><dt>Acceleration</dt><dd id="r-g" class="num"></dd></div>
+      </dl>
+      <button type="button" class="primary" id="stage-button"><span id="stage-button-text">Launch</span> <kbd>Space</kbd></button>
+    </div>
+
+    <div class="controls panel">
+      <div class="throttle">
+        <button type="button" class="chip" id="throttle-full">Full <kbd>Z</kbd></button>
+        <input type="range" id="throttle" min="0" max="100" step="1" value="100" aria-label="Throttle" orient="vertical">
+        <button type="button" class="chip" id="throttle-cut">Cut <kbd>X</kbd></button>
+        <span id="r-throttle" class="num">100%</span>
+      </div>
+      <div class="pitch">
+        <button type="button" class="pad-button" id="pitch-west" aria-label="Tilt west">◀ <kbd>A</kbd></button>
+        <button type="button" class="pad-button" id="pitch-east" aria-label="Tilt east"><kbd>D</kbd> ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause menu and results -->
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog panel" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+      <h2 id="overlay-title"></h2>
+      <p id="overlay-text"></p>
+      <dl id="overlay-stats" class="totals"></dl>
+      <div id="overlay-actions" class="dialog-actions"></div>
+    </div>
+  </div>
+</body>
+
+</html>
