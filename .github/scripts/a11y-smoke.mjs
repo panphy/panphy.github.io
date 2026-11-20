@@ -10,7 +10,7 @@
 // Set CHROME to the browser binary if it is not in a usual place.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, withBrowser } from './headless.mjs';
+import { ROOT, checkPages } from './headless.mjs';
 
 const VIEWPORT = { width: 375, height: 812 };
 const SETTLE_MS = 1500;
@@ -75,11 +75,14 @@ function auditPage() {
 
 async function main() {
   const pages = process.argv.slice(2).length ? process.argv.slice(2) : sitemapPages();
-  const failed = await withBrowser(async ({ send, open, evaluate, errors }) => {
-    await send('Emulation.setDeviceMetricsOverride', { ...VIEWPORT, deviceScaleFactor: 2, mobile: true });
-    await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
-    let failures = 0;
-    for (const path of pages) {
+  let failed = 0;
+  await checkPages(pages, {
+    tabs: 2,
+    setup: async ({ send }) => {
+      await send('Emulation.setDeviceMetricsOverride', { ...VIEWPORT, deviceScaleFactor: 2, mobile: true });
+      await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+    },
+    check: async ({ open, evaluate, errors }, path) => {
       const problems = [];
       try {
         problems.push(...await open(path, SETTLE_MS));
@@ -89,15 +92,17 @@ async function main() {
       }
       const uncaught = errors().filter((text) => !IGNORED_ERRORS.some((pattern) => pattern.test(text)));
       for (const text of uncaught) problems.push(`uncaught error: ${text.split('\n')[0]}`);
+      return problems;
+    },
+    report: (path, problems) => {
       if (problems.length) {
-        failures += 1;
+        failed += 1;
         console.log(`✖ ${path}`);
         for (const problem of problems) console.log(`    ${problem}`);
       } else {
         console.log(`✔ ${path}`);
       }
     }
-    return failures;
   });
   console.log(failed ? `\n${failed} of ${pages.length} pages have problems.` : `\nAll ${pages.length} pages passed.`);
   process.exit(failed ? 1 : 0);

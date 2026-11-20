@@ -16,7 +16,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, withBrowser } from './headless.mjs';
+import { ROOT, checkPages } from './headless.mjs';
 
 const VIEWPORT = { width: 1600, height: 900 };
 const SETTLE_MS = 2500;
@@ -99,25 +99,30 @@ async function main() {
   const decks = named.length ? named : allDecks();
   const baseline = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : {};
   let known = 0;
-  const failed = await withBrowser(async ({ send, open, evaluate }) => {
-    await send('Emulation.setDeviceMetricsOverride', { ...VIEWPORT, deviceScaleFactor: 1, mobile: false });
-    let failures = 0;
-    for (const deck of decks) {
-      let result;
+  let failed = 0;
+  await checkPages(decks, {
+    setup: ({ send }) => send('Emulation.setDeviceMetricsOverride', { ...VIEWPORT, deviceScaleFactor: 1, mobile: false }),
+    check: async ({ open, evaluate }, deck) => {
       try {
         const problems = await open(deck, SETTLE_MS);
         if (problems.length) throw new Error(problems[0]);
-        result = await evaluate(measureDeck, { minPx: MIN_PX });
+        const result = await evaluate(measureDeck, { minPx: MIN_PX });
         if (!result.slides) throw new Error('no slides found');
+        return { result };
       } catch (error) {
-        failures += 1;
-        console.log(`✖ ${deck}\n    could not be checked: ${error.message.split('\n')[0]}`);
-        continue;
+        return { error: error.message.split('\n')[0] };
+      }
+    },
+    report: (deck, { result, error }) => {
+      if (error) {
+        failed += 1;
+        console.log(`✖ ${deck}\n    could not be checked: ${error}`);
+        return;
       }
       if (update) {
         if (result.found.length) baseline[deck] = tally(result.found); else delete baseline[deck];
         console.log(`• ${deck}: ${result.found.length} small text item(s) recorded`);
-        continue;
+        return;
       }
       // Each baseline entry allows that many copies of the same element and text.
       const allowed = { ...(baseline[deck] || {}) };
@@ -126,14 +131,13 @@ async function main() {
         return true;
       });
       if (fresh.length) {
-        failures += 1;
+        failed += 1;
         console.log(`✖ ${deck}: ${fresh.length} new item(s) under ${MIN_PX}px`);
         for (const item of fresh) console.log(`    slide ${item.slide}: ${item.size}px <${item.where}> "${item.text}"`);
       } else {
         console.log(`✔ ${deck} (${result.slides} slides)`);
       }
     }
-    return failures;
   });
   if (update) {
     const sorted = Object.fromEntries(Object.keys(baseline).sort().map((deck) => [deck, Object.fromEntries(Object.entries(baseline[deck]).sort())]));
