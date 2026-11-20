@@ -292,8 +292,10 @@ check("Published page metadata");
   if (fork) {
     const lastmod = (xml) => new Map([...xml.matchAll(/<loc>([^<]*)<\/loc>\s*<lastmod>([^<]*)<\/lastmod>/g)].map(([, loc, date]) => [loc, date]));
     const [now, before] = [lastmod(read("sitemap.xml")), lastmod(git("show", `${fork}:sitemap.xml`))];
+    // A date already set to today (within a day, for time zones) stands for a second change that day.
+    const isCurrent = (date) => Math.abs(Date.parse(date) - Date.now()) < 36 * 3600 * 1000;
     for (const [loc, file] of sitemapPages) {
-      if (changedFiles.has(file) && before.has(loc) && now.get(loc) === before.get(loc)) fail(`${file} changed but its sitemap <lastmod> did not`);
+      if (changedFiles.has(file) && before.has(loc) && now.get(loc) === before.get(loc) && !isCurrent(now.get(loc))) fail(`${file} changed but its sitemap <lastmod> did not`);
     }
   }
 }
