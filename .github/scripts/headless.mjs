@@ -1,6 +1,7 @@
 // Headless Chrome for the page checks (a11y-smoke.mjs, deck-text.mjs): serves the repository on a
-// local port and drives one Chrome tab over the DevTools protocol. Needs Node 22+ and Chrome only.
-// Set CHROME to the browser binary if it is not in a usual place.
+// local port and drives Chrome tabs over the DevTools protocol, a few pages at once if asked.
+// Needs Node 22+ and Chrome only. Set CHROME to the browser binary if it is not in a usual place,
+// and PAGE_CHECK_TABS to override the number of tabs a check asks for.
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
@@ -47,7 +48,7 @@ const LAUNCH_ATTEMPTS = 3;
 const LAUNCH_TIMEOUT_MS = 20000;
 
 // Starts Chrome on a free debugging port (it writes the port to DevToolsActivePort in its profile)
-// and connects to its tab. Resolves { chrome, profile, socket }, or rejects with the reason and the
+// and connects to its tab. Resolves { chrome, profile, port, socket }, or rejects with the reason and the
 // end of Chrome's own error output, having killed it and removed its profile.
 async function launchChrome(chromePath) {
   const profile = mkdtempSync(join(tmpdir(), 'panphy-check-'));
@@ -66,6 +67,7 @@ async function launchChrome(chromePath) {
 
   const started = Date.now();
   let socket = null;
+  let port = 0;
   let reason = 'no response';
   while (!socket) {
     if (exited) { reason = `Chrome exited (${exited})`; break; }
@@ -73,7 +75,7 @@ async function launchChrome(chromePath) {
     try {
       const portFile = join(profile, 'DevToolsActivePort');
       if (existsSync(portFile)) {
-        const port = Number(readFileSync(portFile, 'utf8').split('\n')[0]);
+        port = Number(readFileSync(portFile, 'utf8').split('\n')[0]);
         const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
         const target = targets.find((t) => t.type === 'page');
         if (target) {
@@ -85,16 +87,80 @@ async function launchChrome(chromePath) {
     } catch { /* not up yet */ }
     if (!socket) await sleep(200);
   }
-  if (socket) return { chrome, profile, socket };
+  if (socket) return { chrome, profile, port, socket };
   chrome.kill('SIGKILL');
   try { rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold it */ }
   const tail = stderr.trim().split('\n').slice(-15).join('\n');
   throw new Error(tail ? `${reason}. Chrome said:\n${tail}` : reason);
 }
 
-// Runs `task` with a browser: { send, open(path) → load problems, evaluate(fn) → value, errors() }.
-// Exits 2 when Chrome is missing or fails; otherwise returns what `task` returns.
-export async function withBrowser(task) {
+// Opens another tab and connects to it.
+async function openTab(port) {
+  const target = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  const socket = new WebSocket(target.webSocketDebuggerUrl);
+  await new Promise((done, fail) => { socket.onopen = done; socket.onerror = fail; });
+  return socket;
+}
+
+// One tab: { send, open(path) → load problems, evaluate(fn) → value, errors() }, each with its own
+// connection, so uncaught errors and settings belong to the page that tab is showing.
+async function makeTab(socket, base) {
+  let nextId = 1;
+  const pending = new Map();
+  let errors = [];
+  socket.onmessage = (message) => {
+    const data = JSON.parse(message.data);
+    if (data.id && pending.has(data.id)) {
+      const { done, fail, method } = pending.get(data.id);
+      pending.delete(data.id);
+      if (data.error) fail(new Error(`${method}: ${data.error.message}`)); else done(data.result);
+    } else if (data.method === 'Runtime.exceptionThrown') {
+      const details = data.params.exceptionDetails;
+      errors.push((details.exception && details.exception.description) || details.text || 'Uncaught error');
+    }
+  };
+  const send = (method, params = {}) => {
+    const id = nextId++;
+    socket.send(JSON.stringify({ id, method, params }));
+    return new Promise((done, fail) => pending.set(id, { done, fail, method }));
+  };
+
+  await send('Page.enable');
+  await send('Runtime.enable');
+  await send('Network.enable');
+  // Always test the files on disk, never a service worker's cached copy.
+  await send('Network.setBypassServiceWorker', { bypass: true });
+  // Every tab renders and runs animation frames as if it were the one in front.
+  await send('Emulation.setFocusEmulationEnabled', { enabled: true });
+
+  const open = async (path, settleMs) => {
+    errors = [];
+    await send('Page.navigate', { url: `${base}/${path}` });
+    const started = Date.now();
+    for (;;) {
+      const state = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
+      if (state.result.value === 'complete') break;
+      if (Date.now() - started > LOAD_TIMEOUT_MS) return ['did not finish loading'];
+      await sleep(150);
+    }
+    await sleep(settleMs);
+    return [];
+  };
+  const evaluate = async (fn, arg) => {
+    const result = await send('Runtime.evaluate', {
+      expression: `(${fn.toString()})(${JSON.stringify(arg ?? null)})`, returnByValue: true, awaitPromise: true
+    });
+    if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
+    return result.result.value;
+  };
+  return { send, open, evaluate, errors: () => errors, close: () => { try { socket.close(); } catch { /* already closed */ } } };
+}
+
+// Checks `items` in `tabs` tabs at once. SwiftShader renders on the CPU and pages settle for a
+// fixed time, so pages that keep animating (decks) need one tab; a few suit lighter pages. `setup(tab)` runs once per tab (viewport and the like);
+// `check(tab, item)` returns that item's result; `report(item, result)` is called in the items'
+// order, whichever finishes first. Exits 2 when Chrome is missing or fails.
+export async function checkPages(items, { tabs: wanted = 1, setup = async () => {}, check, report }) {
   const chromePath = findChrome();
   if (!chromePath) {
     console.error('Chrome was not found. Set CHROME to the browser binary.');
@@ -117,17 +183,10 @@ export async function withBrowser(task) {
     server.close();
     process.exit(2);
   }
-  const { chrome, profile, socket } = launched;
-
-  let nextId = 1;
-  const pending = new Map();
-  let errors = [];
-  const send = (method, params = {}) => {
-    const id = nextId++;
-    socket.send(JSON.stringify({ id, method, params }));
-    return new Promise((done, fail) => pending.set(id, { done, fail, method }));
-  };
+  const { chrome, profile, port, socket } = launched;
+  const tabs = [];
   const cleanUp = () => {
+    for (const tab of tabs) tab.close();
     try { socket.close(); } catch { /* already closed */ }
     chrome.kill();
     server.close();
@@ -135,47 +194,28 @@ export async function withBrowser(task) {
   };
 
   try {
-    socket.onmessage = (message) => {
-      const data = JSON.parse(message.data);
-      if (data.id && pending.has(data.id)) {
-        const { done, fail, method } = pending.get(data.id);
-        pending.delete(data.id);
-        if (data.error) fail(new Error(`${method}: ${data.error.message}`)); else done(data.result);
-      } else if (data.method === 'Runtime.exceptionThrown') {
-        const details = data.params.exceptionDetails;
-        errors.push((details.exception && details.exception.description) || details.text || 'Uncaught error');
+    const count = Math.min(Math.max(1, Number(process.env.PAGE_CHECK_TABS) || wanted), items.length) || 1;
+    tabs.push(await makeTab(socket, base));
+    while (tabs.length < count) tabs.push(await makeTab(await openTab(port), base));
+    for (const tab of tabs) await setup(tab);
+
+    const results = new Array(items.length);
+    let next = 0;
+    let reported = 0;
+    const flush = () => {
+      while (reported < items.length && reported in results) {
+        report(items[reported], results[reported]);
+        reported += 1;
       }
     };
-
-    await send('Page.enable');
-    await send('Runtime.enable');
-    await send('Network.enable');
-    // Always test the files on disk, never a service worker's cached copy.
-    await send('Network.setBypassServiceWorker', { bypass: true });
-
-    const open = async (path, settleMs) => {
-      errors = [];
-      await send('Page.navigate', { url: `${base}/${path}` });
-      const started = Date.now();
-      for (;;) {
-        const state = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
-        if (state.result.value === 'complete') break;
-        if (Date.now() - started > LOAD_TIMEOUT_MS) return ['did not finish loading'];
-        await sleep(150);
+    await Promise.all(tabs.map(async (tab) => {
+      while (next < items.length) {
+        const index = next++;
+        results[index] = await check(tab, items[index]);
+        flush();
       }
-      await sleep(settleMs);
-      return [];
-    };
-    const evaluate = async (fn, arg) => {
-      const result = await send('Runtime.evaluate', {
-        expression: `(${fn.toString()})(${JSON.stringify(arg ?? null)})`, returnByValue: true, awaitPromise: true
-      });
-      if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
-      return result.result.value;
-    };
-    const outcome = await task({ send, open, evaluate, errors: () => errors });
+    }));
     cleanUp();
-    return outcome;
   } catch (error) {
     console.error(error.message);
     cleanUp();

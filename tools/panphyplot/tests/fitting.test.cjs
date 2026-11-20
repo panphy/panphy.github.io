@@ -106,7 +106,9 @@ test('custom exponential starts use expression scale even with an arbitrary para
 		const stats = h.api.getCustomFitDataStats();
 		const automatic = names.map(name => h.api.getCustomFitGuessByName(name, stats, expression));
 		const starts = h.api.buildCustomFitInitialCandidates([1, 1, 1], automatic);
-		const fit = core.solveCustomMultiStart(data, starts, core.buildCustomResidualFn(compiled, names), core.buildCustomJacobianFn(compiled, names), { scales: automatic.map(Math.abs) });
+		assert.deepEqual(starts[1], automatic);
+		// Starts on the right scale converge within 30 iterations; the cap stops hopeless starts from running to 350.
+		const fit = core.solveCustomMultiStart(data, starts, core.buildCustomResidualFn(compiled, names), core.buildCustomJacobianFn(compiled, names), { scales: automatic.map(Math.abs), maxIterations: 60 });
 		assert.ok(fit.converged); near(fit.params[1] / scale, 1);
 		predictions(data, x => core.evaluateCustomExpression(compiled, names, fit.params, x));
 	}
