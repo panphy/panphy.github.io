@@ -707,7 +707,12 @@
       connectorDropPreview = null;
       if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
         const w = rr().toWorld(clientX - rect.left, clientY - rect.top);
-        if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w, type).world, ok: true };
+        if (S.BODY_KINDS[type]) {
+          // A dragged object shows at its true size and color, snapped where it will land.
+          const b = S.makeBody({ ...app.scene, bodies: app.scene.bodies.slice(), links: [], nextId: 0 }, type, w.x, w.y);
+          positionBody(b, { ...app.scene, bodies: [...app.scene.bodies, b], links: [] });
+          connectorDropPreview = { body: b, drop: true };
+        } else if (['spring', 'rod', 'rope'].includes(type)) connectorDropPreview = { point: endTarget(w, type).world, ok: true };
         else if (type === 'pulley') connectorDropPreview = { pulley: { c: wheelPoint(w), radius: PULLEY_R } };
         else if (type === 'gear') { const ball = gearBall(w); connectorDropPreview = { point: ball ? app.poseOf(ball) : w, ok: !!ball }; }
         else {
@@ -716,6 +721,7 @@
         }
       }
       app.requestDraw();
+      return !!connectorDropPreview;
     };
 
     ed.clearConnectorDropPreview = function clearConnectorDropPreview() {

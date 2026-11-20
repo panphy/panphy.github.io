@@ -873,7 +873,7 @@
       const ed = app.editor;
       const pv = ed.preview();
       if (!pv) return;
-      ctx.globalAlpha = 0.55;
+      ctx.globalAlpha = pv.drop ? 0.85 : 0.55;
       if (pv.body) {
         drawBody(pv.body);
         ctx.globalAlpha = 1;
