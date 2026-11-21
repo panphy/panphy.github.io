@@ -70,7 +70,6 @@
     bounds: () => [-64, -34, 128, 60],
     terms: () => ({ n: [-60, 0, -1, 0], p: [60, 0, 1, 0] }),
     draw(ctx) {
-      const emf = ctx.p.emf;
       return shadow(roundRect(-54, -20, 108, 40, 9, '')) +
         tag(-60, 0, -1) + tag(60, 0, 1) +
         roundRect(-54, -20, 108, 40, 9, 'fill="#25282E" stroke="#121417" stroke-width="1"') +
@@ -85,7 +84,7 @@
         roundRect(38, -6.5, 6, 13, 2, 'fill="#C9CFD6" stroke="#7D8690" stroke-width="0.6"') +
         roundRect(-41, -14, 79, 28, 4, 'fill="url(#ppc-cyl)"') +
         `<rect x="38" y="-6.5" width="6" height="13" rx="2" fill="url(#ppc-cyl)"/>` +
-        utext(ctx, -16, 0, `${trimNum(emf)} V`, 'ppc-print ppc-print-light') +
+        utext(ctx, -16, 0, '1.5 V', 'ppc-print ppc-print-light') +
         utext(ctx, 25, 0, '+', 'ppc-mark ppc-mark-dark') +
         utext(ctx, -48, -27, '−', 'ppc-pol ppc-pol-neg') + utext(ctx, 48, -27, '+', 'ppc-pol ppc-pol-pos');
     }
@@ -291,16 +290,14 @@
     return a >= 1 ? `${trimNum(Math.round(a * 10) / 10)} A` : `${Math.round(a * 1000)} mA`;
   }
 
-  // Small DC motor on a base, with a propeller on its shaft. The propeller spins
-  // with a CSS animation whose speed follows the current (in a few steps, so the
-  // animation is not restarted on every time step).
+  // Small DC motor on a base, with a propeller on its shaft. The renderer turns the
+  // propeller (.ppc-rotor) frame by frame from the motor's speed, so it speeds up, coasts
+  // and stops smoothly, and keeps its angle when the drawing is rebuilt.
   art.motor = {
     bounds: () => [-56, -34, 112, 68],
     terms: () => ({ a: [-50, 0, -1, 0], b: [50, 0, 1, 0] }),
     draw(ctx) {
-      const st = ctx.st || {};
-      const level = Math.round(Math.min(1.5, st.speed || 0) * 4) / 4;
-      const spin = level > 0 ? ` class="ppc-spin" style="animation-duration:${n(0.9 / level)}s;animation-direction:${st.dir < 0 ? 'reverse' : 'normal'}"` : '';
+      const spin = ` class="ppc-rotor" data-rotor="${ctx.c.id}" transform="rotate(${n(ctx.rotorAngle || 0)})"`;
       return shadow(roundRect(-44, -28, 88, 56, 10, '')) +
         tag(-50, 0, -1) + tag(50, 0, 1) +
         roundRect(-44, -28, 88, 56, 10, 'fill="#2F3744" stroke="#151A21" stroke-width="1"') +

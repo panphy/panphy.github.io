@@ -78,7 +78,7 @@ test('unbalanced Wheatstone bridge (multi-loop) matches hand calculation', () =>
 
 test('open and closed switches', () => {
   const c = build({
-    comps: { B1: ['cell', { emf: 1.5 }], S1: ['switch', { closed: false }], R1: ['resistor', { R: 10 }], V1: ['voltmeter'] },
+    comps: { B1: ['cell'], S1: ['switch', { closed: false }], R1: ['resistor', { R: 10 }], V1: ['voltmeter'] },
     wires: [['B1.p', 'S1.a'], ['S1.b', 'R1.a'], ['R1.b', 'B1.n'], ['V1.p', 'S1.a'], ['V1.n', 'S1.b']]
   });
   close(c.read('R1').i('a'), 0);
@@ -110,7 +110,7 @@ test('internal resistance: terminal p.d. = EMF − Ir', () => {
 
 test('short circuit across an ideal cell is reported, not solved', () => {
   const c = build({
-    comps: { B1: ['cell', { emf: 1.5 }], A1: ['ammeter'], R1: ['resistor', { R: 10 }] },
+    comps: { B1: ['cell'], A1: ['ammeter'], R1: ['resistor', { R: 10 }] },
     wires: [['B1.p', 'A1.p'], ['A1.n', 'B1.n'], ['B1.p', 'R1.a'], ['R1.b', 'B1.n']]
   });
   const r = c.result();
@@ -119,19 +119,19 @@ test('short circuit across an ideal cell is reported, not solved', () => {
   assert.match(r.errors[0].msg, /ammeter/i);
   assert.ok(Number.isNaN(c.read('A1').i('p')), 'no fabricated reading');
   // A wire straight across the cell is also a short.
-  const d = build({ comps: { B1: ['cell', { emf: 1.5 }] }, wires: [['B1.p', 'B1.n']] });
+  const d = build({ comps: { B1: ['cell'] }, wires: [['B1.p', 'B1.n']] });
   assert.equal(d.result().ok, false);
 });
 
 test('conflicting ideal sources in parallel are reported; equal ones leave current undefined', () => {
   const c = build({
-    comps: { B1: ['cell', { emf: 1.5 }], B2: ['cell', { emf: 3 }] },
+    comps: { B1: ['cell'], B2: ['battery', { emf: 3 }] },
     wires: [['B1.p', 'B2.p'], ['B1.n', 'B2.n']]
   });
   assert.equal(c.result().ok, false);
   assert.match(c.result().errors[0].msg, /Conflicting ideal sources/);
   const d = build({
-    comps: { B1: ['cell', { emf: 1.5 }], B2: ['cell', { emf: 1.5 }], R1: ['resistor', { R: 3 }] },
+    comps: { B1: ['cell'], B2: ['cell'], R1: ['resistor', { R: 3 }] },
     wires: [['B1.p', 'B2.p'], ['B1.n', 'B2.n'], ['B1.p', 'R1.a'], ['R1.b', 'B1.n']]
   });
   assert.ok(d.result().ok);
@@ -142,7 +142,7 @@ test('conflicting ideal sources in parallel are reported; equal ones leave curre
 
 test('separate networks: voltage between them is undefined; each solves independently', () => {
   const c = build({
-    comps: { B1: ['cell', { emf: 1.5 }], R1: ['resistor', { R: 1 }], B2: ['battery', { emf: 6 }], R2: ['resistor', { R: 2 }], V1: ['voltmeter'], B3: ['cell'] },
+    comps: { B1: ['cell'], R1: ['resistor', { R: 1 }], B2: ['battery', { emf: 6 }], R2: ['resistor', { R: 2 }], V1: ['voltmeter'], B3: ['cell'] },
     wires: [['B1.p', 'R1.a'], ['R1.b', 'B1.n'], ['B2.p', 'R2.a'], ['R2.b', 'B2.n'], ['V1.p', 'R1.a'], ['V1.n', 'R2.b'], ['B3.p', 'B3.n']]
   });
   // B3 is shorted, but only its own network fails.
@@ -938,4 +938,10 @@ test('a cold lamp draws a switch-on surge, warms up in about 0.1 s, and holds it
   c.sim.trial();
   assert.equal(c.sim.dyn[c.ids.L1].T, T);
   close(c.read('L1').i('a'), 0.3, 1e-4, 'held');
+});
+
+test('a cell is always 1.5 V, even in an older file that set another EMF', () => {
+  const c = build({ comps: { B1: ['cell', { emf: 3 }], R1: ['resistor', { R: 10 }] }, wires: [['B1.p', 'R1.a'], ['R1.b', 'B1.n']] });
+  close(c.read('R1').v('a', 'b'), 1.5);
+  assert.ok(!registry.get('cell').props.some((p) => p.key === 'emf'), 'no EMF setting');
 });

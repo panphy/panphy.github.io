@@ -171,7 +171,7 @@ a.atool { text-decoration: none; }
 .simulation-card .row > label { min-width: 5em; }
 .simulation-card .btn-secondary { margin-top: 10px; width: 100%; min-height: 40px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2, var(--panel)); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
 .simulation-card .btn-secondary:hover { border-color: var(--ink-3); }
-.sim-paused .ppc-spin, .sim-paused .ppc-buzz, .sim-paused .ppc-waves { animation-play-state: paused; }
+.sim-paused .ppc-buzz, .sim-paused .ppc-waves { animation-play-state: paused; }
 .status-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--ink-3); }
 :is(.sim-status, .sim-controls)[data-state="running"] .status-dot { background: var(--good); box-shadow: 0 0 0 2px color-mix(in srgb, var(--good) 25%, transparent); animation: pulse 1.4s ease-in-out infinite; }
 :is(.sim-status, .sim-controls)[data-state="behind"] .status-dot { background: var(--warn); }
@@ -239,9 +239,7 @@ a.atool { text-decoration: none; }
 .comp.is-note .art { filter: url(#ppc-glow-note); }
 .meter-note { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, transparent); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }
 .ppc-glow { pointer-events: none; mix-blend-mode: screen; }
-/* Motor rotor and loudspeaker cone: visual cues only, independent of sim time. */
-.ppc-spin { transform-box: fill-box; transform-origin: center; animation: ppc-spin 1s linear infinite; }
-@keyframes ppc-spin { to { transform: rotate(360deg); } }
+/* Loudspeaker cone: a visual cue only, independent of sim time. (The motor's rotor is turned by render.js.) */
 .ppc-buzz { transform-box: fill-box; transform-origin: center; animation: ppc-buzz 0.08s ease-in-out infinite alternate; }
 @keyframes ppc-buzz { to { transform: scale(1.05); } }
 .ppc-waves { animation: ppc-waves 0.6s ease-in-out infinite alternate; }
@@ -674,7 +672,7 @@ a.atool { text-decoration: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .status-dot, .ppc-spin, .ppc-buzz, .ppc-waves { animation: none !important; }
+  .status-dot, .ppc-buzz, .ppc-waves { animation: none !important; }
   .view-switch::before, .view-switch button { transition: none; }
   .library, .inspector { transition: none; }
 }
