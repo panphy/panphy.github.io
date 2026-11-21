@@ -230,6 +230,7 @@
     ];
   }
 
+  const CELL_EMF = 1.5;
   const internalResistanceProp = {
     key: 'r', label: 'Internal resistance', unit: 'Ω', kind: 'number', default: 0, min: 0, max: 100, step: 0.1,
     help: '0 Ω gives an ideal source.'
@@ -252,14 +253,12 @@
     name: 'Cell', group: 'Sources', prefix: 'B', keywords: 'battery emf aa',
     terminals: [{ id: 'p', name: 'Positive (+)' }, { id: 'n', name: 'Negative (−)' }],
     polarity: { p: '+', n: '−' },
-    props: [
-      { key: 'emf', label: 'EMF', unit: 'V', kind: 'number', default: 1.5, min: 0, max: 3, step: 0.1 },
-      internalResistanceProp
-    ],
-    compile(c, T, b) { compileSource(c, T, b, c.props.emf); },
+    // A cell's EMF is fixed by its chemistry: 1.5 V. A battery or DC supply gives other values.
+    props: [internalResistanceProp],
+    compile(c, T, b) { compileSource(c, T, b, CELL_EMF); },
     readings: sourceReadings,
-    valueText: (c) => fmtSI(c.props.emf, 'V', 3, { trim: true }),
-    help: 'A single chemical cell. With 0 Ω internal resistance it keeps its terminal p.d. equal to its EMF whatever the current.'
+    valueText: () => fmtSI(CELL_EMF, 'V', 3, { trim: true }),
+    help: 'A single 1.5 V chemical cell. With 0 Ω internal resistance it keeps its terminal p.d. at 1.5 V whatever the current. For another EMF, use a battery or a DC power supply.'
   });
 
   define('battery', {

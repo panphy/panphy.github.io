@@ -67,6 +67,7 @@
       junctions: $('.l-junctions'), labels: $('.l-labels'), terms: $('.l-terms'), overlay: $('.l-overlay'), preview: $('.l-preview')
     };
     const dynCache = new Map();
+    const rotorAngles = new Map(); // motor id → propeller angle (degrees), turned each frame
     let routes = new Map();
     let overlayZoom = null;
 
@@ -80,6 +81,7 @@
       const ctx = {
         c, p: c.props, uid, r: 0, f: false, view: v,
         st: r && def.state ? def.state(c, r) : {},
+        rotorAngle: rotorAngles.get(c.id) || 0,
         pressed: !!app.sim.pressed[c.id],
         // A loudspeaker animates only while an AC supply drives its own network.
         sounding: speakerSounding(app, c),
@@ -503,12 +505,39 @@
 
     function route(id) { return routes.get(id); }
 
+    // ---------- Motor rotors ----------
+    // Each propeller turns by the motor's speed times the real time since the last frame, at an
+    // illustrative 400° per second at full speed: no jump when the speed changes or it stops.
+    // Paused (dtReal 0) or with reduced motion, it stays where it is.
+    const ROTOR_DEG_PER_S = 400;
+    const reducedMotion = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+    function updateRotors(dtReal) {
+      const turn = reducedMotion && reducedMotion.matches ? 0 : dtReal;
+      const res = app.sim.result;
+      const ids = new Set();
+      for (const c of app.doc.components) {
+        if (c.type !== 'motor') continue;
+        ids.add(c.id);
+        const st = res ? registry.get('motor').state(c, solver.reader(res, c)) : { speed: 0, dir: 1 };
+        const angle = ((rotorAngles.get(c.id) || 0) + st.dir * st.speed * ROTOR_DEG_PER_S * turn) % 360;
+        rotorAngles.set(c.id, angle);
+      }
+      for (const id of rotorAngles.keys()) if (!ids.has(id)) rotorAngles.delete(id);
+      applyRotors();
+    }
+    function applyRotors() {
+      for (const g of L.comps.querySelectorAll('.ppc-rotor')) {
+        g.setAttribute('transform', `rotate(${(rotorAngles.get(g.dataset.rotor) || 0).toFixed(1)})`);
+      }
+    }
+
     // ---------- Current flow animation ----------
     // Conventional current along wires. Wire currents come from the solver's
     // terminal currents (KCL over each net's wire tree); speed is illustrative.
     const flowAnimation = createFlowAnimation(app);
     const flowOffsets = new Map();
     function updateFlow(dtReal) {
+      updateRotors(dtReal);
       const doc = app.doc;
       const currents = flowAnimation.update(dtReal);
       const note = document.getElementById('flow-note');
