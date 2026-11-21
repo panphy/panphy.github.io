@@ -14,10 +14,10 @@
   --font-body: 'Figtree', 'Manrope', system-ui, sans-serif;
   --font-display: 'DM Serif Display', Georgia, serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --bg-color: #F4F6F6;
-  --bg-pattern: #E8ECEC;
+  --bg-color: #FBFBF9;
+  --bg-pattern: #F0F0ED;
   --text-main: #1B1B1B;
-  --text-secondary: #44494C;
+  --text-secondary: #47484A;
   --brand-primary: #2B7A70;
   --brand-accent: #E8A66C;
   --brand-accent-strong: #2C4654;
@@ -30,14 +30,14 @@
   --bar-apricot: #E8A66C;
   --on-bar-apricot: #1F3340;
   --card-bg: #ffffff;
-  --card-border: #DFE4E4;
+  --card-border: #E6E6E2;
   --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   --soft-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-  --muted-bg: #EFF2F2;
-  --input-border: #CBD3D3;
-  --nav-bg: rgba(244, 246, 246, 0.92);
-  --nav-border: #DFE4E4;
-  --viewer-bg: #EDF0F0;
+  --muted-bg: #F4F4F1;
+  --input-border: #D2D2CD;
+  --nav-bg: rgba(251, 251, 249, 0.92);
+  --nav-border: #E6E6E2;
+  --viewer-bg: #F3F3F0;
   --focus: #2B7A70;
   --electron: #1675BB;
   --positive: #B7791F;
@@ -474,7 +474,7 @@ body.is-fullscreen { transition: background-color .35s ease; }
 body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1px, transparent 1px); }
 /* Title and section slides take a darker sand ground (warmer than the history teal),
    so they stand out in the thumbnails. */
-:root { --intro-bg: color-mix(in srgb, var(--sand) 26%, #ebe6db); --intro-pattern: color-mix(in srgb, var(--sand) 36%, #ddd7c9); }
+:root { --intro-bg: color-mix(in srgb, var(--sand) 4%, #F1F1EE); --intro-pattern: color-mix(in srgb, var(--sand) 7%, #E6E6E2); }
 [data-theme="dark"] { --intro-bg: color-mix(in srgb, var(--sand) 10%, #1b1b19); --intro-pattern: color-mix(in srgb, var(--sand) 14%, #262623); }
 .slide:is(.title, .section) { background-color: var(--intro-bg); background-image: radial-gradient(var(--intro-pattern) 1.5px, transparent 1.5px); background-size: 36px 36px; }
 body.is-fullscreen:has(#deck .slide:is(.title, .section).active) { background-color: var(--intro-bg); background-image: radial-gradient(var(--intro-pattern) 1px, transparent 1px); }
