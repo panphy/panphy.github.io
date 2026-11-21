@@ -103,13 +103,15 @@ ${glow('ppc-glow-white', '#FFFFFF', '#CFE0FF')}
   }
 
   // Blackbody-ish color of a filament at temperature T (K).
+  // A cold filament is gray; from 700 K it blends smoothly into a dull red glow, then orange,
+  // yellow and near white, so a cooling filament never changes color in one step.
   function filamentColor(T) {
     if (!(T > 700)) return '#4A4A4A';
     const x = Math.min(1, (T - 700) / 2200);
-    const r = Math.round(90 + 165 * Math.min(1, x * 2.2));
-    const g = Math.round(40 + 215 * Math.max(0, Math.min(1, (x - 0.2) * 1.4)));
-    const b = Math.round(30 + 190 * Math.max(0, (x - 0.65) * 2.6));
-    return `rgb(${r},${g},${Math.min(255, b)})`;
+    const hot = [90 + 165 * Math.min(1, x * 2.2), 40 + 215 * Math.max(0, Math.min(1, (x - 0.2) * 1.4)), Math.min(255, 30 + 190 * Math.max(0, (x - 0.65) * 2.6))];
+    const w = Math.min(1, (T - 700) / 200);
+    const [r, g, b] = hot.map((c) => Math.round(74 + (c - 74) * w));
+    return `rgb(${r},${g},${b})`;
   }
 
   PPC.artCommon = { esc, n, up, text, utext, defs, shadow, filamentColor };

@@ -251,11 +251,14 @@
         `<path d="M -40 0 H -26 M 26 0 H 40" stroke="url(#ppc-brass)" stroke-width="5"/>` +
         screw(-34, 0, 5) + screw(34, 0, 5) +
         `<circle cx="0" cy="0" r="23" fill="url(#ppc-brass)" stroke="#7A5717" stroke-width="1"/>` +
-        `<circle cx="0" cy="0" r="20" fill="${b > 0.02 ? `rgba(255,214,140,${n(0.25 + 0.6 * Math.min(1, b))})` : '#E9EEF2'}"/>` +
+        // Clear glass, tinted warm yellow in proportion to the light, so a lamp switched off
+        // fades smoothly back to clear rather than snapping at a threshold.
+        `<circle cx="0" cy="0" r="20" fill="#E9EEF2"/>` +
+        (b > 0.001 ? `<circle cx="0" cy="0" r="20" fill="rgb(255,214,140)" opacity="${n(0.85 * Math.min(1, b))}"/>` : '') +
         `<path d="M -8 9 V -1 M 8 9 V -1" stroke="#8E959C" stroke-width="1.3"/>` +
-        `<path d="M -8 -1 l 2 -4 l 2 4 l 2 -4 l 2 4 l 2 -4 l 2 4 l 2 -4 l 2 4" fill="none" stroke="${fil}" stroke-width="${b > 0.05 ? 1.8 : 1.3}" stroke-linejoin="round"/>` +
+        `<path d="M -8 -1 l 2 -4 l 2 4 l 2 -4 l 2 4 l 2 -4 l 2 4 l 2 -4 l 2 4" fill="none" stroke="${fil}" stroke-width="${n(1.3 + 0.5 * Math.min(1, b / 0.2))}" stroke-linejoin="round"/>` +
         `<circle cx="0" cy="0" r="20" fill="url(#ppc-glass)"/>` +
-        (b > 0.01 ? `<circle cx="0" cy="0" r="${glowR}" fill="url(#ppc-glow-warm)" opacity="${n(Math.min(1, b))}" class="ppc-glow"/>` : '');
+        (b > 0.001 ? `<circle cx="0" cy="0" r="${glowR}" fill="url(#ppc-glow-warm)" opacity="${n(Math.min(1, b))}" class="ppc-glow"/>` : '');
     }
   };
 
