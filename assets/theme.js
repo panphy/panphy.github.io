@@ -6,8 +6,9 @@
   const scope = /^[a-z0-9-]+$/.test(legacy.themeScope || '') ? legacy.themeScope : '';
   const STORAGE_KEY = scope ? `panphy-theme-${scope}` : 'panphy-theme';
   // Browser chrome color: the main site uses the Spectrum page background; scoped
-  // sections (gcsephy, ibdpphy) keep their own warm paper.
-  const CHROME = scope ? { light: '#F8F6F1', dark: '#111110' } : { light: '#F5F6FA', dark: '#07080C' };
+  // sections (gcsephy, ibdpphy) keep the light paper color named in the page's theme-color.
+  const pageChrome = document.querySelector('meta[name="theme-color"]')?.content;
+  const CHROME = scope ? { light: pageChrome || '#F8F6F1', dark: '#111110' } : { light: '#F5F6FA', dark: '#07080C' };
 
   function isTheme(value) {
     return value === 'light' || value === 'dark';
