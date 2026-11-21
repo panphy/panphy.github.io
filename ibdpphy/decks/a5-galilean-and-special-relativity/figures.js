@@ -37,18 +37,21 @@ window.DeckFigures.add(P => {
     },
 
     // Two flashes sent from the middle of a carriage, seen in the carriage frame and in the platform frame.
-    'a5-simultaneity': () => {
+    'a5-simultaneity': el => {
       const w = 260, c = 150, v = 60, T = 3.2;
       const row = (y, moving, title) => {
         const x0 = moving ? 330 : 430, tL = (w / 2) / (c + (moving ? v : 0)), tR = (w / 2) / (c - (moving ? v : 0)), end = Math.max(tL, tR), shift = t => (moving ? v * t : 0);
         const k = t => f(t / T * 1000) / 1000;
         const body = car(w, 110, moving ? 'brand-accent-strong' : 'hl') + `<line x1="0" y1="-110" x2="0" y2="-86" style="stroke:var(--text-main);stroke-width:5"/>`;
-        const hit = (x, t) => `<circle cx="${f(x)}" cy="${y - 55}" r="20" style="fill:none;stroke:var(--brand-accent);stroke-width:5" opacity="0">${anim('opacity', [0, 0, 1, 1], T, { extra: `keyTimes="0;${k(t)};${k(t) + 0.01};1"` })}</circle>`;
+        const hit = (x, t) => `<circle cx="${f(x)}" cy="${y - 55}" r="20" style="fill:none;stroke:var(--brand-accent);stroke-width:5" opacity="0">${anim('opacity', [0, 0, 1, 1], T, { loop: false, extra: `keyTimes="0;${k(t)};${k(t) + 0.01};1"` })}</circle>`;
         const still = at(x0 + shift(end), y, body) + flash(x0 - c * tL, y - 55) + flash(x0 + c * tR, y - 55);
-        const mover = `<g>${track([[x0, y], [x0 + shift(end), y], [x0 + shift(end), y]], T, { extra: `keyTimes="0;${k(end)};1"` })}${body}</g>` + `<g>${track([[x0, y - 55], [x0 - c * tL, y - 55], [x0 - c * tL, y - 55]], T, { extra: `keyTimes="0;${k(tL)};1"` })}${flash(0, 0)}</g><g>${track([[x0, y - 55], [x0 + c * tR, y - 55], [x0 + c * tR, y - 55]], T, { extra: `keyTimes="0;${k(tR)};1"` })}${flash(0, 0)}</g>` + hit(x0 - c * tL, tL) + hit(x0 + c * tR, tR);
-        return twoState(still, mover) + `<line x1="60" y1="${y + 20}" x2="820" y2="${y + 20}" class="tick" ${TICK}/>` + text(70, y - 130, title, 'lbl strong', 'start');
+        const mover = `<g>${track([[x0, y], [x0 + shift(end), y], [x0 + shift(end), y]], T, { loop: false, extra: `keyTimes="0;${k(end)};1"` })}${body}</g>` + `<g>${track([[x0, y - 55], [x0 - c * tL, y - 55], [x0 - c * tL, y - 55]], T, { loop: false, extra: `keyTimes="0;${k(tL)};1"` })}${flash(0, 0)}</g><g>${track([[x0, y - 55], [x0 + c * tR, y - 55], [x0 + c * tR, y - 55]], T, { loop: false, extra: `keyTimes="0;${k(tR)};1"` })}${flash(0, 0)}</g>` + hit(x0 - c * tL, tL) + hit(x0 + c * tR, tR);
+        return `<g class="step play">${twoState(still, mover)}<line x1="60" y1="${y + 20}" x2="820" y2="${y + 20}" class="tick" ${TICK}/>${text(70, y - 130, title, 'lbl strong', 'start')}</g>`;
       };
-      return svg('40 20 800 500', row(200, false, 'in the carriage frame: both ends at the same time') + row(450, true, 'in the platform frame: the back end first'), 'A lamp at the center of a railway carriage sends a flash towards each end. In the frame of the carriage the two flashes reach the ends at the same time. In the frame of the platform the carriage is moving: the back wall moves to meet its flash and the front wall moves away from its flash, so the flash reaches the back first. Events that are simultaneous in one frame are not simultaneous in the other');
+      // One picture per frame, so that each runs on its own click.
+      return el.dataset.frame === 'platform'
+        ? svg('40 270 800 250', row(450, true, 'in the platform frame: the back end first'), 'A lamp at the center of a moving railway carriage sends a flash towards each end. In the frame of the platform the back wall moves to meet its flash and the front wall moves away from its flash, so the flash reaches the back first')
+        : svg('40 20 800 250', row(200, false, 'in the carriage frame: both ends at the same time'), 'A lamp at the center of a railway carriage sends a flash towards each end. In the frame of the carriage the two flashes reach the ends at the same time');
     },
 
     // A light clock at rest and the same clock moving: the moving light has further to go.
