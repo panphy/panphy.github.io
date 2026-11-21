@@ -59,6 +59,11 @@
       },
       V(p, q, v, o = {}) { prims.push({ k: 'V', a: p, b: q, v, owner: currentOwner, ...o }); },
       I(p, q, i) { prims.push({ k: 'I', a: p, b: q, i, owner: currentOwner }); },
+      // A resistance in series with an EMF (+ at p), both chosen each solve: rv(ctx) → { R, E }.
+      RE(p, q, rv) {
+        prims.push({ k: 'G', a: p, b: q, g: (ctx) => 1 / rv(ctx).R, owner: currentOwner });
+        prims.push({ k: 'I', a: q, b: p, i: (ctx) => { const x = rv(ctx); return x.E / x.R; }, owner: currentOwner });
+      },
       L(p, q, L, i0) { prims.push({ k: 'L', a: p, b: q, l: L, i0: i0 || 0, owner: currentOwner }); },
       C(p, q, C, v0) { prims.push({ k: 'C', a: p, b: q, c: C, v0: v0 || 0, owner: currentOwner }); },
       transformer(ns, np, nsTurns) {
@@ -206,9 +211,12 @@
       if (resistance > 0 && Number.isFinite(resistance)) need(p.l / resistance / 100, [p.owner]);
       for (const q of net.prims) if (q.k === 'C') need(Math.sqrt(p.l * q.c) / 100, [p.owner, q.owner], true);
     }
+    // Parts with a stored state of their own (a lamp's filament temperature, a motor's speed).
+    const dynamicComps = doc.components.filter((c) => registry.get(c.type).dynamic);
+    for (const c of dynamicComps) need(registry.get(c.type).dynamic.dt(c), [c.id]);
     dtSuggest = Math.min(0.01, Math.max(MIN_DT, dtSuggest));
 
-    return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, dtNeed, dtNeedComps, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T') };
+    return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, dtNeed, dtNeedComps, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T'), hasDynamic: dynamicComps.length > 0 };
   }
 
   // Resistance between nodes a and b of a network through its resistances alone (Infinity
@@ -538,6 +546,8 @@
     const V = new Float64Array(nodes.length);
     for (const i of net.nodes) V[i] = net.refs.has(i) ? 0 : (warm.get(nodes[i].key) ?? 0);
     for (const p of nl) if (ctx.nlState && ctx.nlState[p.owner + p.kind]) Object.assign(p.st, ctx.nlState[p.owner + p.kind]);
+    // Models with a stored state (a lamp's temperature) read it, and the step, from the context.
+    for (const p of nl) if (p.model.prepare) p.model.prepare(p.st, ctx);
 
     // An isolated inductor in hold mode stamps nothing: report stored current at 0 V.
     let stamped = nl.length > 0;
@@ -775,7 +785,7 @@
     const comp = {};
     for (const c of doc.components) {
       const def = registry.get(c.type);
-      const entry = { v: {}, i: {}, net: {}, island: {} };
+      const entry = { v: {}, i: {}, net: {}, island: {}, state: ctx.dyn ? ctx.dyn[c.id] : undefined };
       for (const t of def.terminals) {
         const n = netOf.get(c.id + ':' + t.id);
         entry.v[t.id] = nodeV[n];
@@ -831,6 +841,7 @@
         if (!e || e.net[t] !== result.lgNetwork) return NaN;
         return e.v[t] - result.nodeV[result.lgNode];
       },
+      state() { return e ? e.state : undefined; },
       logicIn(id) { return !!(result.inputs[c.id] && result.inputs[c.id][id]); },
       logicOut(id) { return !!(result.logic[c.id] && result.logic[c.id][id]); },
       sameNetwork(a, b) { return !!e && e.island[a] === e.island[b]; }
@@ -851,6 +862,7 @@
       capHist: {},
       indHist: {},
       heat: {},
+      dyn: {},
       logic: {},
       inputs: {},
       warm: new Map(),
@@ -874,6 +886,8 @@
       for (const id of Object.keys(sim.capHist)) if (!ids.has(id)) delete sim.capHist[id];
       for (const id of Object.keys(sim.indHist)) if (!ids.has(id)) delete sim.indHist[id];
       for (const id of Object.keys(sim.heat)) if (!ids.has(id)) delete sim.heat[id];
+      for (const id of Object.keys(sim.dyn)) if (!ids.has(id)) delete sim.dyn[id];
+      for (const c of doc.components) { const dyn = registry.get(c.type).dynamic; if (dyn && !sim.dyn[c.id]) sim.dyn[c.id] = dyn.init(c); }
       for (const p of sim.compiled.prims) if ((p.k === 'L' || p.k === 'T') && !sim.indHist[p.owner]) sim.indHist[p.owner] = { i1: p.i0 || 0, j1: 0 };
       for (const p of sim.compiled.prims) if (p.k === 'C' && !sim.capHist[p.owner]) sim.capHist[p.owner] = { v1: p.v0 };
       sim.dt = doc.settings.dt === 'auto' ? sim.compiled.dtSuggest : doc.settings.dt;
@@ -914,6 +928,7 @@
       sim.capHist = {};
       sim.indHist = {};
       sim.heat = {};
+      sim.dyn = {};
       sim.logic = {};
       sim.inputs = {};
       sim.nlState = {};
@@ -927,7 +942,7 @@
     };
 
     function context(t, method, dt) {
-      return { t, dt, method, capHist: sim.capHist, indHist: sim.indHist, logic: Object.assign({}, sim.logic), inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
+      return { t, dt, method, capHist: sim.capHist, indHist: sim.indHist, dyn: sim.dyn, logic: Object.assign({}, sim.logic), inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
     }
 
     function run(t, dt, method) {
@@ -942,7 +957,7 @@
     // changes update immediately around that frozen state.
     sim.trial = function () {
       if (!sim.compiled) return null;
-      const method = (sim.compiled.hasCaps || sim.compiled.hasInductors) ? 'hold' : 'be';
+      const method = (sim.compiled.hasCaps || sim.compiled.hasInductors || sim.compiled.hasDynamic) ? 'hold' : 'be';
       const { result, ctx, solved } = run(sim.t, sim.dt, method);
       // Logic settling and Newton state carry over; stored charge does not change.
       sim.logic = ctx.logic;
@@ -995,6 +1010,14 @@
           sim.capHist[info.p.owner] = { v1: v, v2: h ? h.v1 : undefined };
         }
       }
+      // Parts with a stored state advance it from this step's solution (backward Euler).
+      const dynNext = {};
+      for (const c of sim.doc.components) {
+        const dyn = registry.get(c.type).dynamic;
+        if (!dyn) continue;
+        dynNext[c.id] = dyn.update(c, sim.dyn[c.id] || dyn.init(c), reader(result, c), dt);
+      }
+      for (const [id, s] of Object.entries(dynNext)) { sim.dyn[id] = s; if (result.comp[id]) result.comp[id].state = s; }
       // Parts that heat (fuses): I² averaged over their thermal time, exact for steady current.
       for (const c of sim.doc.components) {
         const def = registry.get(c.type);

@@ -573,7 +573,7 @@
   app.NO_TIME_MSG = 'Readings are live. Nothing here changes over time, so there is nothing to pause.';
   app.needsTime = function () {
     const comp = app.sim.compiled;
-    if (comp && (comp.hasCaps || comp.hasInductors || Number.isFinite(comp.acMin))) return true;
+    if (comp && (comp.hasCaps || comp.hasInductors || comp.hasDynamic || Number.isFinite(comp.acMin))) return true;
     if (app.doc.components.some((c) => c.type === 'scope')) return true;
     return app.graphOpen() && app.doc.components.some((c) => canPlot(c) && c.props.plot);
   };

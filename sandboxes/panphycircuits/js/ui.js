@@ -566,6 +566,7 @@
 
     function fmtReading(x) {
       if (x.unit === 'K') return Number.isFinite(x.value) ? `${Math.round(x.value / 10) * 10} K` : '—';
+      if (x.unit === 'rpm') return Number.isFinite(x.value) ? `${Math.round(x.value)} rpm` : '—';
       let v = x.value;
       if (Number.isFinite(v) && Math.abs(v) < (x.unit === 'A' ? 1e-10 : x.unit === 'W' ? 1e-12 : 1e-7)) v = 0;
       return Number.isNaN(v) ? '—' : units.fmtSI(v, x.unit, x.sig || 3);
