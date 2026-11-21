@@ -46,6 +46,34 @@
     pl.f = !pl.f;
     return pl;
   }
+  // Where each terminal of a part ends up when its placement changes from `from` to `to`:
+  // { old terminal: new terminal } for each terminal whose old position another (or the same)
+  // terminal now occupies. Mirroring a part swaps its terminals' positions; moving each wire
+  // to the terminal now where its old one was keeps the wires in place.
+  function terminalSwap(view, comp, from, to) {
+    const terms = terminalsLocal(view, comp);
+    const ids = Object.keys(terms);
+    const at = (pl, id) => xform(pl, terms[id][0], terms[id][1]);
+    const out = {};
+    for (const id of ids) {
+      const p = at(from, id);
+      const now = ids.find((j) => { const q = at(to, j); return Math.abs(q.x - p.x) < 1e-6 && Math.abs(q.y - p.y) < 1e-6; });
+      if (now !== undefined) out[id] = now;
+    }
+    return out;
+  }
+  // A placement near `pl` that moves the terminals as `swap` says ({ old: new }), keeping every
+  // other terminal where it is: mirrored, turned half a turn, or both. Null if none does.
+  function placementForSwap(view, comp, pl, swap, canRotate = true) {
+    const terms = terminalsLocal(view, comp);
+    const ids = Object.keys(terms);
+    const at = (p, id) => xform(p, terms[id][0], terms[id][1]);
+    const same = (a, b) => Math.abs(a.x - b.x) < 1e-6 && Math.abs(a.y - b.y) < 1e-6;
+    const half = (p) => ({ ...p, r: normRot((p.r || 0) + 2) });
+    const candidates = [mirror({ ...pl })].concat(canRotate ? [half(pl), half(mirror({ ...pl }))] : []);
+    return candidates.find((c) => ids.every((id) => same(at(c, swap[id] ?? id), at(pl, id)))) || null;
+  }
+
   // Position (0–1) along a slider control for a world point. An upright slider
   // runs left to right on screen from its center. A `keepDirection` slider is
   // drawn unmirrored, so it still rises to the right when its part is mirrored.
@@ -1904,7 +1932,7 @@
   }
 
   const api = {
-    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, mirror, sliderFraction, clearSpot, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
+    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, mirror, terminalSwap, placementForSwap, sliderFraction, clearSpot, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, branchPoints, canMove, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
     resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, schematicQuality, distributeRuns, seriesParallel, layoutSeriesParallel
   };
