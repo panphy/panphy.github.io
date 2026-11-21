@@ -90,10 +90,11 @@
     terms: () => two(),
     draw(ctx) {
       const b = Math.min(1.2, (ctx.st && ctx.st.brightness) || 0);
-      const glow = b > 0.02 ? `<circle cx="0" cy="0" r="${n(22 + 26 * Math.min(1, b))}" fill="url(#ppc-glow-warm)" opacity="${n(Math.min(1, b))}" class="ppc-glow"/>` : '';
+      const glow = b > 0.001 ? `<circle cx="0" cy="0" r="${n(22 + 26 * Math.min(1, b))}" fill="url(#ppc-glow-warm)" opacity="${n(Math.min(1, b))}" class="ppc-glow"/>` : '';
       return glow + L('M -40 0 H -15 M 15 0 H 40') +
         `<circle cx="0" cy="0" r="15" class="sch-body"/>` +
-        (b > 0.02 ? `<circle cx="0" cy="0" r="13.5" fill="#FFD36B" opacity="${n(0.25 + 0.6 * Math.min(1, b))}"/>` : '') +
+        // The fill fades with the light, so switching off never snaps it away.
+        (b > 0.001 ? `<circle cx="0" cy="0" r="13.5" fill="#FFD36B" opacity="${n(0.85 * Math.min(1, b))}"/>` : '') +
         L('M -10.6 -10.6 L 10.6 10.6 M -10.6 10.6 L 10.6 -10.6') + `<circle cx="0" cy="0" r="15" class="sch-line"/>`;
     }
   };
