@@ -114,26 +114,30 @@
     };
   }
 
-  // Filament lamp: tungsten resistance R ∝ T^1.2, filament temperature from a
-  // radiative power balance P = k(T⁴ − T0⁴), reached instantly (no thermal lag).
-  const LAMP_T0 = 300, LAMP_TR = 2700, LAMP_EXP = 1.2;
+  // Filament lamp: tungsten resistance R ∝ T^1.2, and a filament of heat capacity Cth that
+  // radiates P = k(T⁴ − T0⁴): Cth dT/dt = V²/R − k(T⁴ − T0⁴). Cth gives a warm-up time
+  // constant of LAMP_TAU at the rated point, as for a small torch bulb; cold, the filament's
+  // resistance is about 14 times lower, so switching on draws a brief surge of current.
+  const LAMP_T0 = 300, LAMP_TR = 2700, LAMP_EXP = 1.2, LAMP_TAU = 0.1;
   function lampParams(ratedV, ratedI) {
     const Rhot = ratedV / ratedI;
     const k = (ratedV * ratedI) / (Math.pow(LAMP_TR, 4) - Math.pow(LAMP_T0, 4));
-    return { Rhot, k, Rcold: Rhot * Math.pow(LAMP_T0 / LAMP_TR, LAMP_EXP) };
+    const Cth = LAMP_TAU * (4 * k * Math.pow(LAMP_TR, 3) + LAMP_EXP * ratedV * ratedI / LAMP_TR);
+    return { Rhot, k, Cth, Rcold: Rhot * Math.pow(LAMP_T0 / LAMP_TR, LAMP_EXP) };
   }
   function lampR(p, T) { return p.Rhot * Math.pow(T / LAMP_TR, LAMP_EXP); }
-  // Solve the power balance for T at voltage |V| (monotonic, so Newton with a bracket).
-  function lampTemperature(p, V, guess) {
+  // Solve the power balance for T at voltage |V| (monotonic, so Newton with a bracket): steady
+  // with cdt = 0, or one backward-Euler step from Told with cdt = Cth/dt.
+  function lampTemperature(p, V, guess, cdt = 0, Told = LAMP_T0) {
     const V2 = V * V;
-    if (V2 < 1e-18) return LAMP_T0;
+    if (V2 < 1e-18 && !(cdt > 0)) return LAMP_T0;
     let lo = LAMP_T0, hi = 20000;
     let T = Math.min(Math.max(guess || LAMP_T0 + 1, lo), hi);
     for (let k = 0; k < 60; k++) {
       const R = lampR(p, T);
-      const F = V2 / R - p.k * (Math.pow(T, 4) - Math.pow(LAMP_T0, 4));
+      const F = V2 / R - p.k * (Math.pow(T, 4) - Math.pow(LAMP_T0, 4)) - cdt * (T - Told);
       if (F > 0) lo = T; else hi = T;
-      const dF = -LAMP_EXP * V2 / (R * T) - 4 * p.k * T * T * T;
+      const dF = -LAMP_EXP * V2 / (R * T) - 4 * p.k * T * T * T - cdt;
       let Tn = T - F / dF;
       if (!(Tn > lo && Tn < hi)) Tn = 0.5 * (lo + hi);
       if (Math.abs(Tn - T) < 1e-9 * T) { T = Tn; break; }
@@ -141,17 +145,32 @@
     }
     return T;
   }
-  function lampModel(ratedV, ratedI) {
+  // With an id, the lamp keeps its filament temperature in the simulation's state (ctx.dyn):
+  // held while time is held, and advanced one step at a time while it runs. Without one, it
+  // reaches its steady temperature at once.
+  function lampModel(ratedV, ratedI, id) {
     const p = lampParams(ratedV, ratedI);
     return {
       params: p,
+      prepare(st, ctx) {
+        if (id === undefined) return;
+        const s = ctx.dyn && ctx.dyn[id];
+        st.Told = s ? s.T : LAMP_T0;
+        st.cdt = ctx.method === 'hold' ? Infinity : p.Cth / ctx.dt;
+      },
       eval(v, st) {
         const V = v[0] - v[1];
-        const T = lampTemperature(p, Math.abs(V), st.T);
+        const absV = Math.abs(V);
+        if (st.cdt === Infinity) {
+          const R = lampR(p, st.Told);
+          st.T = st.Told; st.limited = false;
+          return { i: [V / R, -V / R], J: [[1 / R, -1 / R], [-1 / R, 1 / R]], v0: [v[0], v[1]] };
+        }
+        const cdt = st.cdt || 0;
+        const T = lampTemperature(p, absV, st.T, cdt, st.Told ?? LAMP_T0);
         st.T = T;
         const R = lampR(p, T);
-        const absV = Math.abs(V);
-        const dTdV = absV > 1e-12 ? (2 * absV / R) / (LAMP_EXP * absV * absV / (R * T) + 4 * p.k * T * T * T) : 0;
+        const dTdV = absV > 1e-12 ? (2 * absV / R) / (LAMP_EXP * absV * absV / (R * T) + 4 * p.k * T * T * T + cdt) : 0;
         const g = Math.max(1 / R - (LAMP_EXP * absV / (R * T)) * dTdV, 1e-9);
         const i = V / R;
         st.limited = false;
@@ -369,25 +388,36 @@
       { key: 'ratedI', label: 'Rated current', unit: 'A', kind: 'number', default: 0.3, min: 0.01, max: 3, step: 0.01 }
     ],
     compile(c, T, b) {
-      const model = lampModel(c.props.ratedV, c.props.ratedI);
+      const model = lampModel(c.props.ratedV, c.props.ratedI, c.id);
       b.NL([T.a, T.b], model, 'lamp');
+    },
+    // The filament temperature is the lamp's stored state: it starts cold and warms up over
+    // about LAMP_TAU, one backward-Euler step at a time, from the p.d. each step solved.
+    dynamic: {
+      init: () => ({ T: LAMP_T0 }),
+      dt: () => LAMP_TAU / 200,
+      update(c, s, r, dt) {
+        const p = lampParams(c.props.ratedV, c.props.ratedI);
+        const v = r.v('a', 'b');
+        return { T: lampTemperature(p, Number.isFinite(v) ? Math.abs(v) : 0, s.T, p.Cth / dt, s.T) };
+      }
     },
     readings(c, r) {
       const out = twoTerminalReadings(c, r);
-      const v = out[0].value, i = out[1].value;
+      const s = this.state(c, r);
       const p = lampParams(c.props.ratedV, c.props.ratedI);
-      const T = Number.isFinite(v) ? lampTemperature(p, Math.abs(v)) : NaN;
-      out.push({ key: 'R', label: 'Resistance now', value: Number.isFinite(T) ? lampR(p, T) : NaN, unit: 'Ω' });
-      out.push({ key: 'T', label: 'Filament temperature', value: T, unit: 'K', sig: 2 });
+      out.push({ key: 'R', label: 'Resistance now', value: Number.isFinite(s.T) ? lampR(p, s.T) : NaN, unit: 'Ω' });
+      out.push({ key: 'T', label: 'Filament temperature', value: s.T, unit: 'K', sig: 2 });
       return out;
     },
     state(c, r) {
-      const v = r.v('a', 'b');
-      if (!Number.isFinite(v)) return { brightness: 0, T: LAMP_T0 };
       const p = lampParams(c.props.ratedV, c.props.ratedI);
-      const T = lampTemperature(p, Math.abs(v));
+      const v = r.v('a', 'b');
+      const stored = r.state && r.state();
+      // The stored temperature, or (with no simulation state) the steady one at this p.d.
+      const T = stored ? stored.T : Number.isFinite(v) ? lampTemperature(p, Math.abs(v)) : LAMP_T0;
       const b = Math.pow(Math.max(0, (T - 800) / (LAMP_TR - 800)), 2.2);
-      return { brightness: b, T, P: v * v / lampR(p, T), ratedP: c.props.ratedV * c.props.ratedI };
+      return { brightness: b, T, P: Number.isFinite(v) ? v * v / lampR(p, T) : 0, ratedP: c.props.ratedV * c.props.ratedI };
     },
     warnings(c, r) {
       const s = this.state(c, r);
@@ -395,7 +425,7 @@
       return [];
     },
     valueText: (c) => `${fmtSI(c.props.ratedV, 'V', 3, { trim: true })}, ${fmtSI(c.props.ratedI, 'A', 3, { trim: true })}`,
-    help: 'Non-ohmic: the tungsten filament heats up as current flows, so its resistance rises (about 14× from cold to its rated point). Modeled with R ∝ T^1.2 and radiated power ∝ T⁴; the filament reaches its temperature instantly.'
+    help: 'Non-ohmic: the tungsten filament heats up as current flows, so its resistance rises (about 14× from cold to its rated point). Modeled with R ∝ T^1.2 and radiated power ∝ T⁴. The filament takes about 0.1 s to warm up, so switching on a cold lamp draws a brief surge of current.'
   });
 
   define('switch', {
@@ -469,27 +499,74 @@
     help: `A thin wire (${FUSE_R} Ω) that melts when the current is above its rating, which breaks the circuit. Its rating is an r.m.s. current: the wire heats as I², so an AC current blows it by its r.m.s. value, and a brief surge is survived. A large overload blows it at once; a small one takes a moment (about 0.3 s at twice the rating). Switch off “Blown” to fit a new fuse.`
   });
 
+  // DC motor: coil resistance R in series with a back EMF kω (+ at terminal 1, opposing the
+  // current that drives it), and a rotor J dω/dt = k i − bω − τload. Fixed design choices: at its
+  // rated voltage and no load it turns at MOTOR_W0 drawing a tenth of its stall current V/R, and
+  // spins up with time constant MOTOR_TAU. The load is a steady braking torque, a share of the
+  // stall torque at rated voltage: a fully loaded motor at its rated voltage cannot start.
+  const MOTOR_W0 = 300, MOTOR_TAU = 0.1, MOTOR_REST = 1e-9;
+  function motorParams(c) {
+    const V = c.props.ratedV > 0 ? c.props.ratedV : 6, R = c.props.R;
+    const k = 0.9 * V / MOTOR_W0, stall = V / R;
+    const b = 0.1 * stall * k / MOTOR_W0;
+    return { R, k, b, J: MOTOR_TAU * (b + k * k / R), load: Math.max(0, Math.min(100, c.props.load || 0)) / 100 * k * stall };
+  }
   define('motor', {
-    name: 'Motor', group: 'Output devices', prefix: 'M', keywords: 'dc motor spin rotate electric',
+    name: 'Motor', group: 'Output devices', prefix: 'M', keywords: 'dc motor spin rotate electric back emf load',
     terminals: [{ id: 'a', name: 'Terminal 1' }, { id: 'b', name: 'Terminal 2' }],
     props: [
+      { key: 'ratedV', label: 'Rated voltage', unit: 'V', kind: 'number', default: 6, min: 1.5, max: 24, step: 0.5,
+        help: 'At this voltage and no load, the motor turns at full speed (about 2900 rpm) and draws a tenth of its stall current.' },
       { key: 'R', label: 'Coil resistance', unit: 'Ω', kind: 'number', default: 5, min: 0.5, max: 1000, log: true },
-      { key: 'fullI', label: 'Current at full speed', unit: 'A', kind: 'number', default: 0.5, min: 0.01, max: 5, log: true }
+      { key: 'load', label: 'Load', unit: '%', kind: 'number', default: 0, min: 0, max: 100, step: 1, slider: true,
+        help: 'A steady braking torque, as a share of the stall torque at the rated voltage. More load slows the motor and lets more current through; at 100% it cannot start.' }
     ],
-    compile(c, T, b) { b.R(T.a, T.b, c.props.R); },
+    compile(c, T, b) {
+      const m = motorParams(c), id = c.id;
+      // Each step solves the coil and rotor together (backward Euler): the motor is then a
+      // resistance R + a k²/d in series with an EMF k(ω − a τload s)/d, where a = dt/J,
+      // d = 1 + a b and s is the direction it turns. Held, or at rest (it starts moving only
+      // after a step shows its drive torque beats the load), it is R with the EMF kω.
+      b.RE(T.a, T.b, (ctx) => {
+        const w = ctx.dyn && ctx.dyn[id] ? ctx.dyn[id].w : 0;
+        if (ctx.method === 'hold' || !(Math.abs(w) > MOTOR_REST)) return { R: m.R, E: m.k * w };
+        const a = ctx.dt / m.J, d = 1 + a * m.b;
+        return { R: m.R + a * m.k * m.k / d, E: m.k * (w - a * m.load * Math.sign(w)) / d };
+      });
+    },
+    dynamic: {
+      init: () => ({ w: 0 }),
+      dt: () => MOTOR_TAU / 50,
+      update(c, s, r, dt) {
+        const m = motorParams(c);
+        const i = r.i('a');
+        if (!Number.isFinite(i)) return s;
+        const a = dt / m.J, d = 1 + a * m.b, drive = m.k * i;
+        if (Math.abs(s.w) > MOTOR_REST) {
+          const dir = Math.sign(s.w);
+          const w = (s.w + a * (drive - m.load * dir)) / d;
+          return { w: Math.sign(w) === dir ? w : 0 }; // the load stops it; it never turns it back
+        }
+        // At rest the load holds it until the drive torque exceeds it.
+        if (Math.abs(drive) <= m.load * (1 + 1e-9)) return { w: 0 }; // equal at 100% load: rounding must not start it
+        return { w: a * (drive - m.load * Math.sign(drive)) / d };
+      }
+    },
     readings(c, r) {
       const out = twoTerminalReadings(c, r, 'a', 'b', { direction: true });
       const s = this.state(c, r);
+      out.push({ key: 'emf', label: 'Back EMF', value: s.emf, unit: 'V' });
+      out.push({ key: 'rpm', label: 'Speed', value: s.rpm, unit: 'rpm', sig: 3 });
       out.push({ key: 'turn', label: 'Rotor', text: s.speed < 0.02 ? 'not turning' : `turning ${s.dir > 0 ? 'clockwise' : 'counterclockwise'}` });
       return out;
     },
     state(c, r) {
-      const i = r.i('a');
-      if (!Number.isFinite(i)) return { speed: 0, dir: 1 };
-      return { speed: Math.min(1.5, Math.abs(i) / c.props.fullI), dir: i >= 0 ? 1 : -1 };
+      const st = r.state && r.state();
+      const w = st ? st.w : 0;
+      return { speed: Math.min(1.5, Math.abs(w) / MOTOR_W0), dir: w >= 0 ? 1 : -1, emf: motorParams(c).k * w, rpm: Math.abs(w) * 60 / (2 * Math.PI) };
     },
-    valueText: (c) => fmtSI(c.props.R, 'Ω', 3, { trim: true }),
-    help: 'A DC motor, modeled as its coil resistance (as if it turns at a steady speed under a steady load). The rotor turns faster with more current and turns the other way when the current reverses. The back emf of a real spinning motor is not modeled.'
+    valueText: (c) => `${fmtSI(c.props.ratedV > 0 ? c.props.ratedV : 6, 'V', 3, { trim: true })}, ${fmtSI(c.props.R, 'Ω', 3, { trim: true })}${c.props.load > 0 ? `, ${c.props.load}% load` : ''}`,
+    help: 'A DC motor: its coil resistance in series with the back EMF its spinning induces, which grows with speed. Starting, or held still by a heavy load, it draws its stall current V/R; as it speeds up, the back EMF cuts the current to what the load needs. It spins up in about 0.3 s, and turns the other way when the current reverses.'
   });
 
   define('speaker', {

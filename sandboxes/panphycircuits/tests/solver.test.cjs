@@ -183,6 +183,7 @@ test('LED with a current-limiting resistor', () => {
 test('filament lamp is non-ohmic: resistance rises with current', () => {
   const at = (emf) => {
     const c = build({ comps: { B1: ['dcsupply', { emf }], L1: ['lamp', { ratedV: 2.5, ratedI: 0.3 }] }, wires: [['B1.p', 'L1.a'], ['L1.b', 'B1.n']] });
+    while (c.sim.t < 2) c.sim.step(); // warmed up: 20 warm-up time constants
     return c.read('L1').i('a');
   };
   close(at(2.5), 0.3, 1e-6, 'rated point');
@@ -343,17 +344,52 @@ test('thermistor and LDR follow their models', () => {
   assert.ok(registry.models.ldrR(20e3, 1000) < 1e3);
 });
 
-test('motor and loudspeaker act as their coil resistance; the motor turns with the current', () => {
+test('a motor at rest and a loudspeaker act as their coil resistance', () => {
   const c = build({
-    comps: { B1: ['battery', { emf: 6 }], M1: ['motor', { R: 5, fullI: 0.5 }], LS1: ['speaker', { R: 8 }] },
+    comps: { B1: ['battery', { emf: 6 }], M1: ['motor', { R: 5 }], LS1: ['speaker', { R: 8 }] },
     wires: [['B1.p', 'M1.a'], ['M1.b', 'LS1.a'], ['LS1.b', 'B1.n']]
   });
   close(c.read('M1').i('a'), 6 / 13);
   close(c.read('LS1').v('a', 'b'), 8 * 6 / 13);
-  const m = circuit.getComp(c.doc, c.ids.M1);
-  const st = registry.get('motor').state(m, c.read('M1'));
-  close(st.speed, (6 / 13) / 0.5);
-  assert.equal(st.dir, 1);
+  const st = registry.get('motor').state(circuit.getComp(c.doc, c.ids.M1), c.read('M1'));
+  assert.equal(st.speed, 0, 'not yet turning');
+});
+
+test('a motor spins up against its back EMF: stall current at first, then the current its load needs', () => {
+  const motorCircuit = (emf, load) => build({
+    comps: { B1: ['dcsupply', { emf }], M1: ['motor', { ratedV: 6, R: 5, load }] },
+    wires: [['B1.p', 'M1.a'], ['M1.b', 'B1.n']]
+  });
+  const def = registry.get('motor');
+  const W0 = 300, k = 0.9 * 6 / W0, stall = 6 / 5, b = 0.1 * stall * k / W0;
+  // No load at the rated 6 V: V/R at the start, then a tenth of it at full speed (300 rad/s).
+  const c = motorCircuit(6, 0);
+  close(c.read('M1').i('a'), stall, 1e-9, 'stall current at the start');
+  while (c.sim.t < 0.1 - 1e-12) c.sim.step();
+  let s = def.state(circuit.getComp(c.doc, c.ids.M1), c.read('M1'));
+  close(s.rpm * 2 * Math.PI / 60, W0 * (1 - Math.exp(-1)), 0.02, 'spin-up time constant 0.1 s');
+  while (c.sim.t < 1.5) c.sim.step();
+  s = def.state(circuit.getComp(c.doc, c.ids.M1), c.read('M1'));
+  close(s.rpm * 2 * Math.PI / 60, W0, 1e-3, 'full speed');
+  close(c.read('M1').i('a'), 0.1 * stall, 1e-3, 'no-load current');
+  close(s.emf, 6 - 0.1 * stall * 5, 1e-3, 'back EMF = V − IR');
+  // Held (paused or edited) it keeps its speed and current.
+  c.sim.trial();
+  close(c.read('M1').i('a'), 0.1 * stall, 1e-3, 'held');
+  // Half load: k I = b ω + τ and V = I R + k ω, so I = (V + k τ / b) / (R + k² / b).
+  const half = motorCircuit(6, 50);
+  while (half.sim.t < 1.5) half.sim.step();
+  const tau = 0.5 * k * stall;
+  close(half.read('M1').i('a'), (6 + k * tau / b) / (5 + k * k / b), 1e-3, 'current at half load');
+  // Full load at the rated voltage: it cannot start, so it draws its stall current.
+  const full = motorCircuit(6, 100);
+  while (full.sim.t < 0.5) full.sim.step();
+  assert.equal(def.state(circuit.getComp(full.doc, full.ids.M1), full.read('M1')).speed, 0);
+  close(full.read('M1').i('a'), stall, 1e-6, 'stalled');
+  // Reversed, it turns the other way.
+  const rev = motorCircuit(-6, 0);
+  while (rev.sim.t < 0.5) rev.sim.step();
+  assert.equal(def.state(circuit.getComp(rev.doc, rev.ids.M1), rev.read('M1')).dir, -1);
 });
 
 test('a fuse conducts below its rating and opens the circuit once blown', () => {
@@ -885,4 +921,21 @@ test('an inductor’s step follows the resistance it sees, not unrelated resisto
     wires: [['B1.p', 'R1.a'], ['B1.p', 'R2.a'], ['R1.b', 'L1.a'], ['R2.b', 'L1.a'], ['L1.b', 'B1.n']]
   });
   close(c.sim.dt, 2e-3, 1e-6, 'parallel pair');
+});
+
+test('a cold lamp draws a switch-on surge, warms up in about 0.1 s, and holds its temperature while paused', () => {
+  const c = build({ comps: { B1: ['dcsupply', { emf: 2.5 }], L1: ['lamp', { ratedV: 2.5, ratedI: 0.3 }] }, wires: [['B1.p', 'L1.a'], ['L1.b', 'B1.n']] });
+  const p = registry.models.lampParams(2.5, 0.3);
+  close(c.read('L1').i('a'), 2.5 / p.Rcold, 1e-9, 'cold filament before time runs');
+  assert.ok(c.read('L1').i('a') > 10 * 0.3, 'the surge is over ten times the rated current');
+  // The current falls toward 0.3 A; its last 1% takes a few time constants.
+  let tNear = null;
+  while (c.sim.t < 1) { c.sim.step(); if (tNear === null && c.read('L1').i('a') < 0.3 * 1.01) tNear = c.sim.t; }
+  assert.ok(tNear > 0.05 && tNear < 0.5, `within 1% of rated after ${tNear} s`);
+  close(c.read('L1').i('a'), 0.3, 1e-4, 'rated current once warm');
+  // Held (paused or edited): the temperature stays, so the current does too.
+  const T = c.sim.dyn[c.ids.L1].T;
+  c.sim.trial();
+  assert.equal(c.sim.dyn[c.ids.L1].T, T);
+  close(c.read('L1').i('a'), 0.3, 1e-4, 'held');
 });
