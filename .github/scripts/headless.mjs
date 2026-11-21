@@ -1,4 +1,4 @@
-// Headless Chrome for the page checks (a11y-smoke.mjs, deck-text.mjs): serves the repository on a
+// Headless Chrome for the page checks (a11y-smoke.mjs, deck-text.mjs, deck-contrast.mjs): serves the repository on a
 // local port and drives Chrome tabs over the DevTools protocol, a few pages at once if asked.
 // Needs Node 22+ and Chrome only. Set CHROME to the browser binary if it is not in a usual place,
 // and PAGE_CHECK_TABS to override the number of tabs a check asks for.

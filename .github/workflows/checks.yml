@@ -59,3 +59,13 @@ jobs:
           else
             node .github/scripts/deck-text.mjs $DECKS
           fi
+      - name: Deck contrast
+        if: steps.pick.outputs.contrast != 'none'
+        env:
+          DECKS: ${{ steps.pick.outputs.contrast }}
+        run: |
+          if [ "$DECKS" = "all" ]; then
+            node .github/scripts/deck-contrast.mjs
+          else
+            node .github/scripts/deck-contrast.mjs $DECKS
+          fi

@@ -16,11 +16,11 @@
      - the accessibility check on its pages that are in sitemap.xml.
    A changed check script runs only the checks that use it (CHECK_FILES). Changes to assets/,
    the rest of .github/, manifest.json or any file not covered below run everything.
-   Teaching decks (gcsephy/decks/, ibdpphy/decks/) get the text size check when their page or a
-   local file it loads (a <link href> or <script src>, such as a unit's figures.js) changes.
+   Teaching decks (gcsephy/decks/, ibdpphy/decks/) get the text size and contrast checks when their
+   page or a local file it loads (a <link href> or <script src>, such as a unit's figures.js) changes.
 
-   No dependencies. In GitHub Actions it writes `tests`, `a11y` (all, pages or none), `pages` and
-   `decks` (all, none or a list) outputs. */
+   No dependencies. In GitHub Actions it writes `tests`, `a11y` (all, pages or none), `pages`,
+   `decks` and `contrast` (all, none or a list) outputs. */
 import { execFileSync } from "node:child_process";
 import { appendFileSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -35,10 +35,12 @@ const RUN_ALL = [/^assets\//, /^\.github\//, /^manifest\.json$/];
 // affected.mjs and checks.yml are not here: a change to them runs everything.
 const CHECK_FILES = {
   ".github/scripts/check.mjs": [],
-  ".github/scripts/headless.mjs": ["a11y", "decks"],
+  ".github/scripts/headless.mjs": ["a11y", "decks", "contrast"],
   ".github/scripts/a11y-smoke.mjs": ["a11y"],
   ".github/scripts/deck-text.mjs": ["decks"],
   ".github/scripts/deck-text-baseline.json": ["decks"],
+  ".github/scripts/deck-contrast.mjs": ["contrast"],
+  ".github/scripts/deck-contrast-baseline.json": ["contrast"],
   ".github/workflows/deploy.yml": [],
   ".github/workflows/supabase-keepalive.yml": []
 };
@@ -127,9 +129,9 @@ function findDecks() {
   });
 }
 
-export function selectDecks(files, { all = false } = {}) {
+export function selectDecks(files, { all = false, check = "decks" } = {}) {
   const decks = findDecks();
-  if (all || files.some(isShared) || checkScriptsNeed(files, "decks")) return "all";
+  if (all || files.some(isShared) || checkScriptsNeed(files, check)) return "all";
   const chosen = decks.filter(({ uses }) => files.some((file) => uses.has(file))).map(({ deck }) => deck);
   return chosen.length ? chosen.sort() : "none";
 }
@@ -198,11 +200,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   }
   const files = args.includes("--files") ? args.slice(args.indexOf("--files") + 1) : args.includes("--all") ? [] : changedFiles(option("--base") || "origin/main").files;
   const decks = selectDecks(files, { all: args.includes("--all") });
+  const contrast = selectDecks(files, { all: args.includes("--all"), check: "contrast" });
   for (const reason of result.reasons) console.log(reason);
   console.log(`Tests: ${result.tests.length ? result.tests.join(" ") : "none"}`);
   console.log(`Accessibility: ${result.a11y === "all" ? "every sitemap page" : result.pages.join(" ") || "none"}`);
   console.log(`Deck text size: ${decks === "all" ? "every deck" : decks === "none" ? "none" : decks.join(" ")}`);
+  console.log(`Deck contrast: ${contrast === "all" ? "every deck" : contrast === "none" ? "none" : contrast.join(" ")}`);
   if (process.env.GITHUB_OUTPUT) {
-    appendFileSync(process.env.GITHUB_OUTPUT, `tests=${result.tests.join(" ")}\na11y=${result.a11y}\npages=${result.pages.join(" ")}\ndecks=${Array.isArray(decks) ? decks.join(" ") : decks}\n`);
+    appendFileSync(process.env.GITHUB_OUTPUT, `tests=${result.tests.join(" ")}\na11y=${result.a11y}\npages=${result.pages.join(" ")}\ndecks=${Array.isArray(decks) ? decks.join(" ") : decks}\ncontrast=${Array.isArray(contrast) ? contrast.join(" ") : contrast}\n`);
   }
 }
