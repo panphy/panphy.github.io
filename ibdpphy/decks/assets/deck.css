@@ -620,6 +620,9 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .lbl.display { font-family: var(--font-display); font-size: 35px; fill: var(--text-main); }
 .lbl.italic { font-style: italic; }
 .halo { paint-order: stroke; stroke: var(--viewer-bg); stroke-width: 6px; stroke-linejoin: round; }
+/* Safari repaints moving SVG text by its box, and an italic glyph's tail (y, f) overhangs it, leaving a
+   trail as the label moves. An invisible stroke widens the repainted box. */
+#deck g:has(> animateTransform, > animateMotion) .lbl.italic:not(.halo) { stroke: transparent; stroke-width: 16px; }
 .lbl.greek { font-family: var(--font-display); font-size: 38px; }
 .lbl.readout { font-family: var(--font-mono); font-size: 40px; font-weight: 600; fill: var(--text-main); }
 .lbl.a, .big-num.a { fill: var(--brand-primary); }
