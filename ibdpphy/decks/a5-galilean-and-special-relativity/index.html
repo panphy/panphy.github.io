@@ -209,7 +209,7 @@
         <div class="stack center" style="gap: 22px;">
           <div class="q"><p>A train moving at \(v\) shines a lamp forwards. How fast is the light, measured from the platform?</p></div>
           <div class="cards" style="grid-template-columns: 1fr 1fr;">
-            <div class="card step"><p class="eyebrow">Maxwell’s theory, 1860s</p><h3>Light travels at one speed, \(c\)</h3><p>Fixed by the constants of electricity and magnetism. No frame is mentioned</p></div>
+            <div class="card step"><p class="eyebrow">Maxwell’s theory, 1860<span class="nocase">s</span></p><h3>Light travels at one speed, \(c\)</h3><p>Fixed by the constants of electricity and magnetism. No frame is mentioned</p></div>
             <div class="card step"><p class="eyebrow">Galilean velocity addition</p><h3>Its speed should depend on the observer</h3><p>\(c - v\) if you chase it, \(c + v\) if you run to meet it</p></div>
           </div>
           <div class="idea step">Both cannot be right. Either there is one special frame in which light has speed \(c\), or the rule for adding velocities is wrong.</div>
@@ -539,19 +539,20 @@
 
       <section class="slide hl" data-title="The relativity of simultaneity">
         <h2>The relativity of simultaneity<span>.</span></h2>
-        <div class="split wide-fig">
-          <div class="stack">
-            <ul class="points small">
-              <li>A lamp at the <b>center</b> of a carriage flashes</li>
-              <li class="step">Light travels at \(c\) in <b>both</b> frames</li>
-              <li class="step">On the platform, the back wall moves to <b>meet</b> its flash</li>
-            </ul>
-            <div class="idea step">Simultaneous in one frame, <b>not</b> in another.</div>
-          </div>
-          <div class="panel">
+        <div class="split wide-fig" style="grid-template-rows: 1fr auto auto auto 1fr; row-gap: 22px">
+          <ul class="points small" style="grid-area: 2 / 1">
+            <li>A lamp at the <b>center</b> of a carriage flashes</li>
+            <li class="step">Light travels at \(c\) in <b>both</b> frames</li>
+          </ul>
+          <div class="panel" style="grid-area: 1 / 2 / -1 / 3">
             <div class="panel-head"><span>ONE PAIR OF EVENTS, TWO FRAMES</span></div>
-            <div class="fig" data-fig="a5-simultaneity" data-once></div>
+            <div class="fig" data-fig="a5-simultaneity" data-frame="carriage" data-controls="off"></div>
+            <div class="fig" data-fig="a5-simultaneity" data-frame="platform" data-controls="off"></div>
           </div>
+          <ul class="points small" style="grid-area: 3 / 1">
+            <li class="step">On the platform, the back wall moves to <b>meet</b> its flash</li>
+          </ul>
+          <div class="idea step" style="grid-area: 4 / 1">Simultaneous in one frame, <b>not</b> in another.</div>
         </div>
         <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY, HL ONLY</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -1089,7 +1090,7 @@
   <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
   <script src="../assets/figures.js?v=20261118"></script>
-  <script src="figures.js?v=20261117c"></script>
+  <script src="figures.js?v=20261121a"></script>
   <script src="../assets/deck-math.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/deck-notes.js"></script>
