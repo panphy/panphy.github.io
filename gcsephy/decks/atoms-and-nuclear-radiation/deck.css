@@ -540,7 +540,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .tick { stroke: var(--text-secondary); stroke-width: 2.5; }
 .inset { fill: var(--card-bg); stroke: var(--card-border); stroke-width: 2; }
 .depth { fill: #000; pointer-events: none; }
-.changed { fill: none; stroke: var(--brand-accent); stroke-width: 3; }
+.changed { fill: none; stroke: var(--brand-accent-strong); stroke-width: 3; }
 .ghost { fill: none; stroke: var(--electron); stroke-width: 2; stroke-dasharray: 4 4; opacity: .7; }
 .wave { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .trail { stroke-width: 3; stroke-dasharray: 3 9; stroke-linecap: round; opacity: .7; }
@@ -549,7 +549,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .alpha-path.deflect, .alpha-path.bounce { opacity: .95; }
 .scatter-playing .scatter-static { display: none; }
 .scatter-label { fill: var(--alpha); }
-.detector { fill: none; stroke: var(--brand-accent); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; opacity: .8; }
+.detector { fill: none; stroke: var(--brand-accent-strong); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; opacity: .8; }
 .flow { fill: none; stroke: var(--brand-accent); stroke-width: 3; }
 /* On screen the pale year accent is too faint for the cycle's arrows, so they use the strong accent. */
 #deck .flow { stroke: var(--brand-accent-strong); stroke-width: 4; marker-end: url(#m-brand-accent-strong); }
