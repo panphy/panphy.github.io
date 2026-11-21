@@ -147,3 +147,38 @@ test('paused scope scale edits and undo retain acquisition; source edits still c
   app.commit('Source voltage');
   assert.equal(app.sim.scopes[scopeId].t.length, 0);
 });
+
+test('mirroring a part moves each wire to the terminal now where its old one was, in both views', () => {
+  const layout = globalThis.PPC.layout;
+  const doc = circuit.createDoc();
+  const cell = circuit.addComponent(doc, 'cell');
+  const res = circuit.addComponent(doc, 'resistor', { props: { R: 10 } });
+  wire(doc, cell, 'p', res, 'a'); wire(doc, res, 'b', cell, 'n');
+  const { app } = setup(doc);
+  const current = () => solver.reader(app.sim.result, res).i('a');
+  assert.ok(current() > 0, 'current flows a → b through the resistor');
+  const ends = () => app.doc.wires.map((w) => [w.a, w.b].find((e) => e.c === cell.id).t).sort().join();
+  const where = (view, t) => { const p = layout.termWorld(app.doc, view, { c: cell.id, t }); return `${p.x},${p.y}`; };
+  const before = { schematic: [where('schematic', 'p'), where('schematic', 'n')], realistic: [where('realistic', 'p'), where('realistic', 'n')] };
+  const wireOnP = app.doc.wires.find((w) => w.a.c === cell.id ? w.a.t === 'p' : w.b.t === 'p').id;
+  app.doc.view = 'schematic';
+  app.selection.comps = new Set([cell.id]);
+  app.mirrorSelection();
+  assert.equal(ends(), 'n,p', 'still one wire on each terminal');
+  const moved = app.doc.wires.find((w) => w.id === wireOnP);
+  assert.equal(moved.a.c === cell.id ? moved.a.t : moved.b.t, 'n', 'the wire that was on + is now on −');
+  assert.ok(current() < 0, 'the cell is reversed in the circuit');
+  // Both views keep each wire's end where it was: the terminals swapped places.
+  for (const view of ['schematic', 'realistic']) {
+    assert.equal(where(view, 'n'), before[view][0], `${view}: − is where + was`);
+    assert.equal(where(view, 'p'), before[view][1], `${view}: + is where − was`);
+  }
+  app.undo();
+  assert.ok(current() > 0, 'undo restores the connections');
+  // A part standing upright has nothing to swap: mirroring leaves its wires alone.
+  app.doc.layouts.schematic.comps[res.id].r = 1;
+  const wiresBefore = JSON.stringify(app.doc.wires);
+  app.selection.comps = new Set([res.id]);
+  app.mirrorSelection();
+  assert.equal(JSON.stringify(app.doc.wires), wiresBefore);
+});

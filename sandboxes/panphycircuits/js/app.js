@@ -309,14 +309,29 @@
     }
     if (n) app.commit('Rotate');
   };
-  // Mirror the part's artwork left to right; labels and printed text stay readable.
+  // Mirror the part's artwork left to right; labels and printed text stay readable. Each wire
+  // then moves to the terminal now where its old one was, so the wires stay in place and a
+  // polarized part (a cell, diode or meter) is reversed in the circuit. The other view shows the
+  // same circuit, so the part turns there too (mirrored, or turned half a turn) to keep its
+  // wires in place; a terminal no other terminal's position matches keeps its wire.
   app.mirrorSelection = function () {
     const v = app.doc.view;
+    const other = layout.VIEWS.find((x) => x !== v);
     let n = 0;
     for (const id of app.selection.comps) {
       const pl = app.doc.layouts[v].comps[id];
-      if (!pl || !app.canMirror(circuit.getComp(app.doc, id))) continue;
+      const c = circuit.getComp(app.doc, id);
+      if (!pl || !app.canMirror(c)) continue;
+      const before = { ...pl };
       layout.mirror(pl); n++;
+      const swap = layout.terminalSwap(v, c, before, pl);
+      if (!Object.keys(swap).some((t) => swap[t] !== t)) continue;
+      for (const w of app.doc.wires) for (const end of [w.a, w.b]) if (end.c === id && swap[end.t]) end.t = swap[end.t];
+      const plo = other && app.doc.layouts[other].comps[id];
+      if (!plo) continue;
+      const canRotate = !(other === 'realistic' && registry.get(c.type).fixedBenchOrientation);
+      const turned = layout.placementForSwap(other, c, plo, swap, canRotate);
+      if (turned) Object.assign(plo, turned);
     }
     if (n) app.commit('Mirror');
   };
