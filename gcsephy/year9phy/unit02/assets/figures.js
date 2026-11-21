@@ -154,15 +154,30 @@
           `<rect class="ink mid" x="${x - 25}" y="48" width="50" height="8" rx="2"/><path class="ink" d="M${x + 6} 20V118"/><circle class="hot" cx="${x + 6}" cy="120" r="4"/>` + t(x, 156, name, { c: "sm" });
       }).join(""));
   }
-  // House in cross-section with numbered places to annotate.
-  const house = (marks = true) => svg(340, 260, "Cross-section of a house: roof and loft, walls with a cavity, a window, a floor and a door",
-    '<path class="ink" d="M10 244H330"/>' +
-    '<path class="ink sun-t" d="M40 104L170 20L300 104Z"/><path class="ink" d="M40 104H300"/>' +
-    '<path class="ink soft" d="M50 104H60V236H50ZM280 104H290V236H280Z"/><path class="ink soft" d="M64 104H70V236H64ZM270 104H276V236H270Z"/>' +
-    '<path class="ink" d="M50 236H290"/><rect class="ink cool-t" x="120" y="140" width="50" height="40"/><path class="ink thin" d="M145 140V180M120 160H170"/>' +
-    '<rect class="ink paper" x="210" y="170" width="34" height="66"/><circle class="solid" cx="236" cy="204" r="2.5"/>' +
-    '<path class="ink thin" d="M70 230H270"/>' +
-    (marks ? [[170, 92, "1"], [57, 150, "2"], [145, 150, "3"], [170, 233, "4"], [227, 186, "5"]].map(([x, y, n]) => `<circle class="ink paper" cx="${x}" cy="${y}" r="9"/>${t(x, y + 4.5, n, { c: "sm" })}`).join("") : ""));
+  // House in cross-section with numbered places to annotate. Flat colors, and nothing that
+  // gives away the answers: the cavity is empty, the window has one pane, the loft is bare.
+  function house(marks = true) {
+    const sky = "#d6eaf6", room = "#ffdfb8", brick = "#b4523a", cavity = "#33241f";
+    const r = (x, y, w, h, fill, rx) => `<rect x="${x}" y="${y}" width="${w}" height="${h}"${rx ? ` rx="${rx}"` : ""} fill="${fill}"/>`;
+    const joists = [86, 114, 142, 170, 198, 226, 254].map((x) => r(x - 2, 96, 5, 6, "#8a6239")).join("");
+    const wall = (x) => r(x, 110, 10, 122, brick) + r(x + 10, 110, 6, 122, cavity) + r(x + 16, 110, 10, 122, brick);
+    const lead = (x1, y1, x2, y2) => `<path class="ink thin" d="M${x1} ${y1}L${x2} ${y2}"/><circle class="ink thin paper" cx="${x2}" cy="${y2}" r="3"/>`;
+    const badge = (x, y, n) => `<circle class="ink paper" cx="${x}" cy="${y}" r="10"/>${t(x, y + 4.5, n, { c: "sm" })}`;
+    return svg(340, 262, "Cross-section of a house: a loft under the roof, brick walls with an empty cavity, a window, a floor and a door",
+      r(0, 0, 340, 236, sky, 8) +
+      '<g fill="#fff"><ellipse cx="50" cy="42" rx="24" ry="9"/><ellipse cx="62" cy="35" rx="13" ry="9"/><ellipse cx="292" cy="58" rx="22" ry="8"/><ellipse cx="282" cy="51" rx="12" ry="8"/></g>' +
+      r(0, 232, 340, 30, "#7a5a40", 4) + r(0, 230, 340, 9, "#74a84a") +
+      '<path d="M55 110L170 32L285 110Z" fill="#f7e8c9"/>' + joists +
+      r(82, 110, 176, 108, room) + r(56, 102, 228, 8, "#b08a5e") + wall(56) + wall(258) +
+      r(56, 134, 26, 46, "#eaf6fd") + r(67, 134, 4, 46, "#3f9bd1") + r(52, 178, 34, 4, "#f4f1ea") +
+      r(258, 146, 26, 72, "#6f4522") + '<circle cx="255" cy="192" r="3" fill="#e0b13c"/><circle cx="287" cy="192" r="3" fill="#e0b13c"/>' +
+      '<path d="M170 110V128" stroke="#6b5a48" stroke-width="1.6"/><path d="M158 140L164 128H176L182 140Z" fill="#ffc83d"/>' +
+      r(122, 184, 96, 24, "#c9673f", 6) + r(114, 194, 16, 24, "#c9673f", 5) + r(210, 194, 16, 24, "#c9673f", 5) + r(130, 200, 80, 12, "#dd8259", 3) +
+      r(82, 218, 176, 14, "#9c7448") +
+      '<path d="M34 110L170 18L306 110L285 110L170 32L55 110Z" fill="#46536a"/>' +
+      (marks ? lead(33, 157, 69, 157) + lead(33, 207, 69, 207) + lead(306, 172, 271, 172) + lead(170, 240, 170, 225) +
+        badge(170, 74, "1") + badge(23, 207, "2") + badge(23, 157, "3") + badge(170, 250, "4") + badge(316, 172, "5") : ""));
+  }
 
   // ---------- Lesson 9: bounce and Sankey ----------
   // The ball falls and bounces on the same vertical line: down arrow on the left of it, up arrow on the right.
