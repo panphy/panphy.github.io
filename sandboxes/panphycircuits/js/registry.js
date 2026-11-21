@@ -115,16 +115,22 @@
   }
 
   // Filament lamp: tungsten resistance R ∝ T^1.2, and a filament of heat capacity Cth that
-  // radiates P = k(T⁴ − T0⁴): Cth dT/dt = V²/R − k(T⁴ − T0⁴). Cth gives a warm-up time
-  // constant of LAMP_TAU at the rated point, as for a small torch bulb; cold, the filament's
-  // resistance is about 14 times lower, so switching on draws a brief surge of current.
-  const LAMP_T0 = 300, LAMP_TR = 2700, LAMP_EXP = 1.2, LAMP_TAU = 0.1;
+  // radiates k(T⁴ − T0⁴) and loses h(T − T0) through its supports (LAMP_COND of its power at
+  // the rated point): Cth dT/dt = V²/R − k(T⁴ − T0⁴) − h(T − T0). Cth gives a time constant of
+  // LAMP_TAU at the rated point, as for a small torch bulb: cold, the filament's resistance is
+  // about 14 times lower, so switching on draws a brief surge, and switched off it goes dark
+  // within about a third of a second.
+  const LAMP_T0 = 300, LAMP_TR = 2700, LAMP_EXP = 1.2, LAMP_TAU = 0.03, LAMP_COND = 0.2, LAMP_LIGHT = 7.5;
   function lampParams(ratedV, ratedI) {
-    const Rhot = ratedV / ratedI;
-    const k = (ratedV * ratedI) / (Math.pow(LAMP_TR, 4) - Math.pow(LAMP_T0, 4));
-    const Cth = LAMP_TAU * (4 * k * Math.pow(LAMP_TR, 3) + LAMP_EXP * ratedV * ratedI / LAMP_TR);
-    return { Rhot, k, Cth, Rcold: Rhot * Math.pow(LAMP_T0 / LAMP_TR, LAMP_EXP) };
+    const Rhot = ratedV / ratedI, P = ratedV * ratedI;
+    const k = (1 - LAMP_COND) * P / (Math.pow(LAMP_TR, 4) - Math.pow(LAMP_T0, 4));
+    const h = LAMP_COND * P / (LAMP_TR - LAMP_T0);
+    const Cth = LAMP_TAU * (4 * k * Math.pow(LAMP_TR, 3) + h + LAMP_EXP * P / LAMP_TR);
+    return { Rhot, k, h, Cth, Rcold: Rhot * Math.pow(LAMP_T0 / LAMP_TR, LAMP_EXP) };
   }
+  // Heat lost at temperature T, and its rate of change with T.
+  const lampLoss = (p, T) => p.k * (Math.pow(T, 4) - Math.pow(LAMP_T0, 4)) + p.h * (T - LAMP_T0);
+  const lampLossSlope = (p, T) => 4 * p.k * T * T * T + p.h;
   function lampR(p, T) { return p.Rhot * Math.pow(T / LAMP_TR, LAMP_EXP); }
   // Solve the power balance for T at voltage |V| (monotonic, so Newton with a bracket): steady
   // with cdt = 0, or one backward-Euler step from Told with cdt = Cth/dt.
@@ -135,9 +141,9 @@
     let T = Math.min(Math.max(guess || LAMP_T0 + 1, lo), hi);
     for (let k = 0; k < 60; k++) {
       const R = lampR(p, T);
-      const F = V2 / R - p.k * (Math.pow(T, 4) - Math.pow(LAMP_T0, 4)) - cdt * (T - Told);
+      const F = V2 / R - lampLoss(p, T) - cdt * (T - Told);
       if (F > 0) lo = T; else hi = T;
-      const dF = -LAMP_EXP * V2 / (R * T) - 4 * p.k * T * T * T - cdt;
+      const dF = -LAMP_EXP * V2 / (R * T) - lampLossSlope(p, T) - cdt;
       let Tn = T - F / dF;
       if (!(Tn > lo && Tn < hi)) Tn = 0.5 * (lo + hi);
       if (Math.abs(Tn - T) < 1e-9 * T) { T = Tn; break; }
@@ -170,7 +176,7 @@
         const T = lampTemperature(p, absV, st.T, cdt, st.Told ?? LAMP_T0);
         st.T = T;
         const R = lampR(p, T);
-        const dTdV = absV > 1e-12 ? (2 * absV / R) / (LAMP_EXP * absV * absV / (R * T) + 4 * p.k * T * T * T + cdt) : 0;
+        const dTdV = absV > 1e-12 ? (2 * absV / R) / (LAMP_EXP * absV * absV / (R * T) + lampLossSlope(p, T) + cdt) : 0;
         const g = Math.max(1 / R - (LAMP_EXP * absV / (R * T)) * dTdV, 1e-9);
         const i = V / R;
         st.limited = false;
@@ -394,7 +400,7 @@
     // about LAMP_TAU, one backward-Euler step at a time, from the p.d. each step solved.
     dynamic: {
       init: () => ({ T: LAMP_T0 }),
-      dt: () => LAMP_TAU / 200,
+      dt: () => LAMP_TAU / 60,
       update(c, s, r, dt) {
         const p = lampParams(c.props.ratedV, c.props.ratedI);
         const v = r.v('a', 'b');
@@ -415,7 +421,10 @@
       const stored = r.state && r.state();
       // The stored temperature, or (with no simulation state) the steady one at this p.d.
       const T = stored ? stored.T : Number.isFinite(v) ? lampTemperature(p, Math.abs(v)) : LAMP_T0;
-      const b = Math.pow(Math.max(0, (T - 800) / (LAMP_TR - 800)), 2.2);
+      // Visible light from tungsten rises steeply with temperature: (T / TR)^LAMP_LIGHT matches the
+      // familiar light ∝ V^3.4 of a filament lamp. The glow shows it through a display gamma
+      // of 2.2, so a lamp at half its rated voltage (about a tenth of the light) still shows.
+      const b = Math.pow(Math.pow(T / LAMP_TR, LAMP_LIGHT), 1 / 2.2);
       return { brightness: b, T, P: Number.isFinite(v) ? v * v / lampR(p, T) : 0, ratedP: c.props.ratedV * c.props.ratedI };
     },
     warnings(c, r) {
@@ -424,7 +433,7 @@
       return [];
     },
     valueText: (c) => `${fmtSI(c.props.ratedV, 'V', 3, { trim: true })}, ${fmtSI(c.props.ratedI, 'A', 3, { trim: true })}`,
-    help: 'Non-ohmic: the tungsten filament heats up as current flows, so its resistance rises (about 14× from cold to its rated point). Modeled with R ∝ T^1.2 and radiated power ∝ T⁴. The filament takes about 0.1 s to warm up, so switching on a cold lamp draws a brief surge of current.'
+    help: 'Non-ohmic: the tungsten filament heats up as current flows, so its resistance rises (about 14× from cold to its rated point). Modeled with R ∝ T^1.2 and radiated power ∝ T⁴. The filament takes about 0.1 s to warm up, so switching on a cold lamp draws a brief surge of current; switched off, it goes dark within about a third of a second.'
   });
 
   define('switch', {

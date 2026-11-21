@@ -945,3 +945,26 @@ test('a cell is always 1.5 V, even in an older file that set another EMF', () =>
   close(c.read('R1').v('a', 'b'), 1.5);
   assert.ok(!registry.get('cell').props.some((p) => p.key === 'emf'), 'no EMF setting');
 });
+
+test('a lamp glows like a tungsten filament: light ∝ V^3.4, and it goes dark within a third of a second when switched off', () => {
+  const lamp = registry.get('lamp');
+  const lampAt = (emf) => {
+    const c = build({ comps: { B1: ['dcsupply', { emf }], S1: ['switch', { closed: true }], L1: ['lamp', { ratedV: 2.5, ratedI: 0.3 }] },
+      wires: [['B1.p', 'S1.a'], ['S1.b', 'L1.a'], ['L1.b', 'B1.n']] });
+    while (c.sim.t < 1) c.sim.step();
+    return c;
+  };
+  const glow = (c) => lamp.state(circuit.getComp(c.doc, c.ids.L1), c.read('L1')).brightness;
+  // The glow is light^(1/2.2): at half voltage the light is about 0.5^3.4.
+  const light = Math.pow(glow(lampAt(1.25)), 2.2) / Math.pow(glow(lampAt(2.5)), 2.2);
+  assert.ok(Math.abs(Math.log(light) / Math.log(0.5) - 3.4) < 0.15, `light ratio ${light}`);
+  // Switched off, the filament cools by radiation and through its supports.
+  const c = lampAt(2.5);
+  circuit.getComp(c.doc, c.ids.S1).props.closed = false;
+  c.sim.setDoc(c.doc);
+  const t0 = c.sim.t;
+  while (c.sim.t < t0 + 0.1) c.sim.step();
+  assert.ok(glow(c) < 0.3, `still ${glow(c)} after 0.1 s`);
+  while (c.sim.t < t0 + 0.3) c.sim.step();
+  assert.ok(glow(c) < 0.07, `still ${glow(c)} after 0.3 s`);
+});

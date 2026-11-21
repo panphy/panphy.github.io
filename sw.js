@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-21T00:15:17Z';
+const BUILD_ID = '2026-11-21T00:27:32Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
