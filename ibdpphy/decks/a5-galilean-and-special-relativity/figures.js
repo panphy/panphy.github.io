@@ -3,7 +3,7 @@
 // the frame S′ that moves relative to it is terracotta, the color of this higher level topic;
 // light is apricot. On space–time diagrams the time axis is ct and light travels at 45°.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, f, TAU } = P;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, PLAY, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const at = (x, y, body) => `<g transform="translate(${f(x)} ${f(y)})">${body}</g>`;
   const car = (w, h, color = 'hl') => `<rect x="${-w / 2}" y="${-h}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--${color}) 16%, var(--viewer-bg));stroke:var(--${color});stroke-width:3"/><circle cx="${-w / 2 + 34}" cy="6" r="13" style="fill:var(--text-secondary)"/><circle cx="${w / 2 - 34}" cy="6" r="13" style="fill:var(--text-secondary)"/>`;
@@ -45,8 +45,9 @@ window.DeckFigures.add(P => {
         const body = car(w, 110, moving ? 'brand-accent-strong' : 'hl') + `<line x1="0" y1="-110" x2="0" y2="-86" style="stroke:var(--text-main);stroke-width:5"/>`;
         const hit = (x, t) => `<circle cx="${f(x)}" cy="${y - 55}" r="20" style="fill:none;stroke:var(--brand-accent);stroke-width:5" opacity="0">${anim('opacity', [0, 0, 1, 1], T, { loop: false, extra: `keyTimes="0;${k(t)};${k(t) + 0.01};1"` })}</circle>`;
         const still = at(x0 + shift(end), y, body) + flash(x0 - c * tL, y - 55) + flash(x0 + c * tR, y - 55);
-        const mover = `<g>${track([[x0, y], [x0 + shift(end), y], [x0 + shift(end), y]], T, { loop: false, extra: `keyTimes="0;${k(end)};1"` })}${body}</g>` + `<g>${track([[x0, y - 55], [x0 - c * tL, y - 55], [x0 - c * tL, y - 55]], T, { loop: false, extra: `keyTimes="0;${k(tL)};1"` })}${flash(0, 0)}</g><g>${track([[x0, y - 55], [x0 + c * tR, y - 55], [x0 + c * tR, y - 55]], T, { loop: false, extra: `keyTimes="0;${k(tR)};1"` })}${flash(0, 0)}</g>` + hit(x0 - c * tL, tL) + hit(x0 + c * tR, tR);
-        return `<g class="step play">${twoState(still, mover)}<line x1="60" y1="${y + 20}" x2="820" y2="${y + 20}" class="tick" ${TICK}/>${text(70, y - 130, title, 'lbl strong', 'start')}</g>`;
+        const mover = `<g transform="translate(${x0} ${y})">${track([[x0, y], [x0 + shift(end), y], [x0 + shift(end), y]], T, { loop: false, extra: `keyTimes="0;${k(end)};1"` })}${body}</g>` + `<g transform="translate(${x0} ${y - 55})">${track([[x0, y - 55], [x0 - c * tL, y - 55], [x0 - c * tL, y - 55]], T, { loop: false, extra: `keyTimes="0;${k(tL)};1"` })}${flash(0, 0)}</g><g transform="translate(${x0} ${y - 55})">${track([[x0, y - 55], [x0 + c * tR, y - 55], [x0 + c * tR, y - 55]], T, { loop: false, extra: `keyTimes="0;${k(tR)};1"` })}${flash(0, 0)}</g>` + hit(x0 - c * tL, tL) + hit(x0 + c * tR, tR);
+        // First click: the carriage and the flash at its center. Second click: the light travels.
+        return `<g class="step">${twoState(still, mover)}<line x1="60" y1="${y + 20}" x2="820" y2="${y + 20}" class="tick" ${TICK}/>${text(70, y - 130, title, 'lbl strong', 'start')}</g>${PLAY}`;
       };
       // One picture per frame, so that each runs on its own click.
       return el.dataset.frame === 'platform'
