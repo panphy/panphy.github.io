@@ -52,3 +52,18 @@ test('more than three objects keep plain labels', () => {
   assert.equal(L.velocity(vel(0).b), 'v');
   assert.equal(L.tags.size, 0);
 });
+
+test('a force over three times the heaviest weight is drawn three weights long and marked broken', () => {
+  const scene = S.createScene();
+  const b = Object.assign(S.makeBody(scene, 'ball', 0, 1), { mass: 1 });
+  scene.bodies.push(b);
+  const g = scene.world.gravity;
+  const forces = [{ label: 'W', x: 0, y: 0, fx: 0, fy: -g }, { label: 'N', x: 0, y: 0, fx: 2.5 * g, fy: 0 }, { label: 'N', x: 0, y: 0, fx: -50 * g, fy: 0 }];
+  const sim = { forcesOn: () => forces };
+  const renderer = PPM.render.createRenderer({ scene, sim, display: {}, selectedBodies: () => [] }, {}, PPM.svg.createContext(100, 100));
+  const [w, small, big] = renderer.forceArrows(100);
+  const len = (a) => Math.hypot(a.to.x - a.from.x, a.to.y - a.from.y);
+  assert.deepEqual([w.broken, small.broken, big.broken], [false, false, true]);
+  assert.ok(Math.abs(len(small) - 2.5 * len(w)) < 1e-9);
+  assert.ok(Math.abs(len(big) - 3 * len(w)) < 1e-9);
+});

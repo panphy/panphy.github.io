@@ -681,7 +681,8 @@
     }
 
     // An outline in the stage color keeps an arrow readable where it crosses an object.
-    function arrow(from, to, color, label, outline) {
+    // A broken arrow (too long to draw to scale) gets a break mark across the middle of its shaft.
+    function arrow(from, to, color, label, outline, broken) {
       const dx = to.x - from.x;
       const dy = to.y - from.y;
       const L = Math.hypot(dx, dy);
@@ -707,6 +708,34 @@
       // Match the head's border to the exposed shaft border: (3.5 - 2.2) / 2.
       if (outline) shape(3.5, r.colors.bg, 1.3);
       shape(2.2, color);
+      if (broken && L > 40) {
+        // Two parallel slashes with a gap between them, the usual sign for "not to scale".
+        const mx = from.x + dx * 0.45; const my = from.y + dy * 0.45;
+        const gap = 3; const half = 6;
+        const sx = 0.5 * ux - 0.866 * uy; const sy = 0.5 * uy + 0.866 * ux; // 60° to the shaft
+        ctx.lineCap = 'butt';
+        ctx.strokeStyle = r.colors.bg;
+        ctx.lineWidth = 2 * gap;
+        ctx.beginPath();
+        ctx.moveTo(mx - ux * gap, my - uy * gap);
+        ctx.lineTo(mx + ux * gap, my + uy * gap);
+        ctx.stroke();
+        ctx.lineCap = 'round';
+        [-gap, gap].forEach((d) => {
+          const cx = mx + ux * d; const cy = my + uy * d;
+          const slash = (width, ink) => {
+            ctx.strokeStyle = ink;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(cx - sx * half, cy - sy * half);
+            ctx.lineTo(cx + sx * half, cy + sy * half);
+            ctx.stroke();
+          };
+          if (outline) slash(3.5, r.colors.bg);
+          slash(1.8, color);
+        });
+        ctx.lineCap = 'butt';
+      }
       ctx.lineJoin = 'miter';
       if (label) {
         // "F_s" draws F with a small upright s below it.
@@ -740,7 +769,8 @@
     // Force arrows on every moving object or, when objects are selected, a free-body diagram of
     // just those, each force drawn from where it acts. The heaviest object shown has its weight drawn
     // a little longer than it looks (60–160 px). Returns arrows in world coordinates at a
-    // given camera scale, so Fit can make room for them too.
+    // given camera scale, so Fit can make room for them too. A force over three times that weight
+    // is drawn three times as long and marked broken, since it is not to scale.
     r.forceArrows = function forceArrows(scale) {
       if (!app.sim || app.simStale || !app.sim.forcesOn) return [];
       const moving = app.scene.bodies.filter((b) => !b.fixed);
@@ -756,8 +786,9 @@
       return list.map((f) => {
         const F = Math.hypot(f.fx, f.fy);
         if (F < 0.01 * ref) return null;
-        const len = Math.min((unit * F) / ref, 3 * unit);
-        return { from: { x: f.x, y: f.y }, to: { x: f.x + (f.fx / F) * len, y: f.y + (f.fy / F) * len }, label: f.label, body: f.body };
+        const broken = F > 3 * ref;
+        const len = broken ? 3 * unit : (unit * F) / ref;
+        return { from: { x: f.x, y: f.y }, to: { x: f.x + (f.fx / F) * len, y: f.y + (f.fy / F) * len }, label: f.label, body: f.body, broken };
       }).filter(Boolean);
     };
 
@@ -820,7 +851,7 @@
     // Each kind of force has its own color, so the forces on one object are easy to tell apart.
     const FORCE_COLORS = { W: 'forceW', N: 'forceN', f: 'forceF', T: 'forceT', F_s: 'forceS', R: 'forceR', D: 'forceD' };
     function drawForces(forces, labels) {
-      forces.forEach((a, i) => arrow(r.toScreen(a.from), r.toScreen(a.to), r.colors[FORCE_COLORS[a.label]] || r.colors.ink, labels.force(a, i), true));
+      forces.forEach((a, i) => arrow(r.toScreen(a.from), r.toScreen(a.to), r.colors[FORCE_COLORS[a.label]] || r.colors.ink, labels.force(a, i), true, a.broken));
     }
 
     // Object names (with Labels on) and the tags that arrow subscripts refer to, above each object.
