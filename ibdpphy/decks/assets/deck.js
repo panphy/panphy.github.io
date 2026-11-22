@@ -291,9 +291,27 @@
     }
   }
 
+  // A thumbnail holds its photos only while it is near the visible part of the sidebar. Otherwise
+  // every photo in the deck stays decoded at once, and iPad browsers (all WebKit) run short of
+  // memory and paint some photos on the slides as blank white boxes.
+  function holdThumbImages(holder, near) {
+    holder.querySelectorAll('img').forEach(img => {
+      if (near && img.dataset.thumbSrc) {
+        img.src = img.dataset.thumbSrc;
+        delete img.dataset.thumbSrc;
+      } else if (!near && img.getAttribute('src')) {
+        img.dataset.thumbSrc = img.getAttribute('src');
+        img.removeAttribute('src');
+      }
+    });
+  }
+
   // Thumbnails are scaled copies of each slide, with steps shown and motion removed.
   function buildThumbs() {
     const scale = 184 / SLIDE_W;
+    const nearView = 'IntersectionObserver' in window && new IntersectionObserver(entries => {
+      entries.forEach(entry => holdThumbImages(entry.target.querySelector('.thumb-slide'), entry.isIntersecting));
+    }, { root: thumbs, rootMargin: '400px 0px' });
     state.slides.forEach((slide, i) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -309,6 +327,10 @@
       const holder = button.querySelector('.thumb-slide');
       holder.appendChild(copy);
       holder.inert = true;
+      if (nearView) {
+        holdThumbImages(holder, false);
+        nearView.observe(button);
+      }
       button.addEventListener('click', () => {
         // Focus explicitly: Safari does not focus buttons on pointer clicks.
         button.focus({ preventScroll: true });
@@ -542,6 +564,8 @@
     setScripts(deck);
     window.DeckFigures.render();
     state.slides = [...deck.querySelectorAll('.slide')];
+    // Decode photos as they are painted: WebKit's background decoding can leave a slide's photo blank.
+    deck.querySelectorAll('img').forEach(img => { img.decoding = 'sync'; });
     if (window.DeckNotes) window.DeckNotes.collect(state.slides);
     const scatterSvg = deck.querySelector('[data-fig="scatter"] svg');
     if (scatterSvg) state.scatter = { svg: scatterSvg, group: scatterSvg.querySelector('.scatter-live'), labels: scatterSvg.querySelector('.scatter-labels'), particles: [], lastSpawn: null, count: 0, active: false };
