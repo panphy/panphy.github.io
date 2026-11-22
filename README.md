@@ -56,7 +56,7 @@ Then open [localhost:8000](http://localhost:8000). Each app has its own HTML ent
 | `ibdpphy/` | IB DP Physics teaching decks, inventoried in `ibdpphy/index.html` |
 | `.github/` | Repository checks, app tests, and scheduled Supabase keepalive automation |
 
-For editing conventions, caching rules, and verification commands, see [AGENTS.md](AGENTS.md).
+For editing conventions, caching rules, and verification commands, see [AGENTS.md](AGENTS.md). It is the instructions file for AI coding agents (`CLAUDE.md` is the same for Claude Code), and its "Where the rules live" table lists the rest: [`gcsephy/AGENTS.md`](gcsephy/AGENTS.md) and [`ibdpphy/AGENTS.md`](ibdpphy/AGENTS.md) for those sections, and skills in `.agents/skills/` for occasional procedures.
 
 ## License
 
