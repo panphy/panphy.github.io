@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#05060f">
+  <script src="/assets/theme.js"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Worldfall: Reaction Time Game Across the Solar System — PanPhy Labs</title>
+  <meta name="description" content="Catch a falling ball on seven worlds, from the Moon to Jupiter. Learn g on each and measure your reaction time.">
+  <link rel="canonical" href="https://panphy.app/fun/worldfall.html">
+<!-- panphy-discovery -->
+  <meta property="og:title" content="Worldfall: Reaction Time Game Across the Solar System — PanPhy Labs">
+  <meta property="og:description" content="Catch a falling ball on seven worlds, from the Moon to Jupiter. Learn g on each and measure your reaction time.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://panphy.app/fun/worldfall.html">
+  <meta property="og:image" content="https://panphy.app/assets/og-default.png">
+  <meta property="og:site_name" content="PanPhy Labs">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Worldfall: Reaction Time Game Across the Solar System — PanPhy Labs">
+  <meta name="twitter:description" content="Catch a falling ball on seven worlds, from the Moon to Jupiter. Learn g on each and measure your reaction time.">
+  <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Worldfall",
+  "description": "Catch a falling ball on seven worlds, from the Moon to Jupiter. Learn g on each and measure your reaction time.",
+  "url": "https://panphy.app/fun/worldfall.html",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires HTML5 and JavaScript",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "image": "https://panphy.app/assets/og-default.png"
+}
+  </script>
+<!-- /panphy-discovery -->
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="worldfall/game.css">
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
+</head>
+<body data-state="menu">
+  <canvas id="scene" aria-hidden="true"></canvas>
+
+  <header id="hud">
+    <div id="hudLeft">
+      <ol id="pips" aria-label="Worlds completed"></ol>
+      <div id="worldTag"></div>
+    </div>
+    <div id="hudButtons">
+      <button type="button" id="soundBtn" class="iconBtn" aria-label="Mute sound" aria-pressed="false" title="Sound">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path id="soundWaves" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button type="button" id="quitBtn" class="iconBtn" aria-label="Quit to menu" title="Quit">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="readout" role="status" aria-live="polite">
+    <div id="readoutValue"></div>
+    <div id="readoutLabel"></div>
+  </div>
+
+  <main id="menu" class="panel">
+    <h1>Worldfall</h1>
+    <p>Catch the ball before it hits the floor, on seven worlds.</p>
+    <button type="button" id="startBtn" class="primaryBtn">Play</button>
+    <div id="menuBest" hidden>
+      <span>Best <b id="menuBestValue"></b></span>
+      <button type="button" id="clearBtn" class="textBtn">Clear</button>
+    </div>
+    <footer>&copy; PanPhy Labs. All rights reserved. | <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></footer>
+  </main>
+
+  <section id="intro" class="panel" aria-labelledby="introName">
+    <h2 id="introName"></h2>
+    <div id="introFacts">
+      <div><span><i>g</i></span><b id="introG"></b></div>
+      <div><span>Time to floor</span><b id="introFall"></b></div>
+    </div>
+    <p id="introFact"></p>
+    <p id="introSource"></p>
+    <button type="button" id="readyBtn" class="primaryBtn">Ready</button>
+  </section>
+
+  <section id="results" class="panel" aria-labelledby="resultTitle">
+    <h2 id="resultTitle"></h2>
+    <div id="median"></div>
+    <div id="medianLabel">Reaction time (median)</div>
+    <table id="resultTable">
+      <thead><tr><th scope="col">World</th><th scope="col"><i>g</i> (m/s²)</th><th scope="col">Time (ms)</th><th scope="col">Fell (cm)</th></tr></thead>
+      <tbody id="resultRows"></tbody>
+    </table>
+    <div id="resultExtra"></div>
+    <button type="button" id="againBtn" class="primaryBtn">Play again</button>
+  </section>
+
+  <script type="module" src="worldfall/game.js"></script>
+</body>
+</html>
