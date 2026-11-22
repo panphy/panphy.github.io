@@ -4,7 +4,7 @@
 //
 // control({ label, name, min, max, step, value, format, onChange }) returns the row element;
 // `label` may hold math between \( and \), `name` is the plain name for screen readers, `format`
-// turns a value into the text shown, and `row.set(value)` moves the control from code.
+// turns a value into the text shown.
 export function control({ label, name, min, max, step, value, format = String, onChange }) {
   const row = document.createElement('div');
   row.className = 'sim-row';
@@ -47,7 +47,6 @@ export function control({ label, name, min, max, step, value, format = String, o
     button.addEventListener('click', event => { if (event.detail === 0) set(current + dir * step); });
   });
   ['keydown', 'keyup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'wheel'].forEach(type => row.addEventListener(type, event => event.stopPropagation()));
-  row.set = set;
   set(value);
   ready = true;
   return row;

@@ -3,7 +3,7 @@
 // slate; a positive particle is red and an electron blue. Nothing here is terracotta: D.3 has no
 // additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, ball, arrow, fline, text, sub, both, through, sampled, labeled, track, anim, spin, twoState, PLAY, f } = P;
+  const { svg, ball, arrow, fline, text, sub, both, through, sampled, labeled, track, spin, twoState, PLAY, f } = P;
   const positive = (x, y, r = 18) => ball(x, y, r, 'proton');
   const electron = (x, y, r = 16) => ball(x, y, r, 'electron');
   // A magnetic field at right angles to the page: crosses for into the page, dots for out of it.

@@ -233,10 +233,9 @@
   // Starts (dx, dy) away from where it is drawn, then travels there when its step shows.
   const fly = (on, dx, dy, body) => on ? `<g class="fly" style="--fx:${f(dx)}px;--fy:${f(dy)}px">${body}</g>` : body;
 
-  function bohrAtom(cx, cy, labels) {
+  function bohrAtom(cx, cy) {
     let s = shadow(cx, cy + 250, 170);
     s += ring(cx, cy, 120) + ring(cx, cy, 225);
-    if (labels) s += text(cx + 128, cy - 96, 'n = 1', 'lbl mono', 'start') + text(cx + 190, cy - 170, 'n = 2', 'lbl mono', 'start');
     s += cluster(cx, cy, 6, 6, 22);
     [0, Math.PI].forEach(p => { s += orbiter(cx, cy, 120, 120, p, 9); });
     [0.25, 0.75, 1.25, 1.75].forEach(p => { s += orbiter(cx, cy, 225, 225, p * Math.PI, 18); });
@@ -349,7 +348,7 @@
   };
 
   const FIGURES = {
-    hero: () => svg('0 0 560 560', bohrAtom(280, 270, false), 'Carbon atom: a nucleus of protons and neutrons with electrons in two energy levels'),
+    hero: () => svg('0 0 560 560', bohrAtom(280, 270), 'Carbon atom: a nucleus of protons and neutrons with electrons in two energy levels'),
 
     ball: el => svg('0 0 60 60', ball(30, 30, 24, el.dataset.kind), el.dataset.kind),
 
@@ -447,8 +446,6 @@
     },
 
     rutherford: () => svg('0 0 540 500', shadow(270, 470, 170) + nuclearAtom(270, 245, 220, 80, 24, 13, true), 'Nuclear model: a tiny positive nucleus with electrons outside it'),
-
-    bohr: () => svg('0 0 560 560', bohrAtom(280, 270, true), 'Bohr model of carbon: 2 electrons in energy level n = 1 and 4 in n = 2'),
 
     levels: el => {
       const on = animated(el);

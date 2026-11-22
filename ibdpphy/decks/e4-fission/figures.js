@@ -3,9 +3,8 @@
 // the numbers its label gives, and one drawn as a plain sphere stands for the whole nucleus.
 // Hot water and steam are red, cool water blue. Nothing here is terracotta: E.4 has no additional HL content.
 window.DeckFigures.add(P => {
-  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labeled, animated, stepG, track, anim, spin, twoState, PLAY, f, TAU } = P;
+  const { svg, ball, cluster, arrow, text, through, sampled, labeled, animated, stepG, track, anim, spin, twoState, PLAY, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
-  const once = { loop: false };
   const neutron = (x, y, r = 11) => ball(x, y, r, 'neutron', '');
   // Shown or hidden from a given fraction of the run onwards.
   const appear = (at, dur) => anim('opacity', [0, 0, 1, 1], dur, { loop: false, extra: `keyTimes="0;${at};${at + 0.01};1"` });

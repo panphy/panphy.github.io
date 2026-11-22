@@ -2,7 +2,7 @@
 // ../assets/figures.js. Hot is red and cold is blue; particles are teal, energy transfers
 // apricot. Nothing here is terracotta, because B.1 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, through, sampled, labeled, animated, stepG, seeded, track, anim, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, text, through, sampled, labeled, animated, stepG, seeded, track, anim, twoState, PLAY, f, TAU } = P;
   let conductionCount = 0;   // ids for the SMIL runs of data-settle conduction figures
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const atom = (r, color = 'brand-primary') => `<circle r="${r}" style="fill:var(--${color})"/>`;

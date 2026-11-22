@@ -3,7 +3,7 @@
 // adiabatic one terracotta, an isobaric one teal and an isovolumetric one slate; a hot reservoir
 // is red and a cold one blue.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, through, sampled, labeled, seeded, track, anim, twoState, PLAY, f } = P;
+  const { svg, arrow, text, sub, through, labeled, seeded, track, twoState, PLAY, f } = P;
   // Pressure–volume axes, in arbitrary units: X(V) and Y(P) place a point.
   const X = v => 110 + 190 * v, Y = p => 420 - 60 * p;
   const pvAxes = on => arrow(110, 420, 110, 30, 'text-secondary', 2.5) + arrow(110, 420, 790, 420, 'text-secondary', 2.5) + (on ? P.yAxisLabel(88, 225, 'pressure') + text(450, 492, 'volume', 'lbl mono') : '');
@@ -12,7 +12,6 @@ window.DeckFigures.add(P => {
   const curve = (v1, p1, v2, gamma, n = 40) => Array.from({ length: n + 1 }, (_, i) => { const v = v1 + (v2 - v1) * i / n; return [X(v), Y(p1 * (v1 / v) ** gamma)]; });
   const head = (points, at, color) => { const i = Math.max(1, Math.round((points.length - 1) * at)), [x, y] = points[i], [px, py] = points[i - 1]; return `<path d="M-11,-9 L9,0 L-11,9 Z" transform="translate(${f(x)} ${f(y)}) rotate(${f(Math.atan2(y - py, x - px) * 180 / Math.PI)})" style="fill:var(--${color})"/>`; };
   const point = (v, p, label, dx = 14, dy = -12) => `<circle cx="${f(X(v))}" cy="${f(Y(p))}" r="8" style="fill:var(--text-main)"/>` + (label ? text(f(X(v)) + dx, f(Y(p)) + dy, label, 'lbl display', dx < 0 ? 'end' : 'start') : '');
-  const once = { loop: false };
 
   // A box of gas whose atoms never stop: each one bounces between the walls for ever. The box is
   // w wide at first and stretches to w × grow: once, when the figure's PLAY step is shown

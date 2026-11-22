@@ -307,7 +307,6 @@ body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(
   inset: 0;
   display: flex;
   flex-direction: column;
-  padding: 64px 88px 72px;
   visibility: hidden;
   opacity: 0;
   transition: opacity .35s ease, visibility 0s linear .35s;
@@ -315,9 +314,6 @@ body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(
 .slide.active { visibility: visible; opacity: 1; transition: opacity .35s ease; }
 .slide-foot {
   position: absolute;
-  left: 88px;
-  right: 88px;
-  bottom: 28px;
   display: flex;
   justify-content: space-between;
   font: 600 18px var(--font-mono);
@@ -337,29 +333,26 @@ h2 { font-size: 64px; line-height: 1.05; letter-spacing: -.015em; margin: 10px 0
 h3 { font-size: 34px; line-height: 1.15; }
 .mono { font-family: var(--font-mono); }
 .nocase, .facts thead th.nocase { text-transform: none; }
-.lead { font-size: 30px; color: var(--text-secondary); margin: 0; }
+.lead { color: var(--text-secondary); margin: 0; }
 
-.points { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; align-content: start; }
-.points li { position: relative; padding-left: 42px; font-size: 35px; line-height: 1.3; }
+.points { list-style: none; margin: 0; padding: 0; display: grid; align-content: start; }
+.points li { position: relative; }
 .points li::before { content: ""; position: absolute; left: 4px; top: .42em; width: 14px; height: 14px; border-radius: 50%; background: var(--brand-accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-accent), transparent 80%); }
 /* A one-line point with a tall fraction: the dot sits level with the text, not at the top of the line. */
 .points li.frac::before { top: 50%; margin-top: -10px; }
-.points.small li { font-size: 31px; }
-.points.tight { gap: 16px; }
 .points b { color: var(--brand-primary); font-weight: 800; }
-.points .sub { display: block; font-size: .8em; color: var(--text-secondary); }
+.points .sub { display: block; color: var(--text-secondary); }
 .t-proton { color: var(--proton); fill: var(--proton); font-weight: 800; }
 .t-neutron { color: var(--neutron); fill: var(--neutron); font-weight: 800; }
 .t-electron { color: var(--electron); font-weight: 800; }
 .t-alpha { color: var(--alpha); font-weight: 800; }
 .t-photon { color: var(--photon); font-weight: 800; }
-.t-accent { color: var(--brand-accent-strong); font-weight: 800; }
 
 /* Additional higher level. A slide with class "hl" carries a terracotta edge, an "HL only"
    flag in its top corner and a terracotta footer, and its thumbnail is tagged too, so HL content
    cannot be mistaken for standard level. .hl-tag marks one HL item on a mixed slide. */
 .slide.hl::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background: var(--hl); }
-.slide.hl::after { content: "HL only"; position: absolute; top: 0; right: 88px; padding: 18px 24px 12px; border-radius: 0 0 16px 16px; background: var(--hl); color: var(--hl-ink); font: 700 24px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+.slide.hl::after { content: "HL only"; position: absolute; top: 0; padding: 18px 24px 12px; border-radius: 0 0 16px 16px; background: var(--hl); color: var(--hl-ink); font: 700 24px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
 /* Presenting fullscreen on a screen that is not 16:9 leaves a margin round the slide. There
    the bar and flag are drawn on the page instead, so they still reach the screen edges: the
    bar runs the full height of the screen's left edge and the flag hangs from its top edge. */
@@ -369,9 +362,8 @@ body.is-fullscreen:has(#deck .slide.hl.active)::after { content: "HL only"; posi
 .slide.hl .eyebrow { color: var(--hl-text); }
 .slide.hl h1 span, .slide.hl h2 span { color: var(--hl-text); }
 .slide.hl .slide-foot { color: var(--hl-text); opacity: 1; }
-.hl-tag, .sl-tag { display: inline-block; vertical-align: .16em; margin: 0 4px; padding: 2px 12px; border-radius: 999px; font: 700 .58em var(--font-mono); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.hl-tag { display: inline-block; vertical-align: .16em; margin: 0 4px; padding: 2px 12px; border-radius: 999px; font: 700 .58em var(--font-mono); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .hl-tag { background: var(--hl); color: var(--hl-ink); }
-.sl-tag { border: 2px solid var(--brand-primary); color: var(--brand-primary); }
 .thumb.hl .thumb-num::after { content: "HL"; display: block; margin-top: 4px; padding: 1px 0; border-radius: 4px; background: var(--hl); color: var(--hl-ink); font: 700 10px var(--font-mono); text-align: center; }
 /* Only at rest: hovered, focused or current, an HL thumbnail takes the same highlight as any other. */
 .thumb.hl:not(:hover, :focus-visible, [aria-current="true"]) .thumb-frame { border-color: color-mix(in srgb, var(--hl) 55%, var(--card-border)); }
@@ -389,36 +381,26 @@ mjx-container .alpha { fill: var(--alpha); stroke: var(--alpha); }
 mjx-container .electron { fill: var(--electron); stroke: var(--electron); }
 mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
 .slide.hl mjx-container .res { fill: var(--hl-text); stroke: var(--hl-text); }
-.equation.small { font-size: 36px; }
 .eq-note { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: stretch; }
 .eq-note .idea { align-self: center; }
 .equation.left { justify-content: flex-start; }
 .equation .where { margin-left: 26px; font: 500 24px var(--font-body); color: var(--text-secondary); }
-.work { display: grid; gap: 22px; margin: 0; padding: 22px 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); font: 500 29px/1.5 var(--font-body); }
+.work { display: grid; margin: 0; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); font: 500 29px/1.5 var(--font-body); }
 .work > span { display: block; white-space: nowrap; }
-.work .say { font: 600 24px var(--font-mono); letter-spacing: .02em; color: var(--text-secondary); }
-.work .say mjx-container { font-size: 109%; }
-/* A worked example opens on its question; the tighter gap leaves room for it. */
-.work:has(> .ask) { gap: 16px; }
+.work .say { color: var(--text-secondary); }
 .work .ask { font: 700 27px/1.35 var(--font-body); white-space: normal; color: var(--text-main); }
 .work b { color: var(--brand-primary); }
 .slide.hl .work b { color: var(--hl-text); }
 
 /* Layouts */
-.split { flex: 1; min-height: 0; display: grid; grid-template-columns: .86fr 1.26fr; gap: 48px; align-items: center; }
+.split { flex: 1; min-height: 0; display: grid; grid-template-columns: .86fr 1.26fr; align-items: center; }
 .split.wide-fig { grid-template-columns: .76fr 1.38fr; }
 .split.even { grid-template-columns: 1fr 1fr; }
 /* A figure that is played before the text beside it is revealed comes first in the page
    but still sits on the right. */
 .split.fig-first > :first-child { grid-column: 2; grid-row: 1; }
 .split.fig-first > :last-child { grid-column: 1; grid-row: 1; }
-/* An .idea that sums up the figure comes after the panel in the page, so it is revealed
-   after the figure's steps, but still sits under the points on the left. */
-.split.idea-last { grid-template-rows: 1fr auto auto 1fr; row-gap: 26px; }
-.split.idea-last > .stack { grid-area: 2 / 1; }
-.split.idea-last > .idea { grid-area: 3 / 1; }
-.split.idea-last > .panel { grid-area: 1 / 2 / -1 / 3; }
-.stack { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 26px; }
+.stack { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .stack.center { justify-content: center; gap: 44px; }
 .fill { flex: 1; min-height: 0; }
 
@@ -428,7 +410,6 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
   flex-direction: column;
   min-height: 0;
   height: 100%;
-  padding: 18px 22px 20px;
   border: 1px solid var(--card-border);
   border-radius: 24px;
   background: var(--viewer-bg);
@@ -440,7 +421,7 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
 .panel-head { flex-wrap: wrap; row-gap: 6px; }
 .panel-head > span { white-space: nowrap; }
 .panel-head > span:last-child:not(:first-child) { margin-left: auto; }
-.pill { color: var(--text-secondary); font-size: 24px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; letter-spacing: .02em; }
+.pill { color: var(--text-secondary); border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; letter-spacing: .02em; }
 .fig { position: relative; flex: 1; min-height: 0; }
 .fig svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 /* Math typeset in the labels of a 3D model keeps MathJax's own size and sits in the line. */
@@ -448,8 +429,8 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
 .fig .sim-button svg { position: static; inset: auto; }
 .panel .fig { margin: 8px 0; }
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.legend > span { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 5px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 24px; }
-.legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; font-weight: 800; color: #fff; }
+.legend > span { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); }
+.legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; font-weight: 800; color: #fff; }
 .legend .proton { background: var(--proton); }
 .legend .neutron { background: var(--neutron); }
 .legend .electron { background: var(--electron); }
@@ -459,7 +440,7 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
 .legend .undecayed { background: var(--undecayed); }
 .legend .decayed { background: var(--decayed); }
 
-.idea { border-left: 4px solid var(--brand-accent); border-radius: 0 16px 16px 0; padding: 16px 22px; background: var(--muted-bg); font-size: 29px; }
+.idea { border-left: 4px solid var(--brand-accent); border-radius: 0 16px 16px 0; background: var(--muted-bg); }
 .idea b { color: var(--brand-accent-strong); }
 .idea a { font-weight: 700; color: var(--brand-accent-strong); }
 .try { display: inline-flex; align-items: center; gap: 10px; margin-top: 8px; font: 700 25px var(--font-body); color: var(--brand-primary); text-decoration: none; border-bottom: 2px solid color-mix(in srgb, var(--brand-primary), transparent 60%); padding-bottom: 2px; }
@@ -478,13 +459,11 @@ body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mi
 [data-theme="dark"] { --intro-bg: color-mix(in srgb, var(--sand) 10%, #1b1b19); --intro-pattern: color-mix(in srgb, var(--sand) 14%, #262623); }
 .slide:is(.title, .section) { background-color: var(--intro-bg); background-image: radial-gradient(var(--intro-pattern) 1.5px, transparent 1.5px); background-size: 36px 36px; }
 body.is-fullscreen:has(#deck .slide:is(.title, .section).active) { background-color: var(--intro-bg); background-image: radial-gradient(var(--intro-pattern) 1px, transparent 1px); }
-.not-examined { position: absolute; top: 56px; right: 88px; margin: 0; padding: 3px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 700 20px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--text-secondary); }
+.not-examined { position: absolute; top: 56px; margin: 0; padding: 3px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 700 20px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--text-secondary); }
 
 /* Story slides: photographs of the scientists and their apparatus (images/) beside a short
    account. Photos sit to the left of the text, or in a row above it with .band. The
    credits line under the story links each photo to its source. */
-/* On an HL slide the label sits below the "HL only" flag. */
-.slide.hl .not-examined { right: 292px; } /* beside the HL flag */
 .story { flex: 1; min-height: 0; display: grid; grid-template-columns: auto 1fr; gap: 50px; align-items: center; }
 .story.band { grid-template-columns: 1fr; gap: 30px; align-content: center; }
 .story-photos { display: flex; align-items: flex-start; gap: 20px; }
@@ -492,7 +471,7 @@ body.is-fullscreen:has(#deck .slide:is(.title, .section).active) { background-co
 .story-photos figure { margin: 0; }
 .story-photos img { display: block; width: auto; height: var(--photo-h, 360px); border-radius: 16px; border: 1px solid var(--card-border); box-shadow: var(--card-shadow); background: #fff; }
 /* A caption wraps to its photo's width. */
-.story-photos figcaption { width: 0; min-width: 100%; margin-top: 12px; font-size: 24px; line-height: 1.3; color: var(--text-secondary); }
+.story-photos figcaption { width: 0; min-width: 100%; margin-top: 12px; line-height: 1.3; color: var(--text-secondary); }
 .story-photos figcaption b { color: var(--text-main); }
 /* A grid of photos revealed one by one; the caption arrives with the first. */
 .story-photos .photo-grid { display: grid; grid-template-columns: auto auto; gap: 14px; }
@@ -501,12 +480,10 @@ body.is-fullscreen:has(#deck .slide:is(.title, .section).active) { background-co
 /* A wide, shallow picture (a photographed spectrum) set above the text. */
 .story-strip { margin: 0; }
 .story-strip img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--card-border); box-shadow: var(--card-shadow); }
-.story-strip figcaption { margin-top: 10px; font-size: 24px; line-height: 1.3; color: var(--text-secondary); }
+.story-strip figcaption { margin-top: 10px; line-height: 1.3; color: var(--text-secondary); }
 .story-strip figcaption b { color: var(--text-main); }
 .story .points { gap: 18px; }
-.story .points li { font-size: 30px; }
 .story.band .points { grid-template-columns: repeat(3, 1fr); gap: 16px 36px; }
-.story.band .points li { font-size: 28px; }
 .story .stack { flex: none; }
 .credits { margin: 12px 0 0; font-size: 14px; color: var(--text-secondary); }
 .credits a { color: inherit; }
@@ -516,31 +493,27 @@ body.is-fullscreen:has(#deck .slide:is(.title, .section).active) { background-co
 .cards.calc { align-content: center; }
 .cards.calc .card { min-height: 440px; }
 .cards.calc h3 { font-size: 38px; }
-.card { padding: 26px 28px; border: 1px solid var(--card-border); border-radius: 22px; background: var(--card-bg); box-shadow: var(--card-shadow); }
+.card { border: 1px solid var(--card-border); border-radius: 22px; background: var(--card-bg); box-shadow: var(--card-shadow); }
 .card .eyebrow { font-size: 24px; }
 .card h3 { margin: 8px 0 10px; }
-.card p { margin: 0; font-size: 28px; color: var(--text-secondary); line-height: 1.35; }
+.card p { margin: 0; color: var(--text-secondary); line-height: 1.35; }
 
-table.facts { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 28px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 22px; overflow: hidden; box-shadow: var(--card-shadow); }
-.facts th, .facts td { padding: 18px 22px; text-align: left; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+table.facts { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 22px; overflow: hidden; box-shadow: var(--card-shadow); }
+.facts th, .facts td { text-align: left; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
 .facts tr:last-child td { border-bottom: 0; }
 .facts thead th { background: var(--muted-bg); font: 700 24px var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); }
 .facts td:first-child { font-weight: 800; }
 .facts .icon-cell { display: flex; align-items: center; gap: 16px; }
 .facts .icon-cell .fig { flex: none; width: 52px; height: 52px; }
 .facts .num { font-family: var(--font-mono); font-weight: 600; }
-table.facts.big { font-size: 34px; }
-.facts.big td { padding: 26px 26px; }
-table.facts.compare { table-layout: fixed; font-size: 30px; }
+table.facts.compare { table-layout: fixed; }
 .facts.compare td { padding: 18px 24px; }
 .facts.compare th:first-child { width: 22%; }
 .facts.compare th:nth-child(2) { width: 22%; }
 .facts.compare th:nth-child(3) { width: 25%; }
-.facts.big thead th { font-size: 24px; padding: 20px 26px; }
+.facts.big thead th { padding: 20px 26px; }
 .facts.big .icon-cell .fig { width: 68px; height: 68px; }
 
-/* Keeps a nuclide and its trailing punctuation together. */
-.glue { display: inline-flex; align-items: center; }
 /* Rows holding nuclides: center text, arrows and symbols on one line. */
 .eqrow { display: flex; align-items: center; flex-wrap: wrap; gap: 0 .35em; }
 .equation { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 18px 24px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); font: 600 44px var(--font-mono); }
@@ -549,9 +522,6 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .eq-row .idea { display: flex; align-items: center; gap: 12px; }
 .calc { display: grid; grid-template-columns: auto auto; column-gap: 14px; row-gap: 2px; align-items: baseline; }
 .calc > span:nth-child(even) { text-align: right; }
-.calc-label { font: 600 .62em var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
-.eq-check { margin: 10px 0 0; text-align: center; font: 600 24px var(--font-mono); color: var(--text-secondary); }
-.eq-check b { color: var(--brand-accent-strong); }
 
 /* Title and section slides */
 .slide.title { justify-content: center; }
@@ -575,26 +545,26 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .tl .fig { width: 240px; height: 240px; flex: none; padding: 14px; border-radius: 50%; background: var(--viewer-bg); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); }
 .tl .year { margin-top: 20px; font: 600 24px var(--font-mono); color: var(--brand-primary); }
 .tl h3 { font-size: 32px; margin: 6px 0 8px; }
-.tl p { margin: 0; font-size: 26px; color: var(--text-secondary); line-height: 1.3; }
+.tl p { margin: 0; color: var(--text-secondary); line-height: 1.3; }
 
 /* Observation → conclusion rows */
-.obs { display: grid; gap: 16px; }
-.obs-row { display: grid; grid-template-columns: 1fr 36px 1fr; align-items: center; gap: 12px; }
-.obs-row > div { padding: 16px 20px; border-radius: 16px; border: 1px solid var(--card-border); background: var(--card-bg); font-size: 28px; line-height: 1.25; }
+.obs { display: grid; }
+.obs-row { display: grid; align-items: center; gap: 12px; }
+.obs-row > div { border-radius: 16px; border: 1px solid var(--card-border); background: var(--card-bg); line-height: 1.25; }
 .obs-row > div:first-child { border-left: 4px solid var(--alpha); }
 .obs-row > div:last-child { border-left: 4px solid var(--brand-accent); }
-.obs-row .to { font-size: 30px; color: var(--text-secondary); text-align: center; }
-.obs-head { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 12px; font: 700 24px var(--font-body); letter-spacing: .06em; color: var(--text-secondary); }
+.obs-row .to { color: var(--text-secondary); text-align: center; }
+.obs-head { display: grid; gap: 12px; font: 700 24px var(--font-body); letter-spacing: .06em; color: var(--text-secondary); }
 .obs-head span:last-child { grid-column: 3; }
 
 /* Quiz */
 /* Three rows of two-line questions have to end clear of the slide footer. */
-.quiz { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; align-content: start; }
-.q { display: flex; flex-direction: column; gap: 10px; padding: 17px 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
-.q p { margin: 0; font-size: 29px; font-weight: 700; line-height: 1.3; }
+.quiz { display: grid; grid-template-columns: 1fr 1fr; align-content: start; }
+.q { display: flex; flex-direction: column; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
+.q p { margin: 0; font-weight: 700; line-height: 1.3; }
 .eqline { display: inline-flex; align-items: center; gap: 10px; }
 .q .n { display: inline-block; margin-right: 10px; font: 600 24px var(--font-mono); color: var(--brand-primary); }
-.q .ans { margin-top: auto; padding: 10px 16px; border-radius: 12px; background: #E9F0E2; color: #33502A; border: 1px solid #7C9A69; font-size: 27px; font-weight: 700; }
+.q .ans { margin-top: auto; padding: 10px 16px; border-radius: 12px; background: #E9F0E2; color: #33502A; border: 1px solid #7C9A69; font-weight: 700; }
 [data-theme="dark"] .q .ans { background: #1F2A1B; color: #CFE2C2; border-color: #96B083; }
 .step { transition: opacity .3s ease, transform .3s ease; }
 .step:not(.shown) { opacity: 0; transform: translateY(8px); }
@@ -603,9 +573,9 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 /* Bottom margin keeps the last row of cards clear of the slide footer. */
 .terms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
 h2:has(+ .terms) { margin-bottom: 24px; }
-.term { padding: 16px 20px; border: 1px solid var(--card-border); border-radius: 18px; background: var(--card-bg); box-shadow: var(--card-shadow); }
-.term b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 32px; color: var(--brand-primary); }
-.term > span { display: block; font-size: 26px; color: var(--text-secondary); line-height: 1.3; position: relative; padding-left: 24px; }
+.term { border: 1px solid var(--card-border); border-radius: 18px; background: var(--card-bg); box-shadow: var(--card-shadow); }
+.term b { display: block; font-family: var(--font-display); font-weight: 400; color: var(--brand-primary); }
+.term > span { display: block; color: var(--text-secondary); line-height: 1.3; position: relative; padding-left: 24px; }
 .term > span + span { margin-top: 4px; }
 .term > b + span { margin-top: 6px; }
 /* Same dot as .points bullets, scaled to the card text. Direct children only, so a span inside the text stays inline. */
@@ -613,18 +583,16 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 
 /* SVG styling */
 .sym { fill: #fff; text-anchor: middle; dominant-baseline: central; font-family: var(--font-body); font-weight: 800; }
-.lbl { font-family: var(--font-body); font-size: 28px; fill: var(--text-secondary); }
-.lbl.mono { font-family: var(--font-mono); font-size: 26px; }
-.lbl.small { font-size: 24px; }
+.lbl { font-family: var(--font-body); fill: var(--text-secondary); }
+.lbl.mono { font-family: var(--font-mono); }
 .lbl.strong { font-weight: 700; fill: var(--text-main); }
-.lbl.display { font-family: var(--font-display); font-size: 35px; fill: var(--text-main); }
+.lbl.display { font-family: var(--font-display); fill: var(--text-main); }
 .lbl.italic { font-style: italic; }
 .halo { paint-order: stroke; stroke: var(--viewer-bg); stroke-width: 6px; stroke-linejoin: round; }
 /* Safari repaints moving SVG text by its box, and an italic glyph's tail (y, f) overhangs it, leaving a
    trail as the label moves. An invisible stroke widens the repainted box. */
 #deck g:has(> animateTransform, > animateMotion) .lbl.italic:not(.halo) { stroke: transparent; stroke-width: 16px; }
-.lbl.greek { font-family: var(--font-display); font-size: 38px; }
-.lbl.readout { font-family: var(--font-mono); font-size: 40px; font-weight: 600; fill: var(--text-main); }
+.lbl.greek { font-family: var(--font-display); }
 .lbl.a, .big-num.a { fill: var(--brand-primary); }
 .lbl.z, .big-num.z { fill: var(--brand-accent-strong); }
 .big-symbol { font-family: var(--font-display); font-size: 230px; fill: var(--text-main); }
@@ -659,9 +627,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .cable { fill: none; stroke: var(--text-secondary); stroke-width: 3; }
 .axis { stroke: var(--text-main); stroke-width: 2.5; }
 .curve { fill: none; stroke: var(--undecayed); stroke-width: 5; stroke-linecap: round; }
-.roller { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
 .body { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
-.stem { fill: none; stroke: #6B4F2A; stroke-width: 5; stroke-linecap: round; }
 .divider { stroke: var(--card-border); stroke-width: 2; }
 .slide.active .draw { stroke-dasharray: 1400; stroke-dashoffset: 1400; animation: draw 2.4s ease forwards .3s; }
 .slide.active .pulse { animation: pulse 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
@@ -693,9 +659,6 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .loop-buttons { margin-top: 14px; }
 .loop-buttons .sim-button { display: inline-grid; place-items: center; width: 84px; min-width: 0; padding: 0; }
 .loop-buttons .sim-button svg { width: 30px; height: 30px; fill: currentColor; }
-.panel-head .loop-buttons { margin: 0 0 0 auto; gap: 10px; }
-.panel-head .loop-buttons .sim-button { width: 64px; height: 48px; }
-.panel-head .loop-buttons .sim-button svg { width: 26px; height: 26px; }
 @keyframes pulse { 50% { transform: scale(1.08); opacity: .75; } }
 /* A sphere falling through a fluid (A.2): position and speed at steps of the fall, for a speed
    that rises as 1 − e^(−t/τ) with τ = 0.9 s over a 5 s fall. */
@@ -759,9 +722,6 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   #deck .step:not(.shown) .wave-window { transform: scaleX(0); transition: none; }
   #deck .on-arrival { transition: opacity .3s ease var(--wait); }
   #deck .step:not(.shown) .on-arrival { opacity: 0; transition: none; }
-  /* Random decay: each nucleus changes at its own moment. */
-  #deck .pop { transition: opacity .25s ease var(--d); }
-  #deck .step:not(.shown) .pop { opacity: 0; transition-delay: 0s; }
   /* Alpha scattering close-up: a track appears with its observation row. */
   #deck .with-row { transition: opacity .4s ease; }
   #deck .slide:not(:has(.obs-row:nth-child(3).shown)) .with-row-1, #deck .slide:not(:has(.obs-row:nth-child(4).shown)) .with-row-2 { opacity: 0; }
@@ -769,16 +729,11 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 /* Thumbnails show a built figure complete. */
 .thumb-slide svg .step:not(.shown) { opacity: 1; transform: none; }
 
-.slide .uses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.use .fig { height: 250px; margin-bottom: 14px; }
-.use h3 { font-size: 40px; }
-.use p { font-size: 26px; }
-
 @media (prefers-reduced-motion: reduce) {
   .slide, .step, .progress span { transition: none; }
   .slide.active .draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
   .slide.active .pulse { animation: none; }
-  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .pop, #deck .with-row, #deck .on-arrival { transition: none; }
+  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .with-row, #deck .on-arrival { transition: none; }
 }
 
 @media (max-width: 640px) {
@@ -816,7 +771,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 }
 
 /* Copyright line on the title slide */
-.slide-copyright { position: absolute; right: 88px; bottom: 28px; margin: 0; font: 600 15px var(--font-mono); letter-spacing: .06em; color: var(--text-secondary); opacity: .8; }
+.slide-copyright { position: absolute; margin: 0; font: 600 15px var(--font-mono); letter-spacing: .06em; color: var(--text-secondary); opacity: .8; }
 
 /* Keep a typeset quantity and its plain-text unit on the same line. */
 .equation-inline { white-space: nowrap; text-transform: none; }

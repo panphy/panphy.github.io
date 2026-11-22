@@ -3,7 +3,7 @@
 // the frame S′ that moves relative to it is terracotta, the color of this higher level topic;
 // light is apricot. On space–time diagrams the time axis is ct and light travels at 45°.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, PLAY, f } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const at = (x, y, body) => `<g transform="translate(${f(x)} ${f(y)})">${body}</g>`;
   const car = (w, h, color = 'hl') => `<rect x="${-w / 2}" y="${-h}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--${color}) 16%, var(--viewer-bg));stroke:var(--${color});stroke-width:3"/><circle cx="${-w / 2 + 34}" cy="6" r="13" style="fill:var(--text-secondary)"/><circle cx="${w / 2 - 34}" cy="6" r="13" style="fill:var(--text-secondary)"/>`;
