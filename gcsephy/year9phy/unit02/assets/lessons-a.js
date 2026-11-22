@@ -16,9 +16,8 @@
   const lessons = [
     // ============================================================ 1
     {
-      n: 1, accent: "spark", week: "1", title: "Energy stores and systems",
+      n: 1, accent: "spark", title: "Energy stores and systems",
       spec: "AQA Physics 4.1.1.1; Combined Science 6.1.1.1",
-      mapLine: "The energy stores, four ways to transfer energy, systems",
       big: "A skateboarder rolls down one side of a ramp and up the other, but never quite gets back to the starting height. Where did the energy go?",
       goals: ["name the energy stores and give an example of each", "name the four ways energy is transferred", "explain what a system is", "describe the energy transfers when something changes"],
       keywords: ["energy store", "transfer", "system", "closed system", "joule (J)"],
@@ -98,9 +97,8 @@
 
     // ============================================================ 2
     {
-      n: 2, accent: "cyan", week: "1", title: "The kinetic store",
+      n: 2, accent: "cyan", title: "The kinetic store",
       spec: "AQA Physics 4.1.1.2; Combined Science 6.1.1.2",
-      mapLine: R`\(E_k = \tfrac{1}{2}\,m\,v^2\); grams to kilograms; double the speed, four times the energy`,
       big: "A car travels twice as fast. Does it have twice as much energy in its kinetic store, or more?",
       goals: ["say what the kinetic store depends on", R`calculate kinetic energy with \(E_k = \tfrac{1}{2}\,m\,v^2\)`, "convert grams to kilograms", "explain why doubling the speed gives four times the energy"],
       keywords: ["kinetic store", "mass (kg)", "speed (m/s)", "squared"],

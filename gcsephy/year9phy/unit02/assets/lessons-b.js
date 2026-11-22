@@ -13,9 +13,8 @@
   const lessons = [
     // ============================================================ 3
     {
-      n: 3, accent: "copper", week: "2", title: "The gravitational potential store",
+      n: 3, accent: "copper", title: "The gravitational potential store",
       spec: "AQA Physics 4.1.1.2; Combined Science 6.1.1.2",
-      mapLine: R`What \(g\) means, \(E_p = m\,g\,h\), height gained, finding \(h\) or \(m\)`,
       big: "Carrying a bag up the stairs is hard work. Where does that energy go, and can you get it back?",
       goals: [R`explain what \(g = 9.8\) N/kg means`, R`calculate energy with \(E_p = m\,g\,h\)`, "use the height gained", "rearrange to find a height or a mass"],
       keywords: ["gravitational potential store", "gravitational field strength", "newton (N)", "height gained"],
@@ -80,9 +79,8 @@
 
     // ============================================================ 4
     {
-      n: 4, accent: "violet", week: "2", title: "Stretching springs",
+      n: 4, accent: "violet", title: "Stretching springs",
       spec: "AQA Physics 4.5.3; Combined Science 6.5.3",
-      mapLine: R`Two forces, elastic and inelastic, extension, \(F = k\,e\), two graphs`,
       big: "A trampoline spring stretches a lot when you land on it. A car's suspension spring hardly moves when you sit in the car. What makes one spring stiffer than another?",
       goals: ["explain why two forces are needed to stretch a spring", "tell elastic and inelastic deformation apart", R`use \(F = k\,e\) to find a force, a spring constant or an extension`, "plot two graphs of the same results and find the spring constant"],
       keywords: ["extension", "spring constant (N/m)", "elastic deformation", "inelastic deformation", "limit of proportionality"],
@@ -164,9 +162,8 @@
 
     // ============================================================ 5
     {
-      n: 5, accent: "leaf", week: "3", title: "The elastic potential store",
+      n: 5, accent: "leaf", title: "The elastic potential store",
       spec: "AQA Physics 4.1.1.2, 4.5.3; Combined Science 6.1.1.2, 6.5.3",
-      mapLine: R`\(E_e = \tfrac{1}{2}\,k\,e^2\); two-step questions; double the stretch, four times the energy`,
       big: "An archer pulls a bowstring back twice as far. Does the arrow get twice as much energy, or more?",
       goals: [R`calculate elastic potential energy with \(E_e = \tfrac{1}{2}\,k\,e^2\)`, R`find \(k\) first when you are given a force`, "explain why doubling the extension gives four times the energy", "say when the equation can be used"],
       keywords: ["elastic potential store", "work done", "compression"],

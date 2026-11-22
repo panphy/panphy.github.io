@@ -509,7 +509,7 @@ window.DeckSvgTex = {
     penetration: el => {
       const on = animated(el);
       let s = `<rect x="20" y="70" width="64" height="290" rx="12" style="fill:var(--lead)"/>` + text(52, 392, 'SOURCE', 'lbl mono small');
-      s += `<rect x="300" y="52" width="7" height="326" rx="2" style="fill:var(--paper);stroke:var(--input-border)"/>`;
+      s += `<rect x="300" y="52" width="7" height="326" rx="2" style="fill:var(--absorber-paper, var(--paper));stroke:var(--input-border)"/>`;
       s += `<rect x="520" y="52" width="18" height="326" rx="3" style="fill:var(--aluminium)"/>`;
       s += `<rect x="730" y="52" width="52" height="326" rx="4" style="fill:var(--lead)"/>`;
       s += text(303, 30, 'paper', 'lbl mono strong') + text(529, 22, 'aluminium', 'lbl mono strong') + text(529, 46, 'few mm', 'lbl mono') + text(756, 22, 'lead', 'lbl mono strong') + text(756, 46, 'several cm', 'lbl mono');
@@ -563,7 +563,7 @@ window.DeckSvgTex = {
       return svg('0 0 240 180', s, 'Smoke alarm: alpha source ionises air between two plates');
     },
     'use-gauge': () => {
-      let s = `<circle cx="60" cy="62" r="20" class="roller"/><circle cx="60" cy="118" r="20" class="roller"/><rect x="20" y="84" width="200" height="12" rx="2" style="fill:var(--paper);stroke:var(--input-border)"/>`;
+      let s = `<circle cx="60" cy="62" r="20" class="roller"/><circle cx="60" cy="118" r="20" class="roller"/><rect x="20" y="84" width="200" height="12" rx="2" style="fill:var(--absorber-paper, var(--paper));stroke:var(--input-border)"/>`;
       s += `<rect x="140" y="140" width="40" height="30" rx="6" style="fill:var(--lead)"/><rect x="138" y="14" width="44" height="30" rx="8" style="fill:var(--aluminium)"/>`;
       s += arrow(160, 138, 160, 104, 'electron', 2.5) + `<line x1="160" y1="78" x2="160" y2="52" style="stroke:var(--electron)" stroke-width="2.5" stroke-dasharray="4 4" marker-end="url(#m-electron)"/>`;
       return svg('0 0 240 180', s, 'Thickness gauge: beta source below the sheet, detector above');

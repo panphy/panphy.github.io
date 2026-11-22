@@ -13,7 +13,6 @@
     {
       n: 6, accent: "spark", title: "Nuclear equations",
       spec: "AQA Physics 4.4.2.2; Combined Science 6.4.2.2",
-      mapLine: "Symbols for each radiation, balancing mass and atomic numbers",
       big: "Radium-226 decays and becomes radon, a completely different element. How can we predict exactly which nucleus it turns into?",
       goals: ["use the symbols for alpha, beta, gamma and neutron radiation", "balance a nuclear equation using mass numbers and atomic numbers", "work out the new nucleus after alpha or beta decay", "explain the effect of each decay on the mass and charge of the nucleus"],
       keywords: ["nuclear equation", "parent nucleus", "daughter nucleus", "mass number", "atomic number", "balance"],
@@ -67,7 +66,6 @@
     {
       n: 7, accent: "leaf", title: "Properties and uses of radiation",
       spec: "AQA Physics 4.4.2.1; Combined Science 6.4.2.1",
-      mapLine: "Ionising power, range and penetration; choosing the right source",
       big: "A smoke alarm uses alpha radiation, a paper mill uses beta and a hospital uses gamma. Why not use the same radiation for all three?",
       goals: ["compare the ionising power, range in air and penetration of alpha, beta and gamma", "explain why more ionising radiation is less penetrating", "identify radiation from absorber data", "choose a suitable source for a use and justify the choice"],
       keywords: ["ionising", "ion", "penetration", "range", "absorbed", "smoke alarm", "thickness gauge", "tracer"],
@@ -113,7 +111,6 @@
     {
       n: 8, accent: "cyan", title: "Half-life and random decay",
       spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3",
-      mapLine: "Random but predictable, defining half-life, reading a decay curve",
       big: "You cannot predict when one nucleus will decay. So how can we say that half of a sample of iodine-131 will be left after 8 days?",
       goals: ["explain why decay is random but a large sample is predictable", "define half-life in two ways", "find the half-life from a decay curve", "plot a decay curve from data"],
       keywords: ["half-life", "random", "decay curve", "sample", "count rate", "activity"],
@@ -173,7 +170,6 @@
     {
       n: 9, accent: "copper", title: "Half-life calculations",
       spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3",
-      mapLine: "Counting half-lives, finding a half-life from data, net decline as a ratio",
       big: "A hospital uses iodine-131, with a half-life of 8 days. How long before less than 1% of it is left, and why does that matter?",
       goals: ["count half-lives to find how much is left", "find a half-life from data", "find how long it takes to fall to a given value", "work out the net decline as a ratio"],
       keywords: ["half-life", "number of half-lives", "initial activity", "fraction remaining", "net decline", "ratio"],
@@ -223,7 +219,6 @@
     {
       n: 10, accent: "violet", title: "Contamination and irradiation",
       spec: "AQA Physics 4.4.2.4; Combined Science 6.4.2.4",
-      mapLine: "Two ways to be exposed, hazards inside and outside the body, staying safe, peer review",
       big: "Supermarkets can sell food treated with gamma rays to kill bacteria. Does eating it make you radioactive?",
       goals: ["explain the difference between irradiation and contamination", "compare the hazards of alpha, beta and gamma inside and outside the body", "describe precautions for working with radioactive sources", "explain why studies of radiation effects are published and peer reviewed"],
       keywords: ["irradiation", "contamination", "hazard", "precaution", "dosimeter", "peer review"],
@@ -259,7 +254,6 @@
         { t: "q", p: "Why is it important that studies of the effects of radiation on people are published? Tick <strong>one</strong> box.", mcq: { cols: 1, o: ["So that other scientists can check the findings (peer review).", "So that the scientists become famous.", "So that the results can never be changed.", "So that radiation becomes safe."], c: 0 } },
         { t: "q", type: "Challenge", p: "Radon-222 is a gas given off by some rocks, and it emits alpha particles. Explain why radon in homes is a health risk, even though alpha cannot pass through skin.", lines: 3, a: "Radon gas is breathed in, so it contaminates the lungs: the source is inside the body. The alpha particles are strongly ionising and damage lung cells directly, which can cause cancer." },
       ],
-      examSplit: true,
       exam: [
         { p: "Explain the difference between irradiation and contamination.", marks: 2, lines: 2, a: "Irradiation: an object is exposed to radiation from a source outside it and does not become radioactive (1). Contamination: radioactive atoms get onto or into an object, so it keeps emitting radiation (1)." },
         { p: "A technician uses a sealed gamma source. Describe two precautions the technician should take, and explain how each one reduces the risk.", marks: 4, lines: 4, a: "Any two, each with a reason: use tongs / keep a distance (1) so less radiation reaches the body (1); keep exposure time short (1) so the total dose is lower (1); store in a lead-lined box (1) because lead absorbs gamma (1); wear a dosimeter (1) to monitor the dose (1)." },

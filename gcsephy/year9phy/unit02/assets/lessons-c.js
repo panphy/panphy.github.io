@@ -13,9 +13,8 @@
   const lessons = [
     // ============================================================ 6
     {
-      n: 6, accent: "spark", week: "3", title: "Conservation of energy",
+      n: 6, accent: "spark", title: "Conservation of energy",
       spec: "AQA Physics 4.1.2.1, 4.1.1.1; Combined Science 6.1.2.1, 6.1.1.1",
-      mapLine: "Closed systems, falling and swinging, energy bar charts, dissipation",
       big: "A heavy pendulum is pulled back to touch your nose and let go. When it swings back, will it hit you?",
       goals: ["state the principle of conservation of energy", "follow energy from one store to another in a closed system", "use conservation of energy in calculations", "draw energy bar charts", "explain why real systems lose some useful energy"],
       keywords: ["conservation of energy", "closed system", "dissipated", "energy bar chart"],
@@ -77,9 +76,8 @@
 
     // ============================================================ 7
     {
-      n: 7, accent: "cyan", week: "4", title: "Power",
+      n: 7, accent: "cyan", title: "Power",
       spec: "AQA Physics 4.1.1.4; Combined Science 6.1.1.4",
-      mapLine: R`Power as a rate, watts, \(P = \dfrac{E}{t}\), how powerful are you?`,
       big: "Two students carry the same bag up the same stairs. One runs and one walks. Who transferred more energy? Who was more powerful?",
       goals: ["say what power means", "state that 1 watt is 1 joule per second", R`calculate power with \(P = \dfrac{E}{t}\), and find \(E\) or \(t\)`, "convert kW to W, kJ to J and minutes to seconds"],
       keywords: ["power", "watt (W)", "kilowatt (kW)", "rate"],
@@ -137,9 +135,8 @@
 
     // ============================================================ 8
     {
-      n: 8, accent: "copper", week: "4", title: "Wasted energy",
+      n: 8, accent: "copper", title: "Wasted energy",
       spec: "AQA Physics 4.1.2.1; Combined Science 6.1.2.1",
-      mapLine: "Dissipation, lubrication, thermal conductivity, insulation, design an Eco House",
       big: "A hot chocolate always goes cold. Where does the energy go, and how can you slow it down?",
       goals: ["explain what “dissipated” means and where the energy ends up", "explain how lubrication reduces unwanted energy transfers", "explain how thermal conductivity and wall thickness affect how fast a house cools", "suggest and explain ways to insulate a home"],
       keywords: ["dissipated", "friction", "lubrication", "conduction", "thermal conductivity", "thermal insulator"],
@@ -204,9 +201,8 @@
 
     // ============================================================ 9
     {
-      n: 9, accent: "violet", week: "5", title: "Efficiency",
+      n: 9, accent: "violet", title: "Efficiency",
       spec: "AQA Physics 4.1.2.2; Combined Science 6.1.2.2",
-      mapLine: "Efficiency from energy or power, decimals and percentages, Sankey diagrams",
       big: "An old filament lamp and an LED give out the same light. Why does the LED cost much less to run?",
       goals: ["calculate efficiency as a decimal and as a percentage", "explain why efficiency can never be more than 100%", "find the useful output or the total input from the efficiency", "draw and read Sankey diagrams", "describe ways to increase efficiency"],
       keywords: ["efficiency", "useful output", "wasted output", "total input", "Sankey diagram"],
