@@ -49,23 +49,13 @@ jobs:
         env:
           PAGES: ${{ steps.pick.outputs.pages }}
         run: node .github/scripts/a11y-smoke.mjs $PAGES
-      - name: Deck text size
+      - name: Deck text size and contrast
         if: steps.pick.outputs.decks != 'none'
         env:
           DECKS: ${{ steps.pick.outputs.decks }}
         run: |
           if [ "$DECKS" = "all" ]; then
-            node .github/scripts/deck-text.mjs
+            node .github/scripts/deck-check.mjs
           else
-            node .github/scripts/deck-text.mjs $DECKS
-          fi
-      - name: Deck contrast
-        if: steps.pick.outputs.contrast != 'none'
-        env:
-          DECKS: ${{ steps.pick.outputs.contrast }}
-        run: |
-          if [ "$DECKS" = "all" ]; then
-            node .github/scripts/deck-contrast.mjs
-          else
-            node .github/scripts/deck-contrast.mjs $DECKS
+            node .github/scripts/deck-check.mjs $DECKS
           fi
