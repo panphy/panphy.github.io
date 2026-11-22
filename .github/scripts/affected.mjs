@@ -14,13 +14,15 @@
        (a '../' path in the test, such as sw.js, index.html or assets/graph-range.js, or a
        repository path such as 'misc/panphyplotog/js/fit-core.js');
      - the accessibility check on its pages that are in sitemap.xml.
-   A changed check script runs only the checks that use it (CHECK_FILES). Changes to assets/,
-   the rest of .github/, manifest.json or any file not covered below run everything.
-   Teaching decks (gcsephy/decks/, ibdpphy/decks/) get the text size and contrast checks when their
-   page or a local file it loads (a <link href> or <script src>, such as a unit's figures.js) changes.
+   A changed check script runs only the checks that use it (CHECK_FILES). For app tests and pages,
+   changes to assets/, the rest of .github/, manifest.json or any file not covered below run everything.
+   Teaching decks (gcsephy/decks/, ibdpphy/decks/) get the deck check when their page or a file it
+   loads changes, directly or through a stylesheet or script, in assets/ too. A baseline change
+   checks the decks whose entries changed. deck-check.mjs, headless.mjs, this file and checks.yml
+   check every deck, as do manual runs and the Monday run.
 
    No dependencies. In GitHub Actions it writes `tests`, `a11y` (all, pages or none), `pages`,
-   `decks` and `contrast` (all, none or a list) outputs. */
+   and `decks` (all, none or a list) outputs. */
 import { execFileSync } from "node:child_process";
 import { appendFileSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -35,15 +37,15 @@ const RUN_ALL = [/^assets\//, /^\.github\//, /^manifest\.json$/];
 // affected.mjs and checks.yml are not here: a change to them runs everything.
 const CHECK_FILES = {
   ".github/scripts/check.mjs": [],
-  ".github/scripts/headless.mjs": ["a11y", "decks", "contrast"],
+  ".github/scripts/headless.mjs": ["a11y", "decks"],
   ".github/scripts/a11y-smoke.mjs": ["a11y"],
-  ".github/scripts/deck-text.mjs": ["decks"],
-  ".github/scripts/deck-text-baseline.json": ["decks"],
-  ".github/scripts/deck-contrast.mjs": ["contrast"],
-  ".github/scripts/deck-contrast-baseline.json": ["contrast"],
+  ".github/scripts/deck-check.mjs": ["decks"],
+  ".github/scripts/deck-text-baseline.json": [],
+  ".github/scripts/deck-contrast-baseline.json": [],
   ".github/workflows/deploy.yml": [],
   ".github/workflows/supabase-keepalive.yml": []
 };
+const DECK_BASELINES = [".github/scripts/deck-text-baseline.json", ".github/scripts/deck-contrast-baseline.json"];
 const isShared = (file) => !(file in CHECK_FILES) && RUN_ALL.some((pattern) => pattern.test(file));
 const checkScriptsNeed = (files, check) => files.some((file) => CHECK_FILES[file]?.includes(check));
 // Root files handled below: tests that read them run, and changed or newly listed pages are checked.
@@ -116,23 +118,56 @@ function changedFiles(base) {
   return { fork, files: [...new Set(lines(git("diff", "--name-only", "--no-renames", fork)))] };
 }
 
-// Every teaching deck and the local files its page loads.
+// A local file named in a page, stylesheet or script: quoted, or in url(...).
+const LOCAL_REF = /["'`(]\s*((?:\.{0,2}\/)*[\w@%.-]+(?:\/[\w@%.-]+)*\.(?:css|js|mjs|json|woff2?))(?:[?#][^"'`)\s]*)?\s*["'`)]/g;
+
+// Every teaching deck and the tracked files it loads, directly or through another file.
 function findDecks() {
+  const tracked = new Set(lines(git("ls-files")));
+  const refsOf = new Map();
+  const refs = (file) => {
+    if (!refsOf.has(file)) {
+      const found = new Set();
+      for (const [, ref] of read(file).matchAll(LOCAL_REF)) {
+        const target = ref.startsWith("/") ? ref.slice(1) : path.posix.normalize(path.posix.join(path.posix.dirname(file), ref));
+        if (tracked.has(target) && target !== file) found.add(target);
+      }
+      refsOf.set(file, [...found]);
+    }
+    return refsOf.get(file);
+  };
   return lines(git("ls-files", "gcsephy/decks/*/index.html", "ibdpphy/decks/*/index.html")).map((deck) => {
     const uses = new Set([deck]);
-    for (const [, ref] of read(deck).matchAll(/<(?:link|script)\b[^>]*?\b(?:href|src)="([^"]+)"/g)) {
-      if (/^([a-z][a-z0-9+.-]*:|\/\/|#|data:)/i.test(ref)) continue;
-      const clean = ref.split(/[?#]/)[0];
-      uses.add(clean.startsWith("/") ? clean.slice(1) : path.posix.normalize(path.posix.join(path.posix.dirname(deck), clean)));
+    const queue = [deck];
+    while (queue.length) {
+      const file = queue.pop();
+      if (!/\.(html|css|js|mjs)$/.test(file)) continue;
+      for (const target of refs(file)) if (!uses.has(target)) { uses.add(target); queue.push(target); }
     }
     return { deck, uses };
   });
 }
 
-export function selectDecks(files, { all = false, check = "decks" } = {}) {
-  const decks = findDecks();
-  if (all || files.some(isShared) || checkScriptsNeed(files, check)) return "all";
-  const chosen = decks.filter(({ uses }) => files.some((file) => uses.has(file))).map(({ deck }) => deck);
+// The decks whose entries differ between the base and this branch in a changed baseline.
+function baselineDecks(files, fork) {
+  const changed = new Set();
+  for (const file of DECK_BASELINES.filter((name) => files.includes(name))) {
+    if (!fork) return null;
+    const before = JSON.parse(git("show", `${fork}:${file}`));
+    const after = JSON.parse(read(file));
+    for (const deck of new Set([...Object.keys(before), ...Object.keys(after)])) {
+      if (JSON.stringify(before[deck]) !== JSON.stringify(after[deck])) changed.add(deck);
+    }
+  }
+  return changed;
+}
+
+export function selectDecks(files, { all = false, fork = null } = {}) {
+  const runsEverything = (file) => file.startsWith(".github/") && !(file in CHECK_FILES);
+  if (all || files.some(runsEverything) || checkScriptsNeed(files, "decks")) return "all";
+  const fromBaselines = baselineDecks(files, fork);
+  if (!fromBaselines) return "all";
+  const chosen = findDecks().filter(({ deck, uses }) => fromBaselines.has(deck) || files.some((file) => uses.has(file))).map(({ deck }) => deck);
   return chosen.length ? chosen.sort() : "none";
 }
 
@@ -198,15 +233,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const { fork, files } = changedFiles(option("--base") || "origin/main");
     result = selectChecks(files, { fork });
   }
-  const files = args.includes("--files") ? args.slice(args.indexOf("--files") + 1) : args.includes("--all") ? [] : changedFiles(option("--base") || "origin/main").files;
-  const decks = selectDecks(files, { all: args.includes("--all") });
-  const contrast = selectDecks(files, { all: args.includes("--all"), check: "contrast" });
+  const change = args.includes("--files") ? { fork: null, files: args.slice(args.indexOf("--files") + 1) }
+    : args.includes("--all") ? { fork: null, files: [] } : changedFiles(option("--base") || "origin/main");
+  const decks = selectDecks(change.files, { all: args.includes("--all"), fork: change.fork });
   for (const reason of result.reasons) console.log(reason);
   console.log(`Tests: ${result.tests.length ? result.tests.join(" ") : "none"}`);
   console.log(`Accessibility: ${result.a11y === "all" ? "every sitemap page" : result.pages.join(" ") || "none"}`);
-  console.log(`Deck text size: ${decks === "all" ? "every deck" : decks === "none" ? "none" : decks.join(" ")}`);
-  console.log(`Deck contrast: ${contrast === "all" ? "every deck" : contrast === "none" ? "none" : contrast.join(" ")}`);
+  console.log(`Decks: ${decks === "all" ? "every deck" : decks === "none" ? "none" : decks.join(" ")}`);
   if (process.env.GITHUB_OUTPUT) {
-    appendFileSync(process.env.GITHUB_OUTPUT, `tests=${result.tests.join(" ")}\na11y=${result.a11y}\npages=${result.pages.join(" ")}\ndecks=${Array.isArray(decks) ? decks.join(" ") : decks}\ncontrast=${Array.isArray(contrast) ? contrast.join(" ") : contrast}\n`);
+    appendFileSync(process.env.GITHUB_OUTPUT, `tests=${result.tests.join(" ")}\na11y=${result.a11y}\npages=${result.pages.join(" ")}\ndecks=${Array.isArray(decks) ? decks.join(" ") : decks}\n`);
   }
 }

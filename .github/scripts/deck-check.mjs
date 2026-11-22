@@ -1,20 +1,25 @@
-// Deck contrast check. Opens teaching decks in headless Chrome at 1600 × 900, in the light and dark
-// themes, shows each slide alone with all its steps, and measures WCAG contrast as rendered:
-//   normal text at least 4.5:1; large text (24px bold or 32px regular, on the slide) at least 3:1;
-//   figure lines, arrows and arrowheads at least 3:1.
-// The background is what is actually under each item: the stack of painted elements at that point,
-// composited with their opacity, so labels on SVG shapes, cards and tints are judged on those.
-// Items over a photo, gradient, canvas or 3D model cannot be judged this way: they are counted as
-// unmeasured and never fail. Left out: the slide footer, copyright, credits, buttons, graph grids and
-// dividers, thin lines under 1.5px, and anything marked `data-decor` (a deliberate exception or a
-// decorative mark).
+// Teaching deck check: text size and contrast in one run. Opens each deck in headless Chrome at
+// 1600 × 900 with every step shown: playing for text size, then still in the light and dark themes.
 //
-// Failures that predate the check are listed in deck-contrast-baseline.json, keyed by theme,
-// element, text and colors (not slide number), and only failures beyond it fail the check. Figure
-// lines are keyed by their own color alone, because animated figures change what is behind them.
-//   node .github/scripts/deck-contrast.mjs [deck ...]      e.g. ibdpphy/decks/a1-kinematics/index.html
-//   node .github/scripts/deck-contrast.mjs --update-baseline [deck ...]
-//   node .github/scripts/deck-contrast.mjs --report=FILE [deck ...]   also writes every failure, worst first
+// Text size: text students read must be at least 28px on the slide, the rule for a 75" screen read
+// from the back of a 10 m lab (see the decks' readable.css). Sizes are measured as rendered, so scaled
+// figures and SVG labels count at the size they appear. Left out: the slide furniture readable.css
+// keeps small (eyebrows, the footer, the year badge, course flags, AQA spec references, credits, the
+// "not assessed" label, the copyright line), marks of one or two characters, and MathJax, whose glyphs
+// are not text nodes. Add `data-small-ok` to an element (or an ancestor) for a deliberate exception.
+//
+// Contrast, in both themes (WCAG, as rendered): normal text at least 4.5:1; large text (24px bold or
+// 32px regular, on the slide) at least 3:1; figure lines, arrows and arrowheads at least 3:1. The
+// background is the stack of painted elements under each item, composited with their opacity. Items
+// over a photo, gradient, canvas or 3D model are counted as unmeasured and never fail. Left out: the
+// slide footer, copyright, credits, buttons, graph grids and dividers, thin lines under 1.5px, and
+// anything marked `data-decor`.
+//
+// Problems that predate a check are in deck-text-baseline.json and deck-contrast-baseline.json, keyed
+// by element and text or colors (not slide number), and only problems beyond them fail.
+//   node .github/scripts/deck-check.mjs [deck ...]      e.g. ibdpphy/decks/a1-kinematics/index.html
+//   node .github/scripts/deck-check.mjs --update-baseline [deck ...]
+//   node .github/scripts/deck-check.mjs --report=FILE [deck ...]   also writes every contrast failure, worst first
 // With no decks it checks every deck in gcsephy/decks/ and ibdpphy/decks/.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -24,14 +29,80 @@ import { ROOT, checkPages } from './headless.mjs';
 const VIEWPORT = { width: 1600, height: 900 };
 const SETTLE_MS = 2500;
 const THEMES = ['light', 'dark'];
+const MIN_PX = 28;
 const LIMITS = { text: 4.5, large: 3, graphic: 3 };
-const BASELINE = join(ROOT, '.github/scripts/deck-contrast-baseline.json');
+const TEXT_BASELINE = join(ROOT, '.github/scripts/deck-text-baseline.json');
+const CONTRAST_BASELINE = join(ROOT, '.github/scripts/deck-contrast-baseline.json');
 
 const allDecks = () => execFileSync('git', ['ls-files', 'gcsephy/decks/*/index.html', 'ibdpphy/decks/*/index.html'], { cwd: ROOT, encoding: 'utf8' })
   .split('\n').filter(Boolean);
 
+// Runs inside each deck. Returns { slides, found: [text under the minimum] }.
+function measureText({ minPx }) {
+  const SKIP = [
+    '.eyebrow', '.slide-foot', '.slide-copyright', '.year-badge', '.triple-flag', '.triple-tag', '.hl-tag', '.spec', '.spec-ref',
+    '.credit', '.credits', '.not-examined', 'button', 'mjx-assistive-mml', '[aria-hidden="true"]', '[data-small-ok]',
+    'script', 'style', 'noscript', 'title', 'desc'
+  ].join(',');
+  const style = document.createElement('style');
+  style.textContent = '.slide, .step { visibility: visible !important; opacity: 1 !important; transition: none !important; }';
+  document.head.append(style);
+  const slides = [...document.querySelectorAll('.deck .slide, .slides .slide, main .slide')].filter((slide, i, all) => !slide.closest('.thumb-slide') && all.indexOf(slide) === i);
+  // Inactive slides are aria-hidden and inert; only what is inside a slide decides what is skipped.
+  slides.forEach((slide) => {
+    slide.removeAttribute('aria-hidden');
+    slide.removeAttribute('inert');
+    slide.querySelectorAll('.step').forEach((step) => step.classList.add('shown'));
+  });
+  const describe = (el) => {
+    const cls = typeof el.className === 'string' && el.className ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : '';
+    return `${el.tagName.toLowerCase()}${cls}`;
+  };
+  const shown = (el) => {
+    for (let node = el; node && node.nodeType === 1; node = node.parentElement) {
+      const css = getComputedStyle(node);
+      if (css.display === 'none' || css.visibility === 'hidden' || Number(css.opacity) === 0) return false;
+      if (node.classList.contains('slide')) return true;
+    }
+    return true;
+  };
+  const found = [];
+  slides.forEach((slide, index) => {
+    const slideScale = slide.getBoundingClientRect().width / slide.offsetWidth || 1;
+    const seen = new Set();
+    const walker = document.createTreeWalker(slide, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const text = node.textContent.replace(/\s+/g, ' ').trim();
+      if (text.length < 3 || !/[\p{L}\p{N}]/u.test(text)) continue;
+      // Superscripts and subscripts (m s⁻¹, Eₖ) count at the size of the text they belong to.
+      let el = node.parentElement;
+      while (el && /^(SUP|SUB)$/.test(el.tagName) && el.parentElement) el = el.parentElement;
+      if (!el || el.closest(SKIP) || seen.has(el) || !shown(el)) continue;
+      seen.add(el);
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const box = range.getBoundingClientRect();
+      if (box.width < 1 || box.height < 1) continue;
+      let size;
+      const fontSize = parseFloat(getComputedStyle(el).fontSize);
+      if (el instanceof SVGElement) {
+        const svg = el.ownerSVGElement || el;
+        const ctm = (el.getScreenCTM && el.getScreenCTM()) || svg.getScreenCTM();
+        size = fontSize * Math.hypot(ctm.a, ctm.b) / slideScale;
+      } else {
+        const scale = el.offsetWidth ? el.getBoundingClientRect().width / el.offsetWidth : slideScale;
+        size = fontSize * scale / slideScale;
+      }
+      if (size < minPx - 0.5) found.push({ slide: index + 1, size: Math.round(size * 10) / 10, text: text.slice(0, 48), where: describe(el) });
+    }
+  });
+  style.remove();
+  return { slides: slides.length, found };
+}
+
 // Runs inside each deck. Returns { slides, measured, unmeasured, found: [failing items] }.
-function measureDeck({ limits }) {
+function measureContrast({ limits }) {
   const SKIP = 'svg .grid,svg .divider,svg .sx-divider,.slide-foot,.slide-copyright,.credit,.credits,button,mjx-assistive-mml,[data-decor],script,style,noscript,title,desc,defs,marker,clipPath,mask,pattern,symbol';
   const style = document.createElement('style');
   style.textContent = `.slide { display: none !important; }
@@ -247,8 +318,24 @@ function measureDeck({ limits }) {
   return { slides: slides.length, measured, unmeasured, found };
 }
 
-const keyOf = (item) => `${item.theme} <${item.where}> ${item.text} | ${item.fg}${item.kind === 'graphic' ? '' : ` on ${item.bg}`}`;
-const tally = (items) => items.reduce((counts, item) => { counts[keyOf(item)] = (counts[keyOf(item)] || 0) + 1; return counts; }, {});
+const textKey = (item) => `<${item.where}> ${item.text}`;
+const contrastKey = (item) => `${item.theme} <${item.where}> ${item.text} | ${item.fg}${item.kind === 'graphic' ? '' : ` on ${item.bg}`}`;
+const tally = (items, keyOf) => items.reduce((counts, item) => { counts[keyOf(item)] = (counts[keyOf(item)] || 0) + 1; return counts; }, {});
+const readBaseline = (file) => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {});
+const writeBaseline = (file, baseline) => {
+  const sorted = Object.fromEntries(Object.keys(baseline).sort().map((deck) => [deck, Object.fromEntries(Object.entries(baseline[deck]).sort())]));
+  writeFileSync(file, JSON.stringify(sorted, null, 1) + '\n');
+  console.log(`Wrote ${file.slice(ROOT.length + 1)}.`);
+};
+// Each baseline entry allows that many copies of the same item. Returns the items beyond it.
+const beyond = (items, entries, keyOf) => {
+  const allowed = { ...(entries || {}) };
+  return items.filter((item) => {
+    const key = keyOf(item);
+    if (allowed[key] > 0) { allowed[key] -= 1; return false; }
+    return true;
+  });
+};
 
 async function main() {
   const args = process.argv.slice(2);
@@ -256,25 +343,20 @@ async function main() {
   const reportFile = args.find((arg) => arg.startsWith('--report='))?.slice('--report='.length);
   const named = args.filter((arg) => !arg.startsWith('--'));
   const decks = named.length ? named : allDecks();
-  const baseline = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : {};
+  const textBaseline = readBaseline(TEXT_BASELINE);
+  const contrastBaseline = readBaseline(CONTRAST_BASELINE);
   const everything = [];
   let known = 0;
   let failed = 0;
   let measuredTotal = 0;
   let unmeasuredTotal = 0;
   await checkPages(decks, {
-    setup: async ({ send }) => {
-      await send('Emulation.setDeviceMetricsOverride', { ...VIEWPORT, deviceScaleFactor: 1, mobile: false });
-      await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
-    },
+    setup: ({ send }) => send('Emulation.setDeviceMetricsOverride', { ...VIEWPORT, deviceScaleFactor: 1, mobile: false }),
     check: async ({ send, open, evaluate }, deck) => {
       try {
         const scope = deck.startsWith('ibdpphy/') ? 'ibdpphy' : 'gcsephy';
-        const found = [];
-        let slides = 0;
-        let measured = 0;
-        let unmeasured = 0;
-        for (const theme of THEMES) {
+        const load = async (theme, motion) => {
+          await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: motion }] });
           const { identifier } = await send('Page.addScriptToEvaluateOnNewDocument', {
             source: `try { localStorage.setItem('panphy-theme-${scope}', '${theme}'); } catch {}`
           });
@@ -283,14 +365,25 @@ async function main() {
           if (problems.length) throw new Error(problems[0]);
           const actual = await evaluate(() => document.documentElement.dataset.theme);
           if (actual !== theme) throw new Error(`asked for the ${theme} theme, got ${actual}`);
-          const result = await evaluate(measureDeck, { limits: LIMITS });
+        };
+        const contrast = [];
+        let slides = 0;
+        let measured = 0;
+        let unmeasured = 0;
+        // Animated figures show different labels with reduced motion, so each check keeps its own mode:
+        // text as students see it playing, contrast on the still figures.
+        await load('light', 'no-preference');
+        const { found: text } = await evaluate(measureText, { minPx: MIN_PX });
+        for (const theme of THEMES) {
+          await load(theme, 'reduce');
+          const result = await evaluate(measureContrast, { limits: LIMITS });
           if (!result.slides) throw new Error('no slides found');
           slides = result.slides;
           measured += result.measured;
           unmeasured += result.unmeasured;
-          found.push(...result.found.map((item) => ({ ...item, theme })));
+          contrast.push(...result.found.map((item) => ({ ...item, theme })));
         }
-        return { result: { slides, measured, unmeasured, found } };
+        return { result: { slides, measured, unmeasured, text, contrast } };
       } catch (error) {
         return { error: error.message.split('\n')[0] };
       }
@@ -303,39 +396,38 @@ async function main() {
       }
       measuredTotal += result.measured;
       unmeasuredTotal += result.unmeasured;
-      everything.push(...result.found.map((item) => ({ deck, ...item })));
+      everything.push(...result.contrast.map((item) => ({ deck, ...item })));
       if (update) {
-        if (result.found.length) baseline[deck] = tally(result.found); else delete baseline[deck];
-        console.log(`• ${deck}: ${result.found.length} failing item(s) recorded`);
+        if (result.text.length) textBaseline[deck] = tally(result.text, textKey); else delete textBaseline[deck];
+        if (result.contrast.length) contrastBaseline[deck] = tally(result.contrast, contrastKey); else delete contrastBaseline[deck];
+        console.log(`• ${deck}: ${result.text.length} small text and ${result.contrast.length} contrast item(s) recorded`);
         return;
       }
-      const allowed = { ...(baseline[deck] || {}) };
-      const fresh = result.found.filter((item) => {
-        if (allowed[keyOf(item)] > 0) { allowed[keyOf(item)] -= 1; known += 1; return false; }
-        return true;
-      });
-      if (fresh.length) {
-        failed += 1;
-        console.log(`✖ ${deck}: ${fresh.length} new contrast failure(s)`);
-        for (const item of fresh) console.log(`    slide ${item.slide} (${item.theme}): ${item.ratio}:1, needs ${item.need}:1, ${item.fg} on ${item.bg} <${item.where}> "${item.text}"`);
-      } else {
+      const freshText = beyond(result.text, textBaseline[deck], textKey);
+      const freshContrast = beyond(result.contrast, contrastBaseline[deck], contrastKey);
+      known += result.text.length - freshText.length + result.contrast.length - freshContrast.length;
+      if (!freshText.length && !freshContrast.length) {
         console.log(`✔ ${deck} (${result.slides} slides)`);
+        return;
       }
+      failed += 1;
+      console.log(`✖ ${deck}: ${freshText.length} new item(s) under ${MIN_PX}px, ${freshContrast.length} new contrast failure(s)`);
+      for (const item of freshText) console.log(`    slide ${item.slide}: ${item.size}px <${item.where}> "${item.text}"`);
+      for (const item of freshContrast) console.log(`    slide ${item.slide} (${item.theme}): ${item.ratio}:1, needs ${item.need}:1, ${item.fg} on ${item.bg} <${item.where}> "${item.text}"`);
     }
   });
   if (reportFile) {
     writeFileSync(reportFile, JSON.stringify([...everything].sort((a, b) => a.ratio - b.ratio), null, 1) + '\n');
     console.log(`\nWrote ${everything.length} failure(s) to ${reportFile}.`);
   }
-  console.log(`\nMeasured ${measuredTotal} items; ${unmeasuredTotal} over photos, gradients or canvases were not judged.`);
+  console.log(`\nMeasured ${measuredTotal} items for contrast; ${unmeasuredTotal} over photos, gradients or canvases were not judged.`);
   if (update) {
-    const sorted = Object.fromEntries(Object.keys(baseline).sort().map((deck) => [deck, Object.fromEntries(Object.entries(baseline[deck]).sort())]));
-    writeFileSync(BASELINE, JSON.stringify(sorted, null, 1) + '\n');
-    console.log(`Wrote ${BASELINE.slice(ROOT.length + 1)}.`);
+    writeBaseline(TEXT_BASELINE, textBaseline);
+    writeBaseline(CONTRAST_BASELINE, contrastBaseline);
     process.exit(failed ? 2 : 0);
   }
-  const note = known ? ` (${known} older item(s) are in the baseline)` : '';
-  console.log(failed ? `${failed} of ${decks.length} decks have new contrast failures${note}.` : `All ${decks.length} decks passed${note}.`);
+  const note = known ? ` (${known} older item(s) are in the baselines)` : '';
+  console.log(failed ? `${failed} of ${decks.length} decks have new text size or contrast problems${note}.` : `All ${decks.length} decks passed${note}.`);
   process.exit(failed ? 1 : 0);
 }
 
