@@ -60,90 +60,35 @@
   "light <path.axis>  | #1B1B1B": 1
  },
  "ibdpphy/decks/a1-kinematics/index.html": {
-  "light <line.guide.accent>  | #E8A66C": 7,
-  "light <line>  | #E8A66C": 20,
-  "light <path.guide.accent>  | #E8A66C": 3,
   "light <text.lbl.strong> distance: | #2B7A70 on #F0EFE9": 1
  },
  "ibdpphy/decks/a2-forces-and-momentum/index.html": {
   "dark <line.cable>  | #DDDBD6": 1,
   "light <line.cable>  | #2A2B2B": 1,
-  "light <line.guide.accent>  | #E8A66C": 5,
-  "light <line>  | #E8A66C": 33,
-  "light <path.guide.accent>  | #E8A66C": 10,
-  "light <path>  | #E8A66C": 1,
   "light <span.hl-tag> HL only | #FFFFFF on #CC5F41": 1
- },
- "ibdpphy/decks/a3-work-energy-and-power/index.html": {
-  "light <line.guide.accent>  | #E8A66C": 1,
-  "light <line>  | #E8A66C": 7,
-  "light <path.curve>  | #E8A66C": 2,
-  "light <path.guide.accent>  | #E8A66C": 1
  },
  "ibdpphy/decks/a4-rigid-body-mechanics/index.html": {
   "dark <line.guide>  | #A69B8E": 1,
   "light <line.guide>  | #696C6E": 2,
-  "light <line>  | #E8A66C": 2,
-  "light <path.guide.accent>  | #E8A66C": 1,
-  "light <path>  | #CC5F41": 1,
-  "light <text.lbl> hoop: behind | #E8A66C on #F3F3F0": 1
+  "light <path>  | #CC5F41": 1
  },
  "ibdpphy/decks/a5-galilean-and-special-relativity/index.html": {
-  "light <line.guide.accent>  | #E9AD79": 1,
-  "light <line.guide.accent>  | #E9AE79": 1,
-  "light <line.guide.accent>  | #EAAF7B": 1,
   "light <line>  | #CC5F41": 4,
-  "light <line>  | #E8A66C": 2,
-  "light <path.guide.accent>  | #E9AE79": 1,
-  "light <path>  | #E8A66C": 8,
-  "light <path>  | #E9AD79": 1,
-  "light <path>  | #E9AE79": 1,
-  "light <path>  | #EAAF7B": 1,
-  "light <text.lbl.small> light | #E8A66C on #F3F3F0": 4,
   "light <text.lbl.strong> μ | #FFFFFF on #CC5F41": 2
  },
  "ibdpphy/decks/b1-thermal-energy-transfers/index.html": {
   "dark <line.tick>  | #C0BCB4": 1,
   "dark <line>  | #4BA3E3": 2,
   "dark <line>  | #EF6A48": 2,
-  "light <line.guide.accent>  | #E8A66C": 3,
   "light <line.tick>  | #47484A": 1,
   "light <line>  | #1675BB": 2,
-  "light <line>  | #D45132": 2,
-  "light <line>  | #E8A66C": 1,
-  "light <path.guide.accent>  | #E8A66C": 2,
-  "light <path>  | #E8A66C": 10
+  "light <line>  | #D45132": 2
  },
  "ibdpphy/decks/b2-greenhouse-effect/index.html": {
-  "light <line>  | #E2C678": 4,
-  "light <line>  | #E8A66C": 25,
-  "light <path>  | #E8A66C": 1
- },
- "ibdpphy/decks/b3-gas-laws/index.html": {
-  "light <line>  | #E8A66C": 5,
-  "light <path.guide.accent>  | #E8A66C": 2,
-  "light <path>  | #E8A66C": 3,
-  "light <text.lbl.strong> constant temperature | #E8A66C on #F3F3F0": 1
+  "light <line>  | #E2C678": 4
  },
  "ibdpphy/decks/b4-thermodynamics/index.html": {
-  "light <line>  | #E8A66C": 2,
-  "light <path>  | #CC5F41": 3,
-  "light <path>  | #E8A66C": 9,
-  "light <text.lbl.strong> isothermal | #E8A66C on #F3F3F0": 3
- },
- "ibdpphy/decks/b5-current-and-circuits/index.html": {
-  "light <line>  | #E8A66C": 3,
-  "light <path.guide.accent>  | #E8A66C": 1,
-  "light <text.lbl.mono> I | #E8A66C on #F3F3F0": 5,
-  "light <tspan> 1 | #E8A66C on #F3F3F0": 1,
-  "light <tspan> 2 | #E8A66C on #F3F3F0": 1
- },
- "ibdpphy/decks/c1-simple-harmonic-motion/index.html": {
-  "light <line.guide.accent>  | #E8A66C": 5,
-  "light <path>  | #E8A66C": 5,
-  "light <text.lbl.strong> kinetic | #E8A66C on #F3F3F0": 3,
-  "light <text.lbl.strong> velocity | #E8A66C on #F3F3F0": 1,
-  "light <text.lbl.strong> velocity | #E8A66C on #FFFFFF": 1
+  "light <path>  | #CC5F41": 3
  },
  "ibdpphy/decks/c2-wave-model/index.html": {
   "dark <line.guide>  | #ACC0B6": 8,
@@ -151,47 +96,26 @@
   "dark <line>  | #527267": 36,
   "dark <path>  | #43655F": 1,
   "dark <path>  | #527267": 2,
-  "light <line.guide.accent>  | #E8A66C": 2,
   "light <line.guide>  | #3F5755": 8,
   "light <line>  | #98BBB3": 36,
   "light <line>  | #99BDB6": 36,
-  "light <line>  | #E8A66C": 14,
-  "light <line>  | #ECC7A4": 32,
-  "light <line>  | #EDC9A7": 36,
+  "light <line>  | #C1A469": 32,
+  "light <line>  | #C2A66C": 36,
   "light <path>  | #679E96": 1,
   "light <path>  | #6BA29B": 1,
   "light <path>  | #98BBB3": 2,
-  "light <path>  | #99BDB6": 1,
-  "light <path>  | #E8A66C": 3,
-  "light <text.lbl.strong> magnetic field | #E8A66C on #F3F3F0": 1
- },
- "ibdpphy/decks/c3-wave-phenomena/index.html": {
-  "light <line>  | #E8A66C": 33,
-  "light <path.guide.accent>  | #E8A66C": 4,
-  "light <path>  | #E8A66C": 17
+  "light <path>  | #99BDB6": 1
  },
  "ibdpphy/decks/c4-standing-waves-and-resonance/index.html": {
-  "light <line.guide.accent>  | #E8A66C": 3,
-  "light <line>  | #E8A66C": 10,
   "light <path>  | #7AA9A1": 10,
-  "light <path>  | #7BAAA3": 23,
-  "light <path>  | #E8A66C": 4,
-  "light <text.lbl.strong> critical: quickest, no overshoot | #E8A66C on #F3F3F0": 1
+  "light <path>  | #7BAAA3": 23
  },
  "ibdpphy/decks/c5-doppler-effect/index.html": {
-  "light <line>  | #E8A66C": 4,
-  "light <path.guide.accent>  | #E8A66C": 8,
-  "light <path>  | #E8A66C": 7,
   "light <text.lbl.halo> reflected back | #D45132 on #F3F3F0": 1
  },
  "ibdpphy/decks/d1-gravitational-fields/index.html": {
   "dark <text.lbl.mono> 2 | #EDEBE8 on #E26545": 1,
   "dark <text.lbl.mono> 4 | #EDEBE8 on #E26545": 1,
-  "light <line.guide.accent>  | #E8A66C": 4,
-  "light <line>  | #E8A66C": 4,
-  "light <line>  | #EAB586": 5,
-  "light <path.curve>  | #E8A66C": 1,
-  "light <path.guide.accent>  | #E8A66C": 1,
   "light <span.hl-tag> HL only | #FFFFFF on #CC5F41": 1
  },
  "ibdpphy/decks/d2-electric-and-magnetic-fields/index.html": {
@@ -199,9 +123,7 @@
   "dark <line>  | #E58A6C": 1,
   "light <line>  | #99BDB6": 5,
   "light <line>  | #CC5F41": 1,
-  "light <line>  | #E8A66C": 2,
   "light <path.guide>  | #86949A": 3,
-  "light <path>  | #E8A66C": 12,
   "light <span.hl-tag> HL only | #FFFFFF on #CC5F41": 1,
   "light <text.lbl.display> N | #D45132 on #F3F3F0": 1,
   "light <text.lbl.display> N | #FFFFFF on #D45132": 2,
@@ -222,8 +144,6 @@
   "light <line>  | #99BDB6": 4,
   "light <line>  | #A0C3BF": 4,
   "light <line>  | #A3C3BD": 5,
-  "light <line>  | #E8A66C": 18,
-  "light <path.guide.accent>  | #E8A66C": 3,
   "light <path>  | #86949A": 60,
   "light <path>  | #C5CAC8": 96,
   "light <path>  | #C7CDCE": 48,
@@ -236,33 +156,24 @@
   "light <line>  | #909DA2": 3,
   "light <line>  | #96A3AA": 3,
   "light <line>  | #CC5F41": 2,
-  "light <line>  | #E8A66C": 13,
-  "light <path.guide.accent>  | #E8A66C": 1,
   "light <path>  | #88969C": 12,
   "light <path>  | #8E9B9F": 40,
   "light <path>  | #909DA2": 40,
   "light <path>  | #96A3AA": 40,
-  "light <path>  | #E8A66C": 5,
   "light <text.lbl.display> N | #FFFFFF on #D45132": 6
  },
  "ibdpphy/decks/e1-structure-of-the-atom/index.html": {
   "dark <i.neutron> 0 | #FFFFFF on #8C9AA6": 1,
   "dark <path.alpha-path.straight>  | #7E4786": 4,
   "dark <path.alpha-path>  | #7E4786": 3,
-  "light <line.guide.accent>  | #E8A66C": 1,
-  "light <line>  | #E8A66C": 10,
   "light <path.alpha-path.straight>  | #D485C7": 4,
   "light <path.alpha-path>  | #D485C7": 3,
-  "light <path.detector>  | #EAB586": 1,
-  "light <path.flow>  | #E8A66C": 4,
   "light <span.hl-tag> HL only | #FFFFFF on #CC5F41": 1
  },
  "ibdpphy/decks/e2-quantum-physics/index.html": {
   "dark <line>  | #335F7E": 4,
   "dark <path.inset>  | #2A2A28": 1,
   "light <line>  | #8BBADD": 4,
-  "light <line>  | #E8A66C": 4,
-  "light <path.guide.accent>  | #E8A66C": 1,
   "light <path.inset>  | #E6E6E2": 1,
   "light <text.lbl.mono> photoelectrons | #1675BB on #F0EFE9": 2,
   "light <text.lbl.mono> photoelectrons | #1675BB on #F3F3F0": 1,
@@ -270,12 +181,9 @@
  },
  "ibdpphy/decks/e3-radioactive-decay/index.html": {
   "dark <path.wave>  | #564A7B": 1,
-  "light <line.guide.accent>  | #E8A66C": 1,
   "light <line.trail>  | #589BCB": 1,
   "light <line.trail>  | #909AA2": 2,
   "light <line.trail>  | #C99E5E": 1,
-  "light <line>  | #E8A66C": 2,
-  "light <path.guide.accent>  | #E8A66C": 7,
   "light <path.wave>  | #BDA0EF": 1,
   "light <path>  | #D5836B": 1,
   "light <path>  | #D6846D": 1,
@@ -302,7 +210,6 @@
   "dark <text.lbl.mono> loop 1 | #EF6A48 on #2E3133": 1,
   "light <line>  | #B2B8BA": 7,
   "light <line>  | #B3BABE": 7,
-  "light <line>  | #E8A66C": 10,
   "light <path>  | #AFCBDB": 1,
   "light <path>  | #B1CDE0": 1,
   "light <path>  | #B9D6EB": 2,
@@ -318,10 +225,6 @@
  },
  "ibdpphy/decks/e5-fusion-and-stars/index.html": {
   "dark <line>  | #EF6A48": 12,
-  "light <line>  | #D45132": 12,
-  "light <line>  | #E8A66C": 21,
-  "light <path.guide.accent>  | #E8A66C": 2,
-  "light <path>  | #E8A66C": 9,
-  "light <text.lbl.strong> fusion | #FFFFFF on #E6B070": 1
+  "light <line>  | #D45132": 12
  }
 }

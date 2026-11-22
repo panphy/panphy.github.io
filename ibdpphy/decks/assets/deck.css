@@ -633,6 +633,11 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .level { stroke: var(--text-main); stroke-width: 4; stroke-linecap: round; }
 .orbit { fill: none; stroke: var(--text-secondary); stroke-opacity: .35; stroke-width: 1.8; }
 .guide { fill: none; stroke: var(--text-secondary); stroke-width: 1.5; stroke-dasharray: 5 6; opacity: .7; }
+/* On light paper, apricot is too pale for figure lines and labels: figures use an ochre (3:1 on
+   their panels and tints) and a deeper one for text (4.5:1), yellow enough to stay clear of the
+   terracotta kept for higher level content. */
+:root:not([data-theme="dark"]) :is(.slide svg, .svg-defs) { --brand-accent: #9A6700; }
+:root:not([data-theme="dark"]) .slide svg text { --brand-accent: #8C5D00; }
 .guide.accent { stroke: var(--brand-accent); stroke-width: 2.2; opacity: 1; }
 .tick { stroke: var(--text-secondary); stroke-width: 2.5; }
 .inset { fill: var(--card-bg); stroke: var(--card-border); stroke-width: 2; }

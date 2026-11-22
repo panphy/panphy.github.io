@@ -68,7 +68,7 @@ No equation scrolls sideways. Each is typeset in parts, split before every top-l
 
 ## Marking higher level content
 
-Terracotta (`--hl`, with `--hl-text` where it is text on paper) means higher level only and is used for nothing else. The other colors come from the same palette: slate `#2C4654`, teal `#4F9C8F`, sage `#96B083`, sand `#E2C678`, apricot `#E8A66C` and terracotta `#D87759`.
+Terracotta (`--hl`, with `--hl-text` where it is text on paper) means higher level only and is used for nothing else. The other colors come from the same palette: slate `#2C4654`, teal `#4F9C8F`, sage `#96B083`, sand `#E2C678`, apricot `#E8A66C` and terracotta `#D87759`. On light paper, figures deepen apricot to ochre (`#9A6700`, and `#8C5D00` for text) for contrast.
 
 - A slide that is additional HL has the class `hl` on its `<section>`. That gives it the terracotta edge, the "HL only" flag and a terracotta footer, and tags its thumbnail.
 - Write the footer of such a slide as `…, ADDITIONAL HL` (or `…, HL ONLY` in a topic with no SL content) and of every other slide as `…, SL + HL`.
