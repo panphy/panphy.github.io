@@ -167,3 +167,37 @@ window.DeckMath = (() => {
   new MutationObserver(() => { requestAnimationFrame(repaint); setTimeout(repaint, 500); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
   return { labels, watch, repaint };
 })();
+
+// A bullet dot (or step number) sits on its item's first line. When that line holds a fraction, or the item is an
+// equation bullet (.frac) whose equation wraps below a lead-in, the dot moves level with the
+// fraction bar, which is the height of the "=". Measured once MathJax has typeset the slides
+// (before the thumbnails copy them) and again once the fonts have loaded.
+window.DeckBullets = (() => {
+  function align(root = document) {
+    root.querySelectorAll('.points > li, ol.steps > li').forEach(li => {
+      const fracs = [...li.querySelectorAll('mjx-container [data-mml-node="mfrac"]')];
+      const box = li.getBoundingClientRect();
+      const scale = li.offsetHeight ? box.height / li.offsetHeight : 0;
+      if (!fracs.length || !scale) return;
+      const size = parseFloat(getComputedStyle(li).fontSize) || 40;
+      const top = el => (el.getBoundingClientRect().top - box.top) / scale;
+      const tallest = list => list.reduce((a, b) => (b.getBoundingClientRect().height > a.getBoundingClientRect().height ? b : a));
+      const firstLine = fracs.filter(f => top(f) < size * 0.5);
+      const frac = firstLine.length ? tallest(firstLine) : li.classList.contains('frac') ? tallest(fracs) : null;
+      if (!frac) { li.classList.remove('dot-math'); return; }
+      const bar = frac.querySelector(':scope > rect') || frac;
+      const r = bar.getBoundingClientRect();
+      li.style.setProperty('--dot-y', `${((r.top + r.height / 2 - box.top) / scale).toFixed(1)}px`);
+      li.classList.add('dot-math');
+    });
+  }
+  const mj = window.MathJax;
+  mj.startup = {
+    ...mj.startup,
+    pageReady: () => window.MathJax.startup.defaultPageReady().then(() => {
+      align();
+      document.fonts?.ready.then(() => align());
+    })
+  };
+  return { align };
+})();

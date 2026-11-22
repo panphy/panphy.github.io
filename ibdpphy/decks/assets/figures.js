@@ -397,7 +397,7 @@
         return `${f(520 + 200 * Math.cos(a))},${f(230 + 200 * Math.sin(a))}`;
       }).join(' A200,200 0 1 0 ');
       let s = `<path d="${goldArc}" class="detector"/>`;
-      s += text(700, 440, 'detector moves around the foil', 'lbl', 'middle');
+      s += text(228, 440, 'detector moves around the foil', 'lbl', 'middle');
       s += `<rect x="30" y="185" width="110" height="90" rx="10" style="fill:var(--lead)"/>` + ball(130, 230, 9, 'alpha');
       s += text(85, 170, 'alpha source', 'lbl strong');
       const paths = [
@@ -616,7 +616,7 @@
       s += arrow(120, 350, 662, 137, 'brand-accent', 5);
       s += body(120, 350, 14) + body(680, 130, 14);
       s += text(100, 326, 'start', 'lbl mono', 'end') + text(690, 96, 'finish', 'lbl mono');
-      s += text(100, 150, 'displacement:', 'lbl strong', 'start') + text(100, 180, 'straight from start to finish', 'lbl', 'start');
+      s += text(40, 110, 'displacement:', 'lbl strong', 'start') + text(40, 140, 'straight from start to finish', 'lbl', 'start');
       s += text(450, 400, 'distance:', 'lbl strong a', 'start') + text(450, 430, 'the length of the path', 'lbl', 'start');
       return svg('0 0 800 460', s, 'A winding path from start to finish, whose length is the distance, and a straight arrow from start to finish, which is the displacement');
     },
@@ -918,7 +918,7 @@
       s += arrow(260, 330, 260, 246, 'brand-primary', 5) + text(238, 300, sub('F', 'H'), 'lbl display', 'end') + arrow(260, 362, 260, 446, 'brand-primary', 5) + dot(260, 362, 6) + text(278, 446, 'mg', 'lbl display', 'start');
       s += text(130, 270, 'natural', 'lbl small') + text(130, 296, 'length', 'lbl small');
       s += axes(470, 400, 780, 60, 'extension x', 'force') + plot('M470,400 L730,120') + `<path d="M545,319 H640 V217" class="guide accent"/>`;
-      s += text(764, 330, 'gradient = k', 'lbl strong', 'end');
+      s += text(764, 362, 'gradient = k', 'lbl strong', 'end');
       return svg('0 0 800 460', s, 'A spring at its natural length beside the same spring stretched by an extension x by a hanging mass, with the restoring force F H upwards and the weight downwards; and a straight-line graph of force against extension through the origin, whose gradient is the spring constant k');
     },
 

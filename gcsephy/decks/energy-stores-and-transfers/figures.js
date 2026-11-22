@@ -56,7 +56,7 @@ window.DeckSvgTex = {
     let track = '';
     if (pend) {
       track = `<path class="dk-ink" d="M${cx - 70} ${cy}H${cx + 70}"/><path class="dk-guide" d="M${pos(-phi0)[0] - 40} ${pos(-phi0)[1]}H${pos(phi0)[0] + 40}"/>` +
-        t(pos(-phi0)[0], pos(-phi0)[1] - 40, 'release', 'dk-small', 'middle') + `<line class="dk-string" x1="${cx}" y1="${cy}" x2="0" y2="0"/>`;
+        t(pos(-phi0)[0] + 2, pos(-phi0)[1] - 56, 'release', 'dk-small', 'middle') + `<line class="dk-string" x1="${cx}" y1="${cy}" x2="0" y2="0"/>`;
     } else {
       const a = 1.2, steps = 40;
       let d = '';

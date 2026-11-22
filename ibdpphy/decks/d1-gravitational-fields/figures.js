@@ -123,7 +123,7 @@ window.DeckFigures.add(P => {
       if (on) {
         s += text(300, 164, 'F', 'lbl display') + text(500, 164, 'F', 'lbl display');
         s += text(190, 308, sub('m', '1'), 'lbl display') + text(610, 276, sub('m', '2'), 'lbl display');
-        s += `<line x1="190" y1="300" x2="190" y2="372" class="guide"/><line x1="610" y1="260" x2="610" y2="372" class="guide"/>` + both(196, 358, 604, 358) + text(400, 344, 'r', 'lbl display') + text(400, 394, 'between the centers', 'lbl small');
+        s += `<line x1="190" y1="326" x2="190" y2="372" class="guide"/><line x1="610" y1="296" x2="610" y2="372" class="guide"/>` + both(196, 358, 604, 358) + text(400, 344, 'r', 'lbl display') + text(400, 394, 'between the centers', 'lbl small');
       }
       return svg('0 0 800 410', s, 'Two spherical masses m 1 and m 2 with their centers a distance r apart. Each attracts the other with a force F of the same size, drawn from the center of the body it acts on towards the other body');
     },
@@ -190,7 +190,7 @@ window.DeckFigures.add(P => {
       });
       s += `<path d="${sampled(t => at(1 + 3.7 * t))}" class="curve" style="stroke:var(--hl)"/>`;
       [1, 2, 3].forEach(r => { const [x, y] = at(r); s += `<circle cx="${x}" cy="${f(y)}" r="9" style="fill:var(--brand-accent-strong)"/>`; });
-      if (energy) s += text(268, 408, 'at the surface', 'lbl small', 'start') + text(760, 180, 'rises towards zero', 'lbl small', 'end') + text(760, 208, 'far away', 'lbl small', 'end');
+      if (energy) s += text(268, 408, 'at the surface', 'lbl small', 'start') + text(760, 214, 'rises towards zero', 'lbl small', 'end') + text(760, 242, 'far away', 'lbl small', 'end');
       if ('tangent' in el.dataset) s += `<line x1="250" y1="313.7" x2="560" y2="133.9" class="guide accent" style="stroke-dasharray:none;stroke-width:3.5"/>` + text(470, 310, 'gradient here = −g', 'lbl strong', 'start');
       return svg('0 -20 800 510', s, energy ? 'Graph of gravitational potential energy against distance from the center of a planet. It is most negative at the surface and rises towards zero far away' : 'Graph of the gravitational potential of the Earth against distance from its center. It is minus 62.5 megajoules per kilogram at the surface, minus 31.3 at twice the radius and minus 20.8 at three times the radius, rising towards zero far away');
     },
@@ -227,7 +227,7 @@ window.DeckFigures.add(P => {
       let s = `<rect x="110" y="30" width="140" height="420" style="fill:var(--brand-primary);opacity:.12"/>` + arrow(110, 450, 110, 26, 'text-secondary', 2.5) + arrow(110, 230, 790, 230, 'text-secondary', 2.5);
       s += text(450, 494, 'r', 'lbl display') + P.yAxisLabel(66, 238, 'energy') + text(96, 238, '0', 'lbl mono', 'end') + text(250, 214, 'R', 'lbl mono');
       s += line(-100, 'brand-accent') + line(200, 'brand-primary') + line(100, 'hl');
-      s += text(420, 168, 'kinetic', 'lbl strong', 'start', 'style="font-size:37px"') + text(420, 300, 'total', 'lbl strong', 'start', 'style="fill:var(--hl-text);font-size:37px"') + text(330, 400, 'potential', 'lbl strong', 'start', 'style="font-size:37px"');
+      s += text(420, 168, 'kinetic', 'lbl strong', 'start', 'style="font-size:37px"') + text(268, 276, 'total', 'lbl strong', 'start', 'style="fill:var(--hl-text);font-size:37px"') + text(330, 400, 'potential', 'lbl strong', 'start', 'style="font-size:37px"');
       return svg('0 0 840 510', s, 'Graph of the energies of a satellite against the radius of its circular orbit. The kinetic energy is positive and falls with radius. The potential energy is negative and twice as large. The total energy is negative, equal in size to the kinetic energy, and rises towards zero for larger orbits');
     },
 

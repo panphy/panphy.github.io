@@ -99,3 +99,6 @@ table.facts.compare { font-size: 34px; }
 .tl .year { font-size: 28px; }
 .tl p { font-size: 29px; }
 .eq-check { font-size: 28px; }
+
+/* Equation bullets: deck-math.js sets --dot-y to the fraction bar. */
+.points li.dot-math::before, ol.steps li.dot-math::before { top: var(--dot-y); margin-top: 0; translate: 0 -50%; }

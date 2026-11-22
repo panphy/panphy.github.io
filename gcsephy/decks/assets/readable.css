@@ -157,3 +157,6 @@ table.data, .data.compact { font-size: 30px; }
 /* News-style case slides: a slightly narrower photo column leaves room for the larger story text. */
 .front { grid-template-columns: 600px 1fr; gap: 44px; }
 .news-photo img { max-height: 440px; }
+
+/* Equation bullets: deck-math.js sets --dot-y to the fraction bar. */
+.points li.dot-math::before, ol.steps li.dot-math::before { top: var(--dot-y); margin-top: 0; translate: 0 -50%; }

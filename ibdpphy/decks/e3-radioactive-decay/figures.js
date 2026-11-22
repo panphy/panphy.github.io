@@ -154,7 +154,7 @@ window.DeckFigures.add(P => {
     // The forces between two protons a distance apart: a sketch, not to scale.
     'e3-strong': () => {
       const x = r => 110 + 180 * r;
-      let s = arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(445, 482, 'separation / fm', 'lbl mono') + text(126, 48, 'repulsion', 'lbl mono', 'start') + text(126, 432, 'attraction', 'lbl mono', 'start');
+      let s = arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(445, 482, 'separation / fm', 'lbl mono') + text(252, 48, 'repulsion', 'lbl mono', 'start') + text(126, 468, 'attraction', 'lbl mono', 'start');
       [1, 2, 3].forEach(r => { s += `<line x1="${x(r)}" y1="234" x2="${x(r)}" y2="246" class="tick"/>` + text(x(r), 278, r, 'lbl mono halo'); });
       s += `<path d="${sampled(t => { const r = 0.56 + 3.1 * t; return [x(r), 240 - 60 / (r * r)]; })}" class="curve" style="stroke:var(--proton)"/>`;
       s += `<path d="${sampled(t => { const r = 0.7 + 2.9 * t, u = Math.exp(-3 * (r - 1)); return [x(r), 240 + 180 * (2 * u - u * u)]; }, 120)}" class="curve" style="stroke:var(--brand-primary)"/>`;
@@ -200,7 +200,7 @@ window.DeckFigures.add(P => {
       s += text(440, 506, 'time / hours', 'lbl') + text(40, 236, 'count rate / counts per minute', 'lbl', 'middle', 'transform="rotate(-90 40 236)"');
       s += `<line x1="110" y1="${Y(30)}" x2="770" y2="${Y(30)}" class="guide accent"/>` + `<line x1="${X(6.4)}" y1="${Y(30)}" x2="${X(6.4)}" y2="${Y(236)}" class="guide"/>` + text(X(6.4), Y(250), 'background: 30', 'lbl');
       s += `<path d="${sampled(t => [X(8 * t), Y(raw(8 * t))])}" class="curve" style="stroke:var(--neutron)"/><path d="${sampled(t => [X(8 * t), Y(raw(8 * t) - 30)])}" class="curve"/>`;
-      s += text(X(1.3), Y(390), 'measured', 'lbl strong', 'start', 'style="fill:var(--neutron)"') + text(X(0.5), Y(250) + 60, 'corrected', 'lbl strong', 'start', 'style="fill:var(--undecayed)"');
+      s += text(X(1.3), Y(390), 'measured', 'lbl strong', 'start', 'style="fill:var(--neutron)"') + text(120, Y(250) + 60, 'corrected', 'lbl strong', 'start', 'style="fill:var(--undecayed)"');
       [[2, 240], [4, 120]].forEach(([t, c]) => { s += `<path d="M110,${Y(c)} H${X(t)} V430" class="guide"/><circle cx="${X(t)}" cy="${Y(c)}" r="7" style="fill:var(--brand-accent-strong)"/>`; });
       return svg('0 20 800 500', s, 'Graph of count rate against time for a radioactive source. The measured count rate levels off at the background rate of 30 counts per minute and not at zero. With the background subtracted, the corrected count rate halves from 480 to 240 in 2 hours and to 120 after 4 hours');
     },
@@ -220,7 +220,7 @@ window.DeckFigures.add(P => {
       // Each decay as a short arrow of its own slope: beta-minus (Z + 1, N − 1), beta-plus (Z − 1, N + 1), alpha (Z − 2, N − 2).
       s += text(X(4), Y(134), 'too many', 'lbl strong', 'start') + text(X(4), Y(134) + 32, 'neutrons:', 'lbl strong', 'start') + text(X(4), Y(134) + 64, 'beta-minus', 'lbl', 'start', 'style="fill:var(--electron)"') + text(X(4), Y(134) + 96, 'decay', 'lbl', 'start', 'style="fill:var(--electron)"') + arrow(X(32), Y(68), X(44), Y(56), 'electron', 5);
       s += text(X(52), Y(34), 'too few neutrons:', 'lbl strong', 'start') + text(X(52), Y(34) + 32, 'beta-plus decay', 'lbl', 'start', 'style="fill:var(--positive)"') + arrow(X(70), Y(60), X(58), Y(72), 'positive', 5);
-      s += text(X(92), Y(140), 'too heavy:', 'lbl strong', 'start') + text(X(92), Y(140) + 32, 'alpha decay', 'lbl', 'start', 'style="fill:var(--alpha)"') + arrow(X(95), Y(132), X(87), Y(124), 'alpha', 5);
+      s += text(X(97), Y(140), 'too heavy:', 'lbl strong', 'start') + text(X(97), Y(140) + 32, 'alpha decay', 'lbl', 'start', 'style="fill:var(--alpha)"') + arrow(X(95), Y(132), X(87), Y(124), 'alpha', 5);
       return svg('0 0 580 530', s, 'Graph of neutron number against proton number, with both axes on the same scale so that the line N equals Z is at 45 degrees. The stable nuclides lie in a narrow band that follows the line N equals Z for light nuclei and curves above it for heavier ones. Nuclides above the band have too many neutrons and decay by beta-minus emission. Those below it have too few and decay by beta-plus emission. The heaviest nuclides decay by alpha emission');
     },
 

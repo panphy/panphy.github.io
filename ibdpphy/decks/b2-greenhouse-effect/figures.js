@@ -32,7 +32,7 @@ window.DeckFigures.add(P => {
       const cx = 590, cy = 250, r = 130;
       let s = [140, 195, 250, 305, 360].map(y => arrow(150, y, 320, y, 'brand-accent', 5)).join('');
       s += `<ellipse cx="380" cy="${cy}" rx="34" ry="${r}" style="fill:var(--brand-accent);opacity:.35;stroke:var(--brand-accent);stroke-width:3"/><circle cx="${cx}" cy="${cy}" r="${r}" style="fill:color-mix(in srgb, var(--electron) 40%, var(--viewer-bg));stroke:var(--electron);stroke-width:3"/>`;
-      s += `<line x1="380" y1="${cy - r}" x2="${cx}" y2="${cy - r}" class="guide"/><line x1="380" y1="${cy + r}" x2="${cx}" y2="${cy + r}" class="guide"/>` + arrow(cx, cy, cx + 92, cy - 92, 'text-main', 3) + text(cx + 34, cy - 14, 'R', 'lbl display');
+      s += `<line x1="380" y1="${cy - r}" x2="${cx}" y2="${cy - r}" class="guide"/><line x1="380" y1="${cy + r}" x2="${cx}" y2="${cy + r}" class="guide"/>` + arrow(cx, cy, cx + 92, cy - 92, 'text-main', 3) + text(cx + 46, cy + 2, 'R', 'lbl display');
       s += text(235, 100, 'intensity S', 'lbl strong') + text(300, 430, 'intercepts a disk,', 'lbl') + text(300, 464, 'area πR²', 'lbl strong') + text(cx + 10, 430, 'shared over a sphere,', 'lbl') + text(cx + 10, 464, 'area 4πR²', 'lbl strong');
       return svg('130 60 640 420', s, 'Parallel rays of sunlight of intensity S fall on a planet of radius R. The planet intercepts the light that would pass through a disk of area pi R squared, but that power is shared over the whole surface of the sphere, of area 4 pi R squared, so the mean intensity is a quarter of S');
     },
@@ -100,7 +100,7 @@ window.DeckFigures.add(P => {
       let s = ground(100, 780, 430) + air(100, 780, 190, 70);
       s += arrow(200, 40, 200, 422, 'brand-accent', 7) + ir(400, 424, 400, 268) + ir(560, 186, 560, 60, 'brand-primary') + ir(660, 262, 660, 424, 'brand-primary');
       if (on) {
-        s += text(140, 234, 'atmosphere', 'lbl strong', 'start') + text(440, 500, 'surface', 'lbl strong');
+        s += text(224, 234, 'atmosphere', 'lbl strong', 'start') + text(440, 500, 'surface', 'lbl strong');
         s += text(216, 110, 'sunlight absorbed', 'lbl', 'start') + text(216, 144, '(1 − α) S / 4', 'lbl mono strong', 'start');
         s += text(416, 360, 'surface', 'lbl', 'start') + text(416, 394, 'radiates', 'lbl', 'start') + text(576, 110, 'atmosphere', 'lbl', 'start') + text(576, 144, 'radiates up …', 'lbl', 'start') + text(676, 350, '… and', 'lbl', 'start') + text(676, 384, 'down', 'lbl', 'start');
       }

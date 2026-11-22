@@ -183,8 +183,8 @@ window.DeckFigures.add(P => {
     // move on a press of →, not in a loop.
     'c5-lines': el => {
       const on = labeled(el);
-      let s = live('c5-lines', linesAt, on, 0, 0, 'play' in el.dataset) + text(X0, 94, 'hydrogen in the laboratory', 'lbl strong', 'start') + text(X0, 284, 'the same lines from a galaxy moving away', 'lbl strong', 'start');
-      s += text(X0, 232, 'violet', 'lbl small', 'start') + text(X0 + W, 232, 'red', 'lbl small', 'end');
+      let s = live('c5-lines', linesAt, on, 0, 0, 'play' in el.dataset) + text(X0, 94, 'hydrogen in the laboratory', 'lbl strong', 'start') + text(X0, 284, 'the same lines from a galaxy moving away', 'lbl strong halo', 'start');
+      s += text(X0, 232, 'violet', 'lbl small halo', 'start') + text(X0 + W, 232, 'red', 'lbl small halo', 'end');
       if (on) s += text(460, 492, 'every λ grows by the same fraction', 'lbl small');
       return svg(on ? '80 60 760 450' : '80 60 760 340', s, 'Two spectra. The upper one shows the four visible lines of hydrogen measured in the laboratory. The lower one shows the same lines in the light from a galaxy moving away: every wavelength is stretched by the same fraction, so every line moves towards the red end, and the lines at the red end move furthest');
     },

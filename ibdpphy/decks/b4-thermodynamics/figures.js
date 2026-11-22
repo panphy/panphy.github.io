@@ -72,7 +72,7 @@ window.DeckFigures.add(P => {
       const state = [2, 3], through1 = (v1, v2, gamma) => curve(v1, state[1] * (state[0] / v1) ** gamma, v2, gamma), kinds = {
         isobaric: { pts: [[X(0.7), Y(3)], [X(3.4), Y(3)]], color: 'brand-primary', label: ['isobaric', X(0.72), Y(3) - 16, 'start'] },
         isovolumetric: { pts: [[X(2), Y(5.9)], [X(2), Y(0.6)]], color: 'brand-accent-strong', label: ['isovolumetric', X(2) + 16, Y(5.7), 'start'] },
-        isothermal: { pts: through1(1.05, 3.4, 1), color: 'brand-accent', label: ['isothermal', X(3.4), Y(1.76) - 18, 'end'] },
+        isothermal: { pts: through1(1.05, 3.4, 1), color: 'brand-accent', label: ['isothermal', X(3.4), Y(1.76) - 38, 'end'] },
         adiabatic: { pts: through1(1.34, 3.4, G), color: 'hl', label: ['adiabatic', X(3.4), Y(1.24) + 42, 'end'] }
       };
       let s = pvAxes(on);
@@ -142,7 +142,7 @@ window.DeckFigures.add(P => {
       CARNOT.forEach((pts, i) => { s += path(pts, colors[i]) + head(pts, 0.55, colors[i]); });
       if (on) {
         s += point(A[0], A[1], 'A', 26, 16) + point(B[0], B[1], 'B') + point(C[0], C[1], 'C', 14, 34) + point(D[0], D[1], 'D', -14, 34);
-        s += text(f(CARNOT[0][20][0]) + 18, f(CARNOT[0][20][1]) - 14, sub('T', 'h'), 'lbl display', 'start') + text(f(CARNOT[2][20][0]) - 14, f(CARNOT[2][20][1]) + 42, sub('T', 'c'), 'lbl display', 'end') + `<line x1="${X(1.7)}" y1="${Y(2.3)}" x2="${X(2.5)}" y2="${Y(3.5)}" class="guide"/>` + text(X(2.55), Y(3.6), 'area = net work', 'lbl strong', 'start');
+        s += text(f(CARNOT[0][20][0]) + 18, f(CARNOT[0][20][1]) - 14, sub('T', 'h'), 'lbl display', 'start') + text(f(CARNOT[2][20][0]) - 14, f(CARNOT[2][20][1]) + 42, sub('T', 'c'), 'lbl display', 'end') + `<line x1="${X(2.06)}" y1="${Y(1.85)}" x2="${X(2.5)}" y2="${Y(3.5)}" class="guide"/>` + text(X(2.55), Y(3.6), 'area = net work', 'lbl strong', 'start');
         s += `<line x1="560" y1="80" x2="610" y2="80" style="stroke:var(--brand-accent);stroke-width:5"/>` + text(622, 89, 'isothermal', 'lbl', 'start') + `<line x1="560" y1="124" x2="610" y2="124" style="stroke:var(--hl);stroke-width:5"/>` + text(622, 133, 'adiabatic', 'lbl', 'start');
       }
       const marker = `<circle r="12" style="fill:var(--text-main);stroke:var(--viewer-bg);stroke-width:3"/>`;
