@@ -21,6 +21,9 @@
   // Text with LaTeX in it is left for MathJax.
   const SCRIPT = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', '⁺': '+', '⁻': '−', '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', '₊': '+', '₋': '−' };
   const deck = document.getElementById('deck');
+  // Decode photos as they are painted: WebKit's background decoding (every iPad browser) can leave
+  // a slide's photo as a blank white box.
+  deck?.querySelectorAll('img').forEach(img => { img.decoding = 'sync'; });
   if (deck) {
     const walker = document.createTreeWalker(deck, NodeFilter.SHOW_TEXT, {
       acceptNode: node => (/[⁰¹²³⁴-⁹⁺⁻₀-₉₊₋]/.test(node.data) && !/\\[([]/.test(node.data) && !node.parentElement.closest('svg, mjx-container, script, style, code, textarea') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
