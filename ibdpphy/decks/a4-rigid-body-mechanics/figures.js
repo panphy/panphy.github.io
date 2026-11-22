@@ -91,7 +91,7 @@ window.DeckFigures.add(P => {
       // The flat picture: what prints, and what shows if disks.js cannot load Three.js. On screen
       // disks.js puts a model of the two disks over it, turning about the dashed axis. Its PLAY step
       // is the press that drops the upper disk.
-      const disk = (cx, cy, w, color) => `<ellipse cx="${cx}" cy="${cy}" rx="${w}" ry="26" style="fill:color-mix(in srgb, var(--${color}) 40%, var(--viewer-bg));stroke:var(--${color});stroke-width:3"/>`;
+      const disk = (cx, cy, w, color) => `<ellipse cx="${cx}" cy="${cy}" rx="${w}" ry="26" style="fill:color-mix(in srgb, ${color === 'brand-accent' ? '#E8A66C' : `var(--${color})`} 40%, var(--viewer-bg));stroke:var(--${color});stroke-width:3"/>`;
       const axis = cx => `<line x1="${cx}" y1="140" x2="${cx}" y2="440" class="guide" style="stroke-width:3"/>`;
       let s = disk(220, 340, 130, 'brand-accent-strong') + disk(220, 190, 90, 'brand-accent') + axis(220) + turn(220, 340, 150, 160, 20, 'hl', 5) + text(220, 520, 'before', 'lbl strong') + text(50, 300, sub('ω', '1'), 'lbl greek', 'end') + text(330, 196, 'at rest', 'lbl', 'start');
       s += disk(640, 340, 130, 'brand-accent-strong') + disk(640, 314, 90, 'brand-accent') + axis(640) + turn(640, 340, 150, 160, 80, 'hl', 5) + text(640, 520, 'after', 'lbl strong') + text(480, 300, 'ω', 'lbl greek', 'end') + text(640, 130, 'turning together', 'lbl');
