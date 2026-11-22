@@ -424,7 +424,7 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
   .ctl.pts { box-shadow: inset 0 -3px 0 var(--team); }
   .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
   .controls { gap: 3px; }
-  .ctl.primary { flex: 1.4 1 0; }
+  .ctl.primary { flex: 1.1 1 0; }
   .ctl.primary.next { flex: 1.7 1 0; font-size: 19px; }
 }
 
@@ -506,6 +506,7 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
     <button class="ctl shot-btn" id="shotFullBtn" title="Reset shot clock (key S)" hidden>24</button>
     <button class="ctl shot-btn" id="shotShortBtn" title="Reset shot clock, short (key D)" hidden>14</button>
     <button class="ctl primary" id="primaryBtn"></button>
+    <button class="ctl" id="stripFsBtn" aria-label="Full screen" title="Full screen (G)"></button>
     <button class="ctl" id="menuBtn" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2.5H3zM3 10.75h18v2.5H3zM3 15.5h18V18H3z"/></svg></button>
   </div>
 
@@ -602,6 +603,8 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
   const SIDES = ['home', 'away'];
   const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>';
   const ICON_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>';
+  const ICON_FS_ENTER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v2.5H5.5V10H3zM14 3h7v7h-2.5V5.5H14zM3 14h2.5v4.5H10V21H3zM18.5 14H21v7h-7v-2.5h4.5z"/></svg>';
+  const ICON_FS_EXIT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 3H10v7H3V7.5h4.5zM14 3h2.5v4.5H21V10h-7zM3 14h7v7H7.5v-4.5H3zM14 14h7v2.5h-4.5V21H14z"/></svg>';
   const ICON_SOUND_ON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9zM14 7.5v9a4.5 4.5 0 0 0 0-9zM14 3.3v2.4a6.5 6.5 0 0 1 0 12.6v2.4a9 9 0 0 0 0-17.4z"/></svg>';
   const ICON_SOUND_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9zM21.5 9.2 19.8 7.5 17.5 9.8l-2.3-2.3-1.7 1.7 2.3 2.3-2.3 2.3 1.7 1.7 2.3-2.3 2.3 2.3 1.7-1.7-2.3-2.3z"/></svg>';
 
@@ -1033,7 +1036,12 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
 
   function renderMenuButtons() {
     $('soundBtn').innerHTML = `${state.settings.sound ? ICON_SOUND_ON : ICON_SOUND_OFF}Buzzer ${state.settings.sound ? 'on' : 'off'}`;
-    $('fsLabel').textContent = fullscreenElement() ? 'Exit full screen' : 'Full screen';
+    const isFull = !!fullscreenElement();
+    const label = isFull ? 'Exit full screen' : 'Full screen';
+    $('fsLabel').textContent = label;
+    $('stripFsBtn').innerHTML = isFull ? ICON_FS_EXIT : ICON_FS_ENTER;
+    $('stripFsBtn').setAttribute('aria-label', label);
+    $('stripFsBtn').title = `${label} (G)`;
   }
 
   function openMenu() {
@@ -1144,12 +1152,12 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
   // Fullscreen
   const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
   const canFullscreen = !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
-  if (!canFullscreen) $('fsBtn').hidden = true;
+  if (!canFullscreen) { $('fsBtn').hidden = true; $('stripFsBtn').hidden = true; }
   function toggleFullscreen() {
     const root = document.documentElement;
     if (fullscreenElement()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
     else {
-      $('menuDlg').close();
+      if ($('menuDlg').open) $('menuDlg').close();
       const result = (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
       if (result && result.catch) result.catch(() => {});
     }
@@ -1190,6 +1198,7 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
     save();
   });
   $('fsBtn').addEventListener('click', toggleFullscreen);
+  $('stripFsBtn').addEventListener('click', toggleFullscreen);
   $('newGameBtn').addEventListener('click', () => { $('menuDlg').close(); $('confirmDlg').showModal(); });
 
   $('clockDone').addEventListener('click', () => $('clockDlg').close());
@@ -1228,6 +1237,7 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
     f: () => addFoul('home'), j: () => addFoul('away'),
     t: () => callTimeout('home'), y: () => callTimeout('away'),
     p: togglePossession, u: undo,
+    g: () => { if (canFullscreen) toggleFullscreen(); },
     s: () => resetShot(state.settings.shotFull),
     d: () => resetShot(state.settings.shotShort),
   };
@@ -1271,6 +1281,7 @@ dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0
     document.fonts.load('100px "Bebas Neue"', '0123456789:').then(measureDigits).catch(() => {});
   }
 
+  renderMenuButtons();
   commit();
   setInterval(tick, TICK_MS);
 })();
