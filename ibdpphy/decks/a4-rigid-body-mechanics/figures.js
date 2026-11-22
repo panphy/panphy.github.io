@@ -67,9 +67,10 @@ window.DeckFigures.add(P => {
     // A mass on a string wound round a wheel: the falling mass turns the wheel.
     'a4-falling': () => {
       const cx = 380, cy = 180, r = 100;
-      // The radius r drawn beside one spoke (the one at 120°, down and to the left), parallel to it.
-      const ang = 120 * Math.PI / 180, ux = Math.cos(ang), uy = Math.sin(ang), ox = -uy * 20, oy = ux * 20;
-      const rArrow = both(f(cx + ox), f(cy + oy), f(cx + ox + r * ux), f(cy + oy + r * uy)) + text(f(cx + 2.4 * ox + 0.55 * r * ux), f(cy + 2.4 * oy + 0.55 * r * uy) + 10, 'r', 'lbl display italic');
+      // The radius r from the axle to the rim, halfway between the spoke at 120° and the axle bar at 180°.
+      // The arrowhead reaches 4.8 past the line's end, so the line stops short and the tip meets the rim.
+      const ang = 150 * Math.PI / 180, ux = Math.cos(ang), uy = Math.sin(ang);
+      const rArrow = arrow(cx, cy, f(cx + (r - 4.8) * ux), f(cy + (r - 4.8) * uy), 'text-secondary', 3) + text(f(cx + (r + 30) * ux), f(cy + (r + 30) * uy) + 10, 'r', 'lbl display italic');
       let s = `<line x1="${cx - 150}" y1="${cy}" x2="${cx + 150}" y2="${cy}" class="tick" style="stroke-width:6"/>` + at(cx, cy, wheel(r)) + `<line x1="${cx + r}" y1="${cy}" x2="${cx + r}" y2="400" class="cable"/><rect x="${cx + r - 34}" y="400" width="68" height="60" rx="8" style="${BODY}"/>`;
       s += arrow(cx + r, 400, cx + r, 310, 'brand-primary', 6) + text(cx + r + 16, 340, 'T', 'lbl display', 'start') + dot(cx + r, 430, 6) + arrow(cx + r, 430, cx + r, 540, 'brand-primary', 6) + text(cx + r + 16, 540, 'mg', 'lbl display', 'start') + arrow(cx + r - 70, 420, cx + r - 70, 480, 'brand-accent', 5) + text(cx + r - 86, 460, 'a', 'lbl display', 'end') + turn(cx, cy, r + 30, -150, -30) + text(cx, cy - r - 44, 'α', 'lbl greek') + rArrow + text(cx - 190, cy + 10, 'wheel,', 'lbl', 'end') + text(cx - 190, cy + 44, 'moment of inertia I', 'lbl', 'end');
       return svg('-120 -10 760 580', s, 'A wheel free to turn on a fixed axle, with a string wound round its rim and a mass hanging from the string. The weight of the mass acts downwards at its center and the tension acts upwards where the string is attached. As the mass accelerates downwards, the tension exerts a torque on the wheel and gives it an angular acceleration');
