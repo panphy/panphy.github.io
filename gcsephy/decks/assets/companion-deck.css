@@ -1,9 +1,10 @@
 @import url('/gcsephy/assets/fonts/archivo-black.css');
 
-/* The Year 9 and Year 10 companion-style decks (Work Like a Physicist and
-   Electric Circuits, and the later Year 9 and 10 decks): navy and paper, Arial Black headings, 2px ink borders
-   and hard offset shadows in the mission colours. The navy-and-lime palette is the
-   default; <html class="palette-electric"> switches to the electric palette (Electric Circuits, Particle Model). */
+/* Layouts, navigation and slide parts for the companion-style decks (Work Like a Physicist,
+   Energy, Electric Circuits and Particle Model) and the Do Now exam statistics deck. The decks
+   load ../assets/teaching-deck.css after this file, which replaces its navy-and-paper palette,
+   Arial Black headings, 2px ink borders and hard offset shadows with the calm teaching style;
+   the exam statistics deck keeps them, in its own colours. */
 :root {
   --navy: #07162f;
   --navy-deep: #030c1e;
@@ -24,18 +25,6 @@
   --right: #15803d;
   --display: "Arial Black", "Archivo Black", Arial, sans-serif;
   --accent: var(--hi);
-}
-.palette-electric {
-  --navy: #0a1326;
-  --paper: #f3f0e7;
-  --ink: #0a1326;
-  --hi: #ffd23f;
-  --cyan: #3fd0e8;
-  --hot: #ff8a4c;
-  --violet: #a996ff;
-  --alt: #b8ec58;
-  --line: rgba(10, 19, 38, .17);
-  --formula: #fff4c7;
 }
 .a-hi { --accent: var(--hi); }
 .a-cyan { --accent: var(--cyan); }
@@ -62,30 +51,7 @@ a { color: inherit; }
 button:focus-visible, a:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
 sub, sup { line-height: 0; }
 
-/* Top bar and controls */
-.topbar {
-  position: fixed;
-  top: var(--standalone-top);
-  left: 0;
-  right: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  height: 60px;
-  padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
-  background: var(--navy-deep);
-  border-bottom: 1px solid rgba(255, 255, 255, .15);
-  color: #fff;
-}
-.brand { display: inline-flex; align-items: center; gap: 4px; min-height: 48px; min-width: 0; font-weight: 800; letter-spacing: -.02em; }
-.brand a { display: inline-flex; align-items: center; min-height: 48px; color: inherit; text-decoration: none; }
-.brand-logo { flex: none; justify-content: center; min-width: 48px; margin-left: -8px; }
-.brand-name { min-width: 0; padding-right: 8px; }
-.brand img { width: 32px; height: 32px; flex: none; }
-.brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.top-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+/* Controls */
 .nav-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 15px; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; background: none; color: #fff; font-size: 13px; font-weight: 800; text-decoration: none; }
 .nav-pill:hover { background: #fff; color: var(--navy); }
 .nav-pill svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
@@ -115,7 +81,6 @@ sub, sup { line-height: 0; }
 .progress span { display: block; height: 100%; width: 0; background: var(--hi); transition: width .3s ease; }
 
 /* Slide thumbnails: shown beside the stage unless presenting fullscreen. */
-.nav-pill.icon-only { width: 44px; padding: 0; justify-content: center; }
 .nav-pill .pane { fill: currentColor; stroke: none; opacity: 0; }
 .nav-pill[aria-pressed="true"] { background: rgba(255, 255, 255, .12); }
 .nav-pill[aria-pressed="true"]:hover { background: #fff; color: var(--navy); }
@@ -195,7 +160,7 @@ body.is-fullscreen .controls { left: 50%; }
   box-shadow: 14px 14px 0 var(--cyan);
   overflow: hidden;
 }
-body.is-fullscreen .topbar, body.is-fullscreen .controls { display: none; }
+body.is-fullscreen .controls { display: none; }
 body.is-fullscreen .stage { top: 0; bottom: var(--vv-bottom, 0px); }
 body.is-fullscreen .deck { border: 0; box-shadow: none; }
 
@@ -271,7 +236,6 @@ h3 { font-size: 34px; line-height: 1; letter-spacing: -.04em; }
 .points b { font-weight: 900; }
 .points .sub { display: block; font-size: .78em; color: var(--muted); }
 .points.cols { grid-template-columns: 1fr 1fr; gap: 16px 44px; }
-.points.cols3 { grid-template-columns: repeat(3, 1fr); gap: 16px 36px; }
 ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
 ol.steps li { counter-increment: s; position: relative; min-height: 46px; padding: 6px 0 0 64px; font-size: 31px; line-height: 1.2; }
 ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 46px; height: 46px; border: 2px solid var(--ink); border-radius: 50%; background: var(--accent); font: 900 21px Arial, sans-serif; }
@@ -314,7 +278,6 @@ ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; 
 .fig { position: relative; flex: 1; min-height: 0; }
 .fig > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .panel .fig { margin-top: 12px; }
-.cap { margin: 10px 0 0; padding-top: 9px; border-top: 1px solid var(--line); font-size: 25px; font-weight: 700; color: var(--muted); line-height: 1.3; }
 
 /* Companion diagram figures (Diagrams.circuit) drawn inside a frame */
 .fig > .circuit-figure { position: absolute; inset: 0; display: flex; flex-direction: column; margin: 0; padding: 0; border: 0; background: none; }
@@ -435,13 +398,35 @@ table.data { width: 100%; border-collapse: collapse; background: #fff; font-size
 .case-card .points li::before { width: 18px; height: 18px; }
 .case-card .fig { height: 330px; margin-top: 14px; }
 .stamp { position: absolute; z-index: 3; display: grid; place-items: center; width: 132px; height: 132px; border: 6px double var(--hot); border-radius: 50%; color: var(--hot); text-align: center; font: 900 18px/1.05 var(--display); transform: rotate(11deg); }
-.sticky { position: absolute; z-index: 3; padding: 12px 16px; background: var(--alt); color: var(--ink); font: 900 22px/1 Arial, sans-serif; text-transform: uppercase; box-shadow: 5px 5px 0 var(--navy-deep); }
+
+/* News slides (Work Like a Physicist, Energy, Electric Circuits): a case as the front page of a paper,
+   with a credited photo. Each deck sets its own headline, standfirst, question and caption sizes. */
+.masthead { display: flex; align-items: center; gap: 22px; padding-bottom: 14px; border-bottom: 6px double var(--ink); }
+.masthead .dateline { font: 900 20px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.masthead .edition { padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.front { display: grid; grid-template-columns: 690px 1fr; gap: 50px; margin-top: 28px; }
+.news-photo { margin: 0; min-height: 0; }
+.news-photo img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; border: 2px solid var(--ink); box-shadow: 10px 10px 0 var(--accent); background: #05060c; }
+.news-photo .credit { display: block; margin-top: 5px; font-size: 15px; font-weight: 600; color: var(--muted); text-decoration: none; }
+.news-photo .credit a { color: inherit; }
+.story { display: flex; flex-direction: column; min-height: 0; }
+.story .kicker { align-self: flex-start; margin: 0; padding: 6px 13px; background: var(--ink); color: var(--paper); font: 900 20px Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.story .follow-up { margin: 22px 0 0; padding: 12px 18px 14px; border-left: 8px solid var(--accent); background: var(--card); font-size: 26px; line-height: 1.3; }
+.story .follow-up b, .story .ask b { display: block; margin-bottom: 5px; font: 900 20px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.story .follow-up b { color: var(--muted); }
+
+/* A credited photo under a lesson divider's title (Electric Circuits, Particle Model). */
+.hero-photo { margin: 26px 0 0; max-width: 600px; }
+.hero-photo img { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: 18px; }
+.hero-photo figcaption { margin-top: 6px; }
+.hero-photo .credit { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+.hero-photo .credit a { color: inherit; }
 
 /* Print or save as PDF: one slide per landscape page, all steps shown. */
 @media print {
   @page { size: 1600px 900px; margin: 0; }
   html, body { height: auto; overflow: visible; background: #fff; }
-  .topbar, .controls, .progress, .thumbs { display: none !important; }
+  .controls, .progress, .thumbs { display: none !important; }
   .stage { position: static; }
   .deck { position: static; transform: none !important; width: 1600px; height: auto; border: 0; box-shadow: none; overflow: visible; }
   .slide { position: relative; width: 1600px; height: 900px; visibility: visible; opacity: 1; break-after: page; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -451,11 +436,4 @@ table.data { width: 100%; border-collapse: collapse; background: #fff; font-size
 
 @media (prefers-reduced-motion: reduce) {
   .slide, .step, .progress span { transition: none; }
-}
-
-@media (max-width: 640px) {
-  .topbar { height: 56px; }
-  .brand span { font-size: 14px; }
-  .nav-pill .wide { display: none; }
-  .stage { top: calc(56px + var(--standalone-top)); }
 }

@@ -12,8 +12,6 @@ window.DeckSvgTex = {
   'h = height of one step × number of steps': '\\(h =\\) height of one step \\(\\times\\) number of steps',
   '1.00 m': '\\(1.00\\) m',
   '0.65 m': '\\(0.65\\) m',
-  'h1 = 1.00 m': '\\(h_1 = 1.00\\) m',
-  'h2 = 0.65 m': '\\(h_2 = 0.65\\) m',
   'G.P.E. gained = 2.0 × 9.8 × 1.5 = 29.4 J': 'G.P.E. gained \\(= 2.0 \\times 9.8 \\times 1.5 = 29.4\\) J',
   'springLimit|force F / N': 'force \\(F\\) / N',
   'springLimit|extension e / m': 'extension \\(e\\) / m',
@@ -485,14 +483,13 @@ window.DeckSvgTex = {
   }
 
   const FIGURES = {
-    shelf: () => F.shelf(), hike: hikeBig, twoForces: () => F.twoForces(), extension: extensionBig,
-    springRig: () => F.springRig(3), pendulum: () => F.pendulum(), stairs: stairsBig, house: () => F.house(false),
-    houseMarks: () => F.house(true), bounce: () => F.bounce(), cups: () => F.cups(['none', 'newspaper', 'bubble wrap', 'cotton wool', 'felt']),
+    hike: hikeBig, twoForces: () => F.twoForces(), extension: extensionBig,
+    springRig: () => F.springRig(3), pendulum: () => F.pendulum(), stairs: stairsBig,
     barsTop: () => F.barChart({ title: 'released', values: [20, 0, 0] }), barsMid: () => F.barChart({ title: 'half-way down', values: [10, 10, 0] }), barsLow: () => F.barChart({ title: 'just before landing', values: [0, 20, 0] }),
     sankeyLamp: () => F.sankey({ blend: true, input: 100, useful: 10, wasted: 90, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLed: () => F.sankey({ blend: true, input: 100, useful: 40, wasted: 60, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLesson: () => F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
-    twoGraphs, springLimit, coolingChart, story: () => F.storyStrip(),
+    twoGraphs, springLimit, coolingChart,
     coverArt: () => F.coverArt(),
   };
   const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce, rods: rodsLab };

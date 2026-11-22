@@ -4,7 +4,6 @@
 
 .cd { stroke: var(--ink); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .cd .mask { fill: var(--diagram-bg); stroke: none; }
-.cd .body rect, .cd .body circle:not(.dot) { fill: var(--diagram-bg); }
 .cd .fill { fill: var(--ink); stroke: none; }
 .cd .thick { stroke-width: 4.5; }
 .cd .dash { stroke-dasharray: 3 4; }
@@ -37,7 +36,6 @@
 .cd .w-live { stroke: #95582f; stroke-width: 6; }
 .cd .w-neutral { stroke: #2876be; stroke-width: 6; }
 .cd .w-earth { stroke-width: 6; }
-.cd .inner { stroke-width: 2.5; }
 .cd .heater { fill: #fdebe1; stroke-width: 2.5; }
 .cd .spark { fill: var(--hi); stroke: var(--ink); stroke-width: 1.5; }
 /* Static electricity (Mission 9): drawn larger than the circuits, with body-font labels. */
@@ -60,7 +58,6 @@
 .cd .sx-eflow { stroke: var(--cyan); stroke-width: 4; stroke-dasharray: 10 8; }
 .cd .sx-eflow-head { fill: var(--cyan); stroke: none; }
 .cd .sx-fline { stroke-width: 3; }
-.cd .sx-fline.faint { opacity: .55; }
 .cd .sx-fline-head { fill: var(--ink); stroke: none; }
 .cd .sx-metal { fill: #dfe3e8; stroke-width: 3; }
 .cd .sx-column { fill: #f6efe0; stroke-width: 3; }
@@ -110,10 +107,6 @@
 .grid-icon svg { width: 54px; height: 54px; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .grid-icon .coil { stroke: #b8660b; stroke-width: 2.6; }
 .grid-icon .bolt { fill: var(--hi); stroke-width: 1.5; }
-.grid-stage-up .grid-icon { background: #fff4c7; }
-.grid-stage-cables .grid-icon { background: #fdebe1; }
-.grid-stage-down .grid-icon { background: #e2f7fb; }
-.grid-stage-homes .grid-icon { background: #eaf7d5; }
 .grid-text { font-size: 25px; line-height: 1.3; }
 .grid-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-bottom: 3px; }
 .grid-head strong { font-size: 22px; letter-spacing: .08em; text-transform: uppercase; }
@@ -207,10 +200,6 @@
 .thumb-slide .cd .e-drift, .thumb-slide .cd .e-jig { animation: none; }
 @media (prefers-reduced-motion: reduce) { .cd .e-drift, .cd .e-jig, #deck .cd .k2.shown .flow-line, #deck .cd .k3.shown .fuse-flash { animation: none; } }
 
-/* Proportionality sign, drawn because the display fonts have no ∝ glyph */
-.prop { display: inline-block; width: .9em; height: .56em; vertical-align: .02em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
-h2 .prop { stroke-width: 3.4; }
-
 /* Photo slides. Component pictures are in year10phy/unit01/assets/components/;
    the others are in images/, each with a credit
    that links to its source. */
@@ -239,31 +228,10 @@ h2 .prop { stroke-width: 3.4; }
 .wires .neutral { --wire: #2f6fd6; }
 .wires .live { --wire: #8a4b2a; }
 
-/* ----- news slides (as in the Year 9 decks; Mission 9 story) ----- */
-.masthead { display: flex; align-items: center; gap: 22px; padding-bottom: 14px; border-bottom: 6px double var(--ink); }
-/* No newspaper name: the dateline leads. */
-.masthead .dateline { font: 900 20px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-.masthead .edition { padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-.front { display: grid; grid-template-columns: 690px 1fr; gap: 50px; margin-top: 28px; }
-.news-photo { margin: 0; min-height: 0; }
-.news-photo img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; border: 2px solid var(--ink); box-shadow: 10px 10px 0 var(--accent); background: #05060c; }
+/* ----- news slide (Mission 9 story): sizes for the shared layout in ../assets/companion-deck.css ----- */
 .news-photo figcaption { margin-top: 22px; font-size: 24px; font-weight: 700; line-height: 1.3; }
-.news-photo .credit { display: block; margin-top: 5px; font-size: 15px; font-weight: 600; color: var(--muted); text-decoration: none; }
-.news-photo .credit a { color: inherit; }
-.story { display: flex; flex-direction: column; min-height: 0; }
-.story .kicker { align-self: flex-start; margin: 0; padding: 6px 13px; background: var(--ink); color: var(--paper); font: 900 20px Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
 .story h2 { margin: 18px 0 20px; font-size: 62px; }
 .story .standfirst { margin: 0; font-size: 29px; font-weight: 700; line-height: 1.3; }
-.story .follow-up { margin: 22px 0 0; padding: 12px 18px 14px; border-left: 8px solid var(--accent); background: var(--card); font-size: 26px; line-height: 1.3; }
 .story .ask { margin: auto 0 0; padding: 14px 20px 16px; border: 2px solid var(--ink); background: var(--accent); font-size: 28px; font-weight: 800; line-height: 1.2; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
-.story .follow-up b, .story .ask b { display: block; margin-bottom: 5px; font: 900 20px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
-.story .follow-up b { color: var(--muted); }
 /* An engraving on white keeps its whole page in view. */
 .news-photo.engraving img { object-fit: contain; background: #fff; }
-
-/* A photo under a lesson divider's title. */
-.hero-photo { margin: 26px 0 0; max-width: 600px; }
-.hero-photo img { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: 18px; }
-.hero-photo figcaption { margin-top: 6px; }
-.hero-photo .credit { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
-.hero-photo .credit a { color: inherit; }

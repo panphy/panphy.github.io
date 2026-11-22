@@ -3,7 +3,7 @@
 (() => {
   const SLIDE_W = 1600;
   const SLIDE_H = 900;
-  const state = { index: 0, slides: [], orbitFrame: 0, scatter: null };
+  const state = { index: 0, slides: [], scatter: null };
 
   const deck = document.getElementById('deck');
   const stage = document.getElementById('stage');
@@ -333,7 +333,7 @@
 
   // Move electrons around their orbits on the visible slide only.
   function animateOrbits(time) {
-    state.orbitFrame = requestAnimationFrame(animateOrbits);
+    requestAnimationFrame(animateOrbits);
     if (reduceMotion.matches) return;
     animateScatter(time);
     const slide = state.slides[state.index];
@@ -385,7 +385,7 @@
       if (Number.isFinite(n) && n - 1 !== state.index) show(n - 1);
     });
     window.addEventListener('beforeprint', () => state.slides.forEach(slide => slide.querySelectorAll('.step').forEach(step => step.classList.add('shown'))));
-    state.orbitFrame = requestAnimationFrame(animateOrbits);
+    requestAnimationFrame(animateOrbits);
   }
 
   // MathJax typesets the slides first, so thumbnails copy the finished maths.

@@ -37,7 +37,6 @@ window.DeckSvgTex = {
     syringes: () => F.syringes(),
     pvGraph: () => F.pvGraph(),
     pump: () => F.pump(),
-    cover: () => F.coverArt(),
     shcGraph,
     statesLive, gasLive, syringeLive
   };
