@@ -339,7 +339,7 @@ function openVideoFile(file) {
 	hiddenVideo.load();
 }
 
-const SAMPLE_VIDEO_URL = '/tools/motion_tracker/sample-bouncing-ball.mp4';
+const SAMPLE_VIDEO_URL = '/tools/panphytrack/sample-bouncing-ball.mp4';
 
 /* Fit the video to the stage, keeping its shape. Stacked panes cap the height
    so that a portrait clip still leaves the playback bar on screen. */
