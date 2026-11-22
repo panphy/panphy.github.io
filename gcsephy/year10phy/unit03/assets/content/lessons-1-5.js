@@ -10,7 +10,6 @@
     {
       n: 1, accent: "spark", title: "Inside the atom",
       spec: "AQA Physics 4.4.1.1–4.4.1.2; Combined Science 6.4.1.1–6.4.1.2",
-      mapLine: "Protons, neutrons and electrons, the size of an atom, atomic and mass numbers",
       big: "Everything around you is made of atoms, yet an atom is almost entirely empty space. So what is actually in there?",
       goals: ["describe the charge, mass and position of protons, neutrons and electrons", "state the size of an atom and of its nucleus", "explain why an atom has no overall charge", "use atomic and mass numbers to find the numbers of each particle"],
       keywords: ["atom", "nucleus", "proton", "neutron", "electron", "atomic number", "mass number"],
@@ -65,7 +64,6 @@
     {
       n: 2, accent: "cyan", title: "Isotopes and ions",
       spec: "AQA Physics 4.4.1.2; Combined Science 6.4.1.2",
-      mapLine: "Same element, different neutrons; atoms that lose outer electrons",
       big: "Carbon-12 and carbon-14 are both carbon, but only carbon-14 is radioactive. What is different about them?",
       goals: ["explain what isotopes are", "compare isotopes using nuclear notation", "describe how an atom becomes a positive ion", "say what changes, and what does not, when an ion forms"],
       keywords: ["isotope", "ion", "positive ion", "outer electron", "stable", "unstable"],
@@ -122,7 +120,6 @@
     {
       n: 3, accent: "copper", title: "From plum pudding to the nucleus",
       spec: "AQA Physics 4.4.1.3; Combined Science 6.4.1.3",
-      mapLine: "The plum pudding model, alpha scattering and the nuclear model",
       big: "Nobody has ever seen inside an atom. So how did scientists find out that almost all of its mass is squeezed into a tiny nucleus?",
       goals: ["describe the plum pudding model and why it was proposed", "describe the alpha particle scattering experiment", "explain how each result led to the nuclear model", "compare the plum pudding and nuclear models"],
       keywords: ["model", "plum pudding model", "alpha particle", "alpha scattering", "deflected", "nuclear model", "evidence"],
@@ -161,7 +158,6 @@
         { t: "q", say: ["Mia", "Most alpha particles went straight through, so the experiment proved the plum pudding model was right."], p: "Is Mia right? Explain your answer.", lines: 3, a: "No. The plum pudding model also predicts that most go straight through, so that result does not decide between the models. The large deflections and the bounce-backs did not fit the plum pudding model, so it was replaced." },
         { t: "q", type: "Challenge", p: "The gold foil was only a few hundred atoms thick. Suggest why a very thin foil was needed.", lines: 2, a: "Alpha particles are easily stopped, so they need thin foil to pass through at all. Each one then meets only a few nuclei, so each large deflection comes from one close approach to a single nucleus." },
       ],
-      examSplit: true,
       exam: [
         { p: "Describe the differences between the plum pudding model and the nuclear model of the atom.", marks: 4, lines: 4, a: "Any four: plum pudding has the positive charge spread out; nuclear model has it in a tiny nucleus (1). Mass spread out vs concentrated in the nucleus (1). Plum pudding has no empty space; the nuclear atom is mostly empty space (1). Electrons embedded in the positive charge vs electrons outside the nucleus (1)." },
         { p: "In the alpha scattering experiment, most alpha particles passed straight through the gold foil, but a very small number were deflected by more than 90°. Explain what each result showed about the structure of the atom.", marks: 4, lines: 4, a: "Most passing straight through shows the atom is mostly empty space (2). A very small number deflected by more than 90° shows there is a tiny centre (1) where the positive charge and mass are concentrated, which repels alpha particles (1)." },
@@ -175,7 +171,6 @@
     {
       n: 4, accent: "violet", title: "Energy levels and the nucleus",
       spec: "AQA Physics 4.4.1.1–4.4.1.3; Combined Science 6.4.1.1–6.4.1.3",
-      mapLine: "The Bohr model, absorbing and emitting EM radiation, protons and neutrons, why models change",
       big: "Neon signs glow red and sodium street lamps glow orange. Each element gives out its own colours of light. What are its electrons doing?",
       goals: ["describe Bohr's model of electrons in energy levels", "explain how electrons change level when they absorb or emit electromagnetic radiation", "describe how protons and then neutrons were discovered", "explain why scientific models change"],
       keywords: ["Bohr model", "energy level", "absorb", "emit", "electromagnetic radiation", "proton", "neutron", "peer review"],
@@ -217,7 +212,6 @@
         { t: "q", say: ["Leo", "Scientists keep changing the model of the atom because they get bored of the old one."], p: "Explain why scientists really change models.", lines: 3, a: "When new evidence (e.g. from an experiment) does not fit the old model, the model has to be changed or replaced so it explains all the evidence. The new model is checked by other scientists (peer review) before it is accepted." },
         { t: "q", type: "Challenge", p: "Protons were identified in 1919, but the neutron was not found until 1932. Suggest why the neutron was harder to find.", lines: 2, a: "A neutron has no charge, so it is not deflected by electric or magnetic fields and does not ionise atoms directly, so it does not show up easily in detectors." },
       ],
-      examSplit: true,
       exam: [
         { p: "Describe how the arrangement of the electrons in an atom may change when the atom absorbs electromagnetic radiation.", marks: 2, lines: 2, a: "An electron moves to a higher energy level (1), further from the nucleus (1)." },
         { p: "Explain why Bohr's model of the atom was accepted by other scientists.", marks: 2, lines: 2, a: "His theoretical calculations agreed with experimental observations (1); it could be tested and checked by other scientists / explained evidence the nuclear model could not (1)." },
@@ -240,7 +234,6 @@
     {
       n: 5, accent: "leaf", title: "Radioactive decay",
       spec: "AQA Physics 4.4.2.1; Combined Science 6.4.2.1",
-      mapLine: "Unstable nuclei, activity and count rate, alpha, beta, gamma and neutron radiation",
       big: "A smoke alarm contains a radioactive source. Nothing switches it on, yet it gives out radiation for hundreds of years. Why?",
       goals: ["explain why some nuclei give out radiation", "describe radioactive decay as random", "define activity and count rate", "describe what alpha, beta, gamma and neutron radiation are, and how each changes the nucleus"],
       keywords: ["unstable nucleus", "radioactive decay", "random", "activity", "becquerel (Bq)", "count rate", "Geiger–Müller tube", "alpha", "beta", "gamma"],
