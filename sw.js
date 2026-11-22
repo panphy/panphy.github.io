@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-22T22:10:19Z';
+const BUILD_ID = '2026-11-22T23:08:39Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -142,11 +142,8 @@ const ASSETS_TO_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css',
   'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js',
   'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js',
-  'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js',
   'https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js',
   'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
   'https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.min.js',
@@ -400,16 +397,17 @@ async function cachePrecacheAsset(cache, url, onlyMissing, version = BUILD_ID) {
 
 async function cachePrecacheAssets(onlyMissing = false) {
   const [precache, stableCache] = await Promise.all([caches.open(PRECACHE_NAME), caches.open(STABLE_CACHE)]);
-  const results = await Promise.all(
-    ASSETS_TO_CACHE.map(async (url) => ({
-      url,
-      // Stable files are fetched only when they are missing, whatever the build.
-      cached: STABLE_ASSET_SET.has(url)
-        ? await cachePrecacheAsset(stableCache, url, true, STABLE_CACHE_VERSION)
-        : await cachePrecacheAsset(precache, url, onlyMissing)
-    }))
-  );
-  const failed = results.filter((result) => !result.cached).map((result) => result.url);
+  // Stable files are fetched only when they are missing, whatever the build.
+  const cacheOne = (url, missingOnly) => (STABLE_ASSET_SET.has(url)
+    ? cachePrecacheAsset(stableCache, url, true, STABLE_CACHE_VERSION)
+    : cachePrecacheAsset(precache, url, missingOnly));
+  const results = await Promise.all(ASSETS_TO_CACHE.map(async (url) => ({ url, cached: await cacheOne(url, onlyMissing) })));
+  let failed = results.filter((result) => !result.cached).map((result) => result.url);
+  if (failed.length) {
+    // One more try for the files a flaky connection dropped, before the old cache is cleared.
+    const retried = await Promise.all(failed.map(async (url) => ({ url, cached: await cacheOne(url, true) })));
+    failed = retried.filter((result) => !result.cached).map((result) => result.url);
+  }
   return {
     cached: results.length - failed.length,
     failed
@@ -699,6 +697,45 @@ async function matchCurrentCaches(request) {
   return runtime.match(request);
 }
 
+// Sections whose pages always come from the network (no SW cache reads/writes).
+// /gcsephy/ and /ibdpphy/ also have their own freshness workers.
+const NETWORK_ONLY_SECTIONS = ['/beta', '/misc', '/fun', '/gcsephy', '/ibdpphy'];
+
+function isNetworkOnlyPath(pathname) {
+  return NETWORK_ONLY_SECTIONS.some((section) => pathname === section || pathname.startsWith(`${section}/`));
+}
+
+// A page from a network-only section is always the deployed version, so the files
+// it loads come from the network too (falling back to the caches offline);
+// otherwise it could pair new HTML with older precached /assets/ files.
+async function isFromNetworkOnlyPage(clientId) {
+  if (!clientId) return false;
+  try {
+    const client = await self.clients.get(clientId);
+    return Boolean(client) && isNetworkOnlyPath(new URL(client.url).pathname);
+  } catch {
+    return false;
+  }
+}
+
+// Navigation preload is on, so use its response rather than fetching the page twice.
+async function fetchNavigation(event) {
+  try {
+    const preload = await event.preloadResponse;
+    if (preload) return preload;
+  } catch {
+    // Fall through to a normal fetch.
+  }
+  return fetch(event.request);
+}
+
+function putInRuntimeCache(event, request, response) {
+  if (response && (response.ok || response.type === 'opaque')) {
+    const copy = response.clone();
+    event.waitUntil(caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy)).catch(() => {}));
+  }
+}
+
 // Fetch: cache-first for navigations and assets
 self.addEventListener('fetch', (event) => {
   const req = event.request;
@@ -708,41 +745,10 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
-  const isSupabaseApi = !isSameOrigin && url.hostname.endsWith('.supabase.co');
-  const isBetaPath = isSameOrigin && (url.pathname === '/beta' || url.pathname.startsWith('/beta/'));
-  const isMiscPath = isSameOrigin && (url.pathname === '/misc' || url.pathname.startsWith('/misc/'));
-  const isGcsePath = isSameOrigin && (url.pathname === '/gcsephy' || url.pathname.startsWith('/gcsephy/'));
-  const isIbdpPath = isSameOrigin && (url.pathname === '/ibdpphy' || url.pathname.startsWith('/ibdpphy/'));
 
-  // Keep all beta routes/assets network-only (no SW cache reads/writes).
-  if (isBetaPath) {
-    event.respondWith(fetch(req));
-    return;
-  }
-  // Keep all misc routes/assets network-only (no SW cache reads/writes).
-  if (isMiscPath) {
-    event.respondWith(fetch(req));
-    return;
-  }
-  // GCSE curriculum resources are network-only too.
-  if (isGcsePath) {
-    event.respondWith(fetch(req));
-    return;
-  }
-  // IB DP Physics resources are network-only too.
-  if (isIbdpPath) {
-    event.respondWith(fetch(req));
-    return;
-  }
-  // All /fun/* routes are network-only (no SW cache reads/writes).
-  const isFunPath = isSameOrigin && (url.pathname === '/fun' || url.pathname.startsWith('/fun/'));
-  if (isFunPath) {
-    event.respondWith(fetch(req));
-    return;
-  }
-  // Ensure leaderboards and other Supabase API calls stay fresh.
-  if (isSupabaseApi) {
-    event.respondWith(fetch(req));
+  // Network-only sections, and Supabase API calls (leaderboards) so they stay fresh.
+  if ((isSameOrigin && isNetworkOnlyPath(url.pathname)) || (!isSameOrigin && url.hostname.endsWith('.supabase.co'))) {
+    event.respondWith(req.mode === 'navigate' ? fetchNavigation(event) : fetch(req));
     return;
   }
 
@@ -757,12 +763,8 @@ self.addEventListener('fetch', (event) => {
       }
 
       try {
-        const preload = await event.preloadResponse;
-        const fresh = preload || await fetch(req);
-        if (fresh && (fresh.ok || fresh.type === 'opaque')) {
-          const cache = await caches.open(RUNTIME_CACHE);
-          await cache.put(req, fresh.clone());
-        }
+        const fresh = await fetchNavigation(event);
+        putInRuntimeCache(event, req, fresh);
         return fresh;
       } catch {
         const homeFallback = await matchCurrentCaches('/index.html');
@@ -775,6 +777,14 @@ self.addEventListener('fetch', (event) => {
 
   // Assets (same-origin and cross-origin): cache-first, then fetch and store
   event.respondWith((async () => {
+    if (await isFromNetworkOnlyPage(event.clientId)) {
+      try {
+        return await fetch(req);
+      } catch {
+        return (await matchCurrentCaches(req)) || Response.error();
+      }
+    }
+
     const cached = await matchCurrentCaches(req);
     if (cached) {
       // Opaque responses cannot satisfy CORS requests (e.g. module scripts).
@@ -785,10 +795,7 @@ self.addEventListener('fetch', (event) => {
 
     try {
       const fresh = await fetch(req);
-      if (fresh && (fresh.ok || fresh.type === 'opaque')) {
-        const cache = await caches.open(RUNTIME_CACHE);
-        cache.put(req, fresh.clone());
-      }
+      putInRuntimeCache(event, req, fresh);
       return fresh;
     } catch {
       return Response.error();
