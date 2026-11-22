@@ -1,5 +1,6 @@
-// Teaching deck check: text size and contrast in one run. Opens each deck in headless Chrome at
-// 1600 × 900 with every step shown: playing for text size, then still in the light and dark themes.
+// Teaching deck check: text size, contrast and layout in one run. Opens each deck in headless Chrome at
+// 1600 × 900 with every step shown: playing for text size and layout, then still in the light and dark
+// themes for contrast.
 //
 // Text size: text students read must be at least 28px on the slide, the rule for a 75" screen read
 // from the back of a 10 m lab (see the decks' readable.css). Sizes are measured as rendered, so scaled
@@ -15,8 +16,13 @@
 // slide footer, copyright, credits, buttons, graph grids and dividers, thin lines under 1.5px, and
 // anything marked `data-decor`.
 //
-// Problems that predate a check are in deck-text-baseline.json and deck-contrast-baseline.json, keyed
-// by element and text or colors (not slide number), and only problems beyond them fail.
+// Layout, with every step shown: typeset math must not stick out of its box (a work panel, worked
+// example, card or panel), and content must stay at least 12px clear of the slide footer. Slide
+// furniture and revision notes are left out; add `data-layout-ok` to an element for a deliberate exception.
+//
+// Problems that predate a check are in deck-text-baseline.json, deck-contrast-baseline.json and
+// deck-layout-baseline.json, keyed by element and text, colors or slide title (not slide number), and
+// only problems beyond them fail.
 //   node .github/scripts/deck-check.mjs [deck ...]      e.g. ibdpphy/decks/a1-kinematics/index.html
 //   node .github/scripts/deck-check.mjs --update-baseline [deck ...]
 //   node .github/scripts/deck-check.mjs --report=FILE [deck ...]   also writes every contrast failure, worst first
@@ -33,6 +39,8 @@ const MIN_PX = 28;
 const LIMITS = { text: 4.5, large: 3, graphic: 3 };
 const TEXT_BASELINE = join(ROOT, '.github/scripts/deck-text-baseline.json');
 const CONTRAST_BASELINE = join(ROOT, '.github/scripts/deck-contrast-baseline.json');
+const LAYOUT_BASELINE = join(ROOT, '.github/scripts/deck-layout-baseline.json');
+const MIN_FOOTER_GAP = 12;
 
 const allDecks = () => execFileSync('git', ['ls-files', 'gcsephy/decks/*/index.html', 'ibdpphy/decks/*/index.html'], { cwd: ROOT, encoding: 'utf8' })
   .split('\n').filter(Boolean);
@@ -99,6 +107,40 @@ function measureText({ minPx }) {
   });
   style.remove();
   return { slides: slides.length, found };
+}
+
+// Runs inside each deck, after measureText has shown every step. Returns { found: [layout problems] }.
+function measureLayout({ minGap }) {
+  const FURNITURE = '.slide-foot, .slide-copyright, .year-badge, .triple-flag, .triple-tag, .hl-tag, .not-examined, .credit, .credits, aside, .revision-note, [data-layout-ok]';
+  const style = document.createElement('style');
+  style.textContent = '.slide, .step { visibility: visible !important; opacity: 1 !important; transition: none !important; }';
+  document.head.append(style);
+  const slides = [...document.querySelectorAll('.deck .slide, .slides .slide, main .slide')].filter((slide, i, all) => !slide.closest('.thumb-slide') && all.indexOf(slide) === i);
+  const found = [];
+  slides.forEach((slide, index) => {
+    const box = slide.getBoundingClientRect();
+    if (!box.width) return;
+    const scale = slide.offsetWidth / box.width;
+    const title = slide.dataset.title || '';
+    slide.querySelectorAll('mjx-container').forEach((math) => {
+      if (math.closest(FURNITURE)) return;
+      const holder = math.closest('.work, .worked, .card, .panel, .q, .idea, .equation, .stack, .slide');
+      const over = Math.round((math.getBoundingClientRect().right - holder.getBoundingClientRect().right) * scale);
+      if (over > 1) found.push({ slide: index + 1, kind: 'math', px: over, where: holder.className.split(' ')[0], text: (math.querySelector('mjx-assistive-mml')?.textContent || '').slice(0, 48) });
+    });
+    const foot = slide.querySelector('.slide-foot');
+    if (!foot) return;
+    let lowest = 0;
+    for (const el of slide.querySelectorAll('*')) {
+      if (el.children.length || el.closest(FURNITURE)) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.width && rect.height && getComputedStyle(el).visibility !== 'hidden' && !el.closest('[hidden]')) lowest = Math.max(lowest, rect.bottom);
+    }
+    const gap = Math.round((foot.getBoundingClientRect().top - lowest) * scale);
+    if (lowest && gap < minGap) found.push({ slide: index + 1, kind: 'footer', px: gap, where: 'slide', text: title.slice(0, 48) });
+  });
+  style.remove();
+  return { found };
 }
 
 // Runs inside each deck. Returns { slides, measured, unmeasured, found: [failing items] }.
@@ -320,6 +362,7 @@ function measureContrast({ limits }) {
 
 const textKey = (item) => `<${item.where}> ${item.text}`;
 const contrastKey = (item) => `${item.theme} <${item.where}> ${item.text} | ${item.fg}${item.kind === 'graphic' ? '' : ` on ${item.bg}`}`;
+const layoutKey = (item) => `${item.kind} <${item.where}> ${item.text}`;
 const tally = (items, keyOf) => items.reduce((counts, item) => { counts[keyOf(item)] = (counts[keyOf(item)] || 0) + 1; return counts; }, {});
 const readBaseline = (file) => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {});
 const writeBaseline = (file, baseline) => {
@@ -345,6 +388,7 @@ async function main() {
   const decks = named.length ? named : allDecks();
   const textBaseline = readBaseline(TEXT_BASELINE);
   const contrastBaseline = readBaseline(CONTRAST_BASELINE);
+  const layoutBaseline = readBaseline(LAYOUT_BASELINE);
   const everything = [];
   let known = 0;
   let failed = 0;
@@ -374,6 +418,7 @@ async function main() {
         // text as students see it playing, contrast on the still figures.
         await load('light', 'no-preference');
         const { found: text } = await evaluate(measureText, { minPx: MIN_PX });
+        const { found: layout } = await evaluate(measureLayout, { minGap: MIN_FOOTER_GAP });
         for (const theme of THEMES) {
           await load(theme, 'reduce');
           const result = await evaluate(measureContrast, { limits: LIMITS });
@@ -383,7 +428,7 @@ async function main() {
           unmeasured += result.unmeasured;
           contrast.push(...result.found.map((item) => ({ ...item, theme })));
         }
-        return { result: { slides, measured, unmeasured, text, contrast } };
+        return { result: { slides, measured, unmeasured, text, contrast, layout } };
       } catch (error) {
         return { error: error.message.split('\n')[0] };
       }
@@ -400,20 +445,25 @@ async function main() {
       if (update) {
         if (result.text.length) textBaseline[deck] = tally(result.text, textKey); else delete textBaseline[deck];
         if (result.contrast.length) contrastBaseline[deck] = tally(result.contrast, contrastKey); else delete contrastBaseline[deck];
-        console.log(`• ${deck}: ${result.text.length} small text and ${result.contrast.length} contrast item(s) recorded`);
+        if (result.layout.length) layoutBaseline[deck] = tally(result.layout, layoutKey); else delete layoutBaseline[deck];
+        console.log(`• ${deck}: ${result.text.length} small text, ${result.contrast.length} contrast and ${result.layout.length} layout item(s) recorded`);
         return;
       }
       const freshText = beyond(result.text, textBaseline[deck], textKey);
       const freshContrast = beyond(result.contrast, contrastBaseline[deck], contrastKey);
-      known += result.text.length - freshText.length + result.contrast.length - freshContrast.length;
-      if (!freshText.length && !freshContrast.length) {
+      const freshLayout = beyond(result.layout, layoutBaseline[deck], layoutKey);
+      known += result.text.length - freshText.length + result.contrast.length - freshContrast.length + result.layout.length - freshLayout.length;
+      if (!freshText.length && !freshContrast.length && !freshLayout.length) {
         console.log(`✔ ${deck} (${result.slides} slides)`);
         return;
       }
       failed += 1;
-      console.log(`✖ ${deck}: ${freshText.length} new item(s) under ${MIN_PX}px, ${freshContrast.length} new contrast failure(s)`);
+      console.log(`✖ ${deck}: ${freshText.length} new item(s) under ${MIN_PX}px, ${freshContrast.length} new contrast failure(s), ${freshLayout.length} new layout problem(s)`);
       for (const item of freshText) console.log(`    slide ${item.slide}: ${item.size}px <${item.where}> "${item.text}"`);
       for (const item of freshContrast) console.log(`    slide ${item.slide} (${item.theme}): ${item.ratio}:1, needs ${item.need}:1, ${item.fg} on ${item.bg} <${item.where}> "${item.text}"`);
+      for (const item of freshLayout) console.log(item.kind === 'math'
+        ? `    slide ${item.slide}: math sticks out of .${item.where} by ${item.px}px: "${item.text}"`
+        : `    slide ${item.slide}: content ${item.px < 0 ? `runs ${-item.px}px into` : `is only ${item.px}px from`} the footer`);
     }
   });
   if (reportFile) {
@@ -424,10 +474,11 @@ async function main() {
   if (update) {
     writeBaseline(TEXT_BASELINE, textBaseline);
     writeBaseline(CONTRAST_BASELINE, contrastBaseline);
+    writeBaseline(LAYOUT_BASELINE, layoutBaseline);
     process.exit(failed ? 2 : 0);
   }
   const note = known ? ` (${known} older item(s) are in the baselines)` : '';
-  console.log(failed ? `${failed} of ${decks.length} decks have new text size or contrast problems${note}.` : `All ${decks.length} decks passed${note}.`);
+  console.log(failed ? `${failed} of ${decks.length} decks have new text size, contrast or layout problems${note}.` : `All ${decks.length} decks passed${note}.`);
   process.exit(failed ? 1 : 0);
 }
 
