@@ -1,15 +1,15 @@
 /* Shared styles for the IB DP Physics reference pages (course summary, data booklet).
    Colors come from the hub's palette: slate, teal, sage, sand, apricot, and terracotta
-   kept for higher level only. Light is cream paper; dark is the hub's slate. */
+   kept for higher level only. Light is warm white paper; dark is the hub's slate. */
 :root {
   color-scheme: light;
-  --bg: #FBF6E9;
+  --bg: #FBFBF9;
   --grid: rgba(44, 70, 84, .06);
   --ink: #1F3340;
   --muted: #55676F;
   --card: #FFFFFF;
-  --line: #E4D9BF;
-  --soft: #F3ECDA;
+  --line: #E6E6E2;
+  --soft: #F4F4F1;
   --teal: #2B7A70;
   --slate: #2C4654;
   --sage: #96B083;
@@ -22,7 +22,7 @@
   --body: 'Manrope', system-ui, Arial, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
   --gutter: clamp(16px, 4vw, 48px);
-  --standalone-top-bg: #FBF6E9;
+  --standalone-top-bg: #FBFBF9;
 }
 [data-theme="dark"] {
   color-scheme: dark;
