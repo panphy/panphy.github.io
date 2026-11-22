@@ -13,6 +13,15 @@ package-lock.json
 # Local AI tool metadata
 skills-lock.json
 
+# AI tool state and settings stay local, except the shared skills (.agents/skills/ and the .claude/skills link).
+# The folders are re-included first so a global ignore of .agents/ or .claude/ cannot hide the skills.
+!.agents/
+.agents/*
+!.agents/skills/
+!.claude/
+.claude/*
+!.claude/skills
+
 # Local Year 9 Physics assessment materials
 gcsephy/year9phy/unit01/assessment/
 
@@ -23,9 +32,6 @@ ibdpphy/local_reference/
 .vscode/
 .idea/
 
-# AI tool local settings
-.claude/
-.agents/
 
 # Temporary and log files
 *.log

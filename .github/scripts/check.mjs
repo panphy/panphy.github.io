@@ -4,9 +4,22 @@
      node .github/scripts/check.mjs                 everything except the BUILD_ID bump
      node .github/scripts/check.mjs --base origin/main   also compares with that commit
 
+   It checks that cached files exist, homepage offline requirements are cached, BUILD_ID (and
+   STABLE_CACHE_VERSION) changed with their files, catalog and sitemap links resolve, the exam
+   statistics data is consistent, every script parses, and the agent instructions hang together (each
+   AGENTS.md matches its CLAUDE.md, the skills are well formed and linked, and the root index lists
+   them all). It also enforces page wiring: the copyright line on new pages; theme.js placement and
+   scope; canonical, description, standalone-top.css, status-bar style, font order and <lastmod> on
+   sitemap pages; section sw-register.js, deck readable.css and matching section workers; the beta
+   and misc inventories; no root worker in network-only sections; getAssetGroup matching getAppGroup;
+   no CanvasTexture beside createRadialGradient in simulation and shared modules; compound units
+   joined by &nbsp; in decks; and settled wording in gcsephy/ and ibdpphy/ (terminal velocity,
+   v² − u² = 2as, ΔU = Q − W, no · separators, no ÷ in ibdpphy/). End a line with a `check-ok`
+   comment to exempt a deliberate exception.
+
    No dependencies. Each check adds a line to `problems`; any line fails the run. */
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync, readlinkSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
@@ -370,8 +383,36 @@ check("Teaching conventions");
 
 check("Agent instructions");
 {
+  // Each AGENTS.md has a CLAUDE.md beside it that matches below the title.
   const body = (file) => read(file).split("\n").slice(1).join("\n");
-  if (body("AGENTS.md") !== body("CLAUDE.md")) fail("AGENTS.md and CLAUDE.md differ below their titles");
+  const agentFiles = git("ls-files", "-z", "--cached", "--others", "--exclude-standard", "AGENTS.md", "*/AGENTS.md").split("\0").filter(Boolean);
+  for (const file of agentFiles) {
+    const twin = file.replace(/AGENTS\.md$/, "CLAUDE.md");
+    if (!isFile(twin)) fail(`${file} has no ${twin} beside it`);
+    else if (body(file) !== body(twin)) fail(`${file} and ${twin} differ below their titles`);
+  }
+  // Skills live in .agents/skills/<name>/SKILL.md, with a name and description, and .claude/skills links there.
+  const SKILLS = ".agents/skills";
+  const skills = [...new Set(git("ls-files", "-z", "--cached", "--others", "--exclude-standard", `${SKILLS}/*/SKILL.md`).split("\0").filter(Boolean).map((file) => file.split("/")[2]))];
+  for (const name of skills) {
+    const front = (read(`${SKILLS}/${name}/SKILL.md`).match(/^---\n([\s\S]*?)\n---\n/) || [])[1];
+    if (!front) { fail(`${SKILLS}/${name}/SKILL.md has no front matter`); continue; }
+    if ((front.match(/^name:\s*(.+)$/m) || [])[1]?.trim() !== name) fail(`${SKILLS}/${name}/SKILL.md: name must be ${name}`);
+    if (!/^description:\s*\S/m.test(front)) fail(`${SKILLS}/${name}/SKILL.md has no description`);
+  }
+  const link = path.join(ROOT, ".claude/skills");
+  let target = "";
+  try { target = lstatSync(link).isSymbolicLink() ? readlinkSync(link) : ""; } catch { /* missing */ }
+  if (target !== "../.agents/skills") fail(".claude/skills must be a link to ../.agents/skills");
+  // The root index ("Where the rules live") lists every folder AGENTS.md and every skill, and nothing else.
+  const index = (read("AGENTS.md").match(/## Where the rules live\n([\s\S]*?)\n## /) || [])[1] || "";
+  if (!index) fail("AGENTS.md has no \"Where the rules live\" section");
+  const listedFiles = [...index.matchAll(/`([\w./-]+\/AGENTS\.md)`/g)].map((m) => m[1]);
+  const listedSkills = [...index.matchAll(/skill `([\w-]+)`/g)].map((m) => m[1]);
+  for (const file of agentFiles.filter((file) => file !== "AGENTS.md")) if (!listedFiles.includes(file)) fail(`${file} is not listed in AGENTS.md's "Where the rules live"`);
+  for (const file of listedFiles) if (!agentFiles.includes(file)) fail(`AGENTS.md lists ${file}, which does not exist`);
+  for (const name of skills) if (!listedSkills.includes(name)) fail(`skill ${name} is not listed in AGENTS.md's "Where the rules live"`);
+  for (const name of listedSkills) if (!skills.includes(name)) fail(`AGENTS.md lists skill ${name}, which does not exist`);
 }
 
 check("JavaScript syntax");
