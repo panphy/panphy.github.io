@@ -158,17 +158,17 @@ window.DeckFigures.add(P => {
       const arc = (r, deg) => { const a = deg * Math.PI / 180; return `<path d="M${f(150 + r * Math.cos(a))},${f(260 - r * Math.sin(a))} A${r},${r} 0 0 1 ${f(150 + r * Math.cos(a))},${f(260 + r * Math.sin(a))}" class="guide accent"/>`; };
       s += arc(270, 62) + arc(540, 26);
       const patch = (x, n) => { const h = (x - 150) * 360 / 610, y = 260 - h / 2; let g = `<rect x="${x - 5}" y="${f(y)}" width="10" height="${f(h)}" style="fill:var(--brand-primary);opacity:.85"/>`; for (let i = 1; i < n; i++) g += `<line x1="${x - 12}" y1="${f(y + h * i / n)}" x2="${x + 12}" y2="${f(y + h * i / n)}" class="tick"/>`; return g; };
-      s += patch(420, 1) + patch(690, 2) + P.both(150, 470, 420, 470) + text(285, 506, 'd', 'lbl display') + P.both(150, 540, 690, 540) + text(420, 576, '2d', 'lbl display');
-      s += text(420, 150, 'area A', 'lbl strong halo') + text(690, 60, 'area 4A', 'lbl strong halo') + text(420, 620, 'at 2d: a quarter of the brightness', 'lbl');
+      s += patch(420, 1) + patch(690, 2) + P.both(150, 470, 420, 470) + text(230, 506, 'd', 'lbl display') + P.both(150, 540, 690, 540) + text(420, 576, '2d', 'lbl display');
+      s += text(445, 150, 'area A', 'lbl strong halo') + text(710, 60, 'area 4A', 'lbl strong halo') + text(420, 620, 'at 2d: a quarter of the brightness', 'lbl');
       return svg('60 20 760 620', s, 'Light spreading out from a source. The power that passes through an area A at a distance d is spread over an area 4A at a distance 2d, so the apparent brightness there is a quarter as great');
     },
 
     // Black-body spectra at three temperatures, from Planck's law. Also drawn plain.
     'b1-planck': el => {
-      const on = labeled(el), temps = [[6000, 'proton'], [5000, 'brand-accent'], [4000, 'brand-primary']], top = planck(2898 / 6000, 6000);
+      const on = labeled(el), temps = [[6000, 'proton', 30, 26, 'start'], [5000, 'brand-accent', 25, -8, 'middle'], [4000, 'brand-primary', 12, 42, 'start']], top = planck(2898 / 6000, 6000);
       const X = l => 110 + 230 * l, Y = v => 440 - 380 * v / top;
       let s = `<rect x="${X(0.4)}" y="12" width="${X(0.7) - X(0.4)}" height="428" style="fill:var(--sand);opacity:.28"/>` + arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 440, 840, 440, 'text-secondary', 2.5);
-      temps.forEach(([T, color]) => { s += line(sampled(t => { const l = 0.08 + 2.95 * t; return [X(l), Y(planck(l, T))]; }, 140), color); if (on) { const l = 2898 / T; s += `<line x1="${f(X(l))}" y1="${f(Y(planck(l, T)))}" x2="${f(X(l))}" y2="440" class="guide"/>` + text(f(X(l)) + 30, f(Y(planck(l, T))) + 26, `${T} K`, 'lbl mono strong halo', 'start'); } });
+      temps.forEach(([T, color, dx, dy, anchor]) => { s += line(sampled(t => { const l = 0.08 + 2.95 * t; return [X(l), Y(planck(l, T))]; }, 140), color); if (on) { const l = 2898 / T; s += `<line x1="${f(X(l))}" y1="${f(Y(planck(l, T)))}" x2="${f(X(l))}" y2="440" class="guide"/>` + text(f(X(l)) + dx, f(Y(planck(l, T))) + dy, `${T} K`, 'lbl mono strong halo', anchor); } });
       if (on) s += P.yAxisLabel(88, 235, 'intensity') + text(475, 522, 'wavelength / nm', 'lbl mono') + [0.5, 1, 1.5, 2, 2.5, 3].map(l => `<line x1="${X(l)}" y1="440" x2="${X(l)}" y2="450" class="tick"/>` + text(X(l), 478, l * 1000, 'lbl mono')).join('') + text(X(0.55), 0, 'visible', 'lbl small') + text(700, 250, 'hotter: more at', 'lbl halo') + text(700, 284, 'every wavelength,', 'lbl halo') + text(700, 318, 'a shorter peak', 'lbl halo');
       return svg(on ? '40 -30 820 580' : '90 30 760 420', s, 'Black-body spectra at 4000, 5000 and 6000 kelvin: graphs of intensity against wavelength. Each rises steeply to a peak and falls away slowly. The hotter the body, the higher the whole curve and the shorter the wavelength of its peak: about 720 nanometers at 4000 kelvin, 580 at 5000 and 480 at 6000');
     }

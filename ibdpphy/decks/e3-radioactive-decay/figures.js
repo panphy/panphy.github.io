@@ -220,7 +220,7 @@ window.DeckFigures.add(P => {
       // Each decay as a short arrow of its own slope: beta-minus (Z + 1, N − 1), beta-plus (Z − 1, N + 1), alpha (Z − 2, N − 2).
       s += text(X(4), Y(134), 'too many', 'lbl strong', 'start') + text(X(4), Y(134) + 32, 'neutrons:', 'lbl strong', 'start') + text(X(4), Y(134) + 64, 'beta-minus', 'lbl', 'start', 'style="fill:var(--electron)"') + text(X(4), Y(134) + 96, 'decay', 'lbl', 'start', 'style="fill:var(--electron)"') + arrow(X(32), Y(68), X(44), Y(56), 'electron', 5);
       s += text(X(52), Y(34), 'too few neutrons:', 'lbl strong', 'start') + text(X(52), Y(34) + 32, 'beta-plus decay', 'lbl', 'start', 'style="fill:var(--positive)"') + arrow(X(70), Y(60), X(58), Y(72), 'positive', 5);
-      s += text(X(92), Y(140), 'too heavy:', 'lbl strong', 'start') + text(X(92), Y(140) + 32, 'alpha decay', 'lbl', 'start', 'style="fill:var(--alpha)"') + arrow(X(95), Y(132), X(87), Y(124), 'alpha', 5);
+      s += text(X(97), Y(140), 'too heavy:', 'lbl strong', 'start') + text(X(97), Y(140) + 32, 'alpha decay', 'lbl', 'start', 'style="fill:var(--alpha)"') + arrow(X(95), Y(132), X(87), Y(124), 'alpha', 5);
       return svg('0 0 580 530', s, 'Graph of neutron number against proton number, with both axes on the same scale so that the line N equals Z is at 45 degrees. The stable nuclides lie in a narrow band that follows the line N equals Z for light nuclei and curves above it for heavier ones. Nuclides above the band have too many neutrons and decay by beta-minus emission. Those below it have too few and decay by beta-plus emission. The heaviest nuclides decay by alpha emission');
     },
 

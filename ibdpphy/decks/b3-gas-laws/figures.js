@@ -60,7 +60,7 @@ window.DeckFigures.add(P => {
       }
       const charles = kind === 'charles', yl = charles ? 'volume V' : 'pressure P';
       const X = c => 420 + 1.1 * c, Y = c => 400 - 300 * (c + 273) / 573;
-      let s = arrow(110, 400, 800, 400, 'text-secondary', 2.5) + arrow(X(0), 400, X(0), 50, 'text-secondary', 2.5) + P.yAxisLabel(X(0) - 22, 225, yl) + text(455, 480, 'θ / °C', 'lbl mono');
+      let s = arrow(110, 400, 800, 400, 'text-secondary', 2.5) + arrow(X(0), 400, X(0), 50, 'text-secondary', 2.5) + P.yAxisLabel(X(0) - 22, 160, yl) + text(455, 480, 'θ / °C', 'lbl mono');
       s += line(`M${X(0)},${f(Y(0))} L${X(300)},${f(Y(300))}`, 'brand-primary', 6) + `<path d="M${f(X(-273))},400 L${X(0)},${f(Y(0))}" class="guide accent"/>` + [20, 100, 180, 260].map(c => `<circle cx="${X(c)}" cy="${f(Y(c))}" r="8" style="fill:var(--brand-primary)"/>`).join('');
       s += `<circle cx="${f(X(-273))}" cy="400" r="9" style="fill:var(--proton)"/>` + text(f(X(-273)), 440, '−273', 'lbl mono strong') + text(X(0), 440, '0', 'lbl mono') + text(X(200), 440, '200', 'lbl mono') + `<line x1="${X(200)}" y1="400" x2="${X(200)}" y2="410" class="tick"/>`;
       s += text(76, 480, 'absolute zero', 'lbl strong', 'start') + text(240, 150, 'the line through', 'lbl', 'middle') + text(240, 184, 'the readings,', 'lbl', 'middle') + text(240, 218, 'extended back', 'lbl', 'middle');
@@ -73,7 +73,7 @@ window.DeckFigures.add(P => {
       const on = labeled(el), X = v => 110 + 150 * v, Y = p => 430 - 80 * p, iso = (k, from, to) => sampled(t => { const v = from + (to - from) * t; return [X(v), Y(k / v)]; }, 50);
       let s = arrow(110, 430, 110, 40, 'text-secondary', 2.5) + arrow(110, 430, 790, 430, 'text-secondary', 2.5);
       s += line(iso(4, 0.9, 4.2), 'brand-accent', 6) + line(`M${X(0.7)},${Y(2)} H${X(4.2)}`, 'brand-primary', 6) + line(`M${X(2)},${Y(4.4)} V${Y(0.4)}`, 'brand-accent-strong', 6) + `<circle cx="${X(2)}" cy="${Y(2)}" r="10" style="fill:var(--text-main)"/>`;
-      if (on) s += P.yAxisLabel(88, 235, 'pressure') + text(450, 476, 'volume', 'lbl mono') + text(X(3.2), Y(2) - 16, 'constant pressure', 'lbl strong halo', 'middle', 'style="fill:var(--brand-primary)"') + text(X(2) + 16, Y(4.1), 'constant volume', 'lbl strong halo', 'start') + text(X(3.1), Y(0.75), 'constant temperature', 'lbl strong halo', 'middle', 'style="fill:var(--brand-accent)"');
+      if (on) s += P.yAxisLabel(88, 235, 'pressure') + text(450, 476, 'volume', 'lbl mono') + text(X(3.2), Y(2) - 16, 'constant pressure', 'lbl strong halo', 'middle', 'style="fill:var(--brand-primary)"') + text(X(2) + 16, Y(4.1), 'constant volume', 'lbl strong halo', 'start') + text(X(3.1), Y(0.75) + 20, 'constant temperature', 'lbl strong halo', 'middle', 'style="fill:var(--brand-accent)"');
       return svg(on ? '40 20 780 470' : '80 30 730 420', s, 'A pressure–volume diagram with three lines through one state of a gas. A change at constant pressure is a horizontal line, a change at constant volume is a vertical line, and a change at constant temperature is a curve along which pressure times volume stays the same');
     },
 
