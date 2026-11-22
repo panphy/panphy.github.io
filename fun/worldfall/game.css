@@ -92,7 +92,7 @@ body[data-state="results"] #worldTag { visibility: hidden; }
   height: 48px;
 }
 
-#brand img { width: 40px; height: 40px; border-radius: 6px; display: block; }
+#brand img { width: 40px; height: 40px; display: block; }
 
 @media (max-aspect-ratio: 6/5) {
   body[data-state="menu"] #brand,
