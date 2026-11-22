@@ -101,21 +101,53 @@ window.DeckFigures.add(P => {
       return svg('-10 90 820 450', s + PLAY, 'Two disks on the same axis of rotation, shown dashed. Before, the lower disk is spinning with angular velocity omega 1 and the upper disk is at rest above it. After the upper disk is dropped onto the lower one, friction makes them turn together with a smaller angular velocity');
     },
 
-    // A solid sphere and a hoop rolling down the same slope: the sphere wins. Also drawn plain.
-    'a4-rolling': el => {
-      const on = labeled(el), x0 = 130, y0 = 130, x1 = 730, y1 = 390, T = 3.4, n = 40, r = 32, len = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / len, uy = (y1 - y0) / len;
-      // r is the outer radius of both bodies, strokes included; each rests on the ramp's stroke (1.5 thick on the outside).
-      const along = (s, lane) => [x0 + ux * s + uy * (r + 1.5 + lane), y0 + uy * s - ux * (r + 1.5 + lane)];
-      // Accelerations in the ratio 5/7 (solid sphere) to 1/2 (hoop): the hoop has covered 0.7 of the slope when the sphere arrives.
-      const path = (k, lane) => Array.from({ length: n + 1 }, (_, i) => along(Math.min(1, k * (i / n) ** 2) * (len - 70) + 30, lane));
-      const ball = `<circle r="${r - 1.5}" style="${BODY}"/><line x1="${-(r - 1.5)}" y1="0" x2="${r - 1.5}" y2="0" style="stroke:var(--brand-accent-strong);stroke-width:3"/>`, hoop = `<circle r="${r - 4}" style="fill:none;stroke:var(--brand-accent);stroke-width:8"/><line x1="${-(r - 4)}" y1="0" x2="${r - 4}" y2="0" style="stroke:var(--brand-accent);stroke-width:3"/>`;
+    // Rolling without slipping: the center moves at v while the body turns at ω, and the point touching
+    // the ground is momentarily at rest, so v = ωr.
+    'a4-roll': () => {
+      const cx = 380, cy = 220, r = 110, ground = cy + r;
+      let s = `<line x1="120" y1="${ground + 1.5}" x2="680" y2="${ground + 1.5}" style="stroke:var(--text-secondary);stroke-width:3"/>`;
+      // A lighter fill than BODY, so that the velocity arrow drawn across it keeps its contrast.
+      s += `<circle cx="${cx}" cy="${cy}" r="${r - 1.5}" style="${BODY.replace('30%', '14%')}"/>` + dot(cx, cy, 8);
+      // The radius from the center to the contact point; each arrowhead reaches 4.8 past its end of the line.
+      s += both(cx, cy + 4.8, cx, ground - 4.8 - 1.5, 'text-secondary', 3) + text(cx - 18, cy + r / 2 + 12, 'r', 'lbl display italic', 'end');
+      s += arrow(cx + 12, cy, cx + 150, cy, 'brand-accent', 6) + text(cx + 160, cy + 12, 'v', 'lbl display italic', 'start');
+      s += turn(cx, cy, r + 30, -150, -30) + text(cx, cy - r - 48, 'ω', 'lbl greek');
+      s += `<circle cx="${cx}" cy="${ground}" r="9" style="fill:var(--brand-primary)"/>` + text(cx + 22, ground + 44, 'at rest', 'lbl', 'start');
+      return svg('100 40 620 400', s, 'A solid disk rolling to the right along level ground without slipping. Its center moves at speed v while it turns clockwise with angular velocity omega. The point touching the ground is momentarily at rest, a distance r below the center, so v equals omega r');
+    },
+
+    // A solid disk and a ring of the same mass and radius race down identical slopes. Plays once, on a
+    // click (the figure's PLAY step); stepping back puts both at the top again.
+    'a4-rolling': () => {
+      const x0 = 200, x1 = 740, drop = 170, r = 30, T = 3.4, n = 40, tops = [60, 290];
+      const len = Math.hypot(x1 - x0, drop), ux = (x1 - x0) / len, uy = drop / len, s0 = 40, run = len - 50 - s0;
+      // A point r above the slope (r is the outer radius, strokes included; the ramp's stroke is 1.5 thick outside).
+      const along = (y0, d) => [x0 + ux * d + uy * (r + 1.5), y0 + uy * d - ux * (r + 1.5)];
+      // Accelerations down the slope: (2/3)g sin θ for the disk and (1/2)g sin θ for the ring, a ratio of 4 : 3,
+      // so the ring has covered 3/4 of the run when the disk arrives.
+      const dist = (k, i) => s0 + k * run * (i / n) ** 2;
+      const disk = `<circle r="${r - 1.5}" style="${BODY}"/><line x1="${-(r - 1.5)}" y1="0" x2="${r - 1.5}" y2="0" style="stroke:var(--brand-accent-strong);stroke-width:3"/>`;
+      const ring = `<circle r="${r - 4}" style="fill:none;stroke:var(--brand-accent);stroke-width:8"/><circle cx="${r - 4}" cy="0" r="7" style="fill:var(--brand-accent-strong)"/>`;
+      const PLAYS = 'begin="indefinite" fill="freeze"';
       // The angle turned is the distance rolled divided by the radius, sampled like the path, so nothing slips.
-      const rolling = (body, k) => `<g><animateTransform attributeName="transform" type="rotate" values="${Array.from({ length: n + 1 }, (_, i) => f(Math.min(1, k * (i / n) ** 2) * (len - 70) / r * 180 / Math.PI)).join(';')}" dur="${T}s" repeatCount="indefinite"/>${body}</g>`;
-      let s = `<path d="M${x0},${y0} L${x1},${y1} L${x0},${y1} Z" style="fill:color-mix(in srgb, var(--neutron) 22%, transparent);stroke:var(--text-secondary);stroke-width:3"/>`;
-      if (on) s += text(530, 180, 'solid sphere: in front', 'lbl strong', 'start') + text(530, 214, 'hoop: behind', 'lbl', 'start', 'style="fill:var(--brand-accent)"') + both(x0 - 40, y0, x0 - 40, y1) + text(x0 - 54, (y0 + y1) / 2 + 8, 'h', 'lbl display italic', 'end') + text(430, 450, 'released together, rolling without slipping', 'lbl');
-      const still = at(...along(0.6 * (len - 70) + 30, 0).map(f), hoop) + at(...along(0.86 * (len - 70) + 30, 0).map(f), ball);
-      const mover = `<g>${track(path(0.7, 0), T)}${rolling(hoop, 0.7)}</g><g>${track(path(1, 0), T)}${rolling(ball, 1)}</g>`;
-      return svg(on ? '40 40 800 430' : '80 40 700 370', s + twoState(still, mover), 'A solid sphere and a hoop released together from the top of a slope, both rolling without slipping. The sphere reaches the bottom first: more of the hoop’s kinetic energy is rotational, so less is left for moving down the slope');
+      const racer = (y0, body, k) => {
+        const pts = Array.from({ length: n + 1 }, (_, i) => along(y0, dist(k, i)));
+        const turns = Array.from({ length: n + 1 }, (_, i) => f((dist(k, i) - s0) / r * 180 / Math.PI));
+        return `<g transform="translate(${pts[0].map(f).join(' ')})"><animateTransform attributeName="transform" type="translate" values="${pts.map(p => p.map(f).join(',')).join(';')}" dur="${T}s" ${PLAYS}/><g><animateTransform attributeName="transform" type="rotate" values="${turns.join(';')}" dur="${T}s" ${PLAYS}/>${body}</g></g>`;
+      };
+      // The finish line passes through the disk's center where it stops.
+      const finishX = along(tops[0], s0 + run)[0];
+      let s = '';
+      tops.forEach(y0 => {
+        s += `<path d="M${x0},${y0} L${x1},${y0 + drop} L${x0},${y0 + drop} Z" style="fill:color-mix(in srgb, var(--neutron) 22%, transparent);stroke:var(--text-secondary);stroke-width:3"/>`;
+        const yf = y0 + uy / ux * (finishX - x0);
+        s += `<line x1="${f(finishX)}" y1="${f(yf - 2 * r - 56)}" x2="${f(finishX)}" y2="${f(yf)}" class="guide" style="stroke-width:3"/>`;
+      });
+      s += text(x0 + 14, tops[0] + drop - 16, 'solid disk', 'lbl strong', 'start') + text(x0 + 14, tops[1] + drop - 16, 'ring', 'lbl strong', 'start');
+      s += both(x0 - 34, tops[0], x0 - 34, tops[0] + drop) + text(x0 - 48, tops[0] + drop / 2 + 10, 'h', 'lbl display italic', 'end');
+      const still = at(...along(tops[0], s0 + run).map(f), disk) + at(...along(tops[1], s0 + 0.75 * run).map(f), ring);
+      const mover = racer(tops[0], disk, 1) + racer(tops[1], ring, 0.75);
+      return svg('110 30 660 450', s + twoState(still, mover) + PLAY, 'A solid disk and a ring of the same mass and radius released together from rest at the top of identical slopes of height h, both rolling without slipping. The disk reaches the bottom first: when it arrives, the ring has covered only three quarters of the way, because more of the ring’s kinetic energy is rotational');
     }
   };
 });

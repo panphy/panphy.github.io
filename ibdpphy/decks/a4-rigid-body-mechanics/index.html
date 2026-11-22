@@ -771,8 +771,8 @@
             </ul>
           </div>
           <div class="panel">
-            <div class="panel-head"><span>A RACE DOWN A SLOPE</span></div>
-            <div class="fig" data-fig="a4-rolling" data-once></div>
+            <div class="panel-head"><span>A ROLLING DISK</span></div>
+            <div class="fig" data-fig="a4-roll"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS, HL ONLY</span><span data-page></span></div>
@@ -780,8 +780,6 @@
           <div class="rn-main">
             <h3 class="rn-head">Two kinds of kinetic energy at once</h3>
             <p>A rolling body is moving along and turning. Its center of mass carries \(\frac{1}{2} m v^{2}\), as if all the mass were there, and the turning about the center adds \(\frac{1}{2} I \omega^{2}\). If it does not slip, the point touching the ground is momentarily at rest, which fixes \(v = \omega r\).</p>
-            <h3 class="rn-head">Why the sphere wins</h3>
-            <p>Both start with the same potential energy per kilogram. Both must share it between moving and turning. The hoop, with all its mass at the rim, has to put half into rotation. The solid sphere needs only two sevenths for rotation, leaving more for getting down the slope. Neither the mass nor the radius matters: every solid sphere beats every hoop.</p>
             <h3 class="rn-head">Friction without loss</h3>
             <p>Friction is what makes the body turn instead of slide. But the point of contact does not move while it is touching, so the friction does no work, and mechanical energy is conserved.</p>
           </div>
@@ -791,33 +789,32 @@
         </aside>
       </section>
 
-      <section class="slide hl" data-title="Rolling: a sphere down a slope">
+      <section class="slide hl" data-title="Rolling: a disk and a ring down a slope">
         <p class="eyebrow">Worked example</p>
-        <h2>A sphere rolls down a slope<span>.</span></h2>
+        <h2>A disk and a ring roll down a slope<span>.</span></h2>
         <div class="split even">
           <div class="work">
-            <span class="ask">Find its speed at the bottom, if it rolls without slipping.</span>
-            <span class="say">Solid sphere, \(I = \tfrac{2}{5} m r^{2}\); height fallen \(h = 1.0 \,\mathrm{m}\)</span>
+            <span class="ask">A solid disk and a ring of the same mass and radius roll from rest down a slope of height \(h = 1.0 \,\mathrm{m}\). Find each speed at the bottom.</span>
             <span class="step">\(mgh = \dfrac{1}{2} m v^{2} + \dfrac{1}{2} I \omega^{2}\) &nbsp;with&nbsp; \(\omega = \dfrac{v}{r}\)</span>
-            <span class="step">\(mgh = \dfrac{1}{2} m v^{2} + \dfrac{1}{5} m v^{2} = \dfrac{7}{10} m v^{2}\)</span>
-            <span class="step">\(v = \sqrt{\dfrac{10 g h}{7}} = \sqrt{\dfrac{10 \times 9.8 \times 1.0}{7}}\)</span>
-            <span class="step">\(v = \class{res}{3.7 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">Disk, \(I = \tfrac{1}{2} m r^{2}\): \(mgh = \dfrac{3}{4} m v^{2}\)</span>
+            <span class="step">\(v = \sqrt{\dfrac{4 g h}{3}} = \class{res}{3.6 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">Ring, \(I = m r^{2}\): \(mgh = m v^{2}\)</span>
+            <span class="step">\(v = \sqrt{g h} = \class{res}{3.1 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
-          <div class="stack">
-            <ul class="points small">
-              <li class="step">A hoop, \(I = m r^{2}\): \(v = \sqrt{gh} = 3.1 \,\mathrm{m} \,\mathrm{s}^{-1}\)</li>
-              <li class="step">Sliding with no friction: \(v = \sqrt{2gh} = 4.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</li>
-            </ul>
-            <div class="idea step">The mass and the radius have <b>canceled</b>.</div>
+          <div class="panel step">
+            <div class="panel-head"><span>RELEASED TOGETHER</span></div>
+            <div class="fig" data-fig="a4-rolling" data-controls="off"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS, HL ONLY</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <h3 class="rn-head">Where \(\frac{1}{5}\) comes from</h3>
-            <p>\(\frac{1}{2} I \omega^{2} = \frac{1}{2} \times \frac{2}{5} m r^{2} \times \frac{v^{2}}{r^{2}} = \frac{1}{5} m v^{2}\). The \(r^{2}\) in the moment of inertia cancels the \(r^{2}\) from \(\omega = \frac{v}{r}\). That is why the radius does not matter, and since \(m\) is in every term, the mass does not either.</p>
-            <h3 class="rn-head">The three speeds compared</h3>
-            <p>A block sliding without friction keeps all its energy as motion along the slope and arrives fastest. A rolling sphere arrives with five sevenths of its energy in that form, and a hoop with half. The more of the mass that is far from the axis, the more of the energy the rotation takes.</p>
+            <h3 class="rn-head">Where \(\frac{3}{4}\) comes from</h3>
+            <p>For the disk, \(\frac{1}{2} I \omega^{2} = \frac{1}{2} \times \frac{1}{2} m r^{2} \times \frac{v^{2}}{r^{2}} = \frac{1}{4} m v^{2}\), so the total is \(\frac{1}{2} m v^{2} + \frac{1}{4} m v^{2} = \frac{3}{4} m v^{2}\). The \(r^{2}\) in the moment of inertia cancels the \(r^{2}\) from \(\omega = \frac{v}{r}\), and \(m\) is in every term, so neither the radius nor the mass matters.</p>
+            <h3 class="rn-head">Why the disk wins</h3>
+            <p>The two have the same mass, so they start with the same potential energy, and both share it between moving and turning. The ring, with all its mass at the rim, puts half into turning; the disk puts in only a third, leaving more for getting down the slope. Its acceleration is \(\frac{2}{3} g \sin\theta\) against the ring’s \(\frac{1}{2} g \sin\theta\), so when the disk arrives the ring is three quarters of the way down. Every solid disk beats every ring.</p>
+            <h3 class="rn-head">Sliding without friction</h3>
+            <p>A block sliding without friction keeps all its energy as motion along the slope and arrives fastest, at \(\sqrt{2gh} = 4.4 \,\mathrm{m} \,\mathrm{s}^{-1}\). The more of the mass that is far from the axis, the more of the energy the rotation takes.</p>
           </div>
           <div class="rn-side">
             <p class="tip">The method is conservation of energy from A.3 with one extra term. Write the term, substitute \(\omega = \frac{v}{r}\), and solve.</p>
@@ -905,7 +902,7 @@
   <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
   <script src="../assets/figures.js?v=20261122d"></script>
-  <script src="figures.js?v=20261122c"></script>
+  <script src="figures.js?v=20261122d"></script>
   <script src="../assets/deck-math.js?v=20261122e"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/deck-notes.js"></script>
