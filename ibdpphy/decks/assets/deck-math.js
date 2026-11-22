@@ -8,6 +8,19 @@ window.MathJax = {
   options: { enableMenu: false }
 };
 
+// WebKit (Safari, and every browser on iPad and iPhone) sizes a table's columns while its cells still
+// hold the LaTeX source, which cannot wrap, and keeps those widths once MathJax has typeset it. Taking
+// each table with math out of the layout and back makes it measure the typeset math.
+function relayoutMathTables() {
+  document.querySelectorAll('table').forEach(table => {
+    if (!table.querySelector('mjx-container')) return;
+    const display = table.style.display;
+    table.style.display = 'none';
+    void table.offsetWidth;
+    table.style.display = display;
+  });
+}
+
 // A bullet dot (or step number) sits on its item's first line. When that line holds a fraction, or the item is an
 // equation bullet (.frac) whose equation wraps below a lead-in, the dot moves level with the
 // fraction bar, which is the height of the "=". Measured once MathJax has typeset the slides
@@ -35,6 +48,7 @@ window.MathJax = {
   mj.startup = {
     ...mj.startup,
     pageReady: () => window.MathJax.startup.defaultPageReady().then(() => {
+      relayoutMathTables();
       align();
       document.fonts?.ready.then(() => align());
     })
