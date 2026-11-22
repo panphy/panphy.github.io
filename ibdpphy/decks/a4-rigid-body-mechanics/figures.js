@@ -68,8 +68,8 @@ window.DeckFigures.add(P => {
     'a4-falling': () => {
       const cx = 380, cy = 180, r = 100;
       // The radius r from the axle to the rim, halfway between the spoke at 120° and the axle bar at 180°.
-      // Each arrowhead reaches 4.8 past its end of the line, so the tips meet the hub (radius 9) and the rim.
-      const ang = 150 * Math.PI / 180, ux = Math.cos(ang), uy = Math.sin(ang), r0 = 9 + 4.8, r1 = r - 4.8;
+      // Each arrowhead reaches 4.8 past its end of the line, so the tips meet the center and the rim.
+      const ang = 150 * Math.PI / 180, ux = Math.cos(ang), uy = Math.sin(ang), r0 = 4.8, r1 = r - 4.8;
       const rArrow = both(f(cx + r0 * ux), f(cy + r0 * uy), f(cx + r1 * ux), f(cy + r1 * uy), 'text-secondary', 3) + text(f(cx + (r + 30) * ux), f(cy + (r + 30) * uy) + 10, 'r', 'lbl display italic');
       let s = `<line x1="${cx - 150}" y1="${cy}" x2="${cx + 150}" y2="${cy}" class="tick" style="stroke-width:6"/>` + at(cx, cy, wheel(r)) + `<line x1="${cx + r}" y1="${cy}" x2="${cx + r}" y2="400" class="cable"/><rect x="${cx + r - 34}" y="400" width="68" height="60" rx="8" style="${BODY}"/>`;
       s += arrow(cx + r, 400, cx + r, 310, 'brand-primary', 6) + text(cx + r + 16, 340, 'T', 'lbl display', 'start') + dot(cx + r, 430, 6) + arrow(cx + r, 430, cx + r, 540, 'brand-primary', 6) + text(cx + r + 16, 540, 'mg', 'lbl display', 'start') + arrow(cx + r - 70, 420, cx + r - 70, 480, 'brand-accent', 5) + text(cx + r - 86, 460, 'a', 'lbl display', 'end') + turn(cx, cy, r + 30, -150, -30) + text(cx, cy - r - 44, 'α', 'lbl greek') + rArrow + text(cx - 190, cy + 10, 'wheel,', 'lbl', 'end') + text(cx - 190, cy + 44, 'moment of inertia I', 'lbl', 'end');
