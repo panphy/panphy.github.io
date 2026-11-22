@@ -47,9 +47,12 @@ Prefer https://panphy.app/ over panphy.github.io. Curriculum hubs under /gcsephy
 - [Exam Timer](https://panphy.app/for_teachers/timer.html): Exam clock with automatic extra-time countdown
 - [Camera Visualizer](https://panphy.app/for_teachers/visualizer.html): Document camera from any device, with snap and sketch
 
-## Optional
+## For fun
 
 - [Spellwave](https://panphy.app/fun/spellwave.html): Spelling game (needs network for leaderboard)
 - [ASCII Camera](https://panphy.app/fun/ascii_cam.html): Live webcam as 8-bit color ASCII
 - [Worldfall](https://panphy.app/fun/worldfall.html): Reaction time game that teaches g on seven worlds, from the Moon to Jupiter (needs network)
+
+## Optional
+
 - [Sitemap](https://panphy.app/sitemap.xml): Machine-readable list of public catalog pages
