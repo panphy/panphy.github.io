@@ -42,17 +42,19 @@ const CHECK_FILES = {
   ".github/scripts/deck-check.mjs": ["decks"],
   ".github/scripts/deck-text-baseline.json": [],
   ".github/scripts/deck-contrast-baseline.json": [],
+  ".github/scripts/deck-layout-baseline.json": [],
+  ".github/scripts/sci-notation.mjs": [],
   ".github/workflows/deploy.yml": [],
   ".github/workflows/supabase-keepalive.yml": []
 };
-const DECK_BASELINES = [".github/scripts/deck-text-baseline.json", ".github/scripts/deck-contrast-baseline.json"];
+const DECK_BASELINES = [".github/scripts/deck-text-baseline.json", ".github/scripts/deck-contrast-baseline.json", ".github/scripts/deck-layout-baseline.json"];
 const isShared = (file) => !(file in CHECK_FILES) && RUN_ALL.some((pattern) => pattern.test(file));
 const checkScriptsNeed = (files, check) => files.some((file) => CHECK_FILES[file]?.includes(check));
 // Root files handled below: tests that read them run, and changed or newly listed pages are checked.
 const ROOT_FILES = ["sw.js", "index.html", "sitemap.xml"];
 // Never served to an app page or read by a test.
 const NO_EFFECT = [
-  /^(gcsephy|ibdpphy|beta)\//, /^misc\/index\.html$/, /\.md$/,
+  /^(gcsephy|ibdpphy|beta)\//, /^misc\/index\.html$/, /\.md$/, /^\.agents\//, /^\.claude\//,
   /^(llms\.txt|robots\.txt|CNAME|LICENSE|\.gitignore|google[0-9a-f]+\.html)$/
 ];
 

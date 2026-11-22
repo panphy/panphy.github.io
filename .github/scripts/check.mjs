@@ -13,7 +13,8 @@
    sitemap pages; section sw-register.js, deck readable.css and matching section workers; the beta
    and misc inventories; no root worker in network-only sections; getAssetGroup matching getAppGroup;
    no CanvasTexture beside createRadialGradient in simulation and shared modules; compound units
-   joined by &nbsp; in decks; and settled wording in gcsephy/ and ibdpphy/ (terminal velocity,
+   joined by &nbsp; in decks; bracketed scientific notation in deck calculations and an Equation row
+   before any Rearrange row in GCSE worked examples; and settled wording in gcsephy/ and ibdpphy/ (terminal velocity,
    v² − u² = 2as, ΔU = Q − W, no · separators, no ÷ in ibdpphy/). End a line with a `check-ok`
    comment to exempt a deliberate exception.
 
@@ -23,6 +24,7 @@ import { existsSync, lstatSync, readFileSync, readlinkSync, statSync } from "nod
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
+import { MATH, bracketScientific } from "./sci-notation.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SITE = "https://panphy.app";
@@ -378,6 +380,31 @@ check("Teaching conventions");
       if (/check-ok/.test(line)) return;
       for (const [pattern, advice] of rules) if (pattern.test(line)) fail(`${file}:${i + 1}: ${advice}`);
     });
+  }
+}
+
+check("Deck working");
+{
+  // Scientific notation combined with another number is bracketed, and a GCSE worked example shows its
+  // Equation row before any Rearrange row (gcsephy/AGENTS.md, ibdpphy/AGENTS.md).
+  for (const file of git("ls-files", "-z", "gcsephy/decks/*/index.html", "ibdpphy/decks/*/index.html").split("\0").filter(Boolean)) {
+    const text = read(file);
+    text.split("\n").forEach((line, i) => {
+      if (/check-ok/.test(line)) return;
+      for (const match of line.matchAll(MATH)) {
+        const fixed = bracketScientific(match[1] ?? match[2]);
+        if (fixed) fail(`${file}:${i + 1}: bracket scientific notation combined with another number: ${fixed.slice(0, 120)}`);
+      }
+    });
+    for (const worked of text.matchAll(/<div class="worked[^"]*">[\s\S]*?<\/dl>/g)) {
+      if (/check-ok/.test(worked[0])) continue;
+      const labels = [...worked[0].matchAll(/<dt>(.*?)<\/dt>/g)].map((m) => m[1]);
+      const rearrange = labels.indexOf("Rearrange");
+      const equation = labels.indexOf("Equation");
+      if (rearrange > -1 && (equation === -1 || equation > rearrange)) {
+        fail(`${file}:${text.slice(0, worked.index).split("\n").length}: a worked example rearranges before its Equation row (${labels.join(", ")})`);
+      }
+    }
   }
 }
 
