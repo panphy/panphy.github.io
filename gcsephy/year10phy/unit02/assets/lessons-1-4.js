@@ -20,7 +20,6 @@
       big: "An ice cube, a puddle and the steam from a kettle are all water. What is different about them?",
       goals: ["draw particle diagrams for a solid, a liquid and a gas", "describe how the particles are arranged and how they move", "name the six changes of state", "explain why mass is conserved when a substance changes state"],
       keywords: ["particle", "solid", "liquid", "gas", "change of state", "physical change", "conserved"],
-      kit: "Demonstration: two sealed syringes (one of air, one of water); a beaker of ice on a balance, covered with cling film.",
       doNow: [
         ["Name the three states of matter.", "Solid, liquid and gas."],
         ["Name the change of state when ice turns to water.", "Melting."],
@@ -89,7 +88,6 @@
       big: "An aerosol can says “Do not expose to temperatures above 50 °C”. What could go wrong?",
       goals: ["describe the motion of the molecules in a gas", "link the temperature of a gas to the average kinetic energy of its molecules", "explain how a gas pushes on the walls of its container", "explain why heating a gas at constant volume increases its pressure"],
       keywords: ["random motion", "kinetic energy", "temperature", "pressure", "collision", "constant volume"],
-      kit: "Demonstration: a sealed round-bottomed flask joined to a pressure gauge, a large beaker or water bath, a kettle, a thermometer.",
       doNow: [
         ["Describe the arrangement of the particles in a gas.", "Far apart, in a random arrangement."],
         ["Why can a gas be squashed easily?", "There is a lot of empty space between its particles."],
@@ -161,7 +159,6 @@
       big: "A gold bar the size of a carton of milk is too heavy for most people to lift with one hand. Why?",
       goals: [R`calculate density with \(\rho = \dfrac{m}{V}\)`, "use the units kg/m³ and g/cm³", "explain differences in density using the particle model", "rearrange the equation to find a mass or a volume"],
       keywords: ["density", "mass", "volume", "kilogram per cubic metre (kg/m³)", "rho (ρ)"],
-      kit: "Per pair: calculator. Demonstration: blocks of the same size made of different materials (wood, aluminium, steel) to pass round.",
       doNow: [
         ["Describe the arrangement of the particles in a solid.", "Very close together, in a regular pattern."],
         ["A gas in a sealed can is heated. What happens to its pressure?", "It increases."],
@@ -217,7 +214,6 @@
       big: "A jeweller is offered a lump of “gold” with an awkward shape. How could its density be measured?",
       goals: ["measure the density of a regular solid from its dimensions", "measure the volume of an irregular solid by displacement", "measure the density of a liquid", "choose instruments and explain how to make the measurements accurate"],
       keywords: ["displacement", "measuring cylinder", "meniscus", "resolution", "vernier callipers", "balance"],
-      kit: "Per group: balance (0.1 g or better), 30 cm ruler, vernier callipers, regular blocks, irregular objects (stones, modelling-clay lumps) on thread, 100 cm³ measuring cylinder, displacement can, beaker, water, a second liquid (salt water or cooking oil), paper towels.",
       doNow: [
         ["Write the equation for density.", R`\(\rho = \dfrac{m}{V}\)`],
         ["How many cubic centimetres are there in 1 millilitre?", "1 ml = 1 cm³"],

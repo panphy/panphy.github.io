@@ -22,7 +22,6 @@
       big: "A pan of water boils on the hob for ten minutes. The hob keeps supplying energy, but the water never gets hotter than 100 °C. Where does the energy go?",
       goals: ["state what internal energy is", "describe the two things that can happen when a substance is heated", "explain the flat sections of a heating or cooling graph", "read melting and boiling points from a graph"],
       keywords: ["internal energy", "kinetic energy", "potential energy", "melting point", "boiling point", "heating curve"],
-      kit: "Per group: boiling tube of molten stearic acid (from a hot water bath), thermometer, clamp stand, stopwatch. Or use the sample results.",
       doNow: [
         ["Write the equation for density.", R`\(\rho = \dfrac{m}{V}\)`],
         ["What is the temperature of a gas related to?", "The average kinetic energy of its molecules."],
@@ -97,7 +96,6 @@
       big: "A scald from steam at 100 °C is far worse than a scald from water at 100 °C. Why?",
       goals: ["state what specific latent heat means", R`calculate with \(E = m\,L\)`, "tell fusion from vaporisation", "describe an experiment to measure the specific latent heat of fusion of water"],
       keywords: ["latent heat", "specific latent heat", "fusion", "vaporisation", "joule per kilogram (J/kg)"],
-      kit: "Per group, or as a demonstration: two funnels of crushed ice over beakers, 12 V immersion heater, joulemeter, power supply, balance, stopwatch.",
       doNow: [
         ["Define internal energy.", "The total kinetic and potential energy of all the particles in a system."],
         ["What happens to the temperature of a substance while it changes state?", "It stays constant."],
@@ -165,7 +163,6 @@
       big: "On a sunny beach the sand burns your feet but the sea is still cold. Both have had the same sunshine. Why?",
       goals: ["state the three things a temperature rise depends on", "state what specific heat capacity means", R`calculate with \(\Delta E = m\,c\,\Delta\theta\)`, "decide whether a problem needs specific heat capacity or specific latent heat"],
       keywords: ["specific heat capacity", "temperature change (Δθ)", "thermal energy", "joule per kilogram per degree Celsius (J/kg °C)"],
-      kit: "Per pair: calculator. Demonstration: two beakers on identical hotplates, one with 200 g of water and one with 200 g of cooking oil, each with a thermometer.",
       doNow: [
         ["Write the equation for the energy needed for a change of state.", R`\(E = m\,L\)`],
         ["Which energy of the particles increases when the temperature of a substance rises?", "Kinetic energy."],
@@ -219,7 +216,6 @@
       big: "How could you find out which metal a block is made of, using only a heater and a thermometer?",
       goals: ["describe how to measure the specific heat capacity of a metal block", R`calculate the energy supplied with \(E = V\,I\,t\), or read it from a joulemeter`, "calculate the specific heat capacity from the results", "explain why the result is usually too high, and how to improve it"],
       keywords: ["immersion heater", "joulemeter", "insulation", "energy supplied", "gradient", "systematic error"],
-      kit: "Per group: 1 kg metal block with two holes, 12 V immersion heater, thermometer, insulation jacket and heatproof mat, power supply, ammeter, voltmeter, leads, stopwatch, balance. A joulemeter if you have one. A drop of oil for the thermometer hole.",
       doNow: [
         ["Define specific heat capacity.", "The energy needed to raise the temperature of 1 kg of a substance by 1 °C."],
         [R`Write the two equations for electrical power and energy from Electric Circuits.`, R`\(P = V\,I\) and \(E = P\,t\)`],

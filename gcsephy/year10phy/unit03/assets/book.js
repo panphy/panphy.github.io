@@ -8,8 +8,7 @@ window.WORKBOOK = {
   coverArt: () => window.CoverArt.atom(),
   lede: "What is inside an atom, how do we know, and what do unstable nuclei do?",
   parts: [[1, 2], [3, 4], [5, 6, 7], [8, 9, 10]],
-  deck: "panphy.app/gcsephy/decks/atoms-and-nuclear-radiation",
-  // Students get no deck panel beside the goals; each lesson keeps its slides and simulation in its `deck` data.
+  // No panel beside the goals.
   side: () => "",
   // The figures share gradients and markers, defined once at the top of the page.
   beforeRender: () => document.body.insertAdjacentHTML("afterbegin", window.DeckFigures.defs()),

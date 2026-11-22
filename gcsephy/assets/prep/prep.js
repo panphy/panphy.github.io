@@ -9,8 +9,7 @@
    Inline in any text:
      [[answer]], [[answer|30]]            a blank (30 mm wide); the answer edition fills it
      [[answer|first / second / third]]    a blank with its options printed straight after it
-     {{one|two*|three}}                   AQA-style ring box; * marks the answer
-     [x] / [ ]                            a tick box, ticked in the answer edition when [x] */
+     {{one|two*|three}}                   AQA-style ring box; * marks the answer */
 (function () {
   "use strict";
   const U = window.PREP;
@@ -30,8 +29,7 @@
       .replace(/\{\{(.+?)\}\}/g, (_, list) => `<span class="ring-box">${list.split("|").map((o) => {
         const right = o.endsWith("*");
         return `<span class="${right ? "correct" : ""}">${right ? o.slice(0, -1) : o}</span>`;
-      }).join("")}</span>`)
-      .replace(/\[(x| )\]/g, (_, on) => `<span class="check${on === "x" ? " on" : ""}"></span>`);
+      }).join("")}</span>`);
   }
 
   const mk = (m) => (m ? `<span class="mk">[${m}]</span>` : "");

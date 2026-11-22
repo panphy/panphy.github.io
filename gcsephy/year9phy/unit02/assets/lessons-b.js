@@ -86,7 +86,6 @@
       big: "A trampoline spring stretches a lot when you land on it. A car's suspension spring hardly moves when you sit in the car. What makes one spring stiffer than another?",
       goals: ["explain why two forces are needed to stretch a spring", "tell elastic and inelastic deformation apart", R`use \(F = k\,e\) to find a force, a spring constant or an extension`, "plot two graphs of the same results and find the spring constant"],
       keywords: ["extension", "spring constant (N/m)", "elastic deformation", "inelastic deformation", "limit of proportionality"],
-      kit: "Clamp stand, spring, mass hanger, 100 g masses, metre rule, pointer, safety goggles.",
       doNow: [
         [R`In \(E_p = m\,g\,h\), what does \(g\) stand for? Give its value on Earth.`, "Gravitational field strength: 9.8 N/kg."],
         ["A 2.0 kg box is lifted 3.0 m. Calculate the energy transferred to its gravitational potential store.", R`\(E_p = 2.0 \times 9.8 \times 3.0\)<br>\(E_p = 58.8\) J`],

@@ -1,6 +1,6 @@
 /* A4 print styles for the Year 9 "Work Like a Physicist" teaching guides.
    guide.js renders one Markdown lesson plan from ../source/ into this page;
-   build-pdf.sh prints it to PDF with headless Chrome. */
+   build-pdfs.sh prints it to PDF with headless Chrome. */
 @page {
   size: A4;
   margin: 18mm 18mm 20mm;

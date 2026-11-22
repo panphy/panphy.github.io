@@ -19,7 +19,6 @@
       big: "A heavy pendulum is pulled back to touch your nose and let go. When it swings back, will it hit you?",
       goals: ["state the principle of conservation of energy", "follow energy from one store to another in a closed system", "use conservation of energy in calculations", "draw energy bar charts", "explain why real systems lose some useful energy"],
       keywords: ["conservation of energy", "closed system", "dissipated", "energy bar chart"],
-      kit: "Practical: clamp stand, string, pendulum bob, metre rule, a phone to film the swing.",
       doNow: [
         ["A 1.0 kg ball is lifted 2.0 m. Calculate the energy transferred to its gravitational potential store.", R`\(E_p = 1.0 \times 9.8 \times 2.0\)<br>\(E_p = 19.6\) J`],
         ["A 2.0 kg ball moves at 3.0 m/s. Calculate the energy in its kinetic store.", R`\(E_k = 0.5 \times 2.0 \times 3.0^2\)<br>\(E_k = 9.0\) J`],
@@ -84,7 +83,6 @@
       big: "Two students carry the same bag up the same stairs. One runs and one walks. Who transferred more energy? Who was more powerful?",
       goals: ["say what power means", "state that 1 watt is 1 joule per second", R`calculate power with \(P = \dfrac{E}{t}\), and find \(E\) or \(t\)`, "convert kW to W, kJ to J and minutes to seconds"],
       keywords: ["power", "watt (W)", "kilowatt (kW)", "rate"],
-      kit: "Practical: stopwatch, tape measure or metre rule, a flight of stairs.",
       doNow: [
         ["A 50 kg student climbs 3.0 m of stairs. Calculate the energy transferred to their G.P.E. store.", R`\(E_p = 50 \times 9.8 \times 3.0\)<br>\(E_p = 1470\) J`],
         ["Convert 2.0 minutes to seconds.", "120 s"],

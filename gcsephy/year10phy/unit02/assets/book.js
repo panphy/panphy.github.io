@@ -9,8 +9,7 @@ window.WORKBOOK = {
   // Lessons 1-3 and 5-7 print in three parts; each required practical (Lessons 4 and 8) is a booklet of its own.
   parts: [[1, 2], [3, 5], [6, 7]],
   booklets: [["lesson=4", "RP 4"], ["lesson=8", "RP 8"]],
-  deck: "panphy.app/gcsephy/decks/particle-model",
-  // Students get no kit or deck panel beside the goals; the lesson plans list both.
+  // No panel beside the goals: the lesson plans list the kit and deck slides.
   side: () => "",
   toolkit: (W) => W.equationToolkit({
     note: "Example: to find \\(V\\) from \\(\\rho = \\dfrac{m}{V}\\), cover \\(V\\). \\(m\\) is above \\(\\rho\\), so \\(V = \\dfrac{m}{\\rho}\\).",
