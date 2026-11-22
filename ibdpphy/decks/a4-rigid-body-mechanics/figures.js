@@ -4,7 +4,7 @@
 // a tension where the string is attached. Bodies are slate; terracotta marks the turning
 // effect (torques and angular quantities), since the whole topic is higher level only.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, labeled, track, anim, spin, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, text, sub, both, through, labeled, track, anim, spin, twoState, stepG, PLAY, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const BODY = 'fill:color-mix(in srgb, var(--brand-accent-strong) 30%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3';
   const dot = (x, y, r = 7) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--text-main)"/>`;
@@ -99,6 +99,24 @@ window.DeckFigures.add(P => {
       let s = disk(220, 340, 130, 'brand-accent-strong') + disk(220, 190, 90, 'brand-accent') + axis(220) + turn(220, 340, 150, 160, 20, 'hl', 5) + text(220, 520, 'before', 'lbl strong') + text(50, 300, sub('ω', '1'), 'lbl greek', 'end') + text(330, 196, 'at rest', 'lbl', 'start');
       s += disk(640, 340, 130, 'brand-accent-strong') + disk(640, 314, 90, 'brand-accent') + axis(640) + turn(640, 340, 150, 160, 80, 'hl', 5) + text(640, 520, 'after', 'lbl strong') + text(480, 300, 'ω', 'lbl greek', 'end') + text(640, 130, 'turning together', 'lbl');
       return svg('-10 90 820 450', s + PLAY, 'Two disks on the same axis of rotation, shown dashed. Before, the lower disk is spinning with angular velocity omega 1 and the upper disk is at rest above it. After the upper disk is dropped onto the lower one, friction makes them turn together with a smaller angular velocity');
+    },
+
+    // Rolling as two motions added: turning about the center (the rim moves at ωr, forwards at the top
+    // and backwards at the bottom) plus moving along (every point at v). With v = ωr the bottom is at
+    // rest and the top moves at 2v. Turning shows first; moving along and rolling follow on clicks.
+    'a4-roll-sum': () => {
+      const R = 90, L = 120, cy = 200, xs = [170, 620, 1070], top = cy - R, bot = cy + R;
+      const LIGHT = BODY.replace('30%', '14%');
+      const disk = cx => `<circle cx="${cx}" cy="${cy}" r="${R - 1.5}" style="${LIGHT}"/>` + dot(cx, cy, 8);
+      const v = (x, y, len, color, label) => arrow(x, y, x + len, y, color, 6) + text(x + len + (len > 0 ? 16 : -16), y + 11, label, 'lbl display italic', len > 0 ? 'start' : 'end');
+      const caption = (cx, words) => text(cx, bot + 96, words, 'lbl strong');
+      const ground = cx => `<line x1="${cx - 150}" y1="${bot + 1.5}" x2="${cx + 290}" y2="${bot + 1.5}" style="stroke:var(--text-secondary);stroke-width:3"/>`;
+      const [a, b, c] = xs;
+      // The ω arc sits at the upper left, clear of both rim arrows.
+      const turning = disk(a) + turn(a, cy, R + 26, 190, 262) + text(f(a - (R + 58) * Math.SQRT1_2), f(cy - (R + 58) * Math.SQRT1_2 + 10), 'ω', 'lbl greek') + v(a, top, L, 'hl', 'ωr') + v(a, bot, -L, 'hl', 'ωr') + caption(a, 'turning');
+      const moving = text((a + b) / 2 + 20, cy + 26, '+', 'lbl', 'middle', 'style="font-size:84px"') + disk(b) + v(b, top, L, 'brand-accent', 'v') + v(b + 10, cy, L - 10, 'brand-accent', 'v') + v(b, bot, L, 'brand-accent', 'v') + caption(b, 'moving along');
+      const rolling = text((b + c) / 2 + 20, cy + 26, '=', 'lbl', 'middle', 'style="font-size:84px"') + ground(c) + disk(c) + v(c, top, 2 * L, 'brand-accent', '2v') + v(c + 10, cy, L - 10, 'brand-accent', 'v') + `<circle cx="${c}" cy="${bot}" r="9" style="fill:var(--brand-primary)"/>` + text(c, bot + 44, '0', 'lbl display') + caption(c, 'rolling');
+      return svg('20 40 1380 370', turning + stepG(true, 1, moving) + stepG(true, 2, rolling), 'Rolling shown as two motions added together. Turning: a disk spins with angular velocity omega about its fixed center, so its top moves forwards at omega r and its bottom backwards at omega r. Moving along: every point of the disk moves forwards at v. Rolling: the sum. The top moves at 2v, the center at v, and the bottom point touching the ground is at rest, so v equals omega r');
     },
 
     // Rolling without slipping: the center moves at v while the body turns at ω, and the point touching
