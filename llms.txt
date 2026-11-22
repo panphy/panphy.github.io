@@ -13,8 +13,8 @@ Prefer https://panphy.app/ over panphy.github.io. Curriculum hubs under /gcsephy
 
 - [PanPhyPlot](https://panphy.app/tools/panphyplot.html): Graph plotter for physics practicals: tables, error bars, weighted fits, custom formulas
 - [PanPhyPlot manual](https://panphy.app/tools/panphyplot/manual.html): Pendulum walkthrough from repeat readings to a fitted graph
-- [PanPhyTrack](https://panphy.app/tools/motion_tracker.html): Video motion analysis: auto or manual tracking, scale, origin, position and velocity, export to CSV or PanPhyPlot
-- [PanPhyTrack manual](https://panphy.app/tools/motion_tracker/manual.html): Walkthrough using the sample bouncing-ball clip
+- [PanPhyTrack](https://panphy.app/tools/panphytrack.html): Video motion analysis: auto or manual tracking, scale, origin, position and velocity, export to CSV or PanPhyPlot
+- [PanPhyTrack manual](https://panphy.app/tools/panphytrack/manual.html): Walkthrough using the sample bouncing-ball clip
 - [Sound Analyzer](https://panphy.app/tools/sound_analyzer.html): Live microphone spectrum and waveform
 - [Tone Generator](https://panphy.app/tools/tone_generator.html): Two-channel sine mixer with precise frequency and level
 - [PanPhyMD](https://panphy.app/tools/panphymd.html): Markdown editor with LaTeX math and live preview

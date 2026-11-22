@@ -484,9 +484,9 @@ test('native analysis module shares calibrated positions and filming-rate times 
 test('every PanPhyTrack module is listed for precaching and homepage offline readiness', () => {
     const sw = fs.readFileSync(path.join(__dirname, '../../../sw.js'), 'utf8');
     const home = fs.readFileSync(path.join(__dirname, '../../../index.html'), 'utf8');
-    const requirements = home.split("'/tools/motion_tracker.html': [")[1].split(']')[0];
+    const requirements = home.split("'/tools/panphytrack.html': [")[1].split(']')[0];
     for (const file of fs.readdirSync(path.join(__dirname, '../js'))) {
-        const url = `/tools/motion_tracker/js/${file}`;
+        const url = `/tools/panphytrack/js/${file}`;
         assert.ok(sw.includes(`'${url}'`), `${file} must be precached`);
         assert.ok(requirements.includes(`'${url}'`), `${file} must count toward offline readiness`);
     }
