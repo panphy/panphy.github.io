@@ -247,7 +247,8 @@
           </div>
           <div class="work step">
             <span class="say">The speed in the glass</span>
-            <span class="step">\(v = \dfrac{c}{n} = \dfrac{3.00 \times 10^{8}}{1.50}\)</span>
+            <span class="step">\(n = \dfrac{c}{v}\)</span>
+              <span class="step">\(v = \dfrac{c}{n} = \dfrac{3.00 \times 10^{8}}{1.50}\)</span>
             <span class="step">\(v = \class{res}{2.00 \times 10^{8} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="say step">Light of 600 nm in air is 400 nm in the glass</span>
           </div>
@@ -309,6 +310,7 @@
           <div class="work">
             <span class="ask">Find the critical angle from glass to air.</span>
             <span class="say">Glass (\(n_{1} = 1.50\)) to air (\(n_{2} = 1.00\))</span>
+            <span class="step">\(n_{1} \sin \theta_\mathrm{c} = n_{2} \sin 90^{\circ}\)</span>
             <span class="step">\(\sin \theta_\mathrm{c} = \dfrac{n_{2}}{n_{1}} = \dfrac{1.00}{1.50}\)</span>
             <span class="step">\(\theta_\mathrm{c} = \class{res}{42^{\circ}}\)</span>
           </div>
@@ -1096,13 +1098,15 @@
             <span class="ask">Find the angle of the first order, and the highest order that can be seen.</span>
             <span class="say">300 lines per mm, \(\lambda = 589 \,\mathrm{nm}\)</span>
             <span class="step">\(d = \dfrac{1.0 \times 10^{-3}}{300} = 3.33 \times 10^{-6} \,\mathrm{m}\)</span>
+            <span class="step">\(n \lambda = d \sin \theta\)</span>
             <span class="step">\(\sin \theta = \dfrac{n \lambda}{d} = \dfrac{1 \times 589 \times 10^{-9}}{3.33 \times 10^{-6}}\)</span>
             <span class="step">\(\sin \theta = 0.177\)</span>
             <span class="step">\(\theta = \class{res}{10^{\circ}}\) for the first order</span>
           </div>
           <div class="work step">
             <span class="say">The highest order</span>
-            <span class="step">\(n \le \dfrac{d}{\lambda} = \dfrac{3.33 \times 10^{-6}}{589 \times 10^{-9}} = 5.7\)</span>
+            <span class="step">\(\sin \theta = \dfrac{n \lambda}{d} \le 1\)</span>
+              <span class="step">\(n \le \dfrac{d}{\lambda} = \dfrac{3.33 \times 10^{-6}}{589 \times 10^{-9}} = 5.7\)</span>
             <span class="step">Highest order: \(\class{res}{n = 5}\)</span>
             <span class="say step">Eleven beams in all: 5 each side and the center</span>
           </div>
