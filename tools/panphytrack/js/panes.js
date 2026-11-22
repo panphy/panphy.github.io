@@ -1,6 +1,6 @@
 
 
-const PANES_STORAGE_KEY = 'motion-tracker-panes';
+const PANES_STORAGE_KEY = 'panphytrack-panes';
 
 const PANE_WIDE_QUERY = '(min-width: 901px)';
 
