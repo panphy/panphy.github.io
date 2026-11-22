@@ -3,7 +3,7 @@
 // luminosity is plotted upwards and temperature falls from left to right, both on logarithmic
 // scales. Gravity is slate and outward pressure apricot. Nothing here is terracotta.
 window.DeckFigures.add(P => {
-  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labeled, animated, stepG, seeded, track, anim, twoState, PLAY, f, TAU } = P;
+  const { svg, ball, cluster, arrow, text, sub, both, through, labeled, animated, stepG, seeded, track, anim, twoState, PLAY, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const appear = (at, dur) => anim('opacity', [0, 0, 1, 1], dur, { loop: false, extra: `keyTimes="0;${at};${at + 0.01};1"` });
   const vanish = (at, dur) => anim('opacity', [1, 1, 0, 0], dur, { loop: false, extra: `keyTimes="0;${at};${at + 0.01};1"` });

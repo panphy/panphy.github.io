@@ -3,7 +3,7 @@
 // apricot and slate, and nodes are marked in the text color. Nothing here is terracotta,
 // because C.4 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, f, TAU } = P;
+  const { svg, arrow, text, both, sampled, labeled, anim, twoState, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const F = 24, frames = fn => Array.from({ length: F + 1 }, (_, i) => fn(i / F * TAU));
   // A standing wave between x0 and x1 with `loops` half wavelengths (it may be a half-integer,

@@ -3,7 +3,7 @@
 (() => {
   const SLIDE_W = 1600;
   const SLIDE_H = 900;
-  const state = { index: 0, slides: [], orbitFrame: 0, scatter: null, loops: [], clocks: [] };
+  const state = { index: 0, slides: [], scatter: null, loops: [], clocks: [] };
 
   const deck = document.getElementById('deck');
   const stage = document.getElementById('stage');
@@ -237,9 +237,7 @@
       row.querySelector('[data-k="reset"]').addEventListener('click', reset);
       label(false);
       reset();
-      // data-controls="head": in the panel's heading, for a panel of fixed height.
-      const head = fig.dataset.controls === 'head' && fig.closest('.panel')?.querySelector('.panel-head');
-      if (head) head.append(row); else fig.after(row);
+      fig.after(row);
       state.loops.push({ slide: fig.closest('.slide'), reset });
     });
   }
@@ -515,7 +513,7 @@
 
   // Move electrons around their orbits on the visible slide only.
   function animateOrbits(time) {
-    state.orbitFrame = requestAnimationFrame(animateOrbits);
+    requestAnimationFrame(animateOrbits);
     if (reduceMotion.matches) return;
     animateScatter(time);
     const slide = state.slides[state.index];
@@ -602,7 +600,7 @@
       if (Number.isFinite(n) && n - 1 !== state.index) show(n - 1);
     });
     window.addEventListener('beforeprint', () => state.slides.forEach(slide => slide.querySelectorAll('.step').forEach(step => step.classList.add('shown'))));
-    state.orbitFrame = requestAnimationFrame(animateOrbits);
+    requestAnimationFrame(animateOrbits);
   }
 
   // Slides are typeset first, so thumbnails and notes are built with the finished math.

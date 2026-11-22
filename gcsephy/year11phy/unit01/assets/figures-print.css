@@ -51,6 +51,5 @@
 /* Workbook additions drawn with the deck's parts: answer boxes and label leaders. */
 .dfig .blank-box { fill: #fff; stroke: var(--text-main); stroke-width: 2; }
 .dfig .leader { stroke: var(--text-main); stroke-width: 1.8; }
-.dfig .ans-lbl { font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 700; fill: #1558b0; }
 .dfig .ans-path { fill: none; stroke: #1558b0; stroke-width: 3; stroke-linecap: round; }
-body:not(.answers) .dfig .ans-lbl, body:not(.answers) .dfig .ans-path { visibility: hidden; }
+body:not(.answers) .dfig .ans-path { visibility: hidden; }

@@ -4,7 +4,7 @@
 // a tension where the string is attached. Bodies are slate; terracotta marks the turning
 // effect (torques and angular quantities), since the whole topic is higher level only.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, spin, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, text, sub, both, through, labeled, track, anim, spin, twoState, PLAY, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const BODY = 'fill:color-mix(in srgb, var(--brand-accent-strong) 30%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3';
   const dot = (x, y, r = 7) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--text-main)"/>`;

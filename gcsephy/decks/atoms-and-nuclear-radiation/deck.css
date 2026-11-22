@@ -2,27 +2,6 @@
 
 /* Palette matches simulations/atomic_models and simulations/nuclear_decay. */
 :root {
-  color-scheme: light;
-  --font-body: 'Figtree', 'Manrope', system-ui, sans-serif;
-  --font-display: 'DM Serif Display', Georgia, serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --bg-color: #FBFBF9;
-  --bg-pattern: #F0F0ED;
-  --text-main: #1B1B1B;
-  --text-secondary: #5F5954;
-  --brand-primary: #C2410C;
-  --brand-accent: #0D9488;
-  --brand-accent-strong: #0F766E;
-  --card-bg: #ffffff;
-  --card-border: #E6E6E2;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  --soft-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-  --muted-bg: #F4F4F1;
-  --input-border: #D2D2CD;
-  --nav-bg: rgba(251, 251, 249, 0.92);
-  --nav-border: #E6E6E2;
-  --viewer-bg: #F3F3F0;
-  --focus: #0F766E;
   --electron: #1675BB;
   --positive: #B7791F;
   --proton: #D45132;
@@ -41,24 +20,6 @@
 }
 
 [data-theme="dark"] {
-  color-scheme: dark;
-  --bg-color: #111110;
-  --bg-pattern: #1A1A18;
-  --text-main: #EDEBE8;
-  --text-secondary: #A8A49C;
-  --brand-primary: #FB923C;
-  --brand-accent: #5EEAD4;
-  --brand-accent-strong: #2DD4BF;
-  --card-bg: #1A1A19;
-  --card-border: #2A2A28;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --soft-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-  --muted-bg: #222220;
-  --input-border: #3A3A36;
-  --nav-bg: rgba(17, 17, 16, 0.9);
-  --nav-border: rgba(255, 255, 255, 0.06);
-  --viewer-bg: #141413;
-  --focus: #5EEAD4;
   --electron: #4BA3E3;
   --positive: #E0A445;
   --proton: #EF6A48;
@@ -320,7 +281,6 @@ h3 { font-size: 34px; line-height: 1.15; }
 .t-electron { color: var(--electron); font-weight: 800; }
 .t-alpha { color: var(--alpha); font-weight: 800; }
 .t-photon { color: var(--photon); font-weight: 800; }
-.t-accent { color: var(--brand-accent-strong); font-weight: 800; }
 
 
 /* Layouts */
@@ -365,12 +325,6 @@ h3 { font-size: 34px; line-height: 1.15; }
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .legend > span { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 5px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 24px; }
 .legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; font-weight: 800; color: #fff; }
-.legend .proton { background: var(--proton); }
-.legend .neutron { background: var(--neutron); }
-.legend .electron { background: var(--electron); }
-.legend .positive { background: var(--positive); }
-.legend .alpha { background: var(--alpha); }
-.legend .photon { background: var(--photon); }
 .legend .undecayed { background: var(--undecayed); }
 .legend .decayed { background: var(--decayed); }
 
@@ -436,11 +390,8 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 
 /* Nuclide notation, as in the nuclear decay sim */
 .nuc { display: inline-flex; align-items: center; vertical-align: middle; font-weight: 700; font-family: var(--font-mono); }
-/* Keeps a nuclide and its trailing punctuation together. */
-.glue { display: inline-flex; align-items: center; }
 /* Rows holding nuclides: centre text, arrows and symbols on one line. */
 .eqrow { display: flex; align-items: center; flex-wrap: wrap; gap: 0 .35em; }
-.nuc .nums { display: inline-flex; flex-direction: column; align-items: flex-end; margin-right: 3px; font-size: .6em; line-height: 1.05; }
 .nuc.alpha { color: var(--alpha); }
 .nuc.electron { color: var(--electron); }
 .nuc.gamma { color: var(--photon); }
@@ -493,13 +444,9 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .quiz { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; align-content: start; }
 .q { display: flex; flex-direction: column; gap: 12px; padding: 22px 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
 .q p { margin: 0; font-size: 29px; font-weight: 700; line-height: 1.3; }
-.eqline { display: inline-flex; align-items: center; gap: 10px; }
 .q .nuc { font-size: 1.1em; }
-/* Nuclides inside running text: the symbol sits on the text baseline and the
-   stacked numbers hang beside it without making the line taller. */
+/* Nuclides inside running text sit on the text baseline. */
 .nuc.in-text { display: inline; vertical-align: baseline; font-size: 1em; font-family: inherit; font-weight: 800; }
-.nuc.in-text .nums { display: inline-block; vertical-align: -.24em; margin: -.2em 2px -.2em 0; text-align: right; font-family: var(--font-mono); font-size: .52em; line-height: .95; }
-.nuc.in-text .nums > span { display: block; }
 .q .n { display: inline-block; margin-right: 10px; font: 600 24px var(--font-mono); color: var(--brand-primary); }
 .q .ans { margin-top: auto; padding: 10px 16px; border-radius: 12px; background: #E5F2EA; color: #2B5A3A; border: 1px solid #3F7A55; font-size: 27px; font-weight: 700; }
 [data-theme="dark"] .q .ans { background: #183324; color: #BBF7D0; border-color: #4ADE80; }
@@ -560,7 +507,6 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .curve { fill: none; stroke: var(--undecayed); stroke-width: 5; stroke-linecap: round; }
 .roller { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
 .body { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
-.body.edge { stroke: var(--text-secondary); stroke-width: 3; }
 .stem { fill: none; stroke: #6B4F2A; stroke-width: 5; stroke-linecap: round; }
 .divider { stroke: var(--card-border); stroke-width: 2; }
 .slide.active .draw { stroke-dasharray: 1400; stroke-dashoffset: 1400; animation: draw 2.4s ease forwards .3s; }

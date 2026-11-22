@@ -100,7 +100,6 @@ window.DeckSvgTex = {
     // Mission 3
     voltmeter: () => D.circuit({ w: 360, h: 240, wires: [LOOP, 'M130 150 V205 H230 V150'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v'], ['resistor', 180, 150, 'h', '10 Ω'], ['voltmeter', 180, 205, 'h', 'reads 6 V', 'b']], dots: [[130, 150], [230, 150]], caption: 'Ammeter in series. Voltmeter across the resistor, in parallel.' }),
     energy: () => D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V: 6 J gained per C'], ['resistor', 110, 150, 'h', 'R₁: 3 V', 'b'], ['resistor', 250, 150, 'h', 'R₂: 3 V', 'b']], label: 'Series circuit: a 6 volt battery and two resistors with 3 volts across each, so each coulomb transfers 3 joules in each resistor', caption: 'Each coulomb transfers 3\u00a0J in \\(R_1\\) and 3\u00a0J in \\(R_2\\).' }),
-    wrongVoltmeter: () => D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V'], ['lamp', 120, 150, 'h', 'lamp', 'b'], ['voltmeter', 240, 150, 'h', 'reads ≈ 6 V', 'b']], caption: 'Voltmeter in series: almost no current, lamp stays off.' }),
 
     // Mission 4
     ohmic: () => D.graph({ w: 360, h: 250, x: [0, 6, 1], y: [0, 0.6, 0.1], xLabel: 'potential difference / V', yLabel: 'current / A', series: [{ fn: x => 0.1 * x, from: 0, to: 6 }, { points: [[1, 0.1], [2, 0.2], [3, 0.3], [4, 0.4], [5, 0.5], [6, 0.6]] }], label: 'Straight line through the origin: current against potential difference for a 10 ohm resistor', caption: 'A 10 Ω resistor: every point gives \\(V \\div I = 10\\)&nbsp;Ω.' }),
@@ -389,5 +388,5 @@ window.DeckSvgTex = {
     });
   }
 
-  window.DeckFigures = { render, latticeModel };
+  window.DeckFigures = { render };
 })();

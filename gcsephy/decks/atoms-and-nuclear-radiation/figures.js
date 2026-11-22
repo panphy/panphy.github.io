@@ -322,7 +322,6 @@ window.DeckSvgTex = {
       [0.25, 0.75, 1.25, 1.75].forEach(p => { s += ball(80 + 70 * Math.cos(p * Math.PI), 80 + 70 * Math.sin(p * Math.PI), 7, 'electron'); });
       return svg('0 0 160 160', s, 'Bohr model');
     },
-    'mini-proton': () => svg('0 0 160 160', cluster(80, 80, 6, 0, 24), 'Protons in the nucleus'),
     'mini-neutron': () => svg('0 0 160 160', cluster(80, 80, 6, 6, 21), 'Protons and neutrons in the nucleus'),
 
     'mini-decay': () => {
@@ -694,36 +693,6 @@ window.DeckSvgTex = {
       s += text(170, 86, 'short half-life', 'lbl strong', 'start', 'style="fill:var(--proton)"') + text(170, 116, 'very active, then soon gone', 'lbl', 'start', 'style="fill:var(--text-main)"');
       s += text(420, 262, 'long half-life', 'lbl strong', 'start', 'style="fill:var(--electron)"') + text(420, 292, 'less active, for a very long time', 'lbl', 'start', 'style="fill:var(--text-main)"');
       return svg('0 30 720 430', s, 'Activity against time: a short half-life source starts very active and soon falls to almost nothing; a long half-life source is less active but stays active for a long time');
-    },
-
-    // A patient lying under a gamma camera: the tracer collects in one organ (a kidney) and the
-    // camera builds a picture of it on the screen.
-    'gamma-camera': () => {
-      let s = `<rect x="40" y="246" width="300" height="14" rx="5" style="fill:var(--aluminium)"/><rect x="70" y="260" width="12" height="30" style="fill:var(--aluminium)"/><rect x="300" y="260" width="12" height="30" style="fill:var(--aluminium)"/>`;
-      s += `<rect x="60" y="196" width="250" height="50" rx="25" style="fill:color-mix(in srgb, var(--positive) 22%, var(--card-bg));stroke:var(--text-secondary)" stroke-width="2.5"/><circle cx="326" cy="214" r="26" style="fill:color-mix(in srgb, var(--positive) 22%, var(--card-bg));stroke:var(--text-secondary)" stroke-width="2.5"/>`;
-      s += `<path d="M168,206 c-18,0 -26,14 -20,26 c6,10 18,8 22,2 c4,-6 12,-6 14,-14 c2,-10 -6,-14 -16,-14 z" style="fill:color-mix(in srgb, var(--photon) 40%, var(--card-bg));stroke:var(--photon)" stroke-width="2"/>`;
-      s += [[156, 220], [166, 230], [172, 214]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" style="fill:var(--photon)"/>`).join('');
-      s += `<rect x="90" y="40" width="160" height="56" rx="10" style="fill:var(--lead)"/><rect x="98" y="88" width="144" height="10" rx="3" style="fill:var(--aluminium)"/>` + text(170, 74, 'gamma camera', 'lbl small', 'middle', 'style="fill:#fff"');
-      s += [[142, 196, 128, 104], [168, 196, 168, 104], [190, 196, 212, 104]].map(([x1, y1, x2, y2]) => wave(x1, y1, x2, y2, { cycles: 4, amp: 5 })).join('');
-      s += `<path d="M250,68 H300 V100" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5"/><rect x="290" y="100" width="150" height="96" rx="10" style="fill:#1E2433;stroke:var(--text-secondary)" stroke-width="2"/>`;
-      s += `<path d="M352,124 c-24,0 -34,20 -26,36 c8,14 24,12 30,2 c6,-8 16,-8 18,-20 c2,-12 -8,-18 -22,-18 z" style="fill:#F6C90E;opacity:.9"/><path d="M350,134 c-10,2 -14,12 -10,20" style="fill:none;stroke:#F07F2E;stroke-width:6;stroke-linecap:round"/>`;
-      return svg('20 20 440 280', s, 'A patient lies under a gamma camera. A tracer injected into the body collects in a kidney; gamma rays from it pass out of the body to the camera, which shows a picture of the kidney on a screen');
-    },
-
-    // Radiotherapy: the source moves round the patient. Each beam alone is weak; where they all
-    // cross, at the tumour, the doses add up.
-    radiotherapy: () => {
-      const cx = 240, cy = 160, angles = [-90, -30, 30, 150, 210];
-      let s = `<ellipse cx="${cx}" cy="${cy}" rx="150" ry="98" style="fill:color-mix(in srgb, var(--positive) 22%, var(--card-bg));stroke:var(--text-secondary)" stroke-width="2.5"/>`;
-      s += `<circle cx="${cx}" cy="${cy}" r="140" style="fill:none;stroke:var(--text-secondary);stroke-width:2;stroke-dasharray:6 8;opacity:.6"/>`;
-      // Each beam runs from its source through the tumour and fades out just beyond it.
-      s += `<defs><linearGradient id="rt-beam" x1="0" x2="1"><stop offset="0" style="stop-color:var(--photon);stop-opacity:0"/><stop offset=".3" style="stop-color:var(--photon);stop-opacity:.28"/><stop offset="1" style="stop-color:var(--photon);stop-opacity:.28"/></linearGradient></defs>`;
-      s += angles.map(a => `<rect x="${cx - 60}" y="${cy - 9}" width="192" height="18" fill="url(#rt-beam)" transform="rotate(${a} ${cx} ${cy})"/>`).join('');
-      s += angles.map(a => `<rect x="${cx + 132}" y="${cy - 14}" width="30" height="28" rx="6" style="fill:var(--lead)" transform="rotate(${a} ${cx} ${cy})"/>`).join('');
-      s += `<circle cx="${cx}" cy="${cy}" r="30" fill="url(#g-glow)"/><circle cx="${cx}" cy="${cy}" r="15" style="fill:var(--photon);stroke:var(--card-bg)" stroke-width="2"/>`;
-      s += `<path d="M${cx},${cy + 17} V${cy + 128}" style="stroke:var(--text-main);stroke-width:2"/>` + text(cx, cy + 152, 'tumour: all beams cross, big dose', 'lbl small', 'middle', 'style="fill:var(--text-main);font-weight:700"');
-      s += `<path d="M${cx - 96},${cy - 48} L${cx - 150},${cy - 120}" style="stroke:var(--text-main);stroke-width:2"/>` + text(cx - 214, cy - 140, 'healthy tissue:', 'lbl small', 'start', 'style="fill:var(--text-main)"') + text(cx - 214, cy - 118, 'one beam, small dose', 'lbl small', 'start', 'style="fill:var(--text-main)"');
-      return svg('20 0 460 320', s, 'Radiotherapy: gamma beams aimed from five directions round the patient all pass through the tumour. Healthy tissue gets one weak beam; the tumour, where they all cross, gets a large dose');
     },
 
     fission: el => {

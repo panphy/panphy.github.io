@@ -78,7 +78,6 @@
   --bg-color: #111110;
   --bg-pattern: #1a1a18;
   --text-main: #edebe8;
-  --text-secondary: #c0bcb4;
   --card-bg: #1a1a19;
   --card-border: #41413b;
   --viewer-bg: #181816;
@@ -183,7 +182,7 @@ h2 em, h3 em { box-shadow: none; color: var(--brand-primary); }
 .points li { line-height: 1.3; }
 .points li::before { width: 14px; height: 14px; border: 0; top: .48em; background: var(--brand-primary); box-shadow: none; }
 .points.small li::before { width: 12px; height: 12px; }
-/* Year 11 key-word bullets: the pale year accent is too faint on white cards in the light theme. */
+/* Atoms key-word bullets (.deck-atoms): the pale year accent is too faint on white cards in the light theme. */
 :root:not([data-theme="dark"]) .term span::before { background: var(--brand-primary); box-shadow: none; }
 .points b { font-weight: 800; }
 ol.steps li::before { border: 0; color: var(--year-ink); font: 600 24px var(--font-mono); }
@@ -233,7 +232,7 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .q .n { border: 0; color: var(--year-ink); font: 600 24px var(--font-mono); }
 .q .ans { border: 0; border-left: 4px solid var(--brand-primary); border-radius: 0 12px 12px 0; background: var(--formula); color: var(--text-main); font-weight: 600; }
 .terms { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); border-radius: 22px; box-shadow: none; }
-/* In Year 11, .terms is a grid of separate .term cards, not one panel. */
+/* In the Atoms decks, .terms is a grid of separate .term cards, not one panel. */
 .deck-atoms .terms { background: none; border: 0; border-radius: 0; }
 .term { border-color: var(--card-border); }
 .term b { font: 400 32px/1.15 var(--font-display); text-transform: none; color: var(--brand-primary); }
@@ -246,7 +245,6 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .case-card h3 { line-height: 1.15; }
 .plot-card p { font-family: var(--font-display); text-transform: none; font-weight: 400; line-height: 1.15; }
 .case-card .label, .plot-label { color: var(--text-secondary); font: 800 24px var(--font-body); letter-spacing: .08em; border-color: var(--card-border); }
-.sticky { background: var(--formula); color: var(--text-main); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: none; text-transform: none; font: 600 22px var(--font-body); }
 .stamp { color: var(--brand-primary); border-color: var(--brand-primary); font: 800 17px/1.1 var(--font-body); letter-spacing: 0; } /* decorative ring of fixed size */
 .route > div { border: 1px solid var(--card-border); border-radius: 18px; box-shadow: none; }
 .route > div.go { background: var(--formula); }
@@ -259,10 +257,7 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .stores .store, .toolkit .tool { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; }
 .store b { font: 400 28px/1.15 var(--font-display); text-transform: none; }
 .tool .eq { font-family: var(--font-mono); font-weight: 600; }
-.ring-box, .ring-box > span { background: var(--card-bg); color: var(--text-main); }
-.ring-box > span.right.step.shown { color: var(--cyan); outline-color: var(--cyan); }
 .masthead { border-bottom: 2px solid var(--card-border); padding-right: 150px; } /* clear of the year badge */
-.masthead .paper-name { font: 400 42px var(--font-display); letter-spacing: -.015em; }
 .masthead .edition { border: 0; border-radius: 999px; background: var(--formula); color: var(--text-main); font: 700 24px var(--font-body); letter-spacing: .04em; }
 .masthead .dateline { font: 700 24px var(--font-body); letter-spacing: .05em; }
 .news-photo img { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; }
@@ -346,7 +341,7 @@ body.is-fullscreen .deck { border-radius: 0; }
 .wf .f-cyan { fill: #9dccd7; }
 .wf .tick-t { fill: var(--ink); }
 [data-theme="dark"] .wf .f-cyan { fill: #244b57; }
-[data-theme="dark"] .wf .f-accent, [data-theme="dark"] .wf .f-hi, [data-theme="dark"] .wf .f-alt { fill: var(--formula); }
+[data-theme="dark"] .wf .f-accent, [data-theme="dark"] .wf .f-alt { fill: var(--formula); }
 .card.navy .eyebrow { color: var(--brand-primary) !important; }
 .card.navy h3 { color: var(--text-main) !important; }
 [data-fig="coverArt"] { background: var(--viewer-bg); border: 1px solid var(--card-border); border-radius: 14px; }
@@ -399,7 +394,6 @@ body.is-fullscreen .deck { border-radius: 0; }
 .symbol-tile { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; }
 .symbol-tile figcaption { font: 600 24px/1.2 var(--font-body); text-transform: none; letter-spacing: 0; }
 
-.machine .sticky.one, .machine .sticky.two { transform: none; box-shadow: none; }
 .component { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; overflow: hidden; }
 .component figcaption { border-color: var(--card-border); }
 .component figcaption > b { font: 700 24px var(--font-body); letter-spacing: .02em; text-transform: none; }
@@ -458,7 +452,6 @@ body.is-fullscreen .deck { border-radius: 0; }
 .chip { font: 700 24px var(--font-body); letter-spacing: .02em; }
 .obs-head { font: 700 24px var(--font-body); letter-spacing: .06em; }
 .card .eyebrow { font-size: 24px; }
-.legend > span { font-size: 24px; }
 .panel-head .pill { font-size: 24px; }
 .tool .where { font: 800 24px var(--font-body); letter-spacing: .06em; }
 .grid-head strong { font-size: 24px; }

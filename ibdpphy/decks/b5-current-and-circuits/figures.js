@@ -2,7 +2,7 @@
 // Wires and symbols are drawn in the text color, conventional current is apricot, electrons
 // blue and potential differences teal. Nothing here is terracotta: B.5 has no additional HL content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, seeded, track, anim, twoState, f, TAU } = P;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, seeded, track, twoState, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const INK = 'fill:none;stroke:var(--text-main);stroke-width:4;stroke-linecap:round;stroke-linejoin:round';
   const BOX = 'fill:var(--card-bg);stroke:var(--text-main);stroke-width:4;stroke-linejoin:round';

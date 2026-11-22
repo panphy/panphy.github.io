@@ -22,7 +22,6 @@
       big: "A skateboarder rolls down one side of a ramp and up the other, but never quite gets back to the starting height. Where did the energy go?",
       goals: ["name the energy stores and give an example of each", "name the four ways energy is transferred", "explain what a system is", "describe the energy transfers when something changes"],
       keywords: ["energy store", "transfer", "system", "closed system", "joule (J)"],
-      kit: "This booklet, a pencil and a ruler.",
       doNow: [
         ["Name something that has energy. How can you tell?", "For example, a moving car (it is moving) or a hot drink (it is hot). Any sensible answer."],
         [R`Energy is measured in [[joules|joules / newtons / metres]].`, "joules (J)"],
@@ -105,7 +104,6 @@
       big: "A car travels twice as fast. Does it have twice as much energy in its kinetic store, or more?",
       goals: ["say what the kinetic store depends on", R`calculate kinetic energy with \(E_k = \tfrac{1}{2}\,m\,v^2\)`, "convert grams to kilograms", "explain why doubling the speed gives four times the energy"],
       keywords: ["kinetic store", "mass (kg)", "speed (m/s)", "squared"],
-      kit: "Calculator. Practical: trolley, 1.00 m track, stopwatch, balance.",
       doNow: [
         ["Which store does a moving object have energy in?", "The kinetic store."],
         ["A car brakes. Which store fills?", "The thermal store (of the brakes and the surroundings)."],

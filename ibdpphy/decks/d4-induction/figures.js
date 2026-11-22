@@ -2,7 +2,7 @@
 // ../assets/figures.js. Magnetic field lines and symbols are slate, velocities and currents
 // apricot, forces teal; flux curves are teal and emf curves terracotta.
 window.DeckFigures.add(P => {
-  const { svg, arrow, fline, text, sub, axes, both, through, sampled, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, fline, text, axes, both, through, sampled, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU } = P;
   const cross = (x, y, s = 9) => `<path d="M${x - s},${y - s} l${2 * s},${2 * s} m0,${-2 * s} l${-2 * s},${2 * s}" style="stroke:var(--brand-accent-strong);stroke-width:3;stroke-linecap:round;opacity:.5"/>`;
   const fieldGrid = (x0, y0, nx, ny, step) => Array.from({ length: nx * ny }, (_, i) => cross(x0 + (i % nx) * step, y0 + Math.floor(i / nx) * step)).join('');
   // A bar magnet with its north pole at the end given by `north` ('left', 'right', 'up' or 'down').

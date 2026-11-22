@@ -2,7 +2,7 @@
 // Sunlight is sand and apricot, infrared is red, the atmosphere teal and the ground slate.
 // Nothing here is terracotta, because B.2 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, through, sampled, labeled, seeded, track, anim, twoState, f, TAU } = P;
+  const { svg, arrow, text, through, sampled, labeled, seeded, anim, twoState, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   // A wavy arrow for infrared, from (x1, y1) to (x2, y2).
   const ir = (x1, y1, x2, y2, color = 'proton', width = 4) => {

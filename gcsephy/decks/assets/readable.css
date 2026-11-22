@@ -1,9 +1,8 @@
-/* Large-room type for the Year 9 and Year 10 GCSE decks, loaded last (after teaching-deck.css)
-   by the decks that have been reworked for it. It sets the type scale for a 75" screen read
-   from the back of a 10 m lab: anything students read is at least 28px on the 1600 × 900
-   slide, and body text is 34–40px. A slide whose content no longer fits is split into two or
-   more slides rather than set smaller. Slide side margins are narrower to make room. Eyebrows,
-   the footer, AQA spec references and the copyright line keep their sizes.
+/* Large-room type for all six GCSE decks, loaded last (after teaching-deck.css). It sets the
+   type scale for a 75" screen read from the back of a 10 m lab: anything students read is at
+   least 28px on the 1600 × 900 slide, and body text is 34–40px. A slide whose content no longer
+   fits is split into two or more slides rather than set smaller. Slide side margins are narrower
+   to make room. Eyebrows, the footer, AQA spec references and the copyright line keep their sizes.
    Diagram labels are enlarged here, in the deck only: the drawings are shared with the
    printed workbooks, which keep their own label sizes. */
 .slide { padding-left: 72px; padding-right: 72px; padding-bottom: 60px; }
@@ -30,7 +29,6 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 .rule { font-size: 35px; }
 .formula { font-size: 34px; }
 .card p { font-size: 32px; }
-.cap { font-size: 30px; }
 .pair > div > p { font-size: 32px; }
 
 .eq-block .eq-words { font-size: 32px; }
@@ -67,8 +65,6 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 /* Live particle models: readouts and controls */
 .pm-readout span, .pm-slider span { font-size: 28px; }
 .pm-readout b { font-size: 34px; }
-.pm-controls button { font-size: 28px; }
-.pm-note { font-size: 26px; }
 
 /* Workbook drawings (figures.css, class .pf): labels about a third larger on the slide. */
 .slide .pf text { font-size: 14.5px; }
@@ -94,17 +90,14 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 .deck-atoms .facts th, .deck-atoms .facts td { padding: 16px 22px; }
 .deck-atoms .facts.big td { padding: 22px 24px; }
 .deck-atoms .facts .num { white-space: nowrap; }
-.deck-atoms .facts thead th, .deck-atoms .facts.big thead th { font-size: 26px; }
 .deck-atoms .obs { gap: 14px; }
 .deck-atoms .obs-row { grid-template-columns: 1fr 44px 1fr; }
 .deck-atoms .obs-row > div { font-size: 34px; padding: 14px 20px; }
 .deck-atoms .obs-row .to { font-size: 40px; }
-.deck-atoms .obs-head { grid-template-columns: 1fr 44px 1fr; font-size: 26px; }
-.deck-atoms .q p { font-size: 34px; }
-.deck-atoms .q .ans { font-size: 33px; }
+.deck-atoms .obs-head { grid-template-columns: 1fr 44px 1fr; }
 .deck-atoms .term b { font-size: 38px; }
 .deck-atoms .term span { font-size: 32px; }
-/* Year 11 key words are separate cards: keep room inside each one. */
+/* Atoms key words are separate cards: keep room inside each one. */
 .deck-atoms .terms { gap: 22px; padding: 0; }
 .deck-atoms h2:has(+ .terms) { margin-bottom: 40px; }
 .deck-atoms .term { padding: 22px 32px 24px; }
@@ -118,7 +111,7 @@ ol.steps li::before { width: 50px; height: 50px; font-size: 28px; }
 .deck-atoms .lbl.greek { font-size: 42px; }
 /* Slightly shorter illustrations on the source and medical cards, so the larger card text fits. */
 .deck-atoms .source-illustration { height: 205px; }
-.deck-atoms .medical-illustration { height: 270px; }
+.deck-atoms .medical-illustration { height: 240px; }
 
 /* Energy deck: the drop-test readout keeps a fixed height (so the panel does not jump as its
    text changes), now tall enough for three lines at the larger size. */
@@ -147,13 +140,12 @@ table.data, .data.compact { font-size: 30px; }
 .tool p { font-size: 28px; }
 .dk-controls button, .pm-controls button { font-size: 28px; }
 .pm-note { font-size: 28px; }
-/* Year 11: timelines, checks and table text. */
+/* Atoms decks: timelines, checks and table text. */
 .deck-atoms .tl .year { font-size: 28px; }
 .deck-atoms .tl p { font-size: 29px; }
 .deck-atoms .eq-check { font-size: 28px; }
 .deck-atoms .obs-head { font-size: 28px; }
 .deck-atoms .facts thead th, .deck-atoms .facts.big thead th { font-size: 28px; }
-.deck-atoms .medical-illustration { height: 240px; }
 /* News-style case slides: a slightly narrower photo column leaves room for the larger story text. */
 .front { grid-template-columns: 600px 1fr; gap: 44px; }
 .news-photo img { max-height: 440px; }

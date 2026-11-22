@@ -3,7 +3,7 @@
 // force arrow starts where the force acts. Kinetic energy is apricot, potential energy teal and
 // the total slate. Nothing here is terracotta: A.3 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, box, dot, surface, axes, plot, shade, both, through, sampled, labeled, spring, track, anim, twoState, PLAY, f } = P;
+  const { svg, arrow, text, box, dot, surface, axes, plot, shade, both, through, sampled, labeled, spring, track, anim, twoState, PLAY, f } = P;
   const bar = (x, y, w, h, color, extra = '') => `<rect x="${x}" y="${f(y)}" width="${w}" height="${f(h)}" rx="6" style="fill:var(--${color})">${extra}</rect>`;
 
   // Keep the definitions outside the figures so the slide thumbnails use the same gradients.

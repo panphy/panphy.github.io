@@ -2,7 +2,7 @@
 // Displacement is teal, velocity apricot and acceleration slate; kinetic energy is apricot and
 // potential energy teal. Terracotta is kept for what is higher level only.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, spin, twoState, f, TAU } = P;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, f, TAU } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const N = 48, cyc = fn => Array.from({ length: N + 1 }, (_, i) => fn(i / N * TAU));
   // The path of a coiled spring lying along y from x1 to x2.

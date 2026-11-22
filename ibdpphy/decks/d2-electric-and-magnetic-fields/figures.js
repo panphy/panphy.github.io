@@ -3,7 +3,7 @@
 // electrons are in the other decks. Electric field lines and forces are teal, magnetic field
 // lines slate, currents apricot. Terracotta (equipotentials) appears only in the higher level figures.
 window.DeckFigures.add(P => {
-  const { svg, ball, arrow, fline, text, sub, dot, axes, plot, both, through, sampled, labeled, animated, stepG, track, anim, spin, twoState, PLAY, f } = P;
+  const { svg, ball, arrow, fline, text, sub, dot, both, through, sampled, labeled, animated, stepG, track, anim, twoState, PLAY, f } = P;
   const plus = (x, y, r = 22) => ball(x, y, r, 'proton');
   const minus = (x, y, r = 22) => ball(x, y, r, 'electron');
   const polar = (cx, cy, r, deg) => [cx + r * Math.cos(deg * Math.PI / 180), cy + r * Math.sin(deg * Math.PI / 180)];

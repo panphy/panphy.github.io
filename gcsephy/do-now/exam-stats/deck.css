@@ -24,6 +24,40 @@
 .card.navy p { color: #d3e3e1; }
 .status { margin: auto; font: 900 30px Arial, sans-serif; color: var(--muted); }
 
+/* Top bar (the teaching decks have their own banner) */
+.topbar {
+  position: fixed;
+  top: var(--standalone-top);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 60px;
+  padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  background: var(--navy-deep);
+  border-bottom: 1px solid rgba(255, 255, 255, .15);
+  color: #fff;
+}
+.brand { display: inline-flex; align-items: center; gap: 4px; min-height: 48px; min-width: 0; font-weight: 800; letter-spacing: -.02em; }
+.brand a { display: inline-flex; align-items: center; min-height: 48px; color: inherit; text-decoration: none; }
+.brand-logo { flex: none; justify-content: center; min-width: 48px; margin-left: -8px; }
+.brand-name { min-width: 0; padding-right: 8px; }
+.brand img { width: 32px; height: 32px; flex: none; }
+.brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.nav-pill.icon-only { width: 44px; padding: 0; justify-content: center; }
+body.is-fullscreen .topbar { display: none; }
+@media print { .topbar { display: none !important; } }
+@media (max-width: 640px) {
+  .topbar { height: 56px; }
+  .brand span { font-size: 14px; }
+  .nav-pill .wide { display: none; }
+  .stage { top: calc(56px + var(--standalone-top)); }
+}
+
 /* Title slide */
 .figures { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 .figure { padding: 22px 24px; border: 2px solid #fff; background: rgba(255, 255, 255, .06); }

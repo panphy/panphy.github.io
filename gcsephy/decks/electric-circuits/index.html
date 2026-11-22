@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="palette-electric companion-deck" data-year="10" data-theme="light">
+<html lang="en" class="companion-deck" data-year="10" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,16 +13,16 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <link rel="stylesheet" href="../assets/companion-deck.css?v=20261115">
-  <link rel="stylesheet" href="deck.css">
-  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="../assets/companion-deck.css?v=20261122d">
+  <link rel="stylesheet" href="deck.css?v=20261122">
+  <link rel="stylesheet" href="../assets/deck-notes.css?v=20261122">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script src="/assets/theme-toggle.js"></script>
   <script src="/gcsephy/sw-register.js" defer></script>
-  <link rel="stylesheet" href="../assets/teaching-deck.css?v=20261121c">
-  <link rel="stylesheet" href="../assets/readable.css?v=20261122">
-  <script src="../assets/deck-math.js?v=20261122"></script>
+  <link rel="stylesheet" href="../assets/teaching-deck.css?v=20261122d">
+  <link rel="stylesheet" href="../assets/readable.css?v=20261122d">
+  <script src="../assets/deck-math.js?v=20261122d"></script>
 </head>
 <body data-deck-key="electric-circuits" data-deck-title="Electric Circuits">
   <header class="banner">
@@ -44,7 +44,7 @@
     <div class="deck" id="deck">
 
       <!-- Title -->
-      <section class="slide dark a-hi" data-title="Electric Circuits">
+      <section class="slide dark" data-title="Electric Circuits">
         <div class="hero" style="grid-template-columns: 1.3fr .7fr;">
           <div>
             <p class="eyebrow course"><span class="on">Year 10 physics</span><span>AQA GCSE Physics &amp; Combined Science</span></p>
@@ -67,25 +67,25 @@
       </section>
 
       <!-- Map -->
-      <section class="slide a-hi" data-title="Nine topics">
+      <section class="slide" data-title="Nine topics">
         <p class="eyebrow">AQA Physics 8463: 4.2; Combined Science 8464: 6.2</p>
         <h2>Nine topics<em>.</em></h2>
         <div class="missions fill" style="grid-template-columns: repeat(5, 1fr); grid-template-rows: 1fr 1fr;">
-          <div class="mission a-alt"><div class="mission-top"><span class="lesson-number">01</span><span class="lesson-icon">A</span></div><h3>Build &amp; measure</h3><p>Loops, symbols, ammeter</p><p class="spec-ref"><span>Physics 4.2.1.1</span><span>Combined 6.2.1.1</span></p></div>
-          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">02</span><span class="lesson-icon">Q</span></div><h3>Charge on the move</h3><p>Current, \(Q = I\,t\)</p><p class="spec-ref"><span>Physics 4.2.1.2</span><span>Combined 6.2.1.2</span></p></div>
-          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">03</span><span class="lesson-icon">V</span></div><h3>Energy per coulomb</h3><p>p.d., <span class="equation-inline">\(E = Q\,V\),</span> voltmeter</p><p class="spec-ref"><span>Physics 4.2.4.2</span><span>Combined 6.2.4.2</span></p></div>
-          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">04</span><span class="lesson-icon">Ω</span></div><h3>Resistance &amp;<br>\(V = I\,R\)</h3><p>Ohm’s law, RP: wire length</p><p class="spec-ref"><span>Physics 4.2.1.3</span><span>Combined 6.2.1.3</span></p></div>
-          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">05</span><span class="lesson-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12h3M20 12h3M4 5v14M20 5v14M4 5h4M16 5h4M4 19h4M16 19h4M8 3h8v4H8zM8 17h8v4H8z"/></svg></span></div><h3>Series &amp; parallel</h3><p>The rules, \(R_{\text{total}}\)</p><p class="spec-ref"><span>Physics 4.2.2</span><span>Combined 6.2.2</span></p></div>
-          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">06</span><span class="lesson-icon" style="font-size: 17px;">I–V</span></div><h3>\(I\)–\(V\) characteristics</h3><p>Lamp, diode, sensors, RP</p><p class="spec-ref"><span>Physics 4.2.1.4</span><span>Combined 6.2.1.4</span></p></div>
-          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">07</span><span class="lesson-icon">P</span></div><h3>Power &amp; the Grid</h3><p><span class="equation-inline">\(P = V\,I\),</span> <span class="equation-inline">\(E = P\,t\),</span> transformers</p><p class="spec-ref"><span>Physics 4.2.4</span><span>Combined 6.2.4</span></p></div>
-          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">08</span><span class="lesson-icon">~</span></div><h3>Mains &amp; safety</h3><p>ac, 230 V, earth wire</p><p class="spec-ref"><span>Physics 4.2.3</span><span>Combined 6.2.3</span></p></div>
-          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">09</span><span class="lesson-icon">±</span></div><h3>Static <span class="triple-tag">Triple only</span></h3><p>Rubbing, sparks, electric fields</p><p class="spec-ref"><span>Physics 4.2.5</span><span>Not in Combined</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">01</span><span class="lesson-icon">A</span></div><h3>Build &amp; measure</h3><p>Loops, symbols, ammeter</p><p class="spec-ref"><span>Physics 4.2.1.1</span><span>Combined 6.2.1.1</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">02</span><span class="lesson-icon">Q</span></div><h3>Charge on the move</h3><p>Current, \(Q = I\,t\)</p><p class="spec-ref"><span>Physics 4.2.1.2</span><span>Combined 6.2.1.2</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">03</span><span class="lesson-icon">V</span></div><h3>Energy per coulomb</h3><p>p.d., <span class="equation-inline">\(E = Q\,V\),</span> voltmeter</p><p class="spec-ref"><span>Physics 4.2.4.2</span><span>Combined 6.2.4.2</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">04</span><span class="lesson-icon">Ω</span></div><h3>Resistance &amp;<br>\(V = I\,R\)</h3><p>Ohm’s law, RP: wire length</p><p class="spec-ref"><span>Physics 4.2.1.3</span><span>Combined 6.2.1.3</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">05</span><span class="lesson-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12h3M20 12h3M4 5v14M20 5v14M4 5h4M16 5h4M4 19h4M16 19h4M8 3h8v4H8zM8 17h8v4H8z"/></svg></span></div><h3>Series &amp; parallel</h3><p>The rules, \(R_{\text{total}}\)</p><p class="spec-ref"><span>Physics 4.2.2</span><span>Combined 6.2.2</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">06</span><span class="lesson-icon" style="font-size: 17px;">I–V</span></div><h3>\(I\)–\(V\) characteristics</h3><p>Lamp, diode, sensors, RP</p><p class="spec-ref"><span>Physics 4.2.1.4</span><span>Combined 6.2.1.4</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">07</span><span class="lesson-icon">P</span></div><h3>Power &amp; the Grid</h3><p><span class="equation-inline">\(P = V\,I\),</span> <span class="equation-inline">\(E = P\,t\),</span> transformers</p><p class="spec-ref"><span>Physics 4.2.4</span><span>Combined 6.2.4</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">08</span><span class="lesson-icon">~</span></div><h3>Mains &amp; safety</h3><p>ac, 230 V, earth wire</p><p class="spec-ref"><span>Physics 4.2.3</span><span>Combined 6.2.3</span></p></div>
+          <div class="mission"><div class="mission-top"><span class="lesson-number">09</span><span class="lesson-icon">±</span></div><h3>Static <span class="triple-tag">Triple only</span></h3><p>Rubbing, sparks, electric fields</p><p class="spec-ref"><span>Physics 4.2.5</span><span>Not in Combined</span></p></div>
         </div>
         <div class="slide-foot"><span class="tag">Electric circuits</span><span data-page></span></div>
       </section>
 
       <!-- ============ Mission 1 ============ -->
-      <section class="slide dark a-alt" data-title="Build and measure">
+      <section class="slide dark" data-title="Build and measure">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">01</span> <span class="on">Wire it like a physicist</span></p>
@@ -102,7 +102,7 @@
         <div class="slide-foot"><span class="tag">Build &amp; measure</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-alt" data-title="A complete circuit">
+      <section class="slide" data-title="A complete circuit">
         <p class="eyebrow"><span class="num">01</span></p>
         <h2>A complete <em>loop</em></h2>
         <div class="split">
@@ -127,7 +127,7 @@
         </aside>
       </section>
 
-      <section class="slide a-alt" data-title="Circuit symbols">
+      <section class="slide" data-title="Circuit symbols">
         <p class="eyebrow"><span class="num">01</span> Learn to draw all of these</p>
         <h2>Circuit <em>symbols</em></h2>
         <div class="stack centre">
@@ -153,7 +153,7 @@
         </aside>
       </section>
 
-      <section class="slide a-alt" data-title="Drawing a circuit diagram">
+      <section class="slide" data-title="Drawing a circuit diagram">
         <p class="eyebrow"><span class="num">01</span></p>
         <h2>Draw it <em>properly</em></h2>
         <div class="split">
@@ -177,7 +177,7 @@
         </aside>
       </section>
 
-      <section class="slide a-alt" data-title="Measuring current">
+      <section class="slide" data-title="Measuring current">
         <p class="eyebrow"><span class="num">01</span></p>
         <h2>Ammeter <em>in series</em></h2>
         <div class="split">
@@ -207,7 +207,7 @@
       </section>
 
       <!-- ============ Mission 2 ============ -->
-      <section class="slide dark a-cyan" data-title="Charge on the move">
+      <section class="slide dark" data-title="Charge on the move">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">02</span> <span class="on">Measure the flow</span></p>
@@ -225,7 +225,7 @@
         <div class="slide-foot"><span class="tag">Charge on the move</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-cyan" data-title="What is current?">
+      <section class="slide" data-title="What is current?">
         <p class="eyebrow"><span class="num">02</span> Current</p>
         <h2>A <em>rate</em> of flow</h2>
         <div class="split">
@@ -253,7 +253,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Q = I t">
+      <section class="slide" data-title="Q = I t">
         <p class="eyebrow"><span class="num">02</span> Know and apply</p>
         <h2>Charge flow</h2>
         <div class="split even top" style="grid-template-columns: 674px minmax(0, 1fr);">
@@ -285,7 +285,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Q = I t">
+      <section class="slide" data-title="Q = I t">
         <p class="eyebrow"><span class="num">02</span> Know and apply</p>
         <h2>Charge flow</h2>
         <div class="split even top" style="grid-template-columns: 674px minmax(0, 1fr);">
@@ -306,7 +306,7 @@
         <div class="slide-foot"><span class="tag">Charge on the move</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-cyan" data-title="Conventional current">
+      <section class="slide" data-title="Conventional current">
         <p class="eyebrow"><span class="num">02</span></p>
         <h2>Two <em>directions</em></h2>
         <div class="split">
@@ -331,7 +331,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Current is not used up">
+      <section class="slide" data-title="Current is not used up">
         <p class="eyebrow"><span class="num">02</span> Common mistake</p>
         <h2>Current is <em>not used up</em></h2>
         <div class="split">
@@ -359,7 +359,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Quick check: Build and measure; Charge on the move">
+      <section class="slide" data-title="Quick check: Build and measure; Charge on the move">
         <p class="eyebrow"><span class="num">01–02</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
@@ -385,7 +385,7 @@
       </section>
 
       <!-- ============ Mission 3 ============ -->
-      <section class="slide dark a-hi" data-title="Energy per coulomb">
+      <section class="slide dark" data-title="Energy per coulomb">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">03</span> <span class="on">Follow the energy</span></p>
@@ -403,7 +403,7 @@
         <div class="slide-foot"><span class="tag">Energy per coulomb</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-hi" data-title="Potential difference">
+      <section class="slide" data-title="Potential difference">
         <p class="eyebrow"><span class="num">03</span> Know and apply</p>
         <h2>Potential <em>difference</em></h2>
         <div class="split even top" style="grid-template-columns: .8fr 1.2fr;">
@@ -438,7 +438,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="Using a voltmeter">
+      <section class="slide" data-title="Using a voltmeter">
         <p class="eyebrow"><span class="num">03</span></p>
         <h2>Voltmeter <em>across</em></h2>
         <div class="split">
@@ -466,7 +466,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="Energy in, energy out">
+      <section class="slide" data-title="Energy in, energy out">
         <p class="eyebrow"><span class="num">03</span> Source and load</p>
         <h2>Energy in<em>.</em> Energy out<em>.</em></h2>
         <div class="split">
@@ -494,7 +494,7 @@
       </section>
 
       <!-- ============ Mission 4 ============ -->
-      <section class="slide dark a-hot" data-title="Resistance">
+      <section class="slide dark" data-title="Resistance">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">04</span> <span class="on">Control the current</span></p>
@@ -512,7 +512,7 @@
         <div class="slide-foot"><span class="tag">Resistance</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-hot" data-title="V = I R">
+      <section class="slide" data-title="V = I R">
         <p class="eyebrow"><span class="num">04</span> Know and apply</p>
         <h2>Resistance <em>equation</em></h2>
         <div class="split even top">
@@ -549,7 +549,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Ohmic conductors">
+      <section class="slide" data-title="Ohmic conductors">
         <p class="eyebrow"><span class="num">04</span> Ohm’s law</p>
         <h2>Ohmic <em>conductors</em></h2>
         <div class="split">
@@ -578,7 +578,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Where resistance comes from">
+      <section class="slide" data-title="Where resistance comes from">
         <p class="eyebrow"><span class="num">04</span></p>
         <h2>Why metals <em>resist</em></h2>
         <div class="split wide-fig">
@@ -605,7 +605,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Measuring resistance">
+      <section class="slide" data-title="Measuring resistance">
         <p class="eyebrow"><span class="num">04</span> The standard circuit</p>
         <h2>Measure <em>\(R\)</em></h2>
         <div class="split">
@@ -632,7 +632,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Required practical: wire length">
+      <section class="slide" data-title="Required practical: wire length">
         <p class="eyebrow"><span class="num">RP</span> Resistance: Part A</p>
         <h2>Length of a <em>wire</em></h2>
         <div class="split wide-fig" style="grid-template-columns: .72fr 1.28fr;">
@@ -664,7 +664,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Wire length results">
+      <section class="slide" data-title="Wire length results">
         <p class="eyebrow"><span class="num">RP</span> Results and evaluation</p>
         <h2>\(R \propto\) <em>length</em></h2>
         <div class="split wide-fig" style="grid-template-columns: .9fr 1.1fr;">
@@ -692,7 +692,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Quick check: Energy per coulomb; Resistance">
+      <section class="slide" data-title="Quick check: Energy per coulomb; Resistance">
         <p class="eyebrow"><span class="num">03–04</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
@@ -707,7 +707,7 @@
       </section>
 
       <!-- ============ Mission 5 ============ -->
-      <section class="slide dark a-cyan" data-title="Series and parallel">
+      <section class="slide dark" data-title="Series and parallel">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">05</span> <span class="on">Crack any network</span></p>
@@ -724,7 +724,7 @@
         <div class="slide-foot"><span class="tag">Series &amp; parallel</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-cyan" data-title="Series circuits">
+      <section class="slide" data-title="Series circuits">
         <p class="eyebrow"><span class="num">05</span></p>
         <h2>Series <em>rules</em></h2>
         <div class="split">
@@ -751,7 +751,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Parallel circuits">
+      <section class="slide" data-title="Parallel circuits">
         <p class="eyebrow"><span class="num">05</span></p>
         <h2>Parallel <em>rules</em></h2>
         <div class="split">
@@ -779,7 +779,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Why parallel lowers resistance">
+      <section class="slide" data-title="Why parallel lowers resistance">
         <p class="eyebrow"><span class="num">RP</span> Resistance: Part B</p>
         <h2>Another path<em>,</em> <em>less \(R\)</em></h2>
         <div class="split wide-fig" style="grid-template-columns: .9fr 1.1fr;">
@@ -811,7 +811,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Solving a series problem">
+      <section class="slide" data-title="Solving a series problem">
         <p class="eyebrow"><span class="num">05</span> Worked example</p>
         <h2>Find the lamp’s <em>\(R\)</em></h2>
         <div class="split even">
@@ -843,7 +843,7 @@
         </aside>
       </section>
 
-      <section class="slide a-cyan" data-title="Quick check: Series and parallel">
+      <section class="slide" data-title="Quick check: Series and parallel">
         <p class="eyebrow"><span class="num">05</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
@@ -867,7 +867,7 @@
       </section>
 
       <!-- ============ Mission 6 ============ -->
-      <section class="slide dark a-violet" data-title="I–V characteristics">
+      <section class="slide dark" data-title="I–V characteristics">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">06</span> <span class="on">A component’s fingerprint</span></p>
@@ -885,7 +885,7 @@
         <div class="slide-foot"><span class="tag">\(I\)–\(V\) characteristics</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-violet" data-title="Reading an I–V graph">
+      <section class="slide" data-title="Reading an I–V graph">
         <p class="eyebrow"><span class="num">06</span></p>
         <h2>Current against <em>p.d.</em></h2>
         <div class="split">
@@ -914,7 +914,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="Filament lamp">
+      <section class="slide" data-title="Filament lamp">
         <p class="eyebrow"><span class="num">06</span> Non-ohmic</p>
         <h2>Filament <em>lamp</em></h2>
         <div class="split">
@@ -939,7 +939,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="Diode and LED">
+      <section class="slide" data-title="Diode and LED">
         <p class="eyebrow"><span class="num">06</span> Non-ohmic</p>
         <h2>Diode <em>&amp;</em> LED</h2>
         <div class="split">
@@ -964,7 +964,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="Thermistors and LDRs">
+      <section class="slide" data-title="Thermistors and LDRs">
         <p class="eyebrow"><span class="num">06</span> Components that sense</p>
         <h2>Thermistor <em>&amp;</em> LDR</h2>
         <div class="row two fill">
@@ -999,7 +999,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="What the components look like">
+      <section class="slide" data-title="What the components look like">
         <p class="eyebrow"><span class="num">06</span></p>
         <h2>What they <em>look like</em></h2>
         <div class="components fill">
@@ -1013,7 +1013,7 @@
         <div class="slide-foot"><span class="tag">\(I\)–\(V\) characteristics</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-violet" data-title="Sensor circuits">
+      <section class="slide" data-title="Sensor circuits">
         <p class="eyebrow"><span class="num">06</span> Sensor circuit</p>
         <h2>Brighter → <em>more current</em></h2>
         <div class="split">
@@ -1042,7 +1042,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="Required practical: I–V characteristics">
+      <section class="slide" data-title="Required practical: I–V characteristics">
         <p class="eyebrow"><span class="num">RP</span> \(I\)–\(V\) characteristics</p>
         <h2>Test each <em>component</em></h2>
         <div class="split">
@@ -1070,7 +1070,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="I–V practical tips">
+      <section class="slide" data-title="I–V practical tips">
         <p class="eyebrow"><span class="num">RP</span></p>
         <h2>Reverse <em>&amp;</em> read</h2>
         <div class="row two fill">
@@ -1091,7 +1091,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet" data-title="Quick check: I–V characteristics">
+      <section class="slide" data-title="Quick check: I–V characteristics">
         <p class="eyebrow"><span class="num">06</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
@@ -1115,7 +1115,7 @@
       </section>
 
       <!-- ============ Mission 7 ============ -->
-      <section class="slide dark a-hi" data-title="Power and the National Grid">
+      <section class="slide dark" data-title="Power and the National Grid">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">07</span> <span class="on">Count the joules</span></p>
@@ -1134,7 +1134,7 @@
         <div class="slide-foot"><span class="tag">Power &amp; the Grid</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-hi" data-title="Electrical power">
+      <section class="slide" data-title="Electrical power">
         <p class="eyebrow"><span class="num">07</span> Know and apply</p>
         <h2>Two power <em>equations</em></h2>
         <div class="row two fill" style="align-content: center;">
@@ -1159,7 +1159,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="Energy transferred">
+      <section class="slide" data-title="Energy transferred">
         <p class="eyebrow"><span class="num">07</span> Know and apply</p>
         <h2>Energy <em>transferred</em></h2>
         <div class="split even top">
@@ -1195,7 +1195,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="The National Grid">
+      <section class="slide" data-title="The National Grid">
         <p class="eyebrow"><span class="num">07</span></p>
         <h2>The National <em>Grid</em></h2>
         <div class="split wide-fig" style="grid-template-columns: .8fr 1.2fr; align-items: start;">
@@ -1225,7 +1225,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="The National Grid in real life">
+      <section class="slide" data-title="The National Grid in real life">
         <p class="eyebrow"><span class="num">07</span> Spot it outside</p>
         <h2>The Grid<em>,</em> for <em>real</em></h2>
         <div class="photo-pair fill">
@@ -1237,7 +1237,7 @@
         <div class="slide-foot"><span class="tag">Power &amp; the Grid</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-hi" data-title="Transformer equation">
+      <section class="slide" data-title="Transformer equation">
         <p class="eyebrow"><span class="num">07</span></p>
         <h2>Transformer <em>equation</em></h2>
         <div class="split even top">
@@ -1267,7 +1267,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="Quick check: Power and the National Grid">
+      <section class="slide" data-title="Quick check: Power and the National Grid">
         <p class="eyebrow"><span class="num">07</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
@@ -1291,7 +1291,7 @@
       </section>
 
       <!-- ============ Mission 8 ============ -->
-      <section class="slide dark a-hot" data-title="Mains and safety">
+      <section class="slide dark" data-title="Mains and safety">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">08</span> <span class="on">Stay safe at 230 V</span></p>
@@ -1308,7 +1308,7 @@
         <div class="slide-foot"><span class="tag">Mains &amp; safety</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-hot" data-title="ac and dc">
+      <section class="slide" data-title="ac and dc">
         <p class="eyebrow"><span class="num">08</span></p>
         <h2>dc <em>vs</em> ac</h2>
         <div class="split">
@@ -1340,7 +1340,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Three-core cable">
+      <section class="slide" data-title="Three-core cable">
         <p class="eyebrow"><span class="num">08</span> Three-core cable</p>
         <h2>Three wires<em>,</em> three <em>jobs</em></h2>
         <div class="split even">
@@ -1367,7 +1367,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Inside a UK plug">
+      <section class="slide" data-title="Inside a UK plug">
         <p class="eyebrow"><span class="num">08</span></p>
         <h2>Inside a <em>UK plug</em></h2>
         <div class="split plug-split">
@@ -1385,7 +1385,7 @@
         <div class="slide-foot"><span class="tag">Mains &amp; safety</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-hot" data-title="Live wire danger and earthing">
+      <section class="slide" data-title="Live wire danger and earthing">
         <p class="eyebrow"><span class="num">08</span> Staying safe</p>
         <h2>Why live is <em>dangerous</em></h2>
         <div class="split wide-fig" style="grid-template-columns: .95fr 1.05fr;">
@@ -1415,7 +1415,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Quick check: Mains and safety">
+      <section class="slide" data-title="Quick check: Mains and safety">
         <p class="eyebrow"><span class="num">08</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
@@ -1436,7 +1436,7 @@
       </section>
 
       <!-- ============ Summary ============ -->
-      <section class="slide a-hi" data-title="Equation toolkit">
+      <section class="slide" data-title="Equation toolkit">
         <p class="eyebrow">Learn to use these, 1 of 2</p>
         <h2>Equation <em>toolkit</em></h2>
         <div class="toolkit three fill" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
@@ -1456,7 +1456,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="Equation toolkit">
+      <section class="slide" data-title="Equation toolkit">
         <p class="eyebrow">Learn to use these, 2 of 2</p>
         <h2>Equation <em>toolkit</em></h2>
         <div class="toolkit three fill" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
@@ -1468,7 +1468,7 @@
         <div class="slide-foot"><span class="tag">Electric circuits</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-cyan" data-title="Key words">
+      <section class="slide" data-title="Key words">
         <p class="eyebrow">Summary</p>
         <h2>Key words</h2>
         <div class="terms fill">
@@ -1489,7 +1489,7 @@
       </section>
 
       <!-- ============ Mission 9: GCSE Physics (8463) only, AQA 4.2.5 ============ -->
-      <section class="slide dark a-violet triple" data-title="Static electricity">
+      <section class="slide dark triple" data-title="Static electricity">
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">09</span> <span class="on">Charge that stays put</span></p>
@@ -1507,7 +1507,7 @@
         <div class="slide-foot"><span class="tag">Static electricity</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-violet triple" data-title="Charging by rubbing">
+      <section class="slide triple" data-title="Charging by rubbing">
         <p class="eyebrow"><span class="num">09</span></p>
         <h2>Charging by <em>rubbing</em></h2>
         <div class="split">
@@ -1538,7 +1538,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet triple" data-title="Attract and repel">
+      <section class="slide triple" data-title="Attract and repel">
         <p class="eyebrow"><span class="num">09</span></p>
         <h2>Attract <em>or</em> repel</h2>
         <div class="split">
@@ -1564,7 +1564,7 @@
         </aside>
       </section>
 
-      <section class="slide news a-violet triple" data-title="Story: Coulomb’s torsion balance">
+      <section class="slide news triple" data-title="Story: Coulomb’s torsion balance">
         <div class="masthead"><span class="dateline">Paris, 1785</span><span class="edition">The story</span></div>
         <div class="front fill">
           <figure class="news-photo engraving">
@@ -1592,7 +1592,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet triple" data-title="Electric fields">
+      <section class="slide triple" data-title="Electric fields">
         <p class="eyebrow"><span class="num">09</span></p>
         <h2>Electric <em>fields</em></h2>
         <div class="split">
@@ -1622,7 +1622,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet triple" data-title="Sparks">
+      <section class="slide triple" data-title="Sparks">
         <p class="eyebrow"><span class="num">09</span></p>
         <h2>Why <em>sparks</em> jump</h2>
         <div class="split">
@@ -1648,7 +1648,7 @@
         </aside>
       </section>
 
-      <section class="slide a-violet triple" data-title="Quick check: Static electricity">
+      <section class="slide triple" data-title="Quick check: Static electricity">
         <p class="eyebrow"><span class="num">09</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
@@ -1659,7 +1659,7 @@
         <div class="slide-foot"><span class="tag">Static electricity</span><span data-page></span></div>
       </section>
 
-      <section class="slide a-violet triple" data-title="Quick check: Static electricity">
+      <section class="slide triple" data-title="Quick check: Static electricity">
         <p class="eyebrow"><span class="num">09</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill" style="grid-template-columns: 1fr; align-content: center;">
@@ -1682,10 +1682,10 @@
 
   <script src="/gcsephy/year10phy/unit01/assets/diagrams.js"></script>
   <script src="/gcsephy/year10phy/unit01/assets/practical-diagrams.js"></script>
-  <script src="figures.js"></script>
+  <script src="figures.js?v=20261122"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/teaching-deck.js?v=20261122"></script>
-  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck-notes.js?v=20261122"></script>
   <script src="../assets/companion-deck.js?v=20261122"></script>
 </body>
 </html>

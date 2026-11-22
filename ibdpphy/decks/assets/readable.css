@@ -1,9 +1,9 @@
-/* Large-room type for the IB DP Physics decks, loaded after deck.css by the decks that have
-   been reworked for it. It sets the type scale for a 75" screen read from the back of a
-   10 m lab: anything students read is at least 28px on the 1600 × 900 slide, body text is
-   34–40px. A slide whose content no longer fits is split into two or more slides rather than
-   set smaller. Slide side margins are narrower to make room. Eyebrows, the footer, credits and the "not
-   assessed" label keep their sizes: nobody reads them from the back. */
+/* Large-room type for the IB DP Physics decks, loaded after deck.css by every deck. It sets the
+   type scale for a 75" screen read from the back of a 10 m lab: anything students read is at
+   least 28px on the 1600 × 900 slide, body text is 34–40px. A slide whose content no longer fits
+   is split into two or more slides rather than set smaller. Slide side margins are narrower to
+   make room. Eyebrows, the footer, credits and the "not assessed" label keep their sizes:
+   nobody reads them from the back. */
 .slide { padding: 60px 72px 58px; }
 .slide-foot { left: 72px; right: 72px; bottom: 16px; }
 .slide.hl::after { right: 72px; }
@@ -64,8 +64,6 @@ table.facts.compare { font-size: 34px; }
 .term b { font-size: 38px; }
 .term > span { font-size: 32px; }
 
-.story .points li { font-size: 36px; }
-.story.band .points li { font-size: 32px; }
 .story-photos figcaption, .story-strip figcaption { font-size: 28px; }
 .chip { font-size: 28px; }
 
@@ -98,7 +96,6 @@ table.facts.compare { font-size: 34px; }
 .story.band .points li { font-size: 31px; }
 .tl .year { font-size: 28px; }
 .tl p { font-size: 29px; }
-.eq-check { font-size: 28px; }
 
 /* Equation bullets: deck-math.js sets --dot-y to the fraction bar. */
 .points li.dot-math::before, ol.steps li.dot-math::before { top: var(--dot-y); margin-top: 0; translate: 0 -50%; }

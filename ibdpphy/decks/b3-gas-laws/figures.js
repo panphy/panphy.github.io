@@ -2,7 +2,7 @@
 // molecules are teal, pressure and force apricot, hot red and cold blue. Nothing here is
 // terracotta, because B.3 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labeled, seeded, track, anim, twoState, f, TAU } = P;
+  const { svg, arrow, text, both, through, sampled, labeled, seeded, track, anim, twoState, f } = P;
   const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const tri = u => { const v = ((u % 2) + 2) % 2; return v < 1 ? v : 2 - v; };
   // A box of gas whose molecules never stop, as in the B.4 deck: each one bounces between the

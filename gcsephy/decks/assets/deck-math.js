@@ -168,10 +168,9 @@ window.DeckMath = (() => {
   return { labels, watch, repaint };
 })();
 
-// A bullet dot (or step number) sits on its item's first line. When that line holds a fraction, or the item is an
-// equation bullet (.frac) whose equation wraps below a lead-in, the dot moves level with the
-// fraction bar, which is the height of the "=". Measured once MathJax has typeset the slides
-// (before the thumbnails copy them) and again once the fonts have loaded.
+// A bullet dot (or step number) sits on its item's first line. When that line holds a fraction, the dot
+// moves level with the fraction bar, which is the height of the "=". Measured once MathJax has typeset
+// the slides (before the thumbnails copy them) and again once the fonts have loaded.
 window.DeckBullets = (() => {
   function align(root = document) {
     root.querySelectorAll('.points > li, ol.steps > li').forEach(li => {
@@ -183,7 +182,7 @@ window.DeckBullets = (() => {
       const top = el => (el.getBoundingClientRect().top - box.top) / scale;
       const tallest = list => list.reduce((a, b) => (b.getBoundingClientRect().height > a.getBoundingClientRect().height ? b : a));
       const firstLine = fracs.filter(f => top(f) < size * 0.5);
-      const frac = firstLine.length ? tallest(firstLine) : li.classList.contains('frac') ? tallest(fracs) : null;
+      const frac = firstLine.length ? tallest(firstLine) : null;
       if (!frac) { li.classList.remove('dot-math'); return; }
       const bar = frac.querySelector(':scope > rect') || frac;
       const r = bar.getBoundingClientRect();

@@ -15,7 +15,6 @@
 .fig > svg.pf { padding: 6px; }
 
 /* Title slide: the heating curve on the dark hero */
-.case-card .fig { height: 330px; margin-top: 14px; }
 .case-card .fig.tall { height: 400px; }
 
 /* ----- live models: drawing on the left, readouts and exact-step buttons on the right ----- */
@@ -78,10 +77,3 @@
 /* Large-room labels (../assets/readable.css): the cooling curve's last label sits at the drawing's
    right edge, so the figure leaves room for it inside its panel. */
 .panel .fig[data-fig="cooling"] { margin-right: 48px; }
-
-/* A photo under a lesson divider's title. */
-.hero-photo { margin: 26px 0 0; max-width: 600px; }
-.hero-photo img { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: 18px; }
-.hero-photo figcaption { margin-top: 6px; }
-.hero-photo .credit { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
-.hero-photo .credit a { color: inherit; }

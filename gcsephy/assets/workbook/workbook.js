@@ -8,13 +8,14 @@
    WORKBOOK settings:
      file          name stem of the PDFs and page title ("Y10 - Unit 02 - Particle Model of Matter")
      name, year    footer text ("Particle Model of Matter", 10)
-     coverTitle    HTML for the cover heading;  coverArt(W) the cover drawing, coverArtStyle its inline style
+     coverTitle    HTML for the cover heading;  coverArt(W) the cover drawing
      quote         [text, who] printed on the cover (or a function of W)
      lede          one sentence on the cover of the whole-unit preview
      parts         lesson numbers in each part booklet, e.g. [[1, 2], [3, 5], [6, 7]]
      booklets      extra booklets for the preview bar, e.g. [["lesson=4", "RP 4"]]
      firstDoNow    heading of Lesson 1's Do now
      extension     Triple Science pages, if not UNIT.extension
+     triangles     formula triangles by equation text, for equations without their own tri
      Hooks, each given W (this renderer's helpers and state): toolkit(W), side(lesson, W),
      reviewStart(W), block(b, W) for extra block types, question(b, W) for extra
      question parts, beforeRender(W). */
@@ -49,7 +50,7 @@
   };
   const lessonsLabel = (ls) => `${lessonCount(ls) > 1 ? "Lessons" : "Lesson"} ${span(ls)}`;
   const lessonName = (l) => (l.last ? `Lessons ${l.n}–${l.last}` : `Lesson ${l.n}`);
-  const reviewAfter = C.reviewAfter || lessonName(U.lessons[U.lessons.length - 1]);
+  const reviewAfter = lessonName(U.lessons[U.lessons.length - 1]);
   if (answers) document.body.classList.add("answers");
 
   const which = partNo ? `Part ${partNo}, ${lessonsLabel(SEL)}` : ONE ? lessonName(ONE) : REVIEW ? "Unit review" : REVISION ? "Revision exercises" : "";
@@ -107,7 +108,7 @@
 
   /* Graph paper drawn in millimetres: 2 mm minor and 1 cm major squares.
      spec: { w, h, origin: "corner" | "centre", xLabel, yLabel, x: [valuePerCm, labelEvery], y: [...],
-       xTicks/yTicks: false leave that scale for the student; ticks: false prints no scales;
+       yTicks: false leaves that scale for the student;
        blank: true leaves axes, labels and scales for the student (the answer edition shows them);
        printed in both editions: given (points), givenFit (fn) over givenRange, showRead ([[x, y]]);
        answer edition only: points, points2, fit ([[x1,y1],[x2,y2]] or fn over fitRange), fit2, curve
@@ -127,18 +128,16 @@
     for (let i = 0; i <= W; i += 2) out += `<line class="${i % 10 ? "minor" : "major"}" x1="${L + i}" y1="${T}" x2="${L + i}" y2="${T + H}"/>`;
     for (let j = 0; j <= H; j += 2) out += `<line class="${j % 10 ? "minor" : "major"}" x1="${L}" y1="${T + j}" x2="${L + W}" y2="${T + j}"/>`;
     if (show()) out += `<line class="axis" x1="${L}" y1="${T + oy}" x2="${L + W}" y2="${T + oy}"/><line class="axis" x1="${L + ox}" y1="${T}" x2="${L + ox}" y2="${T + H}"/>`;
-    if (spec.ticks !== false) {
-      if (!spec.bars && show(spec.xTicks)) {
-        for (let cm = -Math.floor(ox / 10); cm <= (W - ox) / 10; cm += spec.x[1] || 1) {
-          if (cm) out += `<text class="tick" x="${L + ox + cm * 10}" y="${T + oy + 3.8}" text-anchor="middle">${fmt(cm * spec.x[0])}</text>`;
-        }
+    if (!spec.bars && show()) {
+      for (let cm = -Math.floor(ox / 10); cm <= (W - ox) / 10; cm += spec.x[1] || 1) {
+        if (cm) out += `<text class="tick" x="${L + ox + cm * 10}" y="${T + oy + 3.8}" text-anchor="middle">${fmt(cm * spec.x[0])}</text>`;
       }
-      if (show(spec.yTicks)) {
-        for (let cm = -Math.floor((H - oy) / 10); cm <= oy / 10; cm += spec.y[1] || 1) {
-          if (cm) out += `<text class="tick" x="${L + ox - 1.2}" y="${T + oy - cm * 10 + 1}" text-anchor="end">${fmt(cm * spec.y[0])}</text>`;
-        }
-        out += `<text class="tick" x="${L + ox - 1.2}" y="${T + oy + 3.8}" text-anchor="end">0</text>`;
+    }
+    if (show(spec.yTicks)) {
+      for (let cm = -Math.floor((H - oy) / 10); cm <= oy / 10; cm += spec.y[1] || 1) {
+        if (cm) out += `<text class="tick" x="${L + ox - 1.2}" y="${T + oy - cm * 10 + 1}" text-anchor="end">${fmt(cm * spec.y[0])}</text>`;
       }
+      out += `<text class="tick" x="${L + ox - 1.2}" y="${T + oy + 3.8}" text-anchor="end">0</text>`;
     }
     if (show()) {
       // Axis labels sit at the middle of each axis, outside the grid; the y label reads bottom to top.
@@ -239,9 +238,8 @@
       case "key": return `<div class="key">${marks(b.h)}</div>`;
       case "warn": return `<div class="key warn">${marks(b.h)}</div>`;
       case "tip": return `<div class="tip">${b.h}</div>`;
-      case "say": return `<div class="say" data-who="${b.who}">${b.h}</div>`;
       case "model":
-        return `<div class="model"><h4>${b.title || "Think of it like this"}</h4>${b.fig ? `<div class="split narrow-fig"><div><p>${b.h}</p></div><div class="fig-small">${b.fig}</div></div>` : `<p>${b.h}</p>`}${b.breaks ? `<p class="breaks">${b.breaks}</p>` : ""}</div>`;
+        return `<div class="model"><h4>${b.title || "Think of it like this"}</h4><p>${b.h}</p>${b.breaks ? `<p class="breaks">${b.breaks}</p>` : ""}</div>`;
       case "rule": return `<div class="rule-card"><div class="rule-head">${b.head || "Rule"}</div><div class="rule-body">${b.h}</div>${b.foot ? `<div class="rule-foot">${b.foot}</div>` : ""}</div>`;
       case "eq": {
         const tri = triFor(b);
@@ -326,7 +324,7 @@
       const right = [].concat(b.mcq.c);
       body += `<ul class="mcq" style="--cols:${b.mcq.cols || 2}">${b.mcq.o.map((o, i) => `<li class="${right.includes(i) ? "correct" : ""}">${o}</li>`).join("")}</ul>`;
     }
-    if (b.bank) body += `<div class="bank">${b.bankHead ? `<span class="bank-head">${b.bankHead}</span>` : ""}<div>${b.bank.map((w) => `<span>${w}</span>`).join("")}</div></div>`;
+    if (b.bank) body += `<div class="bank"><div>${b.bank.map((w) => `<span>${w}</span>`).join("")}</div></div>`;
     if (b.fill) body += [].concat(b.fill).map((f) => `<p class="fill">${marks(f)}</p>`).join("");
     if (b.ring) {
       body += `<div class="ring-row">${b.ring.map((r) => `<div><span class="ring-lead">${marks(r[0])}</span><span class="ring-box">${r[1].map((o, i) => `<span class="${i === r[2] ? "correct" : ""}">${o}</span>`).join("")}</span>${r[3] ? `<span class="ring-tail">${marks(r[3])}</span>` : ""}</div>`).join("")}</div>`;
@@ -384,18 +382,10 @@
   }
 
   // ---------- lessons ----------
-  // The panel beside the lesson goals: a story, the kit list, or the deck and simulations.
+  // The panel beside the lesson goals: the unit's side hook, or the lesson's story.
   function side(l) {
     if (C.side) return C.side(l, W);
     if (l.story) return `<div class="online story"><div><h3>${l.story.title}</h3><p>${l.story.text}</p></div></div>`;
-    if (l.kit && C.kitPanel !== false) {
-      const deck = l.slides && C.deck ? `<p class="deck-line"><strong>Teaching deck, slides ${l.slides}</strong><br>${C.deck}/#${l.slides.split(/[–-]/)[0]}</p>` : "";
-      return `<div class="online kit"><div><h3>You will need</h3><p>${l.kit}</p>${deck}</div></div>`;
-    }
-    if (l.deck) {
-      const d = l.deck;
-      return `<div class="online"><div><h3>Slides and simulations</h3><p><strong>Teaching deck, slide${/[–-]/.test(d.slides) ? "s" : ""} ${d.slides}</strong></p><p>${d.text}</p><p class="url">${C.deck}/#${d.slides.split(/[–-]/)[0]}</p>${d.sim ? `<p class="sim"><strong>${d.sim[0]}</strong></p><p class="url">${d.sim[1]}</p>` : ""}</div></div>`;
-    }
     return "";
   }
 
@@ -467,7 +457,7 @@
       ${quote}
       ${answers ? '<div class="edition">Answer edition</div>' : ""}
       <div class="cover-foot">
-        <div class="cover-circuit"${C.coverArtStyle ? ` style="${C.coverArtStyle}"` : ""}>${C.coverArt ? C.coverArt(W) : ""}</div>
+        <div class="cover-circuit">${C.coverArt ? C.coverArt(W) : ""}</div>
         <div class="cover-fields" style="--cols:${REVIEW ? 3 : 2}">${["Name", "Class", "Teacher", ...(REVIEW ? ["Score"] : [])].map((f) => `<div>${f}<span></span></div>`).join("")}</div>
       </div></section>`;
   }

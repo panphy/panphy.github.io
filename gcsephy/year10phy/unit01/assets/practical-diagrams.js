@@ -1,5 +1,5 @@
-/* Teaching diagrams for the required practicals: bench layouts, graph skills and
-   particle pictures. Each returns a <figure> (via Diagrams.circuit) for the
+/* Teaching diagrams for the required practicals: a bench layout, graph skills and
+   circuit details. Each returns a <figure> (via Diagrams.circuit) for the
    practical pages. Colours and text sizes are set inline. */
 (function () {
   "use strict";
@@ -175,33 +175,5 @@
     });
   }
 
-  // I–V: why a hot filament has more resistance.
-  function filament() {
-    const panel = (x0, hot) => {
-      let s = `<rect x="${x0}" y="30" width="220" height="130" rx="8" fill="${hot ? "#fff1e6" : "#eef6fb"}" stroke="${INK}" stroke-width="1.5"/>`;
-      for (let r = 0; r < 3; r += 1) {
-        for (let c = 0; c < 5; c += 1) {
-          const cx = x0 + 32 + c * 39;
-          const cy = 60 + r * 36;
-          if (hot) s += `<path d="M${cx - 15} ${cy - 3} q3 -5 6 0 M${cx + 9} ${cy + 3} q3 5 6 0" fill="none" stroke="${RED}" stroke-width="1.4"/>`;
-          s += `<circle cx="${cx}" cy="${cy}" r="9" fill="${hot ? "#f59e0b" : "#fcd34d"}" stroke="${INK}" stroke-width="1.3"/>${t(cx, cy + 4, "+", { size: 10, weight: 900 })}`;
-        }
-      }
-      const path = hot
-        ? `M${x0 + 8} 78 L${x0 + 44} 92 L${x0 + 62} 70 L${x0 + 92} 96 L${x0 + 118} 72 L${x0 + 148} 94 L${x0 + 170} 74 L${x0 + 212} 84`
-        : `M${x0 + 8} 78 L${x0 + 88} 80 L${x0 + 104} 94 L${x0 + 212} 96`;
-      s += `<path d="${path}" fill="none" stroke="${BLUE}" stroke-width="2.2" stroke-dasharray="5 3"/>`;
-      s += `<circle cx="${x0 + 8}" cy="78" r="4.5" fill="${BLUE}"/>`;
-      s += t(x0 + 110, 20, hot ? "Hot filament (high p.d.)" : "Cool filament (low p.d.)", { size: 11 });
-      s += t(x0 + 110, 180, hot ? "ions vibrate more: more collisions" : "fewer collisions", { size: 11, weight: 600, fill: hot ? RED : BLUE });
-      return s;
-    };
-    return art({
-      w: 480, h: 195, svg: panel(10, false) + panel(250, true),
-      caption: "Electrons (blue path) collide with the metal ions (+). A hotter filament has vibrating ions, so there are more collisions and a higher resistance.",
-      label: "Two particle diagrams: in a cool filament the electron passes the ions with few collisions; in a hot filament the ions vibrate and the electron collides more often",
-    });
-  }
-
-  window.PracticalDiagrams = { wireBench, graphSkills, currentPaths, reverseSupply, diodeWay, filament };
+  window.PracticalDiagrams = { wireBench, graphSkills, currentPaths, reverseSupply, diodeWay };
 })();

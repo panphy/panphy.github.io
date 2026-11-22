@@ -12,9 +12,9 @@ window.MathJax = {
 // equation bullet (.frac) whose equation wraps below a lead-in, the dot moves level with the
 // fraction bar, which is the height of the "=". Measured once MathJax has typeset the slides
 // (before the thumbnails copy them) and again once the fonts have loaded.
-window.DeckBullets = (() => {
-  function align(root = document) {
-    root.querySelectorAll('.points > li, ol.steps > li').forEach(li => {
+(() => {
+  function align() {
+    document.querySelectorAll('.points > li, ol.steps > li').forEach(li => {
       const fracs = [...li.querySelectorAll('mjx-container [data-mml-node="mfrac"]')];
       const box = li.getBoundingClientRect();
       const scale = li.offsetHeight ? box.height / li.offsetHeight : 0;
@@ -39,5 +39,4 @@ window.DeckBullets = (() => {
       document.fonts?.ready.then(() => align());
     })
   };
-  return { align };
 })();

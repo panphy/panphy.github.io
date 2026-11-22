@@ -26,8 +26,8 @@ Writing space: working and written answers get `lines`; a dotted `box` with `gri
 
 ## Content
 
-Block types (`t`): `p`, `html`, `sub`, `key`, `warn`, `tip`, `say`, `model`, `rule`, `eq`, `split`, `fig`, `figs`, `compare`, `worked`, `follow`, `steps`, `list`, `safety`, `vars`, `checks` (`cols: 2` sets the items in two columns), `graph`, `table`, `q`, `part`, `lab`, `home`; a unit adds its own with the `block` hook. An unknown type stops the page with an error rather than printing nothing. Question fields and graph options are listed in `workbook.js`. In sentences, `[[answer|a / b / c]]` prints a blank with its options and `{{a|b*|c}}` an AQA-style ring box.
+Block types (`t`): `p`, `html`, `sub`, `key`, `warn`, `tip`, `model`, `rule`, `eq`, `split`, `fig`, `figs`, `compare`, `worked`, `follow`, `steps`, `list`, `safety`, `vars`, `checks` (`cols: 2` sets the items in two columns), `graph`, `table`, `q`, `part`, `lab`, `home`; a unit adds its own with the `block` hook. An unknown type stops the page with an error rather than printing nothing. Question fields and graph options are listed in `workbook.js`. In sentences, `[[answer|a / b / c]]` prints a blank with its options and `{{a|b*|c}}` an AQA-style ring box.
 
 ## Unit settings (`assets/book.js`)
 
-`file` (PDF name stem), `name`, `year`, `coverTitle`, `coverArt`, `lede`, `parts`, optional `booklets`, `deck`, `kitPanel` (false hides the kit list beside the goals), `quote`, `firstDoNow`, `triangles`, `extension`, and hooks `toolkit`, `side`, `reviewStart`, `block`, `question` and `beforeRender`. `W.equationToolkit()` prints the standard equation toolkit with formula triangles.
+`file` (PDF name stem), `name`, `year`, `coverTitle`, `coverArt`, `lede`, `parts`, optional `booklets`, `quote`, `firstDoNow`, `triangles`, `extension`, and hooks `toolkit`, `side` (the panel beside the goals; without it, a lesson's `story` prints there), `reviewStart`, `block`, `question` and `beforeRender`. `W.equationToolkit()` prints the standard equation toolkit with formula triangles.

@@ -16,7 +16,6 @@
 .ef .hot-t { fill: var(--ef-hot-t); }
 .ef .cool { fill: var(--ef-cool); stroke: none; }
 .ef .cool-t { fill: var(--ef-cool-t); }
-.ef .sun { fill: var(--ef-sun); }
 .ef .sun-t { fill: var(--ef-sun-t); }
 .ef .leaf-t { fill: var(--ef-leaf-t); }
 .ef .s-hot { stroke: var(--ef-hot); }
@@ -26,8 +25,6 @@
 .ef text.lg { font-size: 16px; font-weight: 900; }
 .ef text.muted { fill: #4b5563; }
 .ef text.t-hot { fill: var(--ef-hot); }
-.ef text.t-cool { fill: var(--ef-cool); }
 .ef .grid { stroke: #d6dbe0; stroke-width: 1; fill: none; }
-.ef .grid-major { stroke: #99a3ad; stroke-width: 1; fill: none; }
 .ef .s-leaf { stroke: var(--ef-leaf); }
 .faulty-graph { display: block; width: 100%; height: auto; }

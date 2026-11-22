@@ -25,7 +25,6 @@
 .pf .p { stroke: var(--pf-ink); stroke-width: 1.3; fill: var(--pf-solid); }
 .pf .p.liquid { fill: var(--pf-liquid); }
 .pf .p.gas { fill: var(--pf-gas); }
-.pf .p.hotp { fill: var(--pf-hot); }
 .pf .water { fill: var(--pf-water); stroke: none; }
 .pf .drop { fill: var(--pf-liquid); stroke: var(--pf-ink); stroke-width: 1; }
 .pf .stone { fill: var(--pf-mid); }

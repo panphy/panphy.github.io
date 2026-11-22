@@ -53,17 +53,6 @@
   const smooth = (pts, X, Y) => `M${pts.map(([a, b]) => `${r1(X(a))} ${r1(Y(b))}`).join("L")}`;
 
   const FIG = {
-    // White on the navy cover: a scatter of crosses, a best-fit line and one ringed odd point.
-    coverArt() {
-      const pts = [[40, 168], [110, 140], [180, 120], [250, 92], [320, 30], [390, 52], [460, 30]];
-      let s = line(20, 190, 580, 190, "ink bold") + line(20, 190, 20, 10, "ink bold");
-      s += `<path class="ink bold" style="stroke:var(--ef-sun)" d="M30 176 L560 8"/>`;
-      s += pts.map(([x, y]) => cross(x, y, 8, "ink bold")).join("");
-      s += `<circle cx="320" cy="30" r="20" class="ink bold" style="stroke:var(--ef-hot)"/>`;
-      s += t(300, 22, "why did that happen?", { a: "end", c: "lg" }).replace("<text", '<text style="fill:var(--ef-hot)"');
-      return svg(600, 200, "A graph of crosses with a best-fit line, and one point ringed as a possible anomalous result", s);
-    },
-
     // Precision and accuracy on four targets.
     targets() {
       const sets = [

@@ -28,4 +28,3 @@
 .ef text.t-hot { fill: var(--ef-hot); }
 .ef text.t-cool { fill: var(--ef-cool); }
 .ef .grid { stroke: #d6dbe0; stroke-width: 1; fill: none; }
-.ef .grid-major { stroke: #99a3ad; stroke-width: 1; fill: none; }
