@@ -746,7 +746,7 @@
       const moving = app.scene.bodies.filter((b) => !b.fixed);
       const picked = app.selectedBodies().map((id) => S.bodyById(app.scene, id)).filter((b) => b && !b.fixed);
       const shown = picked.length ? picked : moving;
-      const list = shown.flatMap((b) => app.sim.forcesOn(b.id).map((f) => ({ ...f, body: b.id })));
+      const list = shown.flatMap((b) => app.sim.forcesOn(b.id, { hold: true }).map((f) => ({ ...f, body: b.id })));
       const heaviest = shown.reduce((m, b) => (!m || b.mass > m.mass ? b : m), null);
       let ref = heaviest ? Math.abs(app.scene.world.gravity) * heaviest.mass : 0;
       if (!(ref > 0)) ref = Math.max(0, ...list.map((f) => Math.hypot(f.fx, f.fy)));

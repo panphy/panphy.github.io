@@ -935,6 +935,25 @@ test('force arrows keep the whole contact impulse when a fast ball hits a restin
   assert.ok(Math.abs(J - box.mass * sim.readBody(box.id).vy) < 1e-6, `vertical impulse ${J}`);
 });
 
+test('force arrows keep a one-step impact on screen, equal and opposite, for 0.15 s', () => {
+  const scene = emptyScene();
+  const a = S.makeBody(scene, 'box', -2, 0); a.vx = 3; a.restitution = 1; a.lockRotation = true;
+  const b = S.makeBody(scene, 'box', 0, 0); b.mass = 2; b.vx = -1; b.restitution = 1; b.lockRotation = true;
+  scene.bodies.push(a, b);
+  const sim = P.createSim(scene);
+  const pushOn = (id, hold) => sim.forcesOn(id, { hold }).filter((f) => f.label === 'N').reduce((sum, f) => sum + f.fx, 0);
+  let steps = 0, from = null, to = null;
+  run(sim, 2, () => {
+    if (pushOn(a.id, false) !== 0) steps++;
+    const onA = pushOn(a.id, true);
+    if (onA === 0) return;
+    assert.equal(pushOn(b.id, true), -onA);
+    from ??= sim.t; to = sim.t;
+  });
+  assert.ok(steps <= 2, `impact lasts ${steps} steps`);
+  assert.ok(Math.abs(to - from - 0.15) < 2 * sim.h, `shown for ${to - from} s`);
+});
+
 test('total energy stays flat in free fall and in flight, and gravitational energy is mgh at the start', () => {
   for (const [vx, vy] of [[0, 0], [6, 9]]) {
     const scene = emptyScene();
