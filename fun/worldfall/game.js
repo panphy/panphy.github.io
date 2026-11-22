@@ -254,6 +254,9 @@ const shards = pointCloud(SHARDS, () => {}, .075);
 shards.visible = false;
 shards.material.opacity = 0;
 rig.add(shards);
+// Highest point of the apparatus (the post tip), in rig coordinates, so layout() can keep it clear of the HUD.
+const RIG_TIP_Y = new THREE.Box3().setFromObject(rig).max.y;
+const HUD_GAP_PX = 14;
 
 const fx = { shard: 0, shake: 0, fade: 0, ring: 0 };
 const textures = new Map();
@@ -309,6 +312,10 @@ function layout() {
   camera.lookAt(0, 0, 0);
   camera.updateProjectionMatrix();
   rig.position.x = wide ? -Math.min(3, 2.55 * aspect - 1.6) : 0;
+  // Lower the stand until its tip sits a little below the world name and g readout.
+  const pxPerUnit = h / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+  const hudBottom = $('hudLeft').getBoundingClientRect().bottom;
+  rig.position.y = Math.min(0, (h / 2 - hudBottom - HUD_GAP_PX) / pxPerUnit - RIG_TIP_Y);
   const item = WORLDS[game.index];
   const radius = item?.rings ? (wide ? 3.1 : 1.45) : (wide ? 5 : 4.1);
   planet.scale.setScalar(radius);
@@ -319,6 +326,7 @@ function layout() {
   ringMaterial.uniforms.uRadius.value = radius;
 }
 addEventListener('resize', layout);
+document.fonts?.ready.then(layout);
 
 function resetRig() {
   ball.visible = true;
