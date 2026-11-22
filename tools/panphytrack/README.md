@@ -1,6 +1,6 @@
 # PanPhyTrack
 
-Manual and automatic video analysis at `tools/panphytrack.html`. The saved pane preference key (`motion-tracker-panes`) and the legacy theme keys keep their earlier names so existing settings carry over. CSV downloads default to `panphytrack_data.csv`; transfers to PanPhyPlot create a sheet named PanPhyTrack. Auto is the default on startup and when loading or clearing a video; Manual and Edit remain available. Serve the repository with `python3 -m http.server 8000`; no build step is needed. The HTML owns the interface markup, `css/panphytrack.css` owns the layout, and `js/main.js` starts native ES modules.
+Manual and automatic video analysis at `tools/panphytrack.html`. The pane divider position is saved under `panphytrack-panes`. CSV downloads default to `panphytrack_data.csv`; transfers to PanPhyPlot create a sheet named PanPhyTrack. Auto is the default on startup and when loading or clearing a video; Manual and Edit remain available. Serve the repository with `python3 -m http.server 8000`; no build step is needed. The HTML owns the interface markup, `css/panphytrack.css` owns the layout, and `js/main.js` starts native ES modules.
 
 - `state.js`: shared mutable analysis and interaction state. Marks retain video playback times so changing the filming rate recalculates analysis times.
 - `dom.js`: DOM elements and canvas contexts.
