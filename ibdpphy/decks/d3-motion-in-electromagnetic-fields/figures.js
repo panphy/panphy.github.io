@@ -65,7 +65,7 @@ window.DeckFigures.add(P => {
       const on = labeled(el), cx = 400, cy = 270, r = 150;
       let s = fieldGrid(140, 80, 8, 6, 76, false, true) + `<circle cx="${cx}" cy="${cy}" r="${r}" class="guide accent" style="stroke-width:3"/>`;
       const body = arrow(cx, cy - r + 22, cx, cy - r + 110, 'brand-primary', 5) + arrow(cx - 24, cy - r, cx - 130, cy - r, 'brand-accent', 5) + positive(cx, cy - r);
-      if (on) s += text(cx, cy + 62, 'F is always', 'lbl halo') + text(cx, cy + 96, 'towards the center', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
+      if (on) s += text(cx, cy + 44, 'F is always', 'lbl halo') + text(cx, cy + 78, 'towards', 'lbl halo') + text(cx, cy + 112, 'the center', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
       return svg('100 50 620 450', s + twoState(body, `<g>${spin(cx, cy, 5, { turns: -1 })}${body}</g>`), 'A positive particle moving in a circle in a uniform magnetic field that points into the page. The magnetic force is always at right angles to the velocity and points to the center of the circle, so the speed stays constant');
     },
 

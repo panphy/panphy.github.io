@@ -918,7 +918,7 @@
       s += arrow(260, 330, 260, 246, 'brand-primary', 5) + text(238, 300, sub('F', 'H'), 'lbl display', 'end') + arrow(260, 362, 260, 446, 'brand-primary', 5) + dot(260, 362, 6) + text(278, 446, 'mg', 'lbl display', 'start');
       s += text(130, 270, 'natural', 'lbl small') + text(130, 296, 'length', 'lbl small');
       s += axes(470, 400, 780, 60, 'extension x', 'force') + plot('M470,400 L730,120') + `<path d="M545,319 H640 V217" class="guide accent"/>`;
-      s += text(764, 330, 'gradient = k', 'lbl strong', 'end');
+      s += text(764, 362, 'gradient = k', 'lbl strong', 'end');
       return svg('0 0 800 460', s, 'A spring at its natural length beside the same spring stretched by an extension x by a hanging mass, with the restoring force F H upwards and the weight downwards; and a straight-line graph of force against extension through the origin, whose gradient is the spring constant k');
     },
 

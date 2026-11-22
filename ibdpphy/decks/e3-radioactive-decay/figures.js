@@ -154,7 +154,7 @@ window.DeckFigures.add(P => {
     // The forces between two protons a distance apart: a sketch, not to scale.
     'e3-strong': () => {
       const x = r => 110 + 180 * r;
-      let s = arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(445, 482, 'separation / fm', 'lbl mono') + text(126, 48, 'repulsion', 'lbl mono', 'start') + text(126, 432, 'attraction', 'lbl mono', 'start');
+      let s = arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 780, 240, 'text-secondary', 2.5) + text(445, 482, 'separation / fm', 'lbl mono') + text(252, 48, 'repulsion', 'lbl mono', 'start') + text(126, 468, 'attraction', 'lbl mono', 'start');
       [1, 2, 3].forEach(r => { s += `<line x1="${x(r)}" y1="234" x2="${x(r)}" y2="246" class="tick"/>` + text(x(r), 278, r, 'lbl mono halo'); });
       s += `<path d="${sampled(t => { const r = 0.56 + 3.1 * t; return [x(r), 240 - 60 / (r * r)]; })}" class="curve" style="stroke:var(--proton)"/>`;
       s += `<path d="${sampled(t => { const r = 0.7 + 2.9 * t, u = Math.exp(-3 * (r - 1)); return [x(r), 240 + 180 * (2 * u - u * u)]; }, 120)}" class="curve" style="stroke:var(--brand-primary)"/>`;
@@ -200,7 +200,7 @@ window.DeckFigures.add(P => {
       s += text(440, 506, 'time / hours', 'lbl') + text(40, 236, 'count rate / counts per minute', 'lbl', 'middle', 'transform="rotate(-90 40 236)"');
       s += `<line x1="110" y1="${Y(30)}" x2="770" y2="${Y(30)}" class="guide accent"/>` + `<line x1="${X(6.4)}" y1="${Y(30)}" x2="${X(6.4)}" y2="${Y(236)}" class="guide"/>` + text(X(6.4), Y(250), 'background: 30', 'lbl');
       s += `<path d="${sampled(t => [X(8 * t), Y(raw(8 * t))])}" class="curve" style="stroke:var(--neutron)"/><path d="${sampled(t => [X(8 * t), Y(raw(8 * t) - 30)])}" class="curve"/>`;
-      s += text(X(1.3), Y(390), 'measured', 'lbl strong', 'start', 'style="fill:var(--neutron)"') + text(X(0.5), Y(250) + 60, 'corrected', 'lbl strong', 'start', 'style="fill:var(--undecayed)"');
+      s += text(X(1.3), Y(390), 'measured', 'lbl strong', 'start', 'style="fill:var(--neutron)"') + text(120, Y(250) + 60, 'corrected', 'lbl strong', 'start', 'style="fill:var(--undecayed)"');
       [[2, 240], [4, 120]].forEach(([t, c]) => { s += `<path d="M110,${Y(c)} H${X(t)} V430" class="guide"/><circle cx="${X(t)}" cy="${Y(c)}" r="7" style="fill:var(--brand-accent-strong)"/>`; });
       return svg('0 20 800 500', s, 'Graph of count rate against time for a radioactive source. The measured count rate levels off at the background rate of 30 counts per minute and not at zero. With the background subtracted, the corrected count rate halves from 480 to 240 in 2 hours and to 120 after 4 hours');
     },

@@ -147,7 +147,7 @@ window.DeckFigures.add(P => {
     'd4-frequency': () => {
       let s = arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 240, 770, 240, 'text-secondary', 2.5) + text(440, 466, 'time', 'lbl mono') + P.yAxisLabel(88, 230, 'emf');
       s += line(wave(110, 710, 240, 90, 1.5), 'brand-primary') + line(wave(110, 710, 240, 180, 3), 'hl');
-      s += text(470, 190, 'frequency f', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(560, 70, 'frequency 2f', 'lbl strong halo', 'start', 'style="fill:var(--hl-text)"');
+      s += text(180, 42, 'frequency f', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(420, 42, 'frequency 2f', 'lbl strong halo', 'start', 'style="fill:var(--hl-text)"');
       return svg('60 10 740 470', s, 'Two graphs of induced emf against time. Doubling the frequency of rotation gives a curve with twice the peak emf and half the period');
     }
   };
