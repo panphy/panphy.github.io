@@ -754,6 +754,25 @@
     // (body A feels the opposite), at the middle of its contact points.
     const contactForces = new Map();
     const quadDrag = new Map(); // planck body → quadratic drag force of the latest step
+    // A collision between rigid objects often lasts one step, far shorter than a frame, so its
+    // arrows would rarely reach the screen. Each contact keeps its strongest force from when it
+    // began, and force arrows go on showing a contact that has ended until IMPACT_HOLD after that.
+    const IMPACT_HOLD = 0.15; // s of simulated time
+    const recentContacts = new Map(); // planck contact → { f, start, peak, ended }
+    function noteContacts() {
+      contactForces.forEach((f, contact) => {
+        const n = Math.hypot(f.nx, f.ny);
+        const r = recentContacts.get(contact);
+        // Box2D keeps a contact while the objects are close, so a new touch starts afresh.
+        if (!r || r.ended) recentContacts.set(contact, { f, start: sim.t, peak: n, ended: false });
+        else if (n > r.peak) { r.f = f; r.peak = n; }
+      });
+      recentContacts.forEach((r, contact) => {
+        if (contactForces.has(contact)) return;
+        r.ended = true;
+        if (sim.t - r.start >= IMPACT_HOLD) recentContacts.delete(contact);
+      });
+    }
     world.on('post-solve', (contact, impulse) => {
       const count = contact.getManifold().pointCount;
       const wm = contact.getWorldManifold(null);
@@ -826,6 +845,7 @@
       keepLineSpeeds();
       sim.lastH = h;
       sim.t += h;
+      noteContacts();
     };
 
     // Advance by dt seconds of simulated time in whole steps; returns false if it ran out of budget.
@@ -887,27 +907,35 @@
 
     // The forces on one moving object in the latest step, each where it acts (world point, N):
     // weight W at the center of mass, normal reaction N and friction f at each contact,
-    // spring force F_s, tension T and joint reaction R at attachments, and drag D.
-    sim.forcesOn = function forcesOn(id) {
+    // spring force F_s, tension T and joint reaction R at attachments, and drag D. With
+    // { hold: true } (for arrows on screen), a contact that ended within IMPACT_HOLD of
+    // beginning still shows its strongest force.
+    sim.forcesOn = function forcesOn(id, opts = {}) {
       const pb = bodies.get(id);
       if (!pb || pb.isStatic()) return [];
       // Before time starts no contact or joint has been solved yet, so read the forces from a
       // copy of the world advanced by one step: the forces acting at the start.
       if (!(sim.t > 0)) {
         if (!sim.probe) { sim.probe = createSim(scene); sim.probe.step(); }
-        return sim.probe.forcesOn(id);
+        return sim.probe.forcesOn(id, opts);
       }
       const out = [];
       const add = (label, p, fx, fy) => out.push({ label, x: p.x, y: p.y, fx, fy });
       const c = pb.getWorldCenter();
       const g = world.getGravity();
       add('W', c, pb.getMass() * g.x, pb.getMass() * g.y);
-      contactForces.forEach((f) => {
+      const addContact = (f) => {
         const sign = f.B === pb ? 1 : f.A === pb ? -1 : 0;
         if (!sign) return;
         add('N', f, sign * f.nx, sign * f.ny);
         add('f', f, sign * f.tx, sign * f.ty);
-      });
+      };
+      contactForces.forEach(addContact);
+      if (opts.hold) {
+        recentContacts.forEach((r, contact) => {
+          if (r.ended && sim.t - r.start < IMPACT_HOLD) addContact(r.f);
+        });
+      }
       const inv = 1 / sim.lastH;
       // A rod, rope or spring often joins an object at its center, but its pull acts where it
       // meets the object's surface: the first point of the object on the way in from the
