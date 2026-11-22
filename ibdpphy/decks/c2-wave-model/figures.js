@@ -41,7 +41,7 @@ window.DeckFigures.add(P => {
       const x0 = 110, y0 = 250, amp = 120, lambda = 300;
       let s = arrow(x0, y0, 800, y0, 'text-secondary', 2.5) + line(sine(x0, 760, y0, amp, lambda), 'brand-primary', 6);
       s += both(x0 + lambda / 4, y0 - amp - 30, x0 + 5 * lambda / 4, y0 - amp - 30) + text(x0 + 3 * lambda / 4, y0 - amp - 46, 'wavelength λ', 'lbl strong') + both(x0 + 3 * lambda / 4, y0 + amp + 30, x0 + 7 * lambda / 4, y0 + amp + 30) + text(x0 + 5 * lambda / 4, y0 + amp + 74, 'wavelength λ', 'lbl strong');
-      s += both(x0 + 5 * lambda / 4, y0, x0 + 5 * lambda / 4, y0 - amp, 'brand-accent', 3) + text(x0 + 5 * lambda / 4 + 14, y0 - amp / 2 + 10, 'amplitude', 'lbl halo', 'start') + text(x0 + lambda / 4, y0 - amp + 50, 'crest', 'lbl halo') + text(x0 + 3 * lambda / 4, y0 + amp - 34, 'trough', 'lbl halo');
+      s += both(x0 + 5 * lambda / 4, y0, x0 + 5 * lambda / 4, y0 - amp, 'brand-accent', 3) + text(x0 + 5 * lambda / 4 + 75, y0 - 38, 'amplitude', 'lbl halo', 'start') + text(x0 + lambda / 4, y0 - amp + 50, 'crest', 'lbl halo') + text(x0 + 3 * lambda / 4, y0 + 40, 'trough', 'lbl halo');
       return svg('80 60 740 440', s, 'A snapshot of a wave. The wavelength is the distance from one crest to the next, or from one trough to the next. The amplitude is the height of a crest above the undisturbed level');
     },
 

@@ -88,7 +88,7 @@ window.DeckFigures.add(P => {
       const cx = 430, base = 420, top = 110, A = 280, H = base - top;
       let s = arrow(110, base, 780, base, 'text-secondary', 2.5) + arrow(cx, base, cx, 50, 'text-secondary', 2.5) + line(`M${cx - A},${top} H${cx + A}`, 'text-main', 4) + line(sampled(t => { const u = -1 + 2 * t; return [cx + A * u, base - H * u * u]; }, 60), 'brand-primary', 6) + line(sampled(t => { const u = -1 + 2 * t; return [cx + A * u, base - H * (1 - u * u)]; }, 60), 'brand-accent', 6);
       s += `<path d="M${cx - A},${base} V${top} M${cx + A},${base} V${top}" class="guide"/>` + P.yAxisLabel(cx - 22, 250, 'energy') + text(445, base + 80, 'displacement', 'lbl mono') + text(cx - A, base + 40, sub('−x', '0'), 'lbl mono') + text(cx + A, base + 40, sub('x', '0'), 'lbl mono') + text(cx, base + 40, '0', 'lbl mono');
-      s += text(cx + A + 14, top + 8, 'total', 'lbl strong', 'start') + text(cx + 206, top + 190, 'potential', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(cx - 60, top + 50, 'kinetic', 'lbl strong halo', 'end', 'style="fill:var(--brand-accent)"');
+      s += text(cx + A + 14, top + 8, 'total', 'lbl strong', 'start') + text(cx + 16, top + 190, 'potential', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(cx + 16, top + 90, 'kinetic', 'lbl strong halo', 'start', 'style="fill:var(--brand-accent)"');
       return svg('90 30 800 490', s, 'A graph of energy against displacement for simple harmonic motion. The potential energy is a parabola, zero at the center and greatest at each end. The kinetic energy is an upside-down parabola, greatest at the center and zero at each end. Their sum, the total energy, is a horizontal line');
     },
 
