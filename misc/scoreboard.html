@@ -1,1055 +1,1278 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Scoreboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Scoreboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/standalone-top.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        :root {
-            --bg: #07090f;
-            --border: rgba(255, 255, 255, 0.08);
-            --text: #e8eeff;
-            --text-dim: #8998b5;
-            --accent: #ffb800;
-        }
+:root {
+  color-scheme: dark;
+  --bg: #05070c;
+  --panel: #0e131e;
+  --raised: #1a2130;
+  --raised-hover: #252e41;
+  --line: #2a3243;
+  --text: #ffffff;
+  --dim: #aab6cc;
+  --clock: #ffc21a;
+  --danger: #ff4d4d;
+  --go: #22c55e;
+  --foul: #ffb020;
+  --display: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --ui: 'Barlow Condensed', 'Trebuchet MS', system-ui, sans-serif;
+  --cols: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
+  --strip-h: clamp(58px, 11vh, 92px);
+}
 
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+html, body { height: 100%; overflow: hidden; background: var(--bg); }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Barlow Condensed', 'Trebuchet MS', system-ui, sans-serif;
-            display: flex;
-            flex-direction: column;
-        }
+body {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  font-family: var(--ui);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 
-        /* ── Main Layout ── */
-        .board {
-            flex: 1;
-            min-height: 0;
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-        }
+button, input { font: inherit; color: inherit; }
+button { border: 0; background: none; cursor: pointer; touch-action: manipulation; }
+:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
 
-        /* ── Score Panels ── */
-        .score-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
 
-        .team-label {
-            position: absolute;
-            top: clamp(8px, 2vh, 18px);
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: clamp(12px, 1.8vw, 18px);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            color: var(--text-dim);
-            pointer-events: none;
-            z-index: 1;
-        }
+/* Board */
+.board {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--cols);
+  grid-template-areas: "home center away";
+}
 
-        .score-touch-zone {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-        }
+.team {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+}
+.team.home { grid-area: home; }
+.team.away { grid-area: away; }
 
-        .score-touch-zone.up   { align-items: flex-end; }
-        .score-touch-zone.down { align-items: flex-start; }
+.team-name {
+  flex: none;
+  height: clamp(40px, 11.5vh, 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  background: var(--team);
+  color: var(--on-team);
+  font-family: var(--display);
+  font-size: min(8.6vh, 4vw);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  gap: 0.25em;
+}
+.team-ball { flex: none; width: 0.95em; height: 0.95em; margin-top: -0.08em; }
 
-        .score-value {
-            font-family: 'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif;
-            font-weight: 400;
-            line-height: 0.92;
-            font-variant-numeric: tabular-nums;
-            pointer-events: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            white-space: nowrap;
-        }
+.score-btn {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+  border-radius: 0;
+}
+.score-btn:hover { background: rgba(255, 255, 255, 0.03); }
 
-        .score-hint {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: clamp(10px, 1.4vw, 13px);
-            font-weight: 600;
-            color: var(--text-dim);
-            opacity: 0;
-            transition: opacity 0.25s;
-            pointer-events: none;
-            position: absolute;
-            letter-spacing: 0.05em;
-        }
-        .score-touch-zone.up   .score-hint { top: clamp(38px, 7vh, 54px); }
-        .score-touch-zone.down .score-hint { bottom: clamp(10px, 2.5vh, 22px); }
-        .score-touch-zone:hover .score-hint,
-        .score-touch-zone:active .score-hint { opacity: 0.45; }
+.score {
+  font-family: var(--display);
+  font-size: min(112cqh, calc(94cqw / (var(--chars, 2) * var(--digit-em, 0.46))));
+  line-height: 0.8;
+  padding-top: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+.score.bump { animation: bump 0.28s ease-out; }
+@keyframes bump {
+  0% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
 
-        .score-touch-zone::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: currentColor;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.12s;
-        }
-        .score-touch-zone.flash::after { opacity: 0.05; }
+.team-foot {
+  flex: none;
+  height: clamp(54px, 17vh, 150px);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2vw, 28px);
+  padding: 0 8px;
+  border-top: 2px solid var(--line);
+  border-radius: 0;
+}
+.team-foot:hover { background: rgba(255, 255, 255, 0.03); }
 
-        /* ── Center Panel ── */
-        .center-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: clamp(10px, 1.8vh, 20px);
-            padding: clamp(10px, 2vw, 20px) clamp(14px, 2.5vw, 26px);
-            min-width: clamp(185px, 27vw, 340px);
-            border-left:  1px solid var(--border);
-            border-right: 1px solid var(--border);
-        }
+.stat { display: inline-flex; align-items: center; gap: 0.3em; }
+.stat-label {
+  font-size: min(4.6vh, 2.3vw);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--dim);
+}
+.stat-value {
+  font-family: var(--display);
+  font-size: min(14vh, 6.6vw);
+  line-height: 0.85;
+  padding-top: 0.06em;
+  color: var(--foul);
+}
+.stat.timeouts .stat-value { color: #fff; }
 
-        .section-divider {
-            width: 100%;
-            height: 1px;
-            background: var(--border);
-            flex-shrink: 0;
-        }
+.bonus {
+  padding: 0.14em 0.4em 0.06em;
+  border-radius: 6px;
+  background: var(--danger);
+  color: #fff;
+  font-family: var(--display);
+  font-size: min(6.6vh, 3.2vw);
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
 
-        /* ── Timer ── */
-        .timer-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: clamp(6px, 1.2vh, 12px);
-            width: 100%;
-        }
+/* Center */
+.center {
+  grid-area: center;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-inline: 2px solid var(--line);
+}
 
-        .timer-display {
-            font-family: 'Bebas Neue', 'Impact', monospace;
-            font-size: clamp(52px, 10.5vw, 140px);
-            line-height: 1;
-            color: var(--accent);
-            letter-spacing: 0.04em;
-            font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 28px rgba(255, 184, 0, 0.18);
-        }
+.clock-btn {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0;
+}
+.clock-btn:hover { background: rgba(255, 255, 255, 0.03); }
 
-        .timer-display.danger {
-            color: #ff3b3b;
-            text-shadow: 0 0 28px rgba(255, 59, 59, 0.2);
-        }
+.period-row {
+  flex: none;
+  height: clamp(40px, 11.5vh, 100px);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0 8px;
+  background: var(--raised);
+  font-family: var(--display);
+  font-size: min(8.6vh, 4.6vw);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.period-row.alert { background: var(--danger); }
+.period-row.pause { background: var(--clock); color: #10131a; }
+.period-sub { opacity: 0.8; }
 
-        .timer-controls {
-            display: flex;
-            gap: 6px;
-            width: 100%;
-            justify-content: center;
-        }
+.clock-box {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+.clock {
+  font-family: var(--display);
+  font-size: min(112cqh, calc(95cqw / var(--clock-em, 2.06)));
+  line-height: 0.8;
+  padding-top: 0.06em;
+  color: var(--clock);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.clock.low, .clock.zero { color: var(--danger); }
+.clock.timeout { color: #fff; }
 
-        .timer-btn {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 7px;
-            padding: 8px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: clamp(12px, 1.5vw, 15px);
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background 0.15s;
-            min-height: 40px;
-            max-width: clamp(70px, 9vw, 100px);
-        }
-        .timer-btn:hover { background: rgba(255, 255, 255, 0.09); }
+.lower-row {
+  flex: none;
+  height: clamp(54px, 17vh, 150px);
+  display: flex;
+  align-items: stretch;
+  border-top: 2px solid var(--line);
+}
+.poss-btn {
+  flex: 1;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+}
+.poss-btn svg { height: 68%; aspect-ratio: 1; max-width: 84%; opacity: 0.2; filter: grayscale(1); }
+.poss-btn:hover { background: rgba(255, 255, 255, 0.06); }
+.poss-btn.on, .poss-btn.on:hover { background: var(--team); }
+.poss-btn.on svg { opacity: 1; filter: none; }
 
-        .timer-btn.primary {
-            background: var(--accent);
-            color: #0a0b0e;
-            border-color: var(--accent);
-        }
-        .timer-btn.primary:hover { filter: brightness(1.08); }
+.lower-mid {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.poss-label {
+  font-size: min(4.6vh, 2.3vw);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--dim);
+}
+.shot {
+  font-family: var(--display);
+  font-size: min(15.5vh, 8vw);
+  line-height: 0.85;
+  padding-top: 0.06em;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.shot.low { color: var(--danger); }
 
-        .gear-btn {
-            background: none;
-            border: none;
-            color: var(--text-dim);
-            font-size: clamp(15px, 1.8vw, 20px);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 7px;
-            transition: color 0.15s, background 0.15s;
-            min-width: 40px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .gear-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+/* Control strip */
+.strip {
+  flex: none;
+  display: grid;
+  grid-template-columns: var(--cols);
+  grid-template-areas: "home center away";
+  gap: 6px;
+  padding: 6px max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+  background: #000;
+  border-top: 2px solid var(--line);
+}
+.controls { display: flex; gap: 5px; min-width: 0; height: var(--strip-h); }
+.controls.home { grid-area: home; }
+.controls.away { grid-area: away; }
+.controls.mid { grid-area: center; }
 
-        /* ── Period ── */
-        .period-section {
-            display: flex;
-            align-items: center;
-            gap: clamp(8px, 1.4vw, 16px);
-        }
+.ctl {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--raised);
+  font-family: var(--display);
+  font-size: clamp(22px, 4.6vh, 40px);
+  line-height: 1;
+  padding-top: 0.08em;
+  transition: background 0.1s, transform 0.06s;
+}
+.ctl:hover { background: var(--raised-hover); }
+.ctl:active { transform: scale(0.95); background: var(--raised-hover); }
+.ctl:disabled { opacity: 0.35; cursor: default; }
+.ctl svg { width: clamp(24px, 5vh, 40px); height: clamp(24px, 5vh, 40px); fill: currentColor; }
+.ctl.pts { box-shadow: inset 0 -5px 0 var(--team); }
+.ctl.foul-btn { background: #3a2c0c; color: var(--foul); font-size: clamp(19px, 3.8vh, 34px); }
+.ctl.foul-btn:hover { background: #4c3a10; }
+.ctl.to-btn { font-size: clamp(19px, 3.8vh, 34px); color: var(--dim); }
+.ctl.primary { flex: 2 1 0; background: var(--go); color: #03130a; }
+.ctl.primary:hover { background: #3bd873; }
+.ctl.primary.running { background: var(--clock); color: #1a1300; }
+.ctl.primary.running:hover { background: #ffd24f; }
+.ctl.primary.next { flex: 3 1 0; background: #fff; color: #05070c; font-size: clamp(20px, 4vh, 36px); white-space: nowrap; }
+.ctl.shot-btn { color: var(--clock); }
 
-        .period-inner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: clamp(36px, 5vw, 56px);
-        }
+[hidden] { display: none !important; }
 
-        .period-label {
-            font-size: clamp(9px, 1.1vw, 12px);
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.22em;
-            font-weight: 700;
-        }
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--strip-h) + 26px);
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #fff;
+  color: #05070c;
+  font-size: 22px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 5;
+}
+.toast.show { opacity: 1; }
 
-        .period-value {
-            font-family: 'Bebas Neue', 'Impact', sans-serif;
-            font-size: clamp(26px, 4.5vw, 54px);
-            line-height: 0.9;
-            color: var(--text);
-            font-variant-numeric: tabular-nums;
-        }
+/* Dialogs */
+dialog {
+  margin: auto;
+  width: min(560px, calc(100vw - 20px));
+  max-height: calc(100dvh - 20px);
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.78); }
+dialog h2 { font-family: var(--display); font-weight: 400; font-size: 36px; line-height: 1; letter-spacing: 0.03em; margin-bottom: 14px; }
+dialog h3 { font-size: 18px; font-weight: 700; color: var(--dim); margin: 18px 0 8px; }
 
-        .period-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            border-radius: 7px;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s, color 0.15s;
-            min-width: 40px;
-            min-height: 40px;
-        }
-        .period-btn:hover { background: rgba(255, 255, 255, 0.09); color: var(--text); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; font-size: 22px; font-weight: 600; }
+.row + .row { border-top: 1px solid var(--line); }
+.row > label, .row > span:first-child { flex: 1; min-width: 0; }
 
-        /* ── Possession Dot ── */
-        .poss-dot {
-            position: absolute;
-            bottom: clamp(14px, 2.5vh, 26px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: clamp(10px, 1.4vw, 18px);
-            height: clamp(10px, 1.4vw, 18px);
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.12);
-            cursor: pointer;
-            transition: background 0.2s ease, box-shadow 0.2s ease;
-            z-index: 2;
-        }
-        .poss-dot:hover { background: rgba(255, 255, 255, 0.28); }
-        .poss-dot.active {
-            background: var(--accent);
-            box-shadow: 0 0 12px rgba(255, 184, 0, 0.65);
-        }
-        .poss-dot.active:hover { filter: brightness(1.1); }
+.stepper { display: flex; align-items: center; gap: 4px; flex: none; }
+.stepper button, .btn {
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 8px;
+  background: var(--raised);
+  font-size: 24px;
+  font-weight: 700;
+}
+.stepper button:hover, .btn:hover { background: var(--raised-hover); }
+.stepper input {
+  width: 72px;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  text-align: center;
+  font-family: var(--display);
+  font-size: 30px;
+  padding-top: 3px;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-        /* ── Fouls ── */
-        .fouls-row {
-            display: flex;
-            gap: clamp(10px, 2.2vw, 26px);
-            align-items: flex-start;
-            justify-content: center;
-            width: 100%;
-        }
+.team-edit { display: grid; grid-template-columns: minmax(0, 1fr) 64px; gap: 8px; margin-bottom: 8px; }
+.team-edit input { height: 52px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+.team-edit input[type="text"] { padding: 0 12px; font-size: 24px; font-weight: 700; user-select: text; -webkit-user-select: text; }
+.team-edit input[type="color"] { padding: 4px; cursor: pointer; width: 64px; }
 
-        .foul-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-        }
+.switch { width: 28px; height: 28px; accent-color: var(--go); flex: none; cursor: pointer; }
+.switch-row { cursor: pointer; }
 
-        .foul-label {
-            font-size: clamp(8px, 1.1vw, 11px);
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            font-weight: 700;
-        }
+.btn-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; font-size: 21px; font-weight: 600; }
+.btn svg { width: 24px; height: 24px; fill: currentColor; flex: none; }
+.btn.solid { background: #fff; color: #05070c; }
+.btn.solid:hover { background: #dfe5f0; }
+.btn.warn { background: #4a1616; color: #ffc9c9; }
+.btn.warn:hover { background: #5e1c1c; }
 
-        .foul-touch-zone {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3px 8px;
-            border-radius: 5px;
-            transition: background 0.15s;
-            min-width: 44px;
-            min-height: 34px;
-        }
-        .foul-touch-zone:hover  { background: rgba(255, 255, 255, 0.04); }
-        .foul-touch-zone:active { background: rgba(255, 255, 255, 0.08); }
+.actions { display: flex; gap: 8px; margin-top: 18px; }
+.actions .btn { flex: 1; }
 
-        .foul-value {
-            font-family: 'Bebas Neue', 'Impact', sans-serif;
-            font-size: clamp(26px, 4.2vw, 48px);
-            line-height: 1;
-            font-variant-numeric: tabular-nums;
-            pointer-events: none;
-        }
+.clock-edit {
+  font-family: var(--display);
+  font-size: 88px;
+  line-height: 1;
+  text-align: center;
+  color: var(--clock);
+  font-variant-numeric: tabular-nums;
+}
+.nudges { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+.nudges .btn { padding: 0; font-family: var(--display); font-size: 25px; font-weight: 400; }
 
-        .foul-dec {
-            font-size: clamp(9px, 1.1vw, 12px);
-            color: var(--text-dim);
-            font-weight: 700;
-            pointer-events: none;
-            letter-spacing: 0.05em;
-        }
+.copyright { margin-top: 16px; text-align: center; font-size: 15px; color: var(--dim); }
 
-        /* ── Bottom Bar ── */
-        .bottom-bar {
-            display: flex;
-            justify-content: center;
-            padding: 5px 12px;
-            gap: 8px;
-            border-top: 1px solid var(--border);
-            background: rgba(5, 7, 12, 0.98);
-        }
+/* Short landscape screens such as phones */
+@media (max-height: 500px) {
+  :root { --strip-h: 52px; }
+  .strip { padding-top: 4px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
+  .ctl { font-size: 23px; }
+  .ctl.foul-btn, .ctl.to-btn { font-size: 18px; }
+  .stat-label, .poss-label { font-size: 15px; }
+  .ctl.pts { box-shadow: inset 0 -3px 0 var(--team); }
+  .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .controls { gap: 3px; }
+  .ctl.primary { flex: 1.4 1 0; }
+  .ctl.primary.next { flex: 1.7 1 0; font-size: 19px; }
+}
 
-        .bottom-btn {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            border-radius: 5px;
-            padding: 5px 14px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: clamp(10px, 1.2vw, 12px);
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background 0.15s, color 0.15s;
-            min-height: 32px;
-        }
-        .bottom-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
-
-        .sound-toggle { font-size: clamp(13px, 1.6vw, 16px); }
-
-        /* ── Blink Overlay ── */
-        .blink-overlay {
-            position: fixed;
-            inset: 0;
-            background: #ff0000;
-            z-index: 100;
-            display: none;
-            cursor: pointer;
-        }
-        .blink-overlay.active {
-            display: block;
-            animation: blink 0.5s ease-in-out infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.7; }
-            50%       { opacity: 0; }
-        }
-        .blink-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Bebas Neue', 'Impact', sans-serif;
-            font-size: clamp(32px, 7vw, 80px);
-            color: white;
-            letter-spacing: 0.12em;
-            pointer-events: none;
-        }
-
-        /* ── Modal ── */
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.72);
-            z-index: 200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(4px);
-        }
-        .modal-backdrop.active { display: flex; }
-
-        .modal {
-            background: #0d1220;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            padding: clamp(20px, 4vw, 32px);
-            max-width: 360px;
-            width: 100%;
-        }
-
-        .modal h2 {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .modal-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .modal-row label {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-dim);
-            width: 90px;
-            flex-shrink: 0;
-        }
-
-        .modal-row input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            min-height: 44px;
-        }
-        .modal-row input:focus { outline: none; border-color: var(--accent); }
-
-        .modal-row input[type="color"] {
-            padding: 4px;
-            height: 44px;
-            cursor: pointer;
-        }
-
-        .modal-section-label {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--text-dim);
-            margin-bottom: 10px;
-        }
-
-        .modal-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 14px 0;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-copyright {
-            margin: 16px 0 0;
-            font-size: 12px;
-            color: rgba(232, 238, 255, 0.45);
-            text-align: center;
-        }
-
-        .modal-actions button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            min-height: 44px;
-        }
-
-        .modal-actions .cancel-btn {
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text);
-        }
-        .modal-actions .cancel-btn:hover { background: rgba(255, 255, 255, 0.08); }
-
-        .modal-actions .save-btn {
-            background: var(--accent);
-            color: #0a0b0e;
-            border-color: var(--accent);
-        }
-        .modal-actions .save-btn:hover { filter: brightness(1.08); }
-
-        .confirm-content { text-align: center; }
-        .confirm-content p {
-            color: var(--text-dim);
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        /* ── Responsive ── */
-        @media (max-height: 500px) {
-            .center-panel { gap: 6px; }
-            .period-section { display: none; }
-        }
-
-        @media (orientation: portrait) and (max-width: 600px) {
-            .center-panel { min-width: 95px; padding: 6px 8px; }
-        }
-    </style>
+/* Portrait: clock across the top, teams side by side */
+@media (orientation: portrait) {
+  :root { --cols: minmax(0, 1fr) minmax(0, 1fr); --strip-h: clamp(56px, 7.4vh, 84px); }
+  .board {
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-areas: "center center" "home away";
+  }
+  .center { border-inline: 0; border-bottom: 2px solid var(--line); }
+  .team.home { border-right: 2px solid var(--line); }
+  .team-name { height: clamp(40px, 7vh, 80px); font-size: min(5vh, 7.4vw); }
+  .period-row { height: clamp(40px, 6.4vh, 72px); font-size: min(4.8vh, 8vw); }
+  .lower-row, .team-foot { height: clamp(58px, 10vh, 120px); }
+  .stat-label, .poss-label { font-size: min(2.8vh, 4.4vw); }
+  .stat-value { font-size: min(8vh, 12vw); }
+  .bonus { font-size: min(3.6vh, 5.6vw); }
+  .shot { font-size: min(9vh, 15vw); }
+  .team-foot { gap: 8px; }
+  .strip { grid-template-areas: "center center" "home away"; }
+  .ctl { font-size: clamp(22px, 3.2vh, 38px); }
+  .ctl.foul-btn, .ctl.to-btn { font-size: clamp(17px, 2.6vh, 30px); }
+}
+@media (orientation: portrait) and (max-width: 640px) {
+  :root { --strip-h: 54px; }
+  .strip { grid-template-columns: minmax(0, 1fr); grid-template-areas: "center" "home" "away"; }
+  .team-foot { gap: 5px; padding: 0 3px; }
+  .stat-label { font-size: 14px; }
+  .stat-value { font-size: 40px; }
+  .bonus { font-size: 19px; }
+}
+</style>
 </head>
 <body>
-    <div class="board">
-        <!-- Home Score -->
-        <div class="score-panel home">
-            <span class="team-label" id="homeLabel">HOME</span>
-            <div class="score-touch-zone up" data-team="home" data-dir="up">
-                <span class="score-hint">+1</span>
-            </div>
-            <span class="score-value" id="homeScore">0</span>
-            <div class="score-touch-zone down" data-team="home" data-dir="down">
-                <span class="score-hint">&minus;1</span>
-            </div>
-            <div class="poss-dot" id="homePossDot" title="Set possession to home"></div>
-        </div>
+<h1 class="sr-only">Scoreboard</h1>
+<svg hidden><symbol id="ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.8" fill="#f58220" stroke="#111" stroke-width="1.4"/><path d="M12 1.2v21.6M1.2 12h21.6M5 3.8c3.2 2.3 5 5.1 5 8.2s-1.8 5.9-5 8.2M19 3.8c-3.2 2.3-5 5.1-5 8.2s1.8 5.9 5 8.2" fill="none" stroke="#111" stroke-width="1.3"/></symbol></svg>
 
-        <!-- Center Panel -->
-        <div class="center-panel">
-            <div class="timer-section">
-                <div class="timer-display" id="timerDisplay">10:00</div>
-                <div class="timer-controls">
-                    <button class="timer-btn primary" id="startStopBtn">Start</button>
-                    <button class="gear-btn" id="gearBtn" title="Settings">&#9881;</button>
-                    <button class="timer-btn" id="resetBtn">Reset</button>
-                </div>
-            </div>
+<main class="board">
+  <section class="team home" id="teamHome" aria-label="Left team">
+    <div class="team-name"><svg class="team-ball" data-ball aria-hidden="true" hidden><use href="#ball"/></svg><span data-name></span></div>
+    <button class="score-btn" data-edit-team="home"><span class="score" data-score aria-live="polite"></span></button>
+    <button class="team-foot" data-edit-team="home" data-foot></button>
+  </section>
 
-            <div class="section-divider"></div>
-
-            <div class="period-section">
-                <button class="period-btn" id="periodDown">&#8722;</button>
-                <div class="period-inner">
-                    <div class="period-label">Period</div>
-                    <div class="period-value" id="periodValue">1</div>
-                </div>
-                <button class="period-btn" id="periodUp">&#43;</button>
-            </div>
-
-            <div class="section-divider"></div>
-
-            <div class="fouls-row">
-                <div class="foul-block home">
-                    <div class="foul-label">Fouls</div>
-                    <div class="foul-touch-zone" data-team="home" data-dir="up">
-                        <span class="foul-value" id="homeFouls">0</span>
-                    </div>
-                    <div class="foul-touch-zone" data-team="home" data-dir="down">
-                        <span class="foul-dec">&minus;1</span>
-                    </div>
-                </div>
-                <div class="foul-block away">
-                    <div class="foul-label">Fouls</div>
-                    <div class="foul-touch-zone" data-team="away" data-dir="up">
-                        <span class="foul-value" id="awayFouls">0</span>
-                    </div>
-                    <div class="foul-touch-zone" data-team="away" data-dir="down">
-                        <span class="foul-dec">&minus;1</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Away Score -->
-        <div class="score-panel away">
-            <span class="team-label" id="awayLabel">AWAY</span>
-            <div class="score-touch-zone up" data-team="away" data-dir="up">
-                <span class="score-hint">+1</span>
-            </div>
-            <span class="score-value" id="awayScore">0</span>
-            <div class="score-touch-zone down" data-team="away" data-dir="down">
-                <span class="score-hint">&minus;1</span>
-            </div>
-            <div class="poss-dot" id="awayPossDot" title="Set possession to away"></div>
-        </div>
+  <section class="center" aria-label="Game clock">
+    <button class="clock-btn" id="clockBtn" title="Correct the clock or quarter">
+      <span class="period-row" id="periodRow"><span id="periodText"></span><span class="period-sub" id="periodSub"></span></span>
+      <span class="clock-box"><span class="clock" id="clock"></span></span>
+    </button>
+    <div class="lower-row">
+      <button class="poss-btn" id="possHome" aria-label="Possession to left team" title="Possession (P)"><svg aria-hidden="true"><use href="#ball"/></svg></button>
+      <div class="lower-mid">
+        <span class="poss-label" id="possLabel">POSS</span>
+        <span class="shot" id="shot" hidden></span>
+      </div>
+      <button class="poss-btn" id="possAway" aria-label="Possession to right team" title="Possession (P)"><svg aria-hidden="true"><use href="#ball"/></svg></button>
     </div>
+  </section>
 
-    <div class="bottom-bar">
-        <button class="bottom-btn" id="undoBtn" title="Undo last action">Undo</button>
-        <button class="bottom-btn sound-toggle" id="soundBtn" title="Toggle buzzer">&#128264;</button>
-        <button class="bottom-btn" id="swapBtn" title="Swap sides">Swap</button>
-        <button class="bottom-btn" id="fullscreenBtn" title="Full screen">&#x26F6;</button>
-        <button class="bottom-btn" id="resetAllBtn" title="Reset everything">New Game</button>
-    </div>
+  <section class="team away" id="teamAway" aria-label="Right team">
+    <div class="team-name"><svg class="team-ball" data-ball aria-hidden="true" hidden><use href="#ball"/></svg><span data-name></span></div>
+    <button class="score-btn" data-edit-team="away"><span class="score" data-score aria-live="polite"></span></button>
+    <button class="team-foot" data-edit-team="away" data-foot></button>
+  </section>
+</main>
 
-    <!-- Blink Overlay -->
-    <div class="blink-overlay" id="blinkOverlay">
-        <span class="blink-text">TIME</span>
-    </div>
+<nav class="strip" aria-label="Controls">
+  <div class="controls home" id="ctlHome">
+    <button class="ctl pts" data-pts="1" title="Left team +1 (key 1)">+1</button>
+    <button class="ctl pts" data-pts="2" title="Left team +2 (key 2)">+2</button>
+    <button class="ctl pts" data-pts="3" title="Left team +3 (key 3)">+3</button>
+    <button class="ctl foul-btn" data-foul title="Left team foul (key F)">FOUL</button>
+    <button class="ctl to-btn" data-to title="Left team timeout (key T)" hidden>T/O</button>
+  </div>
 
-    <!-- Settings Modal -->
-    <div class="modal-backdrop" id="timerModal">
-        <div class="modal">
-            <h2>Settings</h2>
-            <div class="modal-section-label">Timer</div>
-            <div class="modal-row">
-                <label>Minutes</label>
-                <input type="number" id="setMinutes" min="0" max="99" value="10">
-            </div>
-            <div class="modal-row">
-                <label>Seconds</label>
-                <input type="number" id="setSeconds" min="0" max="59" value="0">
-            </div>
-            <div class="modal-divider"></div>
-            <div class="modal-section-label">Teams</div>
-            <div class="modal-row">
-                <label>Home name</label>
-                <input type="text" id="setHomeName" maxlength="12" value="HOME">
-            </div>
-            <div class="modal-row">
-                <label>Home color</label>
-                <input type="color" id="setHomeColor" value="#4a90d9">
-            </div>
-            <div class="modal-row">
-                <label>Away name</label>
-                <input type="text" id="setAwayName" maxlength="12" value="AWAY">
-            </div>
-            <div class="modal-row">
-                <label>Away color</label>
-                <input type="color" id="setAwayColor" value="#d94a4a">
-            </div>
-            <div class="modal-actions">
-                <button class="cancel-btn" id="modalCancel">Cancel</button>
-                <button class="save-btn" id="modalSave">Save</button>
-            </div>
-            <p class="modal-copyright">&copy; PanPhy Labs. All rights reserved.</p>
-        </div>
-    </div>
+  <div class="controls mid">
+    <button class="ctl" id="undoBtn" aria-label="Undo" title="Undo (U or Ctrl+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62A7.95 7.95 0 0 1 12.5 10.5c3.54 0 6.55 2.31 7.6 5.5l2.37-.78A10.5 10.5 0 0 0 12.5 8z"/></svg></button>
+    <button class="ctl shot-btn" id="shotFullBtn" title="Reset shot clock (key S)" hidden>24</button>
+    <button class="ctl shot-btn" id="shotShortBtn" title="Reset shot clock, short (key D)" hidden>14</button>
+    <button class="ctl primary" id="primaryBtn"></button>
+    <button class="ctl" id="menuBtn" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2.5H3zM3 10.75h18v2.5H3zM3 15.5h18V18H3z"/></svg></button>
+  </div>
 
-    <!-- Confirm Reset Modal -->
-    <div class="modal-backdrop" id="confirmModal">
-        <div class="modal">
-            <div class="confirm-content">
-                <h2>New Game?</h2>
-                <p>This will reset scores, fouls, timer, and period.</p>
-            </div>
-            <div class="modal-actions">
-                <button class="cancel-btn" id="confirmCancel">Cancel</button>
-                <button class="save-btn" id="confirmOk">Reset</button>
-            </div>
-        </div>
+  <div class="controls away" id="ctlAway">
+    <button class="ctl pts" data-pts="1" title="Right team +1 (key 8)">+1</button>
+    <button class="ctl pts" data-pts="2" title="Right team +2 (key 9)">+2</button>
+    <button class="ctl pts" data-pts="3" title="Right team +3 (key 0)">+3</button>
+    <button class="ctl foul-btn" data-foul title="Right team foul (key J)">FOUL</button>
+    <button class="ctl to-btn" data-to title="Right team timeout (key Y)" hidden>T/O</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status"></div>
+
+<!-- Settings -->
+<dialog id="menuDlg" aria-labelledby="menuTitle">
+  <h2 id="menuTitle">Settings</h2>
+  <div class="btn-grid">
+    <button class="btn" id="swapBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 2 9l5 5v-3.5h8v-3H7zM17 10v3.5H9v3h8V20l5-5z"/></svg>Swap sides</button>
+    <button class="btn" id="soundBtn"></button>
+    <button class="btn" id="fsBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v2.5H5.5V10H3zM14 3h7v7h-2.5V5.5H14zM3 14h2.5v4.5H10V21H3zM18.5 14H21v7h-7v-2.5h4.5z"/></svg><span id="fsLabel">Full screen</span></button>
+    <button class="btn warn" id="newGameBtn">New game</button>
+  </div>
+
+  <h3>Teams</h3>
+  <div class="team-edit">
+    <input type="text" id="setHomeName" maxlength="12" aria-label="Left team name" autocomplete="off">
+    <input type="color" id="setHomeColor" aria-label="Left team color">
+  </div>
+  <div class="team-edit">
+    <input type="text" id="setAwayName" maxlength="12" aria-label="Right team name" autocomplete="off">
+    <input type="color" id="setAwayColor" aria-label="Right team color">
+  </div>
+
+  <h3>Game</h3>
+  <div id="gameFields"></div>
+
+  <h3>Options</h3>
+  <label class="row switch-row"><span>Shot clock</span><input type="checkbox" class="switch" id="setShotOn"></label>
+  <div id="shotFields"></div>
+  <label class="row switch-row"><span>Timeouts</span><input type="checkbox" class="switch" id="setTimeoutsOn"></label>
+  <div id="timeoutFields"></div>
+
+  <div class="actions">
+    <button class="btn" id="menuCancel">Cancel</button>
+    <button class="btn solid" id="menuSave">Save</button>
+  </div>
+  <p class="copyright">&copy; PanPhy Labs. All rights reserved.</p>
+</dialog>
+
+<!-- Clock and quarter correction -->
+<dialog id="clockDlg" aria-labelledby="clockTitle">
+  <h2 id="clockTitle">Clock and quarter</h2>
+  <div class="clock-edit" id="clockEdit"></div>
+  <div class="nudges" id="nudges"></div>
+  <div class="row" style="margin-top:10px">
+    <span>Quarter</span>
+    <div class="stepper">
+      <button id="periodDown" aria-label="Previous quarter">&minus;</button>
+      <input id="periodEdit" readonly aria-label="Current quarter" tabindex="-1">
+      <button id="periodUp" aria-label="Next quarter number">+</button>
     </div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="clockReset" aria-label="Reset clock to full" title="Reset clock to full"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+    <button class="btn" id="startNext"></button>
+    <button class="btn solid" id="clockDone">Done</button>
+  </div>
+</dialog>
+
+<!-- Team correction -->
+<dialog id="teamDlg" aria-labelledby="teamTitle">
+  <h2 id="teamTitle"></h2>
+  <div id="teamFields"></div>
+  <div class="actions"><button class="btn solid" id="teamDone">Done</button></div>
+</dialog>
+
+<!-- Confirm -->
+<dialog id="confirmDlg" aria-labelledby="confirmTitle">
+  <h2 id="confirmTitle">Start a new game?</h2>
+  <div class="actions">
+    <button class="btn" id="confirmCancel">Cancel</button>
+    <button class="btn warn" id="confirmOk">New game</button>
+  </div>
+</dialog>
 
 <script>
 (() => {
-    // ── State ──
-    const state = {
-        home: { score: 0, fouls: 0, name: 'HOME', color: '#4a90d9' },
-        away: { score: 0, fouls: 0, name: 'AWAY', color: '#d94a4a' },
-        period: 1,
-        timerDuration: 600,   // default 10 min in seconds
-        timerRemaining: 600,
-        timerRunning: false,
-        soundOn: true,
-        possession: 'home',
-    };
+  const STORAGE_KEY = 'panphy-scoreboard-v2';
+  const TICK_MS = 100;
+  const LOW_CLOCK_MS = 60000;
+  const LOW_SHOT_MS = 5000;
+  const MAX_UNDO = 200;
+  const SIDES = ['home', 'away'];
+  const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>';
+  const ICON_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>';
+  const ICON_SOUND_ON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9zM14 7.5v9a4.5 4.5 0 0 0 0-9zM14 3.3v2.4a6.5 6.5 0 0 1 0 12.6v2.4a9 9 0 0 0 0-17.4z"/></svg>';
+  const ICON_SOUND_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9zM21.5 9.2 19.8 7.5 17.5 9.8l-2.3-2.3-1.7 1.7 2.3 2.3-2.3 2.3 1.7 1.7 2.3-2.3 2.3 2.3 1.7-1.7-2.3-2.3z"/></svg>';
 
-    const history = [];  // undo stack
-    let timerInterval = null;
-    let blinkActive = false;
+  const defaultSettings = () => ({
+    quarters: 4, quarterMin: 10, otMin: 5, foulLimit: 5, sound: true,
+    shotOn: false, shotFull: 24, shotShort: 14,
+    timeoutsOn: false, timeoutsPer: 4, timeoutSec: 60,
+  });
 
-    // ── DOM refs ──
-    const $ = id => document.getElementById(id);
-    const homeScoreEl   = $('homeScore');
-    const awayScoreEl   = $('awayScore');
-    const homeFoulsEl   = $('homeFouls');
-    const awayFoulsEl   = $('awayFouls');
-    const homeLabel     = $('homeLabel');
-    const awayLabel     = $('awayLabel');
-    const timerDisplay  = $('timerDisplay');
-    const periodValue   = $('periodValue');
-    const startStopBtn  = $('startStopBtn');
-    const blinkOverlay  = $('blinkOverlay');
-    const timerModal    = $('timerModal');
-    const confirmModal  = $('confirmModal');
-    const soundBtn      = $('soundBtn');
-    const homePossDot   = $('homePossDot');
-    const awayPossDot   = $('awayPossDot');
+  const freshState = (settings = defaultSettings(), names = {}) => ({
+    home: { name: names.homeName || 'HOME', color: names.homeColor || '#2f7fe0', score: 0, fouls: 0, timeouts: settings.timeoutsPer },
+    away: { name: names.awayName || 'AWAY', color: names.awayColor || '#e0483e', score: 0, fouls: 0, timeouts: settings.timeoutsPer },
+    period: 1,
+    possession: null,
+    clock: { ms: settings.quarterMin * 60000, endAt: null },
+    shot: { ms: settings.shotFull * 1000, endAt: null },
+    timeout: null,
+    ended: false,
+    settings,
+  });
 
-    // ── Audio Context for Buzzer ──
-    let audioCtx = null;
-    function ensureAudioCtx() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+  const $ = (id) => document.getElementById(id);
+  const history = [];
+  let state = load();
+  let editSide = 'home';
+  let toastTimer = null;
+  let wakeLock = null;
+  let audioCtx = null;
+
+  // Storage
+  function load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && saved.home && saved.away && saved.clock) {
+        saved.settings = { ...defaultSettings(), ...saved.settings };
+        return saved;
+      }
+    } catch (e) { /* storage unavailable */ }
+    return freshState();
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+  }
+
+  // Time
+  const timeLeft = (c) => (c.endAt ? Math.max(0, c.endAt - Date.now()) : c.ms);
+  const isRunning = () => !!state.clock.endAt;
+  const freeze = (c) => { c.ms = timeLeft(c); c.endAt = null; };
+  const run = (c) => { if (c.ms > 0) c.endAt = Date.now() + c.ms; };
+  const periodLengthMs = (p = state.period) =>
+    (p > state.settings.quarters ? state.settings.otMin : state.settings.quarterMin) * 60000;
+
+  function formatClock(ms) {
+    if (ms >= LOW_CLOCK_MS) {
+      const total = Math.ceil(ms / 1000);
+      return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
     }
+    return (Math.floor(ms / 100) / 10).toFixed(1);
+  }
+  const formatMmSs = (ms) => {
+    const total = Math.ceil(ms / 1000);
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+  };
+  const formatShot = (ms) => (ms >= LOW_SHOT_MS ? String(Math.ceil(ms / 1000)) : (Math.floor(ms / 100) / 10).toFixed(1));
 
-    function playBuzzer() {
-        if (!state.soundOn) return;
-        try {
-            ensureAudioCtx();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.value = 440;
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1.5);
-        } catch(e) { /* silent fail */ }
+  function periodLabel(p = state.period) {
+    const q = state.settings.quarters;
+    if (p <= q) return `Q${p}`;
+    return p === q + 1 ? 'OT' : `OT${p - q}`;
+  }
+  const isFinal = () => state.ended && state.period >= state.settings.quarters && state.home.score !== state.away.score;
+
+  // Undo. Clock-changing actions also restore the clock, paused; others leave the running clock alone.
+  function remember(label, withClock = false) {
+    const snap = JSON.parse(JSON.stringify(state));
+    freeze(snap.clock);
+    freeze(snap.shot);
+    history.push({ label, withClock, snap });
+    if (history.length > MAX_UNDO) history.shift();
+  }
+
+  function undo() {
+    const entry = history.pop();
+    if (!entry) { toast('Nothing to undo'); return; }
+    const { snap, withClock, label } = entry;
+    if (!withClock) {
+      snap.clock = state.clock;
+      snap.shot = state.shot;
+      snap.ended = state.ended;
     }
+    if (snap.timeout && snap.timeout.endAt <= Date.now()) snap.timeout = null;
+    state = snap;
+    toast(`Undid ${label}`);
+    commit();
+  }
 
-    // ── Dynamic Score Sizing ──
-    function fitScoreFont(el) {
-        const panel = el.closest('.score-panel');
-        const panelW = panel.clientWidth;
-        const panelH = panel.clientHeight;
-        // Reserve space for team label at top and hints
-        const availW = panelW * 0.9;
-        const availH = panelH * 0.65;
-        const digits = el.textContent.length || 1;
-        // Scale based on available width per digit and height
-        const byWidth = availW / (digits * 0.65);
-        const byHeight = availH;
-        const size = Math.floor(Math.min(byWidth, byHeight));
-        el.style.fontSize = size + 'px';
+  // Actions
+  function addPoints(side, pts) {
+    remember(`+${pts} ${state[side].name}`);
+    state[side].score += pts;
+    commit();
+    bump(side);
+  }
+
+  function addFoul(side) {
+    remember(`foul ${state[side].name}`);
+    state[side].fouls += 1;
+    commit();
+  }
+
+  function callTimeout(side) {
+    if (!state.settings.timeoutsOn || state.timeout) return;
+    if (state[side].timeouts <= 0) { toast(`${state[side].name}: no timeouts left`); return; }
+    remember(`timeout ${state[side].name}`, true);
+    state[side].timeouts -= 1;
+    freeze(state.clock);
+    freeze(state.shot);
+    state.timeout = { side, endAt: Date.now() + state.settings.timeoutSec * 1000 };
+    commit();
+  }
+
+  function setPossession(side) {
+    remember('possession');
+    state.possession = side;
+    commit();
+  }
+  const togglePossession = () => setPossession(state.possession === 'home' ? 'away' : 'home');
+
+  function startClock() {
+    if (state.clock.ms <= 0 && !state.clock.endAt) return;
+    run(state.clock);
+    if (state.settings.shotOn) run(state.shot);
+    commit();
+  }
+  function pauseClock() {
+    freeze(state.clock);
+    freeze(state.shot);
+    commit();
+  }
+
+  function nextPeriod() {
+    remember(`start of ${periodLabel(state.period + 1)}`, true);
+    state.period += 1;
+    freeze(state.clock);
+    freeze(state.shot);
+    state.clock.ms = periodLengthMs();
+    state.shot.ms = state.settings.shotFull * 1000;
+    state.timeout = null;
+    state.ended = false;
+    if (state.period <= state.settings.quarters) SIDES.forEach((s) => { state[s].fouls = 0; });
+    commit();
+  }
+
+  function resetShot(seconds) {
+    if (!state.settings.shotOn) return;
+    state.shot.ms = seconds * 1000;
+    state.shot.endAt = isRunning() ? Date.now() + state.shot.ms : null;
+    commit();
+  }
+
+  function primaryAction() {
+    unlockAudio();
+    if (state.timeout) { state.timeout = null; commit(); return; }
+    if (state.ended) {
+      if (isFinal()) $('confirmDlg').showModal(); else nextPeriod();
+      return;
     }
+    if (isRunning()) pauseClock(); else startClock();
+  }
 
-    function fitAllScores() {
-        fitScoreFont(homeScoreEl);
-        fitScoreFont(awayScoreEl);
+  function swapSides() {
+    remember('swap');
+    [state.home, state.away] = [state.away, state.home];
+    if (state.possession) state.possession = state.possession === 'home' ? 'away' : 'home';
+    if (state.timeout) state.timeout.side = state.timeout.side === 'home' ? 'away' : 'home';
+    commit();
+  }
+
+  function newGame() {
+    const names = { homeName: state.home.name, homeColor: state.home.color, awayName: state.away.name, awayColor: state.away.color };
+    state = freshState(state.settings, names);
+    history.length = 0;
+    commit();
+  }
+
+  // Buzzer
+  function unlockAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { /* audio unavailable */ }
+  }
+  function buzz(seconds = 1.5) {
+    if (!state.settings.sound) return;
+    try {
+      unlockAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const t = audioCtx.currentTime;
+      osc.type = 'square';
+      osc.frequency.value = 440;
+      gain.gain.setValueAtTime(0.32, t);
+      gain.gain.setValueAtTime(0.32, t + seconds - 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.01, t + seconds);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + seconds);
+    } catch (e) { /* audio unavailable */ }
+  }
+
+  // Keep the screen awake while the clock runs
+  async function syncWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      if (isRunning() && !wakeLock && document.visibilityState === 'visible') {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      } else if (!isRunning() && wakeLock) {
+        await wakeLock.release();
+      }
+    } catch (e) { /* not granted */ }
+  }
+
+  // Tick
+  function tick() {
+    let changed = false;
+    if (state.timeout && state.timeout.endAt <= Date.now()) {
+      state.timeout = null;
+      buzz(1);
+      changed = true;
     }
-
-    // ── Render ──
-    function render() {
-        homeScoreEl.textContent = state.home.score;
-        awayScoreEl.textContent = state.away.score;
-        homeFoulsEl.textContent = state.home.fouls;
-        awayFoulsEl.textContent = state.away.fouls;
-        homeLabel.textContent = state.home.name;
-        awayLabel.textContent = state.away.name;
-        periodValue.textContent = state.period;
-        // Apply custom colors
-        homeScoreEl.style.color = state.home.color;
-        awayScoreEl.style.color = state.away.color;
-        homeFoulsEl.style.color = state.home.color;
-        awayFoulsEl.style.color = state.away.color;
-        renderTimer();
-        soundBtn.innerHTML = state.soundOn ? '&#128264;' : '&#128263;';
-        homePossDot.classList.toggle('active', state.possession === 'home');
-        awayPossDot.classList.toggle('active', state.possession === 'away');
-        fitAllScores();
+    if (state.settings.shotOn && state.shot.endAt && timeLeft(state.shot) <= 0) {
+      state.shot.ms = 0;
+      state.shot.endAt = null;
+      if (timeLeft(state.clock) > 0) buzz(1);
+      changed = true;
     }
-
-    function renderTimer() {
-        const t = Math.max(0, state.timerRemaining);
-        const m = Math.floor(t / 60);
-        const s = t % 60;
-        timerDisplay.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        timerDisplay.classList.toggle('danger', t <= 30 && t > 0);
-        startStopBtn.textContent = state.timerRunning ? 'Pause'
-            : (state.timerRemaining < state.timerDuration && state.timerRemaining > 0 ? 'Resume' : 'Start');
+    if (state.clock.endAt && timeLeft(state.clock) <= 0) {
+      state.clock.ms = 0;
+      state.clock.endAt = null;
+      freeze(state.shot);
+      state.ended = true;
+      buzz();
+      changed = true;
     }
+    if (changed) commit(); else renderTime();
+  }
 
-    // ── Undo ──
-    function pushUndo(action) {
-        history.push(action);
-        if (history.length > 100) history.shift();
+  // Render
+  const team = {
+    home: { root: $('teamHome'), ctl: $('ctlHome') },
+    away: { root: $('teamAway'), ctl: $('ctlAway') },
+  };
+
+  function textOn(hex) {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return (lum + 0.05) / 0.05 > 1.05 / (lum + 0.05) ? '#05070c' : '#ffffff';
+  }
+
+  function render() {
+    const s = state.settings;
+    SIDES.forEach((side) => {
+      const t = state[side];
+      const other = state[side === 'home' ? 'away' : 'home'];
+      const { root, ctl } = team[side];
+      [root, ctl].forEach((el) => {
+        el.style.setProperty('--team', t.color);
+        el.style.setProperty('--on-team', textOn(t.color));
+      });
+      root.querySelector('[data-name]').textContent = t.name;
+      const scoreEl = root.querySelector('[data-score]');
+      scoreEl.textContent = t.score;
+      scoreEl.style.setProperty('--chars', Math.max(2, String(t.score).length));
+      const inBonus = other.fouls >= s.foulLimit;
+      const foot = root.querySelector('[data-foot]');
+      foot.innerHTML =
+        `<span class="stat"><span class="stat-label">FOULS</span><span class="stat-value">${t.fouls}</span></span>` +
+        (s.timeoutsOn ? `<span class="stat timeouts"><span class="stat-label">T/O</span><span class="stat-value">${t.timeouts}</span></span>` : '') +
+        (inBonus ? '<span class="bonus">BONUS</span>' : '');
+      foot.setAttribute('aria-label', `Correct ${t.name}: ${t.fouls} fouls${inBonus ? ', in the bonus' : ''}`);
+      root.querySelector('.score-btn').setAttribute('aria-label', `Correct ${t.name} score, ${t.score}`);
+      ctl.querySelector('[data-to]').hidden = !s.timeoutsOn;
+      ctl.querySelector('[data-to]').disabled = t.timeouts <= 0;
+    });
+
+    [['home', $('possHome')], ['away', $('possAway')]].forEach(([side, btn]) => {
+      const on = state.possession === side;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on);
+      btn.setAttribute('aria-label', `Possession to ${state[side].name}`);
+      btn.title = `Possession to ${state[side].name} (P)`;
+      btn.style.setProperty('--team', state[side].color);
+      team[side].root.querySelector('[data-ball]').toggleAttribute('hidden', !on);
+    });
+
+    $('possLabel').hidden = s.shotOn;
+    $('shot').hidden = !s.shotOn;
+    $('shotFullBtn').hidden = !s.shotOn;
+    $('shotShortBtn').hidden = !s.shotOn;
+    $('shotFullBtn').textContent = s.shotFull;
+    $('shotShortBtn').textContent = s.shotShort;
+    $('undoBtn').disabled = history.length === 0;
+
+    renderPrimary();
+    renderTime();
+    if ($('clockDlg').open) renderClockDlg();
+  }
+
+  function renderPrimary() {
+    const btn = $('primaryBtn');
+    const running = isRunning();
+    btn.classList.toggle('running', running);
+    btn.classList.toggle('next', !!state.timeout || state.ended);
+    let html;
+    let label;
+    if (state.timeout) { html = 'END T/O'; label = 'End timeout'; }
+    else if (state.ended) {
+      html = isFinal() ? 'NEW GAME' : `NEXT: ${periodLabel(state.period + 1)}`;
+      label = isFinal() ? 'New game' : `Set up ${periodLabel(state.period + 1)}`;
+    } else if (running) { html = ICON_PAUSE; label = 'Pause clock'; }
+    else { html = ICON_PLAY; label = 'Start clock'; }
+    if (btn.dataset.view !== html) { btn.innerHTML = html; btn.dataset.view = html; }
+    btn.setAttribute('aria-label', label);
+    btn.title = `${label} (Space)`;
+  }
+
+  function renderTime() {
+    const clockEl = $('clock');
+    const row = $('periodRow');
+    const left = timeLeft(state.clock);
+    let text;
+    if (state.timeout) {
+      const tLeft = Math.max(0, state.timeout.endAt - Date.now());
+      text = String(Math.ceil(tLeft / 1000));
+      $('periodText').textContent = `TIMEOUT ${state[state.timeout.side].name}`;
+      $('periodSub').textContent = `${periodLabel()} ${formatClock(left)}`;
+    } else {
+      text = formatClock(left);
+      $('periodSub').textContent = '';
+      if (state.ended) $('periodText').textContent = isFinal() ? 'FINAL' : `END OF ${periodLabel()}`;
+      else $('periodText').textContent = periodLabel();
     }
+    if (clockEl.textContent !== text) clockEl.textContent = text;
+    clockEl.classList.toggle('timeout', !!state.timeout);
+    clockEl.classList.toggle('low', !state.timeout && left < LOW_CLOCK_MS && left > 0);
+    clockEl.classList.toggle('zero', !state.timeout && left === 0);
+    row.classList.toggle('alert', state.ended && !state.timeout);
+    row.classList.toggle('pause', !!state.timeout);
+    $('clockBtn').setAttribute('aria-label', `${$('periodText').textContent}, ${text}. Correct the clock or quarter`);
 
-    function undo() {
-        const action = history.pop();
-        if (!action) return;
-        if (action.type === 'score') {
-            state[action.team].score -= action.delta;
-            if (state[action.team].score < 0) state[action.team].score = 0;
-        } else if (action.type === 'foul') {
-            state[action.team].fouls -= action.delta;
-            if (state[action.team].fouls < 0) state[action.team].fouls = 0;
-        } else if (action.type === 'period') {
-            state.period -= action.delta;
-            if (state.period < 1) state.period = 1;
-        }
-        render();
+    if (state.settings.shotOn) {
+      const shotLeft = timeLeft(state.shot);
+      const off = left > 0 && left < shotLeft;
+      const shotText = off ? '--' : formatShot(shotLeft);
+      if ($('shot').textContent !== shotText) $('shot').textContent = shotText;
+      $('shot').classList.toggle('low', !off && shotLeft < LOW_SHOT_MS);
     }
+    if ($('clockDlg').open) $('clockEdit').textContent = formatClock(left);
+  }
 
-    // ── Score Touch ──
-    document.querySelectorAll('.score-touch-zone').forEach(zone => {
-        zone.addEventListener('click', (e) => {
-            dismissBlink();
-            const team = zone.dataset.team;
-            const delta = zone.dataset.dir === 'up' ? 1 : -1;
-            state[team].score = Math.max(0, state[team].score + delta);
-            pushUndo({ type: 'score', team, delta });
-            flash(zone);
-            render();
-        });
-    });
-
-    // ── Foul Touch ──
-    document.querySelectorAll('.foul-touch-zone').forEach(zone => {
-        zone.addEventListener('click', (e) => {
-            dismissBlink();
-            const team = zone.dataset.team;
-            const delta = zone.dataset.dir === 'up' ? 1 : -1;
-            state[team].fouls = Math.max(0, state[team].fouls + delta);
-            pushUndo({ type: 'foul', team, delta });
-            render();
-        });
-    });
-
-    // ── Flash effect ──
-    function flash(el) {
-        el.classList.add('flash');
-        setTimeout(() => el.classList.remove('flash'), 150);
-    }
-
-    // ── Timer ──
-    startStopBtn.addEventListener('click', () => {
-        dismissBlink();
-        ensureAudioCtx(); // unlock audio on user gesture
-        if (state.timerRunning) {
-            stopTimer();
-        } else {
-            startTimer();
-        }
-    });
-
-    $('resetBtn').addEventListener('click', () => {
-        dismissBlink();
-        stopTimer();
-        state.timerRemaining = state.timerDuration;
-        render();
-    });
-
-    function startTimer() {
-        if (state.timerRemaining <= 0) return;
-        state.timerRunning = true;
-        renderTimer();
-        timerInterval = setInterval(() => {
-            state.timerRemaining--;
-            if (state.timerRemaining <= 0) {
-                state.timerRemaining = 0;
-                stopTimer();
-                triggerBlink();
-                playBuzzer();
-            }
-            renderTimer();
-        }, 1000);
-    }
-
-    function stopTimer() {
-        state.timerRunning = false;
-        clearInterval(timerInterval);
-        timerInterval = null;
-        renderTimer();
-    }
-
-    // ── Blink ──
-    function triggerBlink() {
-        blinkActive = true;
-        blinkOverlay.classList.add('active');
-    }
-
-    function dismissBlink() {
-        if (!blinkActive) return;
-        blinkActive = false;
-        blinkOverlay.classList.remove('active');
-    }
-
-    blinkOverlay.addEventListener('click', dismissBlink);
-
-    // ── Gear / Timer Settings ──
-    $('gearBtn').addEventListener('click', () => {
-        const m = Math.floor(state.timerDuration / 60);
-        const s = state.timerDuration % 60;
-        $('setMinutes').value = m;
-        $('setSeconds').value = s;
-        $('setHomeName').value = state.home.name;
-        $('setAwayName').value = state.away.name;
-        $('setHomeColor').value = state.home.color;
-        $('setAwayColor').value = state.away.color;
-        timerModal.classList.add('active');
-    });
-
-    $('modalCancel').addEventListener('click', () => timerModal.classList.remove('active'));
-
-    $('modalSave').addEventListener('click', () => {
-        const m = Math.max(0, parseInt($('setMinutes').value) || 0);
-        const s = Math.max(0, Math.min(59, parseInt($('setSeconds').value) || 0));
-        state.timerDuration = m * 60 + s;
-        state.timerRemaining = state.timerDuration;
-        stopTimer();
-        // Team names
-        state.home.name = ($('setHomeName').value.trim() || 'HOME').toUpperCase();
-        state.away.name = ($('setAwayName').value.trim() || 'AWAY').toUpperCase();
-        // Team colors
-        state.home.color = $('setHomeColor').value;
-        state.away.color = $('setAwayColor').value;
-        timerModal.classList.remove('active');
-        render();
-    });
-
-    timerModal.addEventListener('click', (e) => {
-        if (e.target === timerModal) timerModal.classList.remove('active');
-    });
-
-    // ── Period ──
-    $('periodUp').addEventListener('click', () => {
-        state.period++;
-        pushUndo({ type: 'period', delta: 1 });
-        render();
-    });
-
-    $('periodDown').addEventListener('click', () => {
-        if (state.period > 1) {
-            state.period--;
-            pushUndo({ type: 'period', delta: -1 });
-            render();
-        }
-    });
-
-    // ── Swap Sides ──
-    $('swapBtn').addEventListener('click', () => {
-        const tmp = { ...state.home };
-        state.home = { ...state.away };
-        state.away = { ...tmp };
-        state.possession = state.possession === 'home' ? 'away' : 'home';
-        render();
-    });
-
-    // ── Possession Dot ──
-    homePossDot.addEventListener('click', () => {
-        state.possession = 'home';
-        render();
-    });
-
-    awayPossDot.addEventListener('click', () => {
-        state.possession = 'away';
-        render();
-    });
-
-    // ── Sound Toggle ──
-    soundBtn.addEventListener('click', () => {
-        state.soundOn = !state.soundOn;
-        render();
-    });
-
-    // ── Fullscreen ──
-    $('fullscreenBtn').addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            document.exitFullscreen();
-        }
-    });
-
-    document.addEventListener('fullscreenchange', () => {
-        $('fullscreenBtn').innerHTML = document.fullscreenElement ? '&#x2716;' : '&#x26F6;';
-        // Refit scores after fullscreen transition
-        setTimeout(fitAllScores, 100);
-    });
-
-    // ── Undo ──
-    $('undoBtn').addEventListener('click', undo);
-
-    // ── New Game ──
-    $('resetAllBtn').addEventListener('click', () => {
-        confirmModal.classList.add('active');
-    });
-
-    $('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('active'));
-
-    $('confirmOk').addEventListener('click', () => {
-        confirmModal.classList.remove('active');
-        stopTimer();
-        dismissBlink();
-        state.home.score = 0;
-        state.home.fouls = 0;
-        state.away.score = 0;
-        state.away.fouls = 0;
-        state.period = 1;
-        state.timerRemaining = state.timerDuration;
-        history.length = 0;
-        render();
-    });
-
-    confirmModal.addEventListener('click', (e) => {
-        if (e.target === confirmModal) confirmModal.classList.remove('active');
-    });
-
-    // ── Keyboard Shortcuts ──
-    document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT') return;
-        dismissBlink();
-        switch (e.key) {
-            case ' ':
-                e.preventDefault();
-                startStopBtn.click();
-                break;
-            case 'z':
-                if (e.ctrlKey || e.metaKey) { e.preventDefault(); undo(); }
-                break;
-            case 'p':
-            case 'P':
-                state.possession = state.possession === 'home' ? 'away' : 'home';
-                render();
-                break;
-        }
-    });
-
-    // ── Prevent zoom on double-tap (iOS) ──
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) e.preventDefault();
-        lastTouchEnd = now;
-    }, { passive: false });
-
-    // ── Init ──
+  function commit() {
     render();
-    window.addEventListener('resize', fitAllScores);
+    save();
+    syncWakeLock();
+  }
+
+  function bump(side) {
+    const el = team[side].root.querySelector('[data-score]');
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+
+  function toast(message) {
+    const el = $('toast');
+    el.textContent = message;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  // Stepper fields
+  function stepperRow({ id, label, min, max, value = '', onChange }) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<label for="${id}">${label}</label><div class="stepper">
+      <button type="button" aria-label="Decrease ${label}">&minus;</button>
+      <input id="${id}" type="number" inputmode="numeric" min="${min}" max="${max}" value="${value}">
+      <button type="button" aria-label="Increase ${label}">+</button></div>`;
+    const input = row.querySelector('input');
+    const [down, up] = row.querySelectorAll('button');
+    const clamp = (v) => Math.min(max, Math.max(min, Number.isFinite(v) ? v : min));
+    const set = (v) => { input.value = clamp(v); if (onChange) onChange(clamp(v)); };
+    down.addEventListener('click', () => set(parseInt(input.value, 10) - 1));
+    up.addEventListener('click', () => set(parseInt(input.value, 10) + 1));
+    input.addEventListener('change', () => set(parseInt(input.value, 10)));
+    return row;
+  }
+
+  const SETTING_FIELDS = {
+    gameFields: [
+      { id: 'setQuarters', key: 'quarters', label: 'Quarters', min: 1, max: 8 },
+      { id: 'setQuarterMin', key: 'quarterMin', label: 'Quarter minutes', min: 1, max: 60 },
+      { id: 'setOtMin', key: 'otMin', label: 'Overtime minutes', min: 1, max: 30 },
+      { id: 'setFoulLimit', key: 'foulLimit', label: 'Bonus at team foul', min: 1, max: 20 },
+    ],
+    shotFields: [
+      { id: 'setShotFull', key: 'shotFull', label: 'Full reset seconds', min: 5, max: 60 },
+      { id: 'setShotShort', key: 'shotShort', label: 'Short reset seconds', min: 3, max: 60 },
+    ],
+    timeoutFields: [
+      { id: 'setTimeoutsPer', key: 'timeoutsPer', label: 'Timeouts per team', min: 1, max: 12 },
+      { id: 'setTimeoutSec', key: 'timeoutSec', label: 'Timeout seconds', min: 10, max: 180 },
+    ],
+  };
+  Object.entries(SETTING_FIELDS).forEach(([boxId, fields]) => {
+    fields.forEach((f) => $(boxId).appendChild(stepperRow(f)));
+  });
+  const allSettingFields = Object.values(SETTING_FIELDS).flat();
+
+  function syncOptionFields() {
+    $('shotFields').hidden = !$('setShotOn').checked;
+    $('timeoutFields').hidden = !$('setTimeoutsOn').checked;
+  }
+  $('setShotOn').addEventListener('change', syncOptionFields);
+  $('setTimeoutsOn').addEventListener('change', syncOptionFields);
+
+  function renderMenuButtons() {
+    $('soundBtn').innerHTML = `${state.settings.sound ? ICON_SOUND_ON : ICON_SOUND_OFF}Buzzer ${state.settings.sound ? 'on' : 'off'}`;
+    $('fsLabel').textContent = fullscreenElement() ? 'Exit full screen' : 'Full screen';
+  }
+
+  function openMenu() {
+    const s = state.settings;
+    allSettingFields.forEach((f) => { $(f.id).value = s[f.key]; });
+    $('setHomeName').value = state.home.name;
+    $('setHomeColor').value = state.home.color;
+    $('setAwayName').value = state.away.name;
+    $('setAwayColor').value = state.away.color;
+    $('setShotOn').checked = s.shotOn;
+    $('setTimeoutsOn').checked = s.timeoutsOn;
+    syncOptionFields();
+    renderMenuButtons();
+    $('menuDlg').showModal();
+  }
+
+  function saveMenu() {
+    remember('settings', true);
+    const s = state.settings;
+    const oldLength = periodLengthMs();
+    const oldFull = s.shotFull;
+    const oldPer = s.timeoutsPer;
+    const wasShotOn = s.shotOn;
+    allSettingFields.forEach((f) => {
+      const v = parseInt($(f.id).value, 10);
+      s[f.key] = Math.min(f.max, Math.max(f.min, Number.isFinite(v) ? v : s[f.key]));
+    });
+    s.shotOn = $('setShotOn').checked;
+    s.timeoutsOn = $('setTimeoutsOn').checked;
+    state.home.name = ($('setHomeName').value.trim() || 'HOME').toUpperCase();
+    state.away.name = ($('setAwayName').value.trim() || 'AWAY').toUpperCase();
+    state.home.color = $('setHomeColor').value;
+    state.away.color = $('setAwayColor').value;
+
+    if (!isRunning() && state.clock.ms === oldLength) state.clock.ms = periodLengthMs();
+    if (s.timeoutsPer !== oldPer) {
+      SIDES.forEach((side) => { state[side].timeouts = Math.max(0, state[side].timeouts + s.timeoutsPer - oldPer); });
+    }
+    if (s.shotOn && (!wasShotOn || (!state.shot.endAt && state.shot.ms === oldFull * 1000))) {
+      state.shot.ms = s.shotFull * 1000;
+      state.shot.endAt = isRunning() ? Date.now() + state.shot.ms : null;
+    }
+    if (!s.shotOn) freeze(state.shot);
+    $('menuDlg').close();
+    commit();
+  }
+
+  // Clock dialog
+  const NUDGES = [
+    ['-1:00', -60000], ['-0:10', -10000], ['-0:01', -1000], ['-0.1', -100],
+    ['+1:00', 60000], ['+0:10', 10000], ['+0:01', 1000], ['+0.1', 100],
+  ];
+  NUDGES.forEach(([label, delta]) => {
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = label;
+    b.setAttribute('aria-label', `Clock ${label}`);
+    b.addEventListener('click', () => adjustClock(delta));
+    $('nudges').appendChild(b);
+  });
+
+  function adjustClock(delta) {
+    remember('clock change', true);
+    const next = Math.max(0, timeLeft(state.clock) + delta);
+    if (state.clock.endAt) state.clock.endAt = Date.now() + next;
+    else state.clock.ms = next;
+    if (next > 0) state.ended = false;
+    commit();
+  }
+
+  function renderClockDlg() {
+    $('periodEdit').value = periodLabel();
+    $('periodDown').disabled = state.period <= 1;
+    $('startNext').textContent = `Go to ${periodLabel(state.period + 1)}`;
+    $('clockEdit').textContent = formatClock(timeLeft(state.clock));
+  }
+
+  function changePeriodNumber(delta) {
+    const next = state.period + delta;
+    if (next < 1) return;
+    remember('quarter change', true);
+    state.period = next;
+    commit();
+  }
+
+  // Team dialog
+  function openTeam(side) {
+    editSide = side;
+    const t = state[side];
+    $('teamTitle').textContent = t.name;
+    const box = $('teamFields');
+    box.textContent = '';
+    const field = (id, label, key, max) => box.appendChild(stepperRow({
+      id, label, min: 0, max, value: t[key],
+      onChange: (v) => {
+        if (state[editSide][key] === v) return;
+        remember(`${label.toLowerCase()} ${state[editSide].name}`);
+        state[editSide][key] = v;
+        commit();
+      },
+    }));
+    field('editScore', 'Score', 'score', 999);
+    field('editFouls', 'Fouls', 'fouls', 99);
+    if (state.settings.timeoutsOn) field('editTimeouts', 'Timeouts left', 'timeouts', 12);
+    $('teamDlg').showModal();
+  }
+
+  // Fullscreen
+  const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+  const canFullscreen = !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+  if (!canFullscreen) $('fsBtn').hidden = true;
+  function toggleFullscreen() {
+    const root = document.documentElement;
+    if (fullscreenElement()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else {
+      $('menuDlg').close();
+      const result = (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+      if (result && result.catch) result.catch(() => {});
+    }
+  }
+
+  // Wiring
+  SIDES.forEach((side) => {
+    const { ctl } = team[side];
+    ctl.querySelectorAll('[data-pts]').forEach((b) => b.addEventListener('click', () => addPoints(side, Number(b.dataset.pts))));
+    ctl.querySelector('[data-foul]').addEventListener('click', () => addFoul(side));
+    ctl.querySelector('[data-to]').addEventListener('click', () => callTimeout(side));
+    team[side].root.querySelectorAll('[data-edit-team]').forEach((b) => b.addEventListener('click', () => openTeam(side)));
+  });
+
+  $('primaryBtn').addEventListener('click', primaryAction);
+  $('undoBtn').addEventListener('click', undo);
+  $('menuBtn').addEventListener('click', openMenu);
+  $('possHome').addEventListener('click', () => setPossession('home'));
+  $('possAway').addEventListener('click', () => setPossession('away'));
+  $('shotFullBtn').addEventListener('click', () => resetShot(state.settings.shotFull));
+  $('shotShortBtn').addEventListener('click', () => resetShot(state.settings.shotShort));
+  $('clockBtn').addEventListener('click', () => { renderClockDlg(); $('clockDlg').showModal(); });
+
+  $('menuCancel').addEventListener('click', () => $('menuDlg').close());
+  $('menuSave').addEventListener('click', saveMenu);
+  $('swapBtn').addEventListener('click', () => {
+    swapSides();
+    $('setHomeName').value = state.home.name;
+    $('setHomeColor').value = state.home.color;
+    $('setAwayName').value = state.away.name;
+    $('setAwayColor').value = state.away.color;
+    toast('Sides swapped');
+  });
+  $('soundBtn').addEventListener('click', () => {
+    state.settings.sound = !state.settings.sound;
+    unlockAudio();
+    renderMenuButtons();
+    save();
+  });
+  $('fsBtn').addEventListener('click', toggleFullscreen);
+  $('newGameBtn').addEventListener('click', () => { $('menuDlg').close(); $('confirmDlg').showModal(); });
+
+  $('clockDone').addEventListener('click', () => $('clockDlg').close());
+  $('clockReset').addEventListener('click', () => {
+    remember('clock reset', true);
+    freeze(state.clock);
+    freeze(state.shot);
+    state.clock.ms = periodLengthMs();
+    state.shot.ms = state.settings.shotFull * 1000;
+    state.ended = false;
+    commit();
+  });
+  $('startNext').addEventListener('click', () => { nextPeriod(); $('clockDlg').close(); });
+  $('periodDown').addEventListener('click', () => changePeriodNumber(-1));
+  $('periodUp').addEventListener('click', () => changePeriodNumber(1));
+  $('teamDone').addEventListener('click', () => $('teamDlg').close());
+  $('confirmCancel').addEventListener('click', () => $('confirmDlg').close());
+  $('confirmOk').addEventListener('click', () => { $('confirmDlg').close(); newGame(); });
+
+  // Tapping outside a dialog closes it, except Settings, which has unsaved edits.
+  ['clockDlg', 'teamDlg', 'confirmDlg'].forEach((id) => {
+    $(id).addEventListener('click', (e) => { if (e.target === $(id)) $(id).close(); });
+  });
+
+  // A mouse or touch press should not leave focus on a button, so Space stays the clock key.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (b && e.detail > 0 && !b.closest('dialog')) b.blur();
+  });
+  document.addEventListener('pointerdown', unlockAudio, { once: true });
+
+  // Keyboard
+  const KEYS = {
+    1: () => addPoints('home', 1), 2: () => addPoints('home', 2), 3: () => addPoints('home', 3),
+    8: () => addPoints('away', 1), 9: () => addPoints('away', 2), 0: () => addPoints('away', 3),
+    f: () => addFoul('home'), j: () => addFoul('away'),
+    t: () => callTimeout('home'), y: () => callTimeout('away'),
+    p: togglePossession, u: undo,
+    s: () => resetShot(state.settings.shotFull),
+    d: () => resetShot(state.settings.shotShort),
+  };
+  document.addEventListener('keydown', (e) => {
+    if (document.querySelector('dialog[open]')) return;
+    const key = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && key === 'z') { e.preventDefault(); undo(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    if (key === ' ') {
+      if (e.target.tagName === 'BUTTON') return;
+      e.preventDefault();
+      primaryAction();
+      return;
+    }
+    if (KEYS[key]) { e.preventDefault(); KEYS[key](); }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { tick(); syncWakeLock(); }
+  });
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach((n) => document.addEventListener(n, renderMenuButtons));
+
+  // A clock that ran out while the page was closed ends quietly.
+  if (state.clock.endAt && state.clock.endAt <= Date.now()) {
+    state.clock = { ms: 0, endAt: null };
+    freeze(state.shot);
+    state.ended = true;
+  }
+  if (state.timeout && state.timeout.endAt <= Date.now()) state.timeout = null;
+
+  // Size the digits from the font actually loaded, so a blocked web font cannot overflow the panels.
+  function measureDigits() {
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = `100px ${getComputedStyle(document.documentElement).getPropertyValue('--display')}`;
+    const root = document.documentElement.style;
+    root.setProperty('--digit-em', (ctx.measureText('00').width / 200).toFixed(3));
+    root.setProperty('--clock-em', (ctx.measureText('10:00').width / 100).toFixed(3));
+  }
+  measureDigits();
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('100px "Bebas Neue"', '0123456789:').then(measureDigits).catch(() => {});
+  }
+
+  commit();
+  setInterval(tick, TICK_MS);
 })();
 </script>
 </body>
