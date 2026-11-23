@@ -6,9 +6,11 @@ The game behind `fun/asteroid_storm.html` (moved from `misc/dodge.html`, which n
 - `art.js`: palette, ship sprite, procedural asteroids, capsules, the 5 × 7 bitmap font, nebulae, stars and planets.
 - `audio.js`: Web Audio chiptune loop (it adds layers each stage) and effects.
 - `leaderboard.js`: the Top Survivors board.
+- `joystick.js`: the pixel-art virtual joystick shown below the game on narrow touch screens. It steers at up to keyboard speed, eased for fine control, and a tap on it starts, resumes or restarts a run.
+- `title.js`: the animated pixel-art title banner.
 - `trophies.js`: the 16 trophies (milestones, pixel-art badges and physics facts) and the trophy case beside the board.
 
-Cloudflare keeps stylesheets and scripts at its edge for up to four hours, so the page loads them with a version query (`?v=YYYYMMDD-name`): in `fun/asteroid_storm.html` for `style.css` and `main.js`, and in the `import` lines of `main.js`, `trophies.js` and `title.js`. Change it everywhere at once whenever any of these files changes, or visitors can get a new page with old styles or code.
+Cloudflare keeps stylesheets and scripts at its edge for up to four hours, so the page loads them with a version query (`?v=YYYYMMDD-name`): in `fun/asteroid_storm.html` for `style.css` and `main.js`, and in the `import` lines of `main.js`, `trophies.js`, `title.js` and `joystick.js`. Change it everywhere at once whenever any of these files changes, or visitors can get a new page with old styles or code.
 
 ## Difficulty
 

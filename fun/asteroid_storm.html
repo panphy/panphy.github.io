@@ -51,8 +51,8 @@
   </script>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <link rel="stylesheet" href="asteroid_storm/style.css?v=20261123-title">
-  <script type="module" src="asteroid_storm/main.js?v=20261123-title"></script>
+  <link rel="stylesheet" href="asteroid_storm/style.css?v=20261123-joystick">
+  <script type="module" src="asteroid_storm/main.js?v=20261123-joystick"></script>
 </head>
 
 <body>
@@ -76,6 +76,7 @@
           </span>
           <span class="label">Pause</span>
         </button>
+        <canvas id="joystick" class="joystick" width="48" height="48" aria-hidden="true"></canvas>
         <button type="button" class="pixel-button" id="soundButton" aria-pressed="true" title="Sound (M)">
           <span class="icon" aria-hidden="true">
             <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><path d="M0 3h2v2H0zM2 2h1v4H2zM3 1h1v6H3zM5 2h1v1H5zM5 5h1v1H5zM6 3h1v2H6z"/></svg>
