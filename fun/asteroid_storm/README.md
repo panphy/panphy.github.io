@@ -6,6 +6,7 @@ The game behind `fun/asteroid_storm.html` (moved from `misc/dodge.html`, which n
 - `art.js`: palette, ship sprite, procedural asteroids, capsules, the 5 × 7 bitmap font, nebulae, stars and planets.
 - `audio.js`: Web Audio chiptune loop (it adds layers each stage) and effects.
 - `leaderboard.js`: the Top Survivors board.
+- `trophies.js`: the 16 trophies (milestones, pixel-art badges and physics facts) and the trophy case beside the board.
 
 ## Difficulty
 
@@ -18,3 +19,7 @@ Scores (survival times in seconds) are read from the `dodge_leaderboard` table a
 A run in which the testing cheat (god mode) was switched on is unranked: it saves no personal best and is never offered for submission. The cheat code is stored only as a hash (`TRAIL_PHASE_SEED`), as in Spellwave.
 
 To reset the board after a gameplay change: copy the table into the `backup` schema (`create table backup.dodge_leaderboard_YYYYMMDD as table public.dodge_leaderboard;`), check that the row counts match, then run `delete from public.dodge_leaderboard;`. In the same change, bump `CACHE_KEY` in `leaderboard.js` and add the old key to `OLD_CACHE_KEYS`, so browsers drop their saved copy of the old board.
+
+## Trophies and callouts
+
+Trophies are kept only in this browser (localStorage: `dodgeTrophiesV1`, `dodgeTrophiesSeenV1`, and `dodgeCapsulesSeenV1` for Collector), never on the server, and are not earned in a run that used god mode. They do not affect the leaderboard. A new trophy slides into the top-right corner of the field, and stays highlighted in the trophy case until opened. Close calls show a callout under the timer, bigger for closer passes; close calls within 2 seconds of each other build a streak, and the game-over screen shows the best streak.

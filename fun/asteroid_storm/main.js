@@ -6,6 +6,7 @@ import {
 } from './art.js';
 import { createAudio } from './audio.js';
 import { createLeaderboard, formatTime } from './leaderboard.js';
+import { createTrophies, trophyArt } from './trophies.js';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -125,6 +126,11 @@ const submitButton = document.getElementById('submitInitials');
 const skipButton = document.getElementById('skipInitials');
 
 const audio = createAudio();
+const trophies = createTrophies({
+  grid: document.getElementById('trophyGrid'),
+  count: document.getElementById('trophyCount'),
+  detail: document.getElementById('trophyDetail'),
+});
 const board = createLeaderboard({
   list: document.getElementById('scoreList'),
   status: document.getElementById('boardStatus'),
@@ -201,6 +207,12 @@ const state = {
   nebulaFrom: 0,
   nebulaFade: 1,
   nearMisses: 0,
+  streak: 0,
+  bestStreak: 0,
+  lastNearAt: -10,
+  callout: null,
+  toasts: [], // trophies waiting to be shown, oldest first
+  runTrophies: 0,
   pickups: 0,
   best: 0,
   newBest: false,
@@ -380,6 +392,7 @@ function updateRocks(dt, { collide }) {
         crash(r);
       } else if (d < reach + NEAR_MISS_GAP) {
         r.near = true;
+        r.minGap = Math.min(r.minGap ?? Infinity, d - reach);
       } else if (r.near && !r.nearDone && d > reach + NEAR_MISS_GAP * 2) {
         r.nearDone = true;
         nearMiss(r);
@@ -425,6 +438,11 @@ function updateWells(dt, collide) {
       const d = 24 + rng() * 20;
       addParticle({ x: w.x + Math.cos(a) * d, y: w.y + Math.sin(a) * d, vx: -Math.cos(a) * 30 - Math.sin(a) * 25, vy: -Math.sin(a) * 30 + Math.cos(a) * 25, life: 0.7, max: 0.7, color: pick([PAL.violet, PAL.rose, '#5b3fb0']), size: 1 });
     }
+    if (collide && s.alive) {
+      const dist = Math.hypot(w.x - s.x, w.y - s.y);
+      if (dist < w.reach * 0.3) w.deep = true;
+      else if (w.deep && dist > w.reach * 0.85) { w.deep = false; awardTrophy('horizon'); }
+    }
     if (collide && s.alive && s.grace <= 0 && !state.god && Math.hypot(w.x - s.x, w.y - s.y) < w.core + hitRadius() * 0.6) {
       if (s.shield) {
         // A shield is spent getting thrown clear of the core.
@@ -434,6 +452,7 @@ function updateWells(dt, collide) {
         moveShipBy(((s.x - w.x) / d) * 30, ((s.y - w.y) / d) * 30);
         popup('SHIELD LOST', s.x, s.y - 14, PAL.glass);
         audio.sfx('shield');
+        awardTrophy('shield');
       } else {
         crash({ vx: 0, vy: 0 });
       }
@@ -477,6 +496,7 @@ function updateCapsules(dt, collect) {
 function applyCapsule(kind) {
   const s = state.ship;
   state.pickups += 1;
+  if (!state.godRun && trophies.noteCapsule(kind)) awardTrophy('collector');
   const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP', wave: 'SHOCKWAVE' }[kind];
   if (kind === 'shield') s.shield = true;
   if (kind === 'slow') state.slow = SLOW_SECONDS;
@@ -510,6 +530,7 @@ function updateWaves(dt) {
       r.vy = (dy / d) * speed;
       r.near = false;
       burst(r.x, r.y, 5, [CAPSULES.wave.light, PAL.white], 50);
+      if (w.pushed.size >= 6) awardTrophy('shockwave');
     }
     if (w.r > WAVE_REACH + 14) state.waves.splice(i, 1);
   }
@@ -599,12 +620,44 @@ function exhaust(dt, strength = 1) {
   });
 }
 
+// Near-miss callouts: the closer the pass, the bigger the word. Close calls within
+// STREAK_WINDOW of each other build a streak, which escalates the callout.
+const STREAK_WINDOW = 2; // s
+const CALLOUT_WORDS = [
+  ['NICE!', 'WHOA!', 'SLICK!', 'SMOOTH!'],
+  ['CLOSE SHAVE!', 'YIKES!', 'NEAT DODGE!', 'HAIRLINE!'],
+  ['RAZOR!', 'TOO CLOSE!', 'WHISKER!', 'PAINT SCRATCH!'],
+];
+const STREAK_TITLES = [[8, 'GHOST PILOT'], [5, 'UNTOUCHABLE'], [3, 'DAREDEVIL']];
+
 function nearMiss(rock) {
   state.nearMisses += 1;
   const s = state.ship;
   burst((rock.x + s.x) / 2, (rock.y + s.y) / 2, 6, [PAL.glassHi], 40);
-  popup('CLOSE!', s.x, s.y - 16, PAL.glassHi);
-  audio.sfx('near');
+  state.streak = state.clock - state.lastNearAt <= STREAK_WINDOW ? state.streak + 1 : 1;
+  state.lastNearAt = state.clock;
+  state.bestStreak = Math.max(state.bestStreak, state.streak);
+  const gap = rock.minGap ?? NEAR_MISS_GAP;
+  const tier = gap < 1.5 ? 2 : gap < 3.5 ? 1 : 0;
+  const title = state.streak >= 2 ? (STREAK_TITLES.find(([n]) => state.streak >= n) || [0, ''])[1] : '';
+  state.callout = {
+    text: pick(CALLOUT_WORDS[tier]),
+    sub: state.streak >= 2 ? `X${state.streak} ${title}`.trim() : '',
+    tier: Math.max(tier, state.streak >= 3 ? 1 : 0),
+    t: 0,
+  };
+  audio.sfx('near', state.streak);
+  if (state.nearMisses >= 10) awardTrophy('daredevil');
+  if (state.streak >= 5) awardTrophy('untouchable');
+  if (rock.kind === 'comet') awardTrophy('comet');
+}
+
+// Trophies are never earned in a run that used god mode.
+function awardTrophy(id) {
+  if (state.godRun || state.mode !== 'playing') return;
+  if (!trophies.award(id)) return;
+  state.runTrophies += 1;
+  state.toasts.push({ id, t: 0 });
 }
 
 // A flare's loop rises from one edge, passes through (about) where the ship is when the warning
@@ -701,6 +754,7 @@ function updateFlares(dt) {
       state.shake = Math.max(state.shake, 0.18);
       audio.sfx('flare');
     }
+    if (f.fired && s.alive && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6 + 10) f.brushed = true;
     if (f.fired && s.alive && s.grace <= 0 && !state.god && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6) {
       if (s.shield) shieldBreak({ x: s.x, y: s.y });
       else crash({ vx: 0, vy: 0 });
@@ -718,7 +772,10 @@ function updateFlares(dt) {
         addParticle({ x, y, vx: Math.cos(a) * v * out + (rng() - 0.5) * 20, vy: Math.sin(a) * v * out + (rng() - 0.5) * 20, life: 0.3 + rng() * 0.4, max: 0.7, color: pick([PAL.white, PAL.gold, PAL.amber, PAL.amber, PAL.hull]), size: rng() < 0.3 ? 2 : 1, drag: 2 });
       }
     }
-    if (f.t >= FLARE_WARN + FLARE_FIRE) state.flares.splice(i, 1);
+    if (f.t >= FLARE_WARN + FLARE_FIRE) {
+      if (f.brushed && s.alive) awardTrophy('flare');
+      state.flares.splice(i, 1);
+    }
   }
 }
 
@@ -748,6 +805,7 @@ function drawFlareBeams() {
 }
 
 function shieldBreak(rock) {
+  awardTrophy('shield');
   const s = state.ship;
   s.shield = false;
   s.grace = SHIELD_GRACE;
@@ -809,6 +867,11 @@ function resetWorld() {
   state.mini = 0;
   state.ship = freshShip();
   state.nearMisses = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.lastNearAt = -10;
+  state.callout = null;
+  state.runTrophies = 0;
   state.pickups = 0;
   state.newBest = false;
   state.shake = 0;
@@ -914,6 +977,24 @@ function update(dt) {
     state.banner.t += dt;
     if (state.banner.t > 2.4) state.banner = null;
   }
+  if (state.callout) {
+    state.callout.t += dt;
+    if (state.callout.t > CALLOUT_LIFE) state.callout = null;
+  }
+  if (state.mode !== 'paused' && state.toasts.length) {
+    const toast = state.toasts[0];
+    if (toast.t === 0) {
+      audio.sfx('trophy');
+      // A ring of gold sparkles where the badge will settle.
+      const [bx, by] = toastBadgeCentre(1);
+      for (let k = 0; k < 24; k += 1) {
+        const a = (k / 24) * Math.PI * 2;
+        addParticle({ x: bx + Math.cos(a) * 6, y: by + Math.sin(a) * 6, vx: Math.cos(a) * 55, vy: Math.sin(a) * 55, life: 0.6, max: 0.6, color: pick([PAL.gold, PAL.white, PAL.amber]), size: 1, drag: 3 });
+      }
+    }
+    toast.t += dt;
+    if (toast.t > TOAST_LIFE) state.toasts.shift();
+  }
 
   if (state.mode === 'paused') return;
 
@@ -938,6 +1019,8 @@ function update(dt) {
 
   if (state.mode === 'playing') {
     state.time += world;
+    for (const [secs, id] of TIME_TROPHIES) if (state.time >= secs) awardTrophy(id);
+    if (state.time >= 45 && state.pickups === 0) awardTrophy('purist');
     const stage = stageAt(state.time);
     if (stage !== state.stage) enterStage(stage);
     const def = STAGES[state.stage];
@@ -1016,7 +1099,11 @@ function updateIntro(dt) {
   if (t >= INTRO_SECONDS) startPlay();
 }
 
+const TIME_TROPHIES = [[30, 'liftoff'], [60, 'orbit'], [90, 'escape'], [120, 'deep']];
+const STAGE_TROPHIES = { 2: 'ice', 3: 'magma', 4: 'storm' };
+
 function enterStage(stage) {
+  if (STAGE_TROPHIES[stage]) awardTrophy(STAGE_TROPHIES[stage]);
   state.stage = stage;
   state.banner = { title: `STAGE ${stage + 1}`, name: STAGES[stage].name, t: 0 };
   state.warp = Math.max(state.warp, 0.6);
@@ -1295,6 +1382,83 @@ function timerBar(label, left, y, fraction, color) {
   ctx.fillRect(x, y + 2, Math.round(32 * fraction), 3);
 }
 
+const CALLOUT_LIFE = 0.75; // s
+const TOAST_LIFE = 3; // s a trophy banner stays, including its entrance and exit
+const TOAST_IN = 0.55;
+const TOAST_OUT = 0.45;
+
+// The callout sits under the timer, out of the ship's way. It pops in large, settles, then
+// blinks out; the closest passes and long streaks are bigger and gold.
+function drawCallout() {
+  const c = state.callout;
+  if (!c) return;
+  const left = CALLOUT_LIFE - c.t;
+  if (left < 0.2 && Math.floor(left * 20) % 2) return;
+  const big = c.tier >= 1;
+  const scale = c.t < 0.07 ? (big ? 4 : 3) : big ? 3 : 2;
+  const color = c.t < 0.1 ? PAL.white : c.tier === 2 ? PAL.gold : c.tier === 1 ? PAL.amber : PAL.glassHi;
+  const y = 32 - (scale - 2) * 4;
+  drawText(ctx, c.text, W / 2, y, { scale, align: 'center', color, shadow: PAL.ink });
+  if (c.sub) drawText(ctx, c.sub, W / 2, y + scale * 8 + 3, { align: 'center', color: PAL.gold });
+}
+
+const easeOutBackSoft = (p) => 1 + 1.6 * (p - 1) ** 3 + 0.6 * (p - 1) ** 2;
+
+// The trophy banner sits in the top-right corner, under the stage readout, away from the
+// middle of the field. TOAST_W x TOAST_H, sliding in from the right edge.
+const TOAST_W = 140;
+const TOAST_H = 40;
+const TOAST_TOP = 28;
+function toastLeft(p) {
+  return Math.round(W - 6 - TOAST_W + (1 - p) * (TOAST_W + 12));
+}
+function toastBadgeCentre(p) {
+  return [toastLeft(p) + 20, TOAST_TOP + TOAST_H / 2];
+}
+
+// A trophy slides in from the right edge on a panel, its badge swelling into place with a
+// breathing glow and circling sparkles, its name typing out; then it slides away.
+function drawToast() {
+  const toast = state.toasts[0];
+  if (!toast || state.mode === 'title' || state.mode === 'paused') return;
+  const t = toast.t;
+  const pin = Math.min(1, t / TOAST_IN);
+  const pout = t > TOAST_LIFE - TOAST_OUT ? (t - (TOAST_LIFE - TOAST_OUT)) / TOAST_OUT : 0;
+  const p = easeOutBackSoft(pin) * (1 - pout * pout);
+  const x = toastLeft(p);
+  const y = TOAST_TOP;
+  panel(x, y, TOAST_W, TOAST_H);
+  ctx.fillStyle = PAL.gold;
+  ctx.fillRect(x + 1, y + 2, 1, TOAST_H - 4);
+  const [bx, by] = [x + 20, y + TOAST_H / 2];
+  // Glow behind the badge: a dithered disc that breathes.
+  const glow = 12 + Math.sin(t * 6) * 2;
+  ctx.fillStyle = 'rgba(255, 209, 102, 0.3)';
+  for (let gy = -glow; gy <= glow; gy += 1) {
+    for (let gx = -glow; gx <= glow; gx += 1) {
+      if (Math.hypot(gx, gy) > glow || ((gx + gy) & 1)) continue;
+      ctx.fillRect(Math.round(bx + gx), Math.round(by + gy), 1, 1);
+    }
+  }
+  // The badge swells to 1.6 times its size.
+  const art = trophyArt(toast.id).earned;
+  const grow = Math.min(1, Math.max(0, (t - 0.15) / 0.35));
+  const size = Math.max(1, Math.round(32 * easeOutBackSoft(grow)));
+  ctx.drawImage(art, Math.round(bx - size / 2), Math.round(by - size / 2), size, size);
+  for (let k = 0; k < 3; k += 1) {
+    const a = t * 3 + (k * Math.PI * 2) / 3;
+    const sx = Math.round(bx + Math.cos(a) * 18);
+    const sy = Math.round(by + Math.sin(a) * 18);
+    ctx.fillStyle = PAL.white;
+    ctx.fillRect(sx, sy, 1, 1);
+    if (Math.sin(t * 9 + k) > 0) { ctx.fillRect(sx - 1, sy, 3, 1); ctx.fillRect(sx, sy - 1, 1, 3); }
+  }
+  const name = trophies.get(toast.id).name.toUpperCase();
+  const reveal = Math.max(0, Math.floor((t - 0.35) * 30));
+  drawText(ctx, 'TROPHY!', x + 40, y + 9, { color: PAL.gold });
+  drawText(ctx, name.slice(0, reveal), x + 40, y + 23, { color: PAL.white });
+}
+
 function drawHud() {
   drawText(ctx, formatTime(state.time).replace(' ', ''), 8, 7, { scale: 2, color: state.slow > 0 ? CAPSULES.slow.light : PAL.white });
   drawText(ctx, `STAGE ${state.stage + 1}`, W - 8, 7, { align: 'right', color: PAL.gold });
@@ -1432,9 +1596,10 @@ function drawGameOver() {
   } else {
     drawText(ctx, `BEST ${formatTime(state.best)}`, W / 2, 124, { align: 'center', color: PAL.steel });
   }
-  drawText(ctx, `REACHED ${STAGES[state.stage].name}`, W / 2, 138, { align: 'center', color: PAL.pale });
-  drawText(ctx, `CLOSE CALLS ${state.nearMisses}`, W / 2, 150, { align: 'center', color: PAL.glass });
-  if (canRestart() && blink(1.5)) drawText(ctx, 'TAP TO FLY AGAIN', W / 2, 174, { align: 'center', color: PAL.mint });
+  drawText(ctx, `REACHED ${STAGES[state.stage].name}`, W / 2, 136, { align: 'center', color: PAL.pale });
+  drawText(ctx, `CLOSE CALLS ${state.nearMisses}   BEST STREAK X${state.bestStreak}`, W / 2, 147, { align: 'center', color: PAL.glass });
+  if (state.runTrophies) drawText(ctx, `+${state.runTrophies} ${state.runTrophies === 1 ? 'TROPHY' : 'TROPHIES'}`, W / 2, 158, { align: 'center', color: PAL.gold });
+  if (canRestart() && blink(1.5)) drawText(ctx, 'TAP TO FLY AGAIN', W / 2, 176, { align: 'center', color: PAL.mint });
 }
 
 function draw() {
@@ -1474,10 +1639,12 @@ function draw() {
     drawIntroText();
   } else {
     drawHud();
+    drawCallout();
     if (state.banner) drawBanner(state.banner);
   }
   if (state.mode === 'paused') drawPaused();
   if (state.mode === 'over') drawGameOver();
+  drawToast();
 }
 
 let lastFrame = 0;
