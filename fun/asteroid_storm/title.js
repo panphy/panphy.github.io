@@ -1,12 +1,14 @@
 // The page's title artwork: "ASTEROID STORM" in the game's pixel font with arcade-marquee
-// shading, the player's ship flying in from the left and two asteroids on the right.
-// Drawn in code like the rest of the game's art, and gently animated.
-import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-radar';
+// shading, the player's ship flying in from the left in 3D, and two asteroids on the right.
+// Drawn in code like the rest of the game's art, and gently animated. The 3D ship is the game's
+// own sprite turned into voxels: each pixel becomes a column of cubes (a thick fuselage, thin
+// wings, a raised canopy), drawn back to front into a small pixel buffer and lit per face.
+import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-voxel';
 
 const TITLE = 'ASTEROID STORM';
 const SCALE = 2; // the 5 x 7 font at twice size: 10 x 14 px letters
-const TW = 262; // artwork size in pixels, before the page scales it up
-const TH = 30;
+const TW = 284; // artwork size in pixels, before the page scales it up
+const TH = 40;
 
 // Rows of the lettering from top to bottom: white-hot, gold, orange, red.
 function rowColor(row, height) {
@@ -50,17 +52,92 @@ function buildLettering() {
   return out;
 }
 
-// The ship sprite turned to point right: (x, y) -> (H - 1 - y, x).
-function buildShipRight(ship) {
-  const c = document.createElement('canvas');
-  c.width = SHIP_H;
-  c.height = SHIP_W;
-  const ctx = c.getContext('2d');
+// The voxel model: [forward, side, up, color, normal] for every cube, from the sprite's pixels.
+function buildVoxels(ship) {
+  const cx = (SHIP_W - 1) / 2;
+  const cy = (SHIP_H - 1) / 2;
+  const solid = new Set();
+  const cubes = [];
   for (const p of ship.pixels) {
-    ctx.fillStyle = p.color;
-    ctx.fillRect(SHIP_H - 1 - p.y, p.x, 1, 1);
+    if (p.color === PAL.ink) continue; // the outline is redrawn around the 3D silhouette
+    const f = cy - p.y; // the nose is at the top of the sprite
+    const side = p.x - cx;
+    const a = Math.abs(side);
+    const glass = p.color === PAL.glass || p.color === PAL.glassHi;
+    // Thickness: a deep fuselage, tapering into thin wings; the canopy bulges upwards.
+    let lo = 0;
+    let hi = 0;
+    if (glass) { lo = -1; hi = 2; } else if (a <= 1.5) { lo = -2; hi = 1; } else if (a <= 3.5) { lo = -1; hi = 0; }
+    for (let z = lo; z <= hi; z += 1) {
+      cubes.push([f, side, z, p.color]);
+      solid.add(`${f},${side},${z}`);
+    }
   }
-  return c;
+  // Each cube's normal points out through its most open face, so lighting shows its shape.
+  const has = (f, side, z) => solid.has(`${f},${side},${z}`);
+  return cubes.map(([f, side, z, color]) => {
+    let n = [0, 0, 1];
+    if (!has(f, side, z + 1)) n = [0, 0, 1];
+    else if (!has(f, side + 1, z)) n = [0, 1, 0];
+    else if (!has(f, side - 1, z)) n = [0, -1, 0];
+    else if (!has(f + 1, side, z)) n = [1, 0, 0];
+    else if (!has(f - 1, side, z)) n = [-1, 0, 0];
+    else if (!has(f, side, z - 1)) n = [0, 0, -1];
+    const rgb = [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16));
+    return { f, side, z, rgb, n };
+  });
+}
+
+const SHIP_BOX = 52; // px square the 3D ship is drawn into
+const VOXEL = 1.6; // px per cube
+const YAW = -0.38; // nose turned a little towards the viewer
+const ELEVATION = 0.62; // the camera looks down on the ship
+const LIGHT = (() => { const v = [-0.45, -0.75, 0.5]; const m = Math.hypot(...v); return v.map((c) => c / m); })();
+
+// Model (forward, side, up) to screen (x right, y down, d towards the viewer), with a roll.
+function project(f, side, z, roll) {
+  const s1 = side * Math.cos(roll) - z * Math.sin(roll);
+  const z1 = side * Math.sin(roll) + z * Math.cos(roll);
+  const x = f * Math.cos(YAW) - s1 * Math.sin(YAW);
+  const depth = f * Math.sin(YAW) + s1 * Math.cos(YAW);
+  return [x, -z1 * Math.cos(ELEVATION) + depth * Math.sin(ELEVATION), -depth * Math.cos(ELEVATION) + z1 * Math.sin(ELEVATION)];
+}
+
+function renderShip(target, cubes, roll) {
+  const ctx = target.getContext('2d');
+  const img = ctx.createImageData(SHIP_BOX, SHIP_BOX);
+  const zbuf = new Float32Array(SHIP_BOX * SHIP_BOX).fill(-Infinity);
+  const o = SHIP_BOX / 2;
+  for (const c of cubes) {
+    const [nx, ny, nd] = project(c.n[0], c.n[1], c.n[2], roll);
+    const lambert = Math.max(0, nx * LIGHT[0] + ny * LIGHT[1] + nd * LIGHT[2]);
+    // Quantised to three steps so the shading stays pixel-art flat.
+    const shade = [0.62, 0.86, 1.1][Math.min(2, Math.floor(lambert * 3))];
+    const color = c.rgb.map((v) => Math.min(255, Math.round(v * shade)));
+    // Eight sample points per cube, so a turned grid leaves no gaps.
+    for (const df of [-0.25, 0.25]) for (const ds of [-0.25, 0.25]) for (const dz of [-0.25, 0.25]) {
+      const [x, y, d] = project(c.f + df, c.side + ds, c.z + dz, roll);
+      const px = Math.round(o + x * VOXEL);
+      const py = Math.round(o + y * VOXEL);
+      if (px < 0 || py < 0 || px >= SHIP_BOX || py >= SHIP_BOX) continue;
+      const i = py * SHIP_BOX + px;
+      if (d <= zbuf[i]) continue;
+      zbuf[i] = d;
+      img.data.set([color[0], color[1], color[2], 255], i * 4);
+    }
+  }
+  // Ink outline around the silhouette, as on every sprite in the game.
+  const filled = (x, y) => x >= 0 && y >= 0 && x < SHIP_BOX && y < SHIP_BOX && img.data[(y * SHIP_BOX + x) * 4 + 3] === 255;
+  const ink = [1, 3, 5].map((i) => parseInt(PAL.ink.slice(i, i + 2), 16));
+  const edge = [];
+  for (let y = 0; y < SHIP_BOX; y += 1) {
+    for (let x = 0; x < SHIP_BOX; x += 1) {
+      if (!filled(x, y) && (filled(x - 1, y) || filled(x + 1, y) || filled(x, y - 1) || filled(x, y + 1))) edge.push((y * SHIP_BOX + x) * 4);
+    }
+  }
+  for (const i of edge) img.data.set([ink[0], ink[1], ink[2], 254], i);
+  ctx.clearRect(0, 0, SHIP_BOX, SHIP_BOX);
+  ctx.putImageData(img, 0, 0);
 }
 
 export function mountTitle(canvas, { ship, rocks }) {
@@ -69,13 +146,15 @@ export function mountTitle(canvas, { ship, rocks }) {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   const lettering = buildLettering();
-  const shipArt = buildShipRight(ship);
+  const cubes = buildVoxels(ship);
+  const shipCanvas = document.createElement('canvas');
+  shipCanvas.width = SHIP_BOX;
+  shipCanvas.height = SHIP_BOX;
   const big = rocks[4][1];
   const small = rocks[1][0];
-  const stars = [[44, 4], [120, 2], [178, 27], [236, 3], [6, 24], [96, 28], [212, 25]];
-  const shipX = 22;
-  const shipY = Math.round((TH - SHIP_W) / 2);
-  const textX = shipX + SHIP_H + 4;
+  const stars = [[50, 4], [128, 3], [186, 35], [244, 4], [6, 33], [104, 36], [222, 33]];
+  const shipLeft = 6; // where the ship's box sits
+  const textX = shipLeft + SHIP_BOX + 2;
   const textY = Math.round((TH - lettering.height) / 2) + 1;
 
   function draw(t) {
@@ -87,29 +166,34 @@ export function mountTitle(canvas, { ship, rocks }) {
       ctx.fillRect(x, y, 1, 1);
       if (on && i % 2 === 0) { ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3); }
     });
-    // Speed streaks and the engine flame trailing behind the ship.
-    const cy = shipY + Math.floor(SHIP_W / 2);
-    const flicker = Math.floor(t * 12) % 3;
-    [[cy - 7, 10], [cy + 7, 12], [cy - 3, 6]].forEach(([y, len], i) => {
-      const x0 = 2 + ((Math.floor(t * 40) + i * 7) % 6);
+    // The ship banks and bobs; the flame and speed streaks stay on its tail.
+    const roll = Math.sin(t * 1.3) * 0.32;
+    const bob = Math.round(Math.sin(t * 1.7) * 1.5);
+    const top = Math.round((TH - SHIP_BOX) / 2) + bob;
+    renderShip(shipCanvas, cubes, roll);
+    const [tx, ty] = project(-(SHIP_H - 1) / 2 + 1, 0, -0.5, roll);
+    const tailX = Math.round(shipLeft + SHIP_BOX / 2 + tx * VOXEL);
+    const tailY = Math.round(top + SHIP_BOX / 2 + ty * VOXEL);
+    [[tailY - 8, 9], [tailY + 7, 11], [tailY - 3, 5]].forEach(([y, len], i) => {
+      const x0 = Math.max(0, tailX - 18 + ((Math.floor(t * 40) + i * 7) % 6));
       ctx.fillStyle = i === 2 ? PAL.steel : PAL.slate;
       ctx.fillRect(x0, y, len, 1);
     });
-    const flame = 6 + flicker * 2;
+    const flame = 6 + (Math.floor(t * 12) % 3) * 2;
     ctx.fillStyle = PAL.hull;
-    ctx.fillRect(shipX - flame + 2, cy - 2, flame, 5);
+    ctx.fillRect(tailX - flame + 1, tailY - 2, flame, 5);
     ctx.fillStyle = PAL.amber;
-    ctx.fillRect(shipX - flame + 4, cy - 1, flame - 2, 3);
+    ctx.fillRect(tailX - flame + 3, tailY - 1, flame - 2, 3);
     ctx.fillStyle = PAL.gold;
-    ctx.fillRect(shipX - flame + 6, cy, flame - 4, 1);
-    ctx.drawImage(shipArt, shipX, shipY);
+    ctx.fillRect(tailX - flame + 5, tailY, flame - 4, 1);
+    ctx.drawImage(shipCanvas, shipLeft, top);
     ctx.drawImage(lettering, textX, textY);
     // Two asteroids tumbling slowly on the right.
     const frameAt = (set, speed) => set.frames[Math.floor(t * speed) % set.frames.length];
     const a = frameAt(big, 3);
     ctx.drawImage(a, TW - a.width + 2, Math.round((TH - a.height) / 2));
     const b = frameAt(small, 5);
-    ctx.drawImage(b, TW - 44, 0);
+    ctx.drawImage(b, TW - 44, 2);
   }
 
   const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
