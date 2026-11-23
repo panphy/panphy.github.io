@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-11-23T11:42:08Z';
+const BUILD_ID = '2026-11-23T13:39:19Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -285,23 +285,23 @@ const ASSETS_TO_CACHE = [
 
   // Simulations
   '/simulations/atomic_models.html',
-  '/simulations/atomic_models/style.css',
+  '/simulations/atomic_models/style.css?v=20261123',
   '/simulations/atomic_models/app.js',
   '/simulations/atomic_models/content.js',
   '/simulations/nuclear_decay.html',
-  '/simulations/nuclear_decay/style.css',
+  '/simulations/nuclear_decay/style.css?v=20261123',
   '/simulations/nuclear_decay/app.js',
   '/simulations/nuclear_decay/content.js',
   '/simulations/fission_fusion.html',
-  '/simulations/fission_fusion/style.css',
+  '/simulations/fission_fusion/style.css?v=20261123',
   '/simulations/fission_fusion/app.js',
   '/simulations/fission_fusion/content.js',
   '/simulations/electric_motors.html',
-  '/simulations/electric_motors/style.css',
+  '/simulations/electric_motors/style.css?v=20261123',
   '/simulations/electric_motors/app.js',
   '/simulations/electric_motors/content.js',
   '/simulations/charges_in_fields.html',
-  '/simulations/charges_in_fields/style.css',
+  '/simulations/charges_in_fields/style.css?v=20261123',
   '/simulations/charges_in_fields/app.js',
   '/simulations/charges_in_fields/content.js',
   '/simulations/star_life_cycle.html',
