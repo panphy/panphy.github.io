@@ -53,6 +53,12 @@ const SLOW_SCALE = 0.5;
 const MINI_SECONDS = 7;
 const MINI_SCALE = 0.55;
 const SHIELD_GRACE = 1.2;
+// Shockwave: a ring bursts out from the ship and throws nearby rocks outwards. Nothing is
+// destroyed; the rocks stay in play and still have to be dodged.
+const WAVE_REACH = 72; // px
+const WAVE_SPEED = 260; // px/s the ring expands
+const WAVE_KICK = 150; // px/s added outwards to a rock at the ship, falling to 0 at the edge
+const WAVE_MIN_SPEED = 120; // px/s a pushed rock leaves at, at least
 
 const BEST_KEY = 'dodgeBestV2';
 
@@ -138,6 +144,7 @@ const state = {
   wells: [],
   warnings: [],
   capsules: [],
+  waves: [],
   particles: [],
   popups: [],
   spawnBudget: 0,
@@ -426,13 +433,61 @@ function updateCapsules(dt, collect) {
 function applyCapsule(kind) {
   const s = state.ship;
   state.pickups += 1;
-  const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP' }[kind];
+  const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP', wave: 'SHOCKWAVE' }[kind];
   if (kind === 'shield') s.shield = true;
   if (kind === 'slow') state.slow = SLOW_SECONDS;
   if (kind === 'mini') state.mini = MINI_SECONDS;
+  if (kind === 'wave') {
+    state.waves.push({ x: s.x, y: s.y, r: 4, pushed: new Set() });
+    state.shake = Math.max(state.shake, 0.15);
+    audio.sfx('wave');
+  } else {
+    audio.sfx('power');
+  }
   popup(label, s.x, s.y - 16, CAPSULES[kind].light);
   burst(s.x, s.y, 14, [CAPSULES[kind].light, CAPSULES[kind].body, PAL.white], 60);
-  audio.sfx('power');
+}
+
+// The ring grows from where the capsule was taken; each rock it reaches is thrown straight
+// away from that point, harder the closer it was.
+function updateWaves(dt) {
+  for (let i = state.waves.length - 1; i >= 0; i -= 1) {
+    const w = state.waves[i];
+    w.r += WAVE_SPEED * dt;
+    for (const r of state.rocks) {
+      if (w.pushed.has(r)) continue;
+      const dx = r.x - w.x;
+      const dy = r.y - w.y;
+      const d = Math.hypot(dx, dy) || 0.01;
+      if (d - r.radius > Math.min(w.r, WAVE_REACH)) continue;
+      w.pushed.add(r);
+      const speed = Math.max(Math.hypot(r.vx, r.vy), WAVE_MIN_SPEED) + WAVE_KICK * Math.max(0, 1 - d / WAVE_REACH);
+      r.vx = (dx / d) * speed;
+      r.vy = (dy / d) * speed;
+      r.near = false;
+      burst(r.x, r.y, 5, [CAPSULES.wave.light, PAL.white], 50);
+    }
+    if (w.r > WAVE_REACH + 14) state.waves.splice(i, 1);
+  }
+}
+
+function drawWaves() {
+  for (const w of state.waves) {
+    const r = Math.min(w.r, WAVE_REACH + 14);
+    const fade = Math.max(0, 1 - r / (WAVE_REACH + 14));
+    const steps = Math.max(24, Math.round(r * 2.2));
+    for (let band = 0; band < 2; band += 1) {
+      const rr = r - band * 3;
+      if (rr <= 0) continue;
+      ctx.fillStyle = band === 0 ? (fade > 0.35 ? PAL.white : CAPSULES.wave.light) : CAPSULES.wave.body;
+      for (let k = 0; k < steps; k += 1) {
+        // Break the ring up as it fades.
+        if (fade < 0.5 && (k * 7 + band) % 3 === 0) continue;
+        const a = (k / steps) * Math.PI * 2;
+        ctx.fillRect(Math.round(w.x + Math.cos(a) * rr), Math.round(w.y + Math.sin(a) * rr), 1, 1);
+      }
+    }
+  }
 }
 
 /* -----------------------------------------------------------
@@ -452,7 +507,16 @@ function burst(x, y, count, colors, speed) {
 
 function popup(text, x, y, color) {
   const half = textWidth(text) / 2 + 2;
-  state.popups.push({ text, x: Math.max(half, Math.min(W - half, x)), y: Math.max(4, y), life: 0.9, color });
+  const px = Math.max(half, Math.min(W - half, x));
+  let py = y;
+  // Stack above any pop-up still showing in the same place, rather than on top of it.
+  for (let tries = 0; tries < 6; tries += 1) {
+    const clash = state.popups.some((o) => Math.abs(o.y - py) < 9 && Math.abs(o.x - px) < half + textWidth(o.text) / 2);
+    if (!clash) break;
+    py -= 9;
+  }
+  if (py < 4) py = y;
+  state.popups.push({ text, x: px, y: py, life: 0.9, color });
 }
 
 function updateParticles(dt) {
@@ -548,6 +612,7 @@ function resetWorld() {
   state.wells = [];
   state.warnings = [];
   state.capsules = [];
+  state.waves = [];
   state.particles = [];
   state.popups = [];
   state.spawnBudget = 0;
@@ -718,6 +783,7 @@ function update(dt) {
     updateWells(world, true);
     updateRocks(world, { collide: true });
     updateCapsules(world, true);
+    updateWaves(world);
   } else {
     // Title and game-over screens keep a slow, harmless drift of rocks.
     if (state.mode === 'title') {
@@ -1141,6 +1207,7 @@ function draw() {
   drawWells();
   drawCapsules();
   drawRocks();
+  drawWaves();
   drawParticles();
   if (state.mode !== 'title') drawShip();
   drawWarnings();

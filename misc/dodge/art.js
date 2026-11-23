@@ -246,6 +246,7 @@ export const CAPSULES = {
   shield: { letter: 'S', body: '#2aa7c9', light: '#9ff0ff', dark: '#11506a' },
   slow: { letter: 'T', body: '#3fbf7f', light: '#b6f5cf', dark: '#16573a' },
   mini: { letter: 'M', body: '#c46be0', light: '#f2c4ff', dark: '#5a2470' },
+  wave: { letter: 'W', body: '#e8902a', light: '#ffe0a0', dark: '#7a4210' },
 };
 
 const CAPSULE_ROWS = [

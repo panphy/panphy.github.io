@@ -202,6 +202,11 @@ export function createAudio() {
       case 'power':
         [67, 71, 74, 79, 83].forEach((m, i) => tone({ freq: mtof(m + 5), start: t + i * 0.045, length: 0.07, wave: pulse, gain: 0.11, bus }));
         break;
+      case 'wave':
+        tone({ freq: 160, slideTo: 38, start: t, length: 0.45, wave: 'sine', gain: 0.6, bus, release: 0.3 });
+        hiss({ start: t, length: 0.5, gain: 0.35, type: 'bandpass', freq: 400, sweepTo: 4000, bus });
+        [72, 79, 84].forEach((m, i) => tone({ freq: mtof(m), start: t + 0.05 + i * 0.05, length: 0.1, wave: pulse, gain: 0.08, bus }));
+        break;
       case 'shield':
         tone({ freq: 1400, slideTo: 200, start: t, length: 0.35, wave: 'square', gain: 0.1, bus });
         hiss({ start: t, length: 0.3, gain: 0.25, type: 'highpass', freq: 3000, bus });
