@@ -21,7 +21,7 @@ import { createLeaderboard, formatTime } from './leaderboard.js';
 const SHIP_RADIUS = 9;
 const MIN_SPEED = 72; // px/s at the start
 const MAX_SPEED = 252;
-const RAMP = 0.72; // share of the previous version's growth rates
+const RAMP = 0.66; // share of the previous version's growth rates
 const MIN_SPEED_GROWTH = 2.057 * RAMP; // px/s gained per second survived
 const MAX_SPEED_GROWTH = 4.114 * RAMP;
 const SPAWN_RATE = 0.6; // rocks per second at the start
@@ -51,8 +51,12 @@ const WELL_ROCK_PULL = 260; // px/s² pull on rocks at the core
 const WELL_SPEED = 16;
 const FIRST_WELL_DELAY = 2.5; // s into the first stage with wells (Stage 2) before one appears
 
-// Solar flares: dashed lines warn of a band across the field, then a beam fires along it.
-const FLARE_HALF = 9; // px, half the band's width
+// Solar flares: a loop of plasma arcs out of one edge of the field and back into it, as
+// flares erupt along magnetic loops on the Sun. Dashed lines warn of the arc, then it blazes.
+const FLARE_HALF = 7; // px, half the arc's width
+const FLARE_SPREAD = [1.15, 1.7]; // each footpoint's distance from the ship along the edge, as a
+// multiple of the ship's height above that edge; above 1 keeps the loop an arch, not a ring
+const FLARE_HEIGHT = [30, 160]; // px the ship may be from the edge the loop rises from
 const FLARE_WARN = 1.0; // s of warning
 const FLARE_FIRE = 0.5; // s the beam burns
 const FIRST_FLARE_DELAY = 3; // s into the first stage with flares (Stage 3) before one appears
@@ -598,17 +602,87 @@ function nearMiss(rock) {
   audio.sfx('near');
 }
 
-// A flare's band runs across the whole field, centred where the ship is when the warning starts
-// (give or take a little), so it always asks for a move.
+// A flare's loop rises from one edge, passes through (about) where the ship is when the warning
+// starts, and lands back on the same edge, so it always asks for a move. The loop is the part of
+// a circle through its two footpoints and that point; the rest of the circle lies off the field.
 function warnFlare() {
   const s = state.ship;
-  const horizontal = rng() < 0.5;
-  const jitter = (rng() - 0.5) * 16;
-  const pos = horizontal
-    ? Math.max(FLARE_HALF, Math.min(H - FLARE_HALF, s.y + jitter))
-    : Math.max(FLARE_HALF, Math.min(W - FLARE_HALF, s.x + jitter));
-  state.flares.push({ horizontal, pos, t: 0, fired: false });
+  // Distance from the ship to each edge, and how to map edge coordinates (u along, v in) to x, y.
+  const edges = [
+    { v: H - s.y, u: s.x, map: (u, v) => [u, H - v] },
+    { v: s.y, u: s.x, map: (u, v) => [u, v] },
+    { v: s.x, u: s.y, map: (u, v) => [v, u] },
+    { v: W - s.x, u: s.y, map: (u, v) => [W - v, u] },
+  ];
+  const fits = edges.filter((e) => e.v >= FLARE_HEIGHT[0] && e.v <= FLARE_HEIGHT[1]);
+  const edge = fits.length ? pick(fits) : edges.reduce((a, b) => (Math.abs(a.v - 90) < Math.abs(b.v - 90) ? a : b));
+  const us = edge.u + (rng() - 0.5) * 10;
+  const vs = Math.max(12, edge.v + (rng() - 0.5) * 10);
+  const spread = () => vs * (FLARE_SPREAD[0] + rng() * (FLARE_SPREAD[1] - FLARE_SPREAD[0]));
+  const u1 = us - spread();
+  const u2 = us + spread();
+  const uc = (u1 + u2) / 2;
+  const half = (u2 - u1) / 2;
+  const vc = ((us - uc) ** 2 + vs ** 2 - half ** 2) / (2 * vs);
+  const [cx, cy] = edge.map(uc, vc);
+  const flare = { cx, cy, r: Math.hypot(half, vc), feet: [edge.map(u1, 0), edge.map(u2, 0)], t: 0, fired: false };
+  Object.assign(flare, drawFlareArt(flare));
+  state.flares.push(flare);
   audio.sfx('flarewarn');
+}
+
+// Distance from a point to the loop's centre line.
+function flareGap(f, x, y) {
+  return Math.abs(Math.hypot(x - f.cx, y - f.cy) - f.r);
+}
+
+// The warning (dashed edges) and the blaze are drawn once per flare, pixel by pixel, so they
+// stay as crisp as the rest of the art. The blaze has FLARE_FRAMES frames with ragged, licking
+// edges, shown in turn so the loop flickers like flame. Only the warned band can hit the ship;
+// the flame tongues reaching past it are for show.
+const FLARE_FRAMES = 4;
+function drawFlareArt(f) {
+  const make = () => {
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const g = c.getContext('2d');
+    return { c, g, img: g.createImageData(W, H) };
+  };
+  const warn = make();
+  const frames = Array.from({ length: FLARE_FRAMES }, make);
+  const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const [rose, white, gold, amber, hull, ember] = [PAL.rose, PAL.white, PAL.gold, PAL.amber, PAL.hull, PAL.hullDark].map(rgb);
+  const put = (img, i, c) => { img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = 255; };
+  // Each frame's flame height along the loop: a few waves with their own phases.
+  const waves = frames.map(() => [0.31, 0.83, 1.9].map((k) => ({ k, p: rng() * Math.PI * 2 })));
+  const reach = FLARE_HALF * 1.6;
+  for (let y = 0; y < H; y += 1) {
+    for (let x = 0; x < W; x += 1) {
+      const dx = x + 0.5 - f.cx;
+      const dy = y + 0.5 - f.cy;
+      const d = Math.hypot(dx, dy) - f.r;
+      const a = Math.abs(d);
+      if (a > reach) continue;
+      const i = (y * W + x) * 4;
+      const along = Math.atan2(dy, dx) * f.r;
+      // Dashes every 3 px along the arc, on both edges of the warned band.
+      if (Math.abs(a - FLARE_HALF) < 0.6 && Math.floor(along / 3) % 2 === 0) put(warn.img, i, rose);
+      frames.forEach((fr, n) => {
+        const w = waves[n];
+        const noise = 0.5 + 0.28 * Math.sin(along * w[0].k + w[0].p) + 0.14 * Math.sin(along * w[1].k + w[1].p) + 0.08 * Math.sin(along * w[2].k + w[2].p);
+        // Tongues lick further outwards than inwards.
+        const half = FLARE_HALF * (d > 0 ? 0.7 + 0.9 * noise : 0.75 + 0.45 * noise);
+        const t = a / half;
+        if (t > 1) return;
+        // Ragged, flickering tips.
+        if (t > 0.8 && ((x * 7 + y * 13 + n * 5) % 4) / 4 > (1 - t) * 5) return;
+        put(fr.img, i, t < 0.18 ? white : t < 0.42 ? gold : t < 0.68 ? amber : t < 0.88 ? hull : ember);
+      });
+    }
+  }
+  for (const layer of [warn, ...frames]) layer.g.putImageData(layer.img, 0, 0);
+  return { warnArt: warn.c, beamFrames: frames.map((fr) => fr.c) };
 }
 
 function updateFlares(dt) {
@@ -621,21 +695,22 @@ function updateFlares(dt) {
       state.shake = Math.max(state.shake, 0.18);
       audio.sfx('flare');
     }
-    if (f.fired && s.alive && s.grace <= 0 && !state.god) {
-      const gap = Math.abs((f.horizontal ? s.y : s.x) - f.pos);
-      if (gap < FLARE_HALF + hitRadius() * 0.6) {
-        if (s.shield) shieldBreak({ x: s.x, y: s.y });
-        else crash({ vx: 0, vy: 0 });
-      }
+    if (f.fired && s.alive && s.grace <= 0 && !state.god && flareGap(f, s.x, s.y) < FLARE_HALF + hitRadius() * 0.6) {
+      if (s.shield) shieldBreak({ x: s.x, y: s.y });
+      else crash({ vx: 0, vy: 0 });
     }
-    if (f.fired && rng() < dt * 60) {
-      const along = rng() * (f.horizontal ? W : H);
-      const across = f.pos + (rng() - 0.5) * FLARE_HALF * 2;
-      addParticle({
-        x: f.horizontal ? along : across, y: f.horizontal ? across : along,
-        vx: f.horizontal ? 0 : (rng() - 0.5) * 60, vy: f.horizontal ? (rng() - 0.5) * 60 : 0,
-        life: 0.3, max: 0.3, color: pick([PAL.gold, PAL.amber, PAL.white]), size: 1,
-      });
+    if (f.fired) {
+      // Embers thrown off the loop, mostly outwards.
+      for (let k = 0; k < 4; k += 1) {
+        if (rng() > dt * 60) continue;
+        const a = rng() * Math.PI * 2;
+        const x = f.cx + Math.cos(a) * f.r;
+        const y = f.cy + Math.sin(a) * f.r;
+        if (x < 0 || x > W || y < 0 || y > H) continue;
+        const v = 25 + rng() * 55;
+        const out = rng() < 0.75 ? 1 : -1;
+        addParticle({ x, y, vx: Math.cos(a) * v * out + (rng() - 0.5) * 20, vy: Math.sin(a) * v * out + (rng() - 0.5) * 20, life: 0.3 + rng() * 0.4, max: 0.7, color: pick([PAL.white, PAL.gold, PAL.amber, PAL.amber, PAL.hull]), size: rng() < 0.3 ? 2 : 1, drag: 2 });
+      }
     }
     if (f.t >= FLARE_WARN + FLARE_FIRE) state.flares.splice(i, 1);
   }
@@ -644,21 +719,15 @@ function updateFlares(dt) {
 function drawFlareWarnings() {
   for (const f of state.flares) {
     if (f.fired) continue;
-    // Dashes blink faster as the beam gets close.
+    // The dashes blink faster as the blaze gets close.
     const rate = 4 + 12 * (f.t / FLARE_WARN);
     if (Math.floor(f.t * rate) % 2) continue;
-    ctx.fillStyle = PAL.rose;
-    const length = f.horizontal ? W : H;
-    for (const edge of [f.pos - FLARE_HALF, f.pos + FLARE_HALF]) {
-      const e = Math.round(edge);
-      for (let k = 0; k < length; k += 6) {
-        if (f.horizontal) ctx.fillRect(k, e, 3, 1);
-        else ctx.fillRect(e, k, 1, 3);
-      }
+    ctx.drawImage(f.warnArt, 0, 0);
+    for (const [x, y] of f.feet) {
+      const fx = Math.max(3, Math.min(W - 8, x - 2));
+      const fy = Math.max(3, Math.min(H - 10, y - 3));
+      drawText(ctx, '!', fx, fy, { color: PAL.gold });
     }
-    const mid = Math.round(f.pos);
-    const ends = f.horizontal ? [[3, mid - 3], [W - 8, mid - 3]] : [[mid - 2, 3], [mid - 2, H - 10]];
-    for (const [x, y] of ends) drawText(ctx, '!', x, y, { color: PAL.gold });
   }
 }
 
@@ -666,17 +735,9 @@ function drawFlareBeams() {
   for (const f of state.flares) {
     if (!f.fired) continue;
     const left = FLARE_WARN + FLARE_FIRE - f.t;
-    const fade = Math.min(1, left / 0.15);
-    const flicker = Math.floor(state.clock * 30) % 2;
-    // Bands from the outside in: amber glow, gold, then a white-hot core.
-    const layers = [[FLARE_HALF, PAL.hull], [FLARE_HALF - 2, PAL.amber], [FLARE_HALF - 4 - flicker, PAL.gold], [2, PAL.white]];
-    for (const [half, color] of layers) {
-      const h = Math.max(1, Math.round(half * fade));
-      ctx.fillStyle = color;
-      const p = Math.round(f.pos);
-      if (f.horizontal) ctx.fillRect(0, p - h, W, h * 2);
-      else ctx.fillRect(p - h, 0, h * 2, H);
-    }
+    ctx.globalAlpha = Math.min(1, left / 0.15);
+    ctx.drawImage(f.beamFrames[Math.floor(state.clock * 18) % FLARE_FRAMES], 0, 0);
+    ctx.globalAlpha = 1;
   }
 }
 
