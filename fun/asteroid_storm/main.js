@@ -3,10 +3,11 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261123-layout';
-import { createAudio } from './audio.js?v=20261123-layout';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-layout';
-import { createTrophies, trophyArt } from './trophies.js?v=20261123-layout';
+} from './art.js?v=20261123-title';
+import { createAudio } from './audio.js?v=20261123-title';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-title';
+import { createTrophies, trophyArt } from './trophies.js?v=20261123-title';
+import { mountTitle } from './title.js?v=20261123-title';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -168,6 +169,7 @@ function nebulaFor(i) {
 }
 rockSet(0);
 rockSet(1);
+mountTitle(document.getElementById('titleArt'), { ship, rocks: rockSets[0] });
 nebulaFor(0);
 
 const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 60));
