@@ -70,9 +70,9 @@ const MINI_SCALE = 0.55;
 const SHIELD_GRACE = 1.2;
 // Shockwave: a ring bursts out from the ship and throws nearby rocks outwards. Nothing is
 // destroyed; the rocks stay in play and still have to be dodged.
-const WAVE_REACH = 72; // px
-const WAVE_SPEED = 260; // px/s the ring expands
-const WAVE_KICK = 150; // px/s added outwards to a rock at the ship, falling to 0 at the edge
+const WAVE_REACH = 100; // px
+const WAVE_SPEED = 340; // px/s the ring expands
+const WAVE_KICK = 170; // px/s added outwards to a rock at the ship, falling to 0 at the edge
 const WAVE_MIN_SPEED = 120; // px/s a pushed rock leaves at, at least
 
 const BEST_KEY = 'dodgeBestV2';
