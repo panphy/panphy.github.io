@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261123-pills';
-import { createAudio } from './audio.js?v=20261123-pills';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-pills';
-import { createTrophies, trophyArt } from './trophies.js?v=20261123-pills';
-import { mountTitle } from './title.js?v=20261123-pills';
-import { createJoystick } from './joystick.js?v=20261123-pills';
+} from './art.js?v=20261124-radar';
+import { createAudio } from './audio.js?v=20261124-radar';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-radar';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-radar';
+import { mountTitle } from './title.js?v=20261124-radar';
+import { createJoystick } from './joystick.js?v=20261124-radar';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -41,7 +41,7 @@ const MAX_CATCH_UP = 0.25; // s of game time run in one display frame at most
 // a drag (on the field or the touch pad) sets a target the ship flies to at up to this speed.
 const SHIP_SPEED = 320; // px/s
 const NEAR_MISS_GAP = 6;
-const STAGE_SECONDS = 15;
+const STAGE_SECONDS = 20;
 const INTRO_SECONDS = 2.8;
 
 const COMET_WARNING = 0.9; // s of warning before a comet enters
@@ -72,6 +72,10 @@ const SHIELD_COOLDOWN = 25; // s between shield capsules at least; the stages se
 const SLOW_SECONDS = 4;
 const SLOW_SCALE = 0.5;
 const MINI_SECONDS = 7;
+const RADAR_SECONDS = 6; // radar: dotted lines show where rocks and comets are heading
+const RADAR_LOOKAHEAD = 0.9; // s of path shown
+const BOOST_SECONDS = 6; // boost: top speed raised by BOOST_FACTOR
+const BOOST_FACTOR = 1.4;
 const MINI_SCALE = 0.55;
 const SHIELD_GRACE = 1.2;
 // Shockwave: a ring bursts out from the ship and throws nearby rocks outwards. Nothing is
@@ -212,6 +216,8 @@ const state = {
   lastShield: -Infinity,
   slow: 0,
   mini: 0,
+  radar: 0,
+  boost: 0,
   ship: freshShip(),
   shake: 0,
   flash: 0,
@@ -515,17 +521,19 @@ function updateCapsules(dt, collect) {
 function applyCapsule(kind) {
   const s = state.ship;
   state.pickups += 1;
-  if (!state.godRun && trophies.noteCapsule(kind)) awardTrophy('collector');
-  const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP', wave: 'SHOCKWAVE' }[kind];
+  if (!state.godRun && trophies.noteCapsule(kind)) awardTrophy('fullset');
+  const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP', wave: 'SHOCKWAVE', radar: 'RADAR', boost: 'BOOST' }[kind];
   if (kind === 'shield') s.shield = true;
   if (kind === 'slow') state.slow = SLOW_SECONDS;
   if (kind === 'mini') state.mini = MINI_SECONDS;
+  if (kind === 'radar') state.radar = RADAR_SECONDS;
+  if (kind === 'boost') state.boost = BOOST_SECONDS;
   if (kind === 'wave') {
     state.waves.push({ x: s.x, y: s.y, r: 4, pushed: new Set() });
     state.shake = Math.max(state.shake, 0.15);
     audio.sfx('wave');
   } else {
-    audio.sfx('power');
+    audio.sfx(kind === 'radar' || kind === 'boost' ? kind : 'power');
   }
   popup(label, s.x, s.y - 16, CAPSULES[kind].light);
   burst(s.x, s.y, 14, [CAPSULES[kind].light, CAPSULES[kind].body, PAL.white], 60);
@@ -857,6 +865,8 @@ function crash(rock) {
   }
   burst(s.x, s.y, 70, [PAL.white, PAL.gold, PAL.amber, PAL.hull, PAL.rose], 140);
   state.mini = 0;
+  state.radar = 0;
+  state.boost = 0;
   audio.stopMusic();
   audio.sfx('crash');
   audio.sfx('over');
@@ -885,6 +895,8 @@ function resetWorld() {
   state.lastShield = -Infinity;
   state.slow = 0;
   state.mini = 0;
+  state.radar = 0;
+  state.boost = 0;
   state.ship = freshShip();
   state.nearMisses = 0;
   state.streak = 0;
@@ -1025,6 +1037,8 @@ function update(dt) {
   if (state.slow > 0) state.slow = Math.max(0, state.slow - dt);
   const world = dt * (state.slow > 0 ? SLOW_SCALE : 1);
   if (state.mini > 0) state.mini = Math.max(0, state.mini - world);
+  if (state.radar > 0) state.radar = Math.max(0, state.radar - world);
+  if (state.boost > 0) state.boost = Math.max(0, state.boost - world);
   state.ship.grace = Math.max(0, state.ship.grace - dt);
 
   if (state.mode === 'intro') updateIntro(dt);
@@ -1162,7 +1176,13 @@ function moveShipWithKeys(dt) {
   const slow = keys.has('ShiftLeft') || keys.has('ShiftRight') ? 0.5 : 1;
   state.ship.tx = null; // the keyboard takes over from any drag
   state.ship.ty = null;
-  moveShipTo(state.ship.x + (dx / len) * SHIP_SPEED * slow * dt, state.ship.y + (dy / len) * SHIP_SPEED * slow * dt);
+  const speed = shipSpeed() * slow;
+  moveShipTo(state.ship.x + (dx / len) * speed * dt, state.ship.y + (dy / len) * speed * dt);
+}
+
+// The shared top speed, raised while a boost lasts.
+function shipSpeed() {
+  return SHIP_SPEED * (state.boost > 0 ? BOOST_FACTOR : 1);
 }
 
 function setTarget(x, y) {
@@ -1178,7 +1198,7 @@ function moveShipTowardTarget(dt) {
   const dx = s.tx - s.x;
   const dy = s.ty - s.y;
   const d = Math.hypot(dx, dy);
-  const step = SHIP_SPEED * dt;
+  const step = shipSpeed() * dt;
   if (d <= step) moveShipTo(s.tx, s.ty);
   else moveShipTo(s.x + (dx / d) * step, s.y + (dy / d) * step);
 }
@@ -1299,6 +1319,25 @@ function drawWarnings() {
   }
 }
 
+// Radar: a dotted line ahead of every rock and comet showing where it will be over the next
+// RADAR_LOOKAHEAD seconds (straight-line paths; black holes may still bend them).
+function drawRadar() {
+  if (state.radar <= 0 || state.mode !== 'playing') return;
+  const fading = state.radar < 1 && Math.floor(state.radar * 10) % 2;
+  if (fading) return;
+  for (const r of state.rocks) {
+    ctx.fillStyle = r.kind === 'comet' ? PAL.glassHi : CAPSULES.radar.light;
+    for (let k = 1; k <= 6; k += 1) {
+      const t = (k / 6) * RADAR_LOOKAHEAD;
+      const x = Math.round(r.x + r.vx * t);
+      const y = Math.round(r.y + r.vy * t);
+      if (x < 0 || y < 0 || x >= W || y >= H) continue;
+      ctx.fillRect(x, y, 1, 1);
+      if (k === 6) { ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3); }
+    }
+  }
+}
+
 function drawRocks() {
   for (const r of state.rocks) {
     if (r.kind === 'comet') {
@@ -1381,7 +1420,7 @@ function drawShip() {
   // Banking squeezes the sprite a pixel or two towards the turn.
   const squeeze = Math.round(Math.abs(s.tilt) * 3 * scale);
   ctx.drawImage(ship.canvas, x + (s.tilt > 0 ? squeeze : 0), y, w - squeeze, h);
-  const boost = state.mode === 'intro' ? 6 : 0;
+  const boost = state.mode === 'intro' ? 6 : state.boost > 0 ? 3 : 0;
   const flame = Math.round((2 + (Math.floor(state.clock * 20) % 3) + boost) * scale);
   const cx = Math.round(s.x);
   const base = y + h - 1;
@@ -1528,7 +1567,9 @@ function drawHud() {
   let row = 26;
   if (state.ship.shield) { drawText(ctx, 'SHIELD', 8, row, { color: CAPSULES.shield.light }); row += 10; }
   if (state.slow > 0) { timerBar('SLOW', 8, row, state.slow / SLOW_SECONDS, CAPSULES.slow.light); row += 10; }
-  if (state.mini > 0) timerBar('MINI', 8, row, state.mini / MINI_SECONDS, CAPSULES.mini.light);
+  if (state.mini > 0) { timerBar('MINI', 8, row, state.mini / MINI_SECONDS, CAPSULES.mini.light); row += 10; }
+  if (state.radar > 0) { timerBar('RADAR', 8, row, state.radar / RADAR_SECONDS, CAPSULES.radar.light); row += 10; }
+  if (state.boost > 0) timerBar('BOOST', 8, row, state.boost / BOOST_SECONDS, CAPSULES.boost.light);
   if (state.god) drawText(ctx, 'GOD MODE', W / 2, H - 14, { align: 'center', color: blink(1) ? PAL.gold : PAL.amber });
   else if (state.godRun) drawText(ctx, 'UNRANKED', W / 2, H - 14, { align: 'center', color: PAL.steel });
 }
@@ -1680,6 +1721,7 @@ function draw() {
   drawWells();
   drawFlareWarnings();
   drawCapsules();
+  drawRadar();
   drawRocks();
   drawFlareBeams();
   drawWaves();
