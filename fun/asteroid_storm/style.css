@@ -141,6 +141,10 @@ h1 {
   outline: none;
 }
 
+/* Between runs a swipe on the field scrolls the page (see main.js). */
+#game.is-idle {
+  touch-action: pan-x pan-y;
+}
 
 .controls {
   display: flex;
