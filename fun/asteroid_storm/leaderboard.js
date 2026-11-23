@@ -6,8 +6,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const TABLE = 'dodge_leaderboard';
 const SUBMIT_RPC = 'submit_dodge_score';
 // Bumped whenever the board is reset; lists saved under older keys are removed on load.
-const CACHE_KEY = 'dodgeLeaderboardCacheV8';
-const OLD_CACHE_KEYS = ['dodgeLeaderboardCacheV1', 'dodgeLeaderboardCacheV2', 'dodgeLeaderboardCacheV3', 'dodgeLeaderboardCacheV4', 'dodgeLeaderboardCacheV5', 'dodgeLeaderboardCacheV6', 'dodgeLeaderboardCacheV7'];
+const CACHE_KEY = 'dodgeLeaderboardCacheV9';
+const OLD_CACHE_KEYS = ['dodgeLeaderboardCacheV1', 'dodgeLeaderboardCacheV2', 'dodgeLeaderboardCacheV3', 'dodgeLeaderboardCacheV4', 'dodgeLeaderboardCacheV5', 'dodgeLeaderboardCacheV6', 'dodgeLeaderboardCacheV7', 'dodgeLeaderboardCacheV8'];
 export const BOARD_SIZE = 10;
 // Matches the server's range check in submit_dodge_score and the dodge_survival_time_range
 // constraint; runs outside it are never offered for submission.
