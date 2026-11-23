@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261123-speed';
-import { createAudio } from './audio.js?v=20261123-speed';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-speed';
-import { createTrophies, trophyArt } from './trophies.js?v=20261123-speed';
-import { mountTitle } from './title.js?v=20261123-speed';
-import { createJoystick } from './joystick.js?v=20261123-speed';
+} from './art.js?v=20261123-direct';
+import { createAudio } from './audio.js?v=20261123-direct';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-direct';
+import { createTrophies, trophyArt } from './trophies.js?v=20261123-direct';
+import { mountTitle } from './title.js?v=20261123-direct';
+import { createJoystick } from './joystick.js?v=20261123-direct';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1579,7 +1579,7 @@ function drawTitle() {
   drawTitleWord('ASTEROID', 56, 4, PAL.gold, PAL.hullDark, 0.3);
   drawTitleWord('STORM', 92, 4, PAL.hull, PAL.ink, 0.85);
   if (state.clock > 1.5) {
-    drawText(ctx, 'DRAG OR USE ARROW KEYS', W / 2, 132, { align: 'center', color: PAL.pale });
+    drawText(ctx, 'POINT, TOUCH OR USE ARROW KEYS', W / 2, 132, { align: 'center', color: PAL.pale });
     if (blink(1.5)) drawText(ctx, 'TAP OR PRESS ENTER', W / 2, 148, { align: 'center', color: PAL.mint });
   }
   if (state.best > 0) drawText(ctx, `BEST ${formatTime(state.best)}`, W / 2, 182, { align: 'center', color: PAL.steel });
@@ -1727,30 +1727,45 @@ function fieldScale() {
   return shown ? W / shown : 1;
 }
 
-function beginDrag(e) {
-  drag.id = e.pointerId;
-  drag.startX = e.clientX;
-  drag.startY = e.clientY;
-  drag.shipX = state.ship.x;
-  drag.shipY = state.ship.y;
-  try { canvas.setPointerCapture(e.pointerId); } catch {}
+// Field coordinates of a pointer, allowing for the picture being letterboxed in its box.
+function fieldPoint(e) {
+  const rect = canvas.getBoundingClientRect();
+  const shownW = Math.min(rect.width, rect.height * (W / H));
+  const shownH = shownW * (H / W);
+  const left = rect.left + (rect.width - shownW) / 2;
+  const top = rect.top + (rect.height - shownH) / 2;
+  return [((e.clientX - left) / shownW) * W, ((e.clientY - top) / shownH) * H];
+}
+
+// Direct control: the ship flies to the pointer (capped at SHIP_SPEED). A mouse steers just by
+// moving over the field; a finger steers while touching, with the ship held TOUCH_LEAD above
+// the fingertip so the finger never hides it.
+const TOUCH_LEAD = 34; // field px
+function steerTo(e) {
+  const [x, y] = fieldPoint(e);
+  setTarget(x, e.pointerType === 'mouse' ? y : y - TOUCH_LEAD);
 }
 
 canvas.addEventListener('pointerdown', (e) => {
   e.preventDefault();
   canvas.focus({ preventScroll: true });
   if (state.mode !== 'playing') primaryAction();
-  if (state.mode === 'playing') beginDrag(e);
+  if (state.mode !== 'playing') return;
+  if (e.pointerType !== 'mouse') {
+    drag.id = e.pointerId;
+    try { canvas.setPointerCapture(e.pointerId); } catch {}
+  }
+  steerTo(e);
 }, { passive: false });
 
 canvas.addEventListener('pointermove', (e) => {
   if (state.mode !== 'playing' || !state.ship.alive) return;
+  if (e.pointerType === 'mouse') { steerTo(e); return; }
   // A finger held through the intro takes control as soon as play starts.
-  if (drag.id === null && e.buttons) beginDrag(e);
+  if (drag.id === null && e.buttons) drag.id = e.pointerId;
   if (drag.id !== e.pointerId) return;
   e.preventDefault();
-  const k = fieldScale();
-  setTarget(drag.shipX + (e.clientX - drag.startX) * k, drag.shipY + (e.clientY - drag.startY) * k);
+  steerTo(e);
 }, { passive: false });
 
 const endDrag = (e) => { if (drag.id === e.pointerId) drag.id = null; };

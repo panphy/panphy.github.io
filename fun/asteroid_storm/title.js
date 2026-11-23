@@ -1,7 +1,7 @@
 // The page's title artwork: "ASTEROID STORM" in the game's pixel font with arcade-marquee
 // shading, the player's ship flying in from the left and two asteroids on the right.
 // Drawn in code like the rest of the game's art, and gently animated.
-import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261123-speed';
+import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261123-direct';
 
 const TITLE = 'ASTEROID STORM';
 const SCALE = 2; // the 5 x 7 font at twice size: 10 x 14 px letters
