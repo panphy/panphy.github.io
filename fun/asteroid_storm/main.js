@@ -79,9 +79,28 @@ const STAGES = [
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-canvas.width = W;
-canvas.height = H;
-ctx.imageSmoothingEnabled = false;
+// The game is drawn in 360 x 240 field pixels, but the canvas holds pixelScale device pixels
+// per field pixel (about the screen's own resolution). Sprites and text still snap to whole
+// field pixels; only the slow background layers use the finer steps, so they glide instead
+// of jumping a whole big pixel at a time.
+let pixelScale = 1;
+function fitCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  const shown = Math.min(rect.width, rect.height * (W / H)) || W;
+  const k = Math.max(1, Math.min(4, Math.round((shown * (window.devicePixelRatio || 1)) / W)));
+  if (k !== pixelScale || canvas.width !== W * k) {
+    pixelScale = k;
+    canvas.width = W * k;
+    canvas.height = H * k;
+  }
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+}
+fitCanvas();
+if (window.ResizeObserver) new ResizeObserver(fitCanvas).observe(canvas);
+window.addEventListener('resize', fitCanvas);
+// Rounds to the finest step the canvas can show.
+const fine = (v) => Math.round(v * pixelScale) / pixelScale;
 
 const pauseButton = document.getElementById('pauseButton');
 const soundButton = document.getElementById('soundButton');
@@ -886,7 +905,7 @@ function updatePlanet(dt) {
  * Drawing
  * ----------------------------------------------------------- */
 function drawBackground() {
-  const y = Math.floor(state.scroll);
+  const y = fine(state.scroll);
   const paint = (img) => {
     ctx.drawImage(img, 0, y - NEBULA_H);
     ctx.drawImage(img, 0, y);
@@ -900,11 +919,11 @@ function drawBackground() {
   } else {
     paint(to);
   }
-  if (state.planet) ctx.drawImage(state.planet.sprite, state.planet.x, Math.floor(state.planet.y));
+  if (state.planet) ctx.drawImage(state.planet.sprite, state.planet.x, fine(state.planet.y));
   const streak = Math.round(state.warp * 14);
   starLayers.forEach((layer, li) => {
     for (const star of layer.stars) {
-      const sy = Math.floor(star.y);
+      const sy = fine(star.y);
       ctx.fillStyle = star.color;
       if (streak > 0) {
         ctx.fillRect(star.x, sy - streak * (li + 1) / 2, 1, 1 + streak * (li + 1) / 2);
@@ -1190,7 +1209,7 @@ function drawPaused() {
   const twinkleRng = makeRng(7);
   for (let i = 0; i < 18; i += 1) {
     const x = Math.floor(twinkleRng() * W);
-    const y = Math.floor((twinkleRng() * H + state.clock * (4 + twinkleRng() * 6)) % H);
+    const y = fine((twinkleRng() * H + state.clock * (4 + twinkleRng() * 6)) % H);
     const on = Math.sin(state.clock * 2 + i) > 0.3;
     ctx.fillStyle = on ? PAL.white : PAL.slate;
     ctx.fillRect(x, y, 1, 1);
