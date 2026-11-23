@@ -248,31 +248,69 @@ export const CAPSULES = {
   mini: { letter: 'M', body: '#c46be0', light: '#f2c4ff', dark: '#5a2470' },
 };
 
+const CAPSULE_ROWS = [
+  '....kkkkkkkkkkk....',
+  '..kkLLLLLLLLLLLkk..',
+  '.kLLWWWLLLLLLLLLLk.',
+  '.kLWBBBBBBBBBBBBBk.',
+  'kLLBBBBBBBBBBBBBBDk',
+  'kLBBBBBBBBBBBBBBBDk',
+  'kLBBBBBBBBBBBBBBBDk',
+  'kLBBBBBBBBBBBBBBBDk',
+  'kBBBBBBBBBBBBBBBDDk',
+  '.kBBBBBBBBBBBBBBDk.',
+  '.kDBBBBBBBBBBBDDDk.',
+  '..kkDDDDDDDDDDDkk..',
+  '....kkkkkkkkkkk....',
+];
+const GLOW_PAD = 9;
+
+// A capsule is three canvases: the pill, a dithered halo around it in its light color,
+// and a white silhouette for the beacon flash.
 export function buildCapsule(kind) {
   const c = CAPSULES[kind];
-  const canvas = makeCanvas(15, 11);
-  const ctx = canvas.getContext('2d');
-  const rows = [
-    '...kkkkkkkkk...',
-    '..kLLLLLLLLLk..',
-    '.kLBBBBBBBBBBk.',
-    'kLBBBBBBBBBBBDk',
-    'kBBBBBBBBBBBBDk',
-    'kBBBBBBBBBBBBDk',
-    'kBBBBBBBBBBBBDk',
-    'kBBBBBBBBBBBDDk',
-    '.kBBBBBBBBBDDk.',
-    '..kDDDDDDDDDk..',
-    '...kkkkkkkkk...',
-  ];
-  const map = { k: PAL.ink, L: c.light, B: c.body, D: c.dark };
-  rows.forEach((row, y) => [...row].forEach((ch, x) => {
+  const w = CAPSULE_ROWS[0].length;
+  const h = CAPSULE_ROWS.length;
+  const map = { k: PAL.ink, L: c.light, B: c.body, D: c.dark, W: PAL.white };
+
+  const sprite = makeCanvas(w, h);
+  const sctx = sprite.getContext('2d');
+  const flash = makeCanvas(w, h);
+  const fctx = flash.getContext('2d');
+  fctx.fillStyle = PAL.white;
+  CAPSULE_ROWS.forEach((row, y) => [...row].forEach((ch, x) => {
     if (!map[ch]) return;
-    ctx.fillStyle = map[ch];
-    ctx.fillRect(x, y, 1, 1);
+    sctx.fillStyle = map[ch];
+    sctx.fillRect(x, y, 1, 1);
+    fctx.fillRect(x, y, 1, 1);
   }));
-  drawText(ctx, c.letter, 5, 2, { color: PAL.white, shadow: c.dark });
-  return canvas;
+  drawText(sctx, c.letter, 7, 3, { color: PAL.white, shadow: c.dark });
+
+  const gw = w + GLOW_PAD * 2;
+  const gh = h + GLOW_PAD * 2;
+  const glow = makeCanvas(gw, gh);
+  const gctx = glow.getContext('2d');
+  const [r, g, b] = hexToRgb(c.light);
+  const img = gctx.createImageData(gw, gh);
+  for (let y = 0; y < gh; y += 1) {
+    for (let x = 0; x < gw; x += 1) {
+      // Distance from the pill's rounded-rectangle outline, so the halo hugs its shape.
+      const dx = Math.max(0, Math.abs(x + 0.5 - gw / 2) - (w / 2 - h / 2));
+      const dy = Math.abs(y + 0.5 - gh / 2);
+      const d = Math.hypot(dx, dy) - h / 2;
+      const strength = 1 - d / (GLOW_PAD + 1);
+      if (d < 0 || strength <= 0) continue;
+      // Dithered fall-off: dense next to the pill, scattered at the edge.
+      if (strength * strength < bayer(x, y)) continue;
+      const i = (y * gw + x) * 4;
+      img.data[i] = r;
+      img.data[i + 1] = g;
+      img.data[i + 2] = b;
+      img.data[i + 3] = Math.round(255 * (0.35 + 0.65 * strength));
+    }
+  }
+  gctx.putImageData(img, 0, 0);
+  return { sprite, glow, flash };
 }
 
 /* -----------------------------------------------------------
