@@ -1130,6 +1130,8 @@ textarea:focus {
   line-height: 1.5;
   box-sizing: border-box;
   overflow-y: auto;
+  /* Every render replaces the content, so the browser has nothing to anchor to. */
+  overflow-anchor: none;
   border-radius: 0 0 var(--radius) var(--radius);
   background-color: var(--pane-background);
   color: var(--text-color);

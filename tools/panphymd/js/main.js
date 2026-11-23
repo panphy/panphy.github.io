@@ -119,6 +119,11 @@ let isSyncingInputScroll = false;
 let isSyncingOutputScroll = false;
 let pendingSyncSource = null;
 let syncScrollRafId = 0;
+let isPreviewHeightHeld = false;
+let isPreviewRenderSettled = true;
+let heldPreviewScrollTop = 0;
+let syncedInputScrollTop = -1;
+let syncedOutputScrollTop = -1;
 let renderCycleId = 0;
 let syncAnchorMap = null;
 let syncAnchorMapRenderCycle = 0;
@@ -316,6 +321,7 @@ function normalizeSyncAnchorPairs(anchorPairs) {
 
 function buildSyncAnchorMap(content, cycleId = renderCycleId) {
   content = markdownInput.value; // Measure the collapsed view, not the embedded bytes.
+  releasePreviewHeight();
   if (!state.isSyncScrollEnabled) {
     clearSyncAnchorMap();
     return;
@@ -468,6 +474,8 @@ function syncScroll(sourceElement, targetElement, sourcePane) {
 function scheduleSyncScroll(source) {
   if (!state.isSyncScrollEnabled) return;
 
+  // The editor leads after a render, so a preview scroll event cannot replace it.
+  if (source === 'output' && pendingSyncSource === 'input') return;
   pendingSyncSource = source;
   if (syncScrollRafId) return;
 
@@ -475,11 +483,13 @@ function scheduleSyncScroll(source) {
     const sourceToSync = pendingSyncSource;
     pendingSyncSource = null;
     syncScrollRafId = 0;
+    releasePreviewHeight();
 
     if (sourceToSync === 'input') {
       if (isSyncingInputScroll) return;
       isSyncingOutputScroll = true;
       syncScroll(markdownInput, renderedOutput, 'input');
+      rememberSyncedScroll();
       requestAnimationFrame(() => {
         isSyncingOutputScroll = false;
       });
@@ -489,6 +499,7 @@ function scheduleSyncScroll(source) {
     if (isSyncingOutputScroll) return;
     isSyncingInputScroll = true;
     syncScroll(renderedOutput, markdownInput, 'output');
+    rememberSyncedScroll();
     requestAnimationFrame(() => {
       isSyncingInputScroll = false;
     });
@@ -501,6 +512,46 @@ function syncInputToOutput() {
 
 function syncOutputToInput() {
   scheduleSyncScroll('output');
+}
+
+function rememberSyncedScroll() {
+  syncedInputScrollTop = markdownInput.scrollTop;
+  syncedOutputScrollTop = renderedOutput.scrollTop;
+}
+
+// A scroll event that leaves a pane where the last sync put it is that sync's
+// echo. The anchor map is not an exact inverse, so answering it moves the other pane.
+function handleInputScroll() {
+  if (Math.abs(markdownInput.scrollTop - syncedInputScrollTop) <= SYNC_SCROLL_EPSILON) return;
+  syncInputToOutput();
+}
+
+function handleOutputScroll() {
+  // A preview that is still rendering has no position worth copying.
+  if (isPreviewHeightHeld) return;
+  if (Math.abs(renderedOutput.scrollTop - syncedOutputScrollTop) <= SYNC_SCROLL_EPSILON) return;
+  syncOutputToInput();
+}
+
+// Replacing the preview and typesetting its math briefly changes its height.
+// Reserving the old height keeps the browser from clamping its scroll position.
+function holdPreviewHeight() {
+  isPreviewRenderSettled = false;
+  if (!state.isSyncScrollEnabled || isPreviewHeightHeld) return;
+  heldPreviewScrollTop = renderedOutput.scrollTop;
+  renderedOutput.style.paddingBottom = `${renderedOutput.scrollHeight}px`;
+  isPreviewHeightHeld = true;
+}
+
+function restoreHeldPreviewScroll() {
+  if (isPreviewHeightHeld) renderedOutput.scrollTop = heldPreviewScrollTop;
+}
+
+// Called in the same frame as the next sync, so a shorter height is never painted.
+function releasePreviewHeight() {
+  if (!isPreviewHeightHeld || !isPreviewRenderSettled) return;
+  renderedOutput.style.paddingBottom = '';
+  isPreviewHeightHeld = false;
 }
 
 // Initialize UI module with DOM references
@@ -1019,7 +1070,9 @@ function renderContent() {
   const parsedMarkdown = markedLib.parse(prepareMarkdownSource(inputText));
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   dismissTableCopyActions();
+  holdPreviewHeight();
   renderedOutput.innerHTML = sanitizedContent;
+  restoreHeldPreviewScroll();
   normalizeRenderedImageSources(renderedOutput);
 
   const syncPreviewScrollToInput = () => {
@@ -1030,6 +1083,8 @@ function renderContent() {
   const isCurrentRender = () => currentRenderCycle === renderCycleId;
   const finalizeRender = () => {
     if (!isCurrentRender()) return;
+    isPreviewRenderSettled = true;
+    if (!state.isSyncScrollEnabled) releasePreviewHeight();
     scheduleSyncAnchorMapRebuild(inputText, currentRenderCycle);
     syncPreviewScrollToInput();
   };
@@ -1784,8 +1839,8 @@ markdownInput.addEventListener('input', () => {
   }
   debouncedPersistDraft();
 });
-markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
-renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
+markdownInput.addEventListener('scroll', handleInputScroll, { passive: true });
+renderedOutput.addEventListener('scroll', handleOutputScroll, { passive: true });
 
 renderedOutput.addEventListener('mouseover', event => {
   if (!isInFullscreen()) {
