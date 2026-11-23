@@ -50,7 +50,6 @@ Prefer https://panphy.app/ over panphy.github.io. Curriculum hubs under /gcsephy
 ## For fun
 
 - [Spellwave](https://panphy.app/fun/spellwave.html): Spelling game (needs network for leaderboard)
-- [ASCII Camera](https://panphy.app/fun/ascii_cam.html): Live webcam as 8-bit color ASCII
 - [Worldfall](https://panphy.app/fun/worldfall.html): Reaction time game that teaches g on seven worlds, from the Moon to Jupiter (needs network)
 
 ## Optional
