@@ -277,7 +277,7 @@ function normalizeDropboxImageUrl(parsedUrl) {
 
 function getGoogleDrivePathFileId(pathname) {
   const filePathPatterns = [
-    /^\/file\/d\/([^/]+)/,
+    /^\/file(?:\/u\/\d+)?\/d\/([^/]+)/,
     /^\/uc\/id\/([^/]+)/,
     /^\/thumbnail\/id\/([^/]+)/
   ];
@@ -298,7 +298,9 @@ function extractGoogleDriveFileId(parsedUrl) {
 
 function normalizeGoogleDriveImageUrl(parsedUrl) {
   const hostname = parsedUrl.hostname.toLowerCase();
-  const isGoogleDriveHost = hostname === 'drive.google.com' || hostname === 'docs.google.com';
+  const isGoogleDriveHost = hostname === 'drive.google.com'
+    || hostname === 'docs.google.com'
+    || hostname === 'drive.usercontent.google.com';
   if (!isGoogleDriveHost) return parsedUrl;
 
   const fileId = extractGoogleDriveFileId(parsedUrl);
@@ -421,6 +423,7 @@ function isCloudImageHost(hostname) {
   const normalizedHost = hostname.toLowerCase();
   return normalizedHost === 'drive.google.com'
     || normalizedHost === 'docs.google.com'
+    || normalizedHost === 'drive.usercontent.google.com'
     || normalizedHost === 'dropbox.com'
     || normalizedHost.endsWith('.dropbox.com')
     || normalizedHost === 'dl.dropboxusercontent.com'
