@@ -1,6 +1,9 @@
 /* Asteroid Storm: a dark, pixel-art arcade page. Fonts are system monospace; the
    game draws its own bitmap font. Corners are notched to read as pixel art. */
-:root {
+:root,
+:root[data-theme] {
+  /* The strip reserved under the iPadOS/iOS home-screen status bar (standalone-top.css). */
+  --standalone-top-bg: #07061a;
   --bg: #07061a;
   --panel: #110f2b;
   --panel-edge: #2b2f52;
@@ -29,7 +32,7 @@ body {
   image-rendering: pixelated;
   color: var(--text);
   font-family: var(--mono);
-  padding: calc(var(--standalone-top, 0px) + 12px) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  padding: 12px max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -479,7 +482,7 @@ h1 {
 /* Phones held sideways: the game takes the full height on the left, and a side column on the
    right holds the home link and title at the top with the touch pad and buttons below. */
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
-  body { --side: 200px; --game-h: calc(100dvh - var(--standalone-top, 0px) - 32px); padding-top: calc(var(--standalone-top, 0px) + 10px); }
+  body { --side: 200px; --game-h: calc(100dvh - var(--standalone-top, 0px) - 32px); padding-top: 10px; }
   .topbar {
     position: absolute;
     top: calc(var(--standalone-top, 0px) + 10px);
