@@ -1,6 +1,6 @@
 # Asteroid Storm
 
-The game behind `misc/dodge.html`: a pixel-art dodger with no shooting. Every image, the font, the music and the sound effects are made in code; there are no asset files.
+The game behind `fun/asteroid_storm.html` (moved from `misc/dodge.html`, which now redirects here): a pixel-art dodger with no shooting. Every image, the font, the music and the sound effects are made in code; there are no asset files.
 
 - `main.js`: game loop, stages, hazards, capsules, input and the initials dialog.
 - `art.js`: palette, ship sprite, procedural asteroids, capsules, the 5 × 7 bitmap font, nebulae, stars and planets.

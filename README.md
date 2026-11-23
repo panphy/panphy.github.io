@@ -16,7 +16,7 @@ Here are a few places to start. The [homepage](https://panphy.app/) has the full
 - **Build an experiment.** Create circuits in [PanPhyCircuits](sandboxes/panphycircuits.html) or mechanical systems in [PanPhyMech](sandboxes/panphymech.html). Both live in the homepage’s Sandboxes group.
 - **Try out the physics.** Make waves in the [Virtual Ripple Tank](simulations/ripple_tank.html), investigate collisions in [Collision Lab](simulations/collision.html), or see how [Electric Motors](simulations/electric_motors.html) work.
 - **Make lessons a little easier.** Put an [Exam Timer](for_teachers/timer.html) on the board, turn a camera into a [Visualizer](for_teachers/visualizer.html), mix waves with the [Tone Generator](tools/tone_generator.html), or write notes in [PanPhyMD](tools/panphymd.html).
-- **Take a break.** Try the spelling game [Spellwave](fun/spellwave.html) or test your reactions across the solar system in [Worldfall](fun/worldfall.html).
+- **Take a break.** Try the spelling game [Spellwave](fun/spellwave.html), test your reactions across the solar system in [Worldfall](fun/worldfall.html), or survive the pixel-art [Asteroid Storm](fun/asteroid_storm.html).
 
 ## Curriculum hubs
 
