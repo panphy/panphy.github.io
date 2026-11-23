@@ -15,4 +15,6 @@ The asteroid curve (speeds, spawn rate, sizes, hitboxes) matches the previous ve
 
 Scores (survival times in seconds) are read from the `dodge_leaderboard` table and written only through the `submit_dodge_score` function, both in the "PanPhy Games" Supabase project rather than in this repository. The page uses plain REST calls with the public anon key. The function and a table constraint (`dodge_survival_time_range`) accept only 1 to 600 seconds; `MIN_SCORE` and `MAX_SCORE` in `leaderboard.js` match them, so raise all three together if a legitimate run could exceed 600 seconds.
 
+A run in which the testing cheat (god mode) was switched on is unranked: it saves no personal best and is never offered for submission. The cheat code is stored only as a hash (`TRAIL_PHASE_SEED`), as in Spellwave.
+
 To reset the board after a gameplay change: copy the table into the `backup` schema (`create table backup.dodge_leaderboard_YYYYMMDD as table public.dodge_leaderboard;`), check that the row counts match, then run `delete from public.dodge_leaderboard;`. In the same change, bump `CACHE_KEY` in `leaderboard.js` and add the old key to `OLD_CACHE_KEYS`, so browsers drop their saved copy of the old board.
