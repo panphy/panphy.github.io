@@ -9,6 +9,10 @@ const SUBMIT_RPC = 'submit_dodge_score';
 const CACHE_KEY = 'dodgeLeaderboardCacheV2';
 const OLD_CACHE_KEYS = ['dodgeLeaderboardCacheV1'];
 export const BOARD_SIZE = 10;
+// Matches the server's range check in submit_dodge_score and the dodge_survival_time_range
+// constraint; runs outside it are never offered for submission.
+const MIN_SCORE = 1;
+const MAX_SCORE = 600;
 const HIGHLIGHT_MS = 8000;
 
 const headers = {
@@ -24,7 +28,7 @@ export function formatTime(seconds) {
 
 function sanitize(value) {
   const n = Number(value);
-  if (!Number.isFinite(n) || n <= 0) return null;
+  if (!Number.isFinite(n) || n < MIN_SCORE || n > MAX_SCORE) return null;
   return Math.round(n * 100) / 100;
 }
 
