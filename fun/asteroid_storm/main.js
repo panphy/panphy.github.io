@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-boost';
-import { createAudio } from './audio.js?v=20261124-boost';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-boost';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-boost';
-import { mountTitle } from './title.js?v=20261124-boost';
-import { createJoystick } from './joystick.js?v=20261124-boost';
+} from './art.js?v=20261124-tap';
+import { createAudio } from './audio.js?v=20261124-tap';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-tap';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-tap';
+import { mountTitle } from './title.js?v=20261124-tap';
+import { createJoystick } from './joystick.js?v=20261124-tap';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1841,9 +1841,20 @@ function steerTo(e) {
   setTarget(x, e.pointerType === 'mouse' ? y : y - TOUCH_LEAD);
 }
 
+// On the title, pause and game-over screens a finger may be scrolling the page, so a touch
+// starts or resumes a run only as a tap: lifted soon, near where it came down.
+const TAP_SLOP = 10; // px
+const TAP_TIME = 500; // ms
+const tap = { id: null, x: 0, y: 0, at: 0 };
+function isIdle() { return state.mode === 'title' || state.mode === 'over' || state.mode === 'paused'; }
+
 canvas.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
   canvas.focus({ preventScroll: true });
+  if (e.pointerType !== 'mouse' && isIdle()) {
+    Object.assign(tap, { id: e.pointerId, x: e.clientX, y: e.clientY, at: e.timeStamp });
+    return;
+  }
+  e.preventDefault();
   if (state.mode !== 'playing') primaryAction();
   if (state.mode !== 'playing') return;
   if (e.pointerType !== 'mouse') {
@@ -1864,8 +1875,14 @@ canvas.addEventListener('pointermove', (e) => {
 }, { passive: false });
 
 const endDrag = (e) => { if (drag.id === e.pointerId) drag.id = null; };
-canvas.addEventListener('pointerup', endDrag);
-canvas.addEventListener('pointercancel', endDrag);
+canvas.addEventListener('pointerup', (e) => {
+  endDrag(e);
+  if (tap.id !== e.pointerId) return;
+  tap.id = null;
+  const still = Math.hypot(e.clientX - tap.x, e.clientY - tap.y) <= TAP_SLOP;
+  if (still && e.timeStamp - tap.at <= TAP_TIME && isIdle()) primaryAction();
+});
+canvas.addEventListener('pointercancel', (e) => { endDrag(e); if (tap.id === e.pointerId) tap.id = null; });
 
 const MOVE_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'ShiftLeft', 'ShiftRight']);
 
@@ -1949,6 +1966,8 @@ function updateButtons() {
   soundButton.querySelector('.label').textContent = muted ? 'Sound off' : 'Sound on';
   soundButton.setAttribute('aria-pressed', String(!muted));
   soundButton.classList.toggle('is-off', muted);
+  // Between runs a swipe on the field scrolls the page; during a run every touch steers.
+  canvas.classList.toggle('is-idle', isIdle());
 }
 
 function toggleSound() {
