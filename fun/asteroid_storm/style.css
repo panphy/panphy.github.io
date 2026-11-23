@@ -353,6 +353,13 @@ h1 {
 .trophy:focus-visible { outline: 3px solid var(--glass); outline-offset: 1px; }
 .trophy.is-locked img { opacity: 0.85; }
 
+.clear-records {
+  width: 100%;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 /* Newly earned trophies glow until opened. */
 .trophy.is-new { animation: trophy-new 1.2s steps(6) infinite; }
 

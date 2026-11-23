@@ -454,6 +454,17 @@ export function createTrophies({ grid, count, detail }) {
     return capsules.size >= Object.keys(CAPSULES).length;
   }
 
+  // Forgets every trophy, and which capsule types have been collected.
+  function clear() {
+    for (const id of Object.keys(earned)) delete earned[id];
+    seen.clear();
+    capsules.clear();
+    try { [STORE_KEY, SEEN_KEY, CAPSULE_KEY].forEach((k) => localStorage.removeItem(k)); } catch {}
+    selected = null;
+    detail.replaceChildren();
+    render();
+  }
+
   render();
-  return { award, has: (id) => Boolean(earned[id]), noteCapsule, get: (id) => BY_ID[id] };
+  return { award, clear, has: (id) => Boolean(earned[id]), noteCapsule, get: (id) => BY_ID[id] };
 }

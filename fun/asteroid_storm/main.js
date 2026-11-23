@@ -131,6 +131,15 @@ const trophies = createTrophies({
   count: document.getElementById('trophyCount'),
   detail: document.getElementById('trophyDetail'),
 });
+// Clears what this game keeps on the device: trophies and the personal best. The online
+// leaderboard is untouched.
+document.getElementById('clearRecords').addEventListener('click', () => {
+  if (!window.confirm('Clear your trophies and personal best on this device? This cannot be undone. The online leaderboard is not affected.')) return;
+  trophies.clear();
+  state.best = 0;
+  try { localStorage.removeItem(BEST_KEY); } catch {}
+});
+
 const board = createLeaderboard({
   list: document.getElementById('scoreList'),
   status: document.getElementById('boardStatus'),
