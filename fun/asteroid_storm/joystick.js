@@ -1,21 +1,25 @@
-// A pixel-art virtual joystick for touch screens. The knob moves within the base; vector()
-// gives its offset as -1..1 on each axis (a dead zone in the middle), shaped so small pushes
-// give fine control. Shown only on narrow touch screens (see style.css).
-import { PAL } from './art.js?v=20261123-joystick';
+// A pixel-art touch pad for narrow touch screens (see style.css). It works like dragging the
+// ship: every finger movement on it is passed straight to onDrag in screen pixels, so the ship
+// moves at once, and the finger may slide past the pad's edge. The knob follows the finger
+// for feedback and springs back to the centre on release.
+import { PAL } from './art.js?v=20261123-pad';
 
 const SIZE = 48; // drawn at 48 x 48 pixels; the page scales it up
 const C = SIZE / 2;
 const TRAVEL = 13; // px the knob can move from the centre
 const KNOB = 8; // knob radius
-const DEAD = 0.12;
 
-export function createJoystick(canvas, { onPress = () => {} } = {}) {
+export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} } = {}) {
   canvas.width = SIZE;
   canvas.height = SIZE;
   const ctx = canvas.getContext('2d');
   let pointer = null;
   let kx = 0; // knob offset in pixels
   let ky = 0;
+  let startX = 0; // where the finger came down, and where it was last
+  let startY = 0;
+  let lastX = 0;
+  let lastY = 0;
 
   // Pixel-perfect ring of the given radius; `dash` skips every other run of pixels.
   function ring(radius, color, dash = 0) {
@@ -82,10 +86,14 @@ export function createJoystick(canvas, { onPress = () => {} } = {}) {
   }
 
   function follow(e) {
+    onDrag(e.clientX - lastX, e.clientY - lastY);
+    lastX = e.clientX;
+    lastY = e.clientY;
+    // The knob shows how far the finger has travelled since it came down, up to the rim.
     const rect = canvas.getBoundingClientRect();
     const scale = SIZE / rect.width;
-    let dx = (e.clientX - (rect.left + rect.width / 2)) * scale;
-    let dy = (e.clientY - (rect.top + rect.height / 2)) * scale;
+    let dx = (e.clientX - startX) * scale;
+    let dy = (e.clientY - startY) * scale;
     const d = Math.hypot(dx, dy);
     if (d > TRAVEL) { dx *= TRAVEL / d; dy *= TRAVEL / d; }
     kx = dx;
@@ -105,8 +113,10 @@ export function createJoystick(canvas, { onPress = () => {} } = {}) {
     e.preventDefault();
     pointer = e.pointerId;
     try { canvas.setPointerCapture(e.pointerId); } catch {}
+    startX = lastX = e.clientX;
+    startY = lastY = e.clientY;
     onPress();
-    follow(e);
+    draw();
   }, { passive: false });
   canvas.addEventListener('pointermove', (e) => {
     if (pointer !== e.pointerId) return;
@@ -119,15 +129,6 @@ export function createJoystick(canvas, { onPress = () => {} } = {}) {
   draw();
 
   return {
-    // The knob's offset as -1..1, zero inside the dead zone, eased for fine control.
-    vector() {
-      const mx = kx / TRAVEL;
-      const my = ky / TRAVEL;
-      const m = Math.min(1, Math.hypot(mx, my));
-      if (m < DEAD) return [0, 0];
-      const eased = ((m - DEAD) / (1 - DEAD)) ** 1.4;
-      return [(mx / m) * eased, (my / m) * eased];
-    },
     reset() { pointer = null; kx = 0; ky = 0; draw(); },
   };
 }

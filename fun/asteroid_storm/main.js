@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261123-joystick';
-import { createAudio } from './audio.js?v=20261123-joystick';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-joystick';
-import { createTrophies, trophyArt } from './trophies.js?v=20261123-joystick';
-import { mountTitle } from './title.js?v=20261123-joystick';
-import { createJoystick } from './joystick.js?v=20261123-joystick';
+} from './art.js?v=20261123-pad';
+import { createAudio } from './audio.js?v=20261123-pad';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-pad';
+import { createTrophies, trophyArt } from './trophies.js?v=20261123-pad';
+import { mountTitle } from './title.js?v=20261123-pad';
+import { createJoystick } from './joystick.js?v=20261123-pad';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1038,7 +1038,6 @@ function update(dt) {
     if (stage !== state.stage) enterStage(stage);
     const def = STAGES[state.stage];
     moveShipWithKeys(dt);
-    moveShipWithJoystick(dt);
     state.spawnBudget += (SPAWN_RATE + SPAWN_GROWTH * state.time) * world;
     while (state.spawnBudget >= 1) {
       state.spawnBudget -= 1;
@@ -1126,16 +1125,17 @@ function enterStage(stage) {
   audio.sfx('stage');
 }
 
-// The on-screen joystick (narrow touch screens) steers at up to keyboard speed.
+// The touch pad (narrow touch screens) drags the ship like a finger on the field does, but
+// PAD_GAIN times as far, so a short thumb movement on the small pad covers the field.
+const PAD_GAIN = 1.8;
 const joystick = createJoystick(document.getElementById('joystick'), {
   onPress: () => { if (state.mode !== 'playing') primaryAction(); },
+  onDrag: (dx, dy) => {
+    if (state.mode !== 'playing' || !state.ship.alive) return;
+    const k = fieldScale() * PAD_GAIN;
+    moveShipTo(state.ship.x + dx * k, state.ship.y + dy * k);
+  },
 });
-
-function moveShipWithJoystick(dt) {
-  const [jx, jy] = joystick.vector();
-  if (!jx && !jy) return;
-  moveShipTo(state.ship.x + jx * KEY_SPEED * dt, state.ship.y + jy * KEY_SPEED * dt);
-}
 
 function moveShipWithKeys(dt) {
   let dx = 0;
