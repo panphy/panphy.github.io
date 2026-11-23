@@ -119,14 +119,11 @@ let isSyncingInputScroll = false;
 let isSyncingOutputScroll = false;
 let pendingSyncSource = null;
 let syncScrollRafId = 0;
-let isPreviewHeightHeld = false;
-let isPreviewRenderSettled = true;
-let heldPreviewScrollTop = 0;
+let previewBufferHost = null;
 let syncedInputScrollTop = -1;
 let syncedOutputScrollTop = -1;
 let renderCycleId = 0;
 let syncAnchorMap = null;
-let syncAnchorMapRenderCycle = 0;
 let syncAnchorMirror = null;
 let syncAnchorRebuildTimeoutId = 0;
 
@@ -142,7 +139,6 @@ function clearPendingSyncAnchorRebuild() {
 
 function clearSyncAnchorMap() {
   syncAnchorMap = null;
-  syncAnchorMapRenderCycle = 0;
 }
 
 function ensureSyncAnchorMirror() {
@@ -321,7 +317,6 @@ function normalizeSyncAnchorPairs(anchorPairs) {
 
 function buildSyncAnchorMap(content, cycleId = renderCycleId) {
   content = markdownInput.value; // Measure the collapsed view, not the embedded bytes.
-  releasePreviewHeight();
   if (!state.isSyncScrollEnabled) {
     clearSyncAnchorMap();
     return;
@@ -366,10 +361,9 @@ function buildSyncAnchorMap(content, cycleId = renderCycleId) {
   }
 
   syncAnchorMap = normalizedPairs;
-  syncAnchorMapRenderCycle = cycleId;
 }
 
-function scheduleSyncAnchorMapRebuild(content, cycleId = renderCycleId) {
+function scheduleSyncAnchorMapRebuild(content, cycleId = renderCycleId, { resync = false } = {}) {
   if (!state.isSyncScrollEnabled) {
     clearPendingSyncAnchorRebuild();
     clearSyncAnchorMap();
@@ -380,6 +374,7 @@ function scheduleSyncAnchorMapRebuild(content, cycleId = renderCycleId) {
   syncAnchorRebuildTimeoutId = window.setTimeout(() => {
     syncAnchorRebuildTimeoutId = 0;
     buildSyncAnchorMap(content, cycleId);
+    if (resync) syncInputToOutput();
   }, SYNC_ANCHOR_REBUILD_DELAY_MS);
 }
 
@@ -417,11 +412,8 @@ function interpolateSyncTarget(anchorPairs, sourceScrollTop, sourceKey, targetKe
 }
 
 function syncScrollByAnchorMap(sourceElement, targetElement, sourcePane) {
-  if (
-    !syncAnchorMap
-    || syncAnchorMapRenderCycle !== renderCycleId
-    || syncAnchorMap.length < 2
-  ) {
+  // The previous render's map stays close enough until its rebuild finishes.
+  if (!syncAnchorMap || syncAnchorMap.length < 2) {
     return false;
   }
 
@@ -483,7 +475,6 @@ function scheduleSyncScroll(source) {
     const sourceToSync = pendingSyncSource;
     pendingSyncSource = null;
     syncScrollRafId = 0;
-    releasePreviewHeight();
 
     if (sourceToSync === 'input') {
       if (isSyncingInputScroll) return;
@@ -527,31 +518,39 @@ function handleInputScroll() {
 }
 
 function handleOutputScroll() {
-  // A preview that is still rendering has no position worth copying.
-  if (isPreviewHeightHeld) return;
   if (Math.abs(renderedOutput.scrollTop - syncedOutputScrollTop) <= SYNC_SCROLL_EPSILON) return;
   syncOutputToInput();
 }
 
-// Replacing the preview and typesetting its math briefly changes its height.
-// Reserving the old height keeps the browser from clamping its scroll position.
-function holdPreviewHeight() {
-  isPreviewRenderSettled = false;
-  if (!state.isSyncScrollEnabled || isPreviewHeightHeld) return;
-  heldPreviewScrollTop = renderedOutput.scrollTop;
-  renderedOutput.style.paddingBottom = `${renderedOutput.scrollHeight}px`;
-  isPreviewHeightHeld = true;
+// New content is typeset here, out of sight, so the preview only ever shows a
+// finished render. MathJax needs it in the document with the preview's font.
+function createPreviewBuffer() {
+  if (!previewBufferHost) {
+    previewBufferHost = document.createElement('div');
+    previewBufferHost.setAttribute('aria-hidden', 'true');
+    previewBufferHost.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;';
+    document.body.appendChild(previewBufferHost);
+  }
+  const computedStyle = window.getComputedStyle(renderedOutput);
+  const buffer = document.createElement('div');
+  buffer.className = 'mathjax-ignore';
+  buffer.style.position = 'absolute';
+  buffer.style.width = `${renderedOutput.clientWidth}px`;
+  buffer.style.fontFamily = computedStyle.fontFamily;
+  buffer.style.fontSize = computedStyle.fontSize;
+  buffer.style.lineHeight = computedStyle.lineHeight;
+  previewBufferHost.appendChild(buffer);
+  return buffer;
 }
 
-function restoreHeldPreviewScroll() {
-  if (isPreviewHeightHeld) renderedOutput.scrollTop = heldPreviewScrollTop;
-}
-
-// Called in the same frame as the next sync, so a shorter height is never painted.
-function releasePreviewHeight() {
-  if (!isPreviewHeightHeld || !isPreviewRenderSettled) return;
-  renderedOutput.style.paddingBottom = '';
-  isPreviewHeightHeld = false;
+function commitPreviewBuffer(buffer) {
+  dismissTableCopyActions();
+  const scrollTop = renderedOutput.scrollTop;
+  const content = document.createDocumentFragment();
+  while (buffer.firstChild) content.appendChild(buffer.firstChild);
+  renderedOutput.replaceChildren(content);
+  renderedOutput.scrollTop = scrollTop;
+  buffer.remove();
 }
 
 // Initialize UI module with DOM references
@@ -1020,7 +1019,7 @@ function canTypesetMath() {
   return Boolean(window.MathJax && typeof MathJax.typesetPromise === 'function');
 }
 
-function queueMathTypeset(isCurrent, hasMath) {
+function queueMathTypeset(isCurrent, hasMath, target, onTypeset) {
   const readyPromise = window.MathJax && MathJax.startup && MathJax.startup.promise
     ? MathJax.startup.promise
     : Promise.resolve();
@@ -1036,9 +1035,10 @@ function queueMathTypeset(isCurrent, hasMath) {
       if (typeof MathJax.typesetClear === 'function') {
         MathJax.typesetClear();
       }
-      return hasMath ? MathJax.typesetPromise([renderedOutput]) : undefined;
+      return hasMath ? MathJax.typesetPromise([target]) : undefined;
     })
-    .catch(console.error);
+    .catch(console.error)
+    .then(onTypeset);
 
   return mathTypesetQueue;
 }
@@ -1069,29 +1069,31 @@ function renderContent() {
 
   const parsedMarkdown = markedLib.parse(prepareMarkdownSource(inputText));
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-  dismissTableCopyActions();
-  holdPreviewHeight();
-  renderedOutput.innerHTML = sanitizedContent;
-  restoreHeldPreviewScroll();
-  normalizeRenderedImageSources(renderedOutput);
-
-  const syncPreviewScrollToInput = () => {
-    if (!state.isSyncScrollEnabled) return;
-    syncInputToOutput();
-  };
+  const buffer = createPreviewBuffer();
+  buffer.innerHTML = sanitizedContent;
+  normalizeRenderedImageSources(buffer);
 
   const isCurrentRender = () => currentRenderCycle === renderCycleId;
   const finalizeRender = () => {
     if (!isCurrentRender()) return;
-    isPreviewRenderSettled = true;
-    if (!state.isSyncScrollEnabled) releasePreviewHeight();
-    scheduleSyncAnchorMapRebuild(inputText, currentRenderCycle);
-    syncPreviewScrollToInput();
+    scheduleSyncAnchorMapRebuild(inputText, currentRenderCycle, { resync: true });
+    if (state.isSyncScrollEnabled) syncInputToOutput();
   };
 
+  const hasMath = Boolean(buffer.querySelector('.math-inline, .math-display'));
+  // Until MathJax has loaded, show the text rather than an out-of-date preview.
+  const typesetsOffscreen = hasMath && canTypesetMath();
+  if (!typesetsOffscreen) commitPreviewBuffer(buffer);
+
   if (window.MathJax) {
-    const hasMath = Boolean(renderedOutput.querySelector('.math-inline, .math-display'));
-    queueMathTypeset(isCurrentRender, hasMath).then(finalizeRender);
+    const target = typesetsOffscreen ? buffer : renderedOutput;
+    queueMathTypeset(isCurrentRender, hasMath, target, () => {
+      if (typesetsOffscreen) {
+        if (isCurrentRender()) commitPreviewBuffer(buffer);
+        else buffer.remove();
+      }
+      finalizeRender();
+    });
   } else {
     finalizeRender();
   }
@@ -2344,12 +2346,13 @@ if (window.location.hash.startsWith('#import=')) {
 renderContent();
 if (importedImage) {
   if (mobileQuery.matches) switchMobilePane('output');
-  const image = [...renderedOutput.querySelectorAll('img')].pop();
-  if (image) {
+  mathTypesetQueue.then(() => {
+    const image = [...renderedOutput.querySelectorAll('img')].pop();
+    if (!image) return;
     const showImage = () => image.scrollIntoView({ block: 'nearest' });
     if (image.complete) requestAnimationFrame(showImage);
     else image.addEventListener('load', showImage, { once: true });
-  }
+  });
 }
 
 // Dirty-state indicator on load (never exported yet, so show if non-empty)
