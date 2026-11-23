@@ -12,16 +12,15 @@ import { createLeaderboard, formatTime } from './leaderboard.js';
  * version's (its 600 x 400 field scaled by 0.6, at 60 fps).
  * Rocks there flew in random directions and half left the
  * screen at once; here every rock heads inwards and half as
- * many spawn, which is the same field. RAMP then slows how
- * fast speed and spawning grow, so a typical run lasts about
- * 3 s longer; a strong human still lasts roughly 30 to 60 s.
- * Stage hazards add a little pressure and capsules give a
- * little back.
+ * many spawn, which is the same field. RAMP slows how fast
+ * speed and spawning grow. With the stage hazards it is tuned
+ * so a bot that reads the warnings averages about 2 minutes,
+ * which should leave good human runs at 45 to 60 s.
  * ----------------------------------------------------------- */
 const SHIP_RADIUS = 9;
 const MIN_SPEED = 72; // px/s at the start
 const MAX_SPEED = 252;
-const RAMP = 0.66; // share of the previous version's growth rates
+const RAMP = 0.09; // share of the previous version's growth rates
 const MIN_SPEED_GROWTH = 2.057 * RAMP; // px/s gained per second survived
 const MAX_SPEED_GROWTH = 4.114 * RAMP;
 const SPAWN_RATE = 0.6; // rocks per second at the start
@@ -46,14 +45,16 @@ const COMET_RADIUS = 3;
 const SPLIT_MIN_DIAMETER = 31;
 const WELL_CORE = 6;
 const WELL_REACH = 130;
-const WELL_PULL = 95; // px/s drift towards the well at its core
-const WELL_ROCK_PULL = 260; // px/s² pull on rocks at the core
+const WELL_PULL = 75; // px/s drift towards the well at its core
+const WELL_ROCK_PULL = 200; // px/s² pull on rocks at the core
 const WELL_SPEED = 16;
+// Each black hole gets its own size between these, scaling its core, reach and pull together.
+const WELL_SIZE = [0.75, 1.35];
 const FIRST_WELL_DELAY = 2.5; // s into the first stage with wells (Stage 2) before one appears
 
 // Solar flares: a loop of plasma arcs out of one edge of the field and back into it, as
 // flares erupt along magnetic loops on the Sun. Dashed lines warn of the arc, then it blazes.
-const FLARE_HALF = 7; // px, half the arc's width
+const FLARE_HALF_RANGE = [5, 10]; // px, half the arc's width; each flare picks its own
 const FLARE_SPREAD = [1.15, 1.7]; // each footpoint's distance from the ship along the edge, as a
 // multiple of the ship's height above that edge; above 1 keeps the loop an arch, not a ring
 const FLARE_HEIGHT = [30, 160]; // px the ship may be from the edge the loop rises from
@@ -84,8 +85,8 @@ const STAGES = [
   { name: 'DUST BELT', palettes: [0, 1], nebula: 0, comet: 0, split: 0, well: 0, flare: 0 },
   { name: 'IRON BELT', palettes: [2, 1], nebula: 1, comet: 4.5, split: 0, well: 15, flare: 0 },
   { name: 'ICE FIELD', palettes: [3], nebula: 2, comet: 4, split: 0.3, well: 13, flare: 6 },
-  { name: 'MAGMA RIFT', palettes: [4, 2], nebula: 3, comet: 3.6, split: 0.35, well: 11, flare: 5 },
-  { name: 'DEEP STORM', palettes: [0, 1, 2, 3, 4], nebula: 4, comet: 3, split: 0.4, well: 9, flare: 4 },
+  { name: 'MAGMA RIFT', palettes: [4, 2], nebula: 3, comet: 4.2, split: 0.35, well: 11, flare: 6 },
+  { name: 'DEEP STORM', palettes: [0, 1, 2, 3, 4], nebula: 4, comet: 3.8, split: 0.4, well: 10, flare: 5.5 },
 ];
 
 const canvas = document.getElementById('game');
@@ -287,10 +288,14 @@ function launchComet(w) {
 function spawnWell() {
   const fromLeft = rng() < 0.5;
   const y = 40 + rng() * (H - 80);
+  const size = WELL_SIZE[0] + rng() * (WELL_SIZE[1] - WELL_SIZE[0]);
   state.wells.push({
-    x: fromLeft ? -30 : W + 30, y,
+    x: fromLeft ? -40 : W + 40, y,
     vx: (fromLeft ? 1 : -1) * WELL_SPEED, vy: (rng() - 0.5) * 8,
     spin: 0,
+    size,
+    core: WELL_CORE * size,
+    reach: WELL_REACH * size,
   });
   audio.sfx('warn');
 }
@@ -320,8 +325,8 @@ function wellPull(x, y, strength) {
     const dx = w.x - x;
     const dy = w.y - y;
     const d = Math.hypot(dx, dy) || 1;
-    if (d > WELL_REACH) continue;
-    const f = strength * (1 - d / WELL_REACH) ** 1.5;
+    if (d > w.reach) continue;
+    const f = strength * w.size * (1 - d / w.reach) ** 1.5;
     px += (dx / d) * f;
     py += (dy / d) * f;
   }
@@ -356,7 +361,7 @@ function updateRocks(dt, { collide }) {
     }
     let swallowed = false;
     for (const w of state.wells) {
-      if (r.kind !== 'comet' && Math.hypot(w.x - r.x, w.y - r.y) < WELL_CORE + 2) swallowed = true;
+      if (r.kind !== 'comet' && Math.hypot(w.x - r.x, w.y - r.y) < w.core + 2) swallowed = true;
     }
     if (swallowed) {
       state.rocks.splice(i, 1);
@@ -420,7 +425,7 @@ function updateWells(dt, collide) {
       const d = 24 + rng() * 20;
       addParticle({ x: w.x + Math.cos(a) * d, y: w.y + Math.sin(a) * d, vx: -Math.cos(a) * 30 - Math.sin(a) * 25, vy: -Math.sin(a) * 30 + Math.cos(a) * 25, life: 0.7, max: 0.7, color: pick([PAL.violet, PAL.rose, '#5b3fb0']), size: 1 });
     }
-    if (collide && s.alive && s.grace <= 0 && !state.god && Math.hypot(w.x - s.x, w.y - s.y) < WELL_CORE + hitRadius() * 0.6) {
+    if (collide && s.alive && s.grace <= 0 && !state.god && Math.hypot(w.x - s.x, w.y - s.y) < w.core + hitRadius() * 0.6) {
       if (s.shield) {
         // A shield is spent getting thrown clear of the core.
         s.shield = false;
@@ -433,7 +438,7 @@ function updateWells(dt, collide) {
         crash({ vx: 0, vy: 0 });
       }
     }
-    if (w.x < -60 || w.x > W + 60) state.wells.splice(i, 1);
+    if (w.x < -70 || w.x > W + 70) state.wells.splice(i, 1);
   }
   if (collide && s.alive && state.wells.length) {
     const [px, py] = wellPull(s.x, s.y, WELL_PULL);
@@ -625,7 +630,8 @@ function warnFlare() {
   const half = (u2 - u1) / 2;
   const vc = ((us - uc) ** 2 + vs ** 2 - half ** 2) / (2 * vs);
   const [cx, cy] = edge.map(uc, vc);
-  const flare = { cx, cy, r: Math.hypot(half, vc), feet: [edge.map(u1, 0), edge.map(u2, 0)], t: 0, fired: false };
+  const width = FLARE_HALF_RANGE[0] + rng() * (FLARE_HALF_RANGE[1] - FLARE_HALF_RANGE[0]);
+  const flare = { cx, cy, r: Math.hypot(half, vc), half: width, feet: [edge.map(u1, 0), edge.map(u2, 0)], t: 0, fired: false };
   Object.assign(flare, drawFlareArt(flare));
   state.flares.push(flare);
   audio.sfx('flarewarn');
@@ -656,7 +662,7 @@ function drawFlareArt(f) {
   const put = (img, i, c) => { img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = 255; };
   // Each frame's flame height along the loop: a few waves with their own phases.
   const waves = frames.map(() => [0.31, 0.83, 1.9].map((k) => ({ k, p: rng() * Math.PI * 2 })));
-  const reach = FLARE_HALF * 1.6;
+  const reach = f.half * 1.6;
   for (let y = 0; y < H; y += 1) {
     for (let x = 0; x < W; x += 1) {
       const dx = x + 0.5 - f.cx;
@@ -667,12 +673,12 @@ function drawFlareArt(f) {
       const i = (y * W + x) * 4;
       const along = Math.atan2(dy, dx) * f.r;
       // Dashes every 3 px along the arc, on both edges of the warned band.
-      if (Math.abs(a - FLARE_HALF) < 0.6 && Math.floor(along / 3) % 2 === 0) put(warn.img, i, rose);
+      if (Math.abs(a - f.half) < 0.6 && Math.floor(along / 3) % 2 === 0) put(warn.img, i, rose);
       frames.forEach((fr, n) => {
         const w = waves[n];
         const noise = 0.5 + 0.28 * Math.sin(along * w[0].k + w[0].p) + 0.14 * Math.sin(along * w[1].k + w[1].p) + 0.08 * Math.sin(along * w[2].k + w[2].p);
         // Tongues lick further outwards than inwards.
-        const half = FLARE_HALF * (d > 0 ? 0.7 + 0.9 * noise : 0.75 + 0.45 * noise);
+        const half = f.half * (d > 0 ? 0.7 + 0.9 * noise : 0.75 + 0.45 * noise);
         const t = a / half;
         if (t > 1) return;
         // Ragged, flickering tips.
@@ -695,7 +701,7 @@ function updateFlares(dt) {
       state.shake = Math.max(state.shake, 0.18);
       audio.sfx('flare');
     }
-    if (f.fired && s.alive && s.grace <= 0 && !state.god && flareGap(f, s.x, s.y) < FLARE_HALF + hitRadius() * 0.6) {
+    if (f.fired && s.alive && s.grace <= 0 && !state.god && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6) {
       if (s.shield) shieldBreak({ x: s.x, y: s.y });
       else crash({ vx: 0, vy: 0 });
     }
@@ -1108,7 +1114,9 @@ function drawWells() {
     const cy = Math.round(w.y);
     // Three rotating rings of dots spiralling in, around a black core with a bright rim.
     const rings = [[32, 12, '#3b2a7a'], [22, 9, PAL.violet], [13, 7, PAL.rose]];
-    rings.forEach(([radius, count, color], ri) => {
+    rings.forEach(([base, n, color], ri) => {
+      const radius = base * w.size;
+      const count = Math.round(n * w.size);
       ctx.fillStyle = color;
       for (let k = 0; k < count; k += 1) {
         const a = w.spin * (1 + ri * 0.6) + (k / count) * Math.PI * 2;
@@ -1116,11 +1124,13 @@ function drawWells() {
       }
     });
     // Black core with a glowing rim, drawn as a pixel disc.
-    for (let y = -WELL_CORE - 1; y <= WELL_CORE + 1; y += 1) {
-      for (let x = -WELL_CORE - 1; x <= WELL_CORE + 1; x += 1) {
+    const core = w.core;
+    const span = Math.ceil(core) + 1;
+    for (let y = -span; y <= span; y += 1) {
+      for (let x = -span; x <= span; x += 1) {
         const d = Math.hypot(x, y);
-        if (d > WELL_CORE + 1.2) continue;
-        ctx.fillStyle = d > WELL_CORE - 0.2 ? PAL.rose : d > WELL_CORE - 1.4 ? '#5b1f4f' : '#000000';
+        if (d > core + 1.2) continue;
+        ctx.fillStyle = d > core - 0.2 ? PAL.rose : d > core - 1.4 ? '#5b1f4f' : '#000000';
         ctx.fillRect(cx + x, cy + y, 1, 1);
       }
     }
