@@ -14,13 +14,13 @@ import { createLeaderboard, formatTime } from './leaderboard.js';
  * screen at once; here every rock heads inwards and half as
  * many spawn, which is the same field. RAMP slows how fast
  * speed and spawning grow. With the stage hazards it is tuned
- * so a bot that reads the warnings averages about 2 minutes,
- * which should leave good human runs at 45 to 60 s.
+ * so a bot that reads the warnings has a median run of about
+ * 100 s.
  * ----------------------------------------------------------- */
 const SHIP_RADIUS = 9;
 const MIN_SPEED = 72; // px/s at the start
 const MAX_SPEED = 252;
-const RAMP = 0.09; // share of the previous version's growth rates
+const RAMP = 0.14; // share of the previous version's growth rates
 const MIN_SPEED_GROWTH = 2.057 * RAMP; // px/s gained per second survived
 const MAX_SPEED_GROWTH = 4.114 * RAMP;
 const SPAWN_RATE = 0.6; // rocks per second at the start
