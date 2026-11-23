@@ -905,7 +905,7 @@ function startIntro() {
   state.introT = 0;
   state.ship.y = H + 30;
   audio.unlock();
-  audio.setIntensity(1);
+  audio.setStage(0);
   audio.sfx('warp');
   updateButtons();
 }
@@ -1122,7 +1122,7 @@ function enterStage(stage) {
   state.banner = { title: `STAGE ${stage + 1}`, name: STAGES[stage].name, t: 0 };
   state.warp = Math.max(state.warp, 0.6);
   setNebula(STAGES[stage].nebula);
-  audio.setIntensity(stage + 1);
+  audio.setStage(stage);
   audio.sfx('stage');
 }
 
