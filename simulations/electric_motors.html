@@ -59,7 +59,7 @@
   <script src="/assets/math.js"></script>
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="/assets/design.css">
-  <link rel="stylesheet" href="electric_motors/style.css">
+  <link rel="stylesheet" href="electric_motors/style.css?v=20261123">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script src="/assets/theme-toggle.js"></script>
@@ -70,7 +70,7 @@
 <body data-mode="force">
   <header class="banner">
     <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
-    <div class="banner-title">Electric Motors</div>
+    <h1 class="banner-title">Electric Motors</h1>
     <div class="banner-actions">
       <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
       <button type="button" class="panphy-fullscreen-button" data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
@@ -78,7 +78,6 @@
   </header>
   <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
   <main>
-    <div class="intro"><h1>Current in. Motion out<span>!</span></h1></div>
     <nav class="models" aria-label="Choose a motor">
       <button type="button" data-mode="force" aria-pressed="true"><strong>Motor effect</strong><small data-math-static>\(F = BIL\)</small></button>
       <button type="button" data-mode="dc" aria-pressed="false"><strong>DC motor</strong><small>Split-ring commutator</small></button>

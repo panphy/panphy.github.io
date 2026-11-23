@@ -105,6 +105,7 @@ button:focus-visible, a:focus-visible, #viewer:focus-visible, select:focus-visib
 .banner-logo { justify-self: start; display: flex; align-items: center; min-height: 48px; line-height: 0; }
 .banner-logo img { display: block; width: 38px; height: 38px; object-fit: contain; }
 .banner-title {
+  margin: 0;
   justify-self: center;
   font-family: var(--font-display);
   font-size: 1.15rem;
@@ -117,15 +118,10 @@ button:focus-visible, a:focus-visible, #viewer:focus-visible, select:focus-visib
 
 main, footer { width: calc(100% - 48px); max-width: 1320px; margin: auto; }
 .eyebrow { margin: 0; font-family: var(--font-mono); font-size: .76rem; letter-spacing: .12em; font-weight: 600; color: var(--brand-primary); }
-.intro { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 0 16px; }
-.intro p { margin: 0; }
-.intro > p { color: var(--text-secondary); font-size: .92rem; border-left: 3px solid var(--card-border); padding-left: 18px; }
-h1, h2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
-h1 { font-size: clamp(1.4rem, 2.3vw, 2rem); letter-spacing: -.03em; line-height: 1.1; margin: 6px 0 0; }
-h1 span { color: var(--brand-primary); }
+h2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
 
 /* Mode chooser */
-.models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+.models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
 .models button {
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -421,8 +417,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   main, footer { width: calc(100% - 28px); }
   .banner { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
   .banner-title { font-size: 0.95rem; }
-  .intro { display: block; padding: 16px 0 14px; }
-  .intro > p { margin-top: 12px; font-size: .88rem; }
   .models { gap: 6px; }
   .models button { min-height: 60px; padding: 8px 10px; border-radius: 12px; }
   .models button > span { font-size: .62rem; letter-spacing: .04em; }
