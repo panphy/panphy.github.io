@@ -27,8 +27,12 @@ const SPAWN_MARGIN = 24;
 const REMOVE_MARGIN = 60;
 const MAX_SPIN = 1.5; // rad/s
 const HITBOX = 0.95; // share of a rock's nominal radius that collides
-const MAX_STEP = 0.1; // s; longer frames are clipped so rocks never jump the ship
-const KEY_SPEED = 190; // px/s for keyboard movement
+// The world always advances in fixed 1/120 s steps, whatever the display's frame rate, so
+// speeds, collisions and the clock are the same on every device. A slow frame runs several
+// steps; only a stall longer than MAX_CATCH_UP slows the game rather than jumping it.
+const STEP = 1 / 120;
+const MAX_CATCH_UP = 0.25; // s of game time run in one display frame at most
+const KEY_SPEED = 300; // px/s for keyboard movement, close to a quick drag
 const NEAR_MISS_GAP = 6;
 const STAGE_SECONDS = 15;
 const INTRO_SECONDS = 2.8;
@@ -1094,7 +1098,11 @@ function drawTitle() {
   if (state.best > 0) drawText(ctx, `BEST ${formatTime(state.best)}`, W / 2, 182, { align: 'center', color: PAL.steel });
 }
 
+// The pause screen hides the field, so a pause can't be used to plan a route.
 function drawPaused() {
+  ctx.fillStyle = PAL.space;
+  ctx.fillRect(0, 0, W, H);
+  if (state.pausedFrom === 'playing') drawText(ctx, formatTime(state.time), W / 2, H / 2 - 56, { scale: 2, align: 'center', color: PAL.steel });
   panel(W / 2 - 80, H / 2 - 30, 160, 56);
   drawText(ctx, 'PAUSED', W / 2, H / 2 - 20, { scale: 3, align: 'center', color: PAL.gold });
   if (blink(1)) drawText(ctx, 'TAP TO RESUME', W / 2, H / 2 + 12, { align: 'center', color: PAL.pale });
@@ -1158,10 +1166,14 @@ function draw() {
 }
 
 let lastFrame = 0;
+let pending = 0;
 function frame(now) {
-  const dt = lastFrame ? Math.min((now - lastFrame) / 1000, MAX_STEP) : 0;
+  pending += lastFrame ? Math.min((now - lastFrame) / 1000, MAX_CATCH_UP) : 0;
   lastFrame = now;
-  update(dt);
+  while (pending >= STEP) {
+    update(STEP);
+    pending -= STEP;
+  }
   draw();
   requestAnimationFrame(frame);
 }
@@ -1170,9 +1182,12 @@ requestAnimationFrame(frame);
 /* -----------------------------------------------------------
  * Input
  * ----------------------------------------------------------- */
+// Field pixels per screen pixel. On a short window the canvas box is wider than 3:2 and
+// the picture is fitted by height, so measure the picture, not the box.
 function fieldScale() {
   const rect = canvas.getBoundingClientRect();
-  return rect.width ? W / rect.width : 1;
+  const shown = Math.min(rect.width, rect.height * (W / H));
+  return shown ? W / shown : 1;
 }
 
 function beginDrag(e) {
