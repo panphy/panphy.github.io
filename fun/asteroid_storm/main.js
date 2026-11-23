@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261123-direct';
-import { createAudio } from './audio.js?v=20261123-direct';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-direct';
-import { createTrophies, trophyArt } from './trophies.js?v=20261123-direct';
-import { mountTitle } from './title.js?v=20261123-direct';
-import { createJoystick } from './joystick.js?v=20261123-direct';
+} from './art.js?v=20261123-pills';
+import { createAudio } from './audio.js?v=20261123-pills';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-pills';
+import { createTrophies, trophyArt } from './trophies.js?v=20261123-pills';
+import { mountTitle } from './title.js?v=20261123-pills';
+import { createJoystick } from './joystick.js?v=20261123-pills';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -68,7 +68,7 @@ const FLARE_FIRE = 0.5; // s the beam burns
 const FIRST_FLARE_DELAY = 3; // s into the first stage with flares (Stage 3) before one appears
 
 const CAPSULE_FIRST = 7;
-const CAPSULE_GAP = [10, 14];
+const SHIELD_COOLDOWN = 25; // s between shield capsules at least; the stages set the capsule gaps
 const SLOW_SECONDS = 4;
 const SLOW_SCALE = 0.5;
 const MINI_SECONDS = 7;
@@ -87,11 +87,11 @@ const TRAIL_PHASE_SEED = 1819600217;
 // Each stage: its name, the rock palettes it uses, and how often each hazard appears
 // (comets and wells: seconds between them; splitters: share of big rocks that split).
 const STAGES = [
-  { name: 'DUST BELT', palettes: [0, 1], nebula: 0, comet: 0, split: 0, well: 0, flare: 0 },
-  { name: 'IRON BELT', palettes: [2, 1], nebula: 1, comet: 4.5, split: 0, well: 15, flare: 0 },
-  { name: 'ICE FIELD', palettes: [3], nebula: 2, comet: 4, split: 0.3, well: 13, flare: 6 },
-  { name: 'MAGMA RIFT', palettes: [4, 2], nebula: 3, comet: 4.2, split: 0.35, well: 11, flare: 6 },
-  { name: 'DEEP STORM', palettes: [0, 1, 2, 3, 4], nebula: 4, comet: 3.8, split: 0.4, well: 10, flare: 5.5 },
+  { name: 'DUST BELT', palettes: [0, 1], nebula: 0, comet: 0, split: 0, well: 0, flare: 0, capsule: [10, 14] },
+  { name: 'IRON BELT', palettes: [2, 1], nebula: 1, comet: 4.5, split: 0, well: 15, flare: 0, capsule: [9, 12] },
+  { name: 'ICE FIELD', palettes: [3], nebula: 2, comet: 4, split: 0.3, well: 13, flare: 6, capsule: [8, 11] },
+  { name: 'MAGMA RIFT', palettes: [4, 2], nebula: 3, comet: 4.2, split: 0.35, well: 11, flare: 6, capsule: [7.5, 10] },
+  { name: 'DEEP STORM', palettes: [0, 1, 2, 3, 4], nebula: 4, comet: 3.8, split: 0.4, well: 10, flare: 5.5, capsule: [7, 9] },
 ];
 
 const canvas = document.getElementById('game');
@@ -209,6 +209,7 @@ const state = {
   cometTimer: 0,
   wellTimer: FIRST_WELL_DELAY,
   capsuleTimer: CAPSULE_FIRST,
+  lastShield: -Infinity,
   slow: 0,
   mini: 0,
   ship: freshShip(),
@@ -327,8 +328,12 @@ function spawnWell() {
 }
 
 function spawnCapsule() {
-  const kinds = Object.keys(CAPSULES).filter((k) => !(k === 'shield' && state.ship.shield));
+  // Shields are the strongest capsule, so they stay rare: none while one is held, and at
+  // least SHIELD_COOLDOWN seconds apart.
+  const shieldOk = !state.ship.shield && state.time - state.lastShield >= SHIELD_COOLDOWN;
+  const kinds = Object.keys(CAPSULES).filter((k) => k !== 'shield' || shieldOk);
   const kind = pick(kinds);
+  if (kind === 'shield') state.lastShield = state.time;
   const fromLeft = rng() < 0.5;
   state.capsules.push({
     kind, x: fromLeft ? -14 : W + 14, y: 30 + rng() * (H - 60), baseY: 0,
@@ -877,6 +882,7 @@ function resetWorld() {
   state.cometTimer = 0;
   state.wellTimer = FIRST_WELL_DELAY;
   state.capsuleTimer = CAPSULE_FIRST;
+  state.lastShield = -Infinity;
   state.slow = 0;
   state.mini = 0;
   state.ship = freshShip();
@@ -1072,7 +1078,8 @@ function update(dt) {
     state.capsuleTimer -= world;
     if (state.capsuleTimer <= 0) {
       spawnCapsule();
-      state.capsuleTimer = CAPSULE_GAP[0] + rng() * (CAPSULE_GAP[1] - CAPSULE_GAP[0]);
+      const [lo, hi] = def.capsule;
+      state.capsuleTimer = lo + rng() * (hi - lo);
     }
     exhaust(dt);
     updateWarnings(world);
