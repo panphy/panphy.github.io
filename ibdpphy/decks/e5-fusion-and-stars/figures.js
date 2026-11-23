@@ -40,11 +40,11 @@ window.DeckFigures.add(P => {
 
     // Binding energy per nucleon: light nuclei gain by joining together.
     'e5-curve': () => {
-      const X = A => 110 + (A <= 60 ? 6.4 * A : 384 + 1.7 * (A - 60)), Y = b => 430 - 42 * b;
+      const X = A => 110 + 2.75 * A, Y = b => 430 - 42 * b;
       let s = arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 430, 810, 430, 'text-secondary', 2.5) + line(through(BE.map(([A, b]) => [X(A), Y(b)])), 'brand-primary', 5);
-      s += P.yAxisLabel(55, 244, 'binding energy per nucleon / MeV', 'lbl') + text(460, 510, 'nucleon number A', 'lbl mono') + [[20, '20'], [40, '40'], [60, '60'], [120, '120'], [240, '240']].map(([A, name]) => `<line x1="${f(X(A))}" y1="430" x2="${f(X(A))}" y2="442" class="tick"/>` + text(f(X(A)), 470, name, 'lbl mono')).join('') + [2, 4, 6, 8].map(b => `<line x1="98" y1="${Y(b)}" x2="110" y2="${Y(b)}" class="tick"/>` + text(88, Y(b) + 9, b, 'lbl mono', 'end')).join('');
+      s += P.yAxisLabel(55, 244, 'binding energy per nucleon / MeV', 'lbl') + text(460, 510, 'nucleon number A', 'lbl mono') + [50, 100, 150, 200].map(A => `<line x1="${f(X(A))}" y1="430" x2="${f(X(A))}" y2="442" class="tick"/>` + text(f(X(A)), 470, A, 'lbl mono')).join('') + [2, 4, 6, 8].map(b => `<line x1="98" y1="${Y(b)}" x2="110" y2="${Y(b)}" class="tick"/>` + text(88, Y(b) + 9, b, 'lbl mono', 'end')).join('');
       const mark = (A, b, name, dx, dy, color = 'brand-accent') => `<circle cx="${f(X(A))}" cy="${Y(b)}" r="10" style="fill:var(--${color})"/>` + text(f(X(A)) + dx, Y(b) + dy, name, 'lbl strong halo', dx < 0 ? 'end' : 'start');
-      s += mark(2, 1.11, '²H', 16, 10) + mark(3, 2.83, '³H', 16, 10) + mark(4, 7.07, '⁴He', 16, -8) + mark(56, 8.79, '⁵⁶Fe: the peak', 10, 44, 'proton') + arrow(X(2) - 30, Y(1.6), X(4) - 34, Y(6.8), 'brand-accent', 5) + text(250, 330, 'fusion: light nuclei', 'lbl halo', 'start') + text(250, 364, 'climb the steep side', 'lbl strong halo', 'start');
+      s += mark(2, 1.11, '²H', 16, 10) + mark(3, 2.83, '³H', 16, 10) + mark(4, 7.07, '⁴He', 0, -61) + mark(56, 8.79, '⁵⁶Fe: the peak', 10, 44, 'proton') + arrow(178, Y(1.6), 184, Y(6.8), 'brand-accent', 5) + text(215, 280, 'fusion: light nuclei', 'lbl halo', 'start') + text(215, 314, 'climb the steep side', 'lbl strong halo', 'start');
       return svg('26 10 800 510', s, 'The curve of binding energy per nucleon against nucleon number, drawn from measured values. It rises very steeply for the lightest nuclei, from about 1 MeV for hydrogen-2 to 7 MeV for helium-4, peaks at 8.8 MeV at iron-56 and then falls slowly. Fusing light nuclei moves them up the steep side of the curve, releasing energy');
     },
 
