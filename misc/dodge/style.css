@@ -1,0 +1,330 @@
+/* Asteroid Storm: a dark, pixel-art arcade page. Fonts are system monospace; the
+   game draws its own bitmap font. Corners are notched to read as pixel art. */
+:root {
+  --bg: #07061a;
+  --panel: #110f2b;
+  --panel-edge: #2b2f52;
+  --ink: #0d0b1a;
+  --text: #e9e6f5;
+  --muted: #8a97b4;
+  --gold: #ffd166;
+  --hull: #e2553b;
+  --mint: #5fe3a1;
+  --glass: #4fd8ec;
+  --px: 3px;
+  --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--bg);
+  background-size: 288px 288px;
+  image-rendering: pixelated;
+  color: var(--text);
+  font-family: var(--mono);
+  padding: calc(var(--standalone-top, 0px) + 12px) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  -webkit-tap-highlight-color: transparent;
+}
+
+a { color: var(--gold); }
+a:hover { color: #fff1c2; }
+
+/* Notched pixel frame used by panels and buttons. */
+.pixel-frame,
+.board,
+.screen,
+.pixel-button,
+.dialog {
+  clip-path: polygon(
+    0 var(--px), var(--px) var(--px), var(--px) 0,
+    calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px),
+    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%,
+    var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px))
+  );
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 1120px;
+  margin: 0 auto 14px;
+}
+
+.home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.home img { display: block; width: 32px; height: 32px; image-rendering: auto; }
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.25rem, 4vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 3px 3px 0 #9c2f2a, 6px 6px 0 var(--ink);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+  align-items: start;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.cabinet { min-width: 0; }
+
+.screen {
+  position: relative;
+  padding: 6px;
+  background: linear-gradient(var(--panel-edge), var(--panel-edge)) padding-box;
+  background-color: var(--panel-edge);
+  box-shadow: inset 0 0 0 3px var(--ink);
+  --px: 6px;
+}
+
+.screen::after {
+  /* Faint scanlines over the playfield. */
+  content: '';
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.14) 2px 3px);
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  max-height: calc(100dvh - 190px - var(--standalone-top, 0px));
+  margin: 0 auto;
+  object-fit: contain;
+  background: #090818;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  outline: none;
+}
+
+#game:focus-visible { box-shadow: 0 0 0 3px var(--glass); }
+
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pixel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0 18px;
+  border: 0;
+  background: var(--panel-edge);
+  color: var(--text);
+  font: 700 0.95rem/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.35), inset 3px 3px 0 rgba(255, 255, 255, 0.12);
+  touch-action: manipulation;
+}
+
+.pixel-button:hover:not(:disabled) { background: #3a3f6c; }
+.pixel-button:active:not(:disabled) { box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.35); transform: translateY(1px); }
+.pixel-button:focus-visible { outline: 3px solid var(--glass); outline-offset: 2px; }
+.pixel-button:disabled { opacity: 0.45; cursor: default; }
+.pixel-button.is-on { background: #6a4b12; color: var(--gold); }
+.pixel-button.is-off { color: var(--muted); }
+.pixel-button.primary { background: var(--hull); color: #fff8ec; }
+.pixel-button.primary:hover:not(:disabled) { background: #f06a4f; }
+.pixel-button.ghost { background: transparent; box-shadow: inset 0 0 0 3px var(--panel-edge); }
+
+.pixel-button .icon svg { display: block; width: 16px; height: 16px; fill: currentColor; }
+.pixel-button.is-off .icon svg path { opacity: 0.5; }
+
+.board {
+  background: var(--panel);
+  padding: 16px 16px 18px;
+  box-shadow: inset 0 0 0 3px var(--panel-edge);
+  --px: 6px;
+}
+
+.board h2 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mint);
+  text-align: center;
+}
+
+.board h2::after {
+  content: '';
+  display: block;
+  height: 3px;
+  margin: 10px auto 0;
+  width: 70%;
+  background: repeating-linear-gradient(90deg, var(--mint) 0 6px, transparent 6px 9px);
+}
+
+.scores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.scores li {
+  display: grid;
+  grid-template-columns: 2.2em 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px;
+  font-size: 1rem;
+}
+
+.scores li:nth-child(odd) { background: rgba(255, 255, 255, 0.03); }
+.scores .rank { color: var(--muted); }
+.scores .name { font-weight: 800; letter-spacing: 0.18em; color: var(--gold); }
+.scores .time { color: var(--text); }
+.scores li:first-child .name,
+.scores li:first-child .time { color: #fff1c2; }
+.scores li.empty .name,
+.scores li.empty .time { color: #3e4466; }
+.scores li.recent { background: #3a2a0a; animation: flash-row 0.5s steps(2) infinite; }
+
+@keyframes flash-row { 50% { background: #6a4b12; } }
+
+.board-status {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.footer {
+  max-width: 1120px;
+  margin: 20px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 20px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.footer p { margin: 0; }
+
+.dialog {
+  border: 0;
+  padding: 24px 26px;
+  width: min(340px, calc(100vw - 32px));
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: inset 0 0 0 3px var(--gold);
+  text-align: center;
+  font-family: var(--mono);
+  --px: 6px;
+}
+
+.dialog::backdrop { background: rgba(4, 3, 14, 0.78); }
+
+.dialog h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.dialog-score {
+  margin: 8px 0 18px;
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.dialog label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#initialsInput {
+  width: 7.5em;
+  min-height: 56px;
+  padding: 6px 0 6px 0.45em;
+  border: 0;
+  background: var(--ink);
+  box-shadow: inset 0 0 0 3px var(--panel-edge);
+  color: var(--gold);
+  font: 800 1.8rem/1 var(--mono);
+  letter-spacing: 0.45em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#initialsInput:focus { outline: none; box-shadow: inset 0 0 0 3px var(--gold); }
+#initialsInput::placeholder { color: #3e4466; }
+
+.dialog-error {
+  min-height: 1.3em;
+  margin: 8px 0 4px;
+  font-size: 0.85rem;
+  color: #ff8a7a;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.dialog-actions .pixel-button { flex: 1; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .board { max-width: 520px; width: 100%; margin: 0 auto; }
+  .scores { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; }
+  .scores li:nth-child(odd) { background: transparent; }
+  .scores li { background: rgba(255, 255, 255, 0.03) !important; }
+  .scores li.recent { background: #3a2a0a !important; }
+  .scores { grid-auto-flow: column; grid-template-rows: repeat(5, auto); }
+}
+
+@media (max-width: 420px) {
+  .scores { grid-template-columns: 1fr; grid-auto-flow: row; grid-template-rows: none; }
+  .controls .pixel-button { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scores li.recent { animation: none; }
+}
