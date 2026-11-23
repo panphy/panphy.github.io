@@ -61,6 +61,7 @@ const WAVE_KICK = 150; // px/s added outwards to a rock at the ship, falling to 
 const WAVE_MIN_SPEED = 120; // px/s a pushed rock leaves at, at least
 
 const BEST_KEY = 'dodgeBestV2';
+const TRAIL_PHASE_SEED = 1819600217;
 
 // Each stage: its name, the rock palettes it uses, and how often each hazard appears
 // (comets and wells: seconds between them; splitters: share of big rocks that split).
@@ -166,6 +167,8 @@ const state = {
   pickups: 0,
   best: 0,
   newBest: false,
+  god: false, // god mode: nothing can hit the ship
+  godRun: false, // god mode was on at some point this run, so it is unranked
   overAt: 0,
   scroll: 0,
   planet: null,
@@ -327,7 +330,7 @@ function updateRocks(dt, { collide }) {
     if (collide && s.alive) {
       const d = Math.hypot(r.x - s.x, r.y - s.y);
       const reach = reachShip + r.radius * HITBOX;
-      if (d < reach && s.grace <= 0) {
+      if (d < reach && s.grace <= 0 && !state.god) {
         if (s.shield) {
           shieldBreak(r);
           state.rocks.splice(i, 1);
@@ -381,7 +384,7 @@ function updateWells(dt, collide) {
       const d = 24 + rng() * 20;
       addParticle({ x: w.x + Math.cos(a) * d, y: w.y + Math.sin(a) * d, vx: -Math.cos(a) * 30 - Math.sin(a) * 25, vy: -Math.sin(a) * 30 + Math.cos(a) * 25, life: 0.7, max: 0.7, color: pick([PAL.violet, PAL.rose, '#5b3fb0']), size: 1 });
     }
-    if (collide && s.alive && s.grace <= 0 && Math.hypot(w.x - s.x, w.y - s.y) < WELL_CORE + hitRadius() * 0.6) {
+    if (collide && s.alive && s.grace <= 0 && !state.god && Math.hypot(w.x - s.x, w.y - s.y) < WELL_CORE + hitRadius() * 0.6) {
       if (s.shield) {
         // A shield is spent getting thrown clear of the core.
         s.shield = false;
@@ -640,6 +643,7 @@ function startIntro() {
   resetWorld();
   state.rocks = leftover;
   state.mode = 'intro';
+  state.godRun = state.god;
   state.introT = 0;
   state.ship.y = H + 30;
   audio.unlock();
@@ -665,7 +669,8 @@ function endRun() {
   state.overAt = state.clock;
   // The run counts in whole hundredths, so the screen, the best and the board agree.
   state.time = Math.floor(state.time * 100) / 100;
-  const score = board.sanitize(state.time);
+  // A run that used god mode is unranked: no personal best and no leaderboard entry.
+  const score = state.godRun ? null : board.sanitize(state.time);
   if (score !== null && score > state.best) {
     state.best = score;
     state.newBest = true;
@@ -1103,6 +1108,8 @@ function drawHud() {
   if (state.ship.shield) { drawText(ctx, 'SHIELD', 8, row, { color: CAPSULES.shield.light }); row += 10; }
   if (state.slow > 0) { timerBar('SLOW', 8, row, state.slow / SLOW_SECONDS, CAPSULES.slow.light); row += 10; }
   if (state.mini > 0) timerBar('MINI', 8, row, state.mini / MINI_SECONDS, CAPSULES.mini.light);
+  if (state.god) drawText(ctx, 'GOD MODE', W / 2, H - 14, { align: 'center', color: blink(1) ? PAL.gold : PAL.amber });
+  else if (state.godRun) drawText(ctx, 'UNRANKED', W / 2, H - 14, { align: 'center', color: PAL.steel });
 }
 
 function drawBanner(b) {
@@ -1162,6 +1169,7 @@ function drawTitle() {
     if (blink(1.5)) drawText(ctx, 'TAP OR PRESS ENTER', W / 2, 148, { align: 'center', color: PAL.mint });
   }
   if (state.best > 0) drawText(ctx, `BEST ${formatTime(state.best)}`, W / 2, 182, { align: 'center', color: PAL.steel });
+  if (state.god) drawText(ctx, 'GOD MODE', W / 2, 196, { align: 'center', color: blink(1) ? PAL.gold : PAL.amber });
 }
 
 // The pause screen hides the field, so a pause can't be used to plan a route.
@@ -1181,7 +1189,9 @@ function drawGameOver() {
   drawText(ctx, 'GAME OVER', W / 2, 54, { scale: 3, align: 'center', color: PAL.hull });
   drawText(ctx, 'SURVIVED', W / 2, 84, { align: 'center', color: PAL.steel });
   drawText(ctx, formatTime(state.time), W / 2, 96, { scale: 3, align: 'center', color: PAL.white });
-  if (state.newBest) {
+  if (state.godRun) {
+    drawText(ctx, 'GOD MODE: UNRANKED', W / 2, 124, { align: 'center', color: PAL.gold });
+  } else if (state.newBest) {
     if (blink(3)) drawText(ctx, 'NEW PERSONAL BEST!', W / 2, 124, { align: 'center', color: PAL.gold });
   } else {
     drawText(ctx, `BEST ${formatTime(state.best)}`, W / 2, 124, { align: 'center', color: PAL.steel });
@@ -1289,8 +1299,39 @@ canvas.addEventListener('pointercancel', endDrag);
 
 const MOVE_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'ShiftLeft', 'ShiftRight']);
 
+// FNV-1a, 32 bit.
+function fnv1a(text) {
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+  }
+  return hash >>> 0;
+}
+
+// The last five letters typed, compared by hash so the code never appears in the source.
+let inputTrace = '';
+function traceKey(key) {
+  if (key.length !== 1 || !/[a-z]/i.test(key)) return;
+  inputTrace = (inputTrace + key.toLowerCase()).slice(-5);
+  if (inputTrace.length === 5 && fnv1a(inputTrace) === TRAIL_PHASE_SEED) {
+    inputTrace = '';
+    toggleGodMode();
+  }
+}
+
+function toggleGodMode() {
+  state.god = !state.god;
+  if (state.god && ['intro', 'playing', 'paused'].includes(state.mode)) state.godRun = true;
+  const s = state.ship;
+  const where = state.mode === 'title' ? [W / 2, 206] : [s.x, s.y - 16];
+  popup(state.god ? 'GOD MODE ON' : 'GOD MODE OFF', where[0], where[1], PAL.gold);
+  audio.sfx(state.god ? 'power' : 'shield');
+}
+
 document.addEventListener('keydown', (e) => {
   if (modal.open || e.target instanceof HTMLInputElement) return;
+  if (!e.ctrlKey && !e.metaKey && !e.altKey) traceKey(e.key);
   if (MOVE_KEYS.has(e.code)) {
     keys.add(e.code);
     if (e.code.startsWith('Arrow') && (state.mode === 'playing' || state.mode === 'intro')) e.preventDefault();
