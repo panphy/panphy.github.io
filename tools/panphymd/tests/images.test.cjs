@@ -25,6 +25,8 @@ test('Dropbox legacy and current shares use raw rendering and retain access keys
 test('Drive file and query shares preserve resource keys and stay stable on rerender', () => {
   for (const input of [
     'https://drive.google.com/file/d/abc/view?resourcekey=key',
+    'https://drive.google.com/file/u/0/d/abc/view?resourcekey=key',
+    'https://drive.usercontent.google.com/download?id=abc&export=view&resourcekey=key',
     'https://drive.google.com/open?id=abc&resourcekey=key',
     'https://docs.google.com/uc?id=abc&resourcekey=key'
   ]) {
