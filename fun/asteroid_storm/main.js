@@ -1786,8 +1786,21 @@ window.addEventListener('blur', pause);
 /* -----------------------------------------------------------
  * Buttons
  * ----------------------------------------------------------- */
+// 8 x 8 pixel icons for the Pause and Sound buttons, which change with their state.
+const ICONS = {
+  pause: 'M1 1h2v6H1zM5 1h2v6H5z',
+  play: 'M1 1h2v6H1zM3 2h2v4H3zM5 3h2v2H5z',
+  sound: 'M0 3h2v2H0zM2 2h1v4H2zM3 1h1v6H3zM5 2h1v1H5zM5 5h1v1H5zM6 3h1v2H6z',
+  mute: 'M0 3h2v2H0zM2 2h1v4H2zM3 1h1v6H3zM5 2h1v1H5zM7 2h1v1H7zM6 3h1v2H6zM5 5h1v1H5zM7 5h1v1H7z',
+};
+function setIcon(button, name) {
+  button.querySelector('.icon path').setAttribute('d', ICONS[name]);
+}
+
 function updateButtons() {
   const paused = state.mode === 'paused';
+  setIcon(pauseButton, paused ? 'play' : 'pause');
+  setIcon(soundButton, audio.isMuted() ? 'mute' : 'sound');
   pauseButton.disabled = !paused && state.mode !== 'playing' && state.mode !== 'intro';
   pauseButton.querySelector('.label').textContent = paused ? 'Resume' : 'Pause';
   pauseButton.setAttribute('aria-pressed', String(paused));

@@ -161,14 +161,24 @@ h1 {
   -webkit-touch-callout: none;
 }
 
+/* On narrow touch screens, Pause and Sound shrink to square icon buttons at the far edges,
+   well away from the joystick; their labels stay for screen readers. */
 @media (max-width: 999px) and (pointer: coarse) {
-  .controls { align-items: center; justify-content: center; }
-  .controls .pixel-button { flex: 1; max-width: 200px; padding: 0 8px; gap: 8px; white-space: nowrap; font-size: 0.85rem; }
+  .controls { align-items: center; justify-content: space-between; }
+  .controls .pixel-button { flex: none; width: 48px; min-width: 48px; padding: 0; }
+  .controls .pixel-button .icon svg { width: 20px; height: 20px; }
+  .controls .pixel-button .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
   .joystick { display: block; }
-}
-
-@media (max-width: 480px) and (pointer: coarse) {
-  .controls .pixel-button .icon { display: none; }
 }
 
 .pixel-button {
@@ -441,6 +451,9 @@ h1 {
 
 @media (max-width: 420px) {
   .scores { grid-template-columns: 1fr; grid-auto-flow: row; grid-template-rows: none; }
+}
+
+@media (max-width: 420px) and (pointer: fine) {
   .controls .pixel-button { flex: 1; }
 }
 
