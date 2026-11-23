@@ -203,7 +203,13 @@
     document.body.classList.toggle('is-window-fullscreen', on && inWindow);
     fullscreenButton.setAttribute('aria-pressed', String(on));
     fullscreenButton.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Present fullscreen');
-    requestAnimationFrame(fit);
+    requestAnimationFrame(() => {
+      fit();
+      // The hidden sidebar could not follow the slides while presenting.
+      if (!on && document.body.classList.contains('show-thumbs')) {
+        thumbs.querySelector('[aria-current="true"]')?.scrollIntoView({ block: 'center' });
+      }
+    });
   }
   function toggleFullscreen() {
     if (fullscreenElement()) {
