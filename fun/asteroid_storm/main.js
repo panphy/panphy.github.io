@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-voxel';
-import { createAudio } from './audio.js?v=20261124-voxel';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-voxel';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-voxel';
-import { mountTitle } from './title.js?v=20261124-voxel';
-import { createJoystick } from './joystick.js?v=20261124-voxel';
+} from './art.js?v=20261124-boost';
+import { createAudio } from './audio.js?v=20261124-boost';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-boost';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-boost';
+import { mountTitle } from './title.js?v=20261124-boost';
+import { createJoystick } from './joystick.js?v=20261124-boost';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -75,7 +75,9 @@ const MINI_SECONDS = 7;
 const RADAR_SECONDS = 6; // radar: dotted lines show where rocks and comets are heading
 const RADAR_LOOKAHEAD = 0.9; // s of path shown
 const BOOST_SECONDS = 6; // boost: top speed raised by BOOST_FACTOR
-const BOOST_FACTOR = 1.4;
+const BOOST_FACTOR = 1.7;
+const GHOST_GAP = 1 / 40; // boost: seconds between afterimages
+const GHOST_LIFE = 0.22;
 const MINI_SCALE = 0.55;
 const SHIELD_GRACE = 1.2;
 // Shockwave: a ring bursts out from the ship and throws nearby rocks outwards. Nothing is
@@ -160,6 +162,18 @@ document.body.style.backgroundImage = `url('${buildPageTile()}')`;
  * drawn in idle moments so loading stays quick.
  * ----------------------------------------------------------- */
 const ship = buildShip();
+// The boost afterimage: the ship's silhouette in the boost pill's red.
+const boostGhost = (() => {
+  const c = document.createElement('canvas');
+  c.width = ship.canvas.width;
+  c.height = ship.canvas.height;
+  const g = c.getContext('2d');
+  g.drawImage(ship.canvas, 0, 0);
+  g.globalCompositeOperation = 'source-in';
+  g.fillStyle = CAPSULES.boost.light;
+  g.fillRect(0, 0, c.width, c.height);
+  return c;
+})();
 const starLayers = buildStars();
 const capsuleSprites = Object.fromEntries(Object.keys(CAPSULES).map((k) => [k, buildCapsule(k)]));
 const rockSets = [];
@@ -218,6 +232,8 @@ const state = {
   mini: 0,
   radar: 0,
   boost: 0,
+  ghosts: [],
+  ghostClock: 0,
   ship: freshShip(),
   shake: 0,
   flash: 0,
@@ -867,6 +883,7 @@ function crash(rock) {
   state.mini = 0;
   state.radar = 0;
   state.boost = 0;
+  state.ghosts = [];
   audio.stopMusic();
   audio.sfx('crash');
   audio.sfx('over');
@@ -897,6 +914,7 @@ function resetWorld() {
   state.mini = 0;
   state.radar = 0;
   state.boost = 0;
+  state.ghosts = [];
   state.ship = freshShip();
   state.nearMisses = 0;
   state.streak = 0;
@@ -1039,6 +1057,7 @@ function update(dt) {
   if (state.mini > 0) state.mini = Math.max(0, state.mini - world);
   if (state.radar > 0) state.radar = Math.max(0, state.radar - world);
   if (state.boost > 0) state.boost = Math.max(0, state.boost - world);
+  updateGhosts(dt);
   state.ship.grace = Math.max(0, state.ship.grace - dt);
 
   if (state.mode === 'intro') updateIntro(dt);
@@ -1159,7 +1178,7 @@ const joystick = createJoystick(document.getElementById('joystick'), {
   onDrag: (dx, dy) => {
     if (state.mode !== 'playing' || !state.ship.alive) return;
     const s = state.ship;
-    const k = fieldScale() * PAD_GAIN;
+    const k = fieldScale() * PAD_GAIN * (state.boost > 0 ? BOOST_FACTOR : 1);
     setTarget((s.tx ?? s.x) + dx * k, (s.ty ?? s.y) + dy * k);
   },
 });
@@ -1406,6 +1425,33 @@ function drawCapsules() {
       ctx.fillRect(sx, sy - 1, 1, 3);
     }
   }
+}
+
+// While boosting, the ship leaves fading afterimages that trail behind it as the field scrolls.
+function updateGhosts(dt) {
+  const s = state.ship;
+  for (const g of state.ghosts) { g.life -= dt; g.y += dt * 40; }
+  state.ghosts = state.ghosts.filter((g) => g.life > 0);
+  if (state.boost <= 0 || state.mode !== 'playing' || !s.alive) { state.ghostClock = 0; return; }
+  state.ghostClock -= dt;
+  if (state.ghostClock > 0) return;
+  state.ghostClock = GHOST_GAP;
+  const last = state.ghosts[state.ghosts.length - 1];
+  if (last && Math.hypot(last.x - s.x, last.y - s.y) < 1.5) return;
+  state.ghosts.push({ x: s.x, y: s.y, life: GHOST_LIFE });
+}
+
+function drawGhosts() {
+  if (!state.ghosts.length) return;
+  const scale = state.mini > 0 ? MINI_SCALE : 1;
+  const w = Math.round(SHIP_W * scale);
+  const h = Math.round(SHIP_H * scale);
+  ctx.save();
+  for (const g of state.ghosts) {
+    ctx.globalAlpha = 0.45 * (g.life / GHOST_LIFE);
+    ctx.drawImage(boostGhost, Math.round(g.x - w / 2), Math.round(g.y - h / 2), w, h);
+  }
+  ctx.restore();
 }
 
 function drawShip() {
@@ -1726,7 +1772,7 @@ function draw() {
   drawFlareBeams();
   drawWaves();
   drawParticles();
-  if (state.mode !== 'title') drawShip();
+  if (state.mode !== 'title') { drawGhosts(); drawShip(); }
   drawWarnings();
   drawPopups();
   ctx.restore();
