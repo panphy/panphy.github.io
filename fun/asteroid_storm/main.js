@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-tap';
-import { createAudio } from './audio.js?v=20261124-tap';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-tap';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-tap';
-import { mountTitle } from './title.js?v=20261124-tap';
-import { createJoystick } from './joystick.js?v=20261124-tap';
+} from './art.js?v=20261124-center';
+import { createAudio } from './audio.js?v=20261124-center';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-center';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-center';
+import { mountTitle } from './title.js?v=20261124-center';
+import { createJoystick } from './joystick.js?v=20261124-center';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
