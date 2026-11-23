@@ -6,7 +6,7 @@ The game behind `fun/asteroid_storm.html` (moved from `misc/dodge.html`, which n
 - `art.js`: palette, ship sprite, procedural asteroids, capsules, the 5 × 7 bitmap font, nebulae, stars and planets.
 - `audio.js`: Web Audio sound: an original chiptune track for each stage (`SONGS`: key, tempo, chords, melody, instruments and drums) and the effects. A new stage's track starts on the next downbeat at least 0.45 s away; the old one fades to a third of its volume under a rising whoosh, and the new one fades back up over 0.9 s.
 - `leaderboard.js`: the Top Survivors board.
-- `joystick.js`: the pixel-art touch pad shown below the game on narrow touch screens. It drags the ship like a finger on the field does, but `PAD_GAIN` (1.8) times as far; a tap on it starts, resumes or restarts a run.
+- `joystick.js`: the pixel-art touch pad shown below the game on narrow touch screens, or beside it on phones held sideways (where the game fills the screen height). It drags the ship like a finger on the field does, but `PAD_GAIN` (1.8) times as far; a tap on it starts, resumes or restarts a run.
 - `title.js`: the animated pixel-art title banner.
 - `trophies.js`: the 16 trophies (milestones, pixel-art badges and physics facts) and the trophy case beside the board. Full Set needs all six capsule types; it replaced Collector, which needed the original four.
 

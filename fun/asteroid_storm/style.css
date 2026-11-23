@@ -475,3 +475,49 @@ h1 {
   .scores li.recent { animation: none; }
   .trophy.is-new { animation: none; box-shadow: inset 0 0 0 2px var(--gold); }
 }
+
+/* Phones held sideways: the game takes the full height on the left, and a side column on the
+   right holds the home link and title at the top with the touch pad and buttons below. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  body { --side: 200px; --game-h: calc(100dvh - var(--standalone-top, 0px) - 32px); padding-top: calc(var(--standalone-top, 0px) + 10px); }
+  .topbar {
+    position: absolute;
+    top: calc(var(--standalone-top, 0px) + 10px);
+    right: max(16px, env(safe-area-inset-right));
+    width: var(--side);
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 6px;
+    margin: 0;
+  }
+  .topbar .home { min-width: 40px; }
+  .topbar .title { justify-self: stretch; }
+  .title-art { width: 100%; height: auto; }
+  .cabinet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--side);
+    gap: 16px;
+  }
+  .screen { justify-self: center; width: max-content; max-width: 100%; box-sizing: border-box; }
+  #game {
+    width: auto;
+    height: var(--game-h);
+    max-height: none;
+    max-width: 100%;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    grid-template-areas: "pad pad pad" "pause . sound";
+    align-content: end;
+    justify-items: center;
+    gap: 10px;
+    margin-top: 0;
+    height: var(--game-h);
+    padding-bottom: 6px;
+    box-sizing: border-box;
+  }
+  .joystick { grid-area: pad; }
+  #pauseButton { grid-area: pause; }
+  #soundButton { grid-area: sound; }
+}
+
