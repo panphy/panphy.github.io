@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261123-pad';
-import { createAudio } from './audio.js?v=20261123-pad';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-pad';
-import { createTrophies, trophyArt } from './trophies.js?v=20261123-pad';
-import { mountTitle } from './title.js?v=20261123-pad';
-import { createJoystick } from './joystick.js?v=20261123-pad';
+} from './art.js?v=20261123-speed';
+import { createAudio } from './audio.js?v=20261123-speed';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-speed';
+import { createTrophies, trophyArt } from './trophies.js?v=20261123-speed';
+import { mountTitle } from './title.js?v=20261123-speed';
+import { createJoystick } from './joystick.js?v=20261123-speed';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -37,7 +37,9 @@ const HITBOX = 0.95; // share of a rock's nominal radius that collides
 // steps; only a stall longer than MAX_CATCH_UP slows the game rather than jumping it.
 const STEP = 1 / 120;
 const MAX_CATCH_UP = 0.25; // s of game time run in one display frame at most
-const KEY_SPEED = 300; // px/s for keyboard movement, close to a quick drag
+// Every control shares one top speed, so no device has an edge: the keyboard moves at it, and
+// a drag (on the field or the touch pad) sets a target the ship flies to at up to this speed.
+const SHIP_SPEED = 320; // px/s
 const NEAR_MISS_GAP = 6;
 const STAGE_SECONDS = 15;
 const INTRO_SECONDS = 2.8;
@@ -187,7 +189,7 @@ const pendingArt = [
 /* -----------------------------------------------------------
  * State
  * ----------------------------------------------------------- */
-const freshShip = () => ({ x: W / 2, y: H * 0.62, tilt: 0, moveX: 0, alive: true, shield: false, grace: 0 });
+const freshShip = () => ({ x: W / 2, y: H * 0.62, tx: null, ty: null, tilt: 0, moveX: 0, alive: true, shield: false, grace: 0 });
 
 const state = {
   mode: 'title', // title | intro | playing | paused | over
@@ -946,6 +948,8 @@ function pause() {
   state.mode = 'paused';
   drag.id = null;
   keys.clear();
+  state.ship.tx = null;
+  state.ship.ty = null;
   joystick.reset();
   audio.stopMusic();
   updateButtons();
@@ -1038,6 +1042,7 @@ function update(dt) {
     if (stage !== state.stage) enterStage(stage);
     const def = STAGES[state.stage];
     moveShipWithKeys(dt);
+    moveShipTowardTarget(dt);
     state.spawnBudget += (SPAWN_RATE + SPAWN_GROWTH * state.time) * world;
     while (state.spawnBudget >= 1) {
       state.spawnBudget -= 1;
@@ -1132,8 +1137,9 @@ const joystick = createJoystick(document.getElementById('joystick'), {
   onPress: () => { if (state.mode !== 'playing') primaryAction(); },
   onDrag: (dx, dy) => {
     if (state.mode !== 'playing' || !state.ship.alive) return;
+    const s = state.ship;
     const k = fieldScale() * PAD_GAIN;
-    moveShipTo(state.ship.x + dx * k, state.ship.y + dy * k);
+    setTarget((s.tx ?? s.x) + dx * k, (s.ty ?? s.y) + dy * k);
   },
 });
 
@@ -1147,7 +1153,27 @@ function moveShipWithKeys(dt) {
   if (!dx && !dy) return;
   const len = Math.hypot(dx, dy);
   const slow = keys.has('ShiftLeft') || keys.has('ShiftRight') ? 0.5 : 1;
-  moveShipTo(state.ship.x + (dx / len) * KEY_SPEED * slow * dt, state.ship.y + (dy / len) * KEY_SPEED * slow * dt);
+  state.ship.tx = null; // the keyboard takes over from any drag
+  state.ship.ty = null;
+  moveShipTo(state.ship.x + (dx / len) * SHIP_SPEED * slow * dt, state.ship.y + (dy / len) * SHIP_SPEED * slow * dt);
+}
+
+function setTarget(x, y) {
+  const s = state.ship;
+  s.tx = Math.max(SHIP_RADIUS, Math.min(W - SHIP_RADIUS, x));
+  s.ty = Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, y));
+}
+
+// Flies the ship towards a drag target at up to SHIP_SPEED; short moves land at once.
+function moveShipTowardTarget(dt) {
+  const s = state.ship;
+  if (s.tx === null) return;
+  const dx = s.tx - s.x;
+  const dy = s.ty - s.y;
+  const d = Math.hypot(dx, dy);
+  const step = SHIP_SPEED * dt;
+  if (d <= step) moveShipTo(s.tx, s.ty);
+  else moveShipTo(s.x + (dx / d) * step, s.y + (dy / d) * step);
 }
 
 function moveShipTo(x, y) {
@@ -1168,6 +1194,10 @@ function moveShipBy(dx, dy) {
   s.y = Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, s.y + dy));
   drag.shipX += s.x - ox;
   drag.shipY += s.y - oy;
+  if (s.tx !== null) {
+    s.tx += s.x - ox;
+    s.ty += s.y - oy;
+  }
 }
 
 function updatePlanet(dt) {
@@ -1720,7 +1750,7 @@ canvas.addEventListener('pointermove', (e) => {
   if (drag.id !== e.pointerId) return;
   e.preventDefault();
   const k = fieldScale();
-  moveShipTo(drag.shipX + (e.clientX - drag.startX) * k, drag.shipY + (e.clientY - drag.startY) * k);
+  setTarget(drag.shipX + (e.clientX - drag.startX) * k, drag.shipY + (e.clientY - drag.startY) * k);
 }, { passive: false });
 
 const endDrag = (e) => { if (drag.id === e.pointerId) drag.id = null; };
