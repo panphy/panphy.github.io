@@ -3,10 +3,10 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js';
-import { createAudio } from './audio.js';
-import { createLeaderboard, formatTime } from './leaderboard.js';
-import { createTrophies, trophyArt } from './trophies.js';
+} from './art.js?v=20261123-layout';
+import { createAudio } from './audio.js?v=20261123-layout';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261123-layout';
+import { createTrophies, trophyArt } from './trophies.js?v=20261123-layout';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous

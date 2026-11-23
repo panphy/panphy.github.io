@@ -1,6 +1,6 @@
 // Trophies: one-off badges for milestones, kept on this device (localStorage). Each has pixel
 // art drawn in code, the milestone that earns it and a short space-physics fact.
-import { PAL, CAPSULES } from './art.js';
+import { PAL, CAPSULES } from './art.js?v=20261123-layout';
 
 const STORE_KEY = 'dodgeTrophiesV1'; // { id: ISO date earned }
 const SEEN_KEY = 'dodgeTrophiesSeenV1'; // ids the player has looked at since earning
