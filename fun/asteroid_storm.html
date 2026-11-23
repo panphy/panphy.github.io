@@ -85,11 +85,22 @@
       </div>
     </section>
 
-    <aside class="board" aria-labelledby="boardTitle">
-      <h2 id="boardTitle">Top Survivors</h2>
-      <ol id="scoreList" class="scores"></ol>
-      <p id="boardStatus" class="board-status" role="status" hidden></p>
-    </aside>
+    <div class="side">
+      <aside class="board" aria-labelledby="boardTitle">
+        <h2 id="boardTitle">Top Survivors</h2>
+        <ol id="scoreList" class="scores"></ol>
+        <p id="boardStatus" class="board-status" role="status" hidden></p>
+      </aside>
+
+      <section class="board trophies" aria-labelledby="trophyTitle">
+        <h2 id="trophyTitle">Trophies <span id="trophyCount" class="trophy-count">0 / 16</span></h2>
+        <div id="trophyGrid" class="trophy-grid"></div>
+        <div id="trophyDetail" class="trophy-detail" aria-live="polite">
+          <p class="trophy-goal">Tap a trophy to see how to earn it.</p>
+        </div>
+        <button type="button" class="pixel-button ghost clear-records" id="clearRecords">Clear local records</button>
+      </section>
+    </div>
   </main>
 
   <footer class="footer">

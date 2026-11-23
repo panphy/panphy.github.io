@@ -169,7 +169,7 @@ export function createAudio() {
     timer = null;
   }
 
-  function sfx(name) {
+  function sfx(name, level = 1) {
     if (!ensure() || muted) return;
     const t = ctx.currentTime + 0.01;
     const bus = sfxBus;
@@ -220,6 +220,12 @@ export function createAudio() {
         break;
       case 'near':
         hiss({ start: t, length: 0.12, gain: 0.12, type: 'bandpass', freq: 3000, sweepTo: 900, bus });
+        // A blip that climbs with the streak.
+        tone({ freq: mtof(76 + 2 * Math.min(level - 1, 8)), start: t, length: 0.07, wave: pulse, gain: 0.08, bus });
+        break;
+      case 'trophy':
+        [72, 76, 79, 84, 88].forEach((m, i) => tone({ freq: mtof(m), start: t + i * 0.07, length: i === 4 ? 0.5 : 0.12, wave: pulse, gain: 0.11, bus }));
+        [91, 96].forEach((m, i) => tone({ freq: mtof(m), start: t + 0.4 + i * 0.12, length: 0.3, wave: 'triangle', gain: 0.07, bus }));
         break;
       case 'crash':
         hiss({ start: t, length: 1.1, gain: 0.7, type: 'lowpass', freq: 4000, sweepTo: 120, bus });

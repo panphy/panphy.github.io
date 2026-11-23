@@ -309,14 +309,90 @@ h1 {
 
 .dialog-actions .pixel-button { flex: 1; }
 
+/* Trophy case */
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.trophy-count {
+  margin-left: 6px;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.trophy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 4px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.trophy img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+.trophy:hover,
+.trophy[aria-pressed="true"] { background: rgba(255, 209, 102, 0.12); }
+.trophy:focus-visible { outline: 3px solid var(--glass); outline-offset: 1px; }
+.trophy.is-locked img { opacity: 0.85; }
+
+.clear-records {
+  width: 100%;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Newly earned trophies glow until opened. */
+.trophy.is-new { animation: trophy-new 1.2s steps(6) infinite; }
+
+@keyframes trophy-new {
+  0%, 100% { box-shadow: inset 0 0 0 2px rgba(255, 209, 102, 0.25); }
+  50% { box-shadow: inset 0 0 0 2px var(--gold), 0 0 14px rgba(255, 209, 102, 0.55); }
+}
+
+.trophy-detail {
+  min-height: 4.6em;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.trophy-detail p { margin: 0 0 4px; }
+.trophy-name { color: var(--gold); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.trophy-goal { color: var(--text); }
+.trophy-fact { color: var(--muted); }
+
 @media (max-width: 900px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
   .board { max-width: 520px; width: 100%; margin: 0 auto; }
+  .trophy-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
   .scores { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; }
   .scores li:nth-child(odd) { background: transparent; }
   .scores li { background: rgba(255, 255, 255, 0.03) !important; }
   .scores li.recent { background: #3a2a0a !important; }
   .scores { grid-auto-flow: column; grid-template-rows: repeat(5, auto); }
+}
+
+@media (max-width: 560px) {
+  .trophy-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (max-width: 420px) {
@@ -326,4 +402,5 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .scores li.recent { animation: none; }
+  .trophy.is-new { animation: none; box-shadow: inset 0 0 0 2px var(--gold); }
 }
