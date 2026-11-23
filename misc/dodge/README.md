@@ -9,7 +9,7 @@ The game behind `misc/dodge.html`: a pixel-art dodger with no shooting. Every im
 
 ## Difficulty
 
-The asteroid curve (speeds, spawn rate, sizes, hitboxes) matches the previous version's, so a strong human lasts roughly 30 to 60 seconds. The world advances in fixed 1/120 s steps whatever the frame rate, so speeds, collisions and the clock are the same on every device. A stage lasts 15 seconds and adds comets, splitting rocks and gravity wells. Capsules give a shield, slow time, a smaller ship or a shockwave that throws nearby rocks away without destroying them. Slow time also slows the clock, so it never pads a score. `STAGES` and the constants at the top of `main.js` hold the numbers.
+The asteroid curve (speeds, spawn rate, sizes, hitboxes) starts from the previous version's, with its growth slowed by `RAMP` so a typical run lasts about 3 seconds longer; a strong human lasts roughly 30 to 60 seconds. The world advances in fixed 1/120 s steps whatever the frame rate, so speeds, collisions and the clock are the same on every device. A stage lasts 15 seconds and adds comets (from Stage 2), splitting rocks and gravity wells (both from Stage 3, the first well 2.5 seconds in), so a good run meets a black hole. Capsules give a shield, slow time, a smaller ship or a shockwave that throws nearby rocks away without destroying them. Slow time also slows the clock, so it never pads a score. `STAGES` and the constants at the top of `main.js` hold the numbers.
 
 ## Leaderboard
 
