@@ -21,7 +21,7 @@ import { createLeaderboard, formatTime } from './leaderboard.js';
 const SHIP_RADIUS = 9;
 const MIN_SPEED = 72; // px/s at the start
 const MAX_SPEED = 252;
-const RAMP = 0.88; // share of the previous version's growth rates
+const RAMP = 0.72; // share of the previous version's growth rates
 const MIN_SPEED_GROWTH = 2.057 * RAMP; // px/s gained per second survived
 const MAX_SPEED_GROWTH = 4.114 * RAMP;
 const SPAWN_RATE = 0.6; // rocks per second at the start
@@ -45,10 +45,17 @@ const COMET_SPEED = 300;
 const COMET_RADIUS = 3;
 const SPLIT_MIN_DIAMETER = 31;
 const WELL_CORE = 6;
-const WELL_REACH = 110;
-const WELL_PULL = 62; // px/s drift towards the well at its core
+const WELL_REACH = 130;
+const WELL_PULL = 95; // px/s drift towards the well at its core
+const WELL_ROCK_PULL = 260; // px/s² pull on rocks at the core
 const WELL_SPEED = 16;
-const FIRST_WELL_DELAY = 2.5; // s into the first stage with wells (Stage 3) before one appears
+const FIRST_WELL_DELAY = 2.5; // s into the first stage with wells (Stage 2) before one appears
+
+// Solar flares: dashed lines warn of a band across the field, then a beam fires along it.
+const FLARE_HALF = 9; // px, half the band's width
+const FLARE_WARN = 1.0; // s of warning
+const FLARE_FIRE = 0.5; // s the beam burns
+const FIRST_FLARE_DELAY = 3; // s into the first stage with flares (Stage 3) before one appears
 
 const CAPSULE_FIRST = 7;
 const CAPSULE_GAP = [10, 14];
@@ -70,11 +77,11 @@ const TRAIL_PHASE_SEED = 1819600217;
 // Each stage: its name, the rock palettes it uses, and how often each hazard appears
 // (comets and wells: seconds between them; splitters: share of big rocks that split).
 const STAGES = [
-  { name: 'DUST BELT', palettes: [0, 1], nebula: 0, comet: 0, split: 0, well: 0 },
-  { name: 'IRON BELT', palettes: [2, 1], nebula: 1, comet: 4.5, split: 0, well: 0 },
-  { name: 'ICE FIELD', palettes: [3], nebula: 2, comet: 4, split: 0.3, well: 15 },
-  { name: 'MAGMA RIFT', palettes: [4, 2], nebula: 3, comet: 3.6, split: 0.35, well: 13 },
-  { name: 'DEEP STORM', palettes: [0, 1, 2, 3, 4], nebula: 4, comet: 3, split: 0.4, well: 10 },
+  { name: 'DUST BELT', palettes: [0, 1], nebula: 0, comet: 0, split: 0, well: 0, flare: 0 },
+  { name: 'IRON BELT', palettes: [2, 1], nebula: 1, comet: 4.5, split: 0, well: 15, flare: 0 },
+  { name: 'ICE FIELD', palettes: [3], nebula: 2, comet: 4, split: 0.3, well: 13, flare: 6 },
+  { name: 'MAGMA RIFT', palettes: [4, 2], nebula: 3, comet: 3.6, split: 0.35, well: 11, flare: 5 },
+  { name: 'DEEP STORM', palettes: [0, 1, 2, 3, 4], nebula: 4, comet: 3, split: 0.4, well: 9, flare: 4 },
 ];
 
 const canvas = document.getElementById('game');
@@ -169,6 +176,8 @@ const state = {
   warnings: [],
   capsules: [],
   waves: [],
+  flares: [],
+  flareTimer: FIRST_FLARE_DELAY,
   particles: [],
   popups: [],
   spawnBudget: 0,
@@ -322,7 +331,7 @@ function updateRocks(dt, { collide }) {
   for (let i = state.rocks.length - 1; i >= 0; i -= 1) {
     const r = state.rocks[i];
     if (state.wells.length && r.kind !== 'comet') {
-      const [ax, ay] = wellPull(r.x, r.y, 260);
+      const [ax, ay] = wellPull(r.x, r.y, WELL_ROCK_PULL);
       r.vx += ax * dt;
       r.vy += ay * dt;
     }
@@ -589,6 +598,88 @@ function nearMiss(rock) {
   audio.sfx('near');
 }
 
+// A flare's band runs across the whole field, centred where the ship is when the warning starts
+// (give or take a little), so it always asks for a move.
+function warnFlare() {
+  const s = state.ship;
+  const horizontal = rng() < 0.5;
+  const jitter = (rng() - 0.5) * 16;
+  const pos = horizontal
+    ? Math.max(FLARE_HALF, Math.min(H - FLARE_HALF, s.y + jitter))
+    : Math.max(FLARE_HALF, Math.min(W - FLARE_HALF, s.x + jitter));
+  state.flares.push({ horizontal, pos, t: 0, fired: false });
+  audio.sfx('flarewarn');
+}
+
+function updateFlares(dt) {
+  const s = state.ship;
+  for (let i = state.flares.length - 1; i >= 0; i -= 1) {
+    const f = state.flares[i];
+    f.t += dt;
+    if (!f.fired && f.t >= FLARE_WARN) {
+      f.fired = true;
+      state.shake = Math.max(state.shake, 0.18);
+      audio.sfx('flare');
+    }
+    if (f.fired && s.alive && s.grace <= 0 && !state.god) {
+      const gap = Math.abs((f.horizontal ? s.y : s.x) - f.pos);
+      if (gap < FLARE_HALF + hitRadius() * 0.6) {
+        if (s.shield) shieldBreak({ x: s.x, y: s.y });
+        else crash({ vx: 0, vy: 0 });
+      }
+    }
+    if (f.fired && rng() < dt * 60) {
+      const along = rng() * (f.horizontal ? W : H);
+      const across = f.pos + (rng() - 0.5) * FLARE_HALF * 2;
+      addParticle({
+        x: f.horizontal ? along : across, y: f.horizontal ? across : along,
+        vx: f.horizontal ? 0 : (rng() - 0.5) * 60, vy: f.horizontal ? (rng() - 0.5) * 60 : 0,
+        life: 0.3, max: 0.3, color: pick([PAL.gold, PAL.amber, PAL.white]), size: 1,
+      });
+    }
+    if (f.t >= FLARE_WARN + FLARE_FIRE) state.flares.splice(i, 1);
+  }
+}
+
+function drawFlareWarnings() {
+  for (const f of state.flares) {
+    if (f.fired) continue;
+    // Dashes blink faster as the beam gets close.
+    const rate = 4 + 12 * (f.t / FLARE_WARN);
+    if (Math.floor(f.t * rate) % 2) continue;
+    ctx.fillStyle = PAL.rose;
+    const length = f.horizontal ? W : H;
+    for (const edge of [f.pos - FLARE_HALF, f.pos + FLARE_HALF]) {
+      const e = Math.round(edge);
+      for (let k = 0; k < length; k += 6) {
+        if (f.horizontal) ctx.fillRect(k, e, 3, 1);
+        else ctx.fillRect(e, k, 1, 3);
+      }
+    }
+    const mid = Math.round(f.pos);
+    const ends = f.horizontal ? [[3, mid - 3], [W - 8, mid - 3]] : [[mid - 2, 3], [mid - 2, H - 10]];
+    for (const [x, y] of ends) drawText(ctx, '!', x, y, { color: PAL.gold });
+  }
+}
+
+function drawFlareBeams() {
+  for (const f of state.flares) {
+    if (!f.fired) continue;
+    const left = FLARE_WARN + FLARE_FIRE - f.t;
+    const fade = Math.min(1, left / 0.15);
+    const flicker = Math.floor(state.clock * 30) % 2;
+    // Bands from the outside in: amber glow, gold, then a white-hot core.
+    const layers = [[FLARE_HALF, PAL.hull], [FLARE_HALF - 2, PAL.amber], [FLARE_HALF - 4 - flicker, PAL.gold], [2, PAL.white]];
+    for (const [half, color] of layers) {
+      const h = Math.max(1, Math.round(half * fade));
+      ctx.fillStyle = color;
+      const p = Math.round(f.pos);
+      if (f.horizontal) ctx.fillRect(0, p - h, W, h * 2);
+      else ctx.fillRect(p - h, 0, h * 2, H);
+    }
+  }
+}
+
 function shieldBreak(rock) {
   const s = state.ship;
   s.shield = false;
@@ -639,6 +730,8 @@ function resetWorld() {
   state.warnings = [];
   state.capsules = [];
   state.waves = [];
+  state.flares = [];
+  state.flareTimer = FIRST_FLARE_DELAY;
   state.particles = [];
   state.popups = [];
   state.spawnBudget = 0;
@@ -801,6 +894,13 @@ function update(dt) {
         state.wellTimer = def.well * (0.8 + rng() * 0.4);
       }
     }
+    if (def.flare) {
+      state.flareTimer -= world;
+      if (state.flareTimer <= 0) {
+        warnFlare();
+        state.flareTimer = def.flare * (0.8 + rng() * 0.4);
+      }
+    }
     state.capsuleTimer -= world;
     if (state.capsuleTimer <= 0) {
       spawnCapsule();
@@ -812,6 +912,7 @@ function update(dt) {
     updateRocks(world, { collide: true });
     updateCapsules(world, true);
     updateWaves(world);
+    updateFlares(world);
   } else {
     // Title and game-over screens keep a slow, harmless drift of rocks.
     if (state.mode === 'title') {
@@ -945,7 +1046,7 @@ function drawWells() {
     const cx = Math.round(w.x);
     const cy = Math.round(w.y);
     // Three rotating rings of dots spiralling in, around a black core with a bright rim.
-    const rings = [[26, 10, '#3b2a7a'], [18, 8, PAL.violet], [11, 6, PAL.rose]];
+    const rings = [[32, 12, '#3b2a7a'], [22, 9, PAL.violet], [13, 7, PAL.rose]];
     rings.forEach(([radius, count, color], ri) => {
       ctx.fillStyle = color;
       for (let k = 0; k < count; k += 1) {
@@ -1279,8 +1380,10 @@ function draw() {
     ctx.fillRect(-8, -8, W + 16, H + 16);
   }
   drawWells();
+  drawFlareWarnings();
   drawCapsules();
   drawRocks();
+  drawFlareBeams();
   drawWaves();
   drawParticles();
   if (state.mode !== 'title') drawShip();
