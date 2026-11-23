@@ -1176,14 +1176,55 @@ function drawTitle() {
   if (state.god) drawText(ctx, 'GOD MODE', W / 2, 196, { align: 'center', color: blink(1) ? PAL.gold : PAL.amber });
 }
 
-// The pause screen hides the field, so a pause can't be used to plan a route.
+// The pause screen hides the field (no rocks, comets, wells or capsules), so a pause can't be
+// used to plan a route. It shows a standby scene instead: the stage's sky, dimmed, with the
+// ship hovering large in the middle.
 function drawPaused() {
   ctx.fillStyle = PAL.space;
   ctx.fillRect(0, 0, W, H);
-  if (state.pausedFrom === 'playing') drawText(ctx, formatTime(state.time), W / 2, H / 2 - 56, { scale: 2, align: 'center', color: PAL.steel });
-  panel(W / 2 - 80, H / 2 - 30, 160, 56);
-  drawText(ctx, 'PAUSED', W / 2, H / 2 - 20, { scale: 3, align: 'center', color: PAL.gold });
-  if (blink(1)) drawText(ctx, 'TAP TO RESUME', W / 2, H / 2 + 12, { align: 'center', color: PAL.pale });
+  drawBackground();
+  ctx.fillStyle = 'rgba(9, 8, 24, 0.6)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Slow twinkles drifting across the dimmed sky.
+  const twinkleRng = makeRng(7);
+  for (let i = 0; i < 18; i += 1) {
+    const x = Math.floor(twinkleRng() * W);
+    const y = Math.floor((twinkleRng() * H + state.clock * (4 + twinkleRng() * 6)) % H);
+    const on = Math.sin(state.clock * 2 + i) > 0.3;
+    ctx.fillStyle = on ? PAL.white : PAL.slate;
+    ctx.fillRect(x, y, 1, 1);
+    if (on && i % 3 === 0) {
+      ctx.fillRect(x - 1, y, 3, 1);
+      ctx.fillRect(x, y - 1, 1, 3);
+    }
+  }
+
+  // The ship, three times size, bobbing gently with a flickering engine.
+  const scale = 3;
+  const w = SHIP_W * scale;
+  const h = SHIP_H * scale;
+  const cx = Math.round(W / 2);
+  const top = Math.round(34 + Math.sin(state.clock * 1.6) * 3);
+  const left = cx - Math.floor(w / 2);
+  ctx.drawImage(ship.canvas, left, top, w, h);
+  const flame = 3 + (Math.floor(state.clock * 14) % 3);
+  const base = top + h - scale;
+  ctx.fillStyle = PAL.hull;
+  ctx.fillRect(cx - 2 * scale + 1, base, 4 * scale + 1, (flame - 1) * scale);
+  ctx.fillStyle = PAL.amber;
+  ctx.fillRect(cx - scale + 1, base, 2 * scale + 1, flame * scale);
+  ctx.fillStyle = PAL.gold;
+  ctx.fillRect(cx - 1, base, 3, (flame + 1) * scale);
+  ctx.fillStyle = PAL.white;
+  ctx.fillRect(cx - 1, base, 3, scale);
+
+  drawText(ctx, 'PAUSED', W / 2, 140, { scale: 4, align: 'center', color: PAL.gold, shadow: PAL.hullDark });
+  if (state.pausedFrom === 'playing') {
+    const stage = `STAGE ${state.stage + 1}  ${STAGES[state.stage].name}`;
+    drawText(ctx, `${formatTime(state.time)}   ${stage}`, W / 2, 178, { align: 'center', color: PAL.pale });
+  }
+  if (blink(1)) drawText(ctx, 'TAP TO RESUME', W / 2, 198, { align: 'center', color: PAL.mint });
 }
 
 function drawGameOver() {
