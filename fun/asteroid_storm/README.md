@@ -6,13 +6,15 @@ The game behind `fun/asteroid_storm.html` (moved from `misc/dodge.html`, which n
 - `art.js`: palette, ship sprite, procedural asteroids, capsules, the 5 × 7 bitmap font, nebulae, stars and planets.
 - `audio.js`: Web Audio sound: an original chiptune track for each stage (`SONGS`: key, tempo, chords, melody, instruments and drums) and the effects. A new stage's track starts on the next downbeat at least 0.45 s away; the old one fades to a third of its volume under a rising whoosh, and the new one fades back up over 0.9 s.
 - `leaderboard.js`: the Top Survivors board.
-- `joystick.js`: the pixel-art touch pad shown below the game on narrow touch screens. It drags the ship like a finger on the field does, but `PAD_GAIN` (1.8) times as far, instantly; a tap on it starts, resumes or restarts a run.
+- `joystick.js`: the pixel-art touch pad shown below the game on narrow touch screens. It drags the ship like a finger on the field does, but `PAD_GAIN` (1.8) times as far; a tap on it starts, resumes or restarts a run.
 - `title.js`: the animated pixel-art title banner.
 - `trophies.js`: the 16 trophies (milestones, pixel-art badges and physics facts) and the trophy case beside the board.
 
 Cloudflare keeps stylesheets and scripts at its edge for up to four hours, so the page loads them with a version query (`?v=YYYYMMDD-name`): in `fun/asteroid_storm.html` for `style.css` and `main.js`, and in the `import` lines of `main.js`, `trophies.js`, `title.js` and `joystick.js`. Change it everywhere at once whenever any of these files changes, or visitors can get a new page with old styles or code.
 
 ## Difficulty
+
+Every control shares one top speed, `SHIP_SPEED` (320 px/s), so no device has an edge: the keyboard moves at it, and a drag on the field or the touch pad sets a target that the ship flies to at up to that speed (short moves land at once).
 
 The asteroid curve (speeds, spawn rate, sizes, hitboxes) starts from the previous version's, with its growth slowed by `RAMP`. The world advances in fixed 1/120 s steps whatever the frame rate, so speeds, collisions and the clock are the same on every device. A stage lasts 15 seconds. Comets and gravity wells (black holes) start in Stage 2, the first well 2.5 seconds in; splitting rocks and solar flares start in Stage 3. A flare is a loop of flame that arcs out of one edge of the field and back into it, as solar flares erupt along magnetic loops: blinking dashed lines mark the loop, drawn through the ship's position, for 1 second, then it blazes for half a second. Only the marked band can hit the ship; the flame tongues past it are for show. Each black hole and each flare gets its own size between a minimum and a maximum (`WELL_SIZE`, `FLARE_HALF_RANGE`); a bigger black hole has a bigger core, reach and pull. `RAMP` and the stage hazard intervals are tuned with a bot that reads the warnings: its median run is about 100 seconds. Capsules give a shield, slow time, a smaller ship or a shockwave that throws nearby rocks away without destroying them. Slow time also slows the clock, so it never pads a score. `STAGES` and the constants at the top of `main.js` hold the numbers.
 
