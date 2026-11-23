@@ -202,6 +202,13 @@ export function createAudio() {
       case 'power':
         [67, 71, 74, 79, 83].forEach((m, i) => tone({ freq: mtof(m + 5), start: t + i * 0.045, length: 0.07, wave: pulse, gain: 0.11, bus }));
         break;
+      case 'flarewarn':
+        tone({ freq: 330, slideTo: 1320, start: t, length: 0.9, wave: thin, gain: 0.07, bus, release: 0.1 });
+        break;
+      case 'flare':
+        hiss({ start: t, length: 0.55, gain: 0.45, type: 'bandpass', freq: 2500, sweepTo: 600, bus });
+        tone({ freq: 70, slideTo: 40, start: t, length: 0.5, wave: 'sawtooth', gain: 0.2, bus });
+        break;
       case 'wave':
         tone({ freq: 160, slideTo: 38, start: t, length: 0.45, wave: 'sine', gain: 0.6, bus, release: 0.3 });
         hiss({ start: t, length: 0.5, gain: 0.35, type: 'bandpass', freq: 400, sweepTo: 4000, bus });
