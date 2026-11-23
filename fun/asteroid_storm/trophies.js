@@ -1,10 +1,10 @@
 // Trophies: one-off badges for milestones, kept on this device (localStorage). Each has pixel
 // art drawn in code, the milestone that earns it and a short space-physics fact.
-import { PAL, CAPSULES } from './art.js?v=20261123-pills';
+import { PAL, CAPSULES } from './art.js?v=20261124-radar';
 
 const STORE_KEY = 'dodgeTrophiesV1'; // { id: ISO date earned }
 const SEEN_KEY = 'dodgeTrophiesSeenV1'; // ids the player has looked at since earning
-const CAPSULE_KEY = 'dodgeCapsulesSeenV1'; // capsule kinds ever collected, for Collector
+const CAPSULE_KEY = 'dodgeCapsulesSeenV1'; // capsule kinds ever collected, for Full Set
 
 // Emblem colors. Letters in the 12 x 12 maps below.
 const INK = {
@@ -12,6 +12,7 @@ const INK = {
   R: PAL.hullDark, c: PAL.glass, C: PAL.glassHi, v: PAL.violet, V: '#c7b4ff', m: PAL.mint, M: '#c9f7de',
   x: '#000000', i: '#9fdcf5', I: '#e4f8ff', q: PAL.rose,
   S: CAPSULES.shield.body, T: CAPSULES.slow.body, N: CAPSULES.mini.body, O: CAPSULES.wave.body,
+  A: CAPSULES.radar.body, B: CAPSULES.boost.body,
 };
 
 // Plate rims, by group.
@@ -242,20 +243,20 @@ export const TROPHIES = [
     ],
   },
   {
-    id: 'collector', group: 'capsule', name: 'Collector', goal: 'Collect all four capsule types.',
+    id: 'fullset', group: 'capsule', name: 'Full Set', goal: 'Collect all six capsule types.',
     fact: 'Uncrewed cargo capsules carry food, water and experiments up to the International Space Station.',
     art: [
+      '.SSS....TTT.',
+      'SwSSS..TwTTT',
+      '.SSS....TTT.',
       '............',
-      '.SSSS..TTTT.',
-      'SwSSSSTwTTTT',
-      'SSSSSSTTTTTT',
-      '.SSSS..TTTT.',
+      '.NNN....OOO.',
+      'NwNNN..OwOOO',
+      '.NNN....OOO.',
       '............',
-      '.NNNN..OOOO.',
-      'NwNNNNOwOOOO',
-      'NNNNNNOOOOOO',
-      '.NNNN..OOOO.',
-      '............',
+      '.AAA....BBB.',
+      'AwAAA..BwBBB',
+      '.AAA....BBB.',
       '............',
     ],
   },
@@ -435,7 +436,8 @@ export function createTrophies({ grid, count, detail }) {
       button.addEventListener('click', () => showDetail(t.id));
       grid.append(button);
     }
-    count.textContent = `${Object.keys(earned).length} / ${TROPHIES.length}`;
+    // Count only current trophies: a retired one (such as Collector) stays stored but not shown.
+    count.textContent = `${TROPHIES.filter((t) => earned[t.id]).length} / ${TROPHIES.length}`;
     if (selected) showDetail(selected);
   }
 

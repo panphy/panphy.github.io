@@ -365,6 +365,14 @@ export function createAudio() {
         hiss({ start: t, length: 0.55, gain: 0.45, type: 'bandpass', freq: 2500, sweepTo: 600, bus });
         tone({ freq: 70, slideTo: 40, start: t, length: 0.5, wave: 'sawtooth', gain: 0.2, bus });
         break;
+      case 'radar':
+        // Two sonar pings, the second fainter.
+        [0, 0.32].forEach((d, i) => tone({ freq: 1568, slideTo: 1480, start: t + d, length: 0.35, wave: 'sine', gain: i ? 0.08 : 0.16, bus, release: 0.3 }));
+        break;
+      case 'boost':
+        hiss({ start: t, length: 0.6, gain: 0.3, type: 'bandpass', freq: 300, sweepTo: 3500, bus });
+        tone({ freq: 110, slideTo: 330, start: t, length: 0.45, wave: pulse, gain: 0.12, bus });
+        break;
       case 'wave':
         tone({ freq: 160, slideTo: 38, start: t, length: 0.45, wave: 'sine', gain: 0.6, bus, release: 0.3 });
         hiss({ start: t, length: 0.5, gain: 0.35, type: 'bandpass', freq: 400, sweepTo: 4000, bus });
