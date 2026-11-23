@@ -250,7 +250,7 @@ function spawnCapsule() {
   const kind = pick(kinds);
   const fromLeft = rng() < 0.5;
   state.capsules.push({
-    kind, x: fromLeft ? -10 : W + 10, y: 30 + rng() * (H - 60), baseY: 0,
+    kind, x: fromLeft ? -14 : W + 14, y: 30 + rng() * (H - 60), baseY: 0,
     vx: (fromLeft ? 1 : -1) * (30 + rng() * 12), bob: rng() * Math.PI * 2,
   });
   state.capsules[state.capsules.length - 1].baseY = state.capsules[state.capsules.length - 1].y;
@@ -410,12 +410,12 @@ function updateCapsules(dt, collect) {
     c.x += c.vx * dt;
     c.bob += dt * 3;
     c.y = c.baseY + Math.sin(c.bob) * 8;
-    if (collect && s.alive && Math.hypot(c.x - s.x, c.y - s.y) < SHIP_RADIUS + 8) {
+    if (collect && s.alive && Math.hypot(c.x - s.x, c.y - s.y) < SHIP_RADIUS + 10) {
       state.capsules.splice(i, 1);
       applyCapsule(c.kind);
       continue;
     }
-    if (c.x < -20 || c.x > W + 20) state.capsules.splice(i, 1);
+    if (c.x < -30 || c.x > W + 30) state.capsules.splice(i, 1);
   }
 }
 
@@ -926,11 +926,26 @@ function drawRocks() {
 
 function drawCapsules() {
   for (const c of state.capsules) {
-    const sprite = capsuleSprites[c.kind];
-    ctx.drawImage(sprite, Math.round(c.x - sprite.width / 2), Math.round(c.y - sprite.height / 2));
-    if (Math.floor(state.clock * 6) % 3 === 0) {
-      ctx.fillStyle = PAL.white;
-      ctx.fillRect(Math.round(c.x - 4), Math.round(c.y - 4), 1, 1);
+    const art = capsuleSprites[c.kind];
+    const x = Math.round(c.x - art.sprite.width / 2);
+    const y = Math.round(c.y - art.sprite.height / 2);
+    // The halo breathes in and out; each capsule keeps its own phase.
+    const breath = 0.5 + 0.5 * Math.sin(state.clock * 5 + c.bob * 2);
+    ctx.globalAlpha = 0.25 + 0.75 * breath;
+    ctx.drawImage(art.glow, Math.round(c.x - art.glow.width / 2), Math.round(c.y - art.glow.height / 2));
+    ctx.globalAlpha = 1;
+    // A short white beacon flash about once a second.
+    const beacon = (state.clock + c.bob) % 1.1 < 0.08;
+    ctx.drawImage(beacon ? art.flash : art.sprite, x, y);
+    // A sparkle circling the pill.
+    const a = state.clock * 4 + c.bob;
+    const sx = Math.round(c.x + Math.cos(a) * 13);
+    const sy = Math.round(c.y + Math.sin(a) * 9);
+    ctx.fillStyle = PAL.white;
+    ctx.fillRect(sx, sy, 1, 1);
+    if (breath > 0.6) {
+      ctx.fillRect(sx - 1, sy, 3, 1);
+      ctx.fillRect(sx, sy - 1, 1, 3);
     }
   }
 }
