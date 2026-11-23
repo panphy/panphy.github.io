@@ -50,13 +50,18 @@ a:hover { color: #fff1c2; }
   );
 }
 
+/* The same columns as .layout, so the title sits centered over the game. */
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 232px;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
   max-width: 1360px;
   margin: 0 auto 14px;
 }
+
+.topbar .home { justify-self: start; }
+.topbar .title { justify-self: center; min-width: 0; }
 
 .home {
   display: inline-flex;
@@ -76,9 +81,13 @@ a:hover { color: #fff1c2; }
   image-rendering: pixelated;
 }
 
+@media (max-width: 999px) {
+  .topbar { grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 8px; }
+}
+
 @media (max-width: 640px) {
   .title-art { height: auto; width: 100%; }
-  .topbar .title { flex: 1; min-width: 0; }
+  .topbar .title { justify-self: stretch; }
 }
 
 h1 {
