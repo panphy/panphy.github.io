@@ -8,21 +8,24 @@ import { createAudio } from './audio.js';
 import { createLeaderboard, formatTime } from './leaderboard.js';
 
 /* -----------------------------------------------------------
- * Difficulty. The asteroid curve carries over the previous
- * version's exactly (its 600 x 400 field scaled by 0.6, at
- * 60 fps), so a strong human still lasts roughly 30 to 60 s.
+ * Difficulty. The asteroid curve started as the previous
+ * version's (its 600 x 400 field scaled by 0.6, at 60 fps).
  * Rocks there flew in random directions and half left the
  * screen at once; here every rock heads inwards and half as
- * many spawn, which is the same field. Stage hazards add a
- * little pressure and the capsules give a little back.
+ * many spawn, which is the same field. RAMP then slows how
+ * fast speed and spawning grow, so a typical run lasts about
+ * 3 s longer; a strong human still lasts roughly 30 to 60 s.
+ * Stage hazards add a little pressure and capsules give a
+ * little back.
  * ----------------------------------------------------------- */
 const SHIP_RADIUS = 9;
 const MIN_SPEED = 72; // px/s at the start
 const MAX_SPEED = 252;
-const MIN_SPEED_GROWTH = 2.057; // px/s gained per second survived
-const MAX_SPEED_GROWTH = 4.114;
+const RAMP = 0.88; // share of the previous version's growth rates
+const MIN_SPEED_GROWTH = 2.057 * RAMP; // px/s gained per second survived
+const MAX_SPEED_GROWTH = 4.114 * RAMP;
 const SPAWN_RATE = 0.6; // rocks per second at the start
-const SPAWN_GROWTH = 0.36; // extra rocks per second, per second survived
+const SPAWN_GROWTH = 0.36 * RAMP; // extra rocks per second, per second survived
 const SPAWN_MARGIN = 24;
 const REMOVE_MARGIN = 60;
 const MAX_SPIN = 1.5; // rad/s
@@ -45,6 +48,7 @@ const WELL_CORE = 6;
 const WELL_REACH = 110;
 const WELL_PULL = 62; // px/s drift towards the well at its core
 const WELL_SPEED = 16;
+const FIRST_WELL_DELAY = 2.5; // s into the first stage with wells (Stage 3) before one appears
 
 const CAPSULE_FIRST = 7;
 const CAPSULE_GAP = [10, 14];
@@ -68,7 +72,7 @@ const TRAIL_PHASE_SEED = 1819600217;
 const STAGES = [
   { name: 'DUST BELT', palettes: [0, 1], nebula: 0, comet: 0, split: 0, well: 0 },
   { name: 'IRON BELT', palettes: [2, 1], nebula: 1, comet: 4.5, split: 0, well: 0 },
-  { name: 'ICE FIELD', palettes: [3], nebula: 2, comet: 4, split: 0.3, well: 0 },
+  { name: 'ICE FIELD', palettes: [3], nebula: 2, comet: 4, split: 0.3, well: 15 },
   { name: 'MAGMA RIFT', palettes: [4, 2], nebula: 3, comet: 3.6, split: 0.35, well: 13 },
   { name: 'DEEP STORM', palettes: [0, 1, 2, 3, 4], nebula: 4, comet: 3, split: 0.4, well: 10 },
 ];
@@ -150,7 +154,7 @@ const state = {
   popups: [],
   spawnBudget: 0,
   cometTimer: 0,
-  wellTimer: 0,
+  wellTimer: FIRST_WELL_DELAY,
   capsuleTimer: CAPSULE_FIRST,
   slow: 0,
   mini: 0,
@@ -620,7 +624,7 @@ function resetWorld() {
   state.popups = [];
   state.spawnBudget = 0;
   state.cometTimer = 0;
-  state.wellTimer = 0;
+  state.wellTimer = FIRST_WELL_DELAY;
   state.capsuleTimer = CAPSULE_FIRST;
   state.slow = 0;
   state.mini = 0;
