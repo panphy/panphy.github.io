@@ -65,6 +65,8 @@ a:hover { color: #fff1c2; }
 
 .topbar .home { justify-self: start; }
 .topbar .title { justify-self: center; min-width: 0; }
+.topbar .fullscreen { grid-column: 3; justify-self: end; padding: 0; }
+.topbar .fullscreen .icon svg { width: 20px; height: 20px; }
 
 .home {
   display: inline-flex;
@@ -275,7 +277,7 @@ h1 {
 .scores li:nth-child(odd) { background: rgba(255, 255, 255, 0.03); }
 .scores .rank { color: var(--muted); }
 .scores .name { font-weight: 800; letter-spacing: 0.18em; color: var(--gold); }
-.scores .time { color: var(--text); }
+.scores .time { min-width: 8ch; text-align: right; color: var(--text); } /* room for 000.00 s */
 .scores li:first-child .name,
 .scores li:first-child .time { color: #fff1c2; }
 .scores li.empty .name,
@@ -488,11 +490,12 @@ h1 {
     top: calc(var(--standalone-top, 0px) + 10px);
     right: max(16px, env(safe-area-inset-right));
     width: var(--side);
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
     gap: 6px;
     margin: 0;
   }
   .topbar .home { min-width: 40px; }
+  .topbar .fullscreen { min-width: 40px; min-height: 40px; }
   .topbar .title { justify-self: stretch; }
   .title-art { width: 100%; height: auto; }
   .cabinet {

@@ -132,6 +132,7 @@ export function createAudio() {
   let nextTime = 0;
   let step = 0;
   let timer = null;
+  let lastSwallow = -1; // ctx time of the last swallow sound, so a crowd of rocks doesn't stack up
 
   try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch {}
 
@@ -364,6 +365,17 @@ export function createAudio() {
           length: 0.16, wave: 'sine', gain: 0.035 * (1 - i * 0.12), bus, attack: 0.01, release: 0.14,
         }));
         break;
+      case 'swallow': {
+        // A rock sucked into a black hole: a rushing inhale that narrows and drops,
+        // then a deep, muffled gulp; bigger rocks sound lower. `level` is the rock's radius.
+        if (t - lastSwallow < 0.12) break;
+        lastSwallow = t;
+        const low = Math.max(0.6, Math.min(1.4, 8 / Math.max(level, 4)));
+        hiss({ start: t, length: 0.45, gain: 0.16, type: 'bandpass', freq: 2400 * low, sweepTo: 180, q: 3, attack: 0.06, bus });
+        tone({ freq: 340 * low, slideTo: 45, start: t, length: 0.4, wave: 'sine', gain: 0.18, bus, attack: 0.03, release: 0.25 });
+        tone({ freq: 70 * low, slideTo: 32, start: t + 0.28, length: 0.3, wave: 'triangle', gain: 0.22, bus, attack: 0.01, release: 0.2 });
+        break;
+      }
       case 'split':
         hiss({ start: t, length: 0.35, gain: 0.35, type: 'lowpass', freq: 2500, sweepTo: 200, bus });
         tone({ freq: 90, slideTo: 45, start: t, length: 0.2, wave: 'triangle', gain: 0.3, bus });

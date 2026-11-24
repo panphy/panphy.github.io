@@ -51,8 +51,8 @@
   </script>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <link rel="stylesheet" href="asteroid_storm/style.css?v=20261124-flame">
-  <script type="module" src="asteroid_storm/main.js?v=20261124-flame"></script>
+  <link rel="stylesheet" href="asteroid_storm/style.css?v=20261124-fullscreen">
+  <script type="module" src="asteroid_storm/main.js?v=20261124-fullscreen"></script>
 </head>
 
 <body>
@@ -61,6 +61,11 @@
       <img src="/assets/panphy.png" alt="PanPhy Labs home" width="32" height="32">
     </a>
     <h1 class="title"><canvas id="titleArt" class="title-art" width="284" height="40" role="img" aria-label="Asteroid Storm"></canvas></h1>
+    <button type="button" class="pixel-button fullscreen" id="fullscreenButton" aria-pressed="false" aria-label="Full screen" title="Full screen" hidden>
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><path d="M0 0h3v1H1v2H0zM5 0h3v3H7V1H5zM0 5h1v2h2v1H0zM7 5h1v3H5V7h2z"/></svg>
+      </span>
+    </button>
   </header>
 
   <main class="layout">

@@ -2,7 +2,7 @@
 // ship: every finger movement on it is passed straight to onDrag in screen pixels, so the ship
 // moves at once, and the finger may slide past the pad's edge. The knob follows the finger
 // for feedback and springs back to the centre on release.
-import { PAL } from './art.js?v=20261124-flame';
+import { PAL } from './art.js?v=20261124-fullscreen';
 
 const SIZE = 48; // drawn at 48 x 48 pixels; the page scales it up
 const C = SIZE / 2;

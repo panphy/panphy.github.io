@@ -87,7 +87,7 @@ export function createLeaderboard({ list, status }) {
       } else {
         li.classList.add('empty');
         name.textContent = '---';
-        time.textContent = '--.-- s';
+        time.textContent = '---.-- s';
       }
       li.append(rank, name, time);
       list.append(li);
