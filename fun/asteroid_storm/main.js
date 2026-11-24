@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-go';
-import { createAudio } from './audio.js?v=20261124-go';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-go';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-go';
-import { mountTitle } from './title.js?v=20261124-go';
-import { createJoystick } from './joystick.js?v=20261124-go';
-import { createPilot } from './pilot.js?v=20261124-go';
+} from './art.js?v=20261124-nogo';
+import { createAudio } from './audio.js?v=20261124-nogo';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-nogo';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-nogo';
+import { mountTitle } from './title.js?v=20261124-nogo';
+import { createJoystick } from './joystick.js?v=20261124-nogo';
+import { createPilot } from './pilot.js?v=20261124-nogo';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1006,7 +1006,6 @@ function startPlay() {
   state.ship.y = H * 0.62;
   state.warp = Math.min(state.warp, 0.4);
   state.banner = null;
-  audio.sfx('go');
   if (!audio.isMuted()) audio.startMusic();
   updateButtons();
 }
