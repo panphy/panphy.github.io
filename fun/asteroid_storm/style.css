@@ -315,6 +315,17 @@ html.is-fullscreen .footer { width: 100%; }
 html.is-fullscreen .topbar { margin-top: auto; }
 html.is-fullscreen .footer { margin-bottom: auto; }
 
+/* Full screen on a wide screen: main.js sets the body's width and scales it to fill the
+   screen. The game is sized by its column, not by the screen's height. */
+html.is-fill { overflow: hidden; }
+html.is-fill body { display: block; min-height: 0; transform-origin: 0 0; }
+html.is-fill .topbar,
+html.is-fill .layout,
+html.is-fill .footer { max-width: none; }
+html.is-fill .topbar { margin-top: 0; }
+html.is-fill .footer { margin-bottom: 0; }
+html.is-fill #game { max-height: none; }
+
 .dialog {
   border: 0;
   padding: 24px 26px;
