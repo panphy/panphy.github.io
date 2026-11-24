@@ -215,6 +215,20 @@ function render(c, off, helmet, P, t) {
   const size = 64 * P.scale;
   const fx = 32 - size / 2 + Math.round(P.shake);
   const fy = 64 - size + Math.round(P.bob);
+  if (P.gold > 0.05) {
+    // God mode: a flickering golden power aura behind the pilot.
+    const cx = 32 + Math.round(P.shake);
+    const cy = fy + 30 * P.scale;
+    c.globalAlpha = 0.85 * clamp(P.gold, 0, 1);
+    for (let k = 0; k < 28; k += 1) {
+      const a = (k / 28) * Math.PI * 2;
+      const len = (3 + 3 * Math.max(0, Math.sin(t * 9 + k * 2.3)) + (Math.sin(a) < 0 ? 2 : 0)) * P.scale;
+      for (let r = 27 * P.scale; r < 27 * P.scale + len; r += 1) {
+        R(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r - (r - 27 * P.scale) * 0.6), 2, 2, r - 27 * P.scale < len / 2 ? C.gold : C.amber);
+      }
+    }
+    c.globalAlpha = 1;
+  }
   if (P.stretch > 0.02) {
     for (let row = 0; row < 32; row += 1) {
       const pull = Math.max(0, 1 - Math.abs(row * 2 - 34) / 40) * P.stretch;
@@ -253,14 +267,6 @@ function render(c, off, helmet, P, t) {
     c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.stroke();
     R(Math.round(cx - 20 * P.scale), Math.round(cy - 21 * P.scale), 2, 2, C.glassHi);
     R(Math.round(cx - 23 * P.scale), Math.round(cy - 17 * P.scale), 2, 2, C.glassHi);
-    c.globalAlpha = 1;
-  }
-  if (P.gold > 0.05) {
-    // A halo floats above the helmet in god mode.
-    c.globalAlpha = clamp(P.gold, 0, 1);
-    c.strokeStyle = C.gold; c.lineWidth = 2;
-    c.beginPath(); c.ellipse(32, fy + 4 * P.scale + Math.sin(t * 2.4), 14 * P.scale, 3 * P.scale, 0, 0, Math.PI * 2); c.stroke();
-    R(19, Math.round(fy + 3 * P.scale), 2, 1, C.white);
     c.globalAlpha = 1;
   }
   if (P.alert > 0.3 && Math.sin(t * 18) > -0.3) {
