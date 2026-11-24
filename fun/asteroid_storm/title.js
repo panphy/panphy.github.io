@@ -1,9 +1,9 @@
 // The page's title artwork: "ASTEROID STORM" in the game's pixel font with arcade-marquee
 // shading, the player's ship flying in from the left in 3D, and two asteroids on the right.
 // Drawn in code like the rest of the game's art, and gently animated. The 3D ship is the game's
-// own sprite turned into voxels: each pixel becomes a column of cubes (a thick fuselage, thin
-// wings, a raised canopy), drawn back to front into a small pixel buffer and lit per face.
-import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-strip';
+// own sprite turned into voxels: each pixel becomes a column of cubes (a rounded fuselage, thin
+// wings, a raised canopy), drawn into a small pixel buffer with a depth test and shaded per face.
+import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-ship3d';
 
 const TITLE = 'ASTEROID STORM';
 const SCALE = 2; // the 5 x 7 font at twice size: 10 x 14 px letters
@@ -56,43 +56,50 @@ function buildLettering() {
 function buildVoxels(ship) {
   const cx = (SHIP_W - 1) / 2;
   const cy = (SHIP_H - 1) / 2;
+  const at = new Set(ship.pixels.map((p) => `${p.x},${p.y}`));
   const solid = new Set();
   const cubes = [];
   for (const p of ship.pixels) {
-    if (p.color === PAL.ink) continue; // the outline is redrawn around the 3D silhouette
+    let color = p.color;
     const f = cy - p.y; // the nose is at the top of the sprite
     const side = p.x - cx;
     const a = Math.abs(side);
-    const glass = p.color === PAL.glass || p.color === PAL.glassHi;
-    // Thickness: a deep fuselage, tapering into thin wings; the canopy bulges upwards.
+    const fuselage = a <= 2;
+    if (color === PAL.ink) {
+      // The outline is redrawn around the 3D silhouette; inner ink lines stay as panel lines.
+      if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => !at.has(`${p.x + dx},${p.y + dy}`))) continue;
+      if (!fuselage) color = PANEL;
+    }
+    // Thickness: a rounded fuselage with a raised canopy, and thin flat wings.
     let lo = 0;
     let hi = 0;
-    if (glass) { lo = -1; hi = 2; } else if (a <= 1.5) { lo = -2; hi = 1; } else if (a <= 3.5) { lo = -1; hi = 0; }
+    if (color === PAL.glass || color === PAL.glassHi) { lo = -1; hi = 2; } else if (fuselage) { lo = -1; hi = a > 1 ? 0 : 1; }
     for (let z = lo; z <= hi; z += 1) {
-      cubes.push([f, side, z, p.color]);
+      cubes.push([f, side, z, color]);
       solid.add(`${f},${side},${z}`);
     }
   }
-  // Each cube's normal points out through its most open face, so lighting shows its shape.
+  // Each cube is shaded by the face it shows most: tops keep the sprite's own colors, so the
+  // ship reads as the one in the game, and the shading never flickers as it banks.
   const has = (f, side, z) => solid.has(`${f},${side},${z}`);
   return cubes.map(([f, side, z, color]) => {
-    let n = [0, 0, 1];
-    if (!has(f, side, z + 1)) n = [0, 0, 1];
-    else if (!has(f, side + 1, z)) n = [0, 1, 0];
-    else if (!has(f, side - 1, z)) n = [0, -1, 0];
-    else if (!has(f + 1, side, z)) n = [1, 0, 0];
-    else if (!has(f - 1, side, z)) n = [-1, 0, 0];
-    else if (!has(f, side, z - 1)) n = [0, 0, -1];
-    const rgb = [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16));
-    return { f, side, z, rgb, n };
+    let shade = 0.5;
+    if (!has(f, side, z + 1)) shade = 1;
+    else if (!has(f, side + 1, z)) shade = 0.62;
+    else if (!has(f, side - 1, z)) shade = 0.82;
+    else if (!has(f + 1, side, z)) shade = 0.9;
+    else if (!has(f - 1, side, z)) shade = 0.7;
+    const rgb = [1, 3, 5].map((i) => Math.round(parseInt(color.slice(i, i + 2), 16) * shade));
+    return { f, side, z, rgb };
   });
 }
 
 const SHIP_BOX = 52; // px square the 3D ship is drawn into
 const VOXEL = 1.6; // px per cube
 const YAW = -0.38; // nose turned a little towards the viewer
-const ELEVATION = 0.62; // the camera looks down on the ship
-const LIGHT = (() => { const v = [-0.45, -0.75, 0.5]; const m = Math.hypot(...v); return v.map((c) => c / m); })();
+const ELEVATION = 1.05; // the camera looks well down on the ship, so the swept wings show
+const ROLL = 0.2; // how far the ship banks each way
+const PANEL = '#5a1f22'; // the sprite's ink lines on the wings, as dark panel seams
 
 // Model (forward, side, up) to screen (x right, y down, d towards the viewer), with a roll.
 function project(f, side, z, roll) {
@@ -109,11 +116,7 @@ function renderShip(target, cubes, roll) {
   const zbuf = new Float32Array(SHIP_BOX * SHIP_BOX).fill(-Infinity);
   const o = SHIP_BOX / 2;
   for (const c of cubes) {
-    const [nx, ny, nd] = project(c.n[0], c.n[1], c.n[2], roll);
-    const lambert = Math.max(0, nx * LIGHT[0] + ny * LIGHT[1] + nd * LIGHT[2]);
-    // Quantised to three steps so the shading stays pixel-art flat.
-    const shade = [0.62, 0.86, 1.1][Math.min(2, Math.floor(lambert * 3))];
-    const color = c.rgb.map((v) => Math.min(255, Math.round(v * shade)));
+    const color = c.rgb;
     // Eight sample points per cube, so a turned grid leaves no gaps.
     for (const df of [-0.25, 0.25]) for (const ds of [-0.25, 0.25]) for (const dz of [-0.25, 0.25]) {
       const [x, y, d] = project(c.f + df, c.side + ds, c.z + dz, roll);
@@ -167,7 +170,7 @@ export function mountTitle(canvas, { ship, rocks }) {
       if (on && i % 2 === 0) { ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3); }
     });
     // The ship banks and bobs; the flame and speed streaks stay on its tail.
-    const roll = Math.sin(t * 1.3) * 0.32;
+    const roll = Math.sin(t * 1.3) * ROLL;
     const bob = Math.round(Math.sin(t * 1.7) * 1.5);
     const top = Math.round((TH - SHIP_BOX) / 2) + bob;
     renderShip(shipCanvas, cubes, roll);
