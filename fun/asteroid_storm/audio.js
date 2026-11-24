@@ -355,13 +355,6 @@ export function createAudio() {
         hiss({ start: t, length: 1.6, gain: 0.3, type: 'bandpass', freq: 300, sweepTo: 6000, bus });
         tone({ freq: 55, slideTo: 440, start: t, length: 1.6, wave: thin, gain: 0.08, bus, release: 0.4 });
         break;
-      case 'go':
-        // The warp lands: a soft low thump under a rounded rising fifth, with a faint sparkle on top.
-        tone({ freq: 110, slideTo: 55, start: t, length: 0.25, wave: 'sine', gain: 0.25, bus, release: 0.15 });
-        tone({ freq: mtof(69), start: t, length: 0.12, wave: 'triangle', gain: 0.16, bus, attack: 0.012 });
-        tone({ freq: mtof(76), start: t + 0.08, length: 0.3, wave: 'triangle', gain: 0.16, bus, attack: 0.012, release: 0.22 });
-        tone({ freq: mtof(88), start: t + 0.08, length: 0.3, wave: 'sine', gain: 0.03, bus, attack: 0.02, release: 0.22 });
-        break;
       case 'warn':
         [0, 0.16].forEach((d) => tone({ freq: 988, start: t + d, length: 0.08, wave: 'square', gain: 0.06, bus }));
         break;
