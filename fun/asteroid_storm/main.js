@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-pilot';
-import { createAudio } from './audio.js?v=20261124-pilot';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-pilot';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-pilot';
-import { mountTitle } from './title.js?v=20261124-pilot';
-import { createJoystick } from './joystick.js?v=20261124-pilot';
-import { createPilot } from './pilot.js?v=20261124-pilot';
+} from './art.js?v=20261124-pilothole';
+import { createAudio } from './audio.js?v=20261124-pilothole';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-pilothole';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-pilothole';
+import { mountTitle } from './title.js?v=20261124-pilothole';
+import { createJoystick } from './joystick.js?v=20261124-pilothole';
+import { createPilot } from './pilot.js?v=20261124-pilothole';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1917,6 +1917,11 @@ const wideLayout = window.matchMedia('(min-width: 1000px)');
 const phoneSideways = window.matchMedia('(pointer: coarse) and (orientation: landscape) and (max-height: 540px)');
 const pilotShown = () => wideLayout.matches && !phoneSideways.matches;
 const sideOf = (x) => (x < state.ship.x ? -1 : 1);
+// The black-hole face shows only deep in a well's pull: from PILOT_HOLE_IN of its reach, until
+// the ship is back out past PILOT_HOLE_OUT (the gap stops it flickering at the edge).
+const PILOT_HOLE_IN = 0.45;
+const PILOT_HOLE_OUT = 0.6;
+let pilotHole = null;
 
 // What the pilot can see: how dangerous it is, where the nearest rock is, and what is active.
 function pilotView() {
@@ -1932,7 +1937,10 @@ function pilotView() {
       if (gap < nearest) { nearest = gap; threat = Math.max(-1, Math.min(1, (r.x - s.x) / 60)); }
     }
   }
-  const well = live && state.wells.find((w) => Math.hypot(w.x - s.x, w.y - s.y) < w.reach);
+  const near = (w, k) => Math.hypot(w.x - s.x, w.y - s.y) < w.reach * k;
+  if (!live || !state.wells.includes(pilotHole) || !near(pilotHole, PILOT_HOLE_OUT)) pilotHole = null;
+  if (live && !pilotHole) pilotHole = state.wells.find((w) => near(w, PILOT_HOLE_IN)) || null;
+  const well = pilotHole;
   const warn = live && state.flares.find((f) => !f.fired);
   const fire = live && state.flares.find((f) => f.fired);
   return {
