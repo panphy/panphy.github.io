@@ -132,13 +132,15 @@ export function createAudio() {
   let nextTime = 0;
   let step = 0;
   let timer = null;
+  let whoosh = null; // the stage-change whoosh, while it is booked or playing
   let lastSwallow = -1; // ctx time of the last swallow sound, so a crowd of rocks doesn't stack up
 
   try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch {}
 
   function ensure() {
     if (ctx) {
-      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      // iOS can leave the context 'interrupted' after a call or an app switch, not just 'suspended'.
+      if (ctx.state !== 'running') ctx.resume().catch(() => {});
       return true;
     }
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -151,13 +153,14 @@ export function createAudio() {
     comp.ratio.value = 4;
     master.connect(comp).connect(ctx.destination);
     musicBus = ctx.createGain();
-    musicBus.gain.value = 0.55;
+    musicBus.gain.value = MUSIC_LEVEL;
     musicBus.connect(master);
     sfxBus = ctx.createGain();
     sfxBus.gain.value = 0.9;
     sfxBus.connect(master);
 
-    const length = ctx.sampleRate;
+    // Two seconds, so a sound starting up to half a second in still has 1.5 s of noise.
+    const length = ctx.sampleRate * 2;
     noise = ctx.createBuffer(1, length, ctx.sampleRate);
     const data = noise.getChannelData(0);
     for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1;
@@ -309,6 +312,7 @@ export function createAudio() {
     src.connect(filter).connect(env).connect(sfxBus);
     src.start(at - SWITCH_FADE);
     src.stop(at + 0.35);
+    whoosh = src;
   }
 
   function startMusic() {
@@ -330,6 +334,12 @@ export function createAudio() {
     song = wanted;
     if (timer) clearInterval(timer);
     timer = null;
+    // A stage change booked ahead must not whoosh over the pause or game-over screen.
+    if (whoosh) { try { whoosh.stop(); } catch {} whoosh = null; }
+    if (musicBus) {
+      musicBus.gain.cancelScheduledValues(ctx.currentTime);
+      musicBus.gain.setValueAtTime(MUSIC_LEVEL, ctx.currentTime);
+    }
   }
 
   function sfx(name, level = 1) {
@@ -337,9 +347,6 @@ export function createAudio() {
     const t = ctx.currentTime + 0.01;
     const bus = sfxBus;
     switch (name) {
-      case 'start':
-        [60, 64, 67, 72].forEach((m, i) => tone({ freq: mtof(m + 12), start: t + i * 0.06, length: 0.09, wave: pulse, gain: 0.14, bus }));
-        break;
       case 'stage':
         hiss({ start: t, length: 0.6, gain: 0.18, type: 'bandpass', freq: 600, sweepTo: 5000, bus });
         [72, 76, 79, 84].forEach((m, i) => tone({ freq: mtof(m), start: t + 0.1 + i * 0.07, length: 0.1, wave: pulse, gain: 0.1, bus }));

@@ -465,7 +465,7 @@ export function buildNebula(stage = 0) {
       const ramp = tint(u, v) > 0.5 ? purple : teal;
       const scaled = Math.max(0, Math.min(3.999, value * 4));
       const step = Math.floor(scaled) + (scaled % 1 > bayer(x, y) ? 1 : 0);
-      const rgb = value <= 0 || step === 0 ? base : ramp[Math.min(step, 4) - 1];
+      const rgb = step === 0 ? base : ramp[step - 1]; // step is 0 to 4, and 0 whenever value <= 0
       const i = (y * W + x) * 4;
       img.data[i] = rgb[0];
       img.data[i + 1] = rgb[1];
@@ -480,13 +480,12 @@ export function buildNebula(stage = 0) {
 export function buildStars() {
   const rng = makeRng(4242);
   const layers = [
-    { count: 70, speed: 6, colors: ['#3b3f6b', '#4b4a7a'], size: 1 },
-    { count: 40, speed: 14, colors: ['#7f86b8', '#a78fd6', '#86b8c9'], size: 1 },
-    { count: 16, speed: 30, colors: [PAL.white, '#ffe9a8', '#bfefff'], size: 2 },
+    { count: 70, speed: 6, colors: ['#3b3f6b', '#4b4a7a'] },
+    { count: 40, speed: 14, colors: ['#7f86b8', '#a78fd6', '#86b8c9'] },
+    { count: 16, speed: 30, colors: [PAL.white, '#ffe9a8', '#bfefff'] }, // drawn as big stars
   ];
   return layers.map((layer) => ({
     speed: layer.speed,
-    size: layer.size,
     stars: Array.from({ length: layer.count }, () => ({
       x: Math.floor(rng() * W),
       y: rng() * H,
@@ -529,7 +528,7 @@ export function buildPlanet(seed) {
     const rx = dx * Math.cos(tilt) + dy * Math.sin(tilt);
     const ry = (-dx * Math.sin(tilt) + dy * Math.cos(tilt)) * 3.2;
     const d = Math.hypot(rx, ry) / radius;
-    return { hit: d > 1.25 && d < 1.75 && Math.abs(d - 1.5) < 0.25, front: ry > 0, d };
+    return { hit: Math.abs(d - 1.5) < 0.25, front: ry > 0, d };
   };
   for (let y = 0; y < size; y += 1) {
     for (let x = 0; x < size; x += 1) {

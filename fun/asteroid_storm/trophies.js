@@ -1,6 +1,6 @@
 // Trophies: one-off badges for milestones, kept on this device (localStorage). Each has pixel
 // art drawn in code, the milestone that earns it and a short space-physics fact.
-import { PAL, CAPSULES } from './art.js?v=20261124-lucky7';
+import { PAL, CAPSULES } from './art.js?v=20261124-review';
 
 const STORE_KEY = 'dodgeTrophiesV1'; // { id: ISO date earned }
 const SEEN_KEY = 'dodgeTrophiesSeenV1'; // ids the player has looked at since earning
@@ -25,7 +25,7 @@ const RIM = {
   skill: ['#e9e6f5', '#525d80'],
 };
 
-export const TROPHIES = [
+const TROPHIES = [
   {
     id: 'liftoff', group: 'time', name: 'Lift-Off', goal: 'Survive 30 s.',
     fact: 'A spacecraft needs about 7.8 km/s to stay in low Earth orbit.',
@@ -369,10 +369,14 @@ export function trophyArt(id) {
 /* -----------------------------------------------------------
  * Storage and the trophy case.
  * ----------------------------------------------------------- */
+// Returns the stored value only if it has the fallback's shape (an array, or a plain object),
+// so damaged or foreign data can't stop the page loading.
 function load(key, fallback) {
   try {
     const value = JSON.parse(localStorage.getItem(key) || 'null');
-    return value ?? fallback;
+    const ok = Array.isArray(fallback) ? Array.isArray(value)
+      : value !== null && typeof value === 'object' && !Array.isArray(value);
+    return ok ? value : fallback;
   } catch { return fallback; }
 }
 function save(key, value) {
@@ -384,9 +388,12 @@ export function createTrophies({ grid, count, detail }) {
   const seen = new Set(load(SEEN_KEY, []));
   const capsules = new Set(load(CAPSULE_KEY, []));
   let selected = null;
+  const hint = [...detail.childNodes]; // the starting text, shown again after a clear
+  const plates = {}; // data URLs of each badge, made once
 
   const dateText = (iso) => {
-    try { return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch { return ''; }
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   function showDetail(id) {
@@ -399,7 +406,8 @@ export function createTrophies({ grid, count, detail }) {
     name.textContent = has ? t.name : `${t.name} (locked)`;
     const goal = document.createElement('p');
     goal.className = 'trophy-goal';
-    goal.textContent = has ? `${t.goal} Earned ${dateText(earned[id])}.` : t.goal;
+    const when = has ? dateText(earned[id]) : '';
+    goal.textContent = when ? `${t.goal} Earned ${when}.` : t.goal;
     detail.append(name, goal);
     if (has) {
       const fact = document.createElement('p');
@@ -415,7 +423,15 @@ export function createTrophies({ grid, count, detail }) {
     for (const b of grid.querySelectorAll('.trophy')) b.setAttribute('aria-pressed', String(b.dataset.id === id));
   }
 
+  function plate(id, has) {
+    const key = `${id}:${has}`;
+    if (!plates[key]) plates[key] = (has ? trophyArt(id).earned : trophyArt(id).locked).toDataURL();
+    return plates[key];
+  }
+
   function render() {
+    // Rebuilding the grid would drop keyboard focus, so it moves to the new button.
+    const focused = grid.contains(document.activeElement) ? document.activeElement.dataset.id : null;
     grid.replaceChildren();
     for (const t of TROPHIES) {
       const has = Boolean(earned[t.id]);
@@ -428,7 +444,7 @@ export function createTrophies({ grid, count, detail }) {
       if (!has) button.classList.add('is-locked');
       if (has && !seen.has(t.id)) button.classList.add('is-new');
       const img = document.createElement('img');
-      img.src = (has ? trophyArt(t.id).earned : trophyArt(t.id).locked).toDataURL();
+      img.src = plate(t.id, has);
       img.alt = '';
       img.width = PLATE;
       img.height = PLATE;
@@ -439,6 +455,7 @@ export function createTrophies({ grid, count, detail }) {
     // Count only current trophies: a retired one (such as Collector) stays stored but not shown.
     count.textContent = `${TROPHIES.filter((t) => earned[t.id]).length} / ${TROPHIES.length}`;
     if (selected) showDetail(selected);
+    if (focused) grid.querySelector(`[data-id="${focused}"]`)?.focus();
   }
 
   // Returns true if the trophy is new.
@@ -451,8 +468,10 @@ export function createTrophies({ grid, count, detail }) {
   }
 
   function noteCapsule(kind) {
-    capsules.add(kind);
-    save(CAPSULE_KEY, [...capsules]);
+    if (!capsules.has(kind)) {
+      capsules.add(kind);
+      save(CAPSULE_KEY, [...capsules]);
+    }
     return Object.keys(CAPSULES).every((k) => capsules.has(k)); // retired kinds don't count
   }
 
@@ -463,10 +482,10 @@ export function createTrophies({ grid, count, detail }) {
     capsules.clear();
     try { [STORE_KEY, SEEN_KEY, CAPSULE_KEY].forEach((k) => localStorage.removeItem(k)); } catch {}
     selected = null;
-    detail.replaceChildren();
+    detail.replaceChildren(...hint.map((node) => node.cloneNode(true)));
     render();
   }
 
   render();
-  return { award, clear, has: (id) => Boolean(earned[id]), noteCapsule, get: (id) => BY_ID[id] };
+  return { award, clear, noteCapsule, get: (id) => BY_ID[id] };
 }

@@ -40,7 +40,6 @@ a { color: var(--gold); }
 a:hover { color: #fff1c2; }
 
 /* Notched pixel frame used by panels and buttons. */
-.pixel-frame,
 .board,
 .screen,
 .pixel-button,
@@ -78,11 +77,12 @@ a:hover { color: #fff1c2; }
 
 .home img { display: block; width: 32px; height: 32px; image-rendering: auto; }
 
+/* 90 px tall where there is room; narrower columns shrink it without squashing it. */
 .title-art {
   display: block;
-  height: 90px;
-  width: auto;
+  width: calc(90px * 284 / 40);
   max-width: 100%;
+  height: auto;
   image-rendering: pixelated;
 }
 
@@ -91,19 +91,10 @@ a:hover { color: #fff1c2; }
 }
 
 @media (max-width: 640px) {
-  .title-art { height: auto; width: 100%; }
   .topbar .title { justify-self: stretch; }
 }
 
-h1 {
-  margin: 0;
-  font-size: clamp(1.25rem, 4vw, 1.9rem);
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gold);
-  text-shadow: 3px 3px 0 #9c2f2a, 6px 6px 0 var(--ink);
-}
+h1 { margin: 0; }
 
 .layout {
   display: grid;
@@ -126,7 +117,6 @@ h1 {
 .screen {
   position: relative;
   padding: 6px;
-  background: linear-gradient(var(--panel-edge), var(--panel-edge)) padding-box;
   background-color: var(--panel-edge);
   box-shadow: inset 0 0 0 3px var(--ink);
   --px: 6px;
@@ -203,6 +193,8 @@ h1 {
   }
   .joystick { display: block; }
 }
+
+[hidden] { display: none !important; }
 
 .pixel-button {
   display: inline-flex;
@@ -472,9 +464,6 @@ html.is-fill #game { max-height: none; }
   .trophy-grid { gap: 5px; }
   .trophy { min-height: 48px; padding: 3px; }
   .trophy img { width: 40px; height: 40px; }
-}
-
-@media (min-width: 1000px) {
   .layout { grid-template-areas: "board game trophies" "pilot game trophies"; grid-template-rows: auto 1fr; }
   .layout > .board.pilot { grid-area: pilot; display: flex; justify-content: center; align-self: start; padding: 9px; }
 }
@@ -492,9 +481,11 @@ html.is-fill #game { max-height: none; }
 @media (max-width: 640px) {
   .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "game" "board" "trophies"; }
   .scores { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; grid-auto-flow: column; grid-template-rows: repeat(5, auto); }
-  .scores li:nth-child(odd) { background: transparent; }
-  .scores li { background: rgba(255, 255, 255, 0.03) !important; }
-  .scores li.recent { background: #3a2a0a !important; }
+  /* Two columns: every row gets the same tint, since odd rows no longer alternate. No
+     !important, so the new entry's flash animation still runs. */
+  .scores li,
+  .scores li:nth-child(odd) { background: rgba(255, 255, 255, 0.03); }
+  .scores li.recent { background: #3a2a0a; }
 }
 
 @media (max-width: 420px) {
@@ -533,7 +524,7 @@ html.is-fill #game { max-height: none; }
     grid-template-columns: minmax(0, 1fr) var(--side);
     gap: 16px;
   }
-  .screen { justify-self: center; width: max-content; max-width: 100%; box-sizing: border-box; }
+  .screen { justify-self: center; width: max-content; max-width: 100%; }
   #game {
     width: auto;
     height: var(--game-h);
@@ -550,7 +541,6 @@ html.is-fill #game { max-height: none; }
     margin-top: 0;
     height: var(--game-h);
     padding-bottom: 6px;
-    box-sizing: border-box;
   }
   .joystick { grid-area: pad; }
   #pauseButton { grid-area: pause; }
