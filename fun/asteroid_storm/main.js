@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-shield7';
-import { createAudio } from './audio.js?v=20261124-shield7';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-shield7';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-shield7';
-import { mountTitle } from './title.js?v=20261124-shield7';
-import { createJoystick } from './joystick.js?v=20261124-shield7';
+} from './art.js?v=20261124-norepeat';
+import { createAudio } from './audio.js?v=20261124-norepeat';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-norepeat';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-norepeat';
+import { mountTitle } from './title.js?v=20261124-norepeat';
+import { createJoystick } from './joystick.js?v=20261124-norepeat';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -233,6 +233,7 @@ const state = {
   wellTimer: FIRST_WELL_DELAY,
   capsuleTimer: CAPSULE_FIRST,
   lastShield: -Infinity,
+  lastCapsule: null, // the kind of the last capsule, which the next one never repeats
   slow: 0,
   mini: 0,
   radar: 0,
@@ -357,9 +358,13 @@ function spawnWell() {
 function spawnCapsule() {
   // Shields are the strongest capsule, so they are held back: none while one is held, and at
   // least SHIELD_COOLDOWN seconds apart. Once allowed, a capsule is a shield with
-  // SHIELD_CHANCE; otherwise it is one of the other kinds, each equally likely.
+  // SHIELD_CHANCE; otherwise it is one of the other kinds, each equally likely, but never the
+  // same kind as the capsule before it.
   const shieldOk = !state.ship.shield && state.time - state.lastShield >= SHIELD_COOLDOWN;
-  const kind = shieldOk && rng() < SHIELD_CHANCE ? 'shield' : pick(Object.keys(CAPSULES).filter((k) => k !== 'shield'));
+  const kind = shieldOk && state.lastCapsule !== 'shield' && rng() < SHIELD_CHANCE
+    ? 'shield'
+    : pick(Object.keys(CAPSULES).filter((k) => k !== 'shield' && k !== state.lastCapsule));
+  state.lastCapsule = kind;
   if (kind === 'shield') state.lastShield = state.time;
   const fromLeft = rng() < 0.5;
   state.capsules.push({
@@ -926,6 +931,7 @@ function resetWorld() {
   state.wellTimer = FIRST_WELL_DELAY;
   state.capsuleTimer = CAPSULE_FIRST;
   state.lastShield = -Infinity;
+  state.lastCapsule = null;
   state.slow = 0;
   state.mini = 0;
   state.radar = 0;
