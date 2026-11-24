@@ -119,6 +119,10 @@ h1 {
 .layout > .board:not(.trophies) { grid-area: board; }
 .trophies { grid-area: trophies; }
 
+/* The pilot portrait sits under the leaderboard, only while the side columns are beside the game. */
+.pilot { display: none; }
+.pilot-face { display: block; width: 160px; height: 160px; image-rendering: pixelated; }
+
 .screen {
   position: relative;
   padding: 6px;
@@ -470,6 +474,11 @@ html.is-fill #game { max-height: none; }
   .trophy img { width: 40px; height: 40px; }
 }
 
+@media (min-width: 1000px) {
+  .layout { grid-template-areas: "board game trophies" "pilot game trophies"; grid-template-rows: auto 1fr; }
+  .layout > .board.pilot { grid-area: pilot; display: flex; justify-content: center; align-self: start; padding: 9px; }
+}
+
 /* Medium screens (tablets in portrait, small laptops): the game across the top, the
    leaderboard and trophies side by side below it. */
 @media (max-width: 999px) {
@@ -504,6 +513,7 @@ html.is-fill #game { max-height: none; }
 /* Phones held sideways: the game takes the full height on the left, and a side column on the
    right holds the home link and title at the top with the touch pad and buttons below. */
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .layout > .board.pilot { display: none; }
   body { --side: 200px; --game-h: calc(100dvh - var(--standalone-top, 0px) - 32px); padding-top: 10px; }
   .topbar {
     position: absolute;

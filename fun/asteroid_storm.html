@@ -51,8 +51,8 @@
   </script>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <link rel="stylesheet" href="asteroid_storm/style.css?v=20261124-norepeat">
-  <script type="module" src="asteroid_storm/main.js?v=20261124-norepeat"></script>
+  <link rel="stylesheet" href="asteroid_storm/style.css?v=20261124-pilot">
+  <script type="module" src="asteroid_storm/main.js?v=20261124-pilot"></script>
 </head>
 
 <body>
@@ -96,6 +96,10 @@
       <ol id="scoreList" class="scores"></ol>
       <p id="boardStatus" class="board-status" role="status" hidden></p>
     </aside>
+
+    <div class="board pilot" aria-hidden="true">
+      <canvas id="pilotFace" class="pilot-face" width="64" height="64"></canvas>
+    </div>
 
     <section class="board trophies" aria-labelledby="trophyTitle">
       <h2 id="trophyTitle">Trophies <span id="trophyCount" class="trophy-count">0 / 16</span></h2>
