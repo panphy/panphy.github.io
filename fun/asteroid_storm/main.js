@@ -3,12 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-norepeat';
-import { createAudio } from './audio.js?v=20261124-norepeat';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-norepeat';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-norepeat';
-import { mountTitle } from './title.js?v=20261124-norepeat';
-import { createJoystick } from './joystick.js?v=20261124-norepeat';
+} from './art.js?v=20261124-pilot';
+import { createAudio } from './audio.js?v=20261124-pilot';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-pilot';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-pilot';
+import { mountTitle } from './title.js?v=20261124-pilot';
+import { createJoystick } from './joystick.js?v=20261124-pilot';
+import { createPilot } from './pilot.js?v=20261124-pilot';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -503,6 +504,7 @@ function updateWells(dt, collide) {
         const d = Math.hypot(s.x - w.x, s.y - w.y) || 1;
         moveShipBy(((s.x - w.x) / d) * 30, ((s.y - w.y) / d) * 30);
         popup('SHIELD LOST', s.x, s.y - 14, PAL.glass);
+        pilot.react('nearMiss', { dir: w.x < s.x ? -1 : 1 });
         audio.sfx('shield');
         awardTrophy('shield');
       } else {
@@ -549,6 +551,7 @@ function applyCapsule(kind) {
   const s = state.ship;
   state.pickups += 1;
   if (!state.godRun && trophies.noteCapsule(kind)) awardTrophy('fullset');
+  pilot.react({ shield: 'shield', mini: 'mini', wave: 'shockwave' }[kind] || 'capsule');
   const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP', wave: 'SHOCKWAVE', radar: 'RADAR', auto: 'AUTOPILOT' }[kind];
   if (kind === 'shield') s.shield = true;
   if (kind === 'slow') state.slow = SLOW_SECONDS;
@@ -688,6 +691,7 @@ function nearMiss(rock) {
   if (state.auto > 0) return; // the autopilot's close calls are not the player's
   state.nearMisses += 1;
   const s = state.ship;
+  pilot.react('nearMiss', { dir: rock.x < s.x ? -1 : 1 });
   burst((rock.x + s.x) / 2, (rock.y + s.y) / 2, 6, [PAL.glassHi], 40);
   state.streak = state.clock - state.lastNearAt <= STREAK_WINDOW ? state.streak + 1 : 1;
   state.lastNearAt = state.clock;
@@ -876,12 +880,14 @@ function shieldBreak(rock) {
   state.shake = 0.2;
   burst(rock.x, rock.y, 24, [PAL.glassHi, PAL.glass, PAL.white], 110);
   popup('SHIELD LOST', s.x, s.y - 16, PAL.glass);
+  pilot.react('nearMiss', { dir: rock.x < s.x ? -1 : 1 });
   audio.sfx('shield');
 }
 
 function crash(rock) {
   const s = state.ship;
   s.alive = false;
+  pilot.react('hit');
   state.shake = 0.5;
   state.flash = 0.25;
   state.slow = 0;
@@ -959,6 +965,7 @@ function startIntro() {
   // Rocks left from the title screen are swept away by the warp rather than vanishing.
   const leftover = state.rocks.filter((r) => r.kind === 'rock');
   resetWorld();
+  pilot.reset();
   state.rocks = leftover;
   state.mode = 'intro';
   state.godRun = state.god;
@@ -1901,16 +1908,62 @@ function draw() {
   drawToast();
 }
 
+/* -----------------------------------------------------------
+ * The pilot portrait under the leaderboard (pilot.js). It is only
+ * drawn while the side columns sit beside the game.
+ * ----------------------------------------------------------- */
+const pilot = createPilot(document.getElementById('pilotFace'));
+const wideLayout = window.matchMedia('(min-width: 1000px)');
+const phoneSideways = window.matchMedia('(pointer: coarse) and (orientation: landscape) and (max-height: 540px)');
+const pilotShown = () => wideLayout.matches && !phoneSideways.matches;
+const sideOf = (x) => (x < state.ship.x ? -1 : 1);
+
+// What the pilot can see: how dangerous it is, where the nearest rock is, and what is active.
+function pilotView() {
+  const s = state.ship;
+  const live = state.mode === 'playing' && s.alive;
+  let crowd = 0;
+  let threat = 0;
+  let nearest = 90;
+  if (live) {
+    for (const r of state.rocks) {
+      const gap = Math.hypot(r.x - s.x, r.y - s.y) - r.radius;
+      if (gap < 70) crowd += 1 - Math.max(0, gap) / 70;
+      if (gap < nearest) { nearest = gap; threat = Math.max(-1, Math.min(1, (r.x - s.x) / 60)); }
+    }
+  }
+  const well = live && state.wells.find((w) => Math.hypot(w.x - s.x, w.y - s.y) < w.reach);
+  const warn = live && state.flares.find((f) => !f.fired);
+  const fire = live && state.flares.find((f) => f.fired);
+  return {
+    danger: live ? Math.min(1, state.stage * 0.12 + crowd * 0.3) : 0,
+    threat,
+    shield: live && s.shield,
+    radar: live && state.radar > 0,
+    slow: live && state.slow > 0,
+    auto: live && state.auto > 0,
+    mini: live && state.mini > 0,
+    hole: well ? sideOf(well.x) : 0,
+    flareWarn: warn ? sideOf(warn.cx) : 0,
+    flare: fire ? sideOf(fire.cx) : 0,
+  };
+}
+
 let lastFrame = 0;
 let pending = 0;
 function frame(now) {
-  pending += lastFrame ? Math.min((now - lastFrame) / 1000, MAX_CATCH_UP) : 0;
+  const elapsed = lastFrame ? Math.min((now - lastFrame) / 1000, MAX_CATCH_UP) : 0;
+  pending += elapsed;
   lastFrame = now;
   while (pending >= STEP) {
     update(STEP);
     pending -= STEP;
   }
   draw();
+  if (state.mode !== 'paused' && pilotShown()) {
+    pilot.frame(elapsed, pilotView());
+    pilot.draw();
+  }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
