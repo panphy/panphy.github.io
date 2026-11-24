@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-flame';
-import { createAudio } from './audio.js?v=20261124-flame';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-flame';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-flame';
-import { mountTitle } from './title.js?v=20261124-flame';
-import { createJoystick } from './joystick.js?v=20261124-flame';
+} from './art.js?v=20261124-fullscreen';
+import { createAudio } from './audio.js?v=20261124-fullscreen';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-fullscreen';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-fullscreen';
+import { mountTitle } from './title.js?v=20261124-fullscreen';
+import { createJoystick } from './joystick.js?v=20261124-fullscreen';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -130,6 +130,7 @@ const fine = (v) => Math.round(v * pixelScale) / pixelScale;
 
 const pauseButton = document.getElementById('pauseButton');
 const soundButton = document.getElementById('soundButton');
+const fullscreenButton = document.getElementById('fullscreenButton');
 const modal = document.getElementById('initialsModal');
 const modalForm = document.getElementById('initialsForm');
 const modalScore = document.getElementById('modalScore');
@@ -422,6 +423,7 @@ function updateRocks(dt, { collide }) {
     if (swallowed) {
       state.rocks.splice(i, 1);
       burst(r.x, r.y, 6, [PAL.violet, PAL.rose], 30);
+      if (collide) audio.sfx('swallow', r.radius);
       continue;
     }
     if (collide && s.alive) {
@@ -2044,6 +2046,8 @@ const ICONS = {
   play: 'M1 1h2v6H1zM3 2h2v4H3zM5 3h2v2H5z',
   sound: 'M0 3h2v2H0zM2 2h1v4H2zM3 1h1v6H3zM5 2h1v1H5zM5 5h1v1H5zM6 3h1v2H6z',
   mute: 'M0 3h2v2H0zM2 2h1v4H2zM3 1h1v6H3zM5 2h1v1H5zM7 2h1v1H7zM6 3h1v2H6zM5 5h1v1H5zM7 5h1v1H7z',
+  expand: 'M0 0h3v1H1v2H0zM5 0h3v3H7V1H5zM0 5h1v2h2v1H0zM7 5h1v3H5V7h2z',
+  shrink: 'M2 0h1v3H0V2h2zM5 0h1v2h2v1H5zM0 5h3v3H2V6H0zM5 5h3v1H6v2H5z',
 };
 function setIcon(button, name) {
   button.querySelector('.icon path').setAttribute('d', ICONS[name]);
@@ -2079,6 +2083,31 @@ pauseButton.addEventListener('click', () => {
 });
 soundButton.addEventListener('click', toggleSound);
 updateButtons();
+
+// Full screen for the whole page (iPhone Safari has no Fullscreen API, so the button stays hidden there).
+const root = document.documentElement;
+const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
+  fullscreenButton.hidden = false;
+  const syncFullscreen = () => {
+    const on = Boolean(fullscreenElement());
+    setIcon(fullscreenButton, on ? 'shrink' : 'expand');
+    const label = on ? 'Exit full screen' : 'Full screen';
+    fullscreenButton.setAttribute('aria-label', label);
+    fullscreenButton.title = label;
+    fullscreenButton.setAttribute('aria-pressed', String(on));
+  };
+  fullscreenButton.addEventListener('click', () => {
+    if (fullscreenElement()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else {
+      const request = root.requestFullscreen || root.webkitRequestFullscreen;
+      Promise.resolve(request.call(root)).catch(() => {});
+    }
+  });
+  document.addEventListener('fullscreenchange', syncFullscreen);
+  document.addEventListener('webkitfullscreenchange', syncFullscreen);
+  syncFullscreen();
+}
 
 /* -----------------------------------------------------------
  * Initials dialog
