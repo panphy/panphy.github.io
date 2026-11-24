@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/assets/standalone-top.css">
   <link rel="stylesheet" href="../assets/companion-deck.css?v=20261122d">
-  <link rel="stylesheet" href="deck.css?v=20261122">
+  <link rel="stylesheet" href="deck.css?v=20261124">
   <link rel="stylesheet" href="../assets/deck-notes.css?v=20261122">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -1197,6 +1197,68 @@
         </aside>
       </section>
 
+      <section class="slide" data-title="A lab transformer">
+        <p class="eyebrow"><span class="num">07</span> In the lab</p>
+        <h2>A lab <em>transformer</em></h2>
+        <div class="split lab-tf-split">
+          <figure class="photo"><img src="images/lab-transformer.webp" width="1712" height="1368" alt="A school demountable transformer: two copper coils of wire on a black iron core, with a bar across the top and terminals at each end">
+            <figcaption><span class="credit">Photo: <a href="https://commons.wikimedia.org/wiki/File:Trafo_4.jpg" target="_blank" rel="noopener">Zátonyi Sándor (ifj.)</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a></span></figcaption></figure>
+          <div class="col">
+            <ul class="points">
+              <li><b>Primary coil</b>: ac p.d. in</li>
+              <li><b>Secondary coil</b>: ac p.d. out</li>
+              <li>Coils on an <b>iron core</b> <span class="triple-tag">Triple only</span></li>
+              <li class="step"><b>Step-up</b>: p.d. out <b>bigger</b></li>
+              <li class="step"><b>Step-down</b>: p.d. out <b>smaller</b></li>
+            </ul>
+            <div class="remember step">Its job: change the size of an <b>ac</b> p.d.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Power &amp; the Grid</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">You have already used one</h3>
+            <p>The lab power supply has a step-down transformer inside. It takes the 230&nbsp;V mains and gives a safe 2&ndash;12&nbsp;V for your circuits.</p>
+            <h3 class="rn-head">Why it needs ac</h3>
+            <p>The changing current in the primary coil makes a changing magnetic field in the iron core. That changing field induces a p.d. across the secondary coil. A steady dc current makes a steady field, so nothing is induced and nothing comes out.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Thinking a step-up transformer gives you more energy. If the p.d. goes up, the current goes down: the next slide shows by how much.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Transformer equation">
+        <p class="eyebrow"><span class="num">07</span></p>
+        <h2>Transformer <em>equation</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</span><span class="eq-words">power in = power out</span><span class="eq-units">\(\mathrm{p}\) = primary (input), \(\mathrm{s}\) = secondary (output)</span><span class="flag">Assumes 100% efficient</span></div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example</span>25 kV, 1200 A in, 400 kV out. \(I_{\mathrm{s}}\)?</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(I_{\mathrm{s}} = V_{\mathrm{p}}\,I_{\mathrm{p}} \div V_{\mathrm{s}}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(25\,000 \times 1200 \div 400\,000\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(I_{\mathrm{s}} = 75\)&nbsp;A</span></dd></div>
+              </dl>
+            </div>
+            <div class="remember step">p.d. stepped up&nbsp;\(\times 16\) → current stepped down&nbsp;\(\times 16\)</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Power &amp; the Grid</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">The equation is conservation of energy</h3>
+            <p>\(V_{\mathrm{p}}\,I_{\mathrm{p}}\) is the power going in; \(V_{\mathrm{s}}\,I_{\mathrm{s}}\) is the power coming out. A transformer cannot create energy, so at best they are equal.</p>
+            <h3 class="rn-head">Think in ratios to check an answer</h3>
+            <p>In the example the p.d. goes from 25 kV to 400 kV, 16 times bigger. So the current must be 16 times smaller: <span class="equation-inline">\(1200 \div 16 = 75\)&nbsp;A</span>.</p>
+          </div>
+        </aside>
+      </section>
+
       <section class="slide" data-title="The National Grid">
         <p class="eyebrow"><span class="num">07</span></p>
         <h2>The National <em>Grid</em></h2>
@@ -1237,37 +1299,6 @@
             <figcaption><b>Transformers</b> change the p.d.: stepped up for the cables, stepped down for homes. This one is at a local substation. <span class="credit">Photo: <a href="https://commons.wikimedia.org/wiki/File:Substation_transformer_-_geograph.org.uk_-_5573682.jpg" target="_blank" rel="noopener">Bob Harvey</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a></span></figcaption></figure>
         </div>
         <div class="slide-foot"><span class="tag">Power &amp; the Grid</span><span data-page></span></div>
-      </section>
-
-      <section class="slide" data-title="Transformer equation">
-        <p class="eyebrow"><span class="num">07</span></p>
-        <h2>Transformer <em>equation</em></h2>
-        <div class="split even top">
-          <div class="col">
-            <div class="eq-block"><span class="eq">\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</span><span class="eq-words">power in = power out</span><span class="eq-units">\(\mathrm{p}\) = primary (input), \(\mathrm{s}\) = secondary (output)</span><span class="flag">Assumes 100% efficient</span></div>
-          </div>
-          <div class="col">
-            <div class="worked">
-              <div class="wq"><span>Example</span>25 kV, 1200 A in, 400 kV out. \(I_{\mathrm{s}}\)?</div>
-              <dl>
-                <div class="step"><dt>Equation</dt><dd>\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</dd></div>
-                <div class="step"><dt>Rearrange</dt><dd>\(I_{\mathrm{s}} = V_{\mathrm{p}}\,I_{\mathrm{p}} \div V_{\mathrm{s}}\)</dd></div>
-                <div class="step"><dt>Substitute</dt><dd>\(25\,000 \times 1200 \div 400\,000\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans"><span class="equation-inline">\(I_{\mathrm{s}} = 75\)&nbsp;A</span></dd></div>
-              </dl>
-            </div>
-            <div class="remember step">p.d. stepped up&nbsp;\(\times 16\) → current stepped down&nbsp;\(\times 16\)</div>
-          </div>
-        </div>
-        <div class="slide-foot"><span class="tag">Power &amp; the Grid</span><span data-page></span></div>
-        <aside class="revision-note" hidden>
-          <div class="rn-main">
-            <h3 class="rn-head">The equation is conservation of energy</h3>
-            <p>\(V_{\mathrm{p}}\,I_{\mathrm{p}}\) is the power going in; \(V_{\mathrm{s}}\,I_{\mathrm{s}}\) is the power coming out. A transformer cannot create energy, so at best they are equal.</p>
-            <h3 class="rn-head">Think in ratios to check an answer</h3>
-            <p>In the example the p.d. goes from 25 kV to 400 kV, 16 times bigger. So the current must be 16 times smaller: <span class="equation-inline">\(1200 \div 16 = 75\)&nbsp;A</span>.</p>
-          </div>
-        </aside>
       </section>
 
       <section class="slide" data-title="Quick check: Power and the National Grid">
