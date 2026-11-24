@@ -9,10 +9,13 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Query SpellWave leaderboard
+      - name: Query the Spellwave and Asteroid Storm leaderboards
         env:
-          # anon key is already public in fun/spellwave/src/main.js
+          # anon key is already public in fun/spellwave/src/leaderboard.js and fun/asteroid_storm/leaderboard.js
           KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY
         run: |
-          curl -sf "https://ldkgodxalwuvkqygchns.supabase.co/rest/v1/spellwave_leaderboard?select=initials&limit=1" \
-            -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
+          for table in spellwave_leaderboard dodge_leaderboard; do
+            curl -sf "https://ldkgodxalwuvkqygchns.supabase.co/rest/v1/$table?select=initials&limit=1" \
+              -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
+            echo
+          done
