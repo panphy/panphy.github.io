@@ -369,9 +369,20 @@ export function createAudio() {
         // Two sonar pings, the second fainter.
         [0, 0.32].forEach((d, i) => tone({ freq: 1568, slideTo: 1480, start: t + d, length: 0.35, wave: 'sine', gain: i ? 0.08 : 0.16, bus, release: 0.3 }));
         break;
-      case 'boost':
+      case 'mini':
         hiss({ start: t, length: 0.6, gain: 0.3, type: 'bandpass', freq: 300, sweepTo: 3500, bus });
-        tone({ freq: 110, slideTo: 330, start: t, length: 0.45, wave: pulse, gain: 0.12, bus });
+        tone({ freq: 220, slideTo: 880, start: t, length: 0.4, wave: pulse, gain: 0.11, bus });
+        break;
+      case 'auto':
+        // A computer chirp: a quick run of beeps, then a held tone as the pilot locks on.
+        [84, 79, 88, 84, 91].forEach((m, i) => tone({ freq: mtof(m), start: t + i * 0.06, length: 0.05, wave: 'square', gain: 0.07, bus }));
+        tone({ freq: mtof(96), start: t + 0.32, length: 0.3, wave: 'triangle', gain: 0.09, bus, release: 0.2 });
+        break;
+      case 'autowarn':
+        [0, 0.25, 0.5, 0.75].forEach((d) => tone({ freq: mtof(91), start: t + d, length: 0.06, wave: 'square', gain: 0.06, bus }));
+        break;
+      case 'autoend':
+        [91, 84].forEach((m, i) => tone({ freq: mtof(m), start: t + i * 0.08, length: 0.1, wave: pulse, gain: 0.09, bus }));
         break;
       case 'wave':
         tone({ freq: 160, slideTo: 38, start: t, length: 0.45, wave: 'sine', gain: 0.6, bus, release: 0.3 });

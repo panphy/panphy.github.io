@@ -3,7 +3,7 @@
 // Drawn in code like the rest of the game's art, and gently animated. The 3D ship is the game's
 // own sprite turned into voxels: each pixel becomes a column of cubes (a rounded fuselage, thin
 // wings, a raised canopy), drawn into a small pixel buffer with a depth test and shaded per face.
-import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-ship3d';
+import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-autopilot';
 
 const TITLE = 'ASTEROID STORM';
 const SCALE = 2; // the 5 x 7 font at twice size: 10 x 14 px letters
