@@ -204,15 +204,21 @@ export function createAudio() {
     osc.stop(start + length + 0.02);
   }
 
-  function hiss({ start, length, gain = 0.2, type = 'highpass', freq = 6000, sweepTo = null, bus = musicBus }) {
+  function hiss({ start, length, gain = 0.2, type = 'highpass', freq = 6000, sweepTo = null, bus = musicBus, attack = 0, q = null }) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const filter = ctx.createBiquadFilter();
     filter.type = type;
     filter.frequency.setValueAtTime(freq, start);
     if (sweepTo) filter.frequency.exponentialRampToValueAtTime(sweepTo, start + length);
+    if (q) filter.Q.value = q;
     const env = ctx.createGain();
-    env.gain.setValueAtTime(gain, start);
+    if (attack) {
+      env.gain.setValueAtTime(0.0001, start);
+      env.gain.exponentialRampToValueAtTime(gain, start + attack);
+    } else {
+      env.gain.setValueAtTime(gain, start);
+    }
     env.gain.exponentialRampToValueAtTime(0.0001, start + length);
     src.connect(filter).connect(env).connect(bus);
     src.start(start, Math.random() * 0.5);
@@ -349,7 +355,14 @@ export function createAudio() {
         [0, 0.16].forEach((d) => tone({ freq: 988, start: t + d, length: 0.08, wave: 'square', gain: 0.06, bus }));
         break;
       case 'comet':
-        hiss({ start: t, length: 0.5, gain: 0.25, type: 'bandpass', freq: 5000, sweepTo: 700, bus });
+        // A shooting star: an airy whoosh that swells in and falls, a soft falling whistle,
+        // and a tail of faint twinkles.
+        hiss({ start: t, length: 0.9, gain: 0.14, type: 'bandpass', freq: 7000, sweepTo: 1500, q: 2.5, attack: 0.18, bus });
+        tone({ freq: 2600, slideTo: 1100, start: t, length: 0.7, wave: 'sine', gain: 0.03, bus, attack: 0.15, release: 0.4 });
+        [100, 98, 95, 93, 91].forEach((m, i) => tone({
+          freq: mtof(m) * (1 + (Math.random() - 0.5) * 0.02), start: t + 0.2 + i * 0.1 + Math.random() * 0.03,
+          length: 0.16, wave: 'sine', gain: 0.035 * (1 - i * 0.12), bus, attack: 0.01, release: 0.14,
+        }));
         break;
       case 'split':
         hiss({ start: t, length: 0.35, gain: 0.35, type: 'lowpass', freq: 2500, sweepTo: 200, bus });
