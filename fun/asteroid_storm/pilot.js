@@ -20,6 +20,7 @@ const BASE = {
   mouthOpen: 0, smile: 0.45, smirk: 0, teeth: 0, wobble: 0, blush: 0, sweat: 0, shades: 0,
   scale: 1, trail: 0, stretch: 0, holeDir: 1, holeRim: 0,
   flare: 0, flareDir: -1, shieldRim: 0, red: 0, sparkle: 0, ring: 0, ringA: 0, desat: 0,
+  alert: 0, alertDir: 1, gold: 0,
 };
 
 // Expression and effect targets; anything left out stays as the resting face has it.
@@ -34,11 +35,13 @@ const FACES = {
 };
 // Lasting states, applied in this order; later ones win.
 const STATES = [
+  ['god', { gold: 1, smirk: 1, wobble: 0, sweat: 0 }],
   ['shield', { shieldRim: 1, smile: 0.35 }],
   ['radar', {}],
   ['slow', { eyeOpen: 0.5, smile: 0.45, browIn: 0, browOut: 0, desat: 1, wobble: 0 }],
   ['auto', { shades: 1, smirk: 1, wobble: 0 }],
   ['mini', { scale: 0.5, trail: 1 }],
+  ['comet', { eyeOpen: 1.4, browIn: -1, browOut: -1, mouthOpen: 0.3, smile: 0, teeth: 0, wobble: 0, alert: 1 }],
   ['flareWarn', { squint: 0.6, browIn: 0.8, smile: -0.3, flare: 0.3, wobble: 0 }],
   ['flare', { squint: 1, browIn: 1, browOut: -1, mouthOpen: 0.3, teeth: 1, smile: -0.3, sweat: 1, flare: 1, wobble: 0 }],
   ['hole', { eyeOpen: 1.4, browIn: -1, browOut: 0, mouthOpen: 0.75, teeth: 0, smile: -0.5, stretch: 1, holeRim: 1, wobble: 0 }],
@@ -50,7 +53,7 @@ const EVENTS = {
 };
 // How fast each number eases (per second); the rest use 9.
 const RATE = { eyeOpen: 22, gazeX: 14, gazeY: 14, yaw: 4, scale: 6, trail: 6, shades: 4, shieldRim: 5,
-  desat: 4, holeRim: 5, stretch: 5, flare: 7, red: 6, sparkle: 4 };
+  desat: 4, holeRim: 5, stretch: 5, flare: 7, red: 6, sparkle: 4, alert: 12, gold: 5 };
 const HIT_TO_DEAD = 0.6; // s of pain face before the game-over face
 const STARS = [[5, 6], [58, 9], [8, 52], [55, 50], [50, 3], [3, 30], [61, 34], [30, 2], [40, 60]];
 
@@ -109,15 +112,20 @@ function drawFace(g, helmet, P, t) {
   px(16 + fs, 18, C.skinShade); px(16 + fs, 19, C.skinShade);
 
   // Eyes: left at x 10-13, right at x 18-21 (plus the head turn).
+  // God mode turns the eyes gold, with amber pupils and a white glint.
+  const god = P.gold > 0.5;
+  const white = god ? C.gold : C.white;
+  const pupil = god ? C.hullDark : C.ink;
   const eye = (ex, side) => {
     if (P.dead > 0.5) { [[0, 14], [3, 14], [1, 15], [2, 15], [0, 16], [3, 16]].forEach(([dx, y]) => px(ex + dx, y, C.ink)); return; }
     if (P.happy > 0.5) { px(ex, 16, C.ink); R(ex + 1, 15, 2, 1, C.ink); px(ex + 3, 16, C.ink); return; }
     if (P.squint > 0.5) { R(ex, 15, 4, 1, C.ink); px(side < 0 ? ex : ex + 3, 14, C.ink); px(side < 0 ? ex + 3 : ex, 16, C.ink); return; }
     const o = P.eyeOpen;
     if (o < 0.2) { R(ex, 15, 4, 1, C.ink); px(ex, 16, C.ink); px(ex + 3, 16, C.ink); return; }
-    if (o < 0.62) { R(ex, 14, 4, 1, C.ink); R(ex, 15, 4, 2, C.white); R(ex + 1 + look, 15, 2, 2, C.ink); return; }
-    if (o < 1.15) { R(ex, 14, 4, 3, C.white); R(ex + 1 + look, 15, 2, 2, C.ink); return; }
-    R(ex, 13, 4, 4, C.white); R(ex + 1 + look, P.gazeY > 0.3 ? 15 : 14, 2, 2, C.ink);
+    if (o < 0.62) { R(ex, 14, 4, 1, C.ink); R(ex, 15, 4, 2, white); R(ex + 1 + look, 15, 2, 2, pupil); }
+    else if (o < 1.15) { R(ex, 14, 4, 3, white); R(ex + 1 + look, 15, 2, 2, pupil); }
+    else { R(ex, 13, 4, 4, white); R(ex + 1 + look, P.gazeY > 0.3 ? 15 : 14, 2, 2, pupil); }
+    if (god && o >= 0.2) px(ex + 1 + look, 15, C.white);
   };
   eye(10 + fs, -1); eye(18 + fs, 1);
 
@@ -247,6 +255,20 @@ function render(c, off, helmet, P, t) {
     R(Math.round(cx - 23 * P.scale), Math.round(cy - 17 * P.scale), 2, 2, C.glassHi);
     c.globalAlpha = 1;
   }
+  if (P.gold > 0.05) {
+    // A halo floats above the helmet in god mode.
+    c.globalAlpha = clamp(P.gold, 0, 1);
+    c.strokeStyle = C.gold; c.lineWidth = 2;
+    c.beginPath(); c.ellipse(32, fy + 4 * P.scale + Math.sin(t * 2.4), 14 * P.scale, 3 * P.scale, 0, 0, Math.PI * 2); c.stroke();
+    R(19, Math.round(fy + 3 * P.scale), 2, 1, C.white);
+    c.globalAlpha = 1;
+  }
+  if (P.alert > 0.3 && Math.sin(t * 18) > -0.3) {
+    // A comet is coming: a blinking "!" on its side.
+    const x = P.alertDir < 0 ? 4 : 57;
+    R(x, 20, 3, 9, C.ink); R(x, 31, 3, 3, C.ink);
+    R(x, 20, 2, 8, C.rose); R(x, 31, 2, 2, C.rose);
+  }
   if (P.sparkle > 0.05) {
     [[6, 10, 0], [55, 14, 2.1], [52, 40, 4.2]].forEach(([x, y, ph]) => {
       const len = Math.round(P.sparkle * (0.55 + 0.45 * Math.sin(t * 9 + ph)) * 2.5);
@@ -308,7 +330,7 @@ export function createPilot(canvas) {
   }
 
   // view: { danger, threat (-1..1, where the nearest rock is), shield, radar, slow, auto, mini,
-  // flareWarn, flare, hole (each 0 when off, or the side it is on: -1 left, 1 right) }
+  // god, comet, flareWarn, flare, hole (each 0 when off, or the side it is on: -1 left, 1 right) }
   function frame(dt, view) {
     t += dt;
     danger += (view.danger - danger) * (1 - Math.exp(-dt * 2));
@@ -327,6 +349,7 @@ export function createPilot(canvas) {
     if (states.radar && !states.dead) T.gazeX = Math.sin(t * 2.5); // scanning
     if (states.flareWarn) { T.flareDir = Math.sign(view.flareWarn); T.gazeX = T.flareDir; T.yaw = -T.flareDir * 0.12; }
     if (states.flare) { T.flareDir = Math.sign(view.flare); T.yaw = -T.flareDir * 0.22; }
+    if (states.comet) { T.alertDir = Math.sign(view.comet); T.gazeX = T.alertDir; T.yaw = T.alertDir * 0.15; }
     if (states.hole) { T.holeDir = Math.sign(view.hole); T.gazeX = T.holeDir; T.yaw = T.holeDir * 0.25; }
 
     const ev = event && event.until > t ? event : null;

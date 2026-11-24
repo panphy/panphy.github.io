@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-pilothole';
-import { createAudio } from './audio.js?v=20261124-pilothole';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-pilothole';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-pilothole';
-import { mountTitle } from './title.js?v=20261124-pilothole';
-import { createJoystick } from './joystick.js?v=20261124-pilothole';
-import { createPilot } from './pilot.js?v=20261124-pilothole';
+} from './art.js?v=20261124-pilotgod';
+import { createAudio } from './audio.js?v=20261124-pilotgod';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-pilotgod';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-pilotgod';
+import { mountTitle } from './title.js?v=20261124-pilotgod';
+import { createJoystick } from './joystick.js?v=20261124-pilotgod';
+import { createPilot } from './pilot.js?v=20261124-pilotgod';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1943,6 +1943,7 @@ function pilotView() {
   const well = pilotHole;
   const warn = live && state.flares.find((f) => !f.fired);
   const fire = live && state.flares.find((f) => f.fired);
+  const comet = live && state.warnings[0];
   return {
     danger: live ? Math.min(1, state.stage * 0.12 + crowd * 0.3) : 0,
     threat,
@@ -1952,6 +1953,8 @@ function pilotView() {
     auto: live && state.auto > 0,
     mini: live && state.mini > 0,
     hole: well ? sideOf(well.x) : 0,
+    comet: comet ? sideOf(comet.ex) : 0,
+    god: state.god,
     flareWarn: warn ? sideOf(warn.cx) : 0,
     flare: fire ? sideOf(fire.cx) : 0,
   };
