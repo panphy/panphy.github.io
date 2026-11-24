@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-durations';
-import { createAudio } from './audio.js?v=20261124-durations';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-durations';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-durations';
-import { mountTitle } from './title.js?v=20261124-durations';
-import { createJoystick } from './joystick.js?v=20261124-durations';
+} from './art.js?v=20261124-shield';
+import { createAudio } from './audio.js?v=20261124-shield';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-shield';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-shield';
+import { mountTitle } from './title.js?v=20261124-shield';
+import { createJoystick } from './joystick.js?v=20261124-shield';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -68,7 +68,8 @@ const FLARE_FIRE = 0.5; // s the beam burns
 const FIRST_FLARE_DELAY = 3; // s into the first stage with flares (Stage 3) before one appears
 
 const CAPSULE_FIRST = 7;
-const SHIELD_COOLDOWN = 25; // s between shield capsules at least; the stages set the capsule gaps
+const SHIELD_COOLDOWN = 20; // s between shield capsules at least; the stages set the capsule gaps
+const SHIELD_WEIGHT = 2; // once allowed, a shield is this many times as likely as each other kind
 const SLOW_SECONDS = 5;
 const SLOW_SCALE = 0.5;
 const MINI_SECONDS = 7; // mini: a much smaller ship that also flies MINI_SPEED times faster
@@ -354,10 +355,10 @@ function spawnWell() {
 }
 
 function spawnCapsule() {
-  // Shields are the strongest capsule, so they stay rare: none while one is held, and at
-  // least SHIELD_COOLDOWN seconds apart.
+  // Shields are the strongest capsule, so they are held back: none while one is held, and at
+  // least SHIELD_COOLDOWN seconds apart. Once allowed, they get SHIELD_WEIGHT shares of the pick.
   const shieldOk = !state.ship.shield && state.time - state.lastShield >= SHIELD_COOLDOWN;
-  const kinds = Object.keys(CAPSULES).filter((k) => k !== 'shield' || shieldOk);
+  const kinds = Object.keys(CAPSULES).flatMap((k) => (k !== 'shield' ? [k] : shieldOk ? Array(SHIELD_WEIGHT).fill(k) : []));
   const kind = pick(kinds);
   if (kind === 'shield') state.lastShield = state.time;
   const fromLeft = rng() < 0.5;
