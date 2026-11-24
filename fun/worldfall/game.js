@@ -56,9 +56,8 @@ const WORLDS = [
     fact: 'The strongest g of any planet. The Great Red Spot is a storm wider than Earth.',
     source: 'Map: NASA Cassini (PIA07782).' },
 ];
-const EARTH_INDEX = WORLDS.findIndex((world) => world.id === 'earth');
-// Starting spin (radians) that turns each world's best-known feature toward the viewer.
-const FACING = { moon: -2, earth: -2.09, jupiter: -1.19 };
+// The menu and results screens show a random world.
+const randomWorldIndex = () => Math.floor(Math.random() * WORLDS.length);
 
 const $ = (id) => document.getElementById(id);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -294,7 +293,7 @@ async function applyWorld(index) {
   halo.material.opacity = item.atm ? .3 : 0;
   if (item.atm) halo.material.color.setRGB(...item.atm, THREE.SRGBColorSpace);
   planet.rotation.set(0, 0, THREE.MathUtils.degToRad(-item.tilt));
-  spinner.rotation.y = FACING[item.id] ?? 0;
+  spinner.rotation.y = Math.random() * Math.PI * 2;
   rings.visible = Boolean(item.rings);
   fx.fade = 0;
   layout();
@@ -550,20 +549,20 @@ function finishRun() {
   }));
   $('resultExtra').textContent = `${caught} of ${WORLDS.length} caught. False starts: ${game.falseStarts}. Best: ${ms(game.best)}`;
   game.resultsAt = performance.now();
-  game.index = EARTH_INDEX;
-  applyWorld(EARTH_INDEX);
+  game.index = randomWorldIndex();
+  applyWorld(game.index);
   resetRig();
   setState('results');
 }
 
 function quit() {
-  game.index = EARTH_INDEX;
+  game.index = randomWorldIndex();
   game.results = [];
   resetRig();
   drawPips();
   showReadout('');
   setState('menu');
-  applyWorld(EARTH_INDEX);
+  applyWorld(game.index);
 }
 
 function pauseAttempt() {
@@ -708,12 +707,12 @@ $('soundBtn').addEventListener('click', () => {
   unlockAudio();
 });
 
-game.index = EARTH_INDEX;
+game.index = randomWorldIndex();
 setState('menu');
 drawSound();
 drawBest();
 drawPips();
 resetRig();
 layout();
-applyWorld(EARTH_INDEX);
+applyWorld(game.index);
 requestAnimationFrame(frame);
