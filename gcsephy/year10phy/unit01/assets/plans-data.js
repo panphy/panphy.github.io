@@ -190,7 +190,7 @@
         [0, 6, "Do now", "Retrieval: P = V I, P = I² R, units."],
         [6, 16, "ac/dc and mains", "Traces or diagrams; 230 V, 50 Hz; cable colours and jobs."],
         [16, 26, "Safety story", "Live danger; earth + fuse sequence. Students order the events (Q3)."],
-        [26, 36, "National Grid", "Grid diagram; Q5 calculation shows the ×10 / ×100 effect."],
+        [26, 36, "Transformers and the Grid", "Lab transformer (demo if available); slide 47 example in its workbook frame; then the grid diagram. Q5 calculation shows the ×10 / ×100 effect."],
         [36, 50, "Try it + exam corner", "Q1–Q6, then exam corner Questions 7–8. Set the Unit review for home."],
       ],
       hinge: "Q4 (Ava): is the live wire dangerous when switched off?",
