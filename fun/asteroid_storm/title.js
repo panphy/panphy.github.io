@@ -3,7 +3,7 @@
 // Drawn in code like the rest of the game's art, and gently animated. The 3D ship is the game's
 // own sprite turned into voxels: each pixel becomes a column of cubes (a rounded fuselage, thin
 // wings, a raised canopy), drawn into a small pixel buffer with a depth test and shaded per face.
-import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-autopilot';
+import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-flame';
 
 const TITLE = 'ASTEROID STORM';
 const SCALE = 2; // the 5 x 7 font at twice size: 10 x 14 px letters
@@ -177,18 +177,26 @@ export function mountTitle(canvas, { ship, rocks }) {
     const [tx, ty] = project(-(SHIP_H - 1) / 2 + 1, 0, -0.5, roll);
     const tailX = Math.round(shipLeft + SHIP_BOX / 2 + tx * VOXEL);
     const tailY = Math.round(top + SHIP_BOX / 2 + ty * VOXEL);
-    [[tailY - 8, 9], [tailY + 7, 11], [tailY - 3, 5]].forEach(([y, len], i) => {
-      const x0 = Math.max(0, tailX - 18 + ((Math.floor(t * 40) + i * 7) % 6));
-      ctx.fillStyle = i === 2 ? PAL.steel : PAL.slate;
-      ctx.fillRect(x0, y, len, 1);
+    // The ship's axis on screen, so the streaks and flame point the way it flies.
+    const [nx, ny] = project(1, 0, 0, roll);
+    const [ox, oy] = project(0, 0, 0, roll);
+    const axis = Math.hypot(nx - ox, ny - oy);
+    const ux = (nx - ox) / axis;
+    const uy = (ny - oy) / axis;
+    const dot = (x, y, color) => { ctx.fillStyle = color; ctx.fillRect(Math.round(x), Math.round(y), 1, 1); };
+    // A pixel line from a point a distance `from` behind the tail, `len` long towards the nose,
+    // shifted `side` px across the axis; half-pixel steps leave no gaps on a slant.
+    const line = (side, from, len, color) => {
+      for (let d = 0; d <= len; d += 0.5) dot(tailX - ux * (from - d) - uy * side, tailY - uy * (from - d) + ux * side, color);
+    };
+    [[-8, 9], [7, 11], [-3, 5]].forEach(([side, len], i) => {
+      line(side, 18 - ((Math.floor(t * 40) + i * 7) % 6), len, i === 2 ? PAL.steel : PAL.slate);
     });
-    const flame = 6 + (Math.floor(t * 12) % 3) * 2;
-    ctx.fillStyle = PAL.hull;
-    ctx.fillRect(tailX - flame + 1, tailY - 2, flame, 5);
-    ctx.fillStyle = PAL.amber;
-    ctx.fillRect(tailX - flame + 3, tailY - 1, flame - 2, 3);
-    ctx.fillStyle = PAL.gold;
-    ctx.fillRect(tailX - flame + 5, tailY, flame - 4, 1);
+    // The flame: red outside, then orange, then a gold core, each layer shorter.
+    const flame = 8 + (Math.floor(t * 12) % 3) * 2;
+    for (let side = -2; side <= 2; side += 0.5) line(side, flame - 1, flame - 1 - Math.abs(side), PAL.hull);
+    for (let side = -1; side <= 1; side += 0.5) line(side, flame - 3, flame - 3, PAL.amber);
+    line(0, flame - 5, flame - 5, PAL.gold);
     ctx.drawImage(shipCanvas, shipLeft, top);
     ctx.drawImage(lettering, textX, textY);
     // Two asteroids tumbling slowly on the right.
