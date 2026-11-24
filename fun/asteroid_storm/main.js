@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-fill';
-import { createAudio } from './audio.js?v=20261124-fill';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-fill';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-fill';
-import { mountTitle } from './title.js?v=20261124-fill';
-import { createJoystick } from './joystick.js?v=20261124-fill';
+} from './art.js?v=20261124-powerups';
+import { createAudio } from './audio.js?v=20261124-powerups';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-powerups';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-powerups';
+import { mountTitle } from './title.js?v=20261124-powerups';
+import { createJoystick } from './joystick.js?v=20261124-powerups';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -71,11 +71,11 @@ const CAPSULE_FIRST = 7;
 const SHIELD_COOLDOWN = 25; // s between shield capsules at least; the stages set the capsule gaps
 const SLOW_SECONDS = 4;
 const SLOW_SCALE = 0.5;
-const MINI_SECONDS = 5; // mini: a much smaller ship that also flies MINI_SPEED times faster
+const MINI_SECONDS = 6.5; // mini: a much smaller ship that also flies MINI_SPEED times faster
 const MINI_SPEED = 1.7;
 const RADAR_SECONDS = 6; // radar: dotted lines show where rocks and comets are heading
 const RADAR_LOOKAHEAD = 0.9; // s of path shown
-const AUTO_SECONDS = 4; // autopilot: the ship flies itself and cannot be hit
+const AUTO_SECONDS = 5.5; // autopilot: the ship flies itself and cannot be hit
 const AUTO_WARN = 1; // s before the end when the ship starts to blink
 const AUTO_GRACE = 1; // s the ship stays safe after the player takes back control
 const AUTO_CLEAR = 24; // px of clearance the autopilot counts as safe enough
@@ -85,7 +85,7 @@ const MINI_SCALE = 0.4;
 const SHIELD_GRACE = 1.2;
 // Shockwave: a ring bursts out from the ship and throws nearby rocks outwards. Nothing is
 // destroyed; the rocks stay in play and still have to be dodged.
-const WAVE_REACH = 100; // px
+const WAVE_REACH = 130; // px
 const WAVE_SPEED = 340; // px/s the ring expands
 const WAVE_KICK = 170; // px/s added outwards to a rock at the ship, falling to 0 at the edge
 const WAVE_MIN_SPEED = 120; // px/s a pushed rock leaves at, at least
