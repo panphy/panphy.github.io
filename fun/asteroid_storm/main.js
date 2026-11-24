@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-ship3d';
-import { createAudio } from './audio.js?v=20261124-ship3d';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-ship3d';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-ship3d';
-import { mountTitle } from './title.js?v=20261124-ship3d';
-import { createJoystick } from './joystick.js?v=20261124-ship3d';
+} from './art.js?v=20261124-autopilot';
+import { createAudio } from './audio.js?v=20261124-autopilot';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-autopilot';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-autopilot';
+import { mountTitle } from './title.js?v=20261124-autopilot';
+import { createJoystick } from './joystick.js?v=20261124-autopilot';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -71,14 +71,17 @@ const CAPSULE_FIRST = 7;
 const SHIELD_COOLDOWN = 25; // s between shield capsules at least; the stages set the capsule gaps
 const SLOW_SECONDS = 4;
 const SLOW_SCALE = 0.5;
-const MINI_SECONDS = 7;
+const MINI_SECONDS = 5; // mini: a much smaller ship that also flies MINI_SPEED times faster
+const MINI_SPEED = 1.7;
 const RADAR_SECONDS = 6; // radar: dotted lines show where rocks and comets are heading
 const RADAR_LOOKAHEAD = 0.9; // s of path shown
-const BOOST_SECONDS = 6; // boost: top speed raised by BOOST_FACTOR
-const BOOST_FACTOR = 1.7;
-const GHOST_GAP = 1 / 40; // boost: seconds between afterimages
+const AUTO_SECONDS = 4; // autopilot: the ship flies itself and cannot be hit
+const AUTO_WARN = 1; // s before the end when the ship starts to blink
+const AUTO_GRACE = 1; // s the ship stays safe after the player takes back control
+const AUTO_CLEAR = 24; // px of clearance the autopilot counts as safe enough
+const GHOST_GAP = 1 / 40; // mini: seconds between afterimages
 const GHOST_LIFE = 0.22;
-const MINI_SCALE = 0.55;
+const MINI_SCALE = 0.4;
 const SHIELD_GRACE = 1.2;
 // Shockwave: a ring bursts out from the ship and throws nearby rocks outwards. Nothing is
 // destroyed; the rocks stay in play and still have to be dodged.
@@ -162,15 +165,15 @@ document.body.style.backgroundImage = `url('${buildPageTile()}')`;
  * drawn in idle moments so loading stays quick.
  * ----------------------------------------------------------- */
 const ship = buildShip();
-// The boost afterimage: the ship's silhouette in the boost pill's red.
-const boostGhost = (() => {
+// The mini ship's afterimage: the ship's silhouette in the mini pill's color.
+const trailGhost = (() => {
   const c = document.createElement('canvas');
   c.width = ship.canvas.width;
   c.height = ship.canvas.height;
   const g = c.getContext('2d');
   g.drawImage(ship.canvas, 0, 0);
   g.globalCompositeOperation = 'source-in';
-  g.fillStyle = CAPSULES.boost.light;
+  g.fillStyle = CAPSULES.mini.light;
   g.fillRect(0, 0, c.width, c.height);
   return c;
 })();
@@ -231,7 +234,7 @@ const state = {
   slow: 0,
   mini: 0,
   radar: 0,
-  boost: 0,
+  auto: 0,
   ghosts: [],
   ghostClock: 0,
   ship: freshShip(),
@@ -424,7 +427,7 @@ function updateRocks(dt, { collide }) {
     if (collide && s.alive) {
       const d = Math.hypot(r.x - s.x, r.y - s.y);
       const reach = reachShip + r.radius * HITBOX;
-      if (d < reach && s.grace <= 0 && !state.god) {
+      if (d < reach && canBeHit()) {
         if (s.shield) {
           shieldBreak(r);
           state.rocks.splice(i, 1);
@@ -484,7 +487,7 @@ function updateWells(dt, collide) {
       if (dist < w.reach * 0.3) w.deep = true;
       else if (w.deep && dist > w.reach * 0.85) { w.deep = false; awardTrophy('horizon'); }
     }
-    if (collide && s.alive && s.grace <= 0 && !state.god && Math.hypot(w.x - s.x, w.y - s.y) < w.core + hitRadius() * 0.6) {
+    if (collide && s.alive && canBeHit() && Math.hypot(w.x - s.x, w.y - s.y) < w.core + hitRadius() * 0.6) {
       if (s.shield) {
         // A shield is spent getting thrown clear of the core.
         s.shield = false;
@@ -538,18 +541,18 @@ function applyCapsule(kind) {
   const s = state.ship;
   state.pickups += 1;
   if (!state.godRun && trophies.noteCapsule(kind)) awardTrophy('fullset');
-  const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP', wave: 'SHOCKWAVE', radar: 'RADAR', boost: 'BOOST' }[kind];
+  const label = { shield: 'SHIELD', slow: 'SLOW TIME', mini: 'MINI SHIP', wave: 'SHOCKWAVE', radar: 'RADAR', auto: 'AUTOPILOT' }[kind];
   if (kind === 'shield') s.shield = true;
   if (kind === 'slow') state.slow = SLOW_SECONDS;
   if (kind === 'mini') state.mini = MINI_SECONDS;
   if (kind === 'radar') state.radar = RADAR_SECONDS;
-  if (kind === 'boost') state.boost = BOOST_SECONDS;
+  if (kind === 'auto') { state.auto = AUTO_SECONDS; s.autoVx = 0; s.autoVy = 0; }
   if (kind === 'wave') {
     state.waves.push({ x: s.x, y: s.y, r: 4, pushed: new Set() });
     state.shake = Math.max(state.shake, 0.15);
     audio.sfx('wave');
   } else {
-    audio.sfx(kind === 'radar' || kind === 'boost' ? kind : 'power');
+    audio.sfx(kind === 'radar' || kind === 'mini' || kind === 'auto' ? kind : 'power');
   }
   popup(label, s.x, s.y - 16, CAPSULES[kind].light);
   burst(s.x, s.y, 14, [CAPSULES[kind].light, CAPSULES[kind].body, PAL.white], 60);
@@ -674,6 +677,7 @@ const CALLOUT_WORDS = [
 const STREAK_TITLES = [[8, 'GHOST PILOT'], [5, 'UNTOUCHABLE'], [3, 'DAREDEVIL']];
 
 function nearMiss(rock) {
+  if (state.auto > 0) return; // the autopilot's close calls are not the player's
   state.nearMisses += 1;
   const s = state.ship;
   burst((rock.x + s.x) / 2, (rock.y + s.y) / 2, 6, [PAL.glassHi], 40);
@@ -696,8 +700,12 @@ function nearMiss(rock) {
 }
 
 // Trophies are never earned in a run that used god mode.
+// Skill trophies are not earned while the autopilot is flying.
+const PILOT_TROPHIES = new Set(['daredevil', 'untouchable', 'comet', 'flare', 'horizon']);
+
 function awardTrophy(id) {
   if (state.godRun || state.mode !== 'playing') return;
+  if (state.auto > 0 && PILOT_TROPHIES.has(id)) return;
   if (!trophies.award(id)) return;
   state.runTrophies += 1;
   state.toasts.push({ id, t: 0 });
@@ -798,7 +806,7 @@ function updateFlares(dt) {
       audio.sfx('flare');
     }
     if (f.fired && s.alive && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6 + 10) f.brushed = true;
-    if (f.fired && s.alive && s.grace <= 0 && !state.god && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6) {
+    if (f.fired && s.alive && canBeHit() && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6) {
       if (s.shield) shieldBreak({ x: s.x, y: s.y });
       else crash({ vx: 0, vy: 0 });
     }
@@ -847,6 +855,11 @@ function drawFlareBeams() {
   }
 }
 
+// The ship can be hit unless it is recovering, on autopilot or in god mode.
+function canBeHit() {
+  return state.ship.grace <= 0 && state.auto <= 0 && !state.god;
+}
+
 function shieldBreak(rock) {
   awardTrophy('shield');
   const s = state.ship;
@@ -882,7 +895,7 @@ function crash(rock) {
   burst(s.x, s.y, 70, [PAL.white, PAL.gold, PAL.amber, PAL.hull, PAL.rose], 140);
   state.mini = 0;
   state.radar = 0;
-  state.boost = 0;
+  state.auto = 0;
   state.ghosts = [];
   audio.stopMusic();
   audio.sfx('crash');
@@ -913,7 +926,7 @@ function resetWorld() {
   state.slow = 0;
   state.mini = 0;
   state.radar = 0;
-  state.boost = 0;
+  state.auto = 0;
   state.ghosts = [];
   state.ship = freshShip();
   state.nearMisses = 0;
@@ -1056,7 +1069,7 @@ function update(dt) {
   const world = dt * (state.slow > 0 ? SLOW_SCALE : 1);
   if (state.mini > 0) state.mini = Math.max(0, state.mini - world);
   if (state.radar > 0) state.radar = Math.max(0, state.radar - world);
-  if (state.boost > 0) state.boost = Math.max(0, state.boost - world);
+  if (state.auto > 0) updateAutoTimer(world);
   updateGhosts(dt);
   state.ship.grace = Math.max(0, state.ship.grace - dt);
 
@@ -1080,8 +1093,12 @@ function update(dt) {
     const stage = stageAt(state.time);
     if (stage !== state.stage) enterStage(stage);
     const def = STAGES[state.stage];
-    moveShipWithKeys(dt);
-    moveShipTowardTarget(dt);
+    if (state.auto > 0) {
+      autopilot(dt);
+    } else {
+      moveShipWithKeys(dt);
+      moveShipTowardTarget(dt);
+    }
     state.spawnBudget += (SPAWN_RATE + SPAWN_GROWTH * state.time) * world;
     while (state.spawnBudget >= 1) {
       state.spawnBudget -= 1;
@@ -1178,7 +1195,7 @@ const joystick = createJoystick(document.getElementById('joystick'), {
   onDrag: (dx, dy) => {
     if (state.mode !== 'playing' || !state.ship.alive) return;
     const s = state.ship;
-    const k = fieldScale() * PAD_GAIN * (state.boost > 0 ? BOOST_FACTOR : 1);
+    const k = fieldScale() * PAD_GAIN * (state.mini > 0 ? MINI_SPEED : 1);
     setTarget((s.tx ?? s.x) + dx * k, (s.ty ?? s.y) + dy * k);
   },
 });
@@ -1199,9 +1216,61 @@ function moveShipWithKeys(dt) {
   moveShipTo(state.ship.x + (dx / len) * speed * dt, state.ship.y + (dy / len) * speed * dt);
 }
 
-// The shared top speed, raised while a boost lasts.
+// The shared top speed, raised while the ship is mini.
 function shipSpeed() {
-  return SHIP_SPEED * (state.boost > 0 ? BOOST_FACTOR : 1);
+  return SHIP_SPEED * (state.mini > 0 ? MINI_SPEED : 1);
+}
+
+// Autopilot: each step, try standing still and the eight directions, look ahead a third of a
+// second, and score each by its clearance from rocks, black holes, comet lanes and flares.
+// Past AUTO_CLEAR px of clearance every choice counts as safe and the middle of the field
+// wins, so the pilot cruises calmly instead of fleeing every distant rock. The ship cannot be
+// hit meanwhile; the turn is smoothed so it flies rather than twitches.
+function autopilot(dt) {
+  const s = state.ship;
+  s.tx = null; // the player's steering is ignored until control comes back
+  s.ty = null;
+  const speed = shipSpeed();
+  const hit = hitRadius();
+  let best = null;
+  for (let a = -1; a < 8; a += 1) {
+    const mx = a < 0 ? 0 : Math.cos((a * Math.PI) / 4);
+    const my = a < 0 ? 0 : Math.sin((a * Math.PI) / 4);
+    let clear = Infinity;
+    for (let k = 1; k <= 7; k += 1) {
+      const t = k * 0.05;
+      const sx = Math.max(SHIP_RADIUS, Math.min(W - SHIP_RADIUS, s.x + mx * speed * Math.min(t, 0.2)));
+      const sy = Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, s.y + my * speed * Math.min(t, 0.2)));
+      for (const r of state.rocks) clear = Math.min(clear, Math.hypot(r.x + r.vx * t - sx, r.y + r.vy * t - sy) - r.radius - hit);
+      for (const w of state.wells) clear = Math.min(clear, Math.hypot(w.x - sx, w.y - sy) - w.core - 8);
+      for (const wn of state.warnings) {
+        const v = Math.hypot(wn.vx, wn.vy) || 1;
+        clear = Math.min(clear, Math.abs((sx - wn.x) * wn.vy - (sy - wn.y) * wn.vx) / v - 14);
+      }
+      for (const f of state.flares) clear = Math.min(clear, flareGap(f, sx, sy) - f.half - hit);
+    }
+    const value = Math.min(clear, AUTO_CLEAR) - 0.05 * Math.hypot(s.x + mx * 12 - W / 2, s.y + my * 12 - H * 0.6);
+    if (!best || value > best.value) best = { value, mx, my };
+  }
+  const ease = Math.min(1, dt * 10);
+  s.autoVx += (best.mx - s.autoVx) * ease;
+  s.autoVy += (best.my - s.autoVy) * ease;
+  moveShipTo(s.x + s.autoVx * speed * dt, s.y + s.autoVy * speed * dt);
+}
+
+// Counts the autopilot down: a warning in its last second, then control comes back with a
+// moment of safety. A finger already on the field steers again only once it moves.
+function updateAutoTimer(world) {
+  const before = state.auto;
+  state.auto = Math.max(0, state.auto - world);
+  if (before > AUTO_WARN && state.auto <= AUTO_WARN) audio.sfx('autowarn');
+  if (state.auto === 0) {
+    const s = state.ship;
+    s.grace = Math.max(s.grace, AUTO_GRACE);
+    s.tx = null;
+    s.ty = null;
+    audio.sfx('autoend');
+  }
 }
 
 function setTarget(x, y) {
@@ -1427,12 +1496,12 @@ function drawCapsules() {
   }
 }
 
-// While boosting, the ship leaves fading afterimages that trail behind it as the field scrolls.
+// While mini, the ship leaves fading afterimages that trail behind it as the field scrolls.
 function updateGhosts(dt) {
   const s = state.ship;
   for (const g of state.ghosts) { g.life -= dt; g.y += dt * 40; }
   state.ghosts = state.ghosts.filter((g) => g.life > 0);
-  if (state.boost <= 0 || state.mode !== 'playing' || !s.alive) { state.ghostClock = 0; return; }
+  if (state.mini <= 0 || state.mode !== 'playing' || !s.alive) { state.ghostClock = 0; return; }
   state.ghostClock -= dt;
   if (state.ghostClock > 0) return;
   state.ghostClock = GHOST_GAP;
@@ -1449,7 +1518,7 @@ function drawGhosts() {
   ctx.save();
   for (const g of state.ghosts) {
     ctx.globalAlpha = 0.45 * (g.life / GHOST_LIFE);
-    ctx.drawImage(boostGhost, Math.round(g.x - w / 2), Math.round(g.y - h / 2), w, h);
+    ctx.drawImage(trailGhost, Math.round(g.x - w / 2), Math.round(g.y - h / 2), w, h);
   }
   ctx.restore();
 }
@@ -1466,7 +1535,7 @@ function drawShip() {
   // Banking squeezes the sprite a pixel or two towards the turn.
   const squeeze = Math.round(Math.abs(s.tilt) * 3 * scale);
   ctx.drawImage(ship.canvas, x + (s.tilt > 0 ? squeeze : 0), y, w - squeeze, h);
-  const boost = state.mode === 'intro' ? 6 : state.boost > 0 ? 3 : 0;
+  const boost = state.mode === 'intro' ? 6 : state.mini > 0 ? 3 : 0;
   const flame = Math.round((2 + (Math.floor(state.clock * 20) % 3) + boost) * scale);
   const cx = Math.round(s.x);
   const base = y + h - 1;
@@ -1478,6 +1547,7 @@ function drawShip() {
   ctx.fillRect(cx, base, 1, flame + 1);
   ctx.fillStyle = PAL.white;
   ctx.fillRect(cx, base, 1, 1);
+  if (state.auto > 0) drawAutopilot(s, scale);
   if (s.shield) {
     const r = Math.round(14 * scale) + 1;
     for (let k = 0; k < 20; k += 1) {
@@ -1486,6 +1556,31 @@ function drawShip() {
       ctx.fillStyle = k % 2 ? PAL.glass : PAL.glassHi;
       ctx.fillRect(Math.round(s.x + Math.cos(a) * r), Math.round(s.y + Math.sin(a) * r), 1, 1);
     }
+  }
+}
+
+// Autopilot: corner brackets lock onto the ship and a dotted line shows where it is heading.
+// Both blink in the last second, before control comes back.
+function drawAutopilot(s, scale) {
+  if (state.auto <= AUTO_WARN && Math.floor(state.clock * 8) % 2) return;
+  const color = CAPSULES.auto.light;
+  ctx.fillStyle = color;
+  const r = Math.round(14 * scale) + 3 + (Math.floor(state.clock * 6) % 2);
+  const arm = 4;
+  for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const x = Math.round(s.x) + dx * r;
+    const y = Math.round(s.y) + dy * r;
+    ctx.fillRect(dx < 0 ? x : x - arm + 1, y, arm, 1);
+    ctx.fillRect(x, dy < 0 ? y : y - arm + 1, 1, arm);
+  }
+  const len = Math.hypot(s.autoVx, s.autoVy);
+  if (len < 0.2) return;
+  const ux = s.autoVx / len;
+  const uy = s.autoVy / len;
+  const step = Math.floor(state.clock * 12) % 2;
+  for (let k = 0; k < 5; k += 1) {
+    const d = r + 4 + k * 6 + step * 3;
+    ctx.fillRect(Math.round(s.x + ux * d), Math.round(s.y + uy * d), 2, 2);
   }
 }
 
@@ -1615,7 +1710,7 @@ function drawHud() {
   if (state.slow > 0) { timerBar('SLOW', 8, row, state.slow / SLOW_SECONDS, CAPSULES.slow.light); row += 10; }
   if (state.mini > 0) { timerBar('MINI', 8, row, state.mini / MINI_SECONDS, CAPSULES.mini.light); row += 10; }
   if (state.radar > 0) { timerBar('RADAR', 8, row, state.radar / RADAR_SECONDS, CAPSULES.radar.light); row += 10; }
-  if (state.boost > 0) timerBar('BOOST', 8, row, state.boost / BOOST_SECONDS, CAPSULES.boost.light);
+  if (state.auto > 0) timerBar('AUTOPILOT', 8, row, state.auto / AUTO_SECONDS, CAPSULES.auto.light);
   if (state.god) drawText(ctx, 'GOD MODE', W / 2, H - 14, { align: 'center', color: blink(1) ? PAL.gold : PAL.amber });
   else if (state.godRun) drawText(ctx, 'UNRANKED', W / 2, H - 14, { align: 'center', color: PAL.steel });
 }

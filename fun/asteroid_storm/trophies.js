@@ -1,6 +1,6 @@
 // Trophies: one-off badges for milestones, kept on this device (localStorage). Each has pixel
 // art drawn in code, the milestone that earns it and a short space-physics fact.
-import { PAL, CAPSULES } from './art.js?v=20261124-ship3d';
+import { PAL, CAPSULES } from './art.js?v=20261124-autopilot';
 
 const STORE_KEY = 'dodgeTrophiesV1'; // { id: ISO date earned }
 const SEEN_KEY = 'dodgeTrophiesSeenV1'; // ids the player has looked at since earning
@@ -12,7 +12,7 @@ const INK = {
   R: PAL.hullDark, c: PAL.glass, C: PAL.glassHi, v: PAL.violet, V: '#c7b4ff', m: PAL.mint, M: '#c9f7de',
   x: '#000000', i: '#9fdcf5', I: '#e4f8ff', q: PAL.rose,
   S: CAPSULES.shield.body, T: CAPSULES.slow.body, N: CAPSULES.mini.body, O: CAPSULES.wave.body,
-  A: CAPSULES.radar.body, B: CAPSULES.boost.body,
+  A: CAPSULES.radar.body, B: CAPSULES.auto.body,
 };
 
 // Plate rims, by group.
@@ -453,7 +453,7 @@ export function createTrophies({ grid, count, detail }) {
   function noteCapsule(kind) {
     capsules.add(kind);
     save(CAPSULE_KEY, [...capsules]);
-    return capsules.size >= Object.keys(CAPSULES).length;
+    return Object.keys(CAPSULES).every((k) => capsules.has(k)); // retired kinds don't count
   }
 
   // Forgets every trophy, and which capsule types have been collected.

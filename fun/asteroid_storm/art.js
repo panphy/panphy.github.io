@@ -248,7 +248,7 @@ export const CAPSULES = {
   mini: { letter: 'M', body: '#c46be0', light: '#f2c4ff', dark: '#5a2470' },
   wave: { letter: 'W', body: '#e8902a', light: '#ffe0a0', dark: '#7a4210' },
   radar: { letter: 'R', body: '#3a7be0', light: '#b8d4ff', dark: '#1b3a75' },
-  boost: { letter: 'B', body: '#e0483e', light: '#ffb3a8', dark: '#6e1a16' },
+  auto: { letter: 'A', body: '#d4a81e', light: '#fff0a0', dark: '#6b520c' },
 };
 
 const CAPSULE_ROWS = [
