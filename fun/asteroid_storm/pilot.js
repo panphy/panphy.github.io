@@ -31,13 +31,13 @@ const FACES = {
   shield: { eyeOpen: 0.5, browOut: -1, browIn: 0, smirk: 1, wobble: 0 },
   mini: { eyeOpen: 1.4, browIn: -1, browOut: -1, mouthOpen: 0.3, smile: 0, wobble: 0 },
   shockwave: { squint: 1, browIn: 1, browOut: -1, mouthOpen: 0.8, teeth: 1, smile: 0.1, wobble: 0 },
+  shieldLost: { eyeOpen: 1.4, browIn: -1, browOut: -1, mouthOpen: 0.3, smile: 0, teeth: 0, wobble: 0 },
   hit: { eyeOpen: 0, browIn: -1, browOut: 0.5, mouthOpen: 0.75, teeth: 0, smile: -0.5, red: 0.9, wobble: 0 },
 };
 // Lasting states, applied in this order; later ones win.
 const STATES = [
   ['god', { gold: 1, smirk: 1, wobble: 0, sweat: 0 }],
   ['shield', { shieldRim: 1, smile: 0.35 }],
-  ['radar', {}],
   ['slow', { eyeOpen: 0.5, smile: 0.45, browIn: 0, browOut: 0, desat: 1, wobble: 0 }],
   ['auto', { shades: 1, smirk: 1, wobble: 0 }],
   ['mini', { scale: 0.5, trail: 1 }],
@@ -49,11 +49,13 @@ const STATES = [
 ];
 const EVENTS = {
   nearMiss: { dur: 0.9, prio: 2 }, capsule: { dur: 1.3, prio: 3 }, shield: { dur: 1.1, prio: 3 },
-  mini: { dur: 0.9, prio: 3 }, shockwave: { dur: 0.9, prio: 4 }, hit: { dur: 0.6, prio: 9 },
+  mini: { dur: 0.9, prio: 3 }, shockwave: { dur: 0.9, prio: 4 }, shieldLost: { dur: 0.9, prio: 4 },
+  hit: { dur: 0.6, prio: 9 },
 };
 // How fast each number eases (per second); the rest use 9.
 const RATE = { eyeOpen: 22, gazeX: 14, gazeY: 14, yaw: 4, scale: 6, trail: 6, shades: 4, shieldRim: 5,
-  desat: 4, holeRim: 5, stretch: 5, flare: 7, red: 6, sparkle: 4, alert: 12, gold: 5 };
+  desat: 4, holeRim: 5, stretch: 5, flare: 7, red: 6, sparkle: 4, alert: 12, gold: 5,
+  holeDir: 60, flareDir: 60, alertDir: 60 };
 const HIT_TO_DEAD = 0.6; // s of pain face before the game-over face
 const STARS = [[5, 6], [58, 9], [8, 52], [55, 50], [50, 3], [3, 30], [61, 34], [30, 2], [40, 60]];
 
@@ -229,19 +231,23 @@ function render(c, off, helmet, P, t) {
     }
     c.globalAlpha = 1;
   }
+  if (P.trail > 0.05) {
+    c.globalAlpha = 0.18 * P.trail; c.drawImage(off, Math.round(fx - 12 * P.trail), Math.round(fy), size, size);
+    c.globalAlpha = 0.35 * P.trail; c.drawImage(off, Math.round(fx - 6 * P.trail), Math.round(fy), size, size);
+    c.globalAlpha = 1;
+  }
   if (P.stretch > 0.02) {
+    // Rows smeared toward the hole, at whatever size the face is (mini halves it).
+    const k = P.scale;
     for (let row = 0; row < 32; row += 1) {
       const pull = Math.max(0, 1 - Math.abs(row * 2 - 34) / 40) * P.stretch;
-      const w = 64 + pull * 10;
-      const x = P.holeDir > 0 ? -2 + pull * 8 : 66 - w - pull * 8;
-      c.drawImage(off, 0, row, 32, 1, Math.round(x), row * 2 + Math.round(fy), Math.round(w), 2);
+      const w = (64 + pull * 10) * k;
+      const x = fx + (P.holeDir > 0 ? (-2 + pull * 8) * k : 66 * k - w - pull * 8 * k);
+      const y0 = Math.round(fy + row * 2 * k);
+      const y1 = Math.round(fy + (row + 1) * 2 * k);
+      if (y1 > y0) c.drawImage(off, 0, row, 32, 1, Math.round(x), y0, Math.round(w), y1 - y0);
     }
   } else {
-    if (P.trail > 0.05) {
-      c.globalAlpha = 0.18 * P.trail; c.drawImage(off, Math.round(fx - 12 * P.trail), Math.round(fy), size, size);
-      c.globalAlpha = 0.35 * P.trail; c.drawImage(off, Math.round(fx - 6 * P.trail), Math.round(fy), size, size);
-      c.globalAlpha = 1;
-    }
     c.drawImage(off, Math.round(fx), Math.round(fy), Math.round(size), Math.round(size));
   }
 
@@ -308,7 +314,7 @@ export function createPilot(canvas) {
   let P;
   let t;
   let danger;
-  let states;
+  let sides;
   let event;
   let nextBlink;
   let blinkEnd;
@@ -320,13 +326,14 @@ export function createPilot(canvas) {
 
   function reset() {
     P = { ...BASE };
-    t = 0; danger = 0; states = {}; event = null;
+    t = 0; danger = 0; event = null;
+    sides = { holeDir: BASE.holeDir, flareDir: BASE.flareDir, alertDir: BASE.alertDir };
     nextBlink = 1.5; blinkEnd = 0; nextGlance = 1; glance = 0;
     ringStart = -9; hitAt = -9; deadAt = Infinity;
   }
   reset();
 
-  // One-off reactions: nearMiss ({ dir }), capsule, shield, mini, shockwave, hit.
+  // One-off reactions: nearMiss and shieldLost ({ dir }), capsule, shield, mini, shockwave, hit.
   function react(name, opts = {}) {
     const ev = EVENTS[name];
     if (event && event.until > t && event.prio > ev.prio) return;
@@ -340,8 +347,9 @@ export function createPilot(canvas) {
   function frame(dt, view) {
     t += dt;
     danger += (view.danger - danger) * (1 - Math.exp(-dt * 2));
-    states = { ...view, dead: t >= deadAt };
-    const T = { ...BASE };
+    const states = { ...view, dead: t >= deadAt };
+    // Each effect keeps the side it was last on while it fades out.
+    const T = { ...BASE, ...sides };
     for (const k in FACES.tense) T[k] = BASE[k] + (FACES.tense[k] - BASE[k]) * danger;
     T.sweat = danger > 0.55 ? 1 : 0;
 
@@ -357,6 +365,7 @@ export function createPilot(canvas) {
     if (states.flare) { T.flareDir = Math.sign(view.flare); T.yaw = -T.flareDir * 0.22; }
     if (states.comet) { T.alertDir = Math.sign(view.comet); T.gazeX = T.alertDir; T.yaw = T.alertDir * 0.15; }
     if (states.hole) { T.holeDir = Math.sign(view.hole); T.gazeX = T.holeDir; T.yaw = T.holeDir * 0.25; }
+    sides = { holeDir: T.holeDir, flareDir: T.flareDir, alertDir: T.alertDir };
 
     const ev = event && event.until > t ? event : null;
     if (ev && !states.dead) {

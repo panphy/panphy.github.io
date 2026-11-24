@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-lucky7';
-import { createAudio } from './audio.js?v=20261124-lucky7';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-lucky7';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-lucky7';
-import { mountTitle } from './title.js?v=20261124-lucky7';
-import { createJoystick } from './joystick.js?v=20261124-lucky7';
-import { createPilot } from './pilot.js?v=20261124-lucky7';
+} from './art.js?v=20261124-review';
+import { createAudio } from './audio.js?v=20261124-review';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-review';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-review';
+import { mountTitle } from './title.js?v=20261124-review';
+import { createJoystick } from './joystick.js?v=20261124-review';
+import { createPilot } from './pilot.js?v=20261124-review';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -112,9 +112,13 @@ const ctx = canvas.getContext('2d');
 // field pixels; only the slow background layers use the finer steps, so they glide instead
 // of jumping a whole big pixel at a time.
 let pixelScale = 1;
+// The canvas box can be wider than the picture (it is fitted by height), so this is the
+// width the picture itself is shown at.
+const shownWidth = (rect) => Math.min(rect.width, rect.height * (W / H));
+
 function fitCanvas() {
   const rect = canvas.getBoundingClientRect();
-  const shown = Math.min(rect.width, rect.height * (W / H)) || W;
+  const shown = shownWidth(rect) || W;
   const k = Math.max(1, Math.min(4, Math.round((shown * (window.devicePixelRatio || 1)) / W)));
   if (k !== pixelScale || canvas.width !== W * k) {
     pixelScale = k;
@@ -263,6 +267,7 @@ const state = {
   god: false, // god mode: nothing can hit the ship
   godRun: false, // god mode was on at some point this run, so it is unranked
   overAt: 0,
+  modalPending: false,
   scroll: 0,
   planet: null,
   planetSeed: 1,
@@ -272,7 +277,7 @@ const state = {
 try { state.best = Number(localStorage.getItem(BEST_KEY)) || 0; } catch {}
 
 const keys = new Set();
-const drag = { id: null, startX: 0, startY: 0, shipX: 0, shipY: 0 };
+const drag = { id: null }; // the pointer steering on the field
 
 const stageAt = (t) => Math.min(STAGES.length - 1, Math.floor(t / STAGE_SECONDS));
 const pick = (list) => list[Math.floor(rng() * list.length)];
@@ -368,18 +373,23 @@ function spawnCapsule() {
   state.lastCapsule = kind;
   if (kind === 'shield') state.lastShield = state.time;
   const fromLeft = rng() < 0.5;
+  const y = 30 + rng() * (H - 60);
   state.capsules.push({
-    kind, x: fromLeft ? -14 : W + 14, y: 30 + rng() * (H - 60), baseY: 0,
+    kind, x: fromLeft ? -14 : W + 14, y, baseY: y,
     vx: (fromLeft ? 1 : -1) * (30 + rng() * 12), bob: rng() * Math.PI * 2,
   });
-  state.capsules[state.capsules.length - 1].baseY = state.capsules[state.capsules.length - 1].y;
 }
 
 /* -----------------------------------------------------------
  * Updating the world
  * ----------------------------------------------------------- */
+const shipScale = () => (state.mini > 0 ? MINI_SCALE : 1);
+// Keeps a point where the whole ship fits on the field.
+const clampX = (x) => Math.max(SHIP_RADIUS, Math.min(W - SHIP_RADIUS, x));
+const clampY = (y) => Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, y));
+
 function hitRadius() {
-  return SHIP_RADIUS * (state.mini > 0 ? MINI_SCALE : 1);
+  return SHIP_RADIUS * shipScale();
 }
 
 function wellPull(x, y, strength) {
@@ -419,7 +429,7 @@ function updateRocks(dt, { collide }) {
       r.splitIn -= dt;
       if (r.splitIn <= 0) {
         state.rocks.splice(i, 1);
-        split(r, spawned);
+        split(r, spawned, collide);
         continue;
       }
     }
@@ -436,13 +446,17 @@ function updateRocks(dt, { collide }) {
     if (collide && s.alive) {
       const d = Math.hypot(r.x - s.x, r.y - s.y);
       const reach = reachShip + r.radius * HITBOX;
-      if (d < reach && canBeHit()) {
-        if (s.shield) {
-          shieldBreak(r);
-          state.rocks.splice(i, 1);
-          continue;
+      if (d < reach) {
+        // A rock that passes through the ship while it cannot be hit is no close call.
+        r.nearDone = true;
+        if (canBeHit()) {
+          if (s.shield) {
+            shieldBreak(r);
+            state.rocks.splice(i, 1);
+            continue;
+          }
+          crash(r);
         }
-        crash(r);
       } else if (d < reach + NEAR_MISS_GAP) {
         r.near = true;
         r.minGap = Math.min(r.minGap ?? Infinity, d - reach);
@@ -459,7 +473,7 @@ function updateRocks(dt, { collide }) {
   state.rocks.push(...spawned);
 }
 
-function split(r, out) {
+function split(r, out, audible = true) {
   const pieces = 3;
   const base = rng() * Math.PI * 2;
   for (let k = 0; k < pieces; k += 1) {
@@ -476,7 +490,7 @@ function split(r, out) {
   }
   const colors = ROCK_PALETTES[r.palette].slice(2);
   burst(r.x, r.y, 26, colors, 90);
-  audio.sfx('split');
+  if (audible) audio.sfx('split');
 }
 
 function updateWells(dt, collide) {
@@ -493,20 +507,15 @@ function updateWells(dt, collide) {
     }
     if (collide && s.alive) {
       const dist = Math.hypot(w.x - s.x, w.y - s.y);
-      if (dist < w.reach * 0.3) w.deep = true;
+      if (dist < w.reach * 0.3 && state.auto <= 0) w.deep = true;
       else if (w.deep && dist > w.reach * 0.85) { w.deep = false; awardTrophy('horizon'); }
     }
     if (collide && s.alive && canBeHit() && Math.hypot(w.x - s.x, w.y - s.y) < w.core + hitRadius() * 0.6) {
       if (s.shield) {
         // A shield is spent getting thrown clear of the core.
-        s.shield = false;
-        s.grace = SHIELD_GRACE;
+        shieldBreak(w);
         const d = Math.hypot(s.x - w.x, s.y - w.y) || 1;
         moveShipBy(((s.x - w.x) / d) * 30, ((s.y - w.y) / d) * 30);
-        popup('SHIELD LOST', s.x, s.y - 14, PAL.glass);
-        pilot.react('nearMiss', { dir: w.x < s.x ? -1 : 1 });
-        audio.sfx('shield');
-        awardTrophy('shield');
       } else {
         crash({ vx: 0, vy: 0 });
       }
@@ -586,6 +595,7 @@ function updateWaves(dt) {
       r.vx = (dx / d) * speed;
       r.vy = (dy / d) * speed;
       r.near = false;
+      r.minGap = Infinity;
       burst(r.x, r.y, 5, [CAPSULES.wave.light, PAL.white], 50);
       if (w.pushed.size >= 6) awardTrophy('shockwave');
     }
@@ -664,7 +674,7 @@ function updateParticles(dt) {
 function exhaust(dt, strength = 1) {
   const s = state.ship;
   if (!s.alive || rng() > dt * 40 * strength) return;
-  const scale = state.mini > 0 ? MINI_SCALE : 1;
+  const scale = shipScale();
   addParticle({
     x: s.x + (rng() - 0.5) * 3 * scale,
     y: s.y + (SHIP_H / 2 - 1) * scale,
@@ -820,10 +830,17 @@ function updateFlares(dt) {
       state.shake = Math.max(state.shake, 0.18);
       audio.sfx('flare');
     }
-    if (f.fired && s.alive && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6 + 10) f.brushed = true;
-    if (f.fired && s.alive && canBeHit() && flareGap(f, s.x, s.y) < f.half + hitRadius() * 0.6) {
-      if (s.shield) shieldBreak({ x: s.x, y: s.y });
-      else crash({ vx: 0, vy: 0 });
+    if (f.fired && s.alive) {
+      const gap = flareGap(f, s.x, s.y);
+      const band = f.half + hitRadius() * 0.6;
+      if (gap < band) {
+        // Sitting in the blaze unhurt (shield grace, autopilot) never counts as dancing past it.
+        f.spoiled = true;
+        if (canBeHit()) {
+          if (s.shield) shieldBreak({ x: s.x, y: s.y });
+          else crash({ vx: 0, vy: 0 });
+        }
+      } else if (gap < band + 10 && state.auto <= 0) f.brushed = true;
     }
     if (f.fired) {
       // Embers thrown off the loop, mostly outwards.
@@ -839,7 +856,7 @@ function updateFlares(dt) {
       }
     }
     if (f.t >= FLARE_WARN + FLARE_FIRE) {
-      if (f.brushed && s.alive) awardTrophy('flare');
+      if (f.brushed && !f.spoiled && s.alive) awardTrophy('flare');
       state.flares.splice(i, 1);
     }
   }
@@ -883,7 +900,7 @@ function shieldBreak(rock) {
   state.shake = 0.2;
   burst(rock.x, rock.y, 24, [PAL.glassHi, PAL.glass, PAL.white], 110);
   popup('SHIELD LOST', s.x, s.y - 16, PAL.glass);
-  pilot.react('nearMiss', { dir: rock.x < s.x ? -1 : 1 });
+  pilot.react('shieldLost', { dir: rock.x < s.x ? -1 : 1 });
   audio.sfx('shield');
 }
 
@@ -894,7 +911,7 @@ function crash(rock) {
   state.shake = 0.5;
   state.flash = 0.25;
   state.slow = 0;
-  const scale = state.mini > 0 ? MINI_SCALE : 1;
+  const scale = shipScale();
   const left = s.x - (SHIP_W / 2) * scale;
   const top = s.y - (SHIP_H / 2) * scale;
   for (const px of ship.pixels) {
@@ -914,6 +931,8 @@ function crash(rock) {
   state.radar = 0;
   state.auto = 0;
   state.ghosts = [];
+  state.warnings = [];
+  state.flares = state.flares.filter((f) => f.fired);
   audio.stopMusic();
   audio.sfx('crash');
   audio.sfx('over');
@@ -998,15 +1017,21 @@ function endRun() {
   // The run counts in whole hundredths, so the screen, the best and the board agree.
   state.time = Math.floor(state.time * 100) / 100;
   // A run that used god mode is unranked: no personal best and no leaderboard entry.
-  const score = state.godRun ? null : board.sanitize(state.time);
-  if (score !== null && score > state.best) {
-    state.best = score;
+  // The personal best keeps any length of run; the board takes only what it accepts.
+  if (!state.godRun && state.time > state.best) {
+    state.best = state.time;
     state.newBest = true;
-    try { localStorage.setItem(BEST_KEY, String(score)); } catch {}
+    try { localStorage.setItem(BEST_KEY, String(state.time)); } catch {}
   }
+  const score = state.godRun ? null : board.sanitize(state.time);
   updateButtons();
   if (score !== null && board.qualifies(score)) {
-    setTimeout(() => { if (state.mode === 'over') openModal(score); }, 1400);
+    // No restart until the initials dialog has had its chance to open.
+    state.modalPending = true;
+    setTimeout(() => {
+      state.modalPending = false;
+      if (state.mode === 'over') openModal(score);
+    }, 1400);
   }
 }
 
@@ -1026,13 +1051,12 @@ function pause() {
 function resume() {
   if (state.mode !== 'paused') return;
   state.mode = state.pausedFrom;
-  lastFrame = 0;
   if (state.mode === 'playing' && !audio.isMuted()) audio.startMusic();
   updateButtons();
 }
 
 function canRestart() {
-  return state.mode === 'over' && state.clock - state.overAt > 1 && !modal.open;
+  return state.mode === 'over' && state.clock - state.overAt > 1 && !modal.open && !state.modalPending;
 }
 
 // The one action behind a tap, Enter or Space.
@@ -1169,6 +1193,8 @@ function update(dt) {
     updateWells(world, false);
     updateRocks(world, { collide: false });
     updateCapsules(world, false);
+    updateWaves(world);
+    updateFlares(world);
   }
   state.ship.tilt += (state.ship.moveX - state.ship.tilt) * Math.min(1, dt * 12);
   state.ship.moveX = 0;
@@ -1258,8 +1284,8 @@ function autopilot(dt) {
     let clear = Infinity;
     for (let k = 1; k <= 7; k += 1) {
       const t = k * 0.05;
-      const sx = Math.max(SHIP_RADIUS, Math.min(W - SHIP_RADIUS, s.x + mx * speed * Math.min(t, 0.2)));
-      const sy = Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, s.y + my * speed * Math.min(t, 0.2)));
+      const sx = clampX(s.x + mx * speed * Math.min(t, 0.2));
+      const sy = clampY(s.y + my * speed * Math.min(t, 0.2));
       for (const r of state.rocks) clear = Math.min(clear, Math.hypot(r.x + r.vx * t - sx, r.y + r.vy * t - sy) - r.radius - hit);
       for (const w of state.wells) clear = Math.min(clear, Math.hypot(w.x - sx, w.y - sy) - w.core - 8);
       for (const wn of state.warnings) {
@@ -1294,8 +1320,8 @@ function updateAutoTimer(world) {
 
 function setTarget(x, y) {
   const s = state.ship;
-  s.tx = Math.max(SHIP_RADIUS, Math.min(W - SHIP_RADIUS, x));
-  s.ty = Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, y));
+  s.tx = clampX(x);
+  s.ty = clampY(y);
 }
 
 // Flies the ship towards a drag target at up to SHIP_SPEED; short moves land at once.
@@ -1312,22 +1338,20 @@ function moveShipTowardTarget(dt) {
 
 function moveShipTo(x, y) {
   const s = state.ship;
-  const nx = Math.max(SHIP_RADIUS, Math.min(W - SHIP_RADIUS, x));
-  const ny = Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, y));
+  const nx = clampX(x);
+  const ny = clampY(y);
   s.moveX = Math.max(-1, Math.min(1, (nx - s.x) * 0.5));
   s.x = nx;
   s.y = ny;
 }
 
-// Moves the ship without the player, keeping a drag in progress anchored correctly.
+// Moves the ship without the player (a black hole's pull or throw), carrying any target with it.
 function moveShipBy(dx, dy) {
   const s = state.ship;
   const ox = s.x;
   const oy = s.y;
-  s.x = Math.max(SHIP_RADIUS, Math.min(W - SHIP_RADIUS, s.x + dx));
-  s.y = Math.max(SHIP_RADIUS, Math.min(H - SHIP_RADIUS, s.y + dy));
-  drag.shipX += s.x - ox;
-  drag.shipY += s.y - oy;
+  s.x = clampX(s.x + dx);
+  s.y = clampY(s.y + dy);
   if (s.tx !== null) {
     s.tx += s.x - ox;
     s.ty += s.y - oy;
@@ -1526,16 +1550,15 @@ function updateGhosts(dt) {
   state.ghostClock = GHOST_GAP;
   const last = state.ghosts[state.ghosts.length - 1];
   if (last && Math.hypot(last.x - s.x, last.y - s.y) < 1.5) return;
-  state.ghosts.push({ x: s.x, y: s.y, life: GHOST_LIFE });
+  state.ghosts.push({ x: s.x, y: s.y, life: GHOST_LIFE, scale: MINI_SCALE });
 }
 
 function drawGhosts() {
   if (!state.ghosts.length) return;
-  const scale = state.mini > 0 ? MINI_SCALE : 1;
-  const w = Math.round(SHIP_W * scale);
-  const h = Math.round(SHIP_H * scale);
   ctx.save();
   for (const g of state.ghosts) {
+    const w = Math.round(SHIP_W * g.scale);
+    const h = Math.round(SHIP_H * g.scale);
     ctx.globalAlpha = 0.45 * (g.life / GHOST_LIFE);
     ctx.drawImage(trailGhost, Math.round(g.x - w / 2), Math.round(g.y - h / 2), w, h);
   }
@@ -1546,7 +1569,7 @@ function drawShip() {
   const s = state.ship;
   if (!s.alive) return;
   if (s.grace > 0 && Math.floor(state.clock * 20) % 2) return;
-  const scale = state.mini > 0 ? MINI_SCALE : 1;
+  const scale = shipScale();
   const w = Math.round(SHIP_W * scale);
   const h = Math.round(SHIP_H * scale);
   const x = Math.round(s.x - w / 2);
@@ -1681,7 +1704,7 @@ function toastBadgeCentre(p) {
 // breathing glow and circling sparkles, its name typing out; then it slides away.
 function drawToast() {
   const toast = state.toasts[0];
-  if (!toast || state.mode === 'title' || state.mode === 'paused') return;
+  if (!toast || state.mode === 'paused') return;
   const t = toast.t;
   const pin = Math.min(1, t / TOAST_IN);
   const pout = t > TOAST_LIFE - TOAST_OUT ? (t - (TOAST_LIFE - TOAST_OUT)) / TOAST_OUT : 0;
@@ -1988,15 +2011,14 @@ requestAnimationFrame(frame);
 // Field pixels per screen pixel. On a short window the canvas box is wider than 3:2 and
 // the picture is fitted by height, so measure the picture, not the box.
 function fieldScale() {
-  const rect = canvas.getBoundingClientRect();
-  const shown = Math.min(rect.width, rect.height * (W / H));
+  const shown = shownWidth(canvas.getBoundingClientRect());
   return shown ? W / shown : 1;
 }
 
 // Field coordinates of a pointer, allowing for the picture being letterboxed in its box.
 function fieldPoint(e) {
   const rect = canvas.getBoundingClientRect();
-  const shownW = Math.min(rect.width, rect.height * (W / H));
+  const shownW = shownWidth(rect);
   const shownH = shownW * (H / W);
   const left = rect.left + (rect.width - shownW) / 2;
   const top = rect.top + (rect.height - shownH) / 2;
@@ -2108,8 +2130,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => keys.delete(e.code));
-document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
-window.addEventListener('blur', pause);
+// Leaving the window loses key releases, so held keys are forgotten whatever the screen.
+function leave() {
+  keys.clear();
+  pause();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) leave(); });
+window.addEventListener('blur', leave);
 
 /* -----------------------------------------------------------
  * Buttons
@@ -2133,11 +2160,9 @@ function updateButtons() {
   setIcon(soundButton, audio.isMuted() ? 'mute' : 'sound');
   pauseButton.disabled = !paused && state.mode !== 'playing' && state.mode !== 'intro';
   pauseButton.querySelector('.label').textContent = paused ? 'Resume' : 'Pause';
-  pauseButton.setAttribute('aria-pressed', String(paused));
   pauseButton.classList.toggle('is-on', paused);
   const muted = audio.isMuted();
   soundButton.querySelector('.label').textContent = muted ? 'Sound off' : 'Sound on';
-  soundButton.setAttribute('aria-pressed', String(!muted));
   soundButton.classList.toggle('is-off', muted);
   // Between runs a swipe on the field scrolls the page; during a run every touch steers.
   canvas.classList.toggle('is-idle', isIdle());
@@ -2165,10 +2190,9 @@ updateButtons();
 const FILL_MIN_WIDTH = 1000; // px: below this the page stacks, and full screen only centers it
 const FILL_WIDTH = [1000, 1700]; // px: range of the width the page is laid out at
 const FILL_MIN_SCALE = 0.9; // the panels and text never shrink below this when they can help it
-const sideLayout = window.matchMedia('(pointer: coarse) and (orientation: landscape) and (max-height: 540px)');
 function fitFullscreen() {
   const body = document.body;
-  const fill = root.classList.contains('is-fullscreen') && innerWidth >= FILL_MIN_WIDTH && !sideLayout.matches;
+  const fill = root.classList.contains('is-fullscreen') && innerWidth >= FILL_MIN_WIDTH && !phoneSideways.matches;
   root.classList.toggle('is-fill', fill);
   body.style.width = '';
   body.style.transform = '';
@@ -2209,7 +2233,6 @@ if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
     const label = on ? 'Exit full screen' : 'Full screen';
     fullscreenButton.setAttribute('aria-label', label);
     fullscreenButton.title = label;
-    fullscreenButton.setAttribute('aria-pressed', String(on));
   };
   fullscreenButton.addEventListener('click', () => {
     if (fullscreenElement()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
@@ -2238,15 +2261,18 @@ function openModal(score) {
   submitButton.disabled = false;
   submitButton.textContent = 'Submit';
   keys.clear();
-  if (typeof modal.showModal === 'function') modal.showModal();
-  else modal.setAttribute('open', '');
+  modal.showModal();
   setTimeout(() => initialsInput.focus(), 50);
+}
+
+function forgetPending() {
+  pendingScore = null;
+  submitting = false;
 }
 
 function closeModal() {
   if (modal.open) modal.close();
-  pendingScore = null;
-  submitting = false;
+  forgetPending();
 }
 
 initialsInput.addEventListener('input', () => {
@@ -2285,4 +2311,4 @@ skipButton.addEventListener('click', () => {
   canvas.focus({ preventScroll: true });
 });
 
-modal.addEventListener('cancel', () => { pendingScore = null; submitting = false; });
+modal.addEventListener('cancel', forgetPending);

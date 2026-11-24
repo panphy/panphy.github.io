@@ -8,12 +8,14 @@ const SUBMIT_RPC = 'submit_dodge_score';
 // Bumped whenever the board is reset; lists saved under older keys are removed on load.
 const CACHE_KEY = 'dodgeLeaderboardCacheV14';
 const OLD_CACHE_KEYS = ['dodgeLeaderboardCacheV1', 'dodgeLeaderboardCacheV2', 'dodgeLeaderboardCacheV3', 'dodgeLeaderboardCacheV4', 'dodgeLeaderboardCacheV5', 'dodgeLeaderboardCacheV6', 'dodgeLeaderboardCacheV7', 'dodgeLeaderboardCacheV8', 'dodgeLeaderboardCacheV9', 'dodgeLeaderboardCacheV10', 'dodgeLeaderboardCacheV11', 'dodgeLeaderboardCacheV12', 'dodgeLeaderboardCacheV13'];
-export const BOARD_SIZE = 10;
+const BOARD_SIZE = 10;
 // Matches the server's range check in submit_dodge_score and the dodge_survival_time_range
 // constraint; runs outside it are never offered for submission.
 const MIN_SCORE = 1;
 const MAX_SCORE = 600;
 const HIGHLIGHT_MS = 8000;
+const FETCH_TIMEOUT_MS = 8000;
+const RETRY_MS = 60000; // after a failed load, try again this often (and when the network returns)
 
 const headers = {
   apikey: SUPABASE_ANON_KEY,
@@ -35,6 +37,8 @@ function sanitize(value) {
 export function createLeaderboard({ list, status }) {
   let scores = [];
   let recent = null;
+  let request = 0; // only the newest load may update the board
+  let retry = null;
 
   function loadCache() {
     try {
@@ -45,7 +49,7 @@ export function createLeaderboard({ list, status }) {
   }
 
   function saveCache() {
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ scores, savedAt: Date.now() })); } catch {}
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ scores })); } catch {}
   }
 
   function isRecent(entry) {
@@ -99,18 +103,24 @@ export function createLeaderboard({ list, status }) {
     url.searchParams.set('select', 'initials,survival_time');
     url.searchParams.set('order', 'survival_time.desc');
     url.searchParams.set('limit', String(BOARD_SIZE));
+    const id = ++request;
+    clearTimeout(retry);
     try {
-      const response = await fetch(url, { headers });
+      const signal = AbortSignal.timeout ? AbortSignal.timeout(FETCH_TIMEOUT_MS) : undefined;
+      const response = await fetch(url, { headers, signal });
       if (!response.ok) throw new Error(`Leaderboard fetch failed: ${response.status}`);
       const rows = await response.json();
+      if (id !== request) return;
       scores = withRecent(rows
         .map((row) => ({ initials: String(row.initials || '???'), score: sanitize(row.survival_time) }))
         .filter((row) => row.score !== null));
       saveCache();
       setStatus('');
     } catch (error) {
+      if (id !== request) return;
       console.warn(error);
-      setStatus('Offline: showing saved scores');
+      setStatus(scores.length ? "Can't reach the board: showing saved scores" : "Can't reach the board right now");
+      retry = setTimeout(refresh, RETRY_MS);
     }
     render();
   }
@@ -139,6 +149,7 @@ export function createLeaderboard({ list, status }) {
   if (cached) scores = cached.map((e) => ({ initials: e.initials, score: sanitize(e.score) })).filter((e) => e.score !== null);
   render();
   refresh();
+  window.addEventListener('online', refresh);
 
-  return { refresh, submit, qualifies, sanitize };
+  return { submit, qualifies, sanitize };
 }

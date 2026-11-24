@@ -2,7 +2,7 @@
 // ship: every finger movement on it is passed straight to onDrag in screen pixels, so the ship
 // moves at once, and the finger may slide past the pad's edge. The knob follows the finger
 // for feedback and springs back to the centre on release.
-import { PAL } from './art.js?v=20261124-lucky7';
+import { PAL } from './art.js?v=20261124-review';
 
 const SIZE = 48; // drawn at 48 x 48 pixels; the page scales it up
 const C = SIZE / 2;
@@ -111,6 +111,7 @@ export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} }
 
   canvas.addEventListener('pointerdown', (e) => {
     e.preventDefault();
+    if (pointer !== null) return; // one thumb steers; a second touch is ignored
     pointer = e.pointerId;
     try { canvas.setPointerCapture(e.pointerId); } catch {}
     startX = lastX = e.clientX;
@@ -129,6 +130,9 @@ export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} }
   draw();
 
   return {
-    reset() { pointer = null; kx = 0; ky = 0; draw(); },
+    reset() {
+      if (pointer !== null) { try { canvas.releasePointerCapture(pointer); } catch {} }
+      pointer = null; kx = 0; ky = 0; draw();
+    },
   };
 }

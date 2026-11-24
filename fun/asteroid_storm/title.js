@@ -3,7 +3,7 @@
 // Drawn in code like the rest of the game's art, and gently animated. The 3D ship is the game's
 // own sprite turned into voxels: each pixel becomes a column of cubes (a rounded fuselage, thin
 // wings, a raised canopy), drawn into a small pixel buffer with a depth test and shaded per face.
-import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-lucky7';
+import { PAL, SHIP_W, SHIP_H, drawText, textWidth } from './art.js?v=20261124-review';
 
 const TITLE = 'ASTEROID STORM';
 const SCALE = 2; // the 5 x 7 font at twice size: 10 x 14 px letters
@@ -110,10 +110,16 @@ function project(f, side, z, roll) {
   return [x, -z1 * Math.cos(ELEVATION) + depth * Math.sin(ELEVATION), -depth * Math.cos(ELEVATION) + z1 * Math.sin(ELEVATION)];
 }
 
+// Reused on every frame of the spinning ship rather than allocated anew.
+let shipImg = null;
+const zbuf = new Float32Array(SHIP_BOX * SHIP_BOX);
+
 function renderShip(target, cubes, roll) {
   const ctx = target.getContext('2d');
-  const img = ctx.createImageData(SHIP_BOX, SHIP_BOX);
-  const zbuf = new Float32Array(SHIP_BOX * SHIP_BOX).fill(-Infinity);
+  if (!shipImg) shipImg = ctx.createImageData(SHIP_BOX, SHIP_BOX);
+  else shipImg.data.fill(0);
+  const img = shipImg;
+  zbuf.fill(-Infinity);
   const o = SHIP_BOX / 2;
   for (const c of cubes) {
     const color = c.rgb;
@@ -139,8 +145,7 @@ function renderShip(target, cubes, roll) {
     }
   }
   for (const i of edge) img.data.set([ink[0], ink[1], ink[2], 254], i);
-  ctx.clearRect(0, 0, SHIP_BOX, SHIP_BOX);
-  ctx.putImageData(img, 0, 0);
+  ctx.putImageData(img, 0, 0); // replaces every pixel, so no clear is needed
 }
 
 export function mountTitle(canvas, { ship, rocks }) {
