@@ -1,6 +1,6 @@
 // Trophies: one-off badges for milestones, kept on this device (localStorage). Each has pixel
 // art drawn in code, the milestone that earns it and a short space-physics fact.
-import { PAL, CAPSULES } from './art.js?v=20261124-pilotgod';
+import { PAL, CAPSULES } from './art.js?v=20261124-lucky7';
 
 const STORE_KEY = 'dodgeTrophiesV1'; // { id: ISO date earned }
 const SEEN_KEY = 'dodgeTrophiesSeenV1'; // ids the player has looked at since earning
@@ -153,25 +153,25 @@ export const TROPHIES = [
     ],
   },
   {
-    id: 'daredevil', group: 'close', name: 'Daredevil', goal: 'Get 10 close calls in one run.',
+    id: 'daredevil', group: 'close', name: 'Lucky 7!', goal: 'Get 7 close calls in one run.',
     fact: 'Real asteroids are far apart: in the main belt they are typically about a million km from each other.',
     art: [
-      '.ss......ss.',
-      'sdds....sdds',
-      'sdds....sdds',
-      '.ss..ww..ss.',
-      '....wccw....',
-      '....wppw....',
-      '...rwppwr...',
-      '...rr..rr...',
-      '.....oo.....',
-      '......o.....',
-      '..C.....C...',
-      '............',
+      '..........C.',
+      'yyyyyyyy.CwC',
+      'yooooooy..C.',
+      '......yo....',
+      '.....yo.....',
+      '.....yo.....',
+      '....yo.mm.mm',
+      '....yo.mMmMm',
+      '...yo...mdm.',
+      '...yo..mMmMm',
+      '...yo..mm.mm',
+      '.........m..',
     ],
   },
   {
-    id: 'untouchable', group: 'close', name: 'Untouchable', goal: 'Chain 5 close calls in a streak.',
+    id: 'untouchable', group: 'close', name: 'Untouchable', goal: 'Chain 3 close calls, each within 3 s of the last.',
     fact: 'The International Space Station sometimes fires its thrusters to dodge space debris.',
     art: [
       '...c.cc.c...',

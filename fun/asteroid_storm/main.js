@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-pilotgod';
-import { createAudio } from './audio.js?v=20261124-pilotgod';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-pilotgod';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-pilotgod';
-import { mountTitle } from './title.js?v=20261124-pilotgod';
-import { createJoystick } from './joystick.js?v=20261124-pilotgod';
-import { createPilot } from './pilot.js?v=20261124-pilotgod';
+} from './art.js?v=20261124-lucky7';
+import { createAudio } from './audio.js?v=20261124-lucky7';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-lucky7';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-lucky7';
+import { mountTitle } from './title.js?v=20261124-lucky7';
+import { createJoystick } from './joystick.js?v=20261124-lucky7';
+import { createPilot } from './pilot.js?v=20261124-lucky7';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -679,13 +679,16 @@ function exhaust(dt, strength = 1) {
 
 // Near-miss callouts: the closer the pass, the bigger the word. Close calls within
 // STREAK_WINDOW of each other build a streak, which escalates the callout.
-const STREAK_WINDOW = 2; // s
+const STREAK_WINDOW = 3; // s
 const CALLOUT_WORDS = [
   ['NICE!', 'WHOA!', 'SLICK!', 'SMOOTH!'],
   ['CLOSE SHAVE!', 'YIKES!', 'NEAT DODGE!', 'HAIRLINE!'],
   ['RAZOR!', 'TOO CLOSE!', 'WHISKER!', 'PAINT SCRATCH!'],
 ];
-const STREAK_TITLES = [[8, 'GHOST PILOT'], [5, 'UNTOUCHABLE'], [3, 'DAREDEVIL']];
+// A streak of 3 earns Untouchable, so its callout says so; the 7th close call of a run earns Lucky 7!.
+const STREAK_TITLES = [[8, 'GHOST PILOT'], [5, 'NERVES OF STEEL'], [3, 'UNTOUCHABLE']];
+const LUCKY_CALLS = 7;
+const UNTOUCHABLE_STREAK = 3;
 
 function nearMiss(rock) {
   if (state.auto > 0) return; // the autopilot's close calls are not the player's
@@ -701,13 +704,13 @@ function nearMiss(rock) {
   const title = state.streak >= 2 ? (STREAK_TITLES.find(([n]) => state.streak >= n) || [0, ''])[1] : '';
   state.callout = {
     text: pick(CALLOUT_WORDS[tier]),
-    sub: state.streak >= 2 ? `X${state.streak} ${title}`.trim() : '',
+    sub: state.streak >= 2 ? `X${state.streak} ${title}`.trim() : state.nearMisses === LUCKY_CALLS ? 'LUCKY 7!' : '',
     tier: Math.max(tier, state.streak >= 3 ? 1 : 0),
     t: 0,
   };
   audio.sfx('near', state.streak);
-  if (state.nearMisses >= 10) awardTrophy('daredevil');
-  if (state.streak >= 5) awardTrophy('untouchable');
+  if (state.nearMisses >= LUCKY_CALLS) awardTrophy('daredevil');
+  if (state.streak >= UNTOUCHABLE_STREAK) awardTrophy('untouchable');
   if (rock.kind === 'comet') awardTrophy('comet');
 }
 
