@@ -3,12 +3,12 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-center';
-import { createAudio } from './audio.js?v=20261124-center';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-center';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-center';
-import { mountTitle } from './title.js?v=20261124-center';
-import { createJoystick } from './joystick.js?v=20261124-center';
+} from './art.js?v=20261124-fill';
+import { createAudio } from './audio.js?v=20261124-fill';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-fill';
+import { createTrophies, trophyArt } from './trophies.js?v=20261124-fill';
+import { mountTitle } from './title.js?v=20261124-fill';
+import { createJoystick } from './joystick.js?v=20261124-fill';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -2084,6 +2084,44 @@ pauseButton.addEventListener('click', () => {
 soundButton.addEventListener('click', toggleSound);
 updateButtons();
 
+// In full screen on a wide screen, the whole page is laid out at a fixed width and then
+// scaled up (or down) as one picture to fill the screen, so the panels, text and game keep
+// their proportions. The game runs in field pixels whatever its size on screen, so a bigger
+// picture changes nothing about speeds, hitboxes or steering.
+const FILL_MIN_WIDTH = 1000; // px: below this the page stacks, and full screen only centers it
+const FILL_WIDTH = [1000, 1700]; // px: range of the width the page is laid out at
+const FILL_MIN_SCALE = 0.9; // the panels and text never shrink below this when they can help it
+const sideLayout = window.matchMedia('(pointer: coarse) and (orientation: landscape) and (max-height: 540px)');
+function fitFullscreen() {
+  const body = document.body;
+  const fill = root.classList.contains('is-fullscreen') && innerWidth >= FILL_MIN_WIDTH && !sideLayout.matches;
+  root.classList.toggle('is-fill', fill);
+  body.style.width = '';
+  body.style.transform = '';
+  if (fill) {
+    // Try layout widths across the range and keep the one that shows the game biggest
+    // without shrinking the panels and text below FILL_MIN_SCALE (or, if every width
+    // would, the one that shrinks them least).
+    const fitAt = (w) => {
+      body.style.width = `${w}px`;
+      const h = body.offsetHeight;
+      const k = Math.min(innerWidth / w, innerHeight / h);
+      return { w, h, k, game: canvas.offsetWidth * k };
+    };
+    const fits = [];
+    for (let w = FILL_WIDTH[0]; w <= FILL_WIDTH[1]; w += 25) fits.push(fitAt(w));
+    const readable = fits.filter((f) => f.k >= FILL_MIN_SCALE);
+    const best = readable.length
+      ? readable.reduce((a, b) => (b.game > a.game ? b : a))
+      : fits.reduce((a, b) => (b.k > a.k ? b : a));
+    const { w: width, h: height, k: scale } = fitAt(best.w);
+    const x = (innerWidth - width * scale) / 2;
+    const y = (innerHeight - height * scale) / 2;
+    body.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
+  fitCanvas();
+}
+
 // Full screen for the whole page (iPhone Safari has no Fullscreen API, so the button stays hidden there).
 const root = document.documentElement;
 const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
@@ -2092,6 +2130,7 @@ if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
   const syncFullscreen = () => {
     const on = Boolean(fullscreenElement());
     root.classList.toggle('is-fullscreen', on);
+    fitFullscreen();
     setIcon(fullscreenButton, on ? 'shrink' : 'expand');
     const label = on ? 'Exit full screen' : 'Full screen';
     fullscreenButton.setAttribute('aria-label', label);
@@ -2105,6 +2144,7 @@ if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
       Promise.resolve(request.call(root)).catch(() => {});
     }
   });
+  window.addEventListener('resize', fitFullscreen);
   document.addEventListener('fullscreenchange', syncFullscreen);
   document.addEventListener('webkitfullscreenchange', syncFullscreen);
   syncFullscreen();
