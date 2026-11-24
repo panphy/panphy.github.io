@@ -306,6 +306,15 @@ h1 {
 
 .footer p { margin: 0; }
 
+/* Full screen: the page sits in the middle of the screen. Auto margins (not
+   justify-content) keep the top reachable when the page is taller than the screen. */
+html.is-fullscreen body { display: flex; flex-direction: column; }
+html.is-fullscreen .topbar,
+html.is-fullscreen .layout,
+html.is-fullscreen .footer { width: 100%; }
+html.is-fullscreen .topbar { margin-top: auto; }
+html.is-fullscreen .footer { margin-bottom: auto; }
+
 .dialog {
   border: 0;
   padding: 24px 26px;
