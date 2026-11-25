@@ -5053,9 +5053,13 @@ function startWaveCleared() {
 let endingStartTime = 0;
 let endingTimers = [];
 let endingLeaderboardOffered = false;
-// The defeated words that fly into the wands in the victory cinematic.
+// 'best' when the run beat the saved best score, 'unranked' when a cheat was used.
+let endingScoreNote = '';
+// The defeated words that fly into the cannon's core in the ending cinematic.
 const ENDING_WORD_COUNT = 10;
 const ENDING_WORD_MAX_LENGTH = 18;
+const endWords = document.getElementById('endWords');
+const endScoreNote = document.getElementById('endScoreNote');
 
 function startEndingSequence() {
   mode = 'ending';
@@ -5070,6 +5074,7 @@ function startEndingSequence() {
   updatePhaseDisplay();
 
   const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
+  endingScoreNote = isUnranked ? 'unranked' : score > bestScore ? 'best' : '';
   if (!isUnranked && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
@@ -5126,8 +5131,12 @@ function chooseEndingWords() {
 function showEndingStatsScreen(finalStats, { skipped = false } = {}) {
   clearEndingTimers();
   if (gameEnding) {
-    gameEnding.className = 'game-ending phase-stats phase-replay';
+    gameEnding.className = 'game-ending phase-stats';
+    // With a score list on screen the summary keeps to the space beside it.
+    gameEnding.classList.toggle('has-score-list', Boolean(document.querySelector('.sw-leaderboard')));
   }
+  // Lifts the score list over the closing shot, beside the summary.
+  document.body.classList.add('ending-summary');
   setEndingStats(finalStats, true);
   if (skipped) {
     endingCinematic?.skipToEnd();
@@ -5164,6 +5173,8 @@ function getEndingStats() {
   const healthHearts = formatHeartCount(health);
   return {
     score,
+    scoreNote: endingScoreNote,
+    wordsWon: defeatedCount,
     accuracy,
     peakStreak,
     mimicsLooted,
@@ -5182,18 +5193,24 @@ function formatRunTime(seconds) {
 function setEndingStats(stats, animate) {
   if (!stats) return;
   if (animate) {
-    animateCounter(endScore, 0, stats.score, 1400);
+    animateCounter(endScore, 0, stats.score, 1400, formatScore);
+    animateCounter(endWords, 0, stats.wordsWon, 1100);
     animateCounter(endAccuracy, 0, stats.accuracy, 1000, v => `${v}%`);
     animateCounter(endStreak, 0, stats.peakStreak, 900);
     animateCounter(endMimics, 0, stats.mimicsLooted, 850);
   } else {
     if (endScore) endScore.textContent = '0';
+    if (endWords) endWords.textContent = '0';
     if (endAccuracy) endAccuracy.textContent = '0%';
     if (endStreak) endStreak.textContent = '0';
     if (endMimics) endMimics.textContent = '0';
   }
   if (endHealth) endHealth.textContent = `${stats.healthHearts}/${HEART_COUNT}`;
   if (endTime) endTime.textContent = stats.time;
+  if (endScoreNote) {
+    endScoreNote.hidden = !stats.scoreNote;
+    endScoreNote.textContent = stats.scoreNote === 'best' ? 'New best' : stats.scoreNote === 'unranked' ? 'Unranked' : '';
+  }
 }
 
 function queueEndingStep(callback, delay) {
@@ -5210,6 +5227,7 @@ function dismissEndingSequence() {
   clearEndingTimers();
   gameEnding.hidden = true;
   gameEnding.className = 'game-ending';
+  document.body.classList.remove('ending-summary');
   endingCinematic?.stop();
   stopVictoryScore(0.2);
 }

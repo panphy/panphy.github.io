@@ -21,7 +21,7 @@ const BARREL_RADIUS = 0.062;
 const MUZZLE_Z = 0.3 + BARREL_LENGTH;
 
 // Everything is built with the muzzle along +z, which is where lookAt points an object.
-function buildCannon(materials, crystalMaterial) {
+export function buildCannon(materials, crystalMaterial) {
   const gun = new THREE.Group();
   const add = (geometry, material, x, y, z, parent = gun) => {
     const mesh = new THREE.Mesh(geometry, material);

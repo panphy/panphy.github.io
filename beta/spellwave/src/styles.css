@@ -2210,25 +2210,26 @@ body:not(.time-frozen) #gameCanvas {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 60%, #ffffff 0%, #fff8d7 32%, rgba(255, 255, 255, 0.85) 58%, transparent 80%);
+    radial-gradient(circle at 50% 40%, #ffffff 0%, #fff8d7 32%, rgba(255, 255, 255, 0.85) 58%, transparent 80%);
   opacity: 0;
   pointer-events: none;
   z-index: 6;
 }
 
-/* The flash as the wands release the wave (set by ending-cinematic.js). */
+/* The flash as the last myth breaks (set by ending-cinematic.js). It peaks 0.83 s
+   later, on the cut to the first land, and clears as the land appears. */
 .ending-flash.is-on {
-  animation: ending-flash-in 1.15s ease-out forwards;
+  animation: ending-flash-in 1.3s linear forwards;
 }
 
 @keyframes ending-flash-in {
   0%   { opacity: 0; }
-  12%  { opacity: 0.95; }
-  30%  { opacity: 0.75; }
+  20%  { opacity: 0.25; }
+  64%  { opacity: 0.95; }
   100% { opacity: 0; }
 }
 
-/* Cinema bars during the film; they slide away for the results card. */
+/* Cinema bars during the film; they slide away for the summary. */
 .ending-letterbox::before,
 .ending-letterbox::after {
   content: "";
@@ -2273,7 +2274,8 @@ body:not(.time-frozen) #gameCanvas {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
   opacity: 0;
   transform: translate(-50%, 6px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  /* Quick, because a land's caption has barely three seconds on screen. */
+  transition: opacity 0.3s ease, transform 0.3s ease;
   pointer-events: none;
 }
 
@@ -2282,13 +2284,13 @@ body:not(.time-frozen) #gameCanvas {
   transform: translate(-50%, 0);
 }
 
-/* A soft shade over the closing shot so the results read on a bright sky. */
+/* A light shade over the dawn so the paper card stands off it. */
 .game-ending::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 7;
-  background: radial-gradient(ellipse at 50% 55%, rgba(18, 10, 32, 0.62), rgba(18, 10, 32, 0.3) 70%, rgba(18, 10, 32, 0.12));
+  background: radial-gradient(ellipse at 50% 55%, rgba(40, 26, 58, 0.42), rgba(40, 26, 58, 0.2) 70%, rgba(40, 26, 58, 0.08));
   opacity: 0;
   transition: opacity 1.2s ease;
   pointer-events: none;
@@ -2298,292 +2300,282 @@ body:not(.time-frozen) #gameCanvas {
   opacity: 1;
 }
 
+/* The summary: one paper card, like the game's other panels. */
 .ending-content {
   position: relative;
   z-index: 8;
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
-  width: min(920px, calc(100vw - 32px));
-  gap: 0.78rem;
-  padding: clamp(1rem, 3vw, 2rem);
-  opacity: 0;
-  pointer-events: none;
+  box-sizing: border-box;
+  width: min(600px, calc(100% - 28px));
+  max-height: calc(100% - 24px);
+  gap: 0.8rem;
+  padding: clamp(1rem, 2.6vw, 1.6rem) clamp(0.9rem, 2.6vw, 1.7rem);
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 0 18px 44px rgba(20, 12, 34, 0.45), 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  color: var(--ink);
   text-align: center;
 }
 
-.game-ending.phase-stats .ending-content,
-.game-ending.phase-replay .ending-content {
-  pointer-events: auto;
-  opacity: 1;
-  animation: ending-content-in 0.45s ease-out forwards;
+.game-ending.phase-stats .ending-content {
+  display: flex;
+  animation: ending-content-in 0.5s cubic-bezier(0.15, 0.9, 0.22, 1) both;
 }
 
 @keyframes ending-content-in {
-  0%   { opacity: 0.72; transform: translateY(8px) scale(0.99); }
-  100% { opacity: 1; transform: scale(1); }
+  0%   { opacity: 0; transform: translateY(18px) scale(0.97); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* A score list is pinned to the right of the screen whenever no run is on. The
+   summary keeps clear of it, and the list is lifted over the closing shot. */
+@media (min-width: 761px) {
+  .game-ending.has-score-list {
+    padding-right: 238px;
+  }
+}
+
+body.ending-summary .sw-leaderboard {
+  z-index: 51;
 }
 
 .ending-kicker {
   margin: 0;
-  opacity: 0;
-  color: rgba(207, 224, 255, 0.78);
-  font-family: var(--font-pixel);
-  font-size: clamp(0.55rem, 1.1vw, 0.72rem);
+  color: var(--aqua);
+  font-family: var(--font-mono);
+  font-size: clamp(0.68rem, 1.3vw, 0.8rem);
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.game-ending.phase-stats .ending-kicker,
-.game-ending.phase-replay .ending-kicker {
-  opacity: 1;
-  animation: ending-copy-in 0.45s ease-out forwards;
-}
-
 .ending-title {
+  margin: 0;
+  color: #a4501c;
   font-family: var(--font-pixel);
-  font-size: clamp(1.3rem, 3.8vw, 2.4rem);
+  font-size: clamp(1.9rem, 5.4vw, 3rem);
   font-weight: 700;
-  color: #ffe18a;
-  text-align: center;
-  text-shadow:
-    0 0 18px rgba(255, 234, 166, 0.95),
-    0 0 54px rgba(110, 166, 255, 0.72),
-    0 0 110px rgba(255, 180, 80, 0.35);
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+
+.stat-label {
   margin: 0;
-  letter-spacing: 0.02em;
-  line-height: 1.25;
-  opacity: 0;
-  transform: translateY(12px) scale(0.95);
-}
-
-.game-ending.phase-stats .ending-title,
-.game-ending.phase-replay .ending-title {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  animation: ending-title-arrive 0.58s cubic-bezier(0.15, 0.9, 0.22, 1) forwards;
-}
-
-@keyframes ending-title-arrive {
-  0%   { opacity: 0.45; transform: translateY(8px) scale(0.98); filter: blur(2px); }
-  74%  { opacity: 1; transform: translateY(0) scale(1.01); filter: blur(0); }
-  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-}
-
-.ending-subtitle,
-.ending-run-summary {
-  margin: 0;
-  max-width: 680px;
-  opacity: 0;
-}
-
-.ending-subtitle {
-  color: rgba(244, 241, 220, 0.82);
+  color: var(--muted);
   font-family: var(--font-pixel);
-  font-size: clamp(0.5rem, 1.1vw, 0.65rem);
-  line-height: 1.85;
-  letter-spacing: 0.02em;
+  font-size: clamp(0.74rem, 1.2vw, 0.84rem);
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-.game-ending.phase-stats .ending-subtitle,
-.game-ending.phase-replay .ending-subtitle {
-  opacity: 1;
-  animation: ending-copy-in 0.5s 0.15s ease-out forwards;
+.stat-value {
+  color: var(--ink);
+  font-family: var(--font-pixel);
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.1;
 }
 
-@keyframes ending-copy-in {
-  0%   { opacity: 0; transform: translateY(14px); }
-  100% { opacity: 1; transform: translateY(0); }
+/* The score leads: a gold plate across the card. */
+.ending-score {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  gap: 0.1rem;
+  padding: 0.6rem 1rem 0.7rem;
+  border: 2px solid #d9a441;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fff6d8, #fbe7b0);
+}
+
+.ending-score .stat-label {
+  color: #9a5a08;
+}
+
+.ending-score .stat-value {
+  color: #a4501c;
+  font-size: clamp(2.1rem, 6vw, 3rem);
+}
+
+.ending-score-note {
+  position: absolute;
+  top: -0.7rem;
+  right: 0.8rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: var(--aqua);
+  color: #fdf8ea;
+  font-family: var(--font-pixel);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transform: rotate(3deg);
+}
+
+.ending-score-note[hidden] {
+  display: none;
 }
 
 .ending-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
-  max-width: 640px;
   width: 100%;
-  opacity: 0;
-  transform: translateY(26px);
-}
-
-.game-ending.phase-stats .ending-stats,
-.game-ending.phase-replay .ending-stats {
-  animation: stats-slide-in 0.95s ease-out forwards;
-}
-
-@keyframes stats-slide-in {
-  0%   { opacity: 0; transform: translateY(26px); }
-  100% { opacity: 1; transform: translateY(0); }
+  gap: 0.55rem;
 }
 
 .ending-stat {
-  min-height: 96px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.035));
-  border: 1px solid rgba(166, 201, 255, 0.24);
-  border-radius: 8px;
-  padding: 0.8rem 0.9rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  box-shadow:
-    inset 0 0 28px rgba(255, 255, 255, 0.035),
-    0 12px 34px rgba(0, 0, 0, 0.22);
+  gap: 0.15rem;
+  padding: 0.55rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
 }
 
-.stat-label {
+/* Each boss's myth, struck out. */
+.ending-myths {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 0.4rem;
+}
+
+.ending-myths ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ending-myths li {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(109, 79, 179, 0.3);
+  border-radius: 999px;
+  background: rgba(109, 79, 179, 0.1);
+  color: #5a4590;
   font-family: var(--font-pixel);
-  font-size: clamp(0.42rem, 0.8vw, 0.5rem);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(207, 224, 255, 0.68);
+  font-size: clamp(0.78rem, 1.25vw, 0.88rem);
+  font-weight: 500;
 }
 
-.stat-value {
-  font-family: var(--font-pixel);
-  font-size: clamp(0.8rem, 1.6vw, 1.15rem);
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 0 18px rgba(128, 185, 255, 0.38);
-}
-
-.ending-run-summary {
-  color: rgba(255, 226, 139, 0.82);
-  font-family: var(--font-pixel);
-  font-size: clamp(0.5rem, 1.1vw, 0.65rem);
-  font-weight: 700;
-  line-height: 1.85;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.game-ending.phase-replay .ending-run-summary {
-  animation: ending-copy-in 0.75s ease-out forwards;
+.ending-myths s {
+  text-decoration-color: #a4501c;
+  text-decoration-thickness: 2px;
 }
 
 .ending-replay {
-  opacity: 0;
-  margin-top: 0.1rem;
-  padding: 0.85rem 2.2rem;
-  font-family: var(--font-pixel);
-  font-size: clamp(0.65rem, 1.3vw, 0.85rem);
-  font-weight: 700;
-  color: #08060c;
-  background:
-    linear-gradient(135deg, #fff5bd, #ffd368 48%, #8fc7ff);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  flex: 0 0 auto;
   min-height: 48px;
-  letter-spacing: 0.02em;
-  box-shadow:
-    0 0 26px rgba(255, 211, 104, 0.42),
-    0 18px 38px rgba(0, 0, 0, 0.32);
+  margin-top: 0.1rem;
+  padding: 0.7rem 2.2rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #e8804a, #efb04c);
+  box-shadow: 0 4px 0 #b8662c, 0 10px 22px rgba(74, 52, 28, 0.3);
+  color: #3a2410;
+  font-family: var(--font-pixel);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  font-weight: 600;
+  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.game-ending.phase-replay .ending-replay {
-  animation: replay-fade-in 0.6s ease-out forwards;
-}
-
-@keyframes replay-fade-in {
-  0%   { opacity: 0; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
 .ending-replay:hover {
-  transform: scale(1.04);
-  box-shadow:
-    0 0 34px rgba(255, 211, 104, 0.64),
-    0 22px 44px rgba(0, 0, 0, 0.38);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 #b8662c, 0 12px 28px rgba(74, 52, 28, 0.4);
 }
 
 .ending-replay:active {
-  transform: scale(0.97);
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #b8662c, 0 6px 14px rgba(74, 52, 28, 0.3);
+}
+
+/* Skip sits in the top cinema bar, clear of the captions in the bottom one. */
+.ending-skip {
+  position: absolute;
+  top: calc(max(10px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  right: max(14px, env(safe-area-inset-right));
+  z-index: 1005;
+  min-height: 44px;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid rgba(255, 221, 134, 0.4);
+  border-radius: 10px;
+  background: rgba(15, 10, 25, 0.6);
+  color: rgba(255, 221, 134, 0.85);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.78rem, 1.3vw, 0.92rem);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ending-skip:hover {
+  border-color: rgba(255, 221, 134, 0.95);
+  background: rgba(255, 221, 134, 0.95);
+  color: #08060c;
+  transform: translateY(-2px);
+}
+
+.ending-skip:active {
+  transform: translateY(0);
+}
+
+.game-ending.phase-stats .ending-skip {
+  display: none;
 }
 
 @media (max-width: 760px) {
   .ending-content {
-    width: min(100vw - 24px, 560px);
-    gap: 0.78rem;
-    padding: 1.3rem 0.8rem;
+    gap: 0.65rem;
   }
 
   .ending-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.65rem;
-  }
-
-  .ending-stat {
-    min-height: 82px;
-    padding: 0.65rem 0.55rem;
-  }
-
-  .ending-title {
-    font-size: clamp(1.0rem, 5vw, 1.6rem);
-  }
-
-  .ending-subtitle {
-    font-size: clamp(0.44rem, 1.2vw, 0.56rem);
-  }
-
-  .ending-kicker {
-    font-size: clamp(0.44rem, 1.2vw, 0.56rem);
-    letter-spacing: 0.08em;
-  }
-
-  .ending-run-summary {
-    font-size: clamp(0.44rem, 1.2vw, 0.56rem);
-    letter-spacing: 0.08em;
   }
 }
 
-@media (max-height: 760px) and (min-width: 761px) {
+/* A short window (a phone on its side): the stats share one row and the card tightens. */
+@media (max-height: 620px) and (min-width: 600px) {
   .ending-content {
-    gap: 0.56rem;
-    padding: 0.85rem 1.5rem;
-  }
-
-  .ending-kicker {
-    font-size: clamp(0.48rem, 1vw, 0.6rem);
+    width: min(760px, calc(100% - 28px));
+    gap: 0.5rem;
+    padding: 0.8rem 1.1rem;
   }
 
   .ending-title {
-    font-size: clamp(1.1rem, 3.2vw, 1.8rem);
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
   }
 
-  .ending-subtitle {
-    font-size: clamp(0.48rem, 1vw, 0.6rem);
+  .ending-score {
+    padding: 0.35rem 1rem 0.45rem;
+  }
+
+  .ending-score .stat-value {
+    font-size: clamp(1.7rem, 4.4vw, 2.2rem);
   }
 
   .ending-stats {
-    gap: 0.55rem;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .ending-stat {
-    min-height: 72px;
-    padding: 0.48rem 0.62rem;
-  }
-
-  .stat-label {
-    font-size: clamp(0.36rem, 0.75vw, 0.44rem);
-  }
-
-  .stat-value {
-    font-size: clamp(0.72rem, 1.4vw, 1.05rem);
-  }
-
-  .ending-run-summary {
-    font-size: clamp(0.48rem, 1vw, 0.6rem);
-  }
-
-  .ending-replay {
-    min-height: 44px;
-    padding: 0.65rem 2.0rem;
-    font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+    padding: 0.4rem 0.25rem;
   }
 }
 
@@ -2621,68 +2613,6 @@ body.battery-saver .god-mode-badge {
 
 body.battery-saver .potion-bar {
   background: var(--panel-solid) !important;
-}
-
-/* ── Custom highlights and Skip button styles for ending ── */
-.ending-stat.highlighted {
-  border: 1px solid rgba(255, 211, 104, 0.45);
-  background:
-    radial-gradient(circle at 50% 24%, rgba(255, 238, 166, 0.2), transparent 45%),
-    linear-gradient(180deg, rgba(255, 226, 139, 0.15), rgba(255, 255, 255, 0.045));
-  box-shadow:
-    inset 0 0 24px rgba(255, 211, 104, 0.05),
-    0 12px 34px rgba(0, 0, 0, 0.3);
-}
-
-.ending-stat.highlighted .stat-label {
-  color: rgba(255, 226, 139, 0.9);
-}
-
-.ending-stat.highlighted .stat-value {
-  color: #ffe18a;
-  font-size: clamp(1.15rem, 2.3vw, 1.6rem);
-  text-shadow:
-    0 0 16px rgba(255, 211, 104, 0.8),
-    0 0 32px rgba(255, 211, 104, 0.3);
-}
-
-.ending-skip {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1005;
-  padding: 0.6rem 1.2rem;
-  font-family: var(--font-pixel);
-  font-size: clamp(0.55rem, 1vw, 0.72rem);
-  font-weight: 700;
-  color: rgba(255, 221, 134, 0.85);
-  background: rgba(15, 10, 25, 0.6);
-  border: 1px solid rgba(255, 221, 134, 0.4);
-  border-radius: 6px;
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  backdrop-filter: blur(4px);
-  pointer-events: auto;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(255, 221, 134, 0.1);
-}
-
-.ending-skip:hover {
-  color: #08060c;
-  background: rgba(255, 221, 134, 0.95);
-  border-color: rgba(255, 221, 134, 0.95);
-  transform: translateY(-2px);
-  box-shadow: 0 0 18px rgba(255, 221, 134, 0.4);
-}
-
-.ending-skip:active {
-  transform: translateY(0);
-}
-
-.game-ending.phase-stats .ending-skip,
-.game-ending.phase-replay .ending-skip {
-  display: none;
 }
 
 /* ── Leaderboard panel ───────────────────────────── */
@@ -3293,56 +3223,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 
 .sw-initials-card .sw-skip-button:hover {
   color: var(--ink);
-}
-
-/* Ending screen: it stays a starlit night, with paper cards for the results. */
-
-.ending-kicker { font-size: clamp(0.85rem, 1.7vw, 1.05rem); font-weight: 600; }
-.ending-title {
-  font-size: clamp(2.1rem, 6vw, 3.8rem);
-  font-weight: 700;
-  line-height: 1.05;
-  text-shadow: 0 0 26px rgba(255, 221, 134, 0.5);
-}
-.ending-subtitle,
-.ending-run-summary { font-size: clamp(0.85rem, 1.6vw, 1.05rem); font-weight: 500; }
-
-.ending-stat {
-  border: 1px solid rgba(110, 78, 40, 0.3);
-  border-radius: 14px;
-  background: var(--paper);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
-}
-
-.stat-label { color: var(--muted); font-size: clamp(0.66rem, 1.15vw, 0.82rem); font-weight: 600; }
-.stat-value { color: var(--ink); font-size: clamp(1.25rem, 2.3vw, 1.7rem); font-weight: 700; text-shadow: none; }
-
-.ending-stat.highlighted {
-  border: 2px solid #d9a441;
-  background: linear-gradient(160deg, #fff6d8, #fbe7b0);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
-}
-
-.ending-stat.highlighted .stat-label { color: #9a5a08; }
-.ending-stat.highlighted .stat-value { color: #a4501c; font-size: clamp(1.7rem, 3.2vw, 2.4rem); text-shadow: none; }
-
-.ending-replay {
-  border-radius: 14px;
-  background: linear-gradient(135deg, #e8804a, #efb04c);
-  box-shadow: 0 4px 0 #b8662c, 0 10px 22px rgba(0, 0, 0, 0.35);
-  color: #3a2410;
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
-  font-weight: 600;
-}
-
-.ending-replay:hover {
-  box-shadow: 0 4px 0 #b8662c, 0 12px 28px rgba(0, 0, 0, 0.45);
-}
-
-.ending-skip {
-  border-radius: 10px;
-  font-size: clamp(0.78rem, 1.3vw, 0.92rem);
-  font-weight: 600;
 }
 
 /* The potion tray is empty most of the time, so it stays see-through until a potion lands in it. */
