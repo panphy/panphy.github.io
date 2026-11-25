@@ -1,19 +1,19 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta10';
+import { createSpellwaveAudio } from './audio.js?v=beta11';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta10';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta10';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta10';
-import { createLeaderboard } from './leaderboard.js?v=beta10';
+import { createPotionSystem } from './potions.js?v=beta11';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta11';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta11';
+import { createLeaderboard } from './leaderboard.js?v=beta11';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta10';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta11';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta10';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta10';
-import { createWordDeck } from './word-decks.js?v=beta10';
-import { createStage } from './stages.js?v=beta10';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta10';
-import { createWizardHands } from './wizard-hands.js?v=beta10';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta11';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta11';
+import { createWordDeck } from './word-decks.js?v=beta11';
+import { createStage } from './stages.js?v=beta11';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta11';
+import { createWizardHands } from './wizard-hands.js?v=beta11';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
