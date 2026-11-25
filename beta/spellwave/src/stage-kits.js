@@ -103,18 +103,73 @@ function createLogPile(mats, random) {
   return groupOf(group);
 }
 
+// A triangular prism with its ridge along x: a pitched roof.
+function createGableGeometry(length, span, rise) {
+  const x = length / 2;
+  const z = span / 2;
+  const corners = {
+    lf: [-x, 0, z], rf: [x, 0, z], lb: [-x, 0, -z], rb: [x, 0, -z], lt: [-x, rise, 0], rt: [x, rise, 0],
+  };
+  const faces = [
+    ['lf', 'rf', 'rt'], ['lf', 'rt', 'lt'], // front slope
+    ['rb', 'lb', 'lt'], ['rb', 'lt', 'rt'], // back slope
+    ['lb', 'lf', 'lt'], ['rf', 'rb', 'rt'], // gable ends
+    ['lb', 'rb', 'rf'], ['lb', 'rf', 'lf'], // underside
+  ];
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(faces.flat().flatMap((key) => corners[key]), 3));
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 // A small building with a door on its +z side; `doorOffset` is where a monster steps out.
-function createHut(mats, random, { width = 3.6, depth = 3.0, height = 2.4, roofMaterial }) {
+// Stone footing, timber corner posts, a pitched roof with eaves, shuttered windows and a chimney.
+function createHut(mats, random, { width = 3.6, depth = 3.0, height = 2.4, roofMaterial, chimney = true }) {
   const group = new THREE.Group();
-  group.add(box(mats.wall, width, height, depth, 0, height / 2, 0));
-  const roof = part(new THREE.CylinderGeometry(0.01, depth * 0.78, width + 0.5, 3, 1), roofMaterial);
-  roof.rotation.z = Math.PI / 2;
-  roof.scale.set(1, 1, 0.72);
-  roof.position.y = height + depth * 0.3;
-  group.add(roof);
-  group.add(box(mats.door, 0.9, 1.5, 0.1, -width * 0.18, 0.75, depth / 2 + 0.04));
-  group.add(box(mats.timber, 0.7, 0.6, 0.1, width * 0.22, 1.45, depth / 2 + 0.04));
-  group.userData.doorOffset = new THREE.Vector3(-width * 0.18, 0, depth / 2 + 0.9);
+  const trim = mats.timber;
+  const footing = mats.stone || mats.timber;
+  group.add(box(footing, width + 0.24, 0.4, depth + 0.24, 0, 0.2, 0));
+  group.add(box(mats.wall, width, height, depth, 0, height / 2 + 0.2, 0));
+  for (const x of [-1, 1]) {
+    for (const z of [-1, 1]) group.add(box(trim, 0.2, height, 0.2, x * (width / 2), height / 2 + 0.2, z * (depth / 2)));
+  }
+  group.add(box(trim, width + 0.2, 0.18, depth + 0.2, 0, height + 0.2, 0));
+
+  const rise = depth * 0.62;
+  const roofY = height + 0.28;
+  group.add(part(createGableGeometry(width + 0.9, depth + 1.0, rise + 0.2), roofMaterial, 0, roofY, 0));
+  // The gable walls fill the triangle under the roof, set just inside its ends.
+  group.add(part(createGableGeometry(width, depth, rise - 0.12), mats.wall, 0, roofY, 0));
+  group.add(box(trim, width + 1.0, 0.16, 0.22, 0, roofY + rise + 0.16, 0));
+
+  const doorX = -width * 0.18;
+  const front = depth / 2;
+  group.add(box(trim, 1.16, 1.84, 0.1, doorX, 1.1, front + 0.03));
+  group.add(box(mats.door, 0.9, 1.66, 0.1, doorX, 1.03, front + 0.07));
+  group.add(box(footing, 1.3, 0.16, 0.5, doorX, 0.12, front + 0.3));
+  const window = (x, y, z, rotation) => {
+    const frame = groupOf(
+      box(trim, 0.92, 0.82, 0.08, 0, 0, 0),
+      box(mats.pane || mats.door, 0.7, 0.6, 0.1, 0, 0, 0.02),
+      box(trim, 0.06, 0.6, 0.12, 0, 0, 0.03),
+      box(trim, 0.7, 0.06, 0.12, 0, 0, 0.03),
+      box(roofMaterial, 0.22, 0.74, 0.07, -0.6, 0, 0.02),
+      box(roofMaterial, 0.22, 0.74, 0.07, 0.6, 0, 0.02),
+      box(trim, 1.0, 0.08, 0.2, 0, -0.44, 0.06),
+    );
+    frame.position.set(x, y, z);
+    frame.rotation.y = rotation;
+    group.add(frame);
+  };
+  window(width * 0.24, height * 0.62 + 0.2, front + 0.03, 0);
+  window(width / 2 + 0.03, height * 0.62 + 0.2, 0, Math.PI / 2);
+  window(-width / 2 - 0.03, height * 0.62 + 0.2, 0, -Math.PI / 2);
+  if (chimney) {
+    const x = width * 0.28;
+    group.add(box(footing, 0.6, rise + 0.9, 0.6, x, roofY + (rise + 0.9) / 2 - 0.1, -depth * 0.2));
+    group.add(box(trim, 0.74, 0.14, 0.74, x, roofY + rise + 0.82, -depth * 0.2));
+  }
+  group.userData.doorOffset = new THREE.Vector3(doorX, 0, depth / 2 + 0.9);
   return group;
 }
 
@@ -251,13 +306,11 @@ function meadowKit() {
     cone(mats.hayDark, 1.2, 1.0, 7, 0, 1.78, 0),
   );
   const createCottage = (mats, random) => {
-    const cottage = createHut(mats, random, {
+    return createHut(mats, random, {
       width: 3.6 + random() * 1.2,
       depth: 3.0 + random() * 0.8,
       roofMaterial: random() < 0.5 ? mats.roof : mats.roofDark,
     });
-    cottage.add(box(mats.stone, 0.5, 1.4, 0.5, 1.2, 3.2, -0.5));
-    return cottage;
   };
   const createBush = (mats, random) => {
     const group = new THREE.Group();
@@ -299,7 +352,7 @@ function meadowKit() {
       hay: flat(0xd9b45a), hayDark: flat(0xb98d3c), wall: flat(0xd8bf94), timber: flat(0x6b4a2c),
       roof: flat(0xa5482c), roofDark: flat(0x7e3522), door: flat(0x4a3220), stone: flat(0xb9ae98),
       fence: flat(0x8a6a44), bush: flat(0x4f7d3a), petalA: flat(0xf2c6d6), petalB: flat(0xf6e7a8),
-      petalC: flat(0xc9d8f4), sail: flat(0xf3ead6),
+      petalC: flat(0xc9d8f4), sail: flat(0xf3ead6), pane: flat(0x6f8fa6),
     }),
     treeArea: 30,
     hills({ away, base, noise }) {
@@ -417,11 +470,12 @@ function forestKit() {
       box(mats.door, 1.0, 1.7, 0.12, 1.2, 2.05, 1.94),
       box(mats.timber, 0.8, 0.7, 0.12, -1.0, 3.1, 1.94),
     );
-    const roof = part(new THREE.CylinderGeometry(0.01, 3.1, 5.4, 3, 1), mats.roof);
-    roof.rotation.z = Math.PI / 2;
-    roof.scale.set(1, 1, 0.72);
-    roof.position.y = 5.6;
-    house.add(roof);
+    house.add(
+      part(createGableGeometry(5.6, 5.0, 2.6), mats.roof, 0, 4.4, 0),
+      part(createGableGeometry(4.6, 3.8, 2.0), mats.wall, 0, 4.4, 0),
+      box(mats.timber, 5.7, 0.16, 0.22, 0, 7.04, 0),
+      box(mats.pane, 0.6, 0.5, 0.14, -1.0, 3.1, 1.95),
+    );
     const wheel = new THREE.Group();
     const rimGeometry = new THREE.TorusGeometry(2.3, 0.14, 4, 12);
     for (const z of [-0.45, 0.45]) wheel.add(part(rimGeometry, mats.timber, 0, 0, z));
@@ -446,7 +500,7 @@ function forestKit() {
     materials: () => ({
       timber: flat(0x5a3d24), plank: flat(0x9a7448), wall: flat(0x7d5a36), roof: flat(0x4d5a34), door: flat(0x33231a),
       stone: flat(0x8a8d86), bush: flat(0x2c6a3c), fern: flat(0x3c8a4a), moss: flat(0x5c9440),
-      cap: flat(0xd9483a), stem: flat(0xeadfc8), rope: flat(0xb89a64),
+      cap: flat(0xd9483a), stem: flat(0xeadfc8), rope: flat(0xb89a64), pane: lit(0xffc66a, 1.3),
       water: flat(0x3a8fc0, { roughness: 0.25, metalness: 0.15, emissive: 0x16466e, emissiveIntensity: 0.55 }),
       firefly: lit(0xe9ff8a, 2.6),
     }),
@@ -649,7 +703,7 @@ function mountainKit(variant) {
     materials: () => ({
       rock: flat(inMine ? 0x5a4a44 : 0x8b7d70), dark: flat(0x0c0908), timber: flat(0x5c3d22), plank: flat(0x8f6a3e),
       rope: flat(0xb89a64), iron: flat(0x4b4f58, { roughness: 0.6, metalness: 0.5 }), wall: flat(0x7a5a38),
-      roof: flat(0x5a3a26), door: flat(0x2e2018),
+      roof: flat(0x5a3a26), door: flat(0x2e2018), stone: flat(0x6a5a52), pane: lit(0xffb45a, 1.3),
       flame: lit(0xffa040, 2.8), crystal: lit(0x58e6d4, 1.7), crystalB: lit(0xb48cff, 1.6), crystalC: lit(0xffc44d, 1.9),
     }),
     treeArea: 34,
@@ -865,9 +919,8 @@ function winterKit(variant) {
     octa(mats.lantern, 0.16, 0.4, 1.95, 0),
   );
   const createFishingHut = (mats, random) => {
-    const hut = createHut(mats, random, { width: 2.4, depth: 2.2, height: 2.0, roofMaterial: mats.roof });
-    const cap = box(mats.snow, 2.9, 0.22, 1.2, 0, 3.0, 0);
-    hut.add(cap, cyl(mats.coal, 0.6, 0.6, 0.04, 8, 0, 0.02, 2.6));
+    const hut = createHut(mats, random, { width: 2.4, depth: 2.2, height: 2.0, roofMaterial: mats.snow, chimney: false });
+    hut.add(cyl(mats.coal, 0.6, 0.6, 0.04, 8, 0, 0.02, 2.6));
     return hut;
   };
   // The tower: dark stone rings to a spire, lit windows, and a storm turning about its crown.
@@ -926,7 +979,7 @@ function winterKit(variant) {
     materials: () => ({
       ice: flat(0xa8dcf0, { roughness: 0.3, emissive: 0x2a6f92, emissiveIntensity: 0.45 }), snow: flat(0xf2f6fc),
       stone: flat(0x7d8794), timber: flat(0x5a4636), plank: flat(0x8a7458), wall: flat(0x8c6a4a), roof: flat(0x6a4030),
-      door: flat(0x33261e), coal: flat(0x1c1d22), carrot: flat(0xf08a2c), scarf: flat(0xc8323c), sail: flat(0xd9d2c0),
+      door: flat(0x33261e), pane: lit(0xffc66a, 1.4), coal: flat(0x1c1d22), carrot: flat(0xf08a2c), scarf: flat(0xc8323c), sail: flat(0xd9d2c0),
       lantern: lit(0xffc45a, 2.4), tower: flat(0x3a4152), towerTrim: flat(0x2a2f3c), towerRoof: flat(0x30486e),
       window: lit(0xffb84a, 2.2), storm: lit(0x9fd8ff, 3.0), cloud: flat(0x2e3444),
     }),

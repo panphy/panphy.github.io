@@ -3545,9 +3545,19 @@ body.loot-guide-open .potion-bar {
   color: rgba(61, 43, 28, 0.9);
 }
 
-.word-tag[data-kind="boss"] .typed-line {
-  white-space: normal;
-  line-height: 1.35;
+/* The boss's line is typed in place: finished words fade, and the letters typed of
+   the current word turn blue. No second line, so the card stays shallow. */
+.word-tag[data-kind="boss"] .typed-line,
+.word-tag[data-kind="boss"] .prompt-kind {
+  display: none;
+}
+
+.word-tag[data-kind="boss"] .prompt .current-word .typed {
+  color: var(--typed);
+}
+
+.word-tag[data-kind="boss"].is-miss .current-word .typed {
+  color: var(--danger);
 }
 
 .word-tag[data-kind="rock"] .prompt-kind {

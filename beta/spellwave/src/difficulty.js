@@ -1,6 +1,6 @@
 // difficulty.js — how long a keyword may be on each wave. The reasoning and the
 // full progression table are in fun/spellwave/README.md; keep the two in step.
-import { buildSearchPrompt } from './prompt-utils.js?v=beta2';
+import { buildSearchPrompt } from './prompt-utils.js?v=beta3';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -117,12 +117,12 @@ export function bossRockTier(wave) {
 // attackGap: seconds between throws. rockFlight: seconds a rock takes to arrive.
 // rockDamage: life units (half hearts) lost to a rock that lands.
 export const BOSS_PLAN_TABLE = [
-  { fromWave: 1, lines: 3, maxLetters: 34, attackGap: 6.0, rockFlight: 3.4, rockDamage: 1 },
-  { fromWave: 2, lines: 3, maxLetters: 40, attackGap: 5.4, rockFlight: 3.2, rockDamage: 1 },
-  { fromWave: 3, lines: 4, maxLetters: 48, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1 },
-  { fromWave: 5, lines: 4, maxLetters: 64, attackGap: 4.6, rockFlight: 2.8, rockDamage: 1 },
-  { fromWave: 7, lines: 5, maxLetters: 64, attackGap: 4.2, rockFlight: 2.6, rockDamage: 2 },
-  { fromWave: 10, lines: 8, maxLetters: 64, attackGap: 3.6, rockFlight: 2.5, rockDamage: 2 },
+  { fromWave: 1, lines: 3, maxLetters: 32, attackGap: 6.0, rockFlight: 3.4, rockDamage: 1 },
+  { fromWave: 2, lines: 3, maxLetters: 34, attackGap: 5.4, rockFlight: 3.2, rockDamage: 1 },
+  { fromWave: 3, lines: 4, maxLetters: 36, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1 },
+  { fromWave: 5, lines: 4, maxLetters: 42, attackGap: 4.6, rockFlight: 2.8, rockDamage: 1 },
+  { fromWave: 7, lines: 5, maxLetters: 46, attackGap: 4.2, rockFlight: 2.6, rockDamage: 2 },
+  { fromWave: 10, lines: 8, maxLetters: 50, attackGap: 3.6, rockFlight: 2.5, rockDamage: 2 },
 ];
 
 export function bossPlan(wave) {

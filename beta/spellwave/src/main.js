@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta2';
+import { createSpellwaveAudio } from './audio.js?v=beta3';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta2';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta2';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta2';
-import { createLeaderboard } from './leaderboard.js?v=beta2';
+import { createPotionSystem } from './potions.js?v=beta3';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta3';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta3';
+import { createLeaderboard } from './leaderboard.js?v=beta3';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta2';
+import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta3';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta2';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=beta2';
-import { createWordDeck } from './word-decks.js?v=beta2';
-import { createStage } from './stages.js?v=beta2';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta2';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta3';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=beta3';
+import { createWordDeck } from './word-decks.js?v=beta3';
+import { createStage } from './stages.js?v=beta3';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta3';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1542,7 +1542,6 @@ function startBossLine(boss) {
 function spawnPhraseBoss() {
   const plan = bossPlan(waveSet);
   const isFinal = isFinalWave();
-  refreshWaveBossOrder(1);
   const lines = chooseBossLines(waveSet, plan.lines);
   bossWordsThisSet = lines.map(line => ({ term: line.term, definition: line.topic, isLine: true }));
   const boss = spawnEnemy({
@@ -1550,7 +1549,7 @@ function spawnPhraseBoss() {
     phraseBoss: true,
     isClimaxBoss: isFinal,
     wordData: { term: lines[0].term, definition: lines[0].topic },
-    bossType: chooseBossType(0),
+    bossType: nextBossType(),
     lane: 0,
     delay: 0,
     startZ: BOSS_STAND_Z,
@@ -2684,7 +2683,7 @@ function updateLabels() {
     enemy.label.style.setProperty('--threat-progress', approachAmount.toFixed(3));
 
     if (enemy.phraseBoss) {
-      labelItems.push({ enemy, x: width / 2, y: height - 22, scale: 1, pinned: true });
+      labelItems.push({ enemy, x: width / 2, y: 0, scale: 1, pinned: true });
     } else if (enemy.isBoss) {
       // Project the road edges at the boss's depth, or the boss's own outer edge
       // where it is wider, so the label lands in the scenery clear of the boss.
@@ -2708,6 +2707,9 @@ function updateLabels() {
     }
   }
 
+  // The boss's line is placed first, so the other cards can keep clear of it.
+  let pinnedBottom = 0;
+  labelItems.sort((first, second) => (second.pinned ? 1 : 0) - (first.pinned ? 1 : 0));
   const layoutItems = labelItems.map((item) => {
     const { enemy, scale } = item;
     // The unscaled label box only changes when its text changes or the viewport resizes,
@@ -2726,8 +2728,13 @@ function updateLabels() {
     let targetX, targetY;
     let labelMinY = minY;
     if (item.pinned) {
+      // The boss's line hangs under its health bar, clear of the rocks flying in below.
+      const barBottom = bossHpBar && !bossHpBar.hidden ? bossHpBar.getBoundingClientRect().bottom : safeBounds.top;
       targetX = item.x;
-      targetY = Math.min(item.y, maxY);
+      targetY = Math.min(barBottom + 8 + labelHeight, maxY);
+      enemy.labelX = targetX;
+      enemy.labelY = targetY;
+      pinnedBottom = targetY;
     } else if (enemy.isBoss) {
       // Place label in the scenery area outside the road boundaries (±5.8 world units),
       // using lane to decide left/right so boss bodies stay fully visible.
@@ -2743,7 +2750,9 @@ function updateLabels() {
       targetY = THREE.MathUtils.clamp(item.bossMidScreenY + labelHeight / 2, labelMinY, maxY);
     } else {
       targetX = THREE.MathUtils.clamp(item.x, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
-      targetY = THREE.MathUtils.clamp(item.y, minY, maxY);
+      // Other cards (the rocks) keep below the boss's line.
+      if (pinnedBottom > 0) labelMinY = Math.min(maxY, Math.max(minY, pinnedBottom + LABEL_STACK_GAP + labelHeight));
+      targetY = THREE.MathUtils.clamp(item.y, labelMinY, maxY);
     }
 
     if (enemy.labelX === undefined) {
@@ -2766,7 +2775,7 @@ function updateLabels() {
     };
   });
 
-  resolveLabelStacks(layoutItems);
+  resolveLabelStacks(layoutItems.filter(item => !item.pinned));
 
   for (const item of layoutItems) {
     const { enemy, scale } = item;
@@ -4385,6 +4394,19 @@ function refreshWaveBossOrder(count) {
   waveBossOrder = indices.slice(0, count);
 }
 
+// One boss a wave, dealt from a shuffled bag, so no model returns until all have appeared.
+let bossTypeBag = [];
+function nextBossType() {
+  if (bossTypeBag.length === 0) {
+    bossTypeBag = BOSS_TYPES.map((_, index) => index);
+    for (let i = bossTypeBag.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [bossTypeBag[i], bossTypeBag[j]] = [bossTypeBag[j], bossTypeBag[i]];
+    }
+  }
+  return BOSS_TYPES[bossTypeBag.pop()];
+}
+
 function chooseBossType(index) {
   if (waveBossOrder.length === 0) refreshWaveBossOrder(bossesPerWave(waveSet));
   return BOSS_TYPES[waveBossOrder[index % waveBossOrder.length]];
@@ -4561,9 +4583,10 @@ function startSeasonFade(palette, { fogBank = false } = {}) {
     from.fogColor.copy(to.fogColor);
     from.bgColor.copy(to.fogColor);
     from.skyTop.copy(to.fogColor);
-    from.fogNear = 0.5;
-    from.fogFar = 9;
-    seasonFade.duration = 4;
+    from.fogNear = 2;
+    from.fogFar = 16;
+    // Brief: the fog should part almost as soon as the camera starts to walk.
+    seasonFade.duration = 1.6;
     updateSeasonFade(0);
   }
 }
