@@ -3448,6 +3448,16 @@ body.loot-guide-open .potion-bar {
   color: #9a2020;
 }
 
+/* A shard of ice that lands frosts the boss's line over for a few seconds. */
+.word-tag[data-kind="boss"].is-frosted {
+  border-color: #7cc4e8;
+  background: linear-gradient(135deg, #e3f4fd, #f6fbff);
+}
+
+.word-tag[data-kind="boss"].is-frosted .prompt {
+  filter: blur(5px);
+}
+
 .word-tag[data-kind="rock"] .prompt-kind {
   background: rgba(196, 98, 30, 0.18);
   color: #8a3f0c;

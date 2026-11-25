@@ -1463,6 +1463,7 @@ function leakEnemy(enemy) {
     potionsSystem.triggerShieldHitVisual();
   } else {
     if (!godMode) health = Math.max(0, health - enemy.damage);
+    if (enemy.frost) frostBossLine();
     streak = 0;
     playDamageSound(enemy);
     damageTimer = 0.32;
@@ -1750,6 +1751,7 @@ function advanceBossLine(boss) {
   if (boss.hp > 0) {
     boss.stagger = 1.4;
     boss.attackTimer = Math.max(boss.attackTimer, 2.2);
+    boss.barrageLeft = 0;
     showBanner(`${boss.hp} ${boss.hp === 1 ? 'LINE' : 'LINES'} LEFT`);
     startBossLine(boss);
     updateHud(true);
@@ -1773,15 +1775,90 @@ function chooseRockWord(boss) {
   return free.length > 0 ? free[Math.floor(Math.random() * free.length)] : null;
 }
 
-function throwRock(boss) {
+// Each boss attacks in its own way. rock: one rock at a time. volley: a rock from each
+// hand. summon: every other attack raises an imp from the ground instead. frost: shards
+// of ice that also frost over the boss's line for a few seconds if they land.
+// barrage: three meteors, one after another.
+const BOSS_ATTACKS = {
+  'Verdant Colossus': 'rock',
+  'Crimson Bulwark': 'volley',
+  'Magma Sovereign': 'summon',
+  'Glacial Titan': 'frost',
+  'Stellar Dreadnought': 'barrage',
+};
+const BOSS_FROST_TIME = 3;
+const SUMMON_TYPE_NAME = 'Cinder Imp';
+
+function bossAttack(boss) {
+  const style = BOSS_ATTACKS[boss.type.name] || 'rock';
+  const inFlight = enemies.filter(enemy => enemy.isProjectile && !enemy.dying).length;
+  boss.attackCount = (boss.attackCount || 0) + 1;
+  let gapScale = 1;
+  if (style === 'volley') {
+    if (inFlight > 0) return 0.5;
+    throwRock(boss, { side: -1 });
+    throwRock(boss, { side: 1, flightScale: 1.3 });
+    gapScale = 1.4;
+  } else if (style === 'barrage') {
+    if (inFlight > 0) return 0.5;
+    boss.barrageLeft = 2;
+    boss.barrageTimer = 0.5;
+    throwRock(boss);
+    gapScale = 1.6;
+  } else if (style === 'summon' && boss.attackCount % 2 === 0 && !enemies.some(enemy => enemy.summoned && !enemy.dying)) {
+    summonMinion(boss);
+    gapScale = 1.2;
+  } else {
+    if (inFlight >= 2) return 1;
+    throwRock(boss, { frost: style === 'frost' });
+  }
+  boss.lunge = 1;
+  reusableVector.set(boss.group.position.x, 0.14, boss.group.position.z);
+  fx.ring(reusableVector, ROCK_TYPE.eye, { from: 0.4, to: 3.4, life: 0.4, opacity: 0.6 });
+  return gapScale;
+}
+
+// A small monster with a short word, raised from the ground in front of the boss.
+function summonMinion(boss) {
+  const initials = new Set(boss.lineWordsList.map(word => buildSearchPrompt(word).charAt(0).toLowerCase()));
+  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt.toLowerCase());
+  const fits = (entry) => {
+    const key = buildSearchPrompt(entry.term).toLowerCase();
+    if (key.length < 3 || key.length > 6 || !/^[a-z]+$/.test(key) || initials.has(key.charAt(0))) return false;
+    return !liveKeys.some(other => other.startsWith(key) || key.startsWith(other));
+  };
+  const wordData = monsterDeck.pick(ALL_WORDS, fits);
+  if (!wordData) {
+    throwRock(boss);
+    return;
+  }
+  const side = boss.group.position.x > 0 ? -1 : 1;
+  const spot = { kind: 'ground', x: THREE.MathUtils.clamp(boss.group.position.x + side * 3.2, -5, 5), z: boss.group.position.z + 4 };
+  const minion = spawnEnemy({ wordData, type: ENEMY_TYPES.find(type => type.name === SUMMON_TYPE_NAME), railSpot: spot });
+  minion.summoned = true;
+  minion.noGlossary = true;
+  minion.damage = 1;
+  playRevealSound(boss);
+}
+
+function frostBossLine() {
+  const boss = enemies.find(enemy => enemy.phraseBoss && !enemy.dying);
+  if (!boss) return;
+  boss.frostTimer = BOSS_FROST_TIME;
+  boss.label.classList.add('is-frosted');
+}
+
+function throwRock(boss, { side = Math.random() < 0.5 ? -1 : 1, flightScale = 1, frost = false } = {}) {
   const wordData = chooseRockWord(boss);
   if (!wordData) return;
   const plan = bossPlan(bossLevel());
   const group = new THREE.Group();
-  const rockMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0), new THREE.MeshStandardMaterial({ color: ROCK_TYPE.body, roughness: 1, flatShading: true }));
+  const rockMesh = frost
+    ? new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), new THREE.MeshStandardMaterial({ color: 0xcfefff, emissive: 0x4aa8d8, emissiveIntensity: 0.7, roughness: 0.25, flatShading: true }))
+    : new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0), new THREE.MeshStandardMaterial({ color: ROCK_TYPE.body, roughness: 1, flatShading: true }));
+  if (frost) rockMesh.scale.set(0.7, 1.7, 0.7);
   rockMesh.castShadow = true;
   group.add(rockMesh);
-  const side = Math.random() < 0.5 ? -1 : 1;
   const start = boss.group.position.clone().add(new THREE.Vector3(side * 1.6, 2.6 * boss.group.scale.y, 0.6));
   const end = new THREE.Vector3(side * (1.2 + Math.random() * 1.8), 2.2, WALL_Z - 0.6);
   const rock = spawnEnemy({ isProjectile: true, wordData, type: ROCK_TYPE, customGroup: group, lane: start.x, startZ: start.z, delay: 0 });
@@ -1790,7 +1867,9 @@ function throwRock(boss) {
   rock.revealed = true;
   rock.revealZ = start.z - 2;
   rock.baseY = start.y;
-  rock.rail = { phase: 'projectile', t: 0, flight: plan.rockFlight, from: start, to: end, spin: new THREE.Vector3(Math.random() * 4, Math.random() * 4, Math.random() * 4) };
+  rock.frost = frost;
+  if (frost) rock.kindNode.textContent = 'ice';
+  rock.rail = { phase: 'projectile', t: 0, flight: plan.rockFlight * flightScale, from: start, to: end, spin: new THREE.Vector3(Math.random() * 4, Math.random() * 4, Math.random() * 4) };
   rock.group.position.copy(start);
   playBossThrowSound(boss);
 }
@@ -1860,6 +1939,10 @@ function updatePhraseBoss(boss, delta, seconds) {
   boss.hurt = Math.max(0, boss.hurt - delta / 1.1);
   boss.lunge = Math.max(0, boss.lunge - delta / 0.4);
   boss.roar = Math.max(0, boss.roar - delta / 0.9);
+  if (boss.frostTimer > 0) {
+    boss.frostTimer -= delta;
+    if (boss.frostTimer <= 0) boss.label.classList.remove('is-frosted');
+  }
 
   // It prowls the arena instead of standing still: wider, faster and closer as it is hurt.
   const pace = 0.42 + rage * 0.3;
@@ -1893,17 +1976,20 @@ function updatePhraseBoss(boss, delta, seconds) {
   }
 
   boss.attackTimer -= delta;
-  const rocksInFlight = enemies.filter(enemy => enemy.isProjectile && !enemy.dying).length;
   boss.windup = boss.attackTimer <= BOSS_WINDUP_TIME ? THREE.MathUtils.clamp(1 - boss.attackTimer / BOSS_WINDUP_TIME, 0, 1) : 0;
+  if (boss.barrageLeft > 0) {
+    boss.barrageTimer -= delta;
+    if (boss.barrageTimer <= 0) {
+      boss.barrageLeft -= 1;
+      boss.barrageTimer = 0.5;
+      throwRock(boss, { flightScale: 1 + (2 - boss.barrageLeft) * 0.12 });
+      boss.lunge = 1;
+    }
+  }
   if (boss.attackTimer <= 0) {
     boss.windup = 0;
-    if (rocksInFlight < 2) {
-      throwRock(boss);
-      boss.lunge = 1;
-      reusableVector.set(position.x, 0.14, position.z);
-      fx.ring(reusableVector, ROCK_TYPE.eye, { from: 0.4, to: 3.4, life: 0.4, opacity: 0.6 });
-    }
-    boss.attackTimer = bossPlan(bossLevel()).attackGap * (0.85 + Math.random() * 0.3);
+    const gapScale = bossAttack(boss);
+    boss.attackTimer = bossPlan(bossLevel()).attackGap * gapScale * (0.85 + Math.random() * 0.3);
   }
 }
 
@@ -1919,6 +2005,12 @@ function startBossDeath(boss) {
   boss.rage = 1;
   boss.windup = 0;
   bossDeath = { boss, t: 0, nextBurst: 0, x: boss.group.position.x, z: boss.group.position.z };
+  boss.barrageLeft = 0;
+  boss.label.classList.remove('is-frosted');
+  for (const minion of enemies.filter(enemy => enemy.summoned && !enemy.dying)) {
+    spawnDebris(minion.group.position, minion.type);
+    removeEnemy(minion);
+  }
   typedBuffer = '';
   activeTarget = null;
   playBossImpactSound();
