@@ -3485,6 +3485,34 @@ body.loot-guide-open .potion-bar {
   filter: blur(5px);
 }
 
+/* A boss's word stage: one word at a time, large, with a pip for each word of the stage. */
+.word-tag[data-kind="boss"][data-stage="words"] {
+  min-width: 0;
+  text-align: center;
+}
+
+.word-tag[data-kind="boss"][data-stage="words"] .prompt {
+  font-size: clamp(1.3rem, 3.4vw, 1.9rem);
+}
+
+.stage-pips {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.stage-pips i {
+  width: 14px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(60, 44, 24, 0.22);
+}
+
+.stage-pips i.is-done {
+  background: var(--boss-accent, #c4621e);
+}
+
 .word-tag[data-kind="rock"] .prompt-kind {
   background: rgba(196, 98, 30, 0.18);
   color: #8a3f0c;

@@ -1,20 +1,20 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta14';
+import { createSpellwaveAudio } from './audio.js?v=beta15';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta14';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta14';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta14';
-import { createLeaderboard } from './leaderboard.js?v=beta14';
+import { createPotionSystem } from './potions.js?v=beta15';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta15';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta15';
+import { createLeaderboard } from './leaderboard.js?v=beta15';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta14';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta14';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta15';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta15';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta14';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta14';
-import { createWordDeck } from './word-decks.js?v=beta14';
-import { createStage } from './stages.js?v=beta14';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta14';
-import { createWizardHands } from './wizard-hands.js?v=beta14';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta15';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta15';
+import { createWordDeck } from './word-decks.js?v=beta15';
+import { createStage } from './stages.js?v=beta15';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta15';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta15';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -437,7 +437,7 @@ let finalWaveScenery = null;
 let sceneLeafMaterials = [];
 let sceneTrunkMaterial = null;
 let sceneCrystalMat = null;
-let wizardHands = null;
+let weapon = null;
 // The palette of the chapter on screen (chapters.js), or the one being faded to.
 let activePalette = null;
 let seasonEmberIntensityBase = 2.1;
@@ -1604,6 +1604,31 @@ function chooseBossLines(wave, count) {
   return lines.sort((a, b) => letters(a) - letters(b));
 }
 
+// A stage of single words, typed one at a time like monsters' words. No two start
+// with the same letter, and none repeats within the fight.
+function chooseBossWordStage(count, used) {
+  const initials = new Set();
+  const entries = [];
+  const fits = (entry) => {
+    const key = buildSearchPrompt(entry.term).toLowerCase();
+    return /^[a-z]+$/.test(entry.term) && key.length >= 4 && key.length <= 10
+      && !used.has(entry.term) && !initials.has(key.charAt(0));
+  };
+  while (entries.length < count) {
+    const entry = monsterDeck.pick(currentKeywordPool(), fits) || monsterDeck.pick(ALL_WORDS, fits);
+    if (!entry) break;
+    entries.push(entry);
+    used.add(entry.term);
+    initials.add(buildSearchPrompt(entry.term).charAt(0).toLowerCase());
+  }
+  return { kind: 'words', term: entries.map(entry => entry.term).join(' '), topic: '', entries };
+}
+
+function chooseBossStory() {
+  const story = BOSS_STORIES[Math.floor(Math.random() * BOSS_STORIES.length)];
+  return story.lines.map(term => ({ kind: 'story', term, topic: story.title, story: story.title }));
+}
+
 function lineWords(line) {
   return line.term.split(/\s+/).filter(word => buildSearchPrompt(word).length > 0);
 }
@@ -1620,6 +1645,8 @@ function startBossLine(boss) {
   const line = boss.bossLines[boss.lineIndex];
   boss.prompt = line.term;
   boss.definition = line.topic;
+  boss.lineKind = line.kind || 'line';
+  boss.label.dataset.stage = boss.lineKind;
   boss.lineWordsList = lineWords(line);
   boss.wordIndex = 0;
   setBossWord(boss);
@@ -1629,8 +1656,10 @@ function startBossLine(boss) {
 function spawnPhraseBoss() {
   const plan = bossPlan(bossLevel());
   const isFinal = isFinalWave();
-  const lines = chooseBossLines(bossLevel(), plan.lines);
-  bossWordsThisSet = lines.map(line => ({ term: line.term, definition: line.topic, isLine: true }));
+  const used = new Set();
+  const closing = plan.story ? chooseBossStory() : chooseBossLines(bossLevel(), plan.finishers);
+  const lines = [...plan.stages.map(count => chooseBossWordStage(count, used)), ...closing];
+  bossWordsThisSet = closing.map(line => ({ term: line.term, definition: line.topic, isLine: true }));
   const boss = spawnEnemy({
     isBoss: true,
     phraseBoss: true,
@@ -1685,7 +1714,7 @@ function showBossHpBar(boss) {
 
 function updateBossHpBar(boss) {
   if (!bossHpBar) return;
-  bossHpBar.setAttribute('aria-label', `${boss.type.name}: ${boss.hp} of ${boss.maxHp} lines left`);
+  bossHpBar.setAttribute('aria-label', `${boss.type.name}: ${boss.hp} of ${boss.maxHp} stages left`);
   bossHpBar.querySelectorAll('.boss-hp-segments i').forEach((segment, index) => {
     segment.classList.toggle('is-gone', index >= boss.hp);
   });
@@ -1703,10 +1732,27 @@ function advanceBossLine(boss) {
   if (streak > peakStreak) peakStreak = streak;
   score += 10 + boss.searchPrompt.length * 8;
   boss.flinch = 1;
+  const stageWord = boss.lineKind === 'words' ? boss.bossLines[boss.lineIndex].entries[boss.wordIndex] : null;
+  if (stageWord) {
+    // A word in a word stage lands like a kill: a beam, a piece knocked off, a flinch.
+    score += 30 + boss.searchPrompt.length * 6;
+    if (!encounteredTerms.some(t => t.term === stageWord.term)) {
+      encounteredTerms.push({ term: stageWord.term, definition: stageWord.definition || null, defeated: true });
+    }
+    spawnBeam(boss.group.position);
+    reusableVector.copy(boss.group.position);
+    reusableVector.x += (Math.random() - 0.5) * 2 * boss.group.scale.x;
+    reusableVector.y += (0.8 + Math.random() * 1.6) * boss.group.scale.y;
+    spawnDebris(reusableVector, boss.type);
+    boss.hurt = Math.max(boss.hurt, 0.45);
+    hitStopTimer = 0.04;
+    kickTimer = Math.max(kickTimer, 0.14);
+  }
   boss.wordIndex += 1;
   if (boss.wordIndex < boss.lineWordsList.length) {
     setBossWord(boss);
-    playTypeSound(1);
+    if (stageWord) playDefeatSound(boss);
+    else playTypeSound(1);
     hitEnemyWithLetter(boss);
     updateHud(true);
     updateTypedDisplay();
@@ -1725,9 +1771,11 @@ function advanceBossLine(boss) {
   }
   boss.hp = Math.max(0, boss.hp - lost);
   boss.lineIndex += lost;
-  score += boss.prompt.replace(/[^a-z]/gi, '').length * 15;
-  if (!encounteredTerms.some(t => t.term === boss.prompt)) {
-    encounteredTerms.push({ term: boss.prompt, definition: boss.definition, defeated: true });
+  if (!stageWord) {
+    score += boss.prompt.replace(/[^a-z]/gi, '').length * 15;
+    if (!encounteredTerms.some(t => t.term === boss.prompt)) {
+      encounteredTerms.push({ term: boss.prompt, definition: boss.definition, defeated: true });
+    }
   }
   updateBossHpBar(boss);
   spawnBeam(boss.group.position);
@@ -1754,7 +1802,10 @@ function advanceBossLine(boss) {
     boss.stagger = 1.4;
     boss.attackTimer = Math.max(boss.attackTimer, 2.2);
     boss.barrageLeft = 0;
-    showBanner(`${boss.hp} ${boss.hp === 1 ? 'LINE' : 'LINES'} LEFT`);
+    // Only the turn to the finishing blow is announced.
+    const next = boss.bossLines[boss.lineIndex];
+    if (stageWord && next.kind === 'story') showBanner(`THE TALE OF ${next.story.toUpperCase()}`);
+    else if (stageWord && next.kind !== 'words') showBanner('FINISH IT!');
     startBossLine(boss);
     updateHud(true);
     updateTypedDisplay();
@@ -2209,6 +2260,7 @@ function enterLatePart(arc) {
 // river wood's bridge, a cart ride into the mine, a blizzard on the frozen lake, and
 // in the night sky every monster flies.
 const RIDE_SPEED = 7;
+const BRIDGE_MONSTERS = 4;
 const RIDE_START_Z = -32;
 const BLIZZARD_VEIL_Z = -6.5;
 const BLIZZARD_STOP = 1;
@@ -2250,7 +2302,8 @@ function updateSetPieceTravel(pose, delta) {
 function startBridgeFight() {
   const spots = [];
   for (let index = 0; index < 6; index += 1) spots.push({ kind: 'climb', x: (index % 2 ? 1 : -1) * 3.6, z: -2 - index * 1.3 });
-  startEncounter({ spots, isBoss: false, resume: true, minionsOnly: true }, rail.setPieceCount, false);
+  // Kept small and steady: a few plain monsters, never more than two at once.
+  startEncounter({ spots, isBoss: false, resume: true, minionsOnly: true, maxLive: 2, plain: true }, Math.min(BRIDGE_MONSTERS, rail.setPieceCount), false);
   showBanner('HOLD THE BRIDGE!');
 }
 
@@ -2314,9 +2367,9 @@ function updateEncounter(delta) {
   if (wantsMore) {
     encounter.clearTimer = 0;
     encounter.timer -= delta;
-    if (encounter.timer <= 0 && live.length < RAIL_ENEMY_CAP) {
+    if (encounter.timer <= 0 && live.length < (encounter.stop.maxLive || RAIL_ENEMY_CAP)) {
       spawnRailMember(encounter);
-      encounter.timer = Math.max(0.45, 0.9 - (monsterLevel() - 1) * 0.05) + Math.random() * 0.3;
+      encounter.timer = Math.max(0.45, 0.9 - (monsterLevel() - 1) * 0.05) + Math.random() * 0.3 + (encounter.stop.maxLive ? 0.6 : 0);
     }
     return;
   }
@@ -2354,7 +2407,7 @@ function spawnRailMember(encounter) {
   // In the night sky every monster flies in from above.
   const flier = kind === 'minion' && rail.setPiece === 'flight';
   if (flier) spot = { ...spot, kind: 'sky' };
-  const variant = kind === 'minion' ? variantSchedule.get(normalEnemiesSpawned) : null;
+  const variant = kind === 'minion' && !encounter.stop.plain ? variantSchedule.get(normalEnemiesSpawned) : null;
   const enemy = spawnEnemy({ isMedic: kind === 'medic', isMimic: kind === 'mimic', railSpot: spot, variant, flier });
   registerNormalTypingCost(enemy);
   if (kind === 'medic') medicsSpawnedThisSet += 1;
@@ -2562,14 +2615,14 @@ function updateRailEnemy(enemy, delta, seconds) {
   return false;
 }
 
-// Every correct letter lands: the monster flinches, sparks fly and the wand flicks a bolt.
+// Every correct letter lands: the monster flinches, sparks fly and the cannon fires a bolt.
 function hitEnemyWithLetter(enemy) {
   enemy.flinch = 1;
   reusableVector.copy(enemy.group.position);
   reusableVector.y += 0.9 * enemy.group.scale.y;
   fx.burst(reusableVector, { color: enemy.type.eye, color2: 0xffffff, count: 7, speed: 3.2, life: 0.3, size: 0.24 });
-  wizardHands.cast(1, 0.45);
-  const start = wizardHands.origin(1);
+  weapon.cast(1, 0.45);
+  const start = weapon.origin(1);
   const end = reusableVector.clone();
   const distance = start.distanceTo(end);
   const bolt = new THREE.Mesh(
@@ -2870,7 +2923,7 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   camera.position.y = CAMERA_HEIGHT + Math.sin(seconds * 0.52) * 0.06 + bob + Math.cos(seconds * 37) * shake;
   camera.position.z = CAMERA_DISTANCE + Math.sin(seconds * 0.28) * 0.08 + Math.sin(seconds * 43) * shake;
   camera.lookAt(cameraTarget);
-  wizardHands.update(seconds, envDelta, {
+  weapon.update(seconds, envDelta, {
     target: activeTarget && !activeTarget.dying ? activeTarget.group.position : null,
     walk: walking,
     walkPhase: rail.walkPhase,
@@ -3282,6 +3335,12 @@ function bossWordProgress(boss) {
 function buildBossLineHtml(boss) {
   const words = boss.lineWordsList;
   const { word, done } = bossWordProgress(boss);
+  if (boss.lineKind === 'words') {
+    // A word stage shows one word at a time, with a pip for each word of the stage.
+    const typedPart = done && word.startsWith(done) ? done : '';
+    const pips = words.map((entry, index) => `<i class="${index < boss.wordIndex ? 'is-done' : ''}"></i>`).join('');
+    return `<span class="current-word"><span class="typed">${escapeHtml(typedPart)}</span><span class="remaining">${escapeHtml(word.slice(typedPart.length))}</span></span><span class="stage-pips">${pips}</span>`;
+  }
   const parts = words.map((entry, index) => {
     if (index < boss.wordIndex) return `<span class="typed">${escapeHtml(entry)}</span>`;
     if (index > boss.wordIndex) return `<span class="remaining">${escapeHtml(entry)}</span>`;
@@ -3636,11 +3695,11 @@ function createTorches() {
     roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9, flatShading: true,
   });
 
-  // The wizard's hands hang from the camera, which must be in the scene for them to draw.
+  // The cannon hangs from the camera, which must be in the scene for it to draw.
   scene.add(camera);
-  wizardHands = createWizardHands({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
-  for (const glow of wizardHands.glows) torchFlames.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
-  lightningCrowns.push(...wizardHands.crowns);
+  weapon = createArcaneCannon({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
+  for (const glow of weapon.glows) torchFlames.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
+  lightningCrowns.push(...weapon.crowns);
 
   // The front of the mine cart, seen only during the ride. It hangs from the camera too.
   rideCart = new THREE.Group();
@@ -3902,10 +3961,10 @@ function glowColor(hex, gain = GLOW_GAIN) {
 }
 
 function spawnBeam(targetPosition) {
-  // The finishing blow comes from the wand, with the open hand flaring beside it.
-  wizardHands.cast(1, 1);
-  wizardHands.cast(0, 1);
-  const start = wizardHands.origin(1);
+  // The finishing blow comes from the muzzle, with the core surging behind it.
+  weapon.cast(1, 1);
+  weapon.cast(0, 1);
+  const start = weapon.origin(1);
   const end = targetPosition.clone();
   end.y += 1.2;
   playBeamSound(end.x);
@@ -5351,16 +5410,16 @@ function triggerChainLightning(firstEnemy) {
   showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
   // The chain leaps from the open hand's rune.
-  wizardHands.cast(0, 1);
-  wizardHands.cast(1, 1);
-  const wandTip = wizardHands.origin(0);
+  weapon.cast(0, 1);
+  weapon.cast(1, 1);
+  const coreTip = weapon.origin(0);
 
   const chainMonsters = [firstEnemy];
 
-  // 1st segment: wandTip -> 1st monster (immediately, held)
+  // 1st segment: coreTip -> 1st monster (immediately, held)
   const p1 = origin.clone();
   p1.y += 0.8;
-  spawnLightningVisual(wandTip, p1, true);
+  spawnLightningVisual(coreTip, p1, true);
 
   let currentChainOrigin = p1;
 

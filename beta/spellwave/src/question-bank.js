@@ -429,6 +429,46 @@ export const EQUATION_WORDS = [
 // Boss lines: whole statements the player types word by word. Each finished line
 // takes a segment off the boss's health bar. `topic` heads the wave-clear list.
 // Words only (no symbols or hyphens), so every word is plain to type.
+// The last boss is finished with a short story about a physicist, typed line by line.
+export const BOSS_STORIES = [
+  { title: 'Archimedes', lines: [
+    'Archimedes climbed into his bath',
+    'The water rose and spilled over',
+    'He shouted eureka and ran outside',
+    'He forgot to put his clothes on',
+  ] },
+  { title: 'Newton', lines: [
+    'Newton sat under an apple tree',
+    'An apple dropped beside him',
+    'He asked why it fell straight down',
+    'The answer reached as far as the Moon',
+  ] },
+  { title: 'Galileo', lines: [
+    'Galileo climbed a leaning tower',
+    'He dropped a heavy ball and a light one',
+    'Both hit the ground together',
+    'Aristotle had been wrong for ages',
+  ] },
+  { title: 'Franklin', lines: [
+    'Franklin flew a kite in a storm',
+    'A key hung from the wet string',
+    'A spark jumped to his knuckle',
+    'Do not try this at home',
+  ] },
+  { title: 'Schrodinger', lines: [
+    'Schrodinger imagined a cat in a box',
+    'Was the cat alive or not',
+    'Nobody could say until they looked',
+    'The cat was not amused',
+  ] },
+  { title: 'Curie', lines: [
+    'Marie Curie found two new elements',
+    'She carried radium in her pocket',
+    'Her notebooks are still radioactive',
+    'She won the Nobel prize twice',
+  ] },
+];
+
 export const BOSS_PHRASES = [
   // Energy
   { term: 'energy cannot be created or destroyed', topic: 'Conservation of energy' },
