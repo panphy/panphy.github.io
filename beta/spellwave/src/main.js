@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta19';
+import { createSpellwaveAudio } from './audio.js?v=beta20';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta19';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta19';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta19';
-import { createLeaderboard } from './leaderboard.js?v=beta19';
+import { createPotionSystem } from './potions.js?v=beta20';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta20';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta20';
+import { createLeaderboard } from './leaderboard.js?v=beta20';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta19';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta19';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta20';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta20';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta19';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta19';
-import { createWordDeck } from './word-decks.js?v=beta19';
-import { createStage } from './stages.js?v=beta19';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta19';
-import { storyBeatForWave } from './story.js?v=beta19';
-import { createStoryteller } from './storyteller.js?v=beta19';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta19';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta20';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta20';
+import { createWordDeck } from './word-decks.js?v=beta20';
+import { createStage } from './stages.js?v=beta20';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta20';
+import { storyBeatForWave } from './story.js?v=beta20';
+import { createStoryteller } from './storyteller.js?v=beta20';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta20';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -5289,8 +5289,9 @@ function updateComboDisplay() {
 function updateTypingLabel() {}
 
 // Letters a second, from the first letter typed at a monster to its last, that earn
-// each rank. 6 a second is about 72 words a minute.
-const RANK_SPEEDS = [['A', 6], ['B', 4.5], ['C', 3.2], ['D', 2.2]];
+// each rank, S at the top. 7 a second is about 84 words a minute.
+const RANK_SPEEDS = [['S', 7], ['A', 5.5], ['B', 4.2], ['C', 3.1], ['D', 2.2]];
+const RANK_COLOURS = { S: 0xffd84a, A: 0x4fd8ff, B: 0x7be36a };
 
 function killRank(enemy) {
   const letters = Math.max(1, enemy.searchPrompt.length - 1);
@@ -5299,7 +5300,8 @@ function killRank(enemy) {
   return (RANK_SPEEDS.find(([, needed]) => speed >= needed) || ['E'])[0];
 }
 
-// Monsters, healers and chests are ranked; rocks and bosses are not.
+// Monsters, healers and chests are ranked; rocks and bosses are not. The rank is the
+// reward for a fast word, so it slams in: the better the rank, the bigger the show.
 function spawnRankPopup(enemy) {
   if (enemy.isProjectile || enemy.isBoss) return;
   const label = enemy.label;
@@ -5311,11 +5313,21 @@ function spawnRankPopup(enemy) {
   const popup = document.createElement('div');
   popup.className = 'rank-popup';
   popup.dataset.rank = rank;
-  popup.innerHTML = `RANK<b>${rank}</b>`;
+  popup.innerHTML = `<span class="rank-rays"></span><span class="rank-ring"></span><span class="rank-word">RANK</span><b>${rank}</b>`;
   popup.style.left = `${left}px`;
-  popup.style.top = `${top + 46}px`;
+  popup.style.top = `${top + 54}px`;
   document.body.appendChild(popup);
-  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+  popup.addEventListener('animationend', (event) => { if (event.target === popup && event.animationName === 'rank-life') popup.remove(); });
+  // The top ranks also burst at the monster itself.
+  const colour = RANK_COLOURS[rank];
+  if (colour) {
+    reusableVector.copy(enemy.group.position);
+    reusableVector.y += 1.1;
+    const best = rank === 'S';
+    fx.burst(reusableVector, { color: colour, color2: 0xffffff, count: best ? 40 : 18, speed: best ? 8 : 5, life: best ? 0.9 : 0.6, size: best ? 0.42 : 0.3 });
+    fx.ring(reusableVector, colour, { from: 0.4, to: best ? 5 : 3, life: 0.45, opacity: 0.85, flat: false });
+    if (best) kickTimer = Math.max(kickTimer, 0.22);
+  }
 }
 
 function spawnScorePopup(points, enemy, healed = 0) {
