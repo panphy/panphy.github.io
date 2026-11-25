@@ -217,19 +217,34 @@ A wrong key is only a miss, so keep typing!</p>
       <div class="ending-letterbox" aria-hidden="true"></div>
       <p class="ending-caption" id="endingCaption"></p>
       <div class="ending-content" id="endingContent">
-        <p class="ending-kicker">The final wave collapses</p>
-        <h2 class="ending-title" id="endingTitle">PHYSICS MASTERED</h2>
-        <div class="ending-stats" id="endingStats">
-          <div class="ending-stat highlighted"><span class="stat-label">Final Score</span><span class="stat-value" id="endScore">0</span></div>
-          <div class="ending-stat"><span class="stat-label">Accuracy</span><span class="stat-value" id="endAccuracy">0%</span></div>
-          <div class="ending-stat"><span class="stat-label">Peak Streak</span><span class="stat-value" id="endStreak">0</span></div>
-          <div class="ending-stat highlighted"><span class="stat-label">Run Time</span><span class="stat-value" id="endTime">0:00</span></div>
-          <div class="ending-stat"><span class="stat-label">Mimics Looted</span><span class="stat-value" id="endMimics">0</span></div>
-          <div class="ending-stat"><span class="stat-label">Life Left</span><span class="stat-value" id="endHealth">0/5</span></div>
+        <p class="ending-kicker">The last myth is broken</p>
+        <h2 class="ending-title" id="endingTitle">The Land Is Free</h2>
+        <div class="ending-score">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="endScore">0</span>
+          <span class="ending-score-note" id="endScoreNote" hidden></span>
         </div>
-        <button class="ending-replay" id="endingReplay" title="Begin a new run">Another Attempt</button>
+        <div class="ending-stats" id="endingStats">
+          <div class="ending-stat"><span class="stat-label">Words won</span><span class="stat-value" id="endWords">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Accuracy</span><span class="stat-value" id="endAccuracy">0%</span></div>
+          <div class="ending-stat"><span class="stat-label">Best chain</span><span class="stat-value" id="endStreak">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Chests looted</span><span class="stat-value" id="endMimics">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Life left</span><span class="stat-value" id="endHealth">0/5</span></div>
+          <div class="ending-stat"><span class="stat-label">Time</span><span class="stat-value" id="endTime">0:00</span></div>
+        </div>
+        <div class="ending-myths">
+          <p class="stat-label" id="endingMythsLabel">Myths broken</p>
+          <ul aria-labelledby="endingMythsLabel">
+            <li><s>Heavy things fall faster</s></li>
+            <li><s>Energy comes free</s></li>
+            <li><s>Heat is a liquid</s></li>
+            <li><s>Ice sinks</s></li>
+            <li><s>The stars rule our lives</s></li>
+          </ul>
+        </div>
+        <button class="ending-replay" id="endingReplay" type="button" title="Begin a new run">Play Again</button>
       </div>
-      <button class="ending-skip" id="endingSkip" title="Skip cinematic">Skip</button>
+      <button class="ending-skip" id="endingSkip" type="button" title="Skip cinematic">Skip</button>
     </div>
   </div>
 
