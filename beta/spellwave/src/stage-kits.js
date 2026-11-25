@@ -17,9 +17,14 @@ function part(geometry, material, x = 0, y = 0, z = 0) {
   return mesh;
 }
 const box = (material, w, h, d, x, y, z) => part(new THREE.BoxGeometry(w, h, d), material, x, y, z);
-const cyl = (material, top, bottom, h, sides, x, y, z) => part(new THREE.CylinderGeometry(top, bottom, h, sides), material, x, y, z);
-const cone = (material, r, h, sides, x, y, z) => part(new THREE.ConeGeometry(r, h, sides), material, x, y, z);
+// Round things get more sides than the sketch asks for; three- and four-sided shapes
+// (spires, obelisks, tubs) are deliberate and stay as written.
+const rounder = (sides) => (sides <= 4 ? sides : Math.round(sides * 1.6));
+const cyl = (material, top, bottom, h, sides, x, y, z) => part(new THREE.CylinderGeometry(top, bottom, h, rounder(sides)), material, x, y, z);
+const cone = (material, r, h, sides, x, y, z) => part(new THREE.ConeGeometry(r, h, rounder(sides)), material, x, y, z);
 const ico = (material, r, x, y, z) => part(new THREE.IcosahedronGeometry(r, 0), material, x, y, z);
+// A rounder lump, for the few big shapes seen close up (ico is for scattered clutter).
+const ball = (material, r, x, y, z) => part(new THREE.IcosahedronGeometry(r, 1), material, x, y, z);
 const octa = (material, r, x, y, z) => part(new THREE.OctahedronGeometry(r, 0), material, x, y, z);
 const dodeca = (material, r, x, y, z) => part(new THREE.DodecahedronGeometry(r, 0), material, x, y, z);
 
@@ -144,9 +149,12 @@ function createHut(mats, random, { width = 3.6, depth = 3.0, height = 2.4, roofM
 
   const doorX = -width * 0.18;
   const front = depth / 2;
-  group.add(box(trim, 1.16, 1.84, 0.1, doorX, 1.1, front + 0.03));
-  group.add(box(mats.door, 0.9, 1.66, 0.1, doorX, 1.03, front + 0.07));
-  group.add(box(footing, 1.3, 0.16, 0.5, doorX, 0.12, front + 0.3));
+  // The door stands on the footing, and each layer sits clear of the one behind it:
+  // faces that share a plane flicker.
+  group.add(box(trim, 1.16, 1.78, 0.12, doorX, 1.29, front + 0.02));
+  group.add(box(mats.door, 0.9, 1.62, 0.12, doorX, 1.21, front + 0.07));
+  group.add(box(trim, 0.08, 0.2, 0.06, doorX + 0.3, 1.2, front + 0.15));
+  group.add(box(footing, 1.5, 0.28, 0.7, doorX, 0.14, front + 0.4));
   const window = (x, y, z, rotation) => {
     const frame = groupOf(
       box(trim, 0.92, 0.82, 0.08, 0, 0, 0),
@@ -194,30 +202,6 @@ function createBridge(mats, span, width = 6.2, { rope = false } = {}) {
     const railMaterial = rope ? mats.rope : mats.timber;
     for (const y of rope ? [1.15] : [0.62, 1.12]) group.add(box(railMaterial, rope ? 0.07 : 0.1, rope ? 0.07 : 0.1, span, x, y, 0));
   }
-  return group;
-}
-
-// The gate a new chapter opens with: two standing stones and a lintel, cut with glowing runes.
-export function createGateMaterials() {
-  return { stone: flat(0x8d8a96), glow: lit(0x9ff3ff, 2.2) };
-}
-
-export function createGate(mats) {
-  const group = new THREE.Group();
-  for (const side of [-1, 1]) {
-    const pillar = box(mats.stone, 1.3, 6.4, 1.3, side * 4.4, 3.2, 0);
-    pillar.rotation.y = side * 0.2;
-    group.add(pillar);
-    group.add(box(mats.stone, 1.8, 0.6, 1.8, side * 4.4, 0.3, 0));
-    for (let index = 0; index < 3; index += 1) {
-      group.add(box(mats.glow, 0.34, 0.5, 0.12, side * 4.4, 2.0 + index * 1.3, 0.68));
-    }
-  }
-  const lintel = box(mats.stone, 11.6, 1.1, 1.5, 0, 6.9, 0);
-  group.add(lintel);
-  const keystone = octa(mats.glow, 0.55, 0, 6.9, 0.7);
-  keystone.scale.set(1, 1.5, 0.5);
-  group.add(keystone);
   return group;
 }
 
@@ -477,7 +461,7 @@ function forestKit() {
       box(mats.pane, 0.6, 0.5, 0.14, -1.0, 3.1, 1.95),
     );
     const wheel = new THREE.Group();
-    const rimGeometry = new THREE.TorusGeometry(2.3, 0.14, 4, 12);
+    const rimGeometry = new THREE.TorusGeometry(2.3, 0.14, 5, 24);
     for (const z of [-0.45, 0.45]) wheel.add(part(rimGeometry, mats.timber, 0, 0, z));
     for (let index = 0; index < 12; index += 1) {
       const angle = (index / 12) * Math.PI * 2;
@@ -578,7 +562,7 @@ function forestKit() {
       trunk.children[1].rotation.z = -0.8;
       trunk.children[2].rotation.z = 0.75;
       const crowns = [[0, 16.5, 0, 5.2], [4.6, 14.5, 0.5, 3.6], [-4.4, 15, 1, 3.8], [0.6, 14, -3.6, 3.4], [-0.5, 19.5, 0.4, 3.2]];
-      crowns.forEach(([x, y, z, r], index) => trunk.add(tilt(ico(ctx.shared.leaves[index % 2], r, x, y, z), random)));
+      crowns.forEach(([x, y, z, r], index) => trunk.add(tilt(ball(ctx.shared.leaves[index % 2], r, x, y, z), random)));
       ctx.place(trunk, giant.x, giant.z, 4);
 
       // Fallen logs and stumps beside the path.
@@ -859,9 +843,9 @@ function winterKit(variant) {
   };
   const createSnowman = (mats) => {
     const group = groupOf(
-      ico(mats.snow, 1.05, 0, 0.85, 0),
-      ico(mats.snow, 0.75, 0, 2.05, 0),
-      ico(mats.snow, 0.5, 0, 2.95, 0),
+      ball(mats.snow, 1.05, 0, 0.85, 0),
+      ball(mats.snow, 0.75, 0, 2.05, 0),
+      ball(mats.snow, 0.5, 0, 2.95, 0),
       cone(mats.carrot, 0.09, 0.5, 5, 0, 2.95, 0.6),
       box(mats.coal, 0.1, 0.1, 0.1, -0.18, 3.1, 0.42),
       box(mats.coal, 0.1, 0.1, 0.1, 0.18, 3.1, 0.42),
@@ -879,14 +863,14 @@ function winterKit(variant) {
   };
   const createSnowRock = (ctx) => {
     const rock = createRockPile(ctx.mats.stone, ctx.random, 1.15);
-    const cap = ico(ctx.mats.snow, 0.95, 0, 1.75, 0);
+    const cap = ball(ctx.mats.snow, 0.95, 0, 1.75, 0);
     cap.scale.set(1.25, 0.42, 1.25);
     rock.add(cap);
     return rock;
   };
   const createIgloo = (mats) => {
     const group = new THREE.Group();
-    const dome = part(new THREE.SphereGeometry(2.3, 7, 4, 0, Math.PI * 2, 0, Math.PI / 2), mats.snow);
+    const dome = part(new THREE.SphereGeometry(2.3, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), mats.snow);
     const tunnel = cyl(mats.snow, 1.0, 1.0, 1.7, 6, 0, 0.55, 2.5);
     tunnel.rotation.x = Math.PI / 2;
     group.add(dome, tunnel, box(mats.coal, 1.1, 1.2, 0.1, 0, 0.6, 3.36));
@@ -956,7 +940,7 @@ function winterKit(variant) {
     for (let index = 0; index < 9; index += 1) {
       const angle = (index / 9) * Math.PI * 2;
       const radius = 7 + random() * 4;
-      const cloud = ico(mats.cloud, 2.6 + random() * 1.8, Math.cos(angle) * radius, (random() - 0.5) * 2.4, Math.sin(angle) * radius);
+      const cloud = ball(mats.cloud, 2.6 + random() * 1.8, Math.cos(angle) * radius, (random() - 0.5) * 2.4, Math.sin(angle) * radius);
       cloud.scale.set(1.5, 0.5, 1.1);
       cloud.rotation.y = -angle;
       cloud.castShadow = false;
@@ -1132,7 +1116,7 @@ function skyKit(variant) {
   );
   const createRing = (mats, radius, tube) => {
     const group = new THREE.Group();
-    group.add(part(new THREE.TorusGeometry(radius, tube, 5, 18), mats.ring));
+    group.add(part(new THREE.TorusGeometry(radius, tube, 6, 32), mats.ring));
     for (let index = 0; index < 9; index += 1) {
       const angle = (index / 9) * Math.PI * 2;
       const rune = box(mats.rune, tube * 0.9, tube * 1.6, tube * 2.3, Math.cos(angle) * radius, Math.sin(angle) * radius, 0);

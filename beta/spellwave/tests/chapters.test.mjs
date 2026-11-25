@@ -9,11 +9,10 @@ test('five chapters cover two waves each', () => {
   assert.equal(CHAPTERS.length, 5);
 });
 
-test('a chapter opens with its first wave: variant 0, a title, and a gate after the first chapter', () => {
+test('a chapter opens with its first wave: variant 0 and a title', () => {
   for (let wave = 1; wave <= 10; wave += 1) {
     const chapter = chapterForWave(wave);
     assert.equal(chapter.variant, (wave - 1) % 2);
-    assert.equal(chapter.gate, wave > 1 && wave % 2 === 1, `gate on wave ${wave}`);
     if (chapter.variant === 0) assert.ok(chapter.title, `wave ${wave} has a title`);
   }
 });

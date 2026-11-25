@@ -117,7 +117,5 @@ export function chapterForWave(wave) {
     kit: chapter.kit,
     palette: chapter.palettes[variant],
     title: chapter.titles[variant] || null,
-    // The first wave of every chapter after the first opens with a gate.
-    gate: index > 0 && variant === 0,
   };
 }

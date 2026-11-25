@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta3';
+import { createSpellwaveAudio } from './audio.js?v=beta4';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta3';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta3';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta3';
-import { createLeaderboard } from './leaderboard.js?v=beta3';
+import { createPotionSystem } from './potions.js?v=beta4';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta4';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta4';
+import { createLeaderboard } from './leaderboard.js?v=beta4';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta3';
+import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta4';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta3';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=beta3';
-import { createWordDeck } from './word-decks.js?v=beta3';
-import { createStage } from './stages.js?v=beta3';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta3';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta4';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=beta4';
+import { createWordDeck } from './word-decks.js?v=beta4';
+import { createStage } from './stages.js?v=beta4';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta4';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1825,7 +1825,6 @@ function buildStageForWave(wave) {
     materials: { trunk: sceneTrunkMaterial, leaves: sceneLeafMaterials, rock: sceneRockMaterial },
     kit: chapter.kit,
     variant: chapter.variant,
-    gate: chapter.gate,
   });
   stageRig.add(rail.stage.group);
   sceneGround = rail.stage.terrain;
