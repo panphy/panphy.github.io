@@ -1,5 +1,6 @@
 // arcane-cannon.js — the player's weapon: a magic machine gun, part machine and part
-// spell, held low at the right of the view. Six barrels spin up as the player types,
+// spell, held low in the middle of the view and seen from behind, so only its top
+// rises into the picture. Six barrels spin up as the player types,
 // a crystal core feeds them, and every letter kicks it back with a muzzle flash.
 //
 // It hangs from the camera, so it draws in front of the world. It adds no lights:
@@ -7,10 +8,11 @@
 import * as THREE from 'three';
 
 const DEPTH = -1.55;
-const GUN_Y = -0.5;
-const GUN_INSET = 0.86;
-const MAX_GUN_X = 1.05;
-const REST_AIM = new THREE.Vector3(0.1, 0.3, -9);
+const GUN_Y = -1.02;
+const GUN_SCALE = 1.6;
+// The gun points almost straight ahead and only leans a little toward the target.
+const REST_AIM = new THREE.Vector3(0, 0.15, -9);
+const AIM_LEAN = 0.3;
 const BARREL_LENGTH = 0.5;
 const BARREL_RADIUS = 0.062;
 const MUZZLE_Z = 0.3 + BARREL_LENGTH;
@@ -25,7 +27,7 @@ function buildCannon(materials, crystalMaterial) {
     return mesh;
   };
 
-  // Housing: a chamfered block with armour plates, and a brace running back out of view.
+  // Housing: a chamfered block with armour plates. Its back end stays below the view.
   const housing = add(new THREE.CylinderGeometry(0.115, 0.13, 0.42, 8), materials.metal, 0, 0, 0.06);
   housing.rotation.x = Math.PI / 2;
   housing.rotation.y = Math.PI / 8;
@@ -35,15 +37,7 @@ function buildCannon(materials, crystalMaterial) {
     cheek.rotation.z = side * -0.12;
     // A glowing vent slot along each cheek.
     add(new THREE.BoxGeometry(0.012, 0.03, 0.22), materials.glow, side * 0.149, 0.01, 0.05);
-    // Swept fins.
-    const fin = add(new THREE.BoxGeometry(0.012, 0.13, 0.2), materials.plate, side * 0.17, 0.07, -0.08);
-    fin.rotation.z = side * -0.7;
-    fin.rotation.x = -0.25;
   }
-  const brace = add(new THREE.BoxGeometry(0.11, 0.12, 0.7), materials.metal, 0.06, -0.14, -0.42);
-  brace.rotation.x = 0.32;
-  brace.rotation.y = -0.12;
-  add(new THREE.BoxGeometry(0.05, 0.2, 0.07), materials.plate, 0, -0.17, 0.02);
 
   // Coils between the housing and the barrels, lit from inside.
   const coils = [];
@@ -83,7 +77,8 @@ function buildCannon(materials, crystalMaterial) {
 
   // The crystal core rides on top in a cage, with two rings turning round it.
   const cage = new THREE.Group();
-  cage.position.set(0, 0.24, 0);
+  cage.position.set(0, 0.17, -0.02);
+  cage.scale.setScalar(0.75);
   gun.add(cage);
   for (const side of [-1, 1]) {
     const prong = add(new THREE.BoxGeometry(0.016, 0.16, 0.02), materials.plate, side * 0.07, -0.02, 0, cage);
@@ -188,23 +183,17 @@ export function createArcaneCannon({ camera, crystalMaterial, createCrown = null
     },
     // `target` is the world position being typed at, or null. `walk` is 0 to 1 while travelling.
     update(seconds, delta, { target = null, walk = 0, walkPhase = 0 } = {}) {
-      const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * -DEPTH;
-      const halfWidth = halfHeight * camera.aspect;
-      // On a narrow screen the gun shrinks and moves in, so it stays in view without crowding it.
+      // On a narrow screen the gun shrinks, so it does not crowd the view.
       const size = THREE.MathUtils.clamp(camera.aspect * 0.62, 0.55, 0.95);
       const bob = Math.sin(walkPhase) * 0.024 * walk;
-      mount.scale.setScalar(size);
-      mount.position.set(
-        THREE.MathUtils.clamp(halfWidth - GUN_INSET * size, 0.14, MAX_GUN_X) + Math.sin(walkPhase * 0.5) * 0.012 * walk,
-        GUN_Y + bob + Math.sin(seconds * 0.9) * 0.008,
-        DEPTH
-      );
+      mount.scale.setScalar(size * GUN_SCALE);
+      mount.position.set(Math.sin(walkPhase * 0.5) * 0.02 * walk, GUN_Y + bob + Math.sin(seconds * 0.9) * 0.008, DEPTH);
 
       // The gun swings toward the target without sweeping right across the view.
       camera.updateMatrixWorld();
       wanted.copy(REST_AIM);
       camera.localToWorld(wanted);
-      if (target) wanted.lerp(target, 0.7);
+      if (target) wanted.lerp(target, AIM_LEAN);
       if (!aimReady) {
         aim.copy(wanted);
         aimReady = true;
