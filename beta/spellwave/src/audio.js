@@ -6,19 +6,17 @@ const GROOVE_TRIM = 0.67;
 const MUSIC_TIMER_INTERVAL = 80;
 const MUSIC_SCHEDULE_AHEAD = 0.34;
 const MUSIC_TRANSITION_DURATION = 1.2;
-// Song form: 16 steps to a bar, two bars to a section. The B section swaps the
-// arpeggio and brings in the lead; the last section lifts the arpeggio an octave.
+// Bars are 16 steps, or 12 in the river's compound time. MUSIC_STEP_WRAP divides by
+// both bar lengths and by the 16-bar arrangement every track is laid out on.
 const MUSIC_BAR_STEPS = 16;
 const MUSIC_SECTION_STEPS = 32;
-const MUSIC_PHRASE_STEPS = 64;
-const MUSIC_FORM = ['a', 'a', 'b', 'a'];
-const MUSIC_STEP_WRAP = 256;
+const MUSIC_ARRANGEMENT_BARS = 16;
+const MUSIC_STEP_WRAP = 768;
 // Kick and bass smear in a long reverb, so the music sends less than the effects do.
 const MUSIC_REVERB_SEND = 0.1;
 const SFX_REVERB_SEND = 0.22;
-// The echo follows the tempo (a dotted eighth); slow profiles use this fixed time.
+// The echo follows the tempo (each profile's `echoSteps`); slow profiles use this fixed time.
 const ECHO_TIME = 0.34;
-const ECHO_SYNC_STEPS = 3;
 const ECHO_FEEDBACK = 0.32;
 const ECHO_SEND = 0.28;
 const MUSIC_FILTER_OPEN = 18000;
@@ -27,8 +25,11 @@ const MUSIC_FILTER_FROZEN = 420;
 const FROZEN_TEMPO_STRETCH = 1.4;
 const BASS_FILTER_FLOOR = 190;
 const PUMP_DEPTH = 0.42;
+const BOSS_TEMPO = 0.95;
 const LANE_PAN_WIDTH = 0.7;
 const NOISE_BUFFER_SECONDS = 2;
+// How long the cannon whines before its blast; a kill's burst waits the same time.
+const BEAM_CHARGE_TIME = 0.07;
 // The victory score: 90 bpm, the same bar grid as ending-cinematic.js.
 const SCORE_BEAT = 60 / 90;
 const SCORE_GAIN = 0.95;
@@ -53,146 +54,124 @@ function stepSeconds(bpm) {
   return 60 / bpm / 4;
 }
 
-// Bass rhythms, one bar of sixteenths: 0 rests, 1 plays the chord's bass note, 2 the octave above.
-const BASS_OFFBEAT = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1];
-const BASS_GALLOP = [0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 2];
-const BASS_ROLLING = [1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 2];
-const BASS_STAGGER = [1, 0, 1, 1, 2, 0, 1, 1, 1, 0, 1, 1, 2, 1, 2, 1];
-const BASS_DRIVE = [1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2];
-// Arpeggio shapes: each number walks up the bar's chord tones, wrapping into higher octaves.
-const ARP_GAPPED = [0, null, 2, 3, null, 2, 4, null, 0, null, 2, 3, null, 5, 4, 2];
-const ARP_RISE = [0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 4, 2];
-const ARP_THREES = [0, 2, 4, 0, 2, 4, 0, 2, 0, 2, 4, 0, 2, 4, 3, 5];
-const ARP_PEDAL = [3, 0, 4, 0, 5, 0, 4, 0, 3, 0, 4, 0, 6, 0, 5, 0];
-const ARP_FALL = [6, 5, 4, 3, 5, 4, 3, 2, 4, 3, 2, 1, 3, 2, 1, 0];
-const ARP_WIDE = [0, 3, 4, 6, 3, 4, 6, 7, 4, 6, 7, 6, 4, 3, 1, 2];
-// Lead lines over a two-bar section: [step, chord-tone index, length in steps].
-// They are written in chord tones, so they fit whatever the bar's harmony is.
-const LEAD_A = [[0, 3, 3], [3, 4, 3], [6, 5, 2], [8, 4, 4], [16, 3, 3], [19, 5, 3], [22, 4, 2], [24, 3, 6]];
-const LEAD_B = [[0, 5, 2], [2, 4, 2], [4, 3, 4], [10, 4, 2], [12, 5, 4], [16, 6, 3], [19, 5, 3], [22, 4, 2], [24, 5, 2], [26, 4, 2], [28, 3, 4]];
-const LEAD_FALLING = [[0, 5, 4], [4, 4, 4], [8, 3, 6], [16, 4, 4], [20, 3, 4], [24, 2, 6]];
-// Syncopated chord stabs in boss music: a 3 + 3 + 2 push across the bar.
-const STAB_STEPS = [0, 6, 12];
+// Kick drums: pitch fall (Hz), how fast it falls and how long the drum rings (s).
+const KICK_PUNCH = { from: 175, to: 47, drop: 0.075, length: 0.24 };
+const KICK_TIGHT = { from: 165, to: 62, drop: 0.05, length: 0.15 };
+const KICK_HEAVY = { from: 150, to: 43, drop: 0.11, length: 0.42 };
+const KICK_SOFT = { from: 110, to: 42, drop: 0.09, length: 0.3 };
 
-// One profile per wave: a four-bar loop of [bass offset, chord tones] in semitones
-// from the root (a MIDI note). `level` switches layers on as the waves go by.
+// Each wave has its own track. The patterns below are one bar of steps unless noted.
+// Bass rhythms: 0 rests, 1 plays the chord's bass note, 2 the octave above.
+// Arpeggios and melodies name chord tones by index, wrapping into higher octaves,
+// so they fit whatever the bar's harmony is; melody entries are [step, tone, length].
+const MEADOW_ARP = [0, 1, 2, 3, 4, 5, 4, 3, 2, 3, 4, 5, 6, 5, 4, 2];
+const MEADOW_LEAD = [[0, 3, 6], [6, 4, 2], [8, 5, 8], [16, 4, 6], [22, 3, 2], [24, 2, 8]];
+const MEADOW_BOSS_BASS = [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1];
+const RIVER_BASS = [1, 0, 1, 2, 0, 1, 1, 0, 1, 2, 1, 2];
+const RIVER_BOSS_BASS = [1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2];
+const RIVER_ARP = [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1];
+const RIVER_LEAD = [[0, 4, 5], [6, 3, 3], [9, 5, 3], [12, 6, 6], [18, 5, 3], [21, 4, 3]];
+const MINE_CLANKS = [3, 6, 11, 14];
+const MINE_PLUCKS = [[2, 3], [5, 5], [9, 4], [18, 6], [23, 4], [28, 3], [29, 5]];
+const MINE_RUN = [3, 4, 5, 4, 6, 5, 4, 3];
+const MINE_BOSS_BASS = [1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 2, 1];
+const LAKE_BELLS = [[0, 5], [6, 4], [12, 6], [16, 3], [22, 5], [26, 4], [28, 7]];
+const LAKE_GLASS = [5, null, 3, null, 4, null, null, null, 6, null, 3, null, 4, null, null, null];
+const NIGHT_ARP = [0, 2, 4, 6, 7, 6, 4, 2, 1, 3, 5, 7, 8, 7, 5, 3];
+const NIGHT_BASS = [0, 1, 1, 1, 0, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1];
+const NIGHT_LEAD = [
+  [0, 3, 6], [6, 4, 2], [8, 5, 8], [16, 6, 6], [22, 5, 2], [24, 4, 8],
+  [32, 5, 6], [38, 6, 2], [40, 7, 8], [48, 6, 4], [52, 5, 4], [56, 4, 8],
+];
+const BOSS_STABS = [0, 6, 12];
+const INTERLUDE_ARP = [0, null, 2, 3, null, 2, 4, null, 0, null, 2, 3, null, 5, 4, 2];
+const LEAD_FALLING = [[0, 5, 4], [4, 4, 4], [8, 3, 6], [16, 4, 4], [20, 3, 4], [24, 2, 6]];
+
+// One profile per wave. `chords` is a loop of [bass offset, chord tones] in semitones
+// from the root (a MIDI note), each held for `barsPerChord` bars.
 const WAVE_MUSIC = [
   {
-    // Spring meadow: D dorian, the lightest groove.
+    // Spring meadow: D dorian at 124, a bright square arpeggio over a light kick.
     name: 'meadow',
-    level: 1,
-    baseStep: stepSeconds(122),
+    track: 'meadow',
+    baseStep: stepSeconds(124),
+    barSteps: 16,
+    barsPerChord: 1,
+    echoSteps: 3,
     root: 38,
-    chords: [[0, [0, 3, 7]], [0, [0, 3, 7]], [-2, [-2, 2, 5]], [5, [5, 9, 12]]],
-    bass: BASS_OFFBEAT,
-    bassType: 'sawtooth',
-    bassCutoff: 700,
-    arp: ARP_GAPPED,
-    arpB: ARP_RISE,
-    arpType: 'square',
-    arpCutoff: 1500,
+    chords: [
+      [0, [0, 3, 7]], [3, [-2, 3, 7]], [-2, [-2, 2, 5]], [5, [0, 5, 9]],
+      [0, [0, 3, 7]], [3, [-2, 3, 7]], [-5, [-2, 2, 7]], [5, [0, 5, 9]],
+    ],
   },
   {
-    // River wood: E minor, a galloping bass.
+    // River wood: E minor in rolling triplets, four beats of three at 104.
     name: 'river',
-    level: 2,
-    baseStep: stepSeconds(126),
+    track: 'river',
+    baseStep: 60 / 104 / 3,
+    barSteps: 12,
+    barsPerChord: 1,
+    echoSteps: 2,
     root: 40,
-    chords: [[0, [0, 3, 7]], [-4, [-4, 0, 3]], [3, [3, 7, 10]], [-2, [-2, 2, 5]]],
-    bass: BASS_GALLOP,
-    bassType: 'sawtooth',
-    bassCutoff: 800,
-    arp: ARP_RISE,
-    arpB: ARP_THREES,
-    arpType: 'square',
-    arpCutoff: 1700,
+    chords: [
+      [0, [0, 3, 7]], [0, [0, 3, 7]], [-4, [0, 3, 8]], [-2, [2, 5, 10]],
+      [0, [0, 3, 7]], [3, [-2, 3, 7]], [5, [0, 5, 8]], [-5, [-1, 2, 7]],
+    ],
   },
   {
-    // Mountain pass and crystal mine: C phrygian, with its flat second.
+    // Mountain pass and crystal mine: C phrygian, half-time, slow harmony.
     name: 'mine',
-    level: 3,
-    baseStep: stepSeconds(128),
+    track: 'mine',
+    baseStep: stepSeconds(126),
+    barSteps: 16,
+    barsPerChord: 2,
+    echoSteps: 3,
     root: 36,
-    chords: [[0, [0, 3, 7]], [0, [0, 3, 7]], [1, [1, 5, 8]], [-2, [-2, 1, 5]]],
-    bass: BASS_ROLLING,
-    bassType: 'square',
-    bassCutoff: 760,
-    arp: ARP_THREES,
-    arpB: ARP_PEDAL,
-    arpType: 'sawtooth',
-    arpCutoff: 1900,
+    chords: [[0, [0, 3, 7]], [1, [1, 5, 8]], [0, [0, 3, 7]], [-2, [-2, 1, 5]]],
   },
   {
-    // Frozen lake: F sharp minor, glassy pedal arpeggios over a pad.
+    // Frozen lake: F sharp minor at 108, sparse, with long pads and FM bells.
     name: 'lake',
-    level: 4,
-    baseStep: stepSeconds(130),
+    track: 'lake',
+    baseStep: stepSeconds(108),
+    barSteps: 16,
+    barsPerChord: 2,
+    echoSteps: 3,
     root: 42,
-    chords: [[0, [0, 3, 7]], [-4, [-4, 0, 3]], [-7, [0, 5, 8]], [-5, [2, 7, 10]]],
-    bass: BASS_STAGGER,
-    bassType: 'sawtooth',
-    bassCutoff: 900,
-    arp: ARP_PEDAL,
-    arpB: ARP_FALL,
-    arpType: 'square',
-    arpCutoff: 2300,
+    chords: [[0, [0, 3, 7]], [-4, [0, 3, 8]], [3, [-2, 3, 7]], [-5, [-2, 2, 7]]],
   },
   {
-    // Night sky: A harmonic minor, the full drive.
+    // Night sky: A minor at 146, the fastest, with a gliding lead.
     name: 'night',
-    level: 5,
-    baseStep: stepSeconds(134),
+    track: 'night',
+    baseStep: stepSeconds(146),
+    barSteps: 16,
+    barsPerChord: 1,
+    echoSteps: 3,
     root: 33,
-    chords: [[0, [0, 3, 7]], [-4, [-4, 0, 3]], [5, [0, 5, 8]], [7, [-1, 2, 7]]],
-    bass: BASS_DRIVE,
-    bassType: 'sawtooth',
-    bassCutoff: 1000,
-    arp: ARP_WIDE,
-    arpB: ARP_FALL,
-    arpType: 'sawtooth',
-    arpCutoff: 2200,
+    chords: [
+      [0, [0, 3, 7]], [0, [0, 3, 7]], [-4, [0, 3, 8]], [-2, [-2, 2, 5]],
+      [0, [0, 3, 7]], [3, [-2, 3, 7]], [5, [0, 5, 8]], [7, [-1, 2, 7]],
+    ],
   },
 ];
-// Each wave's boss keeps the wave's key but runs faster, with the boss layers on.
+// Each wave's boss is its own track pushed harder: faster, with the boss layers on.
 const BOSS_MUSIC = WAVE_MUSIC.map((profile) => ({
   ...profile,
   name: `${profile.name}-boss`,
-  isBoss: true,
-  level: profile.level + 2,
-  baseStep: profile.baseStep * 0.955,
-  bass: BASS_DRIVE,
-  bassCutoff: profile.bassCutoff * 1.5,
+  boss: true,
+  baseStep: profile.baseStep * BOSS_TEMPO,
 }));
-// The last boss: D phrygian with a major dominant, every layer running.
-const FINAL_BOSS_MUSIC = {
-  name: 'final-boss',
-  isBoss: true,
-  level: 8,
-  baseStep: stepSeconds(140),
-  root: 38,
-  chords: [[0, [0, 3, 7]], [1, [1, 5, 8]], [0, [0, 3, 7]], [-5, [-1, 2, 7]]],
-  bass: BASS_DRIVE,
-  bassType: 'sawtooth',
-  bassCutoff: 1700,
-  arp: ARP_WIDE,
-  arpB: ARP_PEDAL,
-  arpType: 'sawtooth',
-  arpCutoff: 2600,
-};
-// Between waves: the same machine at half strength, in a brighter key.
+// Between waves: a light groove in a brighter key.
 const WAVE_CLEAR_MUSIC = {
   name: 'wave-clear',
-  level: 0,
+  track: 'interlude',
   baseStep: stepSeconds(112),
+  barSteps: 16,
+  barsPerChord: 1,
+  echoSteps: 3,
   root: 41,
   chords: [[0, [0, 4, 7]], [-5, [-1, 2, 7]], [-3, [-3, 0, 4]], [-7, [0, 5, 9]]],
-  bass: BASS_OFFBEAT,
-  bassType: 'sawtooth',
-  bassCutoff: 600,
-  arp: ARP_RISE,
-  arpB: ARP_THREES,
-  arpType: 'square',
-  arpCutoff: 1500,
 };
 // Game over: a slow drone and a falling line in D minor.
 const GAME_OVER_MUSIC = {
@@ -265,6 +244,8 @@ export function createSpellwaveAudio({
   let leadFilter = null;
   let snareBus = null;
   let hatBus = null;
+  let metalBus = null;
+  let lastLeadFrequency = 0;
   let sfxBus = null;
   let driveBus = null;
   let noiseBuffer = null;
@@ -399,6 +380,7 @@ export function createSpellwaveAudio({
     leadFilter = createBusFilter(context, 'lowpass', 2600, 1.2, melodyBus);
     snareBus = createBusFilter(context, 'bandpass', 1800, 0.6, musicGain);
     hatBus = createBusFilter(context, 'highpass', 7500, 0.5, musicGain);
+    metalBus = createBusFilter(context, 'bandpass', 2400, 3, melodyBus);
     arpFilter = createBusFilter(context, 'lowpass', 1600, 4, melodyBus);
     if (context.createStereoPanner) {
       arpPan = context.createStereoPanner();
@@ -610,18 +592,18 @@ export function createSpellwaveAudio({
   // ── Music instruments ──────────────────────────────────────────────────
 
   // The kick also dips pumpGain, so bass and pads breathe around it.
-  function scheduleKick(start, gain, pumpDepth = PUMP_DEPTH) {
+  function scheduleKick(start, gain, pumpDepth = PUMP_DEPTH, shape = KICK_PUNCH) {
     const context = audioContext;
     const oscillator = context.createOscillator();
     const gainNode = createEnvelope(context);
-    oscillator.frequency.setValueAtTime(175, start);
-    oscillator.frequency.exponentialRampToValueAtTime(47, start + 0.075);
+    oscillator.frequency.setValueAtTime(shape.from, start);
+    oscillator.frequency.exponentialRampToValueAtTime(shape.to, start + shape.drop);
     gainNode.gain.setValueAtTime(gain, start);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, start + shape.length);
     oscillator.connect(gainNode);
     gainNode.connect(musicGain);
     oscillator.start(start);
-    oscillator.stop(start + 0.27);
+    oscillator.stop(start + shape.length + 0.03);
     pumpGain.gain.setTargetAtTime(pumpDepth, start, 0.005);
     pumpGain.gain.setTargetAtTime(1, start + 0.035, 0.07);
   }
@@ -690,6 +672,84 @@ export function createSpellwaveAudio({
       oscillator.start(start);
       oscillator.stop(start + duration + 0.05);
     });
+  }
+
+  // An anvil: two squares a tritone-and-a-bit apart, rung through the metal bus's
+  // narrow filter and on into the echo.
+  function scheduleClank(start, gain, pitch, pan) {
+    scheduleTone(pitch, 0.12, start, { gain, type: 'square', attack: 0.001, pan }, metalBus);
+    scheduleTone(pitch * 1.483, 0.09, start, { gain: gain * 0.7, type: 'square', attack: 0.001, pan }, metalBus);
+  }
+
+  // A saw whose resonant filter snaps shut: the echoing pluck.
+  function schedulePluck(frequency, start, gain, pan) {
+    scheduleTone(frequency, 0.3, start, { gain, type: 'sawtooth', attack: 0.002, cutoff: 3600, endCutoff: 300, q: 8, pan }, melodyBus);
+  }
+
+  // An FM bell: a sine whose pitch is shaken by a second sine at a non-whole ratio.
+  // The shake dies away faster than the note, which is what makes it glassy.
+  function scheduleBell(frequency, start, duration, gain, pan = 0) {
+    const context = audioContext;
+    const carrier = context.createOscillator();
+    const modulator = context.createOscillator();
+    const depth = createEnvelope(context);
+    const envelope = createEnvelope(context);
+    carrier.frequency.value = frequency;
+    modulator.frequency.value = frequency * 3.5;
+    depth.gain.setValueAtTime(frequency * 1.6, start);
+    depth.gain.exponentialRampToValueAtTime(frequency * 0.05, start + duration * 0.6);
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.exponentialRampToValueAtTime(gain, start + 0.004);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    modulator.connect(depth);
+    depth.connect(carrier.frequency);
+    carrier.connect(envelope);
+    envelope.connect(panned(melodyBus, pan));
+    [carrier, modulator].forEach((oscillator) => {
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.04);
+    });
+  }
+
+  // Blizzard wind: a band of noise that rises, brightens and falls away.
+  function scheduleWind(start, duration, gain) {
+    const context = audioContext;
+    const source = createNoiseSource(context, start, duration);
+    const filter = context.createBiquadFilter();
+    const envelope = createEnvelope(context);
+    filter.type = 'bandpass';
+    filter.Q.value = 1.6;
+    filter.frequency.setValueAtTime(450, start);
+    filter.frequency.exponentialRampToValueAtTime(1500, start + duration * 0.5);
+    filter.frequency.exponentialRampToValueAtTime(600, start + duration);
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.linearRampToValueAtTime(gain, start + duration * 0.5);
+    envelope.gain.linearRampToValueAtTime(0.0001, start + duration);
+    source.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(musicGain);
+  }
+
+  // The night sky's lead: two detuned saws that slide into each note from the last one.
+  function scheduleGlideLead(frequency, start, duration, gain) {
+    const context = audioContext;
+    const envelope = createEnvelope(context);
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.exponentialRampToValueAtTime(gain, start + 0.02);
+    envelope.gain.setValueAtTime(gain, start + duration * 0.7);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    envelope.connect(leadFilter);
+    [-10, 10].forEach((detune) => {
+      const oscillator = context.createOscillator();
+      oscillator.type = 'sawtooth';
+      oscillator.detune.value = detune;
+      oscillator.frequency.setValueAtTime(lastLeadFrequency || frequency, start);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency, start + 0.07);
+      oscillator.connect(envelope);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.04);
+    });
+    lastLeadFrequency = frequency;
   }
 
   function chordToneFrequency(profile, tones, index, octave) {
@@ -763,11 +823,11 @@ export function createSpellwaveAudio({
     musicFilter.frequency.setTargetAtTime(target, audioContext.currentTime, frozen ? 0.12 : 0.3);
   }
 
-  // Keeps the echo on a dotted eighth of the current tempo. It glides, and only when
-  // the profile changes, because moving a delay line bends the pitch of what is in it.
+  // Keeps the echo on the current track's beat. It glides, and only when the profile
+  // changes, because moving a delay line bends the pitch of what is in it.
   function updateEchoTime() {
-    const step = activeMusicProfile.baseStep;
-    const target = step < 0.2 ? step * ECHO_SYNC_STEPS : ECHO_TIME;
+    const { baseStep, echoSteps } = activeMusicProfile;
+    const target = echoSteps ? baseStep * echoSteps : ECHO_TIME;
     if (Math.abs(target - echoTime) < 0.001) return;
     echoTime = target;
     echoDelay.delayTime.setTargetAtTime(target, audioContext.currentTime, 0.2);
@@ -792,12 +852,10 @@ export function createSpellwaveAudio({
     if (getMode() === 'ending') return ENDING_MUSIC;
     if (getMode() === 'gameover') return GAME_OVER_MUSIC;
     if (getMode() === 'wave_cleared') return WAVE_CLEAR_MUSIC;
-    const final = getIsFinalWave();
-    const index = final
+    const index = getIsFinalWave()
       ? WAVE_MUSIC.length - 1
       : Math.max(0, (Number.isFinite(wave) ? wave : 1) - 1) % WAVE_MUSIC.length;
-    if (getWavePhase() === 'boss') return final ? FINAL_BOSS_MUSIC : BOSS_MUSIC[index];
-    return WAVE_MUSIC[index];
+    return (getWavePhase() === 'boss' ? BOSS_MUSIC : WAVE_MUSIC)[index];
   }
 
   function updateMusicProfile(profile) {
@@ -830,122 +888,345 @@ export function createSpellwaveAudio({
     if (profileGain <= 0.02) return;
     if (profile.name === 'ending') scheduleEndingStep(step, start, stepDuration, profile, profileGain);
     else if (profile.name === 'game-over') scheduleGameOverStep(step, start, stepDuration, profile, profileGain * GROOVE_TRIM);
-    else scheduleGrooveStep(step, start, stepDuration, profile, profileGain * GROOVE_TRIM);
+    else trackSteps[profile.track](step, start, stepDuration, profile, profileGain * GROOVE_TRIM);
   }
 
-  // One sixteenth of the driving score. Layers by level: 0 between waves, 1–5 the
-  // waves, bosses two higher, 8 the last boss.
-  function scheduleGrooveStep(step, start, stepDuration, profile, profileGain) {
-    const beatStep = step % MUSIC_BAR_STEPS;
-    const bar = Math.floor(step / MUSIC_BAR_STEPS);
-    const sectionIndex = Math.floor(step / MUSIC_SECTION_STEPS) % MUSIC_FORM.length;
-    const isB = MUSIC_FORM[sectionIndex] === 'b';
-    const isLastSection = sectionIndex === MUSIC_FORM.length - 1;
-    const [bassOffset, tones] = profile.chords[bar % profile.chords.length];
-    const level = profile.level;
-    const isBoss = !!profile.isBoss;
-    const phraseStep = step % MUSIC_PHRASE_STEPS;
+  // Where a step falls in its track: its place in the bar, the bar's place in the
+  // 16-bar arrangement, and the harmony.
+  function trackFrame(step, profile) {
+    const bar = Math.floor(step / profile.barSteps);
+    const [bassOffset, tones] = profile.chords[Math.floor(bar / profile.barsPerChord) % profile.chords.length];
+    return {
+      beatStep: step % profile.barSteps,
+      bar,
+      phraseBar: bar % MUSIC_ARRANGEMENT_BARS,
+      tones,
+      bassNote: profile.root + bassOffset,
+    };
+  }
 
-    // Kick: four on the floor (two to the bar between waves), with pushes at higher levels.
-    const kickGain = (0.13 + level * 0.005) * profileGain;
-    if (beatStep % (level > 0 ? 4 : 8) === 0) {
-      scheduleKick(start, kickGain, isBoss ? PUMP_DEPTH * 0.7 : PUMP_DEPTH);
-    } else if ((isBoss && beatStep === 14 && bar % 2 === 1) || (level >= 5 && beatStep === 11 && bar % 4 === 3)) {
-      scheduleKick(start, kickGain * 0.8);
-    }
+  // The arpeggio's shared filter opens and closes over `periodSteps`.
+  function sweepArpFilter(step, start, cutoff, periodSteps, depth = 0.8) {
+    const sweep = Math.sin(((step % periodSteps) / periodSteps) * Math.PI * 2 - Math.PI / 2);
+    arpFilter.frequency.setTargetAtTime(cutoff * Math.pow(2, sweep * depth), start, 0.04);
+  }
 
-    // Backbeat: a clap early on, a snare from the mine onward, and a roll into each fourth bar.
-    const snareGain = (0.085 + level * 0.005) * profileGain;
-    if (beatStep % 8 === 4) {
-      if (level >= 3) scheduleSnare(start, snareGain);
-      else scheduleClap(start, snareGain);
-    }
-    if (phraseStep >= MUSIC_PHRASE_STEPS - 4 && level > 0) {
-      const rise = 0.4 + (phraseStep % 4) * 0.15;
-      scheduleSnare(start, snareGain * rise);
-      if (isBoss) scheduleSnare(start + stepDuration * 0.5, snareGain * (rise + 0.07));
-    }
+  function scheduleArp(frequency, start, duration, gain, type, pan) {
+    if (arpPan) arpPan.pan.setValueAtTime(pan, start);
+    scheduleTone(frequency, duration, start, { gain, type, attack: 0.003, hold: 0.3 }, arpFilter);
+  }
 
-    // Hats: offbeats only, then ghost notes, then straight sixteenths; bosses add
-    // a doubled tick, and the offbeat opens up at the top levels.
-    const hatGain = (0.022 + level * 0.0015) * profileGain;
-    if (beatStep % 4 === 2) {
-      scheduleHat(start, hatGain, level >= 4 ? 0.15 : 0.05);
-    } else if (level >= 3 || (level === 2 && beatStep % 4 === 3)) {
-      scheduleHat(start, hatGain * 0.5, 0.03);
-      if (isBoss && beatStep % 4 === 3) scheduleHat(start + stepDuration * 0.5, hatGain * 0.4, 0.025);
-    }
-    if (phraseStep === 0 && level >= 3) scheduleHat(start, hatGain * 1.3, 0.9);
-    if (phraseStep === MUSIC_PHRASE_STEPS - 8 && level >= 2) {
-      scheduleNoise(stepDuration * 8, start, {
-        gain: 0.02 * profileGain,
-        swell: true,
-        filterFrequency: 700,
-        endFilterFrequency: 6000,
-        q: 1.2,
-      }, musicGain);
-    }
+  // Boss stabs: a bare fifth in saws.
+  function scheduleStab(bassNote, start, duration, gain) {
+    [12, 19, 24].forEach((interval, index) => {
+      scheduleTone(midiFrequency(bassNote + interval), duration, start, {
+        gain,
+        type: 'sawtooth',
+        attack: 0.004,
+        hold: 0.4,
+        detune: index === 1 ? 6 : -6,
+      }, leadFilter);
+    });
+  }
 
-    const bassNote = profile.bass[beatStep];
-    if (bassNote) {
-      const accent = beatStep % 4 === 2 ? 1.25 : 1;
-      scheduleBass(
-        midiFrequency(profile.root + bassOffset + (bassNote === 2 ? 12 : 0)),
-        start,
-        stepDuration * 0.92,
-        // A square carries more level than a saw at the same peak.
-        (0.062 + level * 0.003) * (profile.bassType === 'square' ? 0.72 : 1) * profileGain,
-        profile.bassCutoff * accent * (isLastSection ? 1.2 : 1),
-        profile.bassType,
-        isBoss,
-      );
-    }
+  // Wave 1, spring meadow: the lightest track. A bright square arpeggio runs all the
+  // time over a tight kick, the bass is only an offbeat octave bounce, and a whistling
+  // lead joins for the second half. Its boss adds a low saw bass, a snare and stabs.
+  function scheduleMeadowStep(step, start, stepDuration, profile, gain) {
+    const { beatStep, bar, phraseBar, tones, bassNote } = trackFrame(step, profile);
+    const boss = !!profile.boss;
+    const full = boss || phraseBar >= 4;
 
-    // The arpeggio's filter opens and closes over the four-bar phrase.
-    const sweep = Math.sin((phraseStep / MUSIC_PHRASE_STEPS) * Math.PI * 2 - Math.PI / 2);
-    arpFilter.frequency.setTargetAtTime(profile.arpCutoff * Math.pow(2, sweep * 0.8) * (isBoss ? 1.3 : 1), start, 0.04);
-    const arpIndex = (isB ? profile.arpB : profile.arp)[beatStep];
-    if (arpIndex !== null) {
-      const frequency = chordToneFrequency(profile, tones, arpIndex, 2);
-      const arpGain = (0.024 + level * 0.0012) * (step % 3 === 0 ? 1.3 : 1) * profileGain;
-      if (arpPan) arpPan.pan.setValueAtTime(beatStep % 2 === 0 ? -0.35 : 0.35, start);
-      scheduleTone(frequency, stepDuration * 0.75, start, { gain: arpGain, type: profile.arpType, attack: 0.003, hold: 0.3 }, arpFilter);
-      if (isLastSection || (level >= 8 && beatStep % 2 === 0)) {
-        scheduleTone(frequency * 2, stepDuration * 0.6, start, { gain: arpGain * 0.4, type: 'triangle', attack: 0.003 }, arpFilter);
-      }
+    if (beatStep % 4 === 0) scheduleKick(start, (boss ? 0.15 : 0.13) * gain, PUMP_DEPTH, boss ? KICK_PUNCH : KICK_TIGHT);
+    if (full && beatStep % 8 === 4) {
+      if (boss) scheduleSnare(start, 0.1 * gain);
+      else scheduleClap(start, 0.09 * gain);
+    }
+    if (beatStep % 4 === 2) scheduleHat(start, 0.028 * gain, 0.12);
+    else if (boss || beatStep % 2 === 1) scheduleHat(start, 0.011 * gain, 0.025);
+    if (boss && bar % 4 === 3 && beatStep >= 12) scheduleSnare(start, (0.05 + (beatStep - 12) * 0.015) * gain);
+
+    if (full && beatStep % 4 === 2) {
+      scheduleBass(midiFrequency(bassNote + (beatStep % 8 === 6 ? 24 : 12)), start, stepDuration * 1.4, 0.05 * gain, 1500, 'sawtooth', false);
+    }
+    if (boss && MEADOW_BOSS_BASS[beatStep]) {
+      scheduleBass(midiFrequency(bassNote), start, stepDuration * 0.92, 0.07 * gain, 1000, 'sawtooth', true);
+    }
+    if (boss && BOSS_STABS.includes(beatStep)) scheduleStab(bassNote, start, stepDuration * 1.5, 0.016 * gain);
+
+    sweepArpFilter(step, start, boss ? 3400 : 2600, 64);
+    const frequency = chordToneFrequency(profile, tones, MEADOW_ARP[beatStep], 2);
+    scheduleArp(frequency, start, stepDuration * 0.75, (step % 3 === 0 ? 0.04 : 0.032) * gain, 'square', beatStep % 2 === 0 ? -0.35 : 0.35);
+    if (phraseBar >= 12) {
+      scheduleTone(frequency * 2, stepDuration * 0.6, start, { gain: 0.012 * gain, type: 'triangle', attack: 0.003 }, arpFilter);
     }
 
-    // Lead: in the B section, in a boss's last section, and all the way through the last boss.
-    if (isB || (isBoss && isLastSection) || level >= 8) {
-      const note = (isB ? LEAD_B : LEAD_A).find((entry) => entry[0] === step % MUSIC_SECTION_STEPS);
+    if (boss || phraseBar >= 8) {
+      const note = MEADOW_LEAD.find((entry) => entry[0] === step % 32);
       if (note) {
         scheduleTone(chordToneFrequency(profile, tones, note[1], 2), stepDuration * note[2] * 0.95, start, {
-          gain: (0.02 + level * 0.0012) * profileGain,
-          type: 'sawtooth',
-          attack: 0.012,
+          gain: 0.034 * gain,
+          type: 'triangle',
+          attack: 0.03,
           hold: 0.6,
-          chorus: 9,
+          chorus: 5,
         }, leadFilter);
       }
     }
+  }
 
-    // Boss stabs: a bare fifth, pushed across the beat.
-    if (isBoss && STAB_STEPS.includes(beatStep)) {
-      [12, 19, 24].forEach((interval, index) => {
-        scheduleTone(midiFrequency(profile.root + bassOffset + interval), stepDuration * 1.5, start, {
-          gain: 0.017 * profileGain,
-          type: 'sawtooth',
-          attack: 0.004,
-          hold: 0.4,
-          detune: index === 1 ? 6 : -6,
-        }, leadFilter);
-      });
+  // Wave 2, river wood: compound time, twelve triplet steps to the bar. The kick and
+  // snare gallop, a hollow square bass and a triangle harp roll in threes, toms fill
+  // every fourth bar, and a resonant square lead sings in the second half.
+  function scheduleRiverStep(step, start, stepDuration, profile, gain) {
+    const { beatStep, bar, phraseBar, tones, bassNote } = trackFrame(step, profile);
+    const boss = !!profile.boss;
+    const triplet = beatStep % 3;
+
+    if (beatStep % 6 === 0 || (boss && triplet === 0) || (beatStep === 11 && bar % 2 === 1)) {
+      scheduleKick(start, (boss ? 0.15 : 0.13) * gain);
+    }
+    if (beatStep === 3 || beatStep === 9) scheduleSnare(start, (boss ? 0.11 : 0.095) * gain);
+    scheduleHat(start, (triplet === 0 ? 0.024 : triplet === 2 ? 0.016 : 0.009) * gain, 0.035);
+    if (bar % 4 === 3 && beatStep >= 9) {
+      const tom = [196, 147, 110][beatStep - 9];
+      scheduleTone(tom, 0.22, start, { gain: 0.09 * gain, type: 'sine', endFrequency: tom * 0.6, attack: 0.002 }, musicGain);
     }
 
-    if (beatStep === 0 && (level >= 4 || level === 0)) {
-      schedulePad(tones.map((tone) => midiFrequency(profile.root + 12 + tone)), start, stepDuration * 16.5, 0.011 * profileGain);
+    const bassStep = (boss ? RIVER_BOSS_BASS : RIVER_BASS)[beatStep];
+    if (bassStep) {
+      scheduleBass(midiFrequency(bassNote + (bassStep === 2 ? 12 : 0)), start, stepDuration * 0.95, 0.052 * gain, boss ? 1300 : 800, 'square', boss);
+    }
+    if (boss && beatStep === 0) {
+      schedulePad(tones.map((tone) => midiFrequency(profile.root + 12 + tone)), start, stepDuration * 12.5, 0.011 * gain);
+    }
+    if (boss && beatStep % 6 === 0) scheduleStab(bassNote, start, stepDuration * 1.6, 0.016 * gain);
+
+    if (boss || phraseBar >= 2) {
+      sweepArpFilter(step, start, 3000, 48, 0.4);
+      scheduleArp(
+        chordToneFrequency(profile, tones, RIVER_ARP[beatStep], 2),
+        start,
+        stepDuration * 1.6,
+        (triplet === 0 ? 0.05 : 0.036) * gain,
+        'triangle',
+        Math.sin((beatStep / 12) * Math.PI * 2) * 0.5,
+      );
+    }
+    if (boss || phraseBar >= 8) {
+      const note = RIVER_LEAD.find((entry) => entry[0] === step % 24);
+      if (note) {
+        scheduleTone(chordToneFrequency(profile, tones, note[1], 2), stepDuration * note[2] * 0.95, start, {
+          gain: 0.022 * gain,
+          type: 'square',
+          attack: 0.02,
+          hold: 0.7,
+          cutoff: 1800,
+          q: 6,
+        }, melodyBus);
+      }
     }
   }
+
+  // Wave 3, the pass and the mine: half-time and heavy. One long kick and one big
+  // snare to the bar, anvil clanks between them, a low saw drone under slow chords,
+  // and filter plucks that ring down the echo. Its boss chugs the bass in sixteenths.
+  function scheduleMineStep(step, start, stepDuration, profile, gain) {
+    const { beatStep, bar, phraseBar, tones, bassNote } = trackFrame(step, profile);
+    const boss = !!profile.boss;
+
+    if (beatStep === 0 || beatStep === 10 || (beatStep === 7 && bar % 2 === 1) || (boss && (beatStep === 6 || beatStep === 14))) {
+      scheduleKick(start, 0.15 * gain, PUMP_DEPTH * 0.8, KICK_HEAVY);
+    }
+    if (beatStep === 8) {
+      scheduleSnare(start, 0.13 * gain);
+      scheduleDrumNoise(snareBus, start, 0.32, 0.05 * gain);
+      scheduleTone(130, 0.22, start, { gain: 0.07 * gain, type: 'sine', endFrequency: 70, attack: 0.002 }, musicGain);
+    } else if (boss && beatStep % 8 === 4) {
+      scheduleSnare(start, 0.05 * gain);
+    }
+    const clank = MINE_CLANKS.indexOf(beatStep);
+    if (clank >= 0) scheduleClank(start, 0.05 * gain, clank % 2 === 0 ? 830 : 620, clank % 2 === 0 ? -0.5 : 0.5);
+    else if (boss && beatStep % 2 === 1) scheduleHat(start, 0.012 * gain, 0.025);
+    // A hiss of steam into every second bar line.
+    if (bar % 2 === 1 && beatStep === 12) {
+      scheduleNoise(stepDuration * 4, start, { gain: 0.018 * gain, swell: true, filterType: 'highpass', filterFrequency: 3000, q: 0.5 }, musicGain);
+    }
+
+    if (beatStep === 0 && bar % 2 === 0) {
+      scheduleTone(midiFrequency(bassNote), stepDuration * 32, start, {
+        gain: 0.03 * gain,
+        type: 'sawtooth',
+        attack: 0.6,
+        hold: 0.8,
+        cutoff: 180,
+        endCutoff: 800,
+        q: 8,
+        chorus: 14,
+      }, pumpGain);
+    }
+    if (boss) {
+      const bassStep = MINE_BOSS_BASS[beatStep];
+      if (bassStep) scheduleBass(midiFrequency(bassNote + (bassStep === 2 ? 12 : 0)), start, stepDuration * 0.92, 0.07 * gain, 1100, 'sawtooth', true);
+      if (beatStep === 0 || beatStep === 3) scheduleStab(bassNote, start, stepDuration * 2, 0.017 * gain);
+    } else if (beatStep === 0 || beatStep === 10 || beatStep === 14) {
+      scheduleBass(midiFrequency(bassNote + (beatStep === 14 ? 12 : 0)), start, stepDuration * (beatStep === 0 ? 3 : 1.8), 0.055 * gain, 520, 'square', false);
+    }
+
+    const pluck = MINE_PLUCKS.find((entry) => entry[0] === step % 32);
+    if (pluck) schedulePluck(chordToneFrequency(profile, tones, pluck[1], 2), start, 0.06 * gain, step % 2 === 0 ? -0.3 : 0.3);
+    if ((boss || phraseBar >= 8) && beatStep % 2 === 0) {
+      schedulePluck(chordToneFrequency(profile, tones, MINE_RUN[beatStep / 2], 2), start, 0.03 * gain, 0);
+    }
+  }
+
+  // Wave 4, frozen lake: slow and sparse. Two soft kicks and one clap to the bar,
+  // long sub notes, wide pads held for two bars, wind, FM bells picking out a slow
+  // melody and glassy sine notes above. Its boss fills in the kick, hats and bass.
+  function scheduleLakeStep(step, start, stepDuration, profile, gain) {
+    const { beatStep, bar, phraseBar, tones, bassNote } = trackFrame(step, profile);
+    const boss = !!profile.boss;
+
+    if (beatStep % (boss ? 4 : 8) === 0) scheduleKick(start, (boss ? 0.14 : 0.12) * gain, PUMP_DEPTH, KICK_SOFT);
+    if (beatStep === 12 || (boss && beatStep === 4)) scheduleClap(start, 0.06 * gain);
+    if (beatStep % 4 === 2) scheduleHat(start, 0.014 * gain, 0.03);
+    else if (boss) scheduleHat(start, 0.008 * gain, 0.02);
+    if (beatStep === 4) scheduleBell(3520, start, 0.08, 0.012 * gain, 0.6);
+
+    if (beatStep === 0) scheduleBass(midiFrequency(bassNote), start, stepDuration * 7, 0.07 * gain, 600, 'triangle', false);
+    if (boss && beatStep % 2 === 0 && beatStep > 0) {
+      scheduleBass(midiFrequency(bassNote + (beatStep % 8 === 6 ? 12 : 0)), start, stepDuration * 1.6, 0.06 * gain, 800, 'sawtooth', false);
+    }
+
+    if (beatStep === 0 && bar % 2 === 0) {
+      const chord = tones.map((tone) => midiFrequency(profile.root + 12 + tone));
+      schedulePad([...chord, midiFrequency(profile.root + 24 + tones[1])], start, stepDuration * 33, 0.021 * gain);
+      // Two high sines far left and right widen the pad.
+      [[tones[0], -0.7], [tones[2], 0.7]].forEach(([tone, pan]) => {
+        scheduleTone(midiFrequency(profile.root + 36 + tone), stepDuration * 30, start, { gain: 0.012 * gain, type: 'sine', attack: 1.5, hold: 0.5, pan }, musicGain);
+      });
+      if (boss || bar % 4 === 2) scheduleWind(start, stepDuration * 32, 0.02 * gain);
+    }
+
+    const bell = LAKE_BELLS.find((entry) => entry[0] === step % 32);
+    if (bell) scheduleBell(chordToneFrequency(profile, tones, bell[1], 2), start, 1.6, 0.058 * gain, step % 3 === 0 ? -0.4 : 0.4);
+    if (boss) {
+      const answer = LAKE_BELLS.find((entry) => entry[0] === (step + 30) % 32);
+      if (answer) scheduleBell(chordToneFrequency(profile, tones, answer[1], 3), start, 1.0, 0.026 * gain, 0);
+    }
+    if (boss || phraseBar >= 4) {
+      const glass = LAKE_GLASS[beatStep - (beatStep % 2)];
+      if (glass !== null && (boss || beatStep % 2 === 0)) {
+        scheduleTone(chordToneFrequency(profile, tones, glass, beatStep % 2 === 0 ? 3 : 2), stepDuration * 2.5, start, {
+          gain: (beatStep % 2 === 0 ? 0.028 : 0.016) * gain,
+          type: 'sine',
+          attack: 0.004,
+          pan: beatStep % 4 === 0 ? -0.5 : 0.5,
+        }, melodyBus);
+      }
+    }
+  }
+
+  // Wave 5, night sky: the fastest. Four on the floor with a layered clap and snare,
+  // a rolling offbeat saw bass, a two-octave doubled-saw arpeggio whose filter sweeps
+  // over eight bars, a gliding lead and high pings. Its boss fills every bass step,
+  // adds stabs and snare rolls, and never drops the lead.
+  function scheduleNightStep(step, start, stepDuration, profile, gain) {
+    const { beatStep, bar, phraseBar, tones, bassNote } = trackFrame(step, profile);
+    const boss = !!profile.boss;
+    const turnaround = bar % 4 === 3;
+
+    if (beatStep % 4 === 0 || (turnaround && beatStep >= 14) || (boss && beatStep === 11 && bar % 2 === 1)) {
+      scheduleKick(start, (boss ? 0.17 : 0.15) * gain, boss ? PUMP_DEPTH * 0.7 : PUMP_DEPTH);
+    }
+    if (beatStep % 8 === 4) {
+      scheduleSnare(start, 0.09 * gain);
+      scheduleClap(start, 0.06 * gain);
+    }
+    if (boss && turnaround && beatStep >= 8) scheduleSnare(start, (0.03 + (beatStep - 8) * 0.01) * gain);
+    if (beatStep % 4 === 2) {
+      scheduleHat(start, 0.03 * gain, 0.15);
+    } else {
+      scheduleHat(start, 0.014 * gain, 0.03);
+      if (boss && beatStep % 4 === 3) scheduleHat(start + stepDuration * 0.5, 0.011 * gain, 0.025);
+    }
+    if (bar % 8 === 0 && beatStep === 0) scheduleHat(start, 0.04 * gain, 0.9);
+    if (turnaround && beatStep === 8) {
+      scheduleNoise(stepDuration * 8, start, { gain: 0.022 * gain, swell: true, filterFrequency: 700, endFilterFrequency: 6000, q: 1.2 }, musicGain);
+    }
+
+    const bassStep = NIGHT_BASS[beatStep] || (boss ? 1 : 0);
+    if (bassStep) {
+      scheduleBass(
+        midiFrequency(bassNote + (bassStep === 2 ? 12 : 0)),
+        start,
+        stepDuration * 0.92,
+        (boss ? 0.085 : 0.075) * gain,
+        (boss ? 1700 : 1100) * (beatStep % 4 === 2 ? 1.25 : 1),
+        'sawtooth',
+        boss,
+      );
+    }
+    if (beatStep === 0) {
+      schedulePad(tones.map((tone) => midiFrequency(profile.root + 24 + tone)), start, stepDuration * 16.5, 0.011 * gain);
+    }
+    if (boss && BOSS_STABS.includes(beatStep)) scheduleStab(bassNote + 12, start, stepDuration * 1.4, 0.016 * gain);
+
+    if (boss || phraseBar >= 2) {
+      sweepArpFilter(step, start, boss ? 3000 : 2400, 128);
+      const frequency = chordToneFrequency(profile, tones, NIGHT_ARP[beatStep], 2);
+      const arpGain = (step % 3 === 0 ? 0.03 : 0.023) * gain;
+      scheduleArp(frequency, start, stepDuration * 0.8, arpGain, 'sawtooth', beatStep % 2 === 0 ? -0.35 : 0.35);
+      scheduleTone(frequency * (boss && beatStep % 2 === 0 ? 2 : 1), stepDuration * 0.8, start, {
+        gain: arpGain * 0.6,
+        type: 'sawtooth',
+        attack: 0.003,
+        hold: 0.3,
+        detune: 14,
+      }, arpFilter);
+    }
+    if (boss || phraseBar >= 4) {
+      const note = NIGHT_LEAD.find((entry) => entry[0] === step % 64);
+      if (note) scheduleGlideLead(chordToneFrequency(profile, tones, note[1], 2), start, stepDuration * note[2] * 0.95, 0.024 * gain);
+    }
+    if (bar % 2 === 1 && (beatStep === 3 || beatStep === 11)) {
+      scheduleTone(chordToneFrequency(profile, tones, beatStep === 3 ? 8 : 7, 3), 0.5, start, {
+        gain: 0.01 * gain,
+        type: 'sine',
+        attack: 0.003,
+        pan: beatStep === 3 ? -0.7 : 0.7,
+      }, melodyBus);
+    }
+  }
+
+  // Between waves: half a drum kit, an offbeat bass, a gapped arpeggio and a pad.
+  function scheduleInterludeStep(step, start, stepDuration, profile, gain) {
+    const { beatStep, tones, bassNote } = trackFrame(step, profile);
+
+    if (beatStep % 8 === 0) scheduleKick(start, 0.12 * gain, PUMP_DEPTH, KICK_TIGHT);
+    if (beatStep % 8 === 4) scheduleClap(start, 0.07 * gain);
+    if (beatStep % 4 === 2) {
+      scheduleHat(start, 0.022 * gain, 0.05);
+      scheduleBass(midiFrequency(bassNote + 12), start, stepDuration * 1.4, 0.055 * gain, 900, 'sawtooth', false);
+    }
+    if (beatStep === 0) {
+      schedulePad(tones.map((tone) => midiFrequency(profile.root + 12 + tone)), start, stepDuration * 16.5, 0.012 * gain);
+    }
+    sweepArpFilter(step, start, 1500, 64);
+    const tone = INTERLUDE_ARP[beatStep];
+    if (tone !== null) {
+      scheduleArp(chordToneFrequency(profile, tones, tone, 2), start, stepDuration * 0.75, 0.026 * gain, 'square', beatStep % 2 === 0 ? -0.35 : 0.35);
+    }
+  }
+
+  const trackSteps = {
+    meadow: scheduleMeadowStep,
+    river: scheduleRiverStep,
+    mine: scheduleMineStep,
+    lake: scheduleLakeStep,
+    night: scheduleNightStep,
+    interlude: scheduleInterludeStep,
+  };
 
   function scheduleGameOverStep(step, start, stepDuration, profile, profileGain) {
     const beatStep = step % MUSIC_BAR_STEPS;
@@ -1130,13 +1411,15 @@ export function createSpellwaveAudio({
     zap(440, 400, 0.09, 0.035, { delay: 0.09, cutoff: 2000 });
   }
 
-  // Each letter is a shot from the cannon: a short falling pulse over a small kick,
-  // pitched higher as the word fills in. It fires on every key, so it stays tiny.
+  // Each letter is a plasma shot: a driven low thump under a crackle of bright noise
+  // and a quick falling zap. The top layers brighten as the word fills in. It fires on
+  // every key, so it stays short and the bright parts stay quiet.
   function playTypeSound(progress = Math.min(getTypedLength(), 12) / 12) {
     const amount = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
-    const pitch = varyPitch(520 + amount * 420, 10);
-    playTone(pitch * 2.6, 0.06, { gain: 0.03, type: 'square', endFrequency: pitch, attack: 0.001, cutoff: 3800 });
-    playTone(190, 0.045, { gain: 0.034, type: 'sine', endFrequency: 80, attack: 0.001 });
+    const pitch = varyPitch(1700 + amount * 1100, 20);
+    playTone(varyPitch(140 + amount * 22, 12), 0.12, { gain: 0.085, type: 'sine', endFrequency: 50, attack: 0.002, drive: true });
+    playNoise(0.045, { gain: varyGain(0.03), filterFrequency: 3600 + amount * 3000, q: 1.2 });
+    playTone(pitch, 0.06, { gain: 0.018, type: 'square', endFrequency: pitch * 0.3, attack: 0.001, cutoff: 5200 });
   }
 
   // A monster bursting out of hiding: a hit, a rush of noise and a falling stinger.
@@ -1186,18 +1469,20 @@ export function createSpellwaveAudio({
     zap(pitch, pitch * 1.5, 0.14, 0.03, { pan, cutoff: 2800, hold: 0.4 });
   }
 
-  // A burst of noise over a falling sweep and a low punch.
+  // The monster bursting: mid-range noise and a falling sweep. It leaves the low end
+  // to the cannon blast that fires with it, and lands with that blast's boom.
   function playDefeatSound(enemy) {
     if (enemy?.isBoss) {
       playBossExplosionSound(enemy);
       return;
     }
     const pan = lanePan(enemy);
-    const base = varyPitch(880, 80);
-    burst(0.16, varyGain(0.05), { pan, filterFrequency: varyPitch(2600, 300), endFilterFrequency: 500 });
-    zap(base, base / 8, 0.2, varyGain(0.05), { pan, type: 'sawtooth', cutoff: 3200, endCutoff: 400, q: 2 });
-    playTone(160, 0.14, { gain: 0.07, type: 'sine', endFrequency: 50, attack: 0.002, pan });
-    zap(base * 2, base * 3, 0.06, 0.014, { pan, type: 'sine', delay: 0.02 });
+    const base = varyPitch(700, 80);
+    const delay = BEAM_CHARGE_TIME;
+    burst(0.2, varyGain(0.05), { pan, delay, filterFrequency: varyPitch(1800, 300), endFilterFrequency: 450 });
+    zap(base, base / 6, 0.18, varyGain(0.04), { pan, delay, type: 'sawtooth', cutoff: 2600, endCutoff: 400, q: 2 });
+    playTone(220, 0.1, { gain: 0.035, type: 'sine', endFrequency: 90, attack: 0.002, pan, delay });
+    zap(base * 2.5, base * 4, 0.07, 0.014, { pan, type: 'sine', delay: delay + 0.03 });
   }
 
   // A driven low hit, a long falling sweep and roar of noise, then sparks scattering
@@ -1222,13 +1507,19 @@ export function createSpellwaveAudio({
     stab([73.42, 110, 146.83, 174.61], 1.6, 0.07, { delay: 0.3, cutoff: 1400, endCutoff: 200 });
   }
 
-  // The spell: a full cannon shot, a longer and brighter fall than a letter's.
+  // The kill shot: a short rising whine as the cannon charges, then a driven boom
+  // with a bright electric tail.
   function playBeamSound(targetX = 0) {
     const pan = laneOf(targetX);
-    const pitch = varyPitch(2200, 70);
-    zap(pitch, pitch * 0.12, 0.16, varyGain(0.04), { pan, type: 'sawtooth', cutoff: 5000, endCutoff: 900 });
-    zap(pitch * 0.5, pitch * 0.06, 0.12, 0.022, { pan });
-    burst(0.1, 0.022, { pan, filterFrequency: 5000, endFilterFrequency: 900, q: 1.4 });
+    const delay = BEAM_CHARGE_TIME;
+    zap(varyPitch(500, 60), 3200, delay, 0.03, { pan, type: 'sawtooth', attack: delay * 0.4, hold: 0.9, cutoff: 6000 });
+    thud(96, 0.42, 0.13, { pan, delay });
+    zap(330, 45, 0.3, 0.06, { pan, delay, type: 'sawtooth', cutoff: 1800, endCutoff: 250, q: 3, drive: true });
+    burst(0.4, 0.03, { pan, delay, filterType: 'highpass', filterFrequency: 5200, q: 0.6 });
+    for (let index = 0; index < 3; index += 1) {
+      const pitch = 2500 + Math.random() * 2500;
+      zap(pitch, pitch * 0.5, 0.02, 0.02, { pan, delay: delay + 0.06 + Math.random() * 0.3 });
+    }
   }
 
   function playHealSound(healed) {

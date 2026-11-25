@@ -1,20 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta17';
+import { createSpellwaveAudio } from './audio.js?v=beta19';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta17';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta17';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta17';
-import { createLeaderboard } from './leaderboard.js?v=beta17';
+import { createPotionSystem } from './potions.js?v=beta19';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta19';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta19';
+import { createLeaderboard } from './leaderboard.js?v=beta19';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta17';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta17';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta19';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta19';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta17';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta17';
-import { createWordDeck } from './word-decks.js?v=beta17';
-import { createStage } from './stages.js?v=beta17';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta17';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta17';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta19';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta19';
+import { createWordDeck } from './word-decks.js?v=beta19';
+import { createStage } from './stages.js?v=beta19';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta19';
+import { storyBeatForWave } from './story.js?v=beta19';
+import { createStoryteller } from './storyteller.js?v=beta19';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta19';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -421,6 +423,7 @@ let variantSchedule = new Map();
 const variantHintsShown = new Set();
 const casterBolts = [];
 let rideCart = null;
+let storyCard = null;
 let sceneGround = null;
 let sceneRockMaterial = null;
 const rail = { stage: null, state: 'idle', stopIndex: -1, from: null, to: null, toIndex: 0, t: 0, duration: 1, bursts: [], encounter: null, walkPhase: 0 };
@@ -864,6 +867,7 @@ function endGame() {
   clearChainLightningTimers();
   releaseChainBeams();
   potionsSystem.clear();
+  endStory();
   document.body.classList.remove('blizzard');
   document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
@@ -1022,6 +1026,10 @@ function handleKeyDown(event) {
     // Let Space activate a focused button/link instead of swallowing it.
     if (event.key === ' ' && event.target !== keyboardInput && event.target.closest && event.target.closest('button, a')) return;
     event.preventDefault();
+    if (hurryStory()) {
+      event.preventDefault();
+      return;
+    }
     enterCharacter(event.key);
   }
 }
@@ -1046,7 +1054,7 @@ function handleBeforeInput(event) {
     const data = event.data;
     const fresh = data.startsWith(composedText) ? data.slice(composedText.length) : data.slice(-1);
     composedText = data;
-    for (const character of fresh) enterCharacter(character);
+    for (const character of fresh) typeOrHurry(character);
     return;
   }
   composedText = '';
@@ -1063,9 +1071,14 @@ function handleBeforeInput(event) {
   if (event.data) {
     event.preventDefault();
     for (const character of event.data) {
-      enterCharacter(character);
+      typeOrHurry(character);
     }
   }
+}
+
+// A key typed on a touch keyboard: it hurries a storyteller on, or else it is a letter.
+function typeOrHurry(character) {
+  if (!hurryStory()) enterCharacter(character);
 }
 
 function enterCharacter(character) {
@@ -1141,6 +1154,8 @@ function checkCheatCode(character) {
 }
 
 function registerMistake() {
+  // A key pressed while someone is talking, with nothing to type at, is not a miss.
+  if (rail.state === 'story' && !enemies.some(enemy => !enemy.dying)) return;
   streak = 0;
   mistakeCount += 1;
   mistakeTimer = 0.2;
@@ -1197,6 +1212,7 @@ function defeatEnemy(enemy) {
 
   const { points, healed } = awardKill(enemy);
   spawnScorePopup(points, enemy, healed);
+  spawnRankPopup(enemy);
   // The final letter lands hard: a hit pause, a kick, and slow motion on the last of an ambush.
   hitStopTimer = 0.06;
   kickTimer = Math.max(kickTimer, 0.14);
@@ -1308,6 +1324,7 @@ function breakShield(enemy) {
   activeTarget = null;
   setEnemyKind(enemy, 'keyword');
   setEnemyWord(enemy, choosePromptOfLength(3, 7));
+  enemy.firstLetterAt = undefined;
   updateHud(true);
   updateTypedDisplay();
 }
@@ -2188,6 +2205,10 @@ function buildStageForWave(wave) {
   if ((rail.setPiece === 'bridge' || rail.setPiece === 'cart') && rail.bursts.length >= 3) rail.setPieceCount = rail.bursts.pop();
   document.body.classList.remove('blizzard');
   if (rideCart) rideCart.visible = false;
+  // One stop of the wave has no ambush: someone waits there with the story.
+  endStory();
+  rail.storyIndex = Math.max(1, Math.min(2, rail.bursts.length - 1));
+  rail.bursts.splice(rail.storyIndex, 0, 0);
   rail.stage = createStage({
     seed: Math.floor(Math.random() * 1e6) + wave,
     burstCount: Math.max(1, rail.bursts.length),
@@ -2243,6 +2264,7 @@ function updateRail(delta) {
     return;
   }
   if (rail.state === 'encounter') updateEncounter(delta);
+  if (rail.state === 'story') updateStory(delta);
 }
 
 // Some stages change partway along (the pass runs into the mine): as the camera steps
@@ -2264,7 +2286,9 @@ const BRIDGE_MONSTERS = 4;
 const RIDE_START_Z = -32;
 const BLIZZARD_VEIL_Z = -6.5;
 const BLIZZARD_STOP = 1;
-const FLIER_Y = 1.5;
+const FLIER_Y = 1.15;
+// Fliers keep right of this, clear of the readouts in the top left corner.
+const FLIER_MIN_X = -1.4;
 
 // Called while the camera travels. Returns true when a set-piece has stopped the walk.
 function updateSetPieceTravel(pose, delta) {
@@ -2310,7 +2334,7 @@ function startBridgeFight() {
 // A cave flier with a short word, rushing at the cart from far down the tunnel.
 function spawnRideMonster() {
   const enemy = spawnEnemy({ wordData: choosePromptOfLength(3, 5), type: ENEMY_TYPES.find(type => type.name === 'Glowmite'), flier: true });
-  const x = (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random() * 2.6);
+  const x = Math.random() < 0.4 ? -(0.6 + Math.random() * 0.8) : 1.2 + Math.random() * 2.6;
   enemy.baseY = GROUND_ENEMY_Y + 1.1 + Math.random() * 1.2;
   enemy.lane = x;
   enemy.damage = 1;
@@ -2339,8 +2363,145 @@ function arriveAtStop() {
     rail.state = 'boss';
     return;
   }
+  if (rail.stopIndex === rail.storyIndex) {
+    startStory();
+    return;
+  }
   startEncounter(stop, rail.bursts[rail.stopIndex] || 0, rail.stopIndex >= rail.bursts.length - 1);
-  if (rail.setPiece === 'blizzard' && rail.stopIndex === BLIZZARD_STOP) beginBlizzard();
+  // The blizzard is the second ambush, whichever stop that falls on.
+  if (rail.setPiece === 'blizzard' && rail.stopIndex === (rail.storyIndex === BLIZZARD_STOP ? BLIZZARD_STOP + 1 : BLIZZARD_STOP)) beginBlizzard();
+}
+
+// ── The story ────────────────────────────────────────────────────────────
+// At one stop in each wave someone is waiting (story.js). In the meadow they simply
+// talk. Later a myth holds them, and its word must be typed to set them free; then
+// they talk, and thank the player with a heart.
+const STORY_SPOT = new THREE.Vector3(2.3, 0, -4.2);
+const STORY_RESCUE_HEAL = 2;
+
+function showStoryLine(name, text) {
+  if (!storyCard) {
+    storyCard = document.createElement('div');
+    storyCard.className = 'story-card';
+    storyCard.innerHTML = '<span class="story-name"></span><span class="story-line"></span>';
+    document.getElementById('app').append(storyCard);
+  }
+  storyCard.querySelector('.story-name').textContent = name;
+  storyCard.querySelector('.story-line').textContent = text;
+  storyCard.hidden = false;
+  // Restart the entrance animation for each new line.
+  storyCard.classList.remove('is-in');
+  void storyCard.offsetWidth;
+  storyCard.classList.add('is-in');
+}
+
+function startStory() {
+  const beat = storyBeatForWave(waveSet);
+  const npc = createStoryteller(beat);
+  npc.position.copy(STORY_SPOT);
+  npc.position.y = GROUND_ENEMY_Y;
+  npc.scale.setScalar(0.01);
+  enemyGroup.add(npc);
+  rail.state = 'story';
+  rail.story = { beat, npc, line: -1, timer: 0, age: 0, guard: null, held: !!beat.plea, leaving: 0 };
+  if (beat.plea) {
+    // The myth that holds them: it stands its ground and does no harm, but will not leave.
+    const guard = spawnEnemy({ wordData: choosePromptOfLength(4, 8), type: ENEMY_TYPES.find(type => type.name === 'Bog Shambler') });
+    const at = new THREE.Vector3(STORY_SPOT.x - 1.9, guard.baseY, STORY_SPOT.z - 0.6);
+    guard.damage = 0;
+    guard.noGlossary = false;
+    guard.lane = at.x;
+    guard.spawnZ = at.z - 3;
+    guard.revealZ = at.z - 2;
+    guard.rail = { phase: 'guard', t: 0, to: at };
+    guard.group.position.copy(at);
+    setEnemyKind(guard, 'myth');
+    rail.story.guard = guard;
+    npc.userData.parts.dome.visible = true;
+    showStoryLine(beat.name, beat.plea);
+  }
+}
+
+function advanceStoryLine() {
+  const story = rail.story;
+  story.line += 1;
+  if (story.line >= story.beat.lines.length) {
+    story.leaving = 0.01;
+    if (storyCard) storyCard.hidden = true;
+    return;
+  }
+  const text = story.beat.lines[story.line];
+  showStoryLine(story.beat.name, text);
+  // Long enough to read at a steady pace; any key moves on sooner.
+  story.timer = 1.8 + text.length * 0.06;
+}
+
+function updateStory(delta) {
+  const story = rail.story;
+  if (!story) return;
+  story.age += delta;
+  const { head, arms, dome } = story.npc.userData.parts;
+  const grow = Math.min(1, story.age / 0.35);
+  story.npc.scale.setScalar(Math.max(0.01, (1 - (1 - grow) ** 3) * (1 - Math.min(1, story.leaving / 0.4))));
+  story.npc.rotation.y = Math.atan2(-story.npc.position.x, CAMERA_DISTANCE - story.npc.position.z);
+  story.npc.position.y = GROUND_ENEMY_Y + Math.abs(Math.sin(story.age * (story.held ? 9 : 3))) * (story.held ? 0.05 : 0.03);
+  head.rotation.z = Math.sin(story.age * 2.2) * 0.08;
+  for (const arm of arms) {
+    // Held: arms up and shaking. Free: one arm waves while they talk.
+    const wave = story.held ? 2.6 + Math.sin(story.age * 14) * 0.2 : arm.userData.side > 0 ? 0.5 + Math.sin(story.age * 5) * 0.5 : 0.1;
+    arm.rotation.z = arm.userData.side * wave;
+  }
+  dome.rotation.y = story.age * 1.4;
+
+  if (story.held) {
+    if (story.guard && !story.guard.dying && enemies.includes(story.guard)) return;
+    // Freed: the dome bursts, the player is thanked with a heart, and the tale begins.
+    story.held = false;
+    story.guard = null;
+    dome.visible = false;
+    reusableVector.copy(story.npc.position);
+    reusableVector.y += 1;
+    fx.burst(reusableVector, { color: 0x9a5cff, color2: 0xffffff, count: 26, speed: 5, life: 0.6, size: 0.3 });
+    fx.ring(reusableVector, 0x9a5cff, { from: 0.4, to: 3, life: 0.45, opacity: 0.8, flat: false });
+    const healed = Math.min(STORY_RESCUE_HEAL, MAX_LIFE - health);
+    if (healed > 0) {
+      health += healed;
+      playHealSound(healed);
+      updateHud(true);
+    }
+    advanceStoryLine();
+    return;
+  }
+  if (story.leaving > 0) {
+    story.leaving += delta;
+    if (story.leaving < 0.5) return;
+    endStory();
+    const stops = rail.stage.stops;
+    railBeginTravel(rail.stopIndex + 1 < rail.bursts.length ? rail.stopIndex + 1 : stops.length - 1);
+    return;
+  }
+  if (story.line < 0) {
+    if (story.age > 0.5) advanceStoryLine();
+    return;
+  }
+  story.timer -= delta;
+  if (story.timer <= 0) advanceStoryLine();
+}
+
+// Any key hurries the storyteller on to the next line. Returns true if it did.
+function hurryStory() {
+  const story = rail.story;
+  if (rail.state !== 'story' || !story || story.held || story.leaving > 0 || story.line < 0) return false;
+  if (story.timer > 0.25) story.timer = 0;
+  return true;
+}
+
+function endStory() {
+  if (storyCard) storyCard.hidden = true;
+  if (!rail.story) return;
+  enemyGroup.remove(rail.story.npc);
+  disposeObject(rail.story.npc);
+  rail.story = null;
 }
 
 const FALLBACK_SPOTS = [
@@ -2443,6 +2604,7 @@ function setupRailEntry(enemy, spot) {
     to = new THREE.Vector3(spot.x, baseY, spot.z);
   }
   if (enemy.variant === 'caster') to.z = Math.min(to.z, -10);
+  if (enemy.flier) to.x = Math.max(FLIER_MIN_X, to.x);
   enemy.lane = to.x;
   enemy.revealed = false;
   enemy.revealZ = Math.min(from.z, to.z) - 2;
@@ -2497,6 +2659,14 @@ function updateRailEnemy(enemy, delta, seconds) {
   const position = enemy.group.position;
   const stunned = enemy.stunTimer > 0;
   const facing = Math.atan2(-position.x, CAMERA_DISTANCE - position.z);
+
+  if (plan.phase === 'guard') {
+    position.x = plan.to.x + Math.sin(seconds * 1.7 + enemy.phase) * 0.25;
+    position.z = plan.to.z;
+    position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4 + enemy.phase)) * 0.1;
+    enemy.group.rotation.y = facing + 0.5;
+    return false;
+  }
 
   if (plan.phase === 'ride') {
     if (!stunned) position.z += plan.speed * delta;
@@ -2617,6 +2787,7 @@ function updateRailEnemy(enemy, delta, seconds) {
 
 // Every correct letter lands: the monster flinches, sparks fly and the cannon fires a bolt.
 function hitEnemyWithLetter(enemy) {
+  if (enemy.firstLetterAt === undefined) enemy.firstLetterAt = elapsed;
   enemy.flinch = 1;
   reusableVector.copy(enemy.group.position);
   reusableVector.y += 0.9 * enemy.group.scale.y;
@@ -3290,7 +3461,11 @@ function displayTypedBuffer() {
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
   if (!effectiveSP.startsWith(typed)) return typedBuffer;
-  if (effectiveSP !== activeTarget.searchPrompt) return typedBuffer;
+  if (effectiveSP !== activeTarget.searchPrompt) {
+    // Another spelling (color for colour): show it as the player spells it, spaces and all.
+    const term = altTermFor(activeTarget.prompt, effectiveSP);
+    return term ? term.slice(0, promptIndexForProgress(term, typed.length)) : typedBuffer;
+  }
   return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typed.length, {
     multiplicationAlias: activeTarget.isEquation,
   }));
@@ -3616,7 +3791,7 @@ function spawnEnemy(options = {}) {
   };
   if (options.flier) {
     enemy.flier = true;
-    enemy.wobbleAmount = 0.6 + Math.random() * 0.5;
+    enemy.wobbleAmount = 0.5 + Math.random() * 0.4;
     enemy.wobbleSpeed = 1.4 + Math.random();
     enemy.wings = createWings(type);
     group.add(enemy.wings);
@@ -5112,6 +5287,36 @@ function updateComboDisplay() {
 }
 
 function updateTypingLabel() {}
+
+// Letters a second, from the first letter typed at a monster to its last, that earn
+// each rank. 6 a second is about 72 words a minute.
+const RANK_SPEEDS = [['A', 6], ['B', 4.5], ['C', 3.2], ['D', 2.2]];
+
+function killRank(enemy) {
+  const letters = Math.max(1, enemy.searchPrompt.length - 1);
+  const seconds = Math.max(0.05, elapsed - (enemy.firstLetterAt ?? elapsed));
+  const speed = letters / seconds;
+  return (RANK_SPEEDS.find(([, needed]) => speed >= needed) || ['E'])[0];
+}
+
+// Monsters, healers and chests are ranked; rocks and bosses are not.
+function spawnRankPopup(enemy) {
+  if (enemy.isProjectile || enemy.isBoss) return;
+  const label = enemy.label;
+  if (!label || label.classList.contains('is-hidden')) return;
+  const left = parseFloat(label.style.left);
+  const top = parseFloat(label.style.top);
+  if (!Number.isFinite(left) || !Number.isFinite(top)) return;
+  const rank = killRank(enemy);
+  const popup = document.createElement('div');
+  popup.className = 'rank-popup';
+  popup.dataset.rank = rank;
+  popup.innerHTML = `RANK<b>${rank}</b>`;
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top + 46}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
 
 function spawnScorePopup(points, enemy, healed = 0) {
   const label = enemy.label;

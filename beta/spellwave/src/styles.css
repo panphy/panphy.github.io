@@ -159,31 +159,121 @@ body.final-wave-active {
   transition: opacity 80ms ease-out;
 }
 
-/* The frozen lake's blizzard: snow closes in over the scene, under the cards and the HUD. */
+/* The frozen lake's blizzard: mist closes in and flakes of several sizes drift across,
+   under the cards and the HUD. */
 .blizzard-veil {
   position: fixed;
   inset: 0;
   z-index: 6;
   pointer-events: none;
   opacity: 0;
-  background:
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0) 0 22px, rgba(255, 255, 255, 0.5) 22px 25px, rgba(255, 255, 255, 0) 25px 60px),
-    radial-gradient(ellipse at 50% 62%, rgba(236, 244, 250, 0.3) 0%, rgba(236, 244, 250, 0.86) 62%, rgba(244, 249, 253, 0.97) 100%);
-  background-size: 240px 240px, 100% 100%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 62%, rgba(236, 244, 250, 0.28) 0%, rgba(236, 244, 250, 0.8) 62%, rgba(244, 249, 253, 0.95) 100%);
   transition: opacity 900ms ease;
+}
+
+.blizzard-veil::before,
+.blizzard-veil::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  transform: rotate(8deg);
+}
+
+/* Small and middling flakes, far off. */
+.blizzard-veil::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.85) 0 2px, rgba(255, 255, 255, 0) 3.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.7) 0 3.5px, rgba(255, 255, 255, 0) 5.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.6) 0 5px, rgba(255, 255, 255, 0) 8px);
+  background-size: 97px 97px, 163px 163px, 241px 241px;
+  background-position: 0 0, 40px 70px, 120px 30px;
+}
+
+/* Large soft flakes, close to the eye. */
+.blizzard-veil::after {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.5) 0 9px, rgba(255, 255, 255, 0) 14px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.38) 0 16px, rgba(255, 255, 255, 0) 24px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.3) 0 26px, rgba(255, 255, 255, 0) 38px);
+  background-size: 337px 337px, 521px 521px, 743px 743px;
+  background-position: 60px 20px, 250px 300px, 400px 90px;
 }
 
 body.blizzard .blizzard-veil {
   opacity: 1;
-  animation: blizzard-drift 0.9s linear infinite;
 }
 
-@keyframes blizzard-drift {
-  to { background-position: -240px 240px, 0 0; }
+body.blizzard .blizzard-veil::before {
+  animation: blizzard-far 5s linear infinite;
+}
+
+body.blizzard .blizzard-veil::after {
+  animation: blizzard-near 3.2s linear infinite;
+}
+
+/* Each layer moves by a whole number of its own tiles, so the loop has no jump. */
+@keyframes blizzard-far {
+  to { background-position: -194px 194px, -123px 233px, -121px 271px; }
+}
+
+@keyframes blizzard-near {
+  to { background-position: -277px 357px, -271px 821px, -343px 833px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.blizzard .blizzard-veil { animation: none; }
+  body.blizzard .blizzard-veil::before,
+  body.blizzard .blizzard-veil::after { animation: none; }
+}
+
+/* The storyteller's words, low in the middle of the view. */
+.story-card {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(96px, 24vh, 220px);
+  z-index: 8;
+  display: grid;
+  gap: 4px;
+  width: min(560px, calc(100vw - 32px));
+  padding: 12px 18px 14px;
+  border: 2px solid #b08a4a;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff8ea, #fbefd6);
+  box-shadow: 0 8px 22px rgba(60, 44, 24, 0.3);
+  color: #2e2416;
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.story-card[hidden] {
+  display: none;
+}
+
+.story-card.is-in {
+  animation: story-in 220ms ease-out;
+}
+
+.story-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a5a1c;
+}
+
+.story-line {
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  line-height: 1.35;
+}
+
+@keyframes story-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-card.is-in { animation: none; }
 }
 
 .damage-flash {
@@ -1029,6 +1119,50 @@ body.is-running:not(.is-paused) .hud-grid {
 #comboValue.is-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+/* Only the score and the life meter show during play; the other readouts stay in the
+   page for the code that fills them. */
+.readout[hidden] {
+  display: none;
+}
+
+/* The rank a kill earns, A to E, by how fast its word was typed. */
+.rank-popup {
+  position: fixed;
+  z-index: 20;
+  font-family: var(--font-mono);
+  font-size: clamp(1.1rem, 3vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fff;
+  pointer-events: none;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55), 0 0 10px rgba(0, 0, 0, 0.35);
+  transform: translate(-50%, -50%);
+  animation: rank-pop 900ms ease-out forwards;
+  white-space: nowrap;
+}
+
+.rank-popup b {
+  margin-left: 0.3em;
+  font-size: 1.5em;
+}
+
+.rank-popup[data-rank="A"] b { color: #4fd8ff; }
+.rank-popup[data-rank="B"] b { color: #7be36a; }
+.rank-popup[data-rank="C"] b { color: #ffd84a; }
+.rank-popup[data-rank="D"] b { color: #ff9a3c; }
+.rank-popup[data-rank="E"] b { color: #ff5a5a; }
+
+@keyframes rank-pop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  75% { opacity: 1; transform: translate(-50%, -62%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(0.96); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rank-popup { animation-duration: 600ms; }
 }
 
 .score-popup {
@@ -3468,6 +3602,11 @@ body.loot-guide-open .potion-bar {
 .word-tag[data-kind="splitter"] .prompt-kind {
   background: rgba(122, 82, 190, 0.18);
   color: #5a3596;
+}
+
+.word-tag[data-kind="myth"] .prompt-kind {
+  background: rgba(154, 92, 255, 0.2);
+  color: #5b2bb0;
 }
 
 .word-tag[data-kind="caster"] .prompt-kind {

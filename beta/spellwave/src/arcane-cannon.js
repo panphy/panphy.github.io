@@ -1,6 +1,6 @@
 // arcane-cannon.js — the player's weapon: a magic machine gun, part machine and part
-// spell, held low in the middle of the view and seen from behind, so only its top
-// rises into the picture. Six barrels spin up as the player types,
+// spell, held low and a little right of the middle, angled in toward the centre of
+// the view, so only its top rises into the picture. Six barrels spin up as the player types,
 // a crystal core feeds them, and every letter kicks it back with a muzzle flash.
 //
 // It hangs from the camera, so it draws in front of the world. It adds no lights:
@@ -8,11 +8,14 @@
 import * as THREE from 'three';
 
 const DEPTH = -1.55;
-const GUN_Y = -1.02;
-const GUN_SCALE = 1.6;
-// The gun points almost straight ahead and only leans a little toward the target.
-const REST_AIM = new THREE.Vector3(0, 0.15, -9);
-const AIM_LEAN = 0.3;
+const GUN_Y = -0.98;
+const GUN_SCALE = 1.5;
+// How far right of centre it sits, as a share of half the view's width.
+const GUN_OFFSET = 0.3;
+// At rest it points at the middle of the view, a short way ahead, which turns it in
+// at an angle; it leans further toward whatever is being typed at.
+const REST_AIM = new THREE.Vector3(0, 0.1, -5.5);
+const AIM_LEAN = 0.45;
 const BARREL_LENGTH = 0.5;
 const BARREL_RADIUS = 0.062;
 const MUZZLE_Z = 0.3 + BARREL_LENGTH;
@@ -187,7 +190,8 @@ export function createArcaneCannon({ camera, crystalMaterial, createCrown = null
       const size = THREE.MathUtils.clamp(camera.aspect * 0.62, 0.55, 0.95);
       const bob = Math.sin(walkPhase) * 0.024 * walk;
       mount.scale.setScalar(size * GUN_SCALE);
-      mount.position.set(Math.sin(walkPhase * 0.5) * 0.02 * walk, GUN_Y + bob + Math.sin(seconds * 0.9) * 0.008, DEPTH);
+      const halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * -DEPTH * camera.aspect;
+      mount.position.set(halfWidth * GUN_OFFSET + Math.sin(walkPhase * 0.5) * 0.02 * walk, GUN_Y + bob + Math.sin(seconds * 0.9) * 0.008, DEPTH);
 
       // The gun swings toward the target without sweeping right across the view.
       camera.updateMatrixWorld();

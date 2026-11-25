@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <link rel="stylesheet" href="../assets/standalone-top.css">
   <style>:root { --standalone-top-bg: #efe3c4; }</style>
-  <link rel="stylesheet" href="./spellwave/src/styles.css?v=beta17">
+  <link rel="stylesheet" href="./spellwave/src/styles.css?v=beta19">
   <script type="importmap">
     {
       "imports": {
@@ -132,7 +132,7 @@
         <span>Score</span>
         <strong id="scoreValue">0</strong>
       </div>
-      <div class="readout" title="Your personal best score">
+      <div class="readout" title="Your personal best score" hidden>
         <span>Best</span>
         <strong id="bestValue">0</strong>
       </div>
@@ -140,11 +140,11 @@
         <span>Life</span>
         <div class="life-meter" id="healthValue" aria-label="Life: 5 hearts"></div>
       </div>
-      <div class="readout" title="Current wave level">
+      <div class="readout" title="Current wave level" hidden>
         <span>Wave</span>
         <strong id="waveValue">1</strong>
       </div>
-      <div class="readout chain-readout" title="Words in a row without a miss">
+      <div class="readout chain-readout" title="Words in a row without a miss" hidden>
         <span>Chain</span>
         <strong id="comboValue">0</strong>
       </div>
@@ -207,7 +207,7 @@ A wrong key is only a miss, so keep typing!</p>
     </div>
   </div>
 
-  <script type="module" src="./spellwave/src/main.js?v=beta17"></script>
+  <script type="module" src="./spellwave/src/main.js?v=beta19"></script>
 </body>
 
 </html>
