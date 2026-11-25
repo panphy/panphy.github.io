@@ -14,6 +14,11 @@
   <link rel="stylesheet" href="../assets/standalone-top.css">
   <style>:root { --standalone-top-bg: #efe3c4; }</style>
   <link rel="stylesheet" href="./spellwave/src/styles.css?v=beta20">
+  <script
+    id="supabaseScript"
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+    defer
+  ></script>
   <script type="importmap">
     {
       "imports": {
@@ -149,6 +154,27 @@
         <strong id="comboValue">0</strong>
       </div>
     </section>
+
+    <aside class="sw-leaderboard" aria-label="Top scores">
+      <div class="sw-leaderboard-header">
+        <p>Hall of Wizards</p>
+        <span id="swLeaderboardStatus">Live</span>
+      </div>
+      <ol id="swScoreList" class="sw-score-list"></ol>
+    </aside>
+
+    <div class="sw-initials-modal" id="swInitialsModal" role="dialog" aria-modal="true" aria-labelledby="swInitialsTitle" hidden>
+      <div class="sw-initials-card" id="swInitialsCard">
+        <p class="sw-modal-kicker">Top Wizard</p>
+        <h2 id="swInitialsTitle">Enter the Tome</h2>
+        <div class="sw-modal-score" id="swModalScore">0</div>
+        <label for="swInitialsInput">Enter 3 initials</label>
+        <input id="swInitialsInput" type="text" maxlength="3" placeholder="AAA" autocomplete="off" inputmode="text">
+        <p class="sw-error-text" id="swInitialsError"></p>
+        <button id="swSubmitInitials" type="button">Submit Score</button>
+        <button id="swSkipInitials" class="sw-skip-button" type="button" title="Close without submitting">Skip</button>
+      </div>
+    </div>
 
     <section class="message-panel" id="messagePanel" aria-live="polite">
       <p id="messageKicker">SPELLWAVE</p>
