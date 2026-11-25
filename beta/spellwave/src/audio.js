@@ -1,23 +1,34 @@
 // The output limiter adds about 2 dB of make-up gain, so the master sits a little lower than it used to.
 const MASTER_VOLUME = 0.78;
 const MUSIC_GAIN = 0.82;
+// Trims the driving score against the effects; the quiet ending reprise is left alone.
+const GROOVE_TRIM = 0.67;
 const MUSIC_TIMER_INTERVAL = 80;
 const MUSIC_SCHEDULE_AHEAD = 0.34;
 const MUSIC_TRANSITION_DURATION = 1.2;
-// Song form: each season theme plays its melody twice, then its B section, then the melody again.
+// Song form: 16 steps to a bar, two bars to a section. The B section swaps the
+// arpeggio and brings in the lead; the last section lifts the arpeggio an octave.
+const MUSIC_BAR_STEPS = 16;
 const MUSIC_SECTION_STEPS = 32;
+const MUSIC_PHRASE_STEPS = 64;
 const MUSIC_FORM = ['a', 'a', 'b', 'a'];
 const MUSIC_STEP_WRAP = 256;
-const MUSIC_REVERB_SEND = 0.2;
-const SFX_REVERB_SEND = 0.24;
-const ECHO_TIME = 0.29;
-const ECHO_FEEDBACK = 0.3;
-const ECHO_SEND = 0.26;
+// Kick and bass smear in a long reverb, so the music sends less than the effects do.
+const MUSIC_REVERB_SEND = 0.1;
+const SFX_REVERB_SEND = 0.22;
+// The echo follows the tempo (a dotted eighth); slow profiles use this fixed time.
+const ECHO_TIME = 0.34;
+const ECHO_SYNC_STEPS = 3;
+const ECHO_FEEDBACK = 0.32;
+const ECHO_SEND = 0.28;
 const MUSIC_FILTER_OPEN = 18000;
 const MUSIC_FILTER_LOW_LIFE = 3400;
 const MUSIC_FILTER_FROZEN = 420;
 const FROZEN_TEMPO_STRETCH = 1.4;
+const BASS_FILTER_FLOOR = 190;
+const PUMP_DEPTH = 0.42;
 const LANE_PAN_WIDTH = 0.7;
+const NOISE_BUFFER_SECONDS = 2;
 // The victory score: 90 bpm, the same bar grid as ending-cinematic.js.
 const SCORE_BEAT = 60 / 90;
 const SCORE_GAIN = 0.95;
@@ -31,180 +42,171 @@ function noteFrequency(name) {
   const semitones = NOTE_OFFSETS[match[1]] + (match[2] === '#' ? 1 : match[2] === 'b' ? -1 : 0) + (Number(match[3]) - 4) * 12;
   return 440 * Math.pow(2, semitones / 12);
 }
-const MUSIC_SEASONS = [
+
+// MIDI note number → Hz (69 = A4).
+function midiFrequency(note) {
+  return 440 * Math.pow(2, (note - 69) / 12);
+}
+
+// Seconds per sixteenth note at a tempo.
+function stepSeconds(bpm) {
+  return 60 / bpm / 4;
+}
+
+// Bass rhythms, one bar of sixteenths: 0 rests, 1 plays the chord's bass note, 2 the octave above.
+const BASS_OFFBEAT = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1];
+const BASS_GALLOP = [0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 2];
+const BASS_ROLLING = [1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 2];
+const BASS_STAGGER = [1, 0, 1, 1, 2, 0, 1, 1, 1, 0, 1, 1, 2, 1, 2, 1];
+const BASS_DRIVE = [1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2];
+// Arpeggio shapes: each number walks up the bar's chord tones, wrapping into higher octaves.
+const ARP_GAPPED = [0, null, 2, 3, null, 2, 4, null, 0, null, 2, 3, null, 5, 4, 2];
+const ARP_RISE = [0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 4, 2];
+const ARP_THREES = [0, 2, 4, 0, 2, 4, 0, 2, 0, 2, 4, 0, 2, 4, 3, 5];
+const ARP_PEDAL = [3, 0, 4, 0, 5, 0, 4, 0, 3, 0, 4, 0, 6, 0, 5, 0];
+const ARP_FALL = [6, 5, 4, 3, 5, 4, 3, 2, 4, 3, 2, 1, 3, 2, 1, 0];
+const ARP_WIDE = [0, 3, 4, 6, 3, 4, 6, 7, 4, 6, 7, 6, 4, 3, 1, 2];
+// Lead lines over a two-bar section: [step, chord-tone index, length in steps].
+// They are written in chord tones, so they fit whatever the bar's harmony is.
+const LEAD_A = [[0, 3, 3], [3, 4, 3], [6, 5, 2], [8, 4, 4], [16, 3, 3], [19, 5, 3], [22, 4, 2], [24, 3, 6]];
+const LEAD_B = [[0, 5, 2], [2, 4, 2], [4, 3, 4], [10, 4, 2], [12, 5, 4], [16, 6, 3], [19, 5, 3], [22, 4, 2], [24, 5, 2], [26, 4, 2], [28, 3, 4]];
+const LEAD_FALLING = [[0, 5, 4], [4, 4, 4], [8, 3, 6], [16, 4, 4], [20, 3, 4], [24, 2, 6]];
+// Syncopated chord stabs in boss music: a 3 + 3 + 2 push across the bar.
+const STAB_STEPS = [0, 6, 12];
+
+// One profile per wave: a four-bar loop of [bass offset, chord tones] in semitones
+// from the root (a MIDI note). `level` switches layers on as the waves go by.
+const WAVE_MUSIC = [
   {
-    name: 'spring',
-    voice: 'marimba',
-    baseStep: 0.185,
-    melodyType: 'triangle',
-    bassType: 'sine',
-    accentType: 'sine',
-    melodyGain: 0.022,
-    bassGain: 0.024,
-    hatGain: 0.006,
-    drumGain: 0.011,
-    drumFilter: 680,
-    melody: [
-      523.25, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25, null,
-      587.33, 659.25, 783.99, 880.0, 783.99, 659.25, 587.33, null,
-      659.25, 783.99, 987.77, 880.0, 783.99, 659.25, 587.33, 523.25,
-      493.88, null, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25,
-    ],
-    melodyB: [
-      783.99, 659.25, 523.25, 659.25, 880.0, 698.46, 587.33, 698.46,
-      1046.5, 880.0, 698.46, 880.0, 987.77, 783.99, 587.33, null,
-      659.25, 783.99, 1046.5, 783.99, 698.46, 880.0, 1174.66, 880.0,
-      880.0, 1046.5, 880.0, 698.46, 783.99, null, 587.33, null,
-    ],
-    bass: [
-      130.81, null, null, null, 146.83, null, null, null,
-      174.61, null, null, null, 196.0, null, 174.61, null,
-    ],
+    // Spring meadow: D dorian, the lightest groove.
+    name: 'meadow',
+    level: 1,
+    baseStep: stepSeconds(122),
+    root: 38,
+    chords: [[0, [0, 3, 7]], [0, [0, 3, 7]], [-2, [-2, 2, 5]], [5, [5, 9, 12]]],
+    bass: BASS_OFFBEAT,
+    bassType: 'sawtooth',
+    bassCutoff: 700,
+    arp: ARP_GAPPED,
+    arpB: ARP_RISE,
+    arpType: 'square',
+    arpCutoff: 1500,
   },
   {
-    name: 'summer',
-    voice: 'pluck',
-    baseStep: 0.168,
-    melodyType: 'square',
-    bassType: 'triangle',
-    accentType: 'triangle',
-    melodyGain: 0.026,
-    bassGain: 0.03,
-    hatGain: 0.011,
-    drumGain: 0.018,
-    drumFilter: 520,
-    melody: [
-      587.33, 739.99, 880.0, 739.99, 987.77, 880.0, 739.99, 659.25,
-      587.33, null, 659.25, 739.99, 880.0, 987.77, 880.0, 739.99,
-      659.25, 783.99, 987.77, 1174.66, 987.77, 880.0, 783.99, 659.25,
-      739.99, null, 880.0, 987.77, 1174.66, 987.77, 880.0, 739.99,
-    ],
-    melodyB: [
-      739.99, 880.0, 1174.66, 880.0, 880.0, 659.25, 880.0, 659.25,
-      659.25, 783.99, 1046.5, 783.99, 587.33, 783.99, 987.77, 880.0,
-      1174.66, 880.0, 739.99, 880.0, 880.0, 987.77, 880.0, 659.25,
-      783.99, 1046.5, 1318.51, 1046.5, 987.77, 1174.66, 987.77, 880.0,
-    ],
-    bass: [
-      146.83, null, 146.83, null, 110.0, null, 110.0, null,
-      130.81, null, 130.81, null, 98.0, null, 110.0, null,
-    ],
+    // River wood: E minor, a galloping bass.
+    name: 'river',
+    level: 2,
+    baseStep: stepSeconds(126),
+    root: 40,
+    chords: [[0, [0, 3, 7]], [-4, [-4, 0, 3]], [3, [3, 7, 10]], [-2, [-2, 2, 5]]],
+    bass: BASS_GALLOP,
+    bassType: 'sawtooth',
+    bassCutoff: 800,
+    arp: ARP_RISE,
+    arpB: ARP_THREES,
+    arpType: 'square',
+    arpCutoff: 1700,
   },
   {
-    name: 'autumn',
-    voice: 'marimba',
-    baseStep: 0.178,
-    melodyType: 'sawtooth',
-    bassType: 'triangle',
-    accentType: 'triangle',
-    melodyGain: 0.02,
-    bassGain: 0.032,
-    hatGain: 0.008,
-    drumGain: 0.02,
-    drumFilter: 420,
-    melody: [
-      440.0, 523.25, 659.25, 587.33, 523.25, 493.88, 440.0, null,
-      392.0, 493.88, 587.33, 659.25, 587.33, 523.25, 493.88, null,
-      349.23, 440.0, 523.25, 659.25, 587.33, 523.25, 440.0, 392.0,
-      329.63, null, 392.0, 493.88, 587.33, 523.25, 493.88, 392.0,
-    ],
-    melodyB: [
-      659.25, 523.25, 440.0, 523.25, 587.33, 493.88, 392.0, 493.88,
-      523.25, 440.0, 349.23, 440.0, 493.88, 587.33, 659.25, null,
-      440.0, 523.25, 659.25, 880.0, 783.99, 587.33, 493.88, 587.33,
-      698.46, 523.25, 440.0, 523.25, 587.33, 493.88, 440.0, null,
-    ],
-    bass: [
-      110.0, null, null, null, 98.0, null, 98.0, null,
-      87.31, null, null, null, 98.0, null, 110.0, null,
-    ],
+    // Mountain pass and crystal mine: C phrygian, with its flat second.
+    name: 'mine',
+    level: 3,
+    baseStep: stepSeconds(128),
+    root: 36,
+    chords: [[0, [0, 3, 7]], [0, [0, 3, 7]], [1, [1, 5, 8]], [-2, [-2, 1, 5]]],
+    bass: BASS_ROLLING,
+    bassType: 'square',
+    bassCutoff: 760,
+    arp: ARP_THREES,
+    arpB: ARP_PEDAL,
+    arpType: 'sawtooth',
+    arpCutoff: 1900,
   },
   {
-    name: 'winter',
-    voice: 'musicbox',
-    baseStep: 0.192,
-    melodyType: 'sine',
-    bassType: 'sine',
-    accentType: 'triangle',
-    melodyGain: 0.018,
-    bassGain: 0.022,
-    hatGain: 0.007,
-    drumGain: 0.009,
-    drumFilter: 1100,
-    melody: [
-      659.25, null, 783.99, null, 987.77, 880.0, null, 783.99,
-      587.33, null, 739.99, null, 880.0, 783.99, null, 739.99,
-      523.25, null, 659.25, null, 783.99, 739.99, null, 659.25,
-      493.88, null, 587.33, null, 739.99, 659.25, null, 587.33,
-    ],
-    melodyB: [
-      987.77, null, 783.99, null, 659.25, 783.99, null, 987.77,
-      880.0, null, 739.99, null, 587.33, 739.99, null, 880.0,
-      783.99, null, 659.25, null, 523.25, 659.25, null, 783.99,
-      739.99, null, 587.33, null, 493.88, 587.33, null, 659.25,
-    ],
-    bass: [
-      82.41, null, null, null, 98.0, null, null, null,
-      73.42, null, null, null, 87.31, null, 98.0, null,
-    ],
+    // Frozen lake: F sharp minor, glassy pedal arpeggios over a pad.
+    name: 'lake',
+    level: 4,
+    baseStep: stepSeconds(130),
+    root: 42,
+    chords: [[0, [0, 3, 7]], [-4, [-4, 0, 3]], [-7, [0, 5, 8]], [-5, [2, 7, 10]]],
+    bass: BASS_STAGGER,
+    bassType: 'sawtooth',
+    bassCutoff: 900,
+    arp: ARP_PEDAL,
+    arpB: ARP_FALL,
+    arpType: 'square',
+    arpCutoff: 2300,
+  },
+  {
+    // Night sky: A harmonic minor, the full drive.
+    name: 'night',
+    level: 5,
+    baseStep: stepSeconds(134),
+    root: 33,
+    chords: [[0, [0, 3, 7]], [-4, [-4, 0, 3]], [5, [0, 5, 8]], [7, [-1, 2, 7]]],
+    bass: BASS_DRIVE,
+    bassType: 'sawtooth',
+    bassCutoff: 1000,
+    arp: ARP_WIDE,
+    arpB: ARP_FALL,
+    arpType: 'sawtooth',
+    arpCutoff: 2200,
   },
 ];
-const FINAL_WAVE_MUSIC = {
-  name: 'final-wave',
+// Each wave's boss keeps the wave's key but runs faster, with the boss layers on.
+const BOSS_MUSIC = WAVE_MUSIC.map((profile) => ({
+  ...profile,
+  name: `${profile.name}-boss`,
   isBoss: true,
-  baseStep: 0.156,
-  minStep: 0.112,
-  intensityBoost: 5,
-  melodyType: 'triangle',
-  bassType: 'sine',
-  accentType: 'sine',
-  melodyGain: 0.034,
-  bassGain: 0.030,
-  hatGain: 0.006,
-  drumGain: 0.018,
-  drumFilter: 150,
-  melody: [
-    587.33, null, 698.46, 880.00, null, 783.99, 698.46, null,
-    659.25, null, 880.00, 1046.50, null, 987.77, 880.00, null,
-    783.99, null, 987.77, 1174.66, null, 1046.50, 987.77, null,
-    880.00, 783.99, 698.46, null, 659.25, 698.46, 783.99, null,
-    587.33, null, 698.46, 880.00, null, 783.99, 698.46, null,
-    659.25, null, 880.00, 1046.50, null, 1174.66, 1318.51, null,
-    1396.91, 1318.51, 1174.66, 1046.50, 987.77, 880.00, 783.99, null,
-    698.46, null, 587.33, null, 440.00, 523.25, 587.33, null,
-  ],
-  bass: [
-    73.42, null, null, null, 73.42, null, null, null,
-    58.27, null, null, null, 58.27, null, null, null,
-    87.31, null, null, null, 87.31, null, null, null,
-    65.41, null, null, null, 65.41, null, null, null,
-  ],
-  padChords: [
-    [73.42, 146.83, 220.00, 293.66, 349.23],
-    [58.27, 116.54, 174.61, 293.66, 349.23],
-    [87.31, 174.61, 261.63, 349.23, 440.00],
-    [65.41, 130.81, 196.00, 261.63, 392.00],
-  ],
-  arpeggio: [
-    587.33, 880.00, 1174.66, 1396.91,
-    1046.50, 880.00, 698.46, 523.25,
-    659.25, 987.77, 1318.51, 1567.98,
-    1174.66, 987.77, 783.99, 659.25,
-  ],
+  level: profile.level + 2,
+  baseStep: profile.baseStep * 0.955,
+  bass: BASS_DRIVE,
+  bassCutoff: profile.bassCutoff * 1.5,
+}));
+// The last boss: D phrygian with a major dominant, every layer running.
+const FINAL_BOSS_MUSIC = {
+  name: 'final-boss',
+  isBoss: true,
+  level: 8,
+  baseStep: stepSeconds(140),
+  root: 38,
+  chords: [[0, [0, 3, 7]], [1, [1, 5, 8]], [0, [0, 3, 7]], [-5, [-1, 2, 7]]],
+  bass: BASS_DRIVE,
+  bassType: 'sawtooth',
+  bassCutoff: 1700,
+  arp: ARP_WIDE,
+  arpB: ARP_PEDAL,
+  arpType: 'sawtooth',
+  arpCutoff: 2600,
+};
+// Between waves: the same machine at half strength, in a brighter key.
+const WAVE_CLEAR_MUSIC = {
+  name: 'wave-clear',
+  level: 0,
+  baseStep: stepSeconds(112),
+  root: 41,
+  chords: [[0, [0, 4, 7]], [-5, [-1, 2, 7]], [-3, [-3, 0, 4]], [-7, [0, 5, 9]]],
+  bass: BASS_OFFBEAT,
+  bassType: 'sawtooth',
+  bassCutoff: 600,
+  arp: ARP_RISE,
+  arpB: ARP_THREES,
+  arpType: 'square',
+  arpCutoff: 1500,
+};
+// Game over: a slow drone and a falling line in D minor.
+const GAME_OVER_MUSIC = {
+  name: 'game-over',
+  baseStep: 0.34,
+  root: 38,
+  chords: [[0, [0, 3, 7]], [-4, [-4, 0, 3]], [-7, [0, 5, 8]], [-5, [-1, 2, 7]]],
 };
 // Under the results card: a slow, quiet reprise of the victory score's theme in D major.
 const ENDING_MUSIC = {
   name: 'ending',
   baseStep: 1 / 3,
-  minStep: 1 / 3,
-  melodyType: 'sine',
-  bassType: 'sine',
-  accentType: 'triangle',
   melodyGain: 0.016,
   bassGain: 0.018,
-  hatGain: 0.002,
-  drumGain: 0.004,
-  drumFilter: 1200,
   melody: [
     440.00, null, 587.33, 659.25, 739.99, null, null, null,
     null, null, null, null, 659.25, null, 587.33, null,
@@ -233,81 +235,6 @@ const ENDING_MUSIC = {
   ],
 };
 
-const BOSS_MUSIC = {
-  name: 'boss',
-  voice: 'edged',
-  isBoss: true,
-  baseStep: 0.145,
-  minStep: 0.096,
-  intensityBoost: 5,
-  melodyType: 'sawtooth',
-  bassType: 'square',
-  accentType: 'sawtooth',
-  melodyGain: 0.028,
-  bassGain: 0.04,
-  hatGain: 0.014,
-  drumGain: 0.026,
-  drumFilter: 260,
-  melody: [
-    220.0, 261.63, 311.13, 293.66, 261.63, 233.08, 220.0, null,
-    196.0, 233.08, 277.18, 311.13, 293.66, 261.63, 233.08, null,
-    174.61, 220.0, 261.63, 311.13, 349.23, 311.13, 261.63, 220.0,
-    164.81, null, 196.0, 233.08, 261.63, 311.13, 293.66, 220.0,
-  ],
-  bass: [
-    55.0, null, 55.0, null, 65.41, null, 58.27, null,
-    49.0, null, 49.0, null, 58.27, null, 65.41, null,
-  ],
-};
-const WAVE_CLEAR_MUSIC = {
-  name: 'wave-clear',
-  voice: 'musicbox',
-  baseStep: 0.176,
-  minStep: 0.118,
-  melodyType: 'triangle',
-  bassType: 'sine',
-  accentType: 'sine',
-  melodyGain: 0.024,
-  bassGain: 0.021,
-  hatGain: 0.005,
-  drumGain: 0.008,
-  drumFilter: 920,
-  melody: [
-    523.25, 659.25, 783.99, 1046.5, 987.77, 783.99, 659.25, null,
-    587.33, 739.99, 880.0, 1174.66, 1046.5, 880.0, 739.99, null,
-    659.25, 783.99, 987.77, 1318.51, 1174.66, 987.77, 880.0, 783.99,
-    698.46, null, 783.99, 987.77, 1046.5, 987.77, 783.99, 659.25,
-  ],
-  bass: [
-    130.81, null, null, null, 164.81, null, null, null,
-    146.83, null, null, null, 196.0, null, 174.61, null,
-  ],
-};
-const GAME_OVER_MUSIC = {
-  name: 'game-over',
-  voice: 'pluck',
-  baseStep: 0.34,
-  minStep: 0.24,
-  melodyType: 'sine',
-  bassType: 'triangle',
-  accentType: 'sine',
-  melodyGain: 0.018,
-  bassGain: 0.026,
-  hatGain: 0.001,
-  drumGain: 0.003,
-  drumFilter: 360,
-  melody: [
-    392.0, null, 349.23, null, 329.63, null, 293.66, null,
-    261.63, null, 246.94, null, 220.0, null, 196.0, null,
-    261.63, null, 293.66, null, 246.94, null, 220.0, null,
-    196.0, null, 174.61, null, 164.81, null, 196.0, null,
-  ],
-  bass: [
-    65.41, null, null, null, 61.74, null, null, null,
-    55.0, null, null, null, 49.0, null, null, null,
-  ],
-};
-
 export function createSpellwaveAudio({
   audioButton,
   initialEnabled,
@@ -329,7 +256,18 @@ export function createSpellwaveAudio({
   let musicFilter = null;
   let musicDuck = null;
   let melodyBus = null;
+  let echoDelay = null;
+  let echoTime = ECHO_TIME;
+  let pumpGain = null;
+  let padFilter = null;
+  let arpFilter = null;
+  let arpPan = null;
+  let leadFilter = null;
+  let snareBus = null;
+  let hatBus = null;
   let sfxBus = null;
+  let driveBus = null;
+  let noiseBuffer = null;
   let musicTimer = null;
   let musicStep = 0;
   let nextMusicTime = 0;
@@ -379,9 +317,13 @@ export function createSpellwaveAudio({
     return audioContext;
   }
 
-  // music: musicGain -> musicFilter -> musicDuck -> master; melody notes also feed an echo.
-  // effects: sfxBus -> master. Both buses send to one shared reverb, and a limiter
-  // sits on the output so stacked sounds cannot clip.
+  // music: musicGain -> musicFilter -> musicDuck -> master. Most instruments share a few
+  // standing buses, so a note costs an oscillator and a gain rather than its own filter:
+  // bass and pads pass through pumpGain, which every kick dips (the sidechain pump);
+  // arpeggio and lead feed melodyBus, which also sends to a tempo-synced echo.
+  // effects: sfxBus -> master, with driveBus as a distorted way in for the heavy hits.
+  // Both sides send to one shared reverb, and a limiter sits on the output so stacked
+  // sounds cannot clip.
   function buildSignalChain(context) {
     const limiter = context.createDynamicsCompressor();
     limiter.threshold.value = -6;
@@ -404,6 +346,21 @@ export function createSpellwaveAudio({
     sfxBus = context.createGain();
     sfxBus.connect(masterGain);
 
+    // Soft clipping: quiet input passes almost clean, loud input gains grit.
+    const driveShaper = context.createWaveShaper();
+    const curve = new Float32Array(1024);
+    for (let index = 0; index < curve.length; index += 1) {
+      curve[index] = Math.tanh((index / (curve.length - 1)) * 2 - 1);
+    }
+    driveShaper.curve = curve;
+    const driveOut = context.createGain();
+    driveBus = context.createGain();
+    driveBus.gain.value = 7;
+    driveOut.gain.value = 0.19;
+    driveBus.connect(driveShaper);
+    driveShaper.connect(driveOut);
+    driveOut.connect(sfxBus);
+
     const reverb = context.createConvolver();
     reverbNode = reverb;
     reverb.buffer = createReverbImpulse(context, 1.7);
@@ -422,6 +379,7 @@ export function createSpellwaveAudio({
     const echoFeedback = context.createGain();
     const echoTone = context.createBiquadFilter();
     const echoSend = context.createGain();
+    echoDelay = echo;
     echo.delayTime.value = ECHO_TIME;
     echoFeedback.gain.value = ECHO_FEEDBACK;
     echoTone.type = 'lowpass';
@@ -434,6 +392,29 @@ export function createSpellwaveAudio({
     echoTone.connect(echoFeedback);
     echoFeedback.connect(echo);
     echoTone.connect(musicGain);
+
+    pumpGain = context.createGain();
+    pumpGain.connect(musicGain);
+    padFilter = createBusFilter(context, 'lowpass', 1100, 0.5, pumpGain);
+    leadFilter = createBusFilter(context, 'lowpass', 2600, 1.2, melodyBus);
+    snareBus = createBusFilter(context, 'bandpass', 1800, 0.6, musicGain);
+    hatBus = createBusFilter(context, 'highpass', 7500, 0.5, musicGain);
+    arpFilter = createBusFilter(context, 'lowpass', 1600, 4, melodyBus);
+    if (context.createStereoPanner) {
+      arpPan = context.createStereoPanner();
+      arpFilter.disconnect();
+      arpFilter.connect(arpPan);
+      arpPan.connect(melodyBus);
+    }
+  }
+
+  function createBusFilter(context, type, frequency, q, destination) {
+    const filter = context.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = frequency;
+    filter.Q.value = q;
+    filter.connect(destination);
+    return filter;
   }
 
   function createReverbImpulse(context, seconds) {
@@ -446,6 +427,35 @@ export function createSpellwaveAudio({
       }
     }
     return impulse;
+  }
+
+  // One shared stretch of white noise: every hat, snare and burst plays a slice of it,
+  // so no sound has to fill a buffer of its own.
+  function getNoiseBuffer(context) {
+    if (!noiseBuffer) {
+      noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * NOISE_BUFFER_SECONDS), context.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let index = 0; index < data.length; index += 1) data[index] = Math.random() * 2 - 1;
+    }
+    return noiseBuffer;
+  }
+
+  function createNoiseSource(context, start, duration, playbackRate = 1) {
+    const source = context.createBufferSource();
+    source.buffer = getNoiseBuffer(context);
+    source.loop = true;
+    source.playbackRate.setValueAtTime(playbackRate, start);
+    source.start(start, Math.random() * (NOISE_BUFFER_SECONDS - 0.1));
+    source.stop(start + duration + 0.02);
+    return source;
+  }
+
+  // A gain for a scheduled voice. It starts silent: a source can begin a sample before
+  // its envelope's first event, and at the default gain of 1 that sample is a loud click.
+  function createEnvelope(context) {
+    const envelope = context.createGain();
+    envelope.gain.value = 0;
+    return envelope;
   }
 
   // Routes a voice through a stereo panner when one is asked for and supported.
@@ -501,21 +511,26 @@ export function createSpellwaveAudio({
     }
   }
 
+  // Effects play now (plus options.delay); `drive: true` sends them through the distortion.
   function playTone(frequency, duration, options = {}) {
     const context = resumeAudio();
     if (!context || !masterGain) return;
 
     const start = context.currentTime + (options.delay || 0);
-    scheduleTone(frequency, duration, start, options, sfxBus);
+    scheduleTone(frequency, duration, start, options, options.drive ? driveBus : sfxBus);
   }
 
+  // One synth voice: oscillator -> optional low-pass -> envelope -> optional pan.
+  // `endFrequency` sweeps the pitch, `cutoff`/`endCutoff` sweep the filter, and
+  // `hold` (0..1) keeps the level up for that share of the note before it decays.
   function scheduleTone(frequency, duration, start, options = {}, destination = sfxBus) {
     const context = audioContext;
     if (!context || !destination) return;
 
     const attack = Math.min(options.attack ?? 0.008, duration * 0.4);
+    const peak = options.gain || 0.05;
     const oscillator = context.createOscillator();
-    const gainNode = context.createGain();
+    const gainNode = createEnvelope(context);
     oscillator.type = options.type || 'sine';
     oscillator.frequency.setValueAtTime(frequency, start);
     if (options.endFrequency) {
@@ -524,10 +539,21 @@ export function createSpellwaveAudio({
     if (options.detune) oscillator.detune.setValueAtTime(options.detune, start);
 
     gainNode.gain.setValueAtTime(0.0001, start);
-    gainNode.gain.exponentialRampToValueAtTime(options.gain || 0.05, start + attack);
+    gainNode.gain.exponentialRampToValueAtTime(peak, start + attack);
+    if (options.hold) gainNode.gain.setValueAtTime(peak, start + attack + (duration - attack) * Math.min(options.hold, 0.95));
     gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
 
-    oscillator.connect(gainNode);
+    if (options.cutoff) {
+      const filter = context.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.Q.setValueAtTime(options.q || 1, start);
+      filter.frequency.setValueAtTime(options.cutoff, start);
+      if (options.endCutoff) filter.frequency.exponentialRampToValueAtTime(options.endCutoff, start + duration);
+      oscillator.connect(filter);
+      filter.connect(gainNode);
+    } else {
+      oscillator.connect(gainNode);
+    }
     gainNode.connect(panned(destination, options.pan));
     oscillator.start(start);
     oscillator.stop(start + duration + 0.04);
@@ -537,7 +563,7 @@ export function createSpellwaveAudio({
       scheduleTone(frequency, duration, start, {
         ...options,
         chorus: 0,
-        gain: (options.gain || 0.05) * 0.5,
+        gain: peak * 0.5,
         detune: (options.detune || 0) + options.chorus,
         pan: -(options.pan || 0),
       }, destination);
@@ -549,81 +575,125 @@ export function createSpellwaveAudio({
     if (!context || !masterGain) return;
 
     const start = context.currentTime + (options.delay || 0);
-    scheduleNoise(duration, start, options, sfxBus);
+    scheduleNoise(duration, start, options, options.drive ? driveBus : sfxBus);
   }
 
+  // Filtered noise that decays from its start, or with `swell` grows and then stops dead.
   function scheduleNoise(duration, start, options = {}, destination = sfxBus) {
     const context = audioContext;
     if (!context || !destination) return;
 
-    const buffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * duration)), context.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let index = 0; index < data.length; index += 1) {
-      data[index] = (Math.random() * 2 - 1) * (1 - index / data.length);
-    }
-
-    const source = context.createBufferSource();
+    const source = createNoiseSource(context, start, duration, options.playbackRate || 1);
     const filter = context.createBiquadFilter();
-    const gainNode = context.createGain();
-    source.buffer = buffer;
-    source.playbackRate.setValueAtTime(options.playbackRate || 1, start);
+    const gainNode = createEnvelope(context);
+    const peak = options.gain || 0.04;
     filter.type = options.filterType || 'bandpass';
     filter.frequency.setValueAtTime(options.filterFrequency || 900, start);
     filter.Q.setValueAtTime(options.q || 0.8, start);
-    gainNode.gain.setValueAtTime(options.gain || 0.04, start);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
     if (options.endFilterFrequency) {
       filter.frequency.exponentialRampToValueAtTime(options.endFilterFrequency, start + duration);
     }
+    if (options.swell) {
+      gainNode.gain.setValueAtTime(0.0001, start);
+      gainNode.gain.exponentialRampToValueAtTime(peak, start + duration * 0.94);
+      gainNode.gain.linearRampToValueAtTime(0.0001, start + duration);
+    } else {
+      gainNode.gain.setValueAtTime(peak, start);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    }
+
     source.connect(filter);
     filter.connect(gainNode);
     gainNode.connect(panned(destination, options.pan));
-    source.start(start);
-    source.stop(start + duration + 0.02);
   }
 
-  function scheduleKick(start, gain) {
-    scheduleTone(150, 0.16, start, { gain, type: 'sine', endFrequency: 44, attack: 0.002 }, musicGain);
-    scheduleNoise(0.02, start, { gain: gain * 0.35, filterType: 'lowpass', filterFrequency: 1800 }, musicGain);
+  // ── Music instruments ──────────────────────────────────────────────────
+
+  // The kick also dips pumpGain, so bass and pads breathe around it.
+  function scheduleKick(start, gain, pumpDepth = PUMP_DEPTH) {
+    const context = audioContext;
+    const oscillator = context.createOscillator();
+    const gainNode = createEnvelope(context);
+    oscillator.frequency.setValueAtTime(175, start);
+    oscillator.frequency.exponentialRampToValueAtTime(47, start + 0.075);
+    gainNode.gain.setValueAtTime(gain, start);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
+    oscillator.connect(gainNode);
+    gainNode.connect(musicGain);
+    oscillator.start(start);
+    oscillator.stop(start + 0.27);
+    pumpGain.gain.setTargetAtTime(pumpDepth, start, 0.005);
+    pumpGain.gain.setTargetAtTime(1, start + 0.035, 0.07);
   }
 
-  function scheduleSnare(start, gain, tone = 1800) {
-    scheduleNoise(0.13, start, { gain, filterType: 'bandpass', filterFrequency: tone, q: 0.7 }, musicGain);
-    scheduleTone(196, 0.07, start, { gain: gain * 0.55, type: 'triangle', endFrequency: 130, attack: 0.002 }, musicGain);
-  }
-
-  function scheduleThump(start, gain) {
-    scheduleTone(108, 0.2, start, { gain, type: 'sine', endFrequency: 52, attack: 0.004 }, musicGain);
-  }
-
-  function scheduleWoodblock(start, gain, pan = 0, pitch = 1) {
-    scheduleTone(880 * pitch, 0.07, start, { gain, type: 'sine', attack: 0.001, pan }, musicGain);
-    scheduleTone(1320 * pitch, 0.045, start, { gain: gain * 0.5, type: 'sine', attack: 0.001, pan }, musicGain);
-  }
-
-  // The melody instruments. Each is a few sine partials with a struck or plucked envelope;
-  // `ring` is how long a note sounds, independent of how fast the tune is stepping.
-  function scheduleVoice(profile, frequency, start, stepDuration, gain, pan) {
-    const voice = profile.voice || 'lead';
-    if (voice === 'marimba' || voice === 'edged') {
-      scheduleTone(frequency, 0.5, start, { gain: gain * 1.3, type: 'sine', attack: 0.002, pan }, melodyBus);
-      scheduleTone(frequency * 4, 0.1, start, { gain: gain * 0.36, type: 'sine', attack: 0.001, pan }, melodyBus);
-      scheduleTone(frequency * 2, 0.22, start, { gain: gain * 0.2, type: 'triangle', attack: 0.002, pan }, melodyBus);
-      if (voice === 'edged') {
-        scheduleTone(frequency, stepDuration * 0.8, start, { gain: gain * 0.3, type: 'sawtooth', attack: 0.004, chorus: 7, pan: -pan }, melodyBus);
-      }
-    } else if (voice === 'musicbox') {
-      scheduleTone(frequency, 0.9, start, { gain: gain * 1.2, type: 'sine', attack: 0.002, pan }, melodyBus);
-      scheduleTone(frequency * 3, 0.3, start, { gain: gain * 0.2, type: 'sine', attack: 0.001, pan: -pan }, melodyBus);
-      scheduleTone(frequency * 5.4, 0.08, start, { gain: gain * 0.1, type: 'sine', attack: 0.001, pan }, melodyBus);
-    } else if (voice === 'pluck') {
-      scheduleTone(frequency, 0.42, start, { gain: gain * 1.25, type: 'triangle', attack: 0.003, pan }, melodyBus);
-      scheduleTone(frequency, 0.6, start, { gain: gain * 0.7, type: 'sine', attack: 0.004, pan: -pan }, melodyBus);
-      scheduleTone(frequency * 2, 0.12, start, { gain: gain * 0.22, type: 'sine', attack: 0.001, pan }, melodyBus);
-    } else {
-      scheduleTone(frequency, stepDuration * 0.82, start, { gain, type: profile.melodyType, attack: 0.003, chorus: 7, pan }, melodyBus);
+  // A slice of noise into one of the drum buses, whose filter gives it its colour.
+  function scheduleDrumNoise(bus, start, duration, gain, flams = 0) {
+    const context = audioContext;
+    const source = createNoiseSource(context, start, duration);
+    const gainNode = createEnvelope(context);
+    let time = start;
+    // A clap is a few hits a hundredth of a second apart.
+    for (let index = 0; index < flams; index += 1) {
+      gainNode.gain.setValueAtTime(gain, time);
+      gainNode.gain.exponentialRampToValueAtTime(gain * 0.2, time + 0.01);
+      time += 0.011;
     }
+    gainNode.gain.setValueAtTime(gain, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    source.connect(gainNode);
+    gainNode.connect(bus);
+  }
+
+  function scheduleSnare(start, gain) {
+    scheduleDrumNoise(snareBus, start, 0.15, gain);
+    scheduleTone(210, 0.08, start, { gain: gain * 0.4, type: 'triangle', endFrequency: 140, attack: 0.001 }, musicGain);
+  }
+
+  function scheduleClap(start, gain) {
+    scheduleDrumNoise(snareBus, start, 0.17, gain, 2);
+  }
+
+  function scheduleHat(start, gain, length = 0.04) {
+    scheduleDrumNoise(hatBus, start, length, gain);
+  }
+
+  // Each bass note has its own closing filter, so the cutoff never jumps back up
+  // on a resonant filter that is still ringing from the note before.
+  function scheduleBass(frequency, start, duration, gain, cutoff, type, thick) {
+    scheduleTone(frequency, duration, start, {
+      gain,
+      type,
+      attack: 0.004,
+      hold: 0.55,
+      cutoff,
+      endCutoff: BASS_FILTER_FLOOR,
+      q: 5,
+      chorus: thick ? 11 : 0,
+    }, pumpGain);
+  }
+
+  // A held chord: detuned saws through the shared pad filter, with a slow swell and release.
+  function schedulePad(frequencies, start, duration, gain) {
+    const context = audioContext;
+    const envelope = createEnvelope(context);
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.linearRampToValueAtTime(gain, start + duration * 0.25);
+    envelope.gain.setValueAtTime(gain, start + duration * 0.7);
+    envelope.gain.linearRampToValueAtTime(0.0001, start + duration);
+    envelope.connect(padFilter);
+    frequencies.forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.value = frequency;
+      oscillator.detune.value = index % 2 === 0 ? -7 : 8;
+      oscillator.connect(envelope);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.05);
+    });
+  }
+
+  function chordToneFrequency(profile, tones, index, octave) {
+    return midiFrequency(profile.root + octave * 12 + tones[index % tones.length] + 12 * Math.floor(index / tones.length));
   }
 
   function startMusicLoop(reset) {
@@ -665,25 +735,22 @@ export function createSpellwaveAudio({
       return;
     }
 
-    const wave = getWaveSet();
-    const profile = getMusicProfile(wave);
-    updateMusicProfile(profile);
+    updateMusicProfile(getMusicProfile(getWaveSet()));
     const frozen = getMode() === 'running' && getIsTimeFrozen();
     const lowLife = isLowLife();
     updateMusicTone(frozen, lowLife);
+    updateEchoTime();
 
     while (nextMusicTime < audioContext.currentTime + MUSIC_SCHEDULE_AHEAD) {
       const transitionProgress = getMusicTransitionProgress(nextMusicTime);
       const baseStep = previousMusicProfile
         ? lerp(previousMusicProfile.baseStep, activeMusicProfile.baseStep, transitionProgress)
         : activeMusicProfile.baseStep;
-      const intensity = getMusicIntensity(wave, activeMusicProfile);
-      const stepDuration = Math.max(activeMusicProfile.minStep || 0.112, baseStep - intensity * 0.0065)
-        * (frozen ? FROZEN_TEMPO_STRETCH : 1);
+      const stepDuration = baseStep * (frozen ? FROZEN_TEMPO_STRETCH : 1);
       if (previousMusicProfile && transitionProgress < 1) {
-        scheduleMusicStep(musicStep, nextMusicTime, stepDuration, previousMusicProfile, intensity, 1 - transitionProgress);
+        scheduleMusicStep(musicStep, nextMusicTime, stepDuration, previousMusicProfile, 1 - transitionProgress);
       }
-      scheduleMusicStep(musicStep, nextMusicTime, stepDuration, activeMusicProfile, intensity, previousMusicProfile ? transitionProgress : 1);
+      scheduleMusicStep(musicStep, nextMusicTime, stepDuration, activeMusicProfile, previousMusicProfile ? transitionProgress : 1);
       if (lowLife) scheduleHeartbeat(musicStep, nextMusicTime, stepDuration);
       nextMusicTime += stepDuration;
       musicStep = (musicStep + 1) % MUSIC_STEP_WRAP;
@@ -696,22 +763,41 @@ export function createSpellwaveAudio({
     musicFilter.frequency.setTargetAtTime(target, audioContext.currentTime, frozen ? 0.12 : 0.3);
   }
 
+  // Keeps the echo on a dotted eighth of the current tempo. It glides, and only when
+  // the profile changes, because moving a delay line bends the pitch of what is in it.
+  function updateEchoTime() {
+    const step = activeMusicProfile.baseStep;
+    const target = step < 0.2 ? step * ECHO_SYNC_STEPS : ECHO_TIME;
+    if (Math.abs(target - echoTime) < 0.001) return;
+    echoTime = target;
+    echoDelay.delayTime.setTargetAtTime(target, audioContext.currentTime, 0.2);
+  }
+
   function isLowLife() {
     return getMode() === 'running' && getHealth() <= lowHealth;
   }
 
+  // Low life: a two-beat heartbeat under the music and a thin warning blip above it.
+  // Both skip the music filter, which low life has already closed a little.
   function scheduleHeartbeat(step, start, stepDuration) {
-    if (step % 8 !== 0) return;
-    scheduleTone(58, 0.2, start, { gain: 0.07, type: 'sine', endFrequency: 40, attack: 0.004 }, musicDuck);
-    scheduleTone(52, 0.24, start + stepDuration * 1.3, { gain: 0.05, type: 'sine', endFrequency: 36, attack: 0.004 }, musicDuck);
+    if (step % 8 === 0) {
+      scheduleTone(64, 0.2, start, { gain: 0.085, type: 'sine', endFrequency: 40, attack: 0.004 }, musicDuck);
+      scheduleTone(56, 0.24, start + stepDuration * 1.5, { gain: 0.06, type: 'sine', endFrequency: 36, attack: 0.004 }, musicDuck);
+    } else if (step % 8 === 4) {
+      scheduleTone(1864.66, 0.07, start, { gain: 0.012, type: 'square', attack: 0.002, cutoff: 4200 }, musicDuck);
+    }
   }
 
   function getMusicProfile(wave) {
     if (getMode() === 'ending') return ENDING_MUSIC;
     if (getMode() === 'gameover') return GAME_OVER_MUSIC;
     if (getMode() === 'wave_cleared') return WAVE_CLEAR_MUSIC;
-    if (getWavePhase() === 'boss') return getIsFinalWave() ? FINAL_WAVE_MUSIC : BOSS_MUSIC;
-    return getMusicSeason(wave);
+    const final = getIsFinalWave();
+    const index = final
+      ? WAVE_MUSIC.length - 1
+      : Math.max(0, (Number.isFinite(wave) ? wave : 1) - 1) % WAVE_MUSIC.length;
+    if (getWavePhase() === 'boss') return final ? FINAL_BOSS_MUSIC : BOSS_MUSIC[index];
+    return WAVE_MUSIC[index];
   }
 
   function updateMusicProfile(profile) {
@@ -733,17 +819,6 @@ export function createSpellwaveAudio({
     return progress;
   }
 
-  function getMusicSeason(wave) {
-    return MUSIC_SEASONS[Math.max(0, wave - 1) % MUSIC_SEASONS.length];
-  }
-
-  function getMusicIntensity(wave, profile) {
-    if (profile.name === 'ending') return 0;
-    if (profile.name === 'game-over') return 0;
-    if (profile.name === 'wave-clear') return Math.min(Math.max(0, wave - 1) * 0.35, 4);
-    return Math.min(Math.max(0, wave - 1) + (profile.intensityBoost || 0), 14);
-  }
-
   function isMusicActiveMode() {
     // The victory score replaces the music loop until its last note is scheduled.
     if (victoryScoreActive) return false;
@@ -751,236 +826,154 @@ export function createSpellwaveAudio({
     return mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending';
   }
 
-  function scheduleMusicStep(step, start, stepDuration, profile, intensity, profileGain = 1) {
+  function scheduleMusicStep(step, start, stepDuration, profile, profileGain = 1) {
     if (profileGain <= 0.02) return;
-    if (profile.name === 'final-wave') {
-      scheduleFinalWaveStep(step, start, stepDuration, profile, intensity, profileGain);
-      return;
-    }
-    if (profile.name === 'ending') {
-      scheduleEndingStep(step, start, stepDuration, profile, profileGain);
-      return;
-    }
-
-    const section = MUSIC_FORM[Math.floor(step / MUSIC_SECTION_STEPS) % MUSIC_FORM.length];
-    const isLastSection = Math.floor(step / MUSIC_SECTION_STEPS) % MUSIC_FORM.length === MUSIC_FORM.length - 1;
-    const line = section === 'b' && profile.melodyB ? profile.melodyB : profile.melody;
-    const melody = line[step % line.length];
-    const bass = profile.bass[step % profile.bass.length];
-    const accent = step % 8 === 0;
-    const isBoss = profile.isBoss || false;
-    const densePulse = (intensity >= 4 || isBoss) && step % 4 === 0;
-    const latePulse = (intensity >= 8 || isBoss) && step % 2 === 1;
-
-    if (bass) {
-      scheduleTone(bass, stepDuration * 1.6, start, {
-        gain: ((accent ? profile.bassGain * 1.25 : profile.bassGain) + intensity * 0.0011) * profileGain,
-        type: profile.bassType,
-        attack: 0.004,
-      }, musicGain);
-      // A soft held fifth above the bass fills the space the old buzzy leads used to.
-      if (!isBoss) {
-        scheduleTone(bass * 3, stepDuration * 4.2, start, {
-          gain: profile.bassGain * 0.22 * profileGain,
-          type: 'sine',
-          attack: 0.12,
-          pan: 0.2,
-        }, musicGain);
-      }
-      if (densePulse) {
-        scheduleTone(bass * 2, stepDuration * 0.52, start + stepDuration * 0.5, {
-          gain: (0.009 + intensity * 0.0007) * profileGain,
-          type: profile.accentType,
-          attack: 0.004,
-        }, musicGain);
-      }
-    }
-
-    if (melody && (step % 2 === 0 || intensity >= 2 || profile.name === 'summer' || isBoss)) {
-      scheduleVoice(profile, melody, start + stepDuration * 0.08, stepDuration,
-        (profile.melodyGain + intensity * 0.0008) * profileGain, -0.18);
-      if (step % 8 === 6 || latePulse) {
-        scheduleTone(melody * (profile.name === 'winter' ? 2 : isBoss ? 1.414 : 1.5), stepDuration * 0.5, start + stepDuration * 0.18, {
-          gain: (0.009 + intensity * 0.0005) * profileGain,
-          type: profile.accentType,
-          attack: 0.003,
-          pan: 0.3,
-        }, musicGain);
-      }
-      // The last pass of the tune is doubled an octave up, so the return of the melody lifts.
-      if (isLastSection && profile.melodyB && step % 2 === 0) {
-        scheduleTone(melody * 2, stepDuration * 0.6, start + stepDuration * 0.08, {
-          gain: profile.melodyGain * 0.3 * profileGain,
-          type: 'triangle',
-          attack: 0.004,
-          pan: 0.22,
-        }, melodyBus);
-      }
-    }
-
-    if (step % 4 === 2 || latePulse) {
-      scheduleNoise(stepDuration * 0.35, start + stepDuration * 0.16, {
-        gain: (profile.hatGain + intensity * 0.00065) * profileGain,
-        filterType: 'highpass',
-        filterFrequency: profile.name === 'winter' ? 3200 : isBoss ? 1800 : 2400,
-        q: 0.6,
-        pan: step % 8 === 2 ? -0.35 : 0.35,
-      }, musicGain);
-    }
-
-    const drumGain = (profile.drumGain + intensity * 0.0009) * profileGain;
-    // Boss music keeps a real kick and snare; everything else uses a soft thump and a woodblock.
-    if (step % 8 === 0 || ((intensity >= 6 || isBoss) && step % 16 === 10)) {
-      if (isBoss) scheduleKick(start, drumGain * 2.1);
-      else scheduleThump(start, drumGain * 1.9);
-    }
-    if (step % 8 === 4) {
-      if (isBoss) scheduleSnare(start, drumGain * 1.15, profile.drumFilter * 2 + 900);
-      else scheduleWoodblock(start, drumGain * 1.5, 0.25);
-    }
-    // A short roll leads into every fourth bar's turnaround.
-    if (step % 64 >= 60 && profile.name !== 'game-over') {
-      const rise = step % 4;
-      if (isBoss) {
-        scheduleSnare(start, drumGain * (0.55 + rise * 0.2), profile.drumFilter * 2 + 1300);
-        scheduleSnare(start + stepDuration * 0.5, drumGain * (0.45 + rise * 0.2), profile.drumFilter * 2 + 1300);
-      } else {
-        scheduleWoodblock(start, drumGain * (0.8 + rise * 0.25), -0.25, 1 + rise * 0.12);
-        scheduleWoodblock(start + stepDuration * 0.5, drumGain * (0.6 + rise * 0.25), 0.25, 1.06 + rise * 0.12);
-      }
-    }
-
-    if (isBoss && step % 16 === 0) {
-      scheduleTone(41.2, stepDuration * 3, start, {
-        gain: (0.02 + intensity * 0.0007) * profileGain,
-        type: 'sawtooth',
-        attack: 0.02,
-      }, musicGain);
-    }
+    if (profile.name === 'ending') scheduleEndingStep(step, start, stepDuration, profile, profileGain);
+    else if (profile.name === 'game-over') scheduleGameOverStep(step, start, stepDuration, profile, profileGain * GROOVE_TRIM);
+    else scheduleGrooveStep(step, start, stepDuration, profile, profileGain * GROOVE_TRIM);
   }
 
-  function scheduleFinalWaveStep(step, start, stepDuration, profile, intensity, profileGain = 1) {
-    const chordIndex = Math.floor(step / 16) % profile.padChords.length;
-    const chord = profile.padChords[chordIndex];
-    const bass = profile.bass[step % profile.bass.length];
-    const melody = profile.melody[step % profile.melody.length];
-    const arp = profile.arpeggio[step % profile.arpeggio.length];
-    const pulseGain = profileGain * (0.9 + Math.min(intensity, 10) * 0.025);
+  // One sixteenth of the driving score. Layers by level: 0 between waves, 1–5 the
+  // waves, bosses two higher, 8 the last boss.
+  function scheduleGrooveStep(step, start, stepDuration, profile, profileGain) {
+    const beatStep = step % MUSIC_BAR_STEPS;
+    const bar = Math.floor(step / MUSIC_BAR_STEPS);
+    const sectionIndex = Math.floor(step / MUSIC_SECTION_STEPS) % MUSIC_FORM.length;
+    const isB = MUSIC_FORM[sectionIndex] === 'b';
+    const isLastSection = sectionIndex === MUSIC_FORM.length - 1;
+    const [bassOffset, tones] = profile.chords[bar % profile.chords.length];
+    const level = profile.level;
+    const isBoss = !!profile.isBoss;
+    const phraseStep = step % MUSIC_PHRASE_STEPS;
 
-    if (step % 16 === 0) {
-      chord.forEach((frequency, index) => {
-        const duration = stepDuration * 18;
-        const gain = (index < 2 ? 0.012 : 0.0075) * profileGain;
-        scheduleTone(frequency, duration, start, {
-          gain,
-          type: index < 2 ? 'sine' : 'triangle',
-          attack: 0.18,
-          detune: index % 2 === 0 ? -5 : 6,
-        }, musicGain);
-        if (index >= 2) {
-          scheduleTone(frequency * 1.005, duration, start + 0.018, {
-            gain: gain * 0.62,
-            type: 'sine',
-            attack: 0.24,
-            detune: index % 2 === 0 ? 7 : -8,
-          }, musicGain);
-        }
+    // Kick: four on the floor (two to the bar between waves), with pushes at higher levels.
+    const kickGain = (0.13 + level * 0.005) * profileGain;
+    if (beatStep % (level > 0 ? 4 : 8) === 0) {
+      scheduleKick(start, kickGain, isBoss ? PUMP_DEPTH * 0.7 : PUMP_DEPTH);
+    } else if ((isBoss && beatStep === 14 && bar % 2 === 1) || (level >= 5 && beatStep === 11 && bar % 4 === 3)) {
+      scheduleKick(start, kickGain * 0.8);
+    }
+
+    // Backbeat: a clap early on, a snare from the mine onward, and a roll into each fourth bar.
+    const snareGain = (0.085 + level * 0.005) * profileGain;
+    if (beatStep % 8 === 4) {
+      if (level >= 3) scheduleSnare(start, snareGain);
+      else scheduleClap(start, snareGain);
+    }
+    if (phraseStep >= MUSIC_PHRASE_STEPS - 4 && level > 0) {
+      const rise = 0.4 + (phraseStep % 4) * 0.15;
+      scheduleSnare(start, snareGain * rise);
+      if (isBoss) scheduleSnare(start + stepDuration * 0.5, snareGain * (rise + 0.07));
+    }
+
+    // Hats: offbeats only, then ghost notes, then straight sixteenths; bosses add
+    // a doubled tick, and the offbeat opens up at the top levels.
+    const hatGain = (0.022 + level * 0.0015) * profileGain;
+    if (beatStep % 4 === 2) {
+      scheduleHat(start, hatGain, level >= 4 ? 0.15 : 0.05);
+    } else if (level >= 3 || (level === 2 && beatStep % 4 === 3)) {
+      scheduleHat(start, hatGain * 0.5, 0.03);
+      if (isBoss && beatStep % 4 === 3) scheduleHat(start + stepDuration * 0.5, hatGain * 0.4, 0.025);
+    }
+    if (phraseStep === 0 && level >= 3) scheduleHat(start, hatGain * 1.3, 0.9);
+    if (phraseStep === MUSIC_PHRASE_STEPS - 8 && level >= 2) {
+      scheduleNoise(stepDuration * 8, start, {
+        gain: 0.02 * profileGain,
+        swell: true,
+        filterFrequency: 700,
+        endFilterFrequency: 6000,
+        q: 1.2,
+      }, musicGain);
+    }
+
+    const bassNote = profile.bass[beatStep];
+    if (bassNote) {
+      const accent = beatStep % 4 === 2 ? 1.25 : 1;
+      scheduleBass(
+        midiFrequency(profile.root + bassOffset + (bassNote === 2 ? 12 : 0)),
+        start,
+        stepDuration * 0.92,
+        // A square carries more level than a saw at the same peak.
+        (0.062 + level * 0.003) * (profile.bassType === 'square' ? 0.72 : 1) * profileGain,
+        profile.bassCutoff * accent * (isLastSection ? 1.2 : 1),
+        profile.bassType,
+        isBoss,
+      );
+    }
+
+    // The arpeggio's filter opens and closes over the four-bar phrase.
+    const sweep = Math.sin((phraseStep / MUSIC_PHRASE_STEPS) * Math.PI * 2 - Math.PI / 2);
+    arpFilter.frequency.setTargetAtTime(profile.arpCutoff * Math.pow(2, sweep * 0.8) * (isBoss ? 1.3 : 1), start, 0.04);
+    const arpIndex = (isB ? profile.arpB : profile.arp)[beatStep];
+    if (arpIndex !== null) {
+      const frequency = chordToneFrequency(profile, tones, arpIndex, 2);
+      const arpGain = (0.024 + level * 0.0012) * (step % 3 === 0 ? 1.3 : 1) * profileGain;
+      if (arpPan) arpPan.pan.setValueAtTime(beatStep % 2 === 0 ? -0.35 : 0.35, start);
+      scheduleTone(frequency, stepDuration * 0.75, start, { gain: arpGain, type: profile.arpType, attack: 0.003, hold: 0.3 }, arpFilter);
+      if (isLastSection || (level >= 8 && beatStep % 2 === 0)) {
+        scheduleTone(frequency * 2, stepDuration * 0.6, start, { gain: arpGain * 0.4, type: 'triangle', attack: 0.003 }, arpFilter);
+      }
+    }
+
+    // Lead: in the B section, in a boss's last section, and all the way through the last boss.
+    if (isB || (isBoss && isLastSection) || level >= 8) {
+      const note = (isB ? LEAD_B : LEAD_A).find((entry) => entry[0] === step % MUSIC_SECTION_STEPS);
+      if (note) {
+        scheduleTone(chordToneFrequency(profile, tones, note[1], 2), stepDuration * note[2] * 0.95, start, {
+          gain: (0.02 + level * 0.0012) * profileGain,
+          type: 'sawtooth',
+          attack: 0.012,
+          hold: 0.6,
+          chorus: 9,
+        }, leadFilter);
+      }
+    }
+
+    // Boss stabs: a bare fifth, pushed across the beat.
+    if (isBoss && STAB_STEPS.includes(beatStep)) {
+      [12, 19, 24].forEach((interval, index) => {
+        scheduleTone(midiFrequency(profile.root + bassOffset + interval), stepDuration * 1.5, start, {
+          gain: 0.017 * profileGain,
+          type: 'sawtooth',
+          attack: 0.004,
+          hold: 0.4,
+          detune: index === 1 ? 6 : -6,
+        }, leadFilter);
       });
     }
 
-    if (bass) {
-      scheduleTone(bass * 0.5, stepDuration * 4.4, start, {
-        gain: profile.bassGain * 0.72 * pulseGain,
-        type: 'sine',
-        attack: 0.035,
-      }, musicGain);
-      scheduleTone(bass, stepDuration * 2.6, start, {
-        gain: profile.bassGain * 0.52 * pulseGain,
+    if (beatStep === 0 && (level >= 4 || level === 0)) {
+      schedulePad(tones.map((tone) => midiFrequency(profile.root + 12 + tone)), start, stepDuration * 16.5, 0.011 * profileGain);
+    }
+  }
+
+  function scheduleGameOverStep(step, start, stepDuration, profile, profileGain) {
+    const beatStep = step % MUSIC_BAR_STEPS;
+    const [bassOffset, tones] = profile.chords[Math.floor(step / MUSIC_BAR_STEPS) % profile.chords.length];
+
+    if (beatStep === 0) {
+      schedulePad(tones.map((tone) => midiFrequency(profile.root + 12 + tone)), start, stepDuration * 16.5, 0.014 * profileGain);
+      scheduleTone(midiFrequency(profile.root + bassOffset), stepDuration * 15, start, {
+        gain: 0.05 * profileGain,
         type: 'sawtooth',
-        attack: 0.024,
-        detune: -7,
+        attack: 0.3,
+        hold: 0.5,
+        cutoff: 320,
+        endCutoff: 140,
       }, musicGain);
-      scheduleTone(bass * 1.5, stepDuration * 1.4, start + stepDuration * 0.38, {
-        gain: profile.bassGain * 0.18 * profileGain,
+    }
+    if (beatStep % 8 === 0) {
+      scheduleTone(70, 0.5, start, { gain: 0.07 * profileGain, type: 'sine', endFrequency: 36, attack: 0.004 }, musicGain);
+    }
+    const note = LEAD_FALLING.find((entry) => entry[0] === step % MUSIC_SECTION_STEPS);
+    if (note) {
+      scheduleTone(chordToneFrequency(profile, tones, note[1], 2), stepDuration * note[2], start, {
+        gain: 0.022 * profileGain,
         type: 'triangle',
-        attack: 0.02,
-      }, musicGain);
-    }
-
-    if (step % 4 === 0) {
-      scheduleNoise(stepDuration * 1.5, start + stepDuration * 0.02, {
-        gain: (profile.drumGain + intensity * 0.00055) * profileGain,
-        filterType: 'lowpass',
-        filterFrequency: profile.drumFilter,
-        q: 0.75,
-      }, musicGain);
-    }
-
-    if (step % 8 === 6) {
-      scheduleNoise(stepDuration * 0.75, start + stepDuration * 0.18, {
-        gain: 0.0065 * profileGain,
-        filterType: 'highpass',
-        filterFrequency: 5200,
-        q: 0.4,
-      }, musicGain);
-    }
-
-    if (arp) {
-      const shimmerGain = (0.010 + intensity * 0.00035) * profileGain;
-      scheduleTone(arp, stepDuration * 1.1, start + stepDuration * 0.06, {
-        gain: shimmerGain,
-        type: 'sine',
-        attack: 0.018,
-      }, musicGain);
-      scheduleTone(arp * 2, stepDuration * 0.72, start + stepDuration * 0.22, {
-        gain: shimmerGain * 0.46,
-        type: 'triangle',
-        attack: 0.012,
-        detune: 5,
-      }, musicGain);
-      if (step % 2 === 0) {
-        scheduleTone(arp * 1.5, stepDuration * 0.8, start + stepDuration * 0.58, {
-          gain: shimmerGain * 0.32,
-          type: 'sine',
-          attack: 0.02,
-          detune: -9,
-        }, musicGain);
-      }
-    }
-
-    if (melody) {
-      scheduleTone(melody, stepDuration * 1.8, start + stepDuration * 0.12, {
-        gain: (profile.melodyGain + intensity * 0.00042) * profileGain,
-        type: 'triangle',
-        attack: 0.045,
-      }, musicGain);
-      scheduleTone(melody * 0.5, stepDuration * 2.4, start + stepDuration * 0.12, {
-        gain: 0.010 * profileGain,
-        type: 'sine',
-        attack: 0.09,
-      }, musicGain);
-      if (step % 8 === 2 || step % 16 === 12) {
-        scheduleTone(melody * 1.5, stepDuration * 1.25, start + stepDuration * 0.32, {
-          gain: 0.0105 * profileGain,
-          type: 'sine',
-          attack: 0.03,
-        }, musicGain);
-      }
-    }
-
-    if (step % 32 === 24) {
-      scheduleTone(55, stepDuration * 8, start, {
-        gain: 0.018 * profileGain,
-        type: 'sawtooth',
-        attack: 0.22,
-        endFrequency: 73.42,
-      }, musicGain);
-      scheduleNoise(stepDuration * 7.5, start, {
-        gain: 0.010 * profileGain,
-        filterType: 'highpass',
-        filterFrequency: 1800,
-        q: 0.35,
-      }, musicGain);
+        attack: 0.03,
+        hold: 0.4,
+        chorus: 8,
+      }, leadFilter);
     }
   }
 
@@ -1035,53 +1028,81 @@ export function createSpellwaveAudio({
   }
 
   // ── Sound effects ──────────────────────────────────────────────────────
-  // One family, built from a few handmade-sounding pieces: wooden knocks, mallet
-  // notes, small bells, paper rustles and soft drums. Options carry delay and pan.
+  // One electronic family for the arcane cannon and what it hits: pitch-swept
+  // pulses, filtered noise bursts, driven low hits and clean synth chimes.
+  // Options carry delay and pan.
 
-  // A struck piece of wood: a short pitched thud with a click on the front.
-  function knock(frequency, gain, options = {}) {
-    const pitch = varyPitch(frequency, options.spread ?? 24);
-    playTone(pitch, options.length ?? 0.07, { ...options, gain: varyGain(gain), type: 'sine', attack: 0.001, endFrequency: pitch * 0.82 });
-    playTone(pitch * 2.4, 0.03, { ...options, gain: gain * 0.35, type: 'sine', attack: 0.001 });
+  // A pitch sweep: the body of every laser, blip and alarm.
+  function zap(from, to, duration, gain, options = {}) {
+    playTone(from, duration, { type: 'square', attack: 0.002, ...options, gain, endFrequency: to });
   }
 
-  // A marimba-like bar.
-  function mallet(frequency, duration, gain, options = {}) {
-    playTone(frequency, duration, { ...options, gain, type: 'sine', attack: 0.002 });
-    playTone(frequency * 4, duration * 0.2, { ...options, gain: gain * 0.26, type: 'sine', attack: 0.001 });
-    playTone(frequency * 2, duration * 0.4, { ...options, gain: gain * 0.14, type: 'triangle', attack: 0.002 });
+  // A burst of filtered noise, optionally sweeping.
+  function burst(duration, gain, options = {}) {
+    playNoise(duration, { filterType: 'bandpass', filterFrequency: 2400, q: 0.9, ...options, gain });
   }
 
-  // A small bell: the out-of-tune upper partials are what make it ring like metal.
-  function bell(frequency, duration, gain, options = {}) {
-    playTone(frequency, duration, { ...options, gain, type: 'sine', attack: 0.002 });
-    playTone(frequency * 2.76, duration * 0.55, { ...options, gain: gain * 0.3, type: 'sine', attack: 0.001 });
-    playTone(frequency * 5.4, duration * 0.25, { ...options, gain: gain * 0.14, type: 'sine', attack: 0.001 });
+  // A heavy low hit: a falling sine and a puff of low noise, both through the drive.
+  function thud(frequency, duration, gain, options = {}) {
+    playTone(frequency, duration, { ...options, gain, type: 'sine', endFrequency: frequency * 0.4, attack: 0.002, drive: true });
+    playNoise(Math.min(0.14, duration), { ...options, gain: gain * 0.5, filterType: 'lowpass', filterFrequency: 420, drive: true });
   }
 
-  // Paper or cloth moving: a short band of filtered noise, optionally sweeping.
-  function rustle(duration, gain, options = {}) {
-    playNoise(duration, {
-      filterType: 'bandpass', filterFrequency: 2600, q: 0.9, ...options, gain,
+  // A clean synth chime: a chorused triangle with a soft octave above.
+  function chime(frequency, duration, gain, options = {}) {
+    playTone(frequency, duration, { ...options, gain, type: 'triangle', attack: 0.003, chorus: 6 });
+    playTone(frequency * 2, duration * 0.5, { ...options, gain: gain * 0.25, type: 'sine', attack: 0.002 });
+  }
+
+  // A saw chord whose filter closes as it rings.
+  function stab(frequencies, duration, gain, options = {}) {
+    frequencies.forEach((frequency, index) => {
+      playTone(frequency, duration, {
+        type: 'sawtooth', attack: 0.004, hold: 0.35, cutoff: 3200, endCutoff: 500, q: 2,
+        ...options,
+        gain: gain / Math.sqrt(frequencies.length),
+        detune: index % 2 === 0 ? -7 : 7,
+      });
     });
   }
 
-  // A soft-headed drum: a falling low tone with a dull thud of air.
-  function drum(frequency, duration, gain, options = {}) {
-    playTone(frequency, duration, { ...options, gain, type: 'sine', endFrequency: frequency * 0.45, attack: 0.003 });
-    playNoise(Math.min(0.12, duration), { ...options, gain: gain * 0.45, filterType: 'lowpass', filterFrequency: 320 });
-  }
-
-  // Loose pieces of wood falling: a scatter of knocks over a short time.
-  function clatter(count, span, gain, options = {}) {
-    for (let index = 0; index < count; index += 1) {
-      knock(260 + Math.random() * 700, gain * (0.55 + Math.random() * 0.45), {
-        ...options,
-        delay: (options.delay || 0) + Math.random() * span,
-        pan: options.pan ?? Math.random() * 1.2 - 0.6,
-        spread: 0,
-      });
-    }
+  // A low synth growl: two detuned saws through a resonant filter that swells open
+  // and flutters, then through the drive.
+  function growl(frequency, duration, gain, options = {}) {
+    const context = resumeAudio();
+    if (!context || !masterGain) return;
+    const start = context.currentTime + (options.delay || 0);
+    const filter = context.createBiquadFilter();
+    const envelope = createEnvelope(context);
+    const flutter = context.createOscillator();
+    const flutterDepth = context.createGain();
+    filter.type = 'lowpass';
+    filter.Q.value = 6;
+    filter.frequency.setValueAtTime(110, start);
+    filter.frequency.exponentialRampToValueAtTime(options.cutoff || 900, start + duration * 0.65);
+    filter.frequency.exponentialRampToValueAtTime(160, start + duration);
+    flutter.frequency.setValueAtTime(18, start);
+    flutter.frequency.linearRampToValueAtTime(34, start + duration);
+    flutterDepth.gain.value = 90;
+    flutter.connect(flutterDepth);
+    flutterDepth.connect(filter.frequency);
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.exponentialRampToValueAtTime(gain, start + duration * 0.55);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    filter.connect(envelope);
+    envelope.connect(panned(driveBus, options.pan));
+    [-9, 9].forEach((detune) => {
+      const oscillator = context.createOscillator();
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(frequency, start);
+      if (options.endFrequency) oscillator.frequency.exponentialRampToValueAtTime(options.endFrequency, start + duration);
+      oscillator.detune.value = detune;
+      oscillator.connect(filter);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.04);
+    });
+    flutter.start(start);
+    flutter.stop(start + duration + 0.04);
   }
 
   function laneOf(targetX) {
@@ -1092,55 +1113,60 @@ export function createSpellwaveAudio({
   // Menu and typing
 
   function playToggleSound() {
-    knock(700, 0.05);
-    bell(1400, 0.18, 0.016, { delay: 0.01 });
+    zap(1100, 1500, 0.04, 0.03, { cutoff: 3600 });
+    zap(1650, 2200, 0.05, 0.022, { delay: 0.045, cutoff: 4200 });
   }
 
+  // Powering up: a rising sweep into a D minor stab.
   function playStartSound() {
-    mallet(392, 0.32, 0.05);
-    mallet(587.33, 0.32, 0.045, { delay: 0.08 });
-    mallet(783.99, 0.5, 0.045, { delay: 0.16 });
-    rustle(0.12, 0.014, { delay: 0.16, filterFrequency: 5200 });
+    zap(110, 440, 0.28, 0.045, { type: 'sawtooth', cutoff: 500, endCutoff: 3000, q: 3 });
+    burst(0.26, 0.02, { swell: true, filterFrequency: 900, endFilterFrequency: 6000 });
+    stab([293.66, 440, 587.33], 0.55, 0.07, { delay: 0.26 });
+    thud(73.42, 0.4, 0.07, { delay: 0.26 });
   }
 
   function playPauseSound() {
-    knock(520, 0.045);
-    knock(390, 0.04, { delay: 0.09 });
+    zap(660, 620, 0.07, 0.035, { cutoff: 2400 });
+    zap(440, 400, 0.09, 0.035, { delay: 0.09, cutoff: 2000 });
   }
 
-  // Each letter is a spell hitting home: a knock and a spark that climb as the word fills in.
+  // Each letter is a shot from the cannon: a short falling pulse over a small kick,
+  // pitched higher as the word fills in. It fires on every key, so it stays tiny.
   function playTypeSound(progress = Math.min(getTypedLength(), 12) / 12) {
-    const pitch = 640 + Math.min(1, progress) * 720;
-    knock(pitch, 0.05, { length: 0.05, spread: 8 });
-    rustle(0.035, 0.014, { filterFrequency: 3000 + progress * 2600, q: 1.6 });
+    const amount = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
+    const pitch = varyPitch(520 + amount * 420, 10);
+    playTone(pitch * 2.6, 0.06, { gain: 0.03, type: 'square', endFrequency: pitch, attack: 0.001, cutoff: 3800 });
+    playTone(190, 0.045, { gain: 0.034, type: 'sine', endFrequency: 80, attack: 0.001 });
   }
 
-  // A monster bursting out of hiding: a thump and a scuffle of leaves or earth.
+  // A monster bursting out of hiding: a hit, a rush of noise and a falling stinger.
   function playAmbushSound(kind = 'cover', pan = 0) {
     if (kind === 'sky') {
-      rustle(0.22, 0.03, { pan, filterFrequency: 1400 });
-      drum(110, 0.32, 0.08, { pan, delay: 0.16 });
+      burst(0.26, 0.035, { pan, filterType: 'highpass', filterFrequency: 5000, endFilterFrequency: 700 });
+      zap(1400, 280, 0.24, 0.035, { pan, type: 'sawtooth', cutoff: 3200, endCutoff: 700 });
+      thud(100, 0.32, 0.085, { pan, delay: 0.18 });
       return;
     }
-    drum(kind === 'ground' ? 70 : 120, 0.28, 0.085, { pan });
-    rustle(0.2, 0.034, { pan, filterFrequency: kind === 'ground' ? 700 : 1500 });
+    const ground = kind === 'ground';
+    thud(ground ? 62 : 110, 0.3, 0.09, { pan });
+    burst(0.22, 0.035, { pan, filterFrequency: ground ? 300 : 700, endFilterFrequency: ground ? 1200 : 2800 });
+    zap(ground ? 147 : 294, ground ? 55 : 104, 0.22, 0.04, { pan, type: 'sawtooth', cutoff: ground ? 900 : 1800, q: 3 });
   }
 
-  // A monster at striking distance winding up: two quick rising notes.
+  // A monster at striking distance winding up: two charging sweeps, the second higher.
   function playWindupSound(pan = 0) {
-    mallet(392, 0.14, 0.03, { pan });
-    mallet(523, 0.18, 0.034, { pan, delay: 0.12 });
+    zap(294, 587, 0.12, 0.032, { pan, type: 'sawtooth', cutoff: 2600, hold: 0.5 });
+    zap(392, 784, 0.16, 0.036, { pan, type: 'sawtooth', cutoff: 3000, hold: 0.5, delay: 0.12 });
   }
 
   function playBackspaceSound() {
-    knock(300, 0.035, { length: 0.06 });
-    rustle(0.05, 0.01, { filterFrequency: 1800 });
+    zap(280, 170, 0.06, 0.04, { type: 'triangle', cutoff: 1200 });
   }
 
-  // Two dull, hollow thumps.
+  // Two dull digital blips, the second lower.
   function playMistakeSound() {
-    knock(190, 0.07, { length: 0.11 });
-    knock(150, 0.06, { length: 0.12, delay: 0.085 });
+    zap(165, 150, 0.1, 0.055, { cutoff: 800, hold: 0.4 });
+    zap(131, 110, 0.13, 0.055, { cutoff: 700, hold: 0.4, delay: 0.085 });
   }
 
   // Monsters
@@ -1148,180 +1174,204 @@ export function createSpellwaveAudio({
   // For bosses this is the arm cue: rocks unlock after their first-shot delay.
   function playRevealSound(enemy) {
     const pan = lanePan(enemy);
-    if (enemy.isBoss) {
-      drum(92, 0.55, 0.09, { pan });
-      drum(70, 0.65, 0.1, { delay: 0.09, pan });
-      bell(196, 0.95, 0.04, { delay: 0.04, pan });
-      bell(293.66, 0.75, 0.028, { delay: 0.16, pan });
+    if (enemy?.isBoss) {
+      thud(70, 0.6, 0.09, { pan });
+      growl(55, 1.1, 0.09, { pan, cutoff: 1000, endFrequency: 73.42 });
+      growl(82.41, 0.9, 0.05, { pan: -pan, cutoff: 700, delay: 0.12 });
+      burst(0.9, 0.03, { pan, swell: true, filterType: 'lowpass', filterFrequency: 200, endFilterFrequency: 1400 });
       return;
     }
-    const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy.lane));
-    bell(690 + laneIndex * 27, 0.24, 0.03, { pan });
+    const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy?.lane));
+    const pitch = 520 + laneIndex * 27;
+    zap(pitch, pitch * 1.5, 0.14, 0.03, { pan, cutoff: 2800, hold: 0.4 });
   }
 
-  // A soft pop, a struck note and a flutter of paper.
+  // A burst of noise over a falling sweep and a low punch.
   function playDefeatSound(enemy) {
-    if (enemy.isBoss) {
+    if (enemy?.isBoss) {
       playBossExplosionSound(enemy);
       return;
     }
     const pan = lanePan(enemy);
-    const base = varyPitch(560, 80);
-    playTone(base, 0.08, { gain: varyGain(0.065), type: 'sine', endFrequency: base * 1.9, attack: 0.002, pan });
-    mallet(base * 1.5, 0.24, 0.036, { delay: 0.03, pan });
-    knock(210, 0.05, { length: 0.1, pan });
-    rustle(0.11, 0.02, { delay: 0.02, filterFrequency: varyPitch(2200, 300), pan });
+    const base = varyPitch(880, 80);
+    burst(0.16, varyGain(0.05), { pan, filterFrequency: varyPitch(2600, 300), endFilterFrequency: 500 });
+    zap(base, base / 8, 0.2, varyGain(0.05), { pan, type: 'sawtooth', cutoff: 3200, endCutoff: 400, q: 2 });
+    playTone(160, 0.14, { gain: 0.07, type: 'sine', endFrequency: 50, attack: 0.002, pan });
+    zap(base * 2, base * 3, 0.06, 0.014, { pan, type: 'sine', delay: 0.02 });
   }
 
-  // A big drum, a long low rumble, then the pieces clattering down and one low bell.
+  // A driven low hit, a long falling sweep and roar of noise, then sparks scattering
+  // and one low minor chord.
   function playBossExplosionSound(enemy) {
     const pan = lanePan(enemy) * 0.6;
     duckMusic(0.35, 1.0);
-    drum(96, 1.3, 0.15, { pan });
-    drum(64, 0.9, 0.1, { delay: 0.09 });
-    playNoise(1.3, { gain: 0.085, filterType: 'lowpass', filterFrequency: 900, endFilterFrequency: 90, pan });
-    rustle(0.4, 0.035, { filterFrequency: 3400, endFilterFrequency: 900, pan });
-    clatter(9, 0.9, 0.05, { delay: 0.16 });
-    bell(196, 1.6, 0.035, { delay: 0.3 });
-    bell(293.66, 1.2, 0.02, { delay: 0.42 });
+    thud(92, 1.3, 0.15, { pan });
+    thud(55, 0.9, 0.1, { delay: 0.09 });
+    playNoise(1.4, { gain: 0.09, filterType: 'lowpass', filterFrequency: 1400, endFilterFrequency: 80, pan, drive: true });
+    zap(660, 30, 1.1, 0.07, { pan, type: 'sawtooth', cutoff: 2600, endCutoff: 200, q: 3 });
+    burst(0.4, 0.035, { filterFrequency: 3400, endFilterFrequency: 900, pan });
+    for (let index = 0; index < 7; index += 1) {
+      const pitch = 500 + Math.random() * 1500;
+      zap(pitch, pitch * 0.3, 0.09, 0.03, {
+        type: 'sawtooth',
+        delay: 0.16 + Math.random() * 0.9,
+        pan: Math.random() * 1.2 - 0.6,
+        cutoff: 3000,
+      });
+    }
+    stab([73.42, 110, 146.83, 174.61], 1.6, 0.07, { delay: 0.3, cutoff: 1400, endCutoff: 200 });
   }
 
-  // The spell: a quick swish of air and a falling plucked note.
+  // The spell: a full cannon shot, a longer and brighter fall than a letter's.
   function playBeamSound(targetX = 0) {
     const pan = laneOf(targetX);
-    const pitch = varyPitch(1320, 70);
-    rustle(0.13, 0.03, { filterFrequency: 900, endFilterFrequency: 4200, q: 1.4, pan });
-    playTone(pitch, 0.12, { gain: varyGain(0.04), type: 'sine', endFrequency: pitch * 0.4, attack: 0.002, pan });
+    const pitch = varyPitch(2200, 70);
+    zap(pitch, pitch * 0.12, 0.16, varyGain(0.04), { pan, type: 'sawtooth', cutoff: 5000, endCutoff: 900 });
+    zap(pitch * 0.5, pitch * 0.06, 0.12, 0.022, { pan });
+    burst(0.1, 0.022, { pan, filterFrequency: 5000, endFilterFrequency: 900, q: 1.4 });
   }
 
   function playHealSound(healed) {
-    mallet(523.25, 0.3, 0.04);
-    mallet(659.25, 0.3, 0.036, { delay: 0.07 });
+    chime(523.25, 0.3, 0.036);
+    chime(659.25, 0.3, 0.034, { delay: 0.07 });
     if (healed > 0) {
-      mallet(783.99, 0.4, 0.036, { delay: 0.14 });
-      bell(1567.98, 0.5, 0.016, { delay: 0.2 });
+      chime(783.99, 0.4, 0.034, { delay: 0.14 });
+      chime(1567.98, 0.5, 0.014, { delay: 0.2 });
+      zap(523.25, 1046.5, 0.3, 0.012, { type: 'sine', attack: 0.08 });
     }
   }
 
   function playMedicPassSound() {
-    knock(420, 0.03, { length: 0.08 });
-    knock(315, 0.026, { length: 0.09, delay: 0.09 });
+    zap(420, 380, 0.08, 0.03, { type: 'triangle', cutoff: 1600 });
+    zap(315, 270, 0.1, 0.028, { type: 'triangle', cutoff: 1400, delay: 0.09 });
   }
 
-  // A hit on the wall: a deep drum and a rattle of loose wood.
+  // A hit on the wall: a heavy driven thud with a crunch of noise over it.
   function playDamageSound(enemy) {
     const bossHit = !!enemy?.isBoss;
     duckMusic(0.55, 0.3);
-    drum(bossHit ? 70 : 88, bossHit ? 0.5 : 0.36, bossHit ? 0.11 : 0.085);
-    clatter(bossHit ? 6 : 3, 0.22, 0.045, { delay: 0.03 });
+    thud(bossHit ? 55 : 72, bossHit ? 0.5 : 0.36, bossHit ? 0.13 : 0.1);
+    playNoise(bossHit ? 0.34 : 0.24, { gain: 0.075, filterFrequency: 1100, endFilterFrequency: 180, q: 0.7, drive: true });
+    zap(bossHit ? 98 : 123, 40, bossHit ? 0.4 : 0.28, 0.06, { type: 'sawtooth', cutoff: 900, endCutoff: 200, drive: true });
   }
 
-  function playBossThrowSound() {
-    rustle(0.22, 0.04, { filterFrequency: 320, endFilterFrequency: 1100, q: 1.2 });
-    knock(180, 0.05, { length: 0.1 });
+  function playBossThrowSound(enemy) {
+    const pan = lanePan(enemy) * 0.6;
+    burst(0.22, 0.04, { pan, filterFrequency: 320, endFilterFrequency: 1500, q: 1.2 });
+    zap(90, 240, 0.2, 0.04, { pan, type: 'sawtooth', cutoff: 1000, hold: 0.4 });
   }
 
   function playBossImpactSound() {
-    drum(104, 0.26, 0.065);
-    clatter(2, 0.1, 0.04, { delay: 0.02 });
+    thud(104, 0.26, 0.07);
+    playNoise(0.05, { gain: 0.04, filterType: 'highpass', filterFrequency: 2000 });
+    zap(300, 80, 0.1, 0.03, { cutoff: 1800 });
   }
 
-  // Three war-drum beats, closing in, over a low bell.
+  // An alarm: three rising sweeps over a growl.
   function playBossWarningSound() {
     duckMusic(0.45, 0.7);
-    drum(82, 0.4, 0.085);
-    drum(82, 0.4, 0.085, { delay: 0.26 });
-    drum(70, 0.7, 0.1, { delay: 0.46 });
-    bell(110, 1.4, 0.04, { delay: 0.46 });
+    thud(82, 0.4, 0.085);
+    [0, 0.26, 0.52].forEach((delay, index) => {
+      const from = 330 * Math.pow(2, index / 12);
+      zap(from, from * 2, 0.22, 0.042, { type: 'sawtooth', delay, cutoff: 2800, hold: 0.6, chorus: 9 });
+    });
+    growl(55, 1.2, 0.07, { cutoff: 800 });
   }
 
   // Potions
 
-  // A run of small bells climbing, with a crackle of paper.
+  // Charging up: a quick run of pulses climbing over a rising sweep.
   function playChainPrimeSound() {
     [880, 1108.73, 1318.51, 1760].forEach((frequency, index) => {
-      bell(frequency, 0.3, 0.026, { delay: index * 0.06, pan: index % 2 === 0 ? -0.3 : 0.3 });
+      zap(frequency, frequency * 1.06, 0.09, 0.026, { delay: index * 0.06, pan: index % 2 === 0 ? -0.3 : 0.3, cutoff: 4200 });
     });
-    rustle(0.3, 0.02, { filterFrequency: 1800, endFilterFrequency: 6000, q: 1.6 });
+    zap(220, 880, 0.3, 0.02, { type: 'sawtooth', cutoff: 800, endCutoff: 4000, q: 3 });
+    burst(0.3, 0.02, { swell: true, filterFrequency: 1800, endFilterFrequency: 6000, q: 1.6 });
   }
 
-  // One jump of chain lightning: a sharp crack of wood, a quick rattle and a low thump.
+  // One jump of chain lightning: a sharp crack, a falling zap, crackles and a low thump.
   function playChainZapSound(targetX = 0) {
     const pan = laneOf(targetX);
     playNoise(0.035, { gain: 0.085, filterType: 'highpass', filterFrequency: 2800, pan });
-    knock(1300, 0.06, { length: 0.05, pan });
-    for (let index = 0; index < 5; index += 1) {
-      knock(900 + Math.random() * 1400, 0.03, { length: 0.03, delay: 0.03 + Math.random() * 0.16, pan, spread: 0 });
+    zap(2600, 400, 0.07, 0.05, { pan, cutoff: 5000 });
+    for (let index = 0; index < 4; index += 1) {
+      const pitch = 900 + Math.random() * 1400;
+      zap(pitch, pitch * (0.5 + Math.random()), 0.025, 0.028, { pan, delay: 0.03 + Math.random() * 0.16 });
     }
-    drum(84, 0.24, 0.06);
+    thud(84, 0.24, 0.06);
   }
 
-  // Bells stepping down and slowing, as if the world winds down.
+  // The world winding down: a long falling sweep with chimes stepping down and slowing.
   function playTimeFreezeSound() {
+    zap(1567.98, 98, 0.9, 0.05, { type: 'sawtooth', cutoff: 4000, endCutoff: 200, q: 2 });
     [1567.98, 1174.66, 880, 587.33, 392].forEach((frequency, index) => {
-      bell(frequency, 0.7, 0.03, { delay: index * index * 0.028, pan: index % 2 === 0 ? -0.35 : 0.35 });
+      chime(frequency, 0.7, 0.022, { delay: index * index * 0.028, pan: index % 2 === 0 ? -0.35 : 0.35 });
     });
-    drum(72, 0.7, 0.07, { delay: 0.42 });
-    rustle(0.6, 0.02, { filterFrequency: 5000, endFilterFrequency: 500, q: 1.2 });
+    thud(72, 0.7, 0.07, { delay: 0.42 });
+    burst(0.6, 0.02, { filterFrequency: 5000, endFilterFrequency: 500, q: 1.2 });
   }
 
   function playTimeResumeSound() {
-    [392, 587.33, 880].forEach((frequency, index) => bell(frequency, 0.35, 0.026, { delay: index * 0.05 }));
-    rustle(0.25, 0.016, { filterFrequency: 600, endFilterFrequency: 4800, q: 1.2 });
+    zap(98, 784, 0.3, 0.04, { type: 'sawtooth', cutoff: 300, endCutoff: 3200, q: 2 });
+    [392, 587.33, 880].forEach((frequency, index) => chime(frequency, 0.35, 0.022, { delay: index * 0.05 }));
+    burst(0.25, 0.016, { filterFrequency: 600, endFilterFrequency: 4800, q: 1.2 });
   }
 
-  // A great drum and three waves of air rolling outward.
+  // A driven blast and three waves of noise rolling outward.
   function playShockwaveSound() {
     duckMusic(0.4, 0.7);
-    drum(88, 0.9, 0.14);
-    drum(52, 1.1, 0.1, { delay: 0.04 });
+    thud(88, 0.9, 0.14);
+    thud(52, 1.1, 0.1, { delay: 0.04 });
     playNoise(0.7, { gain: 0.06, filterType: 'lowpass', filterFrequency: 500 });
+    zap(440, 40, 0.6, 0.05, { type: 'sawtooth', cutoff: 2000, endCutoff: 200, drive: true });
     [0, 0.15, 0.3].forEach((delay) => {
-      rustle(0.5, 0.036, { delay, filterFrequency: 300, endFilterFrequency: 3000, q: 1.1 });
+      burst(0.5, 0.036, { delay, filterFrequency: 300, endFilterFrequency: 3000, q: 1.1 });
     });
   }
 
+  // A force field switching on: a rising sweep under three stacked chimes.
   function playShieldActivateSound() {
-    [293.66, 440, 587.33].forEach((frequency, index) => bell(frequency, 0.8, 0.034, { delay: index * 0.09 }));
+    zap(147, 587, 0.4, 0.03, { type: 'sawtooth', cutoff: 400, endCutoff: 2600, q: 4 });
+    [293.66, 440, 587.33].forEach((frequency, index) => chime(frequency, 0.8, 0.03, { delay: index * 0.09 }));
     playTone(146.83, 0.8, { gain: 0.04, type: 'sine', attack: 0.2 });
   }
 
-  // A gong, with the thud of whatever struck it.
+  // The field taking a hit: a hard resonant clang over a thud.
   function playShieldBlockSound() {
-    bell(220, 1.2, 0.07);
-    bell(330, 0.8, 0.03, { delay: 0.01 });
-    drum(110, 0.3, 0.08);
-    knock(900, 0.04, { length: 0.04 });
+    stab([220, 330, 446], 0.9, 0.08, { type: 'square', cutoff: 2600, endCutoff: 600, q: 6 });
+    thud(110, 0.3, 0.08);
+    playNoise(0.03, { gain: 0.05, filterType: 'highpass', filterFrequency: 3000 });
   }
 
   // Chests
 
   function playChestClackSound() {
-    knock(400, 0.045, { length: 0.07 });
-    knock(290, 0.04, { length: 0.09, delay: 0.035 });
-    drum(140, 0.12, 0.04);
+    zap(300, 200, 0.05, 0.045, { cutoff: 1400 });
+    zap(220, 150, 0.07, 0.04, { cutoff: 1200, delay: 0.035 });
+    playTone(140, 0.12, { gain: 0.045, type: 'sine', endFrequency: 60, attack: 0.002 });
   }
 
-  // A creak of the lid, then a glint of coins.
+  // The lock releasing, then a glint.
   function playChestOpenSound() {
-    [180, 205, 235].forEach((frequency, index) => knock(frequency, 0.04, { length: 0.05, delay: index * 0.04, spread: 0 }));
-    [1318.51, 1760, 2093].forEach((frequency, index) => bell(frequency, 0.3, 0.018, { delay: 0.14 + index * 0.06 }));
+    zap(180, 360, 0.14, 0.04, { type: 'sawtooth', cutoff: 1400, hold: 0.4 });
+    [1318.51, 1760, 2093].forEach((frequency, index) => chime(frequency, 0.3, 0.016, { delay: 0.14 + index * 0.06 }));
   }
 
   // Wave results
 
+  // Three synth stabs climbing to a held major chord: B flat, C, D.
   function playWaveClearSound() {
-    [523.25, 659.25, 783.99, 1046.5].forEach((frequency, index) => {
-      mallet(frequency, index === 3 ? 0.7 : 0.4, 0.042, { delay: index * 0.08 });
-    });
-    bell(2093, 0.6, 0.014, { delay: 0.34 });
-    rustle(0.14, 0.014, { delay: 0.3, filterFrequency: 5200 });
+    stab([233.08, 293.66, 349.23], 0.3, 0.07);
+    stab([261.63, 329.63, 392], 0.3, 0.07, { delay: 0.17 });
+    stab([293.66, 369.99, 440, 587.33], 1.1, 0.085, { delay: 0.34, cutoff: 4200, endCutoff: 700 });
+    thud(73.42, 0.5, 0.07, { delay: 0.34 });
+    burst(0.7, 0.02, { delay: 0.34, filterType: 'highpass', filterFrequency: 5000 });
   }
 
   // ── Victory score ──────────────────────────────────────────────────────
   // A 40-second cue scored to the victory cinematic (ending-cinematic.js), on the
   // same 90 bpm bar grid: the night in D minor, words chiming into the wands, the
-  // wave of light in D major on bar 4, the sunrise theme, one bell per letter of
+  // wave of light in D major on bar 4, the sunrise theme, one chime per letter of
   // the name on bars 10–11, and the full chord as the name completes on bar 12.
   // It runs on its own bus so Skip and Replay can fade it out.
 
@@ -1329,22 +1379,23 @@ export function createSpellwaveAudio({
     scheduleTone(frequency, duration, start, { type: 'sine', attack: 0.004, ...options, gain }, scoreBus);
   }
 
-  function scoreMallet(frequency, start, duration, gain, pan = 0) {
-    scoreTone(frequency, start, duration, gain, { attack: 0.002, pan });
-    scoreTone(frequency * 4, start, duration * 0.2, gain * 0.26, { attack: 0.001, pan });
-    scoreTone(frequency * 2, start, duration * 0.4, gain * 0.14, { type: 'triangle', attack: 0.002, pan });
+  // The theme's voice: a sine body under a saw whose filter closes as the note rings.
+  function scoreLead(frequency, start, duration, gain, pan = 0) {
+    scoreTone(frequency, start, duration, gain * 0.85, { attack: 0.003, pan });
+    scoreTone(frequency, start, duration * 0.8, gain * 0.5, { type: 'sawtooth', attack: 0.004, cutoff: 3000, endCutoff: 700, pan });
   }
 
-  function scoreBell(frequency, start, duration, gain, pan = 0) {
-    scoreTone(frequency, start, duration, gain, { attack: 0.002, pan });
-    scoreTone(frequency * 2.76, start, duration * 0.55, gain * 0.3, { attack: 0.001, pan });
-    scoreTone(frequency * 5.4, start, duration * 0.25, gain * 0.14, { attack: 0.001, pan });
+  // A clean synth chime with harmonic overtones.
+  function scoreChime(frequency, start, duration, gain, pan = 0) {
+    scoreTone(frequency, start, duration, gain, { type: 'triangle', attack: 0.002, pan });
+    scoreTone(frequency * 2, start, duration * 0.55, gain * 0.3, { attack: 0.001, pan });
+    scoreTone(frequency * 3, start, duration * 0.25, gain * 0.1, { attack: 0.001, pan });
   }
 
-  function scoreMusicBox(frequency, start, gain, pan = 0) {
-    scoreTone(frequency, start, 1.1, gain * 1.2, { attack: 0.002, pan });
-    scoreTone(frequency * 3, start, 0.35, gain * 0.2, { attack: 0.001, pan: -pan });
-    scoreTone(frequency * 5.4, start, 0.1, gain * 0.1, { attack: 0.001, pan });
+  // The arpeggio voice: a short filtered pulse with a sine tail.
+  function scorePluck(frequency, start, gain, pan = 0) {
+    scoreTone(frequency, start, 1.1, gain, { attack: 0.002, pan });
+    scoreTone(frequency, start, 0.3, gain * 0.5, { type: 'square', attack: 0.002, cutoff: 3600, endCutoff: 900, pan: -pan });
   }
 
   // A held chord: soft sine and triangle voices with a slow swell and release.
@@ -1355,7 +1406,7 @@ export function createSpellwaveAudio({
     filter.type = 'lowpass';
     filter.frequency.value = cutoff;
     filter.Q.value = 0.3;
-    const envelope = context.createGain();
+    const envelope = createEnvelope(context);
     envelope.gain.setValueAtTime(0.0001, start);
     envelope.gain.linearRampToValueAtTime(gain, start + attack);
     envelope.gain.setValueAtTime(gain, start + Math.max(attack, duration - release));
@@ -1395,13 +1446,9 @@ export function createSpellwaveAudio({
   function scoreSwell(start, duration, gain, fromFrequency, toFrequency) {
     const context = audioContext;
     if (!context || !scoreBus) return;
-    const buffer = context.createBuffer(1, Math.floor(context.sampleRate * duration), context.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let index = 0; index < data.length; index += 1) data[index] = Math.random() * 2 - 1;
-    const source = context.createBufferSource();
+    const source = createNoiseSource(context, start, duration);
     const filter = context.createBiquadFilter();
-    const envelope = context.createGain();
-    source.buffer = buffer;
+    const envelope = createEnvelope(context);
     filter.type = 'bandpass';
     filter.Q.value = 0.9;
     filter.frequency.setValueAtTime(fromFrequency, start);
@@ -1412,8 +1459,6 @@ export function createSpellwaveAudio({
     source.connect(filter);
     filter.connect(envelope);
     envelope.connect(scoreBus);
-    source.start(start);
-    source.stop(start + duration + 0.02);
   }
 
   function scoreBass(frequency, start, duration, gain) {
@@ -1429,16 +1474,17 @@ export function createSpellwaveAudio({
     scheduleNoise(0.09, start, { gain, filterType: 'bandpass', filterFrequency: 1900, q: 0.7 }, scoreBus);
   }
 
-  function scoreWoodblock(start, gain, pan = 0) {
-    scoreTone(880, start, 0.07, gain, { attack: 0.001, pan });
-    scoreTone(1320, start, 0.045, gain * 0.5, { attack: 0.001, pan });
+  // An electronic rim tick on the offbeats.
+  function scoreTick(start, gain, pan = 0) {
+    scoreTone(1760, start, 0.03, gain * 0.6, { type: 'square', attack: 0.001, cutoff: 4000, pan });
+    scheduleNoise(0.04, start, { gain: gain * 1.6, filterType: 'highpass', filterFrequency: 5000, q: 0.5, pan }, scoreBus);
   }
 
   function scoreShaker(start, gain) {
     scheduleNoise(0.05, start, { gain, filterType: 'highpass', filterFrequency: 7000, q: 0.4 }, scoreBus);
   }
 
-  // A firework over the name: a soft thump, a crackle of sparks and a bell.
+  // A firework over the name: a soft thump, a crackle of sparks and a chime.
   function scoreFirework(start, pan) {
     scoreDrum(98, start, 0.6, 0.08);
     for (let index = 0; index < 7; index += 1) {
@@ -1446,7 +1492,7 @@ export function createSpellwaveAudio({
         attack: 0.001, pan: Math.max(-1, Math.min(1, pan + Math.random() * 0.5 - 0.25)),
       });
     }
-    scoreBell(noteFrequency('A6'), start + 0.05, 1.3, 0.012, pan);
+    scoreChime(noteFrequency('A6'), start + 0.05, 1.3, 0.012, pan);
   }
 
   function buildVictoryScore(arrivals) {
@@ -1458,16 +1504,16 @@ export function createSpellwaveAudio({
     const at = (time, play) => events.push({ time, play });
     const chord = (names) => names.map(N);
 
-    // Bars 0–1: the silent night. A low drone, frozen bells, D minor then B flat.
+    // Bars 0–1: the silent night. A low drone, frozen chimes, D minor then B flat.
     at(0, (T) => scorePad(chord(['D2', 'A2']), T, 10.9, 0.03, { attack: 3, release: 1.0, cutoff: 900 }));
     at(0, (T) => scorePad(chord(['D3', 'F3', 'A3']), T, BAR + 0.3, 0.011, { attack: 1.4, release: 1, cutoff: 1400 }));
     at(BAR, (T) => scorePad(chord(['A#2', 'D3', 'F3']), T, BAR + 0.3, 0.011, { attack: 1.2, release: 1, cutoff: 1400 }));
     at(0, (T) => scoreSwell(T, 5.2, 0.005, 3000, 4600));
     [[0.667, 'A5'], [1.667, 'F5'], [2.333, 'D6'], [3.333, 'C6'], [4.0, 'A5'], [4.667, 'E5']].forEach(([time, name], index) => {
-      at(time, (T) => scoreBell(N(name), T, 2.4, 0.018, index % 2 === 0 ? -0.4 : 0.4));
+      at(time, (T) => scoreChime(N(name), T, 2.4, 0.018, index % 2 === 0 ? -0.4 : 0.4));
     });
 
-    // Bars 2–3: the words gather. A music-box arpeggio climbs to the dominant,
+    // Bars 2–3: the words gather. A plucked arpeggio climbs to the dominant,
     // each word chimes as it lands, and the air rises into the release.
     at(2 * BAR, (T) => scorePad(chord(['G2', 'A#2', 'D3', 'G3']), T, BAR + 0.3, 0.011, { attack: 0.9, release: 0.6, cutoff: 1600 }));
     at(3 * BAR, (T) => scorePad(chord(['A2', 'C#3', 'E3', 'A3']), T, BAR - 0.05, 0.013, { attack: 0.8, release: 0.25, cutoff: 2000 }));
@@ -1478,11 +1524,11 @@ export function createSpellwaveAudio({
       if (time >= 4 * BAR - 0.16) break;
       const progress = (time - 2 * BAR) / (2 * BAR);
       const notes = time < 3 * BAR ? minorArp : dominantArp;
-      at(time, (T) => scoreMusicBox(notes[step % notes.length], T, 0.006 + 0.012 * progress, Math.sin(step * 0.7) * 0.5));
+      at(time, (T) => scorePluck(notes[step % notes.length], T, 0.006 + 0.012 * progress, Math.sin(step * 0.7) * 0.5));
     }
     const arrivalNotes = ['E5', 'F#5', 'G5', 'A5', 'B5', 'C#6', 'D6', 'E6', 'F#6', 'G6', 'A6', 'B6'];
     arrivals.slice(0, arrivalNotes.length).forEach((time, index) => {
-      at(time, (T) => scoreBell(N(arrivalNotes[index]), T, 1.4, 0.026 - index * 0.0008, index % 2 === 0 ? -0.35 : 0.35));
+      at(time, (T) => scoreChime(N(arrivalNotes[index]), T, 1.4, 0.026 - index * 0.0008, index % 2 === 0 ? -0.35 : 0.35));
     });
     at(7.0, (T) => scoreSwell(T, 4 * BAR - 7.05, 0.028, 350, 7500));
     [[3 * BAR, 0.05], [3 * BAR + B, 0.06], [3 * BAR + 2 * B, 0.07], [3 * BAR + 3 * B, 0.08], [3 * BAR + 3 * B + E, 0.09]].forEach(([time, gain]) => {
@@ -1495,7 +1541,7 @@ export function createSpellwaveAudio({
       scoreDrum(N('D2'), T, 1.4, 0.14);
       scoreBoom(T, 0.06);
       scoreCymbal(T, 3.8, 0.045);
-      ['D6', 'F#6', 'A6', 'D7'].forEach((name, index) => scoreBell(N(name), T + index * 0.035, 2.2, 0.026, (index - 1.5) * 0.3));
+      ['D6', 'F#6', 'A6', 'D7'].forEach((name, index) => scoreChime(N(name), T + index * 0.035, 2.2, 0.026, (index - 1.5) * 0.3));
       scorePad(chord(['D2', 'A2', 'D3', 'F#3', 'A3', 'D4']), T, 2.9, 0.012, { attack: 0.04, release: 1.2, cutoff: 3200 });
     });
 
@@ -1524,26 +1570,26 @@ export function createSpellwaveAudio({
       if (bar >= 5) at(start, (T) => scoreKick(T, 0.05));
       at(start + 2 * B, (T) => scoreKick(T, 0.05));
       if (bar >= 5) {
-        at(start + 1.5 * B, (T) => scoreWoodblock(T, 0.01, -0.3));
-        at(start + 3.5 * B, (T) => scoreWoodblock(T, 0.01, 0.3));
+        at(start + 1.5 * B, (T) => scoreTick(T, 0.01, -0.3));
+        at(start + 3.5 * B, (T) => scoreTick(T, 0.01, 0.3));
       }
       if (bar >= 6) {
         for (let slot = 0; slot < 8; slot += 1) {
           at(start + slot * E, (T) => scoreShaker(T, slot % 2 === 1 ? 0.004 : 0.0025));
           const tone = N(harmony.high[slot % 3]) * 2;
-          at(start + slot * E, (T) => scoreMusicBox(tone, T, 0.005, slot % 2 === 0 ? -0.45 : 0.45));
+          at(start + slot * E, (T) => scorePluck(tone, T, 0.005, slot % 2 === 0 ? -0.45 : 0.45));
         }
         at(start, (T) => scorePad(chord(harmony.high), T, BAR + 0.5, 0.006, { attack: 1.0, release: 0.8, cutoff: 3000 }));
       }
       themeMelody[bar].forEach(([slot, note, ring]) => {
         at(start + slot * E, (T) => {
-          scoreMallet(N(note), T, ring, 0.042, 0.1);
-          if (bar >= 8) scoreMusicBox(N(note) * 2, T, 0.01, -0.2);
+          scoreLead(N(note), T, ring, 0.042, 0.1);
+          if (bar >= 8) scorePluck(N(note) * 2, T, 0.01, -0.2);
         });
       });
     });
 
-    // Bars 10–11: the name assembles, one bell per letter, over a rising roll.
+    // Bars 10–11: the name assembles, one chime per letter, over a rising roll.
     at(10 * BAR, (T) => scorePad(chord(['G2', 'D3', 'G3', 'B3', 'D4']), T, BAR + 0.3, 0.011, { attack: 0.4, release: 0.4, cutoff: 2400 }));
     at(11 * BAR, (T) => scorePad(chord(['A2', 'E3', 'A3', 'C#4', 'E4']), T, BAR, 0.013, { attack: 0.4, release: 0.15, cutoff: 2800 }));
     at(10 * BAR, (T) => scoreDrum(N('G1'), T, 1.2, 0.12));
@@ -1556,8 +1602,8 @@ export function createSpellwaveAudio({
     }
     ['D5', 'E5', 'F#5', 'G5', 'A5', 'B5', 'C#6', 'D6'].forEach((name, index) => {
       at(10 * BAR + index * B, (T) => {
-        scoreBell(N(name), T, 1.6, 0.03, (index - 3.5) / 6);
-        scoreMallet(N(name), T, 0.5, 0.018, (index - 3.5) / 6);
+        scoreChime(N(name), T, 1.6, 0.03, (index - 3.5) / 6);
+        scoreLead(N(name), T, 0.5, 0.018, (index - 3.5) / 6);
       });
     });
     for (let step = 0; ; step += 1) {
@@ -1575,9 +1621,9 @@ export function createSpellwaveAudio({
       scoreBoom(T, 0.06);
       scoreCymbal(T, 5, 0.055);
       scorePad(chord(['D2', 'A2', 'D3', 'F#3', 'A3', 'D4', 'F#4']), T, BAR + 0.3, 0.012, { attack: 0.03, release: 0.6, cutoff: 3600 });
-      scoreBell(N('D6'), T, 2.6, 0.03, -0.2);
-      scoreBell(N('A6'), T, 2.6, 0.022, 0.2);
-      scoreBell(N('F#6'), T + 0.05, 2.2, 0.02, 0);
+      scoreChime(N('D6'), T, 2.6, 0.03, -0.2);
+      scoreChime(N('A6'), T, 2.6, 0.022, 0.2);
+      scoreChime(N('F#6'), T + 0.05, 2.2, 0.02, 0);
     });
     const finaleMelody = {
       12: [[0, 'F#5', 0.6], [2, 'A5', 0.6], [4, 'D6', 2.2]],
@@ -1587,14 +1633,14 @@ export function createSpellwaveAudio({
       const start = bar * BAR;
       finaleMelody[bar].forEach(([slot, note, ring]) => {
         at(start + slot * E, (T) => {
-          scoreMallet(N(note), T, ring, 0.05, 0.1);
-          scoreMusicBox(N(note) * 2, T, 0.012, -0.2);
+          scoreLead(N(note), T, ring, 0.05, 0.1);
+          scorePluck(N(note) * 2, T, 0.012, -0.2);
         });
       });
       at(start, (T) => scoreKick(T, 0.05));
       at(start + 2 * B, (T) => scoreKick(T, 0.05));
-      at(start + 1.5 * B, (T) => scoreWoodblock(T, 0.01, -0.3));
-      at(start + 3.5 * B, (T) => scoreWoodblock(T, 0.01, 0.3));
+      at(start + 1.5 * B, (T) => scoreTick(T, 0.01, -0.3));
+      at(start + 3.5 * B, (T) => scoreTick(T, 0.01, 0.3));
       for (let slot = 0; slot < 8; slot += 1) at(start + slot * E, (T) => scoreShaker(T, slot % 2 === 1 ? 0.004 : 0.0025));
     });
     at(12 * BAR, (T) => scoreBass(N('D2'), T, 2, 0.05));
@@ -1613,10 +1659,10 @@ export function createSpellwaveAudio({
       scoreBass(N('D2'), T, 5, 0.05);
       scoreDrum(N('D1'), T, 2.5, 0.12);
       scoreCymbal(T, 4, 0.022);
-      scoreMallet(N('D6'), T, 3, 0.05, 0);
-      scoreBell(N('D6'), T, 3.5, 0.022, 0);
+      scoreLead(N('D6'), T, 3, 0.05, 0);
+      scoreChime(N('D6'), T, 3.5, 0.022, 0);
       [['F#6', 0.5], ['A6', 1.0], ['D7', 1.6], ['A6', 2.4], ['F#6', 3.3], ['D6', 4.4]].forEach(([name, delay], index) => {
-        scoreMusicBox(N(name), T + delay, 0.011 - index * 0.0012, index % 2 === 0 ? -0.4 : 0.4);
+        scorePluck(N(name), T + delay, 0.011 - index * 0.0012, index % 2 === 0 ? -0.4 : 0.4);
       });
     });
 
@@ -1695,29 +1741,34 @@ export function createSpellwaveAudio({
       }, sfxBus);
     });
     ['D5', 'F#5', 'A5', 'D6'].forEach((name, index) => {
-      bell(noteFrequency(name), 1.6, 0.028, { delay: 0.05 + index * 0.11, pan: (index - 1.5) * 0.25 });
+      chime(noteFrequency(name), 1.6, 0.026, { delay: 0.05 + index * 0.11, pan: (index - 1.5) * 0.25 });
     });
-    drum(noteFrequency('D2'), 0.9, 0.1);
+    thud(noteFrequency('D2'), 0.9, 0.1);
   }
 
+  // Powering down: a falling minor line, then a long sweep into the floor.
   function playGameOverSound() {
-    [392, 349.23, 293.66, 196].forEach((frequency, index) => {
-      mallet(frequency, index === 3 ? 0.9 : 0.4, 0.04, { delay: index * 0.16 });
+    [440, 349.23, 293.66, 220].forEach((frequency, index) => {
+      playTone(frequency, index === 3 ? 0.9 : 0.4, {
+        gain: 0.04, type: 'sawtooth', attack: 0.004, hold: 0.3, cutoff: 2200, endCutoff: 400, chorus: 9, delay: index * 0.16,
+      });
     });
-    drum(70, 0.8, 0.06, { delay: 0.5 });
+    zap(146.83, 36.71, 1.4, 0.06, { type: 'sawtooth', delay: 0.48, cutoff: 900, endCutoff: 120, q: 3, hold: 0.3 });
+    thud(64, 0.8, 0.07, { delay: 0.5 });
   }
 
   function playGodModeOnSound() {
     [523.25, 659.25, 783.99, 1046.5, 1567.98].forEach((frequency, index) => {
-      bell(frequency, 0.3, 0.026, { delay: index * 0.045, pan: index % 2 === 0 ? -0.3 : 0.3 });
+      zap(frequency, frequency, 0.14, 0.024, { delay: index * 0.045, pan: index % 2 === 0 ? -0.3 : 0.3, cutoff: 4200 });
     });
+    zap(196, 784, 0.26, 0.022, { type: 'sawtooth', cutoff: 600, endCutoff: 3600, q: 3 });
   }
 
   function playGodModeOffSound() {
     [1567.98, 1046.5, 783.99, 659.25, 523.25].forEach((frequency, index) => {
-      bell(frequency, 0.3, 0.026, { delay: index * 0.045, pan: index % 2 === 0 ? 0.3 : -0.3 });
+      zap(frequency, frequency, 0.14, 0.024, { delay: index * 0.045, pan: index % 2 === 0 ? 0.3 : -0.3, cutoff: 4200 });
     });
-    knock(260, 0.04, { length: 0.1, delay: 0.24 });
+    zap(260, 130, 0.12, 0.04, { delay: 0.24, cutoff: 1200 });
   }
 
   return {
