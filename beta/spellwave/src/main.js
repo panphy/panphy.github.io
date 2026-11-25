@@ -1,20 +1,20 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta16';
+import { createSpellwaveAudio } from './audio.js?v=beta17';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta16';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta16';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta16';
-import { createLeaderboard } from './leaderboard.js?v=beta16';
+import { createPotionSystem } from './potions.js?v=beta17';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta17';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta17';
+import { createLeaderboard } from './leaderboard.js?v=beta17';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta16';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta16';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta17';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta17';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta16';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta16';
-import { createWordDeck } from './word-decks.js?v=beta16';
-import { createStage } from './stages.js?v=beta16';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta16';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta16';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta17';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta17';
+import { createWordDeck } from './word-decks.js?v=beta17';
+import { createStage } from './stages.js?v=beta17';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta17';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta17';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -3971,8 +3971,12 @@ function spawnBeam(targetPosition) {
   const distance = start.distanceTo(end);
   const mid = start.clone().lerp(end, 0.5);
 
+  // The beams start thin at the muzzle, which is close to the camera, and widen
+  // toward the target; a beam of even width would fill the view.
+  const taper = (atTarget, atMuzzle) => new THREE.CylinderGeometry(atTarget, atMuzzle, distance, 6, 1, true).rotateX(Math.PI / 2);
+
   // White core beam
-  const coreGeo = new THREE.BoxGeometry(0.14, 0.14, distance);
+  const coreGeo = taper(0.08, 0.012);
   const coreMat = new THREE.MeshBasicMaterial({
     color: glowColor(0xffffff), transparent: true, opacity: 1,
     blending: THREE.AdditiveBlending, depthWrite: false,
@@ -3984,7 +3988,7 @@ function spawnBeam(targetPosition) {
   beams.push({ mesh: coreMesh, life: 0.28, maxLife: 0.28, kind: 'beam_core' });
 
   // Wide teal glow beam
-  const glowGeo = new THREE.BoxGeometry(0.72, 0.72, distance);
+  const glowGeo = taper(0.38, 0.03);
   const glowMat = new THREE.MeshBasicMaterial({
     color: glowColor(0x58dfcf, 1.5), transparent: true, opacity: 0.48,
     blending: THREE.AdditiveBlending, depthWrite: false,
@@ -4007,7 +4011,7 @@ function spawnBeam(targetPosition) {
   beams.push({ mesh: flashMesh, life: 0.22, maxLife: 0.22, kind: 'beam_flash' });
 
   // Muzzle flash at caster
-  const muzzleGeo = new THREE.DodecahedronGeometry(0.38, 0);
+  const muzzleGeo = new THREE.DodecahedronGeometry(0.1, 0);
   const muzzleMat = new THREE.MeshBasicMaterial({
     color: 0xffffff, transparent: true, opacity: 0.9,
     blending: THREE.AdditiveBlending, depthWrite: false,
@@ -4017,7 +4021,7 @@ function spawnBeam(targetPosition) {
   effectsGroup.add(muzzleMesh);
   beams.push({ mesh: muzzleMesh, life: 0.14, maxLife: 0.14, kind: 'beam_flash' });
 
-  fx.flash(start, 0xd8fff6, 2.2, 0.18);
+  fx.flash(start, 0xd8fff6, 0.5, 0.18);
   fx.flash(end, 0x9ffff0, 3.6, 0.26);
   fx.ring(end, 0x58dfcf, { from: 0.3, to: 2.4, life: 0.32, flat: false });
   fx.lightPulse(end, 0x58dfcf, 16, 0.3);
