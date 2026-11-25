@@ -113,32 +113,6 @@ export function buildMudlug(type, kit) {
   return group;
 }
 
-// One wing as a fan of flat triangles between the arm and finger bones. `side` is -1
-// for the left wing, which extends toward -x.
-function wingGeometry(side) {
-  const point = (x, y, z) => new THREE.Vector3(x * -side, y, z);
-  const shoulder = point(0, 0, 0);
-  const elbow = point(-0.9, 0.55, 0);
-  const tipTop = point(-2.35, 1.3, -0.12);
-  const tipMid = point(-2.15, 0.12, -0.06);
-  const tipLow = point(-1.4, -0.78, 0);
-  const inner = point(-0.32, -0.72, 0);
-  // Edge points pulled toward the elbow give the scalloped trailing edge.
-  const scallop = (a, b) => a.clone().add(b).multiplyScalar(0.5).lerp(elbow, 0.3);
-  const triangles = [
-    [shoulder, elbow, inner],
-    [elbow, tipTop, scallop(tipTop, tipMid)], [elbow, scallop(tipTop, tipMid), tipMid],
-    [elbow, tipMid, scallop(tipMid, tipLow)], [elbow, scallop(tipMid, tipLow), tipLow],
-    [elbow, tipLow, scallop(tipLow, inner)], [elbow, scallop(tipLow, inner), inner],
-  ];
-  const positions = [];
-  for (const triangle of triangles) for (const vertex of triangle) positions.push(vertex.x, vertex.y, vertex.z);
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geometry.computeVertexNormals();
-  return { geometry, bones: [[shoulder, elbow, 0.07], [elbow, tipTop, 0.045], [elbow, tipMid, 0.04], [elbow, tipLow, 0.04]], tipTop };
-}
-
 const UP = new THREE.Vector3(0, 1, 0);
 
 // ---- Boss helpers ----
@@ -783,7 +757,7 @@ export function buildVerdantColossus(type, kit) {
     clubArm.elbow.rotation.x = -1.15 - windup * 0.5 + Math.sin(t * 1.7 + 1) * 0.06 * wide;
     clubArm.hand.rotation.x = -0.2;
     club.rotation.x = 1.35 + Math.sin(t * 1.7) * 0.06 * wide - windup * 0.3;
-    club.rotation.z = -0.3;
+    club.rotation.z = -0.18;
     for (let finger = 0; finger < clubArm.digits.length; finger += 1) clubArm.digits[finger].rotation.x = -1.2;
     for (let index = 0; index < tail.length; index += 1) {
       tail[index].rotation.x = 0.3;
@@ -945,7 +919,7 @@ export function buildStormWarden(type, kit) {
     skull.rotation.y = Math.sin(t * 0.8) * 0.28 * wide;
     skull.rotation.z = Math.sin(t * 1.6) * 0.06 + rattle * 0.12;
     // The jaw hangs open and chatters now and then; it drops wide for a wind-up or a hit.
-    const chatter = Math.sin(t * 0.6) > 0.55 ? Math.max(0, Math.sin(t * 15)) * 0.25 : 0;
+    const chatter = Math.max(0, Math.sin(t * 0.6) - 0.5) * Math.max(0, Math.sin(t * 15)) * 0.6;
     jaw.rotation.x = 0.2 + chatter + Math.max(windup, hurt) * 0.5 + rage * 0.12;
     const caster = arms[0];
     const bearer = arms[1];
@@ -1508,7 +1482,7 @@ export function buildVoidSpecter(type, kit) {
   for (let index = 0; index < 7; index += 1) {
     const angle = (index / 7) * Math.PI * 2;
     const wisp = index % 3 === 0;
-    b.place(orbit, b.octa(wisp ? 0.08 : 0.11), wisp ? edge : voidDark, [Math.cos(angle) * 1.12, Math.sin(index * 1.9) * 0.3, Math.sin(angle) * 1.12], [0.6, wisp ? 1.4 : 2.2, 0.6], [index, 0, index * 0.8]);
+    b.place(orbit, b.octa(wisp ? 0.08 : 0.11), wisp ? edge : voidDark, [Math.cos(angle) * 1.05, Math.sin(index * 1.9) * 0.3, Math.sin(angle) * 1.05], [0.6, wisp ? 1.4 : 2.2, 0.6], [index, 0, index * 0.8]);
   }
 
   const clock = rageClock();
@@ -1559,28 +1533,6 @@ export function buildVoidSpecter(type, kit) {
   return group;
 }
 
-// A fan of long feathers with a serrated edge, for the Arbiter. `side` is -1 for the left wing.
-function featherWingGeometry(side, length) {
-  const point = (x, y, z = 0) => new THREE.Vector3(x * -side, y, z);
-  const shoulder = point(0, 0);
-  const tips = [];
-  const feathers = 6;
-  for (let index = 0; index <= feathers; index += 1) {
-    const angle = 1.75 - index * 0.36;
-    const reach = length * (1 - index * 0.07);
-    tips.push(point(-Math.sin(angle) * reach, Math.cos(angle) * reach * -1 + reach * 0.15, -index * 0.03));
-  }
-  const positions = [];
-  for (let index = 0; index < feathers; index += 1) {
-    const notch = tips[index].clone().add(tips[index + 1]).multiplyScalar(0.5).lerp(shoulder, 0.32);
-    for (const vertex of [shoulder, tips[index], notch, shoulder, notch, tips[index + 1]]) positions.push(vertex.x, vertex.y, vertex.z);
-  }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
 // Celestial Arbiter — a faceless judge: a blank mask weeping light under a broken
 // sunburst halo, a lidless eye set in its breastplate, four bladed wings (the lower pair
 // dark), a ragged robe, one gauntlet reaching out and a greatsword in the other.
@@ -1599,11 +1551,11 @@ export function buildCelestialArbiter(type, kit) {
   const eyeGlow = kit.glow(type.eye, 2.2);
   const group = new THREE.Group();
 
-  const BODY_Y = 0.4;
+  const BODY_Y = 0.42;
   const body = pivot(group, 0, BODY_Y, 0);
   // Built a little large and scaled down, to keep the height the game expects.
   const rig = pivot(body, 0, 0, 0);
-  rig.scale.setScalar(0.9);
+  rig.scale.setScalar(0.87);
   b.place(rig, b.cylinder(0.44, 0.2, 1.1, 7), robe, [0, 1.0, 0], [1, 1, 0.8]);
   b.place(rig, b.box(0.2, 0.9, 0.05), gold, [0, 0.98, 0.3], null, [-0.2, 0, 0]);
   b.place(rig, b.cone(0.13, 0.26, 3), gold, [0, 0.42, 0.21], [1, 1, 0.3], [Math.PI, 0, 0]);
