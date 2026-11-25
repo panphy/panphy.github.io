@@ -1,6 +1,5 @@
-// chapters.js — the five places the route passes through, two waves each, and the
-// light and colour of each one. A chapter names the scenery kit that stages.js builds
-// from; `variant` is 0 for a chapter's first wave and 1 for its second.
+// chapters.js — the five places the route passes through, one wave each, and the
+// light and colour of each one. A chapter names the scenery kit that stages.js builds from.
 
 // The palettes' ground colours are scaled down so the road stays moody under the bright sun and sky lights.
 export const GROUND_TONE = 0.8;
@@ -94,28 +93,20 @@ export const MINE_PALETTE = {
 
 const [SPRING, SUMMER, AUTUMN, WINTER] = SEASON_PALETTES;
 
-// `titles` are shown as a banner when the camera arrives; a missing second title means
-// the second wave stays in the same place.
+// One wave per chapter. `boss` names the model that guards it. A chapter with a
+// `late` part changes palette and title partway along its route, where the stage
+// says (the mountain pass runs into the mine).
 export const CHAPTERS = [
-  { kit: 'meadow', palettes: [SPRING, SPRING], titles: ['The Meadow'] },
-  { kit: 'forest', palettes: [SUMMER, SUMMER], titles: ['The River Wood'] },
-  { kit: 'mountain', palettes: [AUTUMN, MINE_PALETTE], titles: ['The Mountain Pass', 'The Crystal Mine'] },
-  { kit: 'winter', palettes: [WINTER, WINTER], titles: ['The Frozen Lake', 'The Storm Tower'] },
-  { kit: 'sky', palettes: [FINAL_WAVE_PALETTE, FINAL_WAVE_PALETTE], titles: ['The Night Sky'] },
+  { kit: 'meadow', palette: SPRING, title: 'The Meadow', boss: 'Verdant Colossus' },
+  { kit: 'forest', palette: SUMMER, title: 'The River Wood', boss: 'Crimson Bulwark' },
+  { kit: 'mountain', palette: AUTUMN, title: 'The Mountain Pass', boss: 'Magma Sovereign', late: { palette: MINE_PALETTE, title: 'The Crystal Mine' } },
+  { kit: 'winter', palette: WINTER, title: 'The Frozen Lake', boss: 'Glacial Titan' },
+  { kit: 'sky', palette: FINAL_WAVE_PALETTE, title: 'The Night Sky', boss: 'Stellar Dreadnought' },
 ];
 
-export const WAVES_PER_CHAPTER = 2;
+export const WAVE_COUNT = CHAPTERS.length;
 
 export function chapterForWave(wave) {
-  const step = Math.max(0, Math.floor(wave) - 1);
-  const index = Math.min(CHAPTERS.length - 1, Math.floor(step / WAVES_PER_CHAPTER));
-  const variant = index === CHAPTERS.length - 1 ? Math.min(1, step - index * WAVES_PER_CHAPTER) : step % WAVES_PER_CHAPTER;
-  const chapter = CHAPTERS[index];
-  return {
-    index,
-    variant,
-    kit: chapter.kit,
-    palette: chapter.palettes[variant],
-    title: chapter.titles[variant] || null,
-  };
+  const index = Math.min(CHAPTERS.length - 1, Math.max(0, Math.floor(wave) - 1));
+  return { index, ...CHAPTERS[index] };
 }

@@ -1,5 +1,5 @@
 // difficulty.js — how long a keyword may be on each wave, and each wave's boss fight.
-import { buildSearchPrompt } from './prompt-utils.js?v=beta10';
+import { buildSearchPrompt } from './prompt-utils.js?v=beta12';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -34,6 +34,7 @@ export function hardGuestCount(wave, random = Math.random) {
 // Bosses: one per wave. A boss shows whole statements (BOSS_PHRASES); each one
 // typed takes a segment off its health bar. Between words the player can shatter
 // the rocks it throws, each marked with a short unit.
+// The game's five waves use every second row: bosses fight at steps 2, 4, 6, 8 and 10.
 // lines: segments on the health bar. maxLetters: longest statement, letters only.
 // attackGap: seconds between throws. rockFlight: seconds a rock takes to arrive.
 // rockDamage: life units (half hearts) lost to a rock that lands.
@@ -43,7 +44,7 @@ export const BOSS_PLAN_TABLE = [
   { fromWave: 3, lines: 4, maxLetters: 36, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1 },
   { fromWave: 5, lines: 4, maxLetters: 42, attackGap: 4.6, rockFlight: 2.8, rockDamage: 1 },
   { fromWave: 7, lines: 5, maxLetters: 46, attackGap: 4.2, rockFlight: 2.6, rockDamage: 2 },
-  { fromWave: 10, lines: 8, maxLetters: 50, attackGap: 3.6, rockFlight: 2.5, rockDamage: 2 },
+  { fromWave: 10, lines: 6, maxLetters: 50, attackGap: 3.6, rockFlight: 2.5, rockDamage: 2 },
 ];
 
 export function bossPlan(wave) {

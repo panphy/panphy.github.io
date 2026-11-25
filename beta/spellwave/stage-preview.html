@@ -54,8 +54,8 @@
 
   <script type="module">
     import * as THREE from 'three';
-    import { createStage } from './src/stages.js?v=beta10';
-    import { chapterForWave, GROUND_TONE } from './src/chapters.js?v=beta10';
+    import { createStage } from './src/stages.js?v=beta12';
+    import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './src/chapters.js?v=beta12';
 
     const $ = (id) => document.getElementById(id);
     const canvas = $('canvas');
@@ -96,9 +96,8 @@
 
     const state = { stage: null, arc: 0, playing: false, overhead: false, spots: false, look: 0, pitch: 0 };
 
-    for (let wave = 1; wave <= 10; wave += 1) {
-      const chapter = chapterForWave(wave);
-      $('wave').add(new Option(`${wave} · ${chapter.kit}${chapter.variant ? ' (second)' : ''}`, wave));
+    for (let wave = 1; wave <= WAVE_COUNT; wave += 1) {
+      $('wave').add(new Option(`${wave} · ${chapterForWave(wave).title}`, wave));
     }
 
     function applyPalette(palette) {
@@ -141,11 +140,10 @@
         burstCount: THREE.MathUtils.clamp(Number($('bursts').value) || 1, 1, 7),
         materials,
         kit: chapter.kit,
-        variant: chapter.variant,
       });
       state.buildTime = performance.now() - started;
       stageRig.add(state.stage.group);
-      applyPalette(chapter.palette);
+      state.palette = null;
       state.arc = state.stage.startArc;
       const stops = $('stops');
       stops.replaceChildren();
@@ -159,6 +157,7 @@
       add('Start', state.stage.startArc);
       state.stage.stops.forEach((stop, index) => add(stop.isBoss ? 'Boss' : String(index + 1), stop.arc));
       if (state.stage.crossing) add('Crossing', state.stage.crossing.arc - 14);
+      if (Number.isFinite(state.stage.lateArc)) add(chapter.late ? chapter.late.title : 'Late part', state.stage.lateArc - 12);
       rebuildMarkers();
       syncControls();
       window.__stagePreview = state;
@@ -288,6 +287,13 @@
         if (state.arc >= last) state.playing = false;
         syncControls();
       }
+      // A stage with a late part (the mine) takes its other palette once the camera is inside.
+      const chapter = chapterForWave(Number($('wave').value));
+      const palette = chapter.late && state.arc > stage.lateArc + 7 ? chapter.late.palette : chapter.palette;
+      if (palette !== state.palette) {
+        state.palette = palette;
+        applyPalette(palette);
+      }
       setRailPose(poseAt(state.arc));
       stage.update(time / 1000);
 
@@ -301,8 +307,8 @@
       camera.lookAt(-Math.sin(yaw) * 22.5 * Math.cos(pitch), 3.5 + Math.sin(pitch) * 22.6, 10.5 - Math.cos(yaw) * 22.5 * Math.cos(pitch));
       overheadCamera.position.set(0, 150, 40);
       overheadCamera.lookAt(0, 0, -30);
-      scene.fog.far = state.overhead ? 5000 : chapterForWave(Number($('wave').value)).palette.fogFar;
-      scene.fog.near = state.overhead ? 4000 : chapterForWave(Number($('wave').value)).palette.fogNear;
+      scene.fog.far = state.overhead ? 5000 : palette.fogFar;
+      scene.fog.near = state.overhead ? 4000 : palette.fogNear;
       renderer.render(scene, state.overhead ? overheadCamera : camera);
 
       statsTimer -= delta;

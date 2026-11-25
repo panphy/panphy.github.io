@@ -604,8 +604,7 @@ function forestKit() {
 
 // ── Autumn mountain pass, then the crystal mine ────────────────────────────
 
-function mountainKit(variant) {
-  const inMine = variant === 1;
+function mountainKit() {
   const CHASM = 3.4;
   const createCairn = (mats, random) => {
     const group = new THREE.Group();
@@ -637,7 +636,7 @@ function mountainKit(variant) {
     const count = 1 + Math.floor(random() * 3);
     for (let index = 0; index < count; index += 1) {
       const h = 1.2 + random() * 2.4;
-      group.add(cone(mats.rock, 0.3 + h * 0.14, h, 5, (random() - 0.5) * 1.2, h / 2, (random() - 0.5) * 1.2));
+      group.add(cone(mats.caveRock, 0.3 + h * 0.14, h, 5, (random() - 0.5) * 1.2, h / 2, (random() - 0.5) * 1.2));
     }
     return group;
   };
@@ -651,13 +650,12 @@ function mountainKit(variant) {
   );
   const createPortal = (mats, random) => {
     const group = new THREE.Group();
-    // A cliff face closes the valley, with the mine's mouth cut into it.
+    // A cliff face closes the valley, with the mine's mouth cut through it: the route walks in.
     const slabs = [[-13, 7, 0, 9], [13, 7.5, 0, 9.5], [-6.5, 14, -1, 7], [6.5, 15, -1, 7.5], [0, 17, -2, 7], [-20, 5, 2, 7], [20, 5.5, 2, 7.5]];
     for (const [x, y, z, r] of slabs) {
       const slab = tilt(dodeca(mats.rock, r, x, y, z - 6), random, 0.8);
       group.add(slab);
     }
-    group.add(box(mats.dark, 8.4, 8.6, 5, 0, 4.3, -4.2));
     group.add(createSupport(mats, 4.6, 8.8));
     for (const side of [-1, 1]) {
       const torch = createTorch(mats, 3.2);
@@ -685,7 +683,7 @@ function mountainKit(variant) {
 
   return {
     materials: () => ({
-      rock: flat(inMine ? 0x5a4a44 : 0x8b7d70), dark: flat(0x0c0908), timber: flat(0x5c3d22), plank: flat(0x8f6a3e),
+      rock: flat(0x8b7d70), caveRock: flat(0x5a4a44), timber: flat(0x5c3d22), plank: flat(0x8f6a3e),
       rope: flat(0xb89a64), iron: flat(0x4b4f58, { roughness: 0.6, metalness: 0.5 }), wall: flat(0x7a5a38),
       roof: flat(0x5a3a26), door: flat(0x2e2018), stone: flat(0x6a5a52), pane: lit(0xffb45a, 1.3),
       flame: lit(0xffa040, 2.8), crystal: lit(0x58e6d4, 1.7), crystalB: lit(0xb48cff, 1.6), crystalC: lit(0xffc44d, 1.9),
@@ -695,17 +693,20 @@ function mountainKit(variant) {
       rock: { h: 0.07, s: 0.14, l: 0.42, vary: 0.12 },
       cave: { h: 0.06, s: 0.18, l: 0.27, vary: 0.1 },
     },
-    faceKind: ({ y, onPath }) => (inMine ? (onPath && y > -1 ? null : 'cave') : (y > 1.4 || y < -1 ? 'rock' : null)),
-    skipAbove: inMine ? 15 : null,
-    // The mine's roof: a rough rock ceiling over the whole stage.
-    roof: inMine ? { kind: 'cave', height: ({ noise }) => 10 + noise(0.09, 11) * 3.2 - Math.max(0, noise(0.33, 17) - 0.72) * 9 } : null,
+    // The route starts in the open pass and walks into the mine: everything the stage
+    // calls `late` lies beyond the mine's mouth.
+    late: true,
+    faceKind: ({ y, onPath, late }) => (late ? (onPath && y > -1 ? null : 'cave') : (y > 1.4 || y < -1 ? 'rock' : null)),
+    skip: ({ y, late }) => late && y > 15,
+    // The mine's roof: a rough rock ceiling over the late part of the stage.
+    roof: { kind: 'cave', lateOnly: true, height: ({ noise }) => 10 + noise(0.09, 11) * 3.2 - Math.max(0, noise(0.33, 17) - 0.72) * 9 },
     crossing: {
       halfWidth: CHASM,
       meander: 3,
       carve: (height, d) => Math.min(height, -26 + Math.max(0, Math.abs(d) - CHASM) * 11),
     },
-    hills({ away, base, noise }) {
-      if (inMine) {
+    hills({ away, base, noise, late }) {
+      if (late) {
         const rise = THREE.MathUtils.smoothstep(away, 0, 4.5);
         return base + rise * (16 + noise(0.2, 5) * 3);
       }
@@ -713,8 +714,8 @@ function mountainKit(variant) {
       const peaks = 6 + noise(0.05, 3) * 26 + Math.abs(noise(0.14, 7) - 0.5) * 9;
       return base + rise * peaks * Math.min(1, 0.45 + away / 26);
     },
-    tree({ open, height, random }) {
-      if (inMine || open < 1.6 || height > 8 || height < -0.5) return null;
+    tree({ open, height, random, late }) {
+      if (late || open < 1.6 || height > 8 || height < -0.5) return null;
       if (random() > 0.3) return null;
       return { kind: random() < 0.55 ? 'pine' : 'round', scale: 1.1 + random() * 0.9 };
     },
@@ -722,12 +723,10 @@ function mountainKit(variant) {
       { kind: 'boulder', build: (ctx) => ({ object: createRockPile(ctx.mats.rock, ctx.random, 1.25), radius: 1.9 }) },
       { kind: 'cart', build: (ctx) => ({ object: createMineCart(ctx.mats, ctx.random), radius: 1.7, face: true }) },
       { kind: 'crates', build: (ctx) => ({ object: createCrateStack(ctx.mats, ctx.random), radius: 1.5 }) },
-      inMine
-        ? { kind: 'crystal', build: (ctx) => ({ object: createCrystals([ctx.mats.crystal, ctx.mats.crystalB], ctx.random, 2.3, 6), radius: 1.6 }) }
-        : { kind: 'pine', build: (ctx) => ({ object: ctx.tree('pine', 2.4 + ctx.random() * 0.4), radius: 1.6 }) },
-      inMine
-        ? { kind: 'timber', build: (ctx) => ({ object: createTimberStack(ctx.mats, ctx.random), radius: 1.9 }) }
-        : { kind: 'cairn', build: (ctx) => ({ object: createCairn(ctx.mats, ctx.random), radius: 1.4 }) },
+      { kind: 'crystal', where: 'late', build: (ctx) => ({ object: createCrystals([ctx.mats.crystal, ctx.mats.crystalB], ctx.random, 2.3, 6), radius: 1.6 }) },
+      { kind: 'pine', where: 'early', build: (ctx) => ({ object: ctx.tree('pine', 2.4 + ctx.random() * 0.4), radius: 1.6 }) },
+      { kind: 'timber', where: 'late', build: (ctx) => ({ object: createTimberStack(ctx.mats, ctx.random), radius: 1.9 }) },
+      { kind: 'cairn', where: 'early', build: (ctx) => ({ object: createCairn(ctx.mats, ctx.random), radius: 1.4 }) },
       {
         kind: 'shed', wide: true,
         build: (ctx) => ({ object: createHut(ctx.mats, ctx.random, { width: 3.2, depth: 2.8, height: 2.3, roofMaterial: ctx.mats.roof }), radius: 3, face: true }),
@@ -745,67 +744,66 @@ function mountainKit(variant) {
         }
       }
 
-      if (inMine) {
-        layTrack(ctx, mats, 4, boss.arc - 6);
-        // Timber sets hold the roof up along the tunnel; torches burn on their posts.
-        for (let arc = 10; arc < boss.arc + 4; arc += 11) {
-          const pose = ctx.poseAtArc(arc);
-          if (crossing && Math.abs(arc - crossing.arc) < crossing.halfWidth + 5) continue;
-          const left = ctx.at(pose, -9.4, 0);
-          const right = ctx.at(pose, 9.4, 0);
-          if (!ctx.isFree(left.x, left.z, 0.8) || !ctx.isFree(right.x, right.z, 0.8)) continue;
-          const centre = ctx.at(pose, 0, 0);
-          ctx.set(createSupport(mats, 9.4, 8.6), centre.x, -0.1, centre.z, pose.yaw);
-          ctx.occupy(left.x, left.z, 0.8);
-          ctx.occupy(right.x, right.z, 0.8);
-          for (const x of [-8.7, 8.7]) {
-            const p = ctx.at(pose, x, 0.6);
-            ctx.set(createTorch(mats, 3.0), p.x, 0, p.z);
-          }
-        }
-        // Crystals crowd the walls, and a great geode fills the cavern behind the boss.
-        for (let index = 0; index < ctx.length / 3.2; index += 1) {
-          const pose = ctx.poseAtArc(random() * ctx.length);
-          const p = ctx.at(pose, sideOf(random) * (10 + random() * 6), 0);
-          const open = ctx.openness(p.x, p.z);
-          if (open > 2.5 || !ctx.isFree(p.x, p.z, 1.2)) continue;
-          const decor = random() < 0.6
-            ? createCrystals([mats.crystal, mats.crystalB, mats.crystalC], random, 0.9 + random() * 1.3, 4)
-            : createStalagmite(mats, random);
-          ctx.place(decor, p.x, p.z, 1.1);
-        }
-        const { group: geode, heart } = createGeode(mats, random);
-        const heartMount = groupOf(heart);
-        const geodePoint = ctx.at(boss.pose, 0, -52);
-        ctx.set(geode, geodePoint.x, -0.1, geodePoint.z, boss.pose.yaw);
-        const heartPoint = ctx.at(boss.pose, 0, -56);
-        heartMount.position.set(heartPoint.x, 0, heartPoint.z);
-        heart.position.set(0, 7.5, 0);
-        ctx.live(heartMount);
-        ctx.animate((seconds) => {
-          heart.rotation.y = seconds * 0.35;
-          heart.position.y = 7.5 + Math.sin(seconds * 0.9) * 0.5;
-        });
-      } else {
-        // The mine's mouth closes the valley beyond the boss; a cart track runs up to it.
-        layTrack(ctx, mats, boss.arc - 22, boss.arc + 66);
-        const portalPoint = ctx.at(boss.pose, 0, -74);
-        ctx.set(createPortal(mats, random), portalPoint.x, -0.1, portalPoint.z, boss.pose.yaw);
-        for (let z = -12; z > -64; z -= 13) {
-          for (const x of [-15.2, 15.2]) {
-            const p = ctx.at(boss.pose, x, z);
-            ctx.place(createTorch(mats, 2.8), p.x, p.z, 0.4);
-          }
-        }
-        // Boulders and scree along the foot of the cliffs.
-        for (let index = 0; index < ctx.length / 2.6; index += 1) {
-          const pose = ctx.poseAtArc(random() * ctx.length);
-          const p = ctx.at(pose, sideOf(random) * (9.5 + random() * 9), 0);
-          if (ctx.arenaDistance(p.x, p.z) < 0.5 || !ctx.isFree(p.x, p.z, 1.4)) continue;
-          if (ctx.heightAt(p.x, p.z) < -0.5) continue;
-          ctx.place(createRockPile(mats.rock, random, 0.6 + random() * 0.9), p.x, p.z, 1.3);
+      const mouth = ctx.lateArc;
+      // The mine's mouth stands across the valley, and a cart track runs from the pass
+      // through it to the cavern where the boss waits.
+      const mouthPose = ctx.poseAtArc(mouth);
+      ctx.set(createPortal(mats, random), mouthPose.x, -0.1, mouthPose.z, mouthPose.yaw);
+      for (const x of [-22, -13, -6.6, 6.6, 13, 22]) {
+        const p = ctx.at(mouthPose, x, -3);
+        ctx.occupy(p.x, p.z, 4.5);
+      }
+      layTrack(ctx, mats, Math.max(4, mouth - 30), boss.arc - 6);
+
+      // Outside: boulders and scree along the foot of the cliffs.
+      for (let index = 0; index < ctx.length / 2.6; index += 1) {
+        const arc = random() * mouth;
+        const pose = ctx.poseAtArc(arc);
+        const p = ctx.at(pose, sideOf(random) * (9.5 + random() * 9), 0);
+        if (ctx.isLate(p.x, p.z) || ctx.arenaDistance(p.x, p.z) < 0.5 || !ctx.isFree(p.x, p.z, 1.4)) continue;
+        if (ctx.heightAt(p.x, p.z) < -0.5) continue;
+        ctx.place(createRockPile(mats.rock, random, 0.6 + random() * 0.9), p.x, p.z, 1.3);
+      }
+
+      // Inside: timber sets hold the roof up along the tunnel; torches burn on their posts.
+      for (let arc = mouth + 9; arc < boss.arc + 4; arc += 11) {
+        const pose = ctx.poseAtArc(arc);
+        if (crossing && Math.abs(arc - crossing.arc) < crossing.halfWidth + 5) continue;
+        const left = ctx.at(pose, -9.4, 0);
+        const right = ctx.at(pose, 9.4, 0);
+        if (!ctx.isFree(left.x, left.z, 0.8) || !ctx.isFree(right.x, right.z, 0.8)) continue;
+        const centre = ctx.at(pose, 0, 0);
+        ctx.set(createSupport(mats, 9.4, 8.6), centre.x, -0.1, centre.z, pose.yaw);
+        ctx.occupy(left.x, left.z, 0.8);
+        ctx.occupy(right.x, right.z, 0.8);
+        for (const x of [-8.7, 8.7]) {
+          const p = ctx.at(pose, x, 0.6);
+          ctx.set(createTorch(mats, 3.0), p.x, 0, p.z);
         }
       }
+      // Crystals crowd the walls, and a great geode fills the cavern behind the boss.
+      for (let index = 0; index < ctx.length / 3.2; index += 1) {
+        const pose = ctx.poseAtArc(mouth + 4 + random() * (ctx.length - mouth - 4));
+        const p = ctx.at(pose, sideOf(random) * (10 + random() * 6), 0);
+        const open = ctx.openness(p.x, p.z);
+        if (!ctx.isLate(p.x, p.z) || open > 2.5 || !ctx.isFree(p.x, p.z, 1.2)) continue;
+        const decor = random() < 0.6
+          ? createCrystals([mats.crystal, mats.crystalB, mats.crystalC], random, 0.9 + random() * 1.3, 4)
+          : createStalagmite(mats, random);
+        ctx.place(decor, p.x, p.z, 1.1);
+      }
+      const { group: geode, heart } = createGeode(mats, random);
+      const heartMount = groupOf(heart);
+      const geodePoint = ctx.at(boss.pose, 0, -52);
+      ctx.set(geode, geodePoint.x, -0.1, geodePoint.z, boss.pose.yaw);
+      const heartPoint = ctx.at(boss.pose, 0, -56);
+      heartMount.position.set(heartPoint.x, 0, heartPoint.z);
+      heart.position.set(0, 7.5, 0);
+      ctx.live(heartMount);
+      ctx.animate((seconds) => {
+        heart.rotation.y = seconds * 0.35;
+        heart.position.y = 7.5 + Math.sin(seconds * 0.9) * 0.5;
+      });
       ctx.animate((seconds) => {
         mats.flame.emissiveIntensity = 2.6 + Math.sin(seconds * 9.1) * 0.5 + Math.sin(seconds * 15.7) * 0.3;
         mats.crystalC.emissiveIntensity = 1.9 + Math.sin(seconds * 1.7) * 0.5;
@@ -826,7 +824,7 @@ function mountainKit(variant) {
 
 // ── Winter: the frozen lake and the storm tower ────────────────────────────
 
-function winterKit(variant) {
+function winterKit() {
   const createIceSpires = (mats, random, size = 1) => {
     const group = new THREE.Group();
     const count = 3 + Math.floor(random() * 3);
@@ -994,12 +992,11 @@ function winterKit(variant) {
     decorate(ctx) {
       const { random, mats } = ctx;
       const boss = ctx.bossStop;
-      // In the first wave the tower stands off across the lake; in the second the boss guards its door.
-      const near = variant === 1;
+      // The lake leads to the storm tower, and the boss guards its door.
       const { tower, storm, rod, spark } = createTower(mats, random);
-      const point = near ? ctx.at(boss.pose, 0, -80) : ctx.at(boss.pose, sideOf(random) * 34, -70);
+      const point = ctx.at(boss.pose, 0, -80);
       const yaw = boss.pose.yaw;
-      const scale = near ? 1.25 : 1;
+      const scale = 1.25;
       const base = ctx.heightAt(point.x, point.z) - 0.3;
       tower.add(rod);
       tower.scale.setScalar(scale);
@@ -1057,7 +1054,7 @@ function winterKit(variant) {
 
 // ── The night sky: floating islands ────────────────────────────────────────
 
-function skyKit(variant) {
+function skyKit() {
   const GAP = 5.5;
   const createPillar = (mats, random, height = 3.4 + random() * 1.6) => {
     const group = groupOf(
@@ -1186,12 +1183,12 @@ function skyKit(variant) {
         }
       }
 
-      // A star gate hangs beyond the boss; in the last wave standing stones circle the arena too.
-      const gate = createRing(mats, variant === 1 ? 13 : 10, variant === 1 ? 1.1 : 0.9);
-      const inner = createRing(mats, variant === 1 ? 8.6 : 6.4, 0.5);
+      // A star gate hangs beyond the boss, and standing stones circle the arena.
+      const gate = createRing(mats, 13, 1.1);
+      const inner = createRing(mats, 8.6, 0.5);
       const gatePoint = ctx.at(boss.pose, 0, -72);
       const mount = groupOf(gate, inner);
-      mount.position.set(gatePoint.x, variant === 1 ? 15 : 12, gatePoint.z);
+      mount.position.set(gatePoint.x, 15, gatePoint.z);
       mount.rotation.y = boss.pose.yaw;
       ctx.live(mount);
       ctx.animate((seconds) => {
@@ -1200,7 +1197,7 @@ function skyKit(variant) {
         inner.rotation.x = Math.sin(seconds * 0.4) * 0.5;
         mats.rune.emissiveIntensity = 2.0 + Math.sin(seconds * 2.1) * 0.6;
       });
-      if (variant === 1) {
+      {
         const crown = new THREE.Group();
         const centre = ctx.at(boss.pose, 0, -16);
         crown.position.set(centre.x, 0, centre.z);
@@ -1262,6 +1259,6 @@ const KIT_BUILDERS = { meadow: meadowKit, forest: forestKit, mountain: mountainK
 
 export const STAGE_KIT_NAMES = Object.keys(KIT_BUILDERS);
 
-export function createStageKit(name, variant = 0) {
-  return (KIT_BUILDERS[name] || meadowKit)(variant);
+export function createStageKit(name) {
+  return (KIT_BUILDERS[name] || meadowKit)();
 }

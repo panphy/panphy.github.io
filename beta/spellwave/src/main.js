@@ -1,19 +1,19 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta10';
+import { createSpellwaveAudio } from './audio.js?v=beta12';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta10';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta10';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta10';
-import { createLeaderboard } from './leaderboard.js?v=beta10';
+import { createPotionSystem } from './potions.js?v=beta12';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta12';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta12';
+import { createLeaderboard } from './leaderboard.js?v=beta12';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta10';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta12';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta10';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta10';
-import { createWordDeck } from './word-decks.js?v=beta10';
-import { createStage } from './stages.js?v=beta10';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta10';
-import { createWizardHands } from './wizard-hands.js?v=beta10';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta12';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta12';
+import { createWordDeck } from './word-decks.js?v=beta12';
+import { createStage } from './stages.js?v=beta12';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta12';
+import { createWizardHands } from './wizard-hands.js?v=beta12';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -105,7 +105,7 @@ const CHAIN_BOSS_MAX = 2;
 // the scene in boss waves. The model gallery shows the listed scale.
 const BOSS_SIZE = 1.35;
 // Each wave's boss fight is set by bossPlan (difficulty.js).
-const FINAL_WAVE_NUMBER = 10;
+const FINAL_WAVE_NUMBER = WAVE_COUNT;
 // The camera rides a route through each wave's stage (stages.js) and stops for each ambush.
 const CAMERA_HEIGHT = 3.5;
 const CAMERA_DISTANCE = 10.5;
@@ -369,7 +369,7 @@ let wandsArePrimed = false;
 let gameTimeSeconds = 0;
 let waveSet = 1;
 let wavePhase = 'normal';
-let normalEnemyTarget = getNormalEnemyTarget(waveSet);
+let normalEnemyTarget = getNormalEnemyTarget(monsterLevel());
 let normalEnemiesSpawned = 0;
 let normalTypingCostSpawned = 0;
 let cosmicBuffer = [];
@@ -787,7 +787,7 @@ function startGame() {
   wandsArePrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
-  normalEnemyTarget = getNormalEnemyTarget(waveSet);
+  normalEnemyTarget = getNormalEnemyTarget(monsterLevel());
   normalEnemiesSpawned = 0;
   normalTypingCostSpawned = 0;
   prepareWavePlan();
@@ -1429,9 +1429,9 @@ function startBossLine(boss) {
 }
 
 function spawnPhraseBoss() {
-  const plan = bossPlan(waveSet);
+  const plan = bossPlan(bossLevel());
   const isFinal = isFinalWave();
-  const lines = chooseBossLines(waveSet, plan.lines);
+  const lines = chooseBossLines(bossLevel(), plan.lines);
   bossWordsThisSet = lines.map(line => ({ term: line.term, definition: line.topic, isLine: true }));
   const boss = spawnEnemy({
     isBoss: true,
@@ -1581,7 +1581,7 @@ function chooseRockWord(boss) {
 function throwRock(boss) {
   const wordData = chooseRockWord(boss);
   if (!wordData) return;
-  const plan = bossPlan(waveSet);
+  const plan = bossPlan(bossLevel());
   const group = new THREE.Group();
   const rockMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0), new THREE.MeshStandardMaterial({ color: ROCK_TYPE.body, roughness: 1, flatShading: true }));
   rockMesh.castShadow = true;
@@ -1708,7 +1708,7 @@ function updatePhraseBoss(boss, delta, seconds) {
       reusableVector.set(position.x, 0.14, position.z);
       fx.ring(reusableVector, ROCK_TYPE.eye, { from: 0.4, to: 3.4, life: 0.4, opacity: 0.6 });
     }
-    boss.attackTimer = bossPlan(waveSet).attackGap * (0.85 + Math.random() * 0.3);
+    boss.attackTimer = bossPlan(bossLevel()).attackGap * (0.85 + Math.random() * 0.3);
   }
 }
 
@@ -1800,7 +1800,7 @@ function updateRock(rock, delta) {
 // hiding, and once the stop is clear it walks on; the last stop is the boss arena.
 
 function currentPalette() {
-  return chapterForWave(waveSet).palette;
+  return activePalette || chapterForWave(waveSet).palette;
 }
 
 // The last chapter is the night sky: no clouds or weather, and the moons and drifting rocks are out.
@@ -1808,11 +1808,21 @@ function isSkyChapter() {
   return currentPalette().name === 'final';
 }
 
+// The difficulty tables were tuned over ten steps. The five waves climb the same
+// range two steps at a time: monsters at steps 1, 3, 5, 7, 9 and bosses at 2, 4, 6, 8, 10.
+function monsterLevel(wave = waveSet) {
+  return wave * 2 - 1;
+}
+
+function bossLevel(wave = waveSet) {
+  return wave * 2;
+}
+
 // Split the wave's monsters, healers and chests into ambushes.
 function planBursts(wave) {
-  if (wave >= FINAL_WAVE_NUMBER) return [];
-  let left = getNormalEnemyTarget(wave) + getMedicCountForWave(wave) + getMimicCountForWave(wave);
-  const [low, high] = wave <= 2 ? [2, 3] : wave <= 4 ? [3, 4] : [3, 5];
+  const level = monsterLevel(wave);
+  let left = getNormalEnemyTarget(level) + getMedicCountForWave(level) + getMimicCountForWave(level);
+  const [low, high] = level <= 2 ? [2, 3] : level <= 4 ? [3, 4] : [3, 5];
   const sizes = [];
   while (left > 0) {
     let size = Math.min(left, low + Math.floor(Math.random() * (high - low + 1)));
@@ -1835,11 +1845,11 @@ function buildStageForWave(wave) {
     burstCount: Math.max(1, rail.bursts.length),
     materials: { trunk: sceneTrunkMaterial, leaves: sceneLeafMaterials, rock: sceneRockMaterial },
     kit: chapter.kit,
-    variant: chapter.variant,
   });
   stageRig.add(rail.stage.group);
   sceneGround = rail.stage.terrain;
-  recolorGround(currentPalette());
+  recolorGround(chapter.palette);
+  rail.lateDone = false;
   rail.state = 'idle';
   rail.stopIndex = -1;
   rail.from = null;
@@ -1877,11 +1887,23 @@ function updateRail(delta) {
   if (rail.state === 'travel') {
     rail.t = Math.min(1, rail.t + delta / rail.duration);
     rail.walkPhase += delta * 7.2;
-    setRailPose(rail.stage.travelPose(rail.from, rail.to, rail.t));
+    const pose = rail.stage.travelPose(rail.from, rail.to, rail.t);
+    setRailPose(pose);
+    enterLatePart(pose.arc);
     if (rail.t >= 1) arriveAtStop();
     return;
   }
   if (rail.state === 'encounter') updateEncounter(delta);
+}
+
+// Some stages change partway along (the pass runs into the mine): as the camera steps
+// through, the light and the name of the place change with it.
+function enterLatePart(arc) {
+  const { late } = chapterForWave(waveSet);
+  if (!late || rail.lateDone || arc < rail.stage.lateArc + 7) return;
+  rail.lateDone = true;
+  applyPalette(late.palette);
+  showBanner(late.title.toUpperCase());
 }
 
 function arriveAtStop() {
@@ -1921,7 +1943,7 @@ function updateEncounter(delta) {
     encounter.timer -= delta;
     if (encounter.timer <= 0 && live.length < RAIL_ENEMY_CAP) {
       spawnRailMember(encounter);
-      encounter.timer = Math.max(0.45, 0.9 - (waveSet - 1) * 0.05) + Math.random() * 0.3;
+      encounter.timer = Math.max(0.45, 0.9 - (monsterLevel() - 1) * 0.05) + Math.random() * 0.3;
     }
     return;
   }
@@ -1959,7 +1981,7 @@ function spawnRailMember(encounter) {
 
 // Seconds a player at this wave needs for a word, from a gentle 24 words a minute upward.
 function railTypingEstimate(enemy) {
-  const lettersPerSecond = 2.0 + (waveSet - 1) * 0.17;
+  const lettersPerSecond = 2.0 + (monsterLevel() - 1) * 0.17;
   return 0.7 + enemy.searchPrompt.length / lettersPerSecond;
 }
 
@@ -1983,7 +2005,7 @@ function setupRailEntry(enemy, spot) {
   enemy.revealed = false;
   enemy.revealZ = Math.min(from.z, to.z) - 2;
   enemy.group.position.copy(from);
-  const own = railTypingEstimate(enemy) * Math.max(1.12, 1.6 - (waveSet - 1) * 0.05);
+  const own = railTypingEstimate(enemy) * Math.max(1.12, 1.6 - (monsterLevel() - 1) * 0.05);
   const queue = enemies
     .filter(other => other !== enemy && !other.dying && other.rail && !other.isMimic)
     .reduce((sum, other) => sum + railTypingEstimate(other) * 0.8, 0);
@@ -2916,7 +2938,7 @@ function registerNormalTypingCost(enemy) {
 }
 
 function isNormalTypingBudgetReached() {
-  return normalTypingCostSpawned >= getNormalWaveTypingBudget(waveSet);
+  return normalTypingCostSpawned >= getNormalWaveTypingBudget(monsterLevel());
 }
 
 function isNormalWaveComplete() {
@@ -3659,10 +3681,10 @@ function isLabelShown(enemy) {
 function prepareWavePlan() {
   bossWordsThisSet = [];
   medicsSpawnedThisSet = 0;
-  medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(waveSet));
+  medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(monsterLevel()));
   mimicsSpawnedThisSet = 0;
-  mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(waveSet));
-  hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
+  mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(monsterLevel()));
+  hardGuestSchedule = monsterLevel() <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
 }
 
 function getMedicCountForWave(wave) {
@@ -3734,8 +3756,8 @@ function shouldSpawnMimic() {
 
 
 function buildHardGuestSchedule(target) {
-  const count = hardGuestCount(waveSet);
-  const available = withinLength(HARD_WORDS, normalPromptLengthCap(waveSet));
+  const count = hardGuestCount(monsterLevel());
+  const available = withinLength(HARD_WORDS, normalPromptLengthCap(monsterLevel()));
   if (count === 0 || available.length === 0) return new Map();
 
   const picked = [];
@@ -3800,23 +3822,17 @@ function chooseMedicPrompt() {
 }
 
 function currentKeywordPool() {
-  const pool = waveSet >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS]
-    : waveSet >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS]
+  const level = monsterLevel();
+  const pool = level >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS]
+    : level >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS]
     : EASY_WORDS;
-  return withinLength(pool, normalPromptLengthCap(waveSet));
+  return withinLength(pool, normalPromptLengthCap(level));
 }
 
-// One boss a wave, dealt from a shuffled bag, so no model returns until all have appeared.
-let bossTypeBag = [];
+// Each chapter has its own boss (chapters.js).
 function nextBossType() {
-  if (bossTypeBag.length === 0) {
-    bossTypeBag = BOSS_TYPES.map((_, index) => index);
-    for (let i = bossTypeBag.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [bossTypeBag[i], bossTypeBag[j]] = [bossTypeBag[j], bossTypeBag[i]];
-    }
-  }
-  return BOSS_TYPES[bossTypeBag.pop()];
+  const name = chapterForWave(waveSet).boss;
+  return BOSS_TYPES.find(type => type.name === name) || BOSS_TYPES[0];
 }
 
 function weightedPick(items) {
@@ -3907,10 +3923,13 @@ function applySeasonInstant(palette) {
   recolorGround(palette);
 }
 
-// Sets the light, colour and weather of the wave's chapter. A change of palette comes
-// in through a fog bank that hides the new stage, then clears.
+// Sets the light, colour and weather of the wave's chapter.
 function applySeasonForWave(wave, instant = false) {
-  const palette = chapterForWave(wave).palette;
+  applyPalette(chapterForWave(wave).palette, instant);
+}
+
+// A change of palette comes in through a fog bank that hides the new scenery, then clears.
+function applyPalette(palette, instant = false) {
   const changed = palette !== activePalette;
   activePalette = palette;
   const sky = palette.name === 'final';
@@ -4207,7 +4226,6 @@ function isFinalWave() {
 }
 
 function startFinalWave() {
-  wavePhase = 'boss';
   document.body.classList.add('final-wave-active');
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
@@ -4503,7 +4521,7 @@ function advanceWaveSet() {
   document.body.classList.remove('final-wave-active');
   waveSet += 1;
   wavePhase = 'normal';
-  normalEnemyTarget = getNormalEnemyTarget(waveSet);
+  normalEnemyTarget = getNormalEnemyTarget(monsterLevel());
   normalEnemiesSpawned = 0;
   normalTypingCostSpawned = 0;
   prepareWavePlan();

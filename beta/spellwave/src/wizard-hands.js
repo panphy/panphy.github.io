@@ -158,13 +158,15 @@ function createHand(materials, side, pose) {
 // grip, the forefinger laid along the shaft and the thumb pressed on top.
 function createWandHand(materials, crystalMaterial) {
   const wrist = new THREE.Group();
-  const hand = createHand(materials, 1, {
+  // Turned toward the target, a hand's own +x lies to the player's left, so the right
+  // hand is built with side −1: that puts its thumb on the inside, toward the left hand.
+  const hand = createHand(materials, -1, {
     fingers: [[0.28, 0.4, 0.3], [0.85, 1.6, 1.0], [0.92, 1.62, 1.05], [1.0, 1.6, 1.1]],
     thumb: { out: 0.1, roll: 0.9, curls: [0.3, 0.5] },
     spread: 0.02,
   });
   // Turned as a real grip is, so the knuckles, the forefinger and the thumb all show.
-  hand.rotation.z = -0.8;
+  hand.rotation.z = 0.8;
   wrist.add(hand);
   
   const wand = new THREE.Group();
@@ -201,7 +203,7 @@ function createWandHand(materials, crystalMaterial) {
 // The open hand: palm up, fingers relaxed and a little cupped, a rune turning over it.
 function createPalmHand(materials, crystalMaterial) {
   const wrist = new THREE.Group();
-  const hand = createHand(materials, -1, {
+  const hand = createHand(materials, 1, {
     fingers: [[0.18, 0.35, 0.3], [0.24, 0.42, 0.34], [0.3, 0.48, 0.38], [0.38, 0.55, 0.42]],
     thumb: { out: 0.85, roll: 0.3, curls: [0.15, 0.3] },
     spread: 0.13,
