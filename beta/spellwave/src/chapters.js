@@ -98,10 +98,10 @@ const [SPRING, SUMMER, AUTUMN, WINTER] = SEASON_PALETTES;
 // says (the mountain pass runs into the mine).
 export const CHAPTERS = [
   { kit: 'meadow', palette: SPRING, title: 'The Meadow', boss: 'Verdant Colossus' },
-  { kit: 'forest', palette: SUMMER, title: 'The River Wood', boss: 'Crimson Bulwark' },
-  { kit: 'mountain', palette: AUTUMN, title: 'The Mountain Pass', boss: 'Magma Sovereign', late: { palette: MINE_PALETTE, title: 'The Crystal Mine' } },
-  { kit: 'winter', palette: WINTER, title: 'The Frozen Lake', boss: 'Glacial Titan' },
-  { kit: 'sky', palette: FINAL_WAVE_PALETTE, title: 'The Night Sky', boss: 'Stellar Dreadnought' },
+  { kit: 'forest', palette: SUMMER, title: 'The River Wood', boss: 'Crimson Bulwark', setPiece: 'bridge' },
+  { kit: 'mountain', palette: AUTUMN, title: 'The Mountain Pass', boss: 'Magma Sovereign', late: { palette: MINE_PALETTE, title: 'The Crystal Mine' }, setPiece: 'cart' },
+  { kit: 'winter', palette: WINTER, title: 'The Frozen Lake', boss: 'Glacial Titan', setPiece: 'blizzard' },
+  { kit: 'sky', palette: FINAL_WAVE_PALETTE, title: 'The Night Sky', boss: 'Stellar Dreadnought', setPiece: 'flight' },
 ];
 
 export const WAVE_COUNT = CHAPTERS.length;

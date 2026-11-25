@@ -69,3 +69,31 @@ export function createCasterBolt(type) {
   ));
   return group;
 }
+
+// A pair of wings for monsters that fly: the night sky's swoopers and the mine's
+// cave fliers. `userData.wings` holds the two pivots to flap.
+export function createWings(type) {
+  const group = new THREE.Group();
+  const material = new THREE.MeshStandardMaterial({
+    color: type.trim, emissive: type.trim, emissiveIntensity: 0.35, roughness: 0.6,
+    flatShading: true, side: THREE.DoubleSide, transparent: true, opacity: 0.88,
+  });
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute([
+    0, 0, 0, 1.6, 0.55, 0, 1.35, -0.3, 0,
+    0, 0, 0, 1.35, -0.3, 0, 0.6, -0.55, 0,
+  ], 3));
+  geometry.computeVertexNormals();
+  const wings = [-1, 1].map((side) => {
+    const pivot = new THREE.Group();
+    pivot.position.set(side * 0.3, 1.2, -0.3);
+    pivot.userData.side = side;
+    const wing = new THREE.Mesh(geometry, material);
+    wing.scale.x = side;
+    pivot.add(wing);
+    group.add(pivot);
+    return pivot;
+  });
+  group.userData.wings = wings;
+  return group;
+}

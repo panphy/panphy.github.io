@@ -159,6 +159,33 @@ body.final-wave-active {
   transition: opacity 80ms ease-out;
 }
 
+/* The frozen lake's blizzard: snow closes in over the scene, under the cards and the HUD. */
+.blizzard-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0) 0 22px, rgba(255, 255, 255, 0.5) 22px 25px, rgba(255, 255, 255, 0) 25px 60px),
+    radial-gradient(ellipse at 50% 62%, rgba(236, 244, 250, 0.3) 0%, rgba(236, 244, 250, 0.86) 62%, rgba(244, 249, 253, 0.97) 100%);
+  background-size: 240px 240px, 100% 100%;
+  transition: opacity 900ms ease;
+}
+
+body.blizzard .blizzard-veil {
+  opacity: 1;
+  animation: blizzard-drift 0.9s linear infinite;
+}
+
+@keyframes blizzard-drift {
+  to { background-position: -240px 240px, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.blizzard .blizzard-veil { animation: none; }
+}
+
 .damage-flash {
   z-index: 9;
   opacity: 0;
