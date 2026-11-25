@@ -1128,8 +1128,8 @@ body.is-running:not(.is-paused) .hud-grid {
 }
 
 /* The rank a kill earns, S to E, by how fast its word was typed. It is the reward for
-   a fast word: the letter slams in over a flash ring and turning rays, holds, then lifts
-   away. Better ranks are bigger and brighter; S is gold and shakes. */
+   a fast word: the letter slams in over a flash ring, holds, then lifts away. Better
+   ranks are bigger and brighter; S is gold. */
 .rank-popup {
   --rank-colour: #ffffff;
   --rank-size: clamp(2.6rem, 7vw, 4.4rem);
@@ -1167,8 +1167,7 @@ body.is-running:not(.is-paused) .hud-grid {
   animation: rank-slam 1150ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
 
-.rank-popup .rank-ring,
-.rank-popup .rank-rays {
+.rank-popup .rank-ring {
   position: absolute;
   left: 50%;
   top: 62%;
@@ -1184,14 +1183,7 @@ body.is-running:not(.is-paused) .hud-grid {
   animation: rank-ring 520ms ease-out both;
 }
 
-.rank-popup .rank-rays {
-  background: repeating-conic-gradient(from 0deg, var(--rank-colour) 0 7deg, rgba(255, 255, 255, 0) 7deg 30deg);
-  -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0) 26%, #000 34%, rgba(0, 0, 0, 0) 70%);
-  mask-image: radial-gradient(circle, rgba(0, 0, 0, 0) 26%, #000 34%, rgba(0, 0, 0, 0) 70%);
-  opacity: 0;
-}
-
-.rank-popup[data-rank="S"] { --rank-colour: #ffd84a; --rank-size: clamp(3.6rem, 10vw, 6.2rem); animation-name: rank-life, rank-shake; animation-duration: 1150ms, 320ms; }
+.rank-popup[data-rank="S"] { --rank-colour: #ffd84a; --rank-size: clamp(3.2rem, 8.5vw, 5.4rem); }
 .rank-popup[data-rank="A"] { --rank-colour: #4fd8ff; --rank-size: clamp(3rem, 8vw, 5rem); }
 .rank-popup[data-rank="B"] { --rank-colour: #7be36a; }
 .rank-popup[data-rank="C"] { --rank-colour: #ffe9a6; --rank-size: clamp(2.2rem, 6vw, 3.6rem); }
@@ -1204,15 +1196,8 @@ body.is-running:not(.is-paused) .hud-grid {
   background-clip: text;
   color: transparent;
   -webkit-text-stroke: 0;
-  filter: drop-shadow(0 0 16px rgba(255, 200, 60, 0.95)) drop-shadow(0 4px 0 rgba(20, 14, 6, 0.75));
+  filter: drop-shadow(0 0 8px rgba(255, 200, 60, 0.7)) drop-shadow(0 4px 0 rgba(20, 14, 6, 0.75));
   text-shadow: none;
-}
-
-/* Only the top three ranks get the turning rays. */
-.rank-popup[data-rank="S"] .rank-rays,
-.rank-popup[data-rank="A"] .rank-rays,
-.rank-popup[data-rank="B"] .rank-rays {
-  animation: rank-rays 1000ms ease-out both;
 }
 
 .rank-popup[data-rank="D"] .rank-ring,
@@ -1243,27 +1228,11 @@ body.is-running:not(.is-paused) .hud-grid {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
 }
 
-@keyframes rank-rays {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(0); }
-  18% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15) rotate(20deg); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) rotate(110deg); }
-}
-
-@keyframes rank-shake {
-  0%, 100% { margin: 0; }
-  20% { margin: -5px 0 0 6px; }
-  40% { margin: 4px 0 0 -6px; }
-  60% { margin: -3px 0 0 4px; }
-  80% { margin: 2px 0 0 -3px; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .rank-popup,
   .rank-popup b,
   .rank-popup .rank-word { animation-duration: 700ms; }
-  .rank-popup .rank-ring,
-  .rank-popup .rank-rays { display: none; }
-  .rank-popup[data-rank="S"] { animation-name: rank-life; }
+  .rank-popup .rank-ring { display: none; }
 }
 
 .score-popup {
@@ -2704,8 +2673,9 @@ body.battery-saver .potion-bar {
   transition: top 0.35s ease;
 }
 
+/* The board shows before and after a run, and while paused; not during play. */
 body.is-running:not(.is-paused) .sw-leaderboard {
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  display: none;
 }
 
 .sw-leaderboard-header {
