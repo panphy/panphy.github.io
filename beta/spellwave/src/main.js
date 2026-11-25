@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta6';
+import { createSpellwaveAudio } from './audio.js?v=beta7';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta6';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta6';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta6';
-import { createLeaderboard } from './leaderboard.js?v=beta6';
+import { createPotionSystem } from './potions.js?v=beta7';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta7';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta7';
+import { createLeaderboard } from './leaderboard.js?v=beta7';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta6';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta7';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta6';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta6';
-import { createWordDeck } from './word-decks.js?v=beta6';
-import { createStage } from './stages.js?v=beta6';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta6';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta7';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress, stripOptionalSymbols, buildOptionalSymbolPrompts, keyProgress } from './prompt-utils.js?v=beta7';
+import { createWordDeck } from './word-decks.js?v=beta7';
+import { createStage } from './stages.js?v=beta7';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta7';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -2617,6 +2617,11 @@ function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget) return typedBuffer;
   const typed = bufferFor(activeTarget);
+  if (activeTarget.optionalSymbols) {
+    // A skipped / or = is filled in as the next letter lands.
+    const progress = keyProgress(activeTarget.searchPrompt, typed);
+    if (progress >= 0) return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, progress));
+  }
   const effectiveSP = activeTarget._matchedSearchPrompt?.startsWith(typed)
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
@@ -2640,7 +2645,8 @@ function renderPrompt(enemy) {
     ? enemy._matchedSearchPrompt
     : enemy.searchPrompt;
   const matched = effectiveSP.startsWith(typed) && typed.length > 0;
-  const typedProgress = matched ? typed.length : 0;
+  const typedProgress = enemy.optionalSymbols ? Math.max(0, keyProgress(enemy.searchPrompt, typed))
+    : matched ? typed.length : 0;
 
   const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
     multiplicationAlias: enemy.isEquation,
@@ -2910,7 +2916,11 @@ function spawnEnemy(options = {}) {
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
     searchPrompt: buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: wordData.isSymbol ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
+    // Units and symbol equations may be typed without their / and =.
+    altSearchPrompts: wordData.isSymbol
+      ? buildOptionalSymbolPrompts(buildSearchPrompt(wordData.term, promptOptions))
+      : buildAltSearchPrompts(wordData.term, promptOptions),
+    optionalSymbols: !!wordData.isSymbol,
     _matchedSearchPrompt: null,
     lastPromptHtml: '',
     promptKind,
@@ -3718,10 +3728,11 @@ function choosePrompt() {
   const scheduledHardGuest = wavePhase === 'normal' ? hardGuestSchedule.get(normalEnemiesSpawned) : null;
   if (scheduledHardGuest) return scheduledHardGuest;
 
-  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt.toLowerCase());
+  // Keys are compared without / and =, which the player may leave out (N/m and N m are both nm).
+  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => stripOptionalSymbols(enemy.searchPrompt.toLowerCase()));
   // No word on screen may start another, or typing one would finish the other.
   const clashes = entry => {
-    const key = buildSearchPrompt(entry.term).toLowerCase();
+    const key = stripOptionalSymbols(buildSearchPrompt(entry.term).toLowerCase());
     return liveKeys.some(other => other.startsWith(key) || key.startsWith(other));
   };
   if (Math.random() < symbolShare(waveSet)) {
