@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createLowPolyTree, createLowPolyRock } from './lowpoly.js';
-import { createStageKit, createGate, createGateMaterials } from './stage-kits.js?v=beta3';
+import { createStageKit } from './stage-kits.js?v=beta4';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
@@ -218,12 +218,11 @@ function disposeTree(root, keepMaterials) {
 
 // burstCount ambush stops, then the boss arena. `materials` are the scene's shared
 // tree and rock materials, so the palette recolours the stage's trees as well. `kit`
-// and `variant` choose the scenery (chapters.js); `gate` stands a gate at the start.
-export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName = 'meadow', variant = 0, gate = false }) {
+// and `variant` choose the scenery (chapters.js).
+export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName = 'meadow', variant = 0 }) {
   const random = mulberry32(seed * 9973 + 17);
   const kit = createStageKit(kitName, variant);
   const mats = kit.materials();
-  const gateMats = gate ? createGateMaterials() : null;
   const keepMaterials = new Set([materials.trunk, ...materials.leaves, materials.rock]);
   const group = new THREE.Group();
 
@@ -444,15 +443,6 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     },
   };
 
-  if (gate) {
-    const pose = poseAtArc(startArc + 2);
-    place(createGate(gateMats), pose.x, pose.z, 0, pose.yaw);
-    for (const x of [-4.4, 4.4]) {
-      const pillar = frameToStage(pose, x, 0);
-      occupy(pillar.x, pillar.z, 1.4);
-    }
-  }
-
   // Hiding spots for each ambush stop, with the cover that hides them.
   const narrowCovers = kit.covers.filter((cover) => !cover.wide);
   for (const stop of stops) {
@@ -510,7 +500,7 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
 
   const merged = mergeStatic(staticRoot);
   group.add(merged);
-  disposeTree(staticRoot, new Set([...keepMaterials, ...Object.values(mats), ...Object.values(gateMats || {})]));
+  disposeTree(staticRoot, new Set([...keepMaterials, ...Object.values(mats)]));
 
   let triangles = 0;
   group.traverse((child) => {

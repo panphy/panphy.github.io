@@ -30,15 +30,19 @@ function builder(kit) {
     parent.add(mesh);
     return mesh;
   };
+  // The builders below name coarse shapes; these raise the facet count of everything
+  // round by one step. Three- and four-sided shapes are deliberate (spikes, flat limbs,
+  // plates) and stay as written, as do the crystal-like octahedra and dodecahedra.
+  const rounder = (sides) => (sides <= 4 ? sides : Math.round(sides * 1.6));
   return {
     place,
-    ico: (radius, detail = 0) => new THREE.IcosahedronGeometry(radius, detail),
+    ico: (radius, detail = 0) => new THREE.IcosahedronGeometry(radius, detail + 1),
     octa: (radius) => new THREE.OctahedronGeometry(radius, 0),
-    cone: (radius, height, sides = 4) => new THREE.ConeGeometry(radius, height, sides),
-    cylinder: (top, bottom, height, sides = 5) => new THREE.CylinderGeometry(top, bottom, height, sides),
+    cone: (radius, height, sides = 4) => new THREE.ConeGeometry(radius, height, rounder(sides)),
+    cylinder: (top, bottom, height, sides = 5) => new THREE.CylinderGeometry(top, bottom, height, rounder(sides)),
     box: (x, y, z) => new THREE.BoxGeometry(x, y, z),
     dodeca: (radius) => new THREE.DodecahedronGeometry(radius, 0),
-    ring: (radius, tube, sides = 8) => new THREE.TorusGeometry(radius, tube, 4, sides),
+    ring: (radius, tube, sides = 8) => new THREE.TorusGeometry(radius, tube, 6, rounder(sides)),
   };
 }
 

@@ -54,8 +54,8 @@
 
   <script type="module">
     import * as THREE from 'three';
-    import { createStage } from './src/stages.js?v=beta3';
-    import { chapterForWave, GROUND_TONE } from './src/chapters.js?v=beta3';
+    import { createStage } from './src/stages.js?v=beta4';
+    import { chapterForWave, GROUND_TONE } from './src/chapters.js?v=beta4';
 
     const $ = (id) => document.getElementById(id);
     const canvas = $('canvas');
@@ -142,7 +142,6 @@
         materials,
         kit: chapter.kit,
         variant: chapter.variant,
-        gate: chapter.gate,
       });
       state.buildTime = performance.now() - started;
       stageRig.add(state.stage.group);
