@@ -28,7 +28,7 @@ test("last run's words come after fresh ones", () => {
   assert.ok(lastRun.includes(deck.pick(EASY_WORDS).term));
 });
 
-test('no equation boss repeats within a run', () => {
+test('a small pool does not repeat within a run', () => {
   const deck = createWordDeck();
   const run = Array.from({ length: 10 }, () => deck.pick(EQUATION_WORDS).term);
   assert.equal(new Set(run).size, run.length);

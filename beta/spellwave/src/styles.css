@@ -319,7 +319,6 @@ body.is-running:not(.is-paused) .game-bar {
   white-space: nowrap;
 }
 
-
 .icon-button,
 .message-panel > button {
   min-height: 44px;
@@ -827,15 +826,6 @@ body.is-running:not(.is-paused) .hud-grid {
   text-transform: uppercase;
 }
 
-.word-tag .definition {
-  color: var(--muted);
-  font-family: var(--font-body);
-  font-size: 0.68rem;
-  font-weight: 600;
-  line-height: 1.35;
-  white-space: normal;
-}
-
 .word-tag .prompt {
   font-size: clamp(0.82rem, 2vw, 1.05rem);
   font-weight: 700;
@@ -848,14 +838,6 @@ body.is-running:not(.is-paused) .hud-grid {
 
 .word-tag .remaining {
   color: var(--ink);
-}
-
-.word-tag .given-tok {
-  color: rgba(242, 240, 223, 0.35);
-}
-
-.word-tag .given-sup {
-  color: rgba(242, 240, 223, 0.28);
 }
 
 .word-tag .threat-meter {
@@ -939,15 +921,6 @@ body.is-running:not(.is-paused) .hud-grid {
   animation: label-pop 280ms ease-out;
 }
 
-.word-tag.is-boss.is-approaching {
-  opacity: 0.88;
-  filter: saturate(0.92);
-}
-
-.word-tag.is-boss.is-arming {
-  animation: boss-arm-flash 420ms ease-out;
-}
-
 .word-tag.is-medic {
   border-color: rgba(255, 143, 179, 0.8);
   background:
@@ -1010,10 +983,6 @@ body.is-running:not(.is-paused) .hud-grid {
   color: color-mix(in srgb, var(--boss-glow, var(--gold)) 82%, white 18%);
 }
 
-.word-tag.is-boss .definition {
-  font-size: 0.8rem;
-}
-
 .word-tag.is-boss .prompt {
   font-size: clamp(1rem, 2.5vw, 1.3rem);
 }
@@ -1028,22 +997,6 @@ body.is-running:not(.is-paused) .hud-grid {
 
 .word-tag.is-boss.is-danger {
   border-color: color-mix(in srgb, var(--boss-accent, var(--danger)) 82%, white 18%);
-}
-
-.word-tag[data-kind="equation"] .definition,
-.word-tag[data-kind="equation"] .prompt-kind {
-  color: #ffe39a;
-}
-
-.word-tag[data-kind="equation"] .definition {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.word-tag[data-kind="equation"] .prompt-kind {
-  background: rgba(239, 195, 92, 0.18);
 }
 
 #comboValue.is-hidden {
@@ -1230,7 +1183,6 @@ body.is-running:not(.is-paused) .hud-grid {
     -2px -2px 0 rgba(0, 0, 0, 0.8),
     0 0 18px rgba(217, 70, 239, 0.45);
 }
-
 
 .boss-banner.is-active {
   animation: boss-banner-flash 2.2s ease-out forwards;
@@ -2929,14 +2881,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   background: rgba(21, 122, 112, 0.14);
 }
 
-.word-tag .given-tok {
-  color: rgba(61, 43, 28, 0.42);
-}
-
-.word-tag .given-sup {
-  color: rgba(61, 43, 28, 0.34);
-}
-
 .word-tag .threat-meter {
   background: rgba(61, 43, 28, 0.14);
 }
@@ -3020,26 +2964,8 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--boss-accent, var(--danger)) 40%, transparent), 0 8px 22px rgba(74, 52, 28, 0.34);
 }
 
-.word-tag.is-boss.is-approaching {
-  opacity: 0.9;
-  filter: saturate(0.94);
-}
-
-.word-tag.is-boss.is-arming {
-  animation: boss-arm-flash-paper 420ms ease-out;
-}
-
 .word-tag.is-boss.is-danger {
   border-color: var(--danger);
-}
-
-.word-tag[data-kind="equation"] .definition,
-.word-tag[data-kind="equation"] .prompt-kind {
-  color: #8a5600;
-}
-
-.word-tag[data-kind="equation"] .prompt-kind {
-  background: rgba(168, 101, 26, 0.16);
 }
 
 /* Floating score text and banners sit straight on the scene, so they get a pale outline. */
