@@ -1,24 +1,23 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta4';
+import { createSpellwaveAudio } from './audio.js?v=beta5';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta4';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta4';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta4';
-import { createLeaderboard } from './leaderboard.js?v=beta4';
+import { createPotionSystem } from './potions.js?v=beta5';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta5';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta5';
+import { createLeaderboard } from './leaderboard.js?v=beta5';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta4';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta5';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta4';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=beta4';
-import { createWordDeck } from './word-decks.js?v=beta4';
-import { createStage } from './stages.js?v=beta4';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta4';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta5';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta5';
+import { createWordDeck } from './word-decks.js?v=beta5';
+import { createStage } from './stages.js?v=beta5';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta5';
 
-// Monster, healer and chest words, and boss questions, are drawn from decks so they
+// Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
 const monsterDeck = createWordDeck();
 const bossDeck = createWordDeck();
-const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
 const LAST_RUN_TERMS_KEY = 'panphySpellwaveBetaLastRunTermsV1';
 
 function loadLastRunTerms() {
@@ -92,24 +91,11 @@ const MIN_FRAME_MS = 1000 / 60 - 3;
 const IDLE_FRAME_INTERVAL = 100; // ~10 fps when not actively playing
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
-const FIRST_WAVE_SPAWN_Z = -34;
-const SPAWN_SPREAD = 10;
-const FIRST_WAVE_SPAWN_SPREAD = 4;
 const HEART_COUNT = 5;
 const MAX_LIFE = HEART_COUNT * 2;
 // Two hearts or fewer: the music darkens and a heartbeat joins it.
 const LOW_LIFE_MUSIC_THRESHOLD = 4;
 const MINION_DAMAGE = 2;
-// A boss that reaches the wall costs three hearts.
-const BOSS_CONTACT_DAMAGE = 6;
-const BOSS_SHOT_DAMAGE = 1;
-// Rock timing and damage by wave are in bossRockTier (difficulty.js).
-const BOSS_ROCK_FLIGHT_TIME = 1.45;
-const BOSS_ROCK_ARC_HEIGHT = 2.3;
-const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
-// Keep this under the fastest boss rock interval so late-wave cadence can fire
-// when more than one boss is armed (wave 10 is 2.5 s).
-const MIN_PROJECTILE_SPACING = 2.0;
 // Chain lightning vs bosses: a long interrupt (not a global freeze like time freeze),
 // and at most this many bosses are touched by one cast (a typed boss kill counts).
 const CHAIN_BOSS_STUN = 5.5;
@@ -117,8 +103,7 @@ const CHAIN_BOSS_MAX = 2;
 // Bosses are drawn this much bigger than their listed scale, so they dominate
 // the scene in boss waves. The model gallery shows the listed scale.
 const BOSS_SIZE = 1.35;
-// Max live bosses, total bosses, hint letters and rock damage by wave are in
-// BOSS_WAVE_TABLE (difficulty.js).
+// Each wave's boss fight is set by bossPlan (difficulty.js).
 const FINAL_WAVE_NUMBER = 10;
 // The camera rides a route through each wave's stage (stages.js) and stops for each ambush.
 const CAMERA_HEIGHT = 3.5;
@@ -132,47 +117,23 @@ const COSMIC_WAVE_THRESHOLD = 99149236;
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = 1819600217;
 const PARTICLE_GRAVITY_COEFFS = 2242416284;
-const GAME_PROFILE = {
-  phaseLabel: 'Spellwave',
-  enemyLimit: 11,
-  speedMultiplier: 0.94,
-  waveSpeedBonus: 0.075,
-  spawnBase: 2.45,
-  spawnGrowth: 0.04,
-  spawnJitter: 0.5,
-  spawnMin: 1.05,
-  bossWarningDelay: 1.0,
-  bossSpawnGap: 2.8,
-  revealZ: -40,
-};
 const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
 const NORMAL_TYPING_BUDGETS = [58, 68, 80, 92, 104, 116, 128, 140, 152, 164];
-const ACTIVE_TYPING_PRESSURE_BASE = 36;
-const ACTIVE_TYPING_PRESSURE_GROWTH = 4;
-const ACTIVE_TYPING_PRESSURE_MAX = 58;
-const LONG_ACTIVE_PROMPT_COST = 13;
-const ACTIVE_LONG_PROMPT_LIMIT = 2;
-const LATE_ACTIVE_LONG_PROMPT_LIMIT = 2;
 const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
 const LABEL_X_EASE = 0.14;
 const LABEL_Y_EASE = 0.07;
-const BOSS_LABEL_GAP = 16;
 const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
 const PATH_MARKER_MIN_Z = -44;
 const PATH_MARKER_MAX_Z = 4;
 const PATH_MARKER_SPACING = 6;
 const PATH_MARKER_SPAN = PATH_MARKER_MAX_Z - PATH_MARKER_MIN_Z + PATH_MARKER_SPACING;
-const PATH_MARKER_BASE_Y = 0.08;
 const TREE_MIN_Z = -58;
 const TREE_MAX_Z = 18;
 const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
 const PATH_MARKER_SCROLL_MULTIPLIER = 1.0;
-const ROAD_MIN_Z = -58;
-const ROAD_MAX_Z = 16;
-const ROAD_SPAN = ROAD_MAX_Z - ROAD_MIN_Z;
 const ROAD_SCROLL_MULTIPLIER = 1.0;
 // Monsters are modelled with their feet at y = 0, and the road surface undulates between
 // about -0.14 and -0.06, so walkers stand at its high points; any higher and they visibly
@@ -385,10 +346,7 @@ const CLOUD_RESET_X = -46;
 const CLOUD_SKY_TINT = 0.42;
 
 const reusableVector = new THREE.Vector3();
-const reusableVectorTwo = new THREE.Vector3();
 const moonScreenVector = new THREE.Vector3();
-const reusableQuaternion = new THREE.Quaternion();
-const reusableMatrix = new THREE.Matrix4();
 const cameraTarget = new THREE.Vector3(0, 1.5, -12);
 const enemies = [];
 const beams = [];
@@ -415,18 +373,9 @@ let wavePhase = 'normal';
 let normalEnemyTarget = getNormalEnemyTarget(waveSet);
 let normalEnemiesSpawned = 0;
 let normalTypingCostSpawned = 0;
-let bossesSpawned = 0;
-let bossSpawnTimer = 0;
-let waveClearDelayTimer = 0;
-let waveBossOrder = [];
-let finalWaveQueue = [];
-let finalWaveQueueIndex = 0;
 let cosmicBuffer = [];
 let bossWordsThisSet = [];
-let previewableWordsThisSet = [];
-let bossPreviewSchedule = new Map();
 let hardGuestSchedule = new Map();
-let introducedBossTermsThisSet = new Set();
 let medicsSpawnedThisSet = 0;
 let medicSpawnSlots = [];
 let mimicsSpawnedThisSet = 0;
@@ -443,10 +392,7 @@ let peakStreak = 0;
 let mimicsLooted = 0;
 let typedBuffer = '';
 let activeTarget = null;
-let lastBossShotTime = -999;
-let spawnTimer = 0;
 let lastFrameTime = 0;
-let lastIdleFrameTime = 0;
 let rafId = null;
 let isTimeoutScheduled = false;
 let batterySaver = false;
@@ -470,8 +416,6 @@ let typedAttempts = 0;
 let mistakeCount = 0;
 let defeatedCount = 0;
 let leakedCount = 0;
-let bossShotHits = 0;
-let bossesDefeated = 0;
 let encounteredTerms = [];
 let firstMedicHintShown = false;
 let sceneGround = null;
@@ -843,15 +787,9 @@ function startGame() {
   wandsArePrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
-  waveClearDelayTimer = 0;
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
   normalTypingCostSpawned = 0;
-  bossesSpawned = 0;
-  bossSpawnTimer = 0;
-  waveBossOrder = [];
-  finalWaveQueue = [];
-  finalWaveQueueIndex = 0;
   prepareWavePlan();
   streak = 0;
   peakStreak = 0;
@@ -860,13 +798,10 @@ function startGame() {
   mistakeCount = 0;
   defeatedCount = 0;
   leakedCount = 0;
-  bossShotHits = 0;
-  bossesDefeated = 0;
   encounteredTerms = [];
   pendingLootGuide = null;
   typedBuffer = '';
   activeTarget = null;
-  spawnTimer = 1.25;
   lastFrameTime = 0;
   elapsed = 0;
   moonAngle = INITIAL_MOON_ANGLE;
@@ -1275,7 +1210,6 @@ function awardKill(enemy) {
   streak += 1;
   if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
-  if (enemy.isBoss) bossesDefeated += 1;
   const points = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
   const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
   score += points;
@@ -1345,7 +1279,6 @@ function leakEnemy(enemy) {
     encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
   }
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
-  if (isFinalWave() && enemy.isBoss) bossesDefeated += 1;
   removeEnemy(enemy);
   // Keep typing progress on other targets — only reset when the leaked enemy
   // was the one being typed (matches the medic/mimic leak behaviour).
@@ -1361,39 +1294,6 @@ function leakEnemy(enemy) {
         endGame();
       }, 2500);
     } else {
-      endGame();
-    }
-  }
-}
-
-function bossShootPlayer(enemy) {
-  spawnBossRock(enemy);
-  playBossThrowSound();
-}
-
-function bossProjectileHitPlayer(enemy) {
-  bossShotHits += 1;
-  playBossImpactSound();
-
-  if (bossShotHits % bossRockTier(waveSet).hitsPerUnit === 0) {
-    let wasBlocked = false;
-    if (!godMode && potionsSystem.isShieldActive()) {
-      wasBlocked = potionsSystem.blockBossHit();
-    }
-
-    if (wasBlocked) {
-      potionsSystem.triggerShieldHitVisual();
-    } else {
-      if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
-      streak = 0;
-      damageTimer = 0.24;
-      damageFlash.classList.add('show');
-      window.setTimeout(() => damageFlash.classList.remove('show'), 120);
-      playDamageSound(enemy);
-    }
-    updateHud(true);
-    updateTypedDisplay();
-    if (!godMode && health <= 0) {
       endGame();
     }
   }
@@ -1878,12 +1778,7 @@ function arriveAtStop() {
   const stop = rail.to;
   if (stop.isBoss) {
     if (wavePhase === 'normal') startBossPhase();
-    if (wavePhase === 'normal') {
-      // Boss words not yet seen as monsters come out here first.
-      startEncounter(stop, Math.max(1, normalEnemyTarget - normalEnemiesSpawned), true);
-    } else {
-      rail.state = 'boss';
-    }
+    rail.state = 'boss';
     return;
   }
   startEncounter(stop, rail.bursts[rail.stopIndex] || 0, rail.stopIndex >= rail.bursts.length - 1);
@@ -2181,76 +2076,14 @@ function updateEnemies(delta, seconds) {
       });
     }
 
-    if (enemy.rail) {
-      if (updateRailEnemy(enemy, delta, seconds)) {
-        if (mode !== 'running') break;
-        continue;
-      }
-    } else {
-    let speed = 0;
-    if (enemy.stunTimer <= 0) {
-      speed = getEnemySpeed(enemy);
-    }
-
-    if (enemy.pushbackTargetZ !== undefined) {
-      enemy.group.position.z += (enemy.pushbackTargetZ - enemy.group.position.z) * Math.min(1.0, 10.0 * delta);
-      if (Math.abs(enemy.group.position.z - enemy.pushbackTargetZ) < 0.1) {
-        delete enemy.pushbackTargetZ;
-      }
-    } else {
-      enemy.group.position.z += speed * delta;
-    }
-    enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
-    if (enemy.isFlying) {
-      enemy.group.position.y = enemy.baseY + Math.sin(seconds * 1.4 + enemy.phase) * enemy.floatAmount;
-      enemy.group.rotation.z = Math.sin(seconds * 0.85 + enemy.phase) * 0.10;
-      if (enemy.shadowMesh) {
-        enemy.shadowMesh.position.x = enemy.group.position.x;
-        enemy.shadowMesh.position.z = enemy.group.position.z;
-      }
-    } else {
-      enemy.group.position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4.8 + enemy.phase)) * enemy.stepBounce;
-    }
-    enemy.group.rotation.y = Math.sin(seconds * 2.4 + enemy.phase) * 0.18;
+    if (updateRailEnemy(enemy, delta, seconds)) {
+      if (mode !== 'running') break;
+      continue;
     }
     if (enemy.group.userData.animate && enemy.stunTimer <= 0) enemy.group.userData.animate(seconds, enemy);
 
-    const wasRevealed = enemy.revealed;
-    if (!enemy.rail) enemy.revealed = enemy.group.position.z >= enemy.revealZ;
-    if (enemy.revealed && !wasRevealed) {
-      // Bosses arm here: rocks begin after their first-shot delay. The question was
-      // already typeable during the approach; this flash marks the combat start.
-      enemy.revealFlash = enemy.isBoss ? 0.42 : 0.28;
-      if (!enemy.isMimic) playRevealSound(enemy);
-      reusableVector.set(enemy.group.position.x, 0.14, enemy.group.position.z);
-      fx.ring(reusableVector, enemy.type.eye, {
-        from: 0.3,
-        to: enemy.isBoss ? 6.2 : 2.2,
-        life: enemy.isBoss ? 0.7 : 0.55,
-        opacity: enemy.isBoss ? 0.85 : 0.7,
-      });
-    }
     updateEnemyAura(enemy, delta);
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
-
-    if (enemy.isBoss && !enemy.phraseBoss && enemy.revealed && (!enemy.stunTimer || enemy.stunTimer <= 0)) {
-      enemy.shotTimer -= delta;
-      if (enemy.shotTimer <= 0) {
-        const activeRocksCount = beams.filter(b => b.kind === 'rock').length;
-        const timeSinceLastShot = seconds - lastBossShotTime;
-        const canShoot = enemy.isClimaxBoss || (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES && timeSinceLastShot >= MIN_PROJECTILE_SPACING);
-        if (canShoot) {
-          bossShootPlayer(enemy);
-          enemy.shotTimer = bossRockTier(waveSet).interval + Math.random() * 0.65;
-          if (!enemy.isClimaxBoss) {
-            lastBossShotTime = seconds;
-          }
-          if (mode !== 'running') break;
-        } else {
-          enemy.shotTimer = 0; // Hold throw until a slot opens AND spacing is met
-        }
-      }
-    }
 
     updateEnemyMarkers(enemy, seconds);
 
@@ -2362,36 +2195,6 @@ function updateEnemyMarkers(enemy, seconds) {
 function updateEffects(delta) {
   for (let index = beams.length - 1; index >= 0; index -= 1) {
     const effect = beams[index];
-
-    if (effect.kind === 'rock') {
-      if (!potionsSystem.isTimeFrozen()) {
-        effect.age += delta;
-      }
-      const progress = THREE.MathUtils.clamp(effect.age / effect.flightTime, 0, 1);
-      const eased = easeOutSine(progress);
-      effect.mesh.position.copy(effect.start).lerp(effect.end, eased);
-      effect.mesh.position.y += Math.sin(progress * Math.PI) * effect.arcHeight;
-      if (!potionsSystem.isTimeFrozen()) {
-        effect.trailTimer = (effect.trailTimer || 0) + delta;
-        while (effect.trailTimer > 0.03) {
-          effect.trailTimer -= 0.03;
-          fx.burst(effect.mesh.position, { color: effect.enemy.type.eye, color2: 0xff7a2a, count: 1, speed: 0.6, life: 0.5, size: 0.34, gravity: 1.2, up: 0 });
-        }
-        effect.mesh.rotation.x += effect.spin.x * delta;
-        effect.mesh.rotation.y += effect.spin.y * delta;
-        effect.mesh.rotation.z += effect.spin.z * delta;
-      }
-      effect.mesh.scale.setScalar(THREE.MathUtils.lerp(0.95, 1.2, progress));
-
-      if (progress >= 1) {
-        if (mode === 'running') bossProjectileHitPlayer(effect.enemy);
-        spawnDebris(effect.end, effect.enemy.type);
-        effectsGroup.remove(effect.mesh);
-        disposeObject(effect.mesh);
-        beams.splice(index, 1);
-      }
-      continue;
-    }
 
     if (effect.hold) {
       if (effect.kind === 'lightning_bolt') {
@@ -2651,7 +2454,6 @@ function updateLabels() {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const safeBounds = getLabelSafeBounds(height);
-  const { hudBottom, leaderboardBottom } = getPanelBottoms();
   const labelItems = [];
 
   for (const enemy of enemies) {
@@ -2662,9 +2464,6 @@ function updateLabels() {
 
     const isVisible = isLabelShown(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
     enemy.label.classList.toggle('is-hidden', !isVisible);
-    // Boss cards stay up during the approach; the arm flash fires when rocks unlock.
-    enemy.label.classList.toggle('is-approaching', !!enemy.isBoss && !enemy.revealed);
-    enemy.label.classList.toggle('is-arming', !!enemy.isBoss && enemy.revealFlash > 0);
     enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
     if (!isVisible) continue;
 
@@ -2672,9 +2471,8 @@ function updateLabels() {
     const y = (-reusableVector.y * 0.5 + 0.5) * height;
     const approachAmount = enemy.isProjectile ? enemy.rail.t
       : enemy.phraseBoss ? 0
-      : enemy.rail
-      ? (enemy.rail.phase === 'cross' ? enemy.rail.crossT : THREE.MathUtils.clamp((enemy.group.position.z - enemy.rail.to.z) / (STRIKE_Z - enemy.rail.to.z), 0, 1))
-      : THREE.MathUtils.clamp((enemy.group.position.z - enemy.revealZ) / (WALL_Z - enemy.revealZ), 0, 1);
+      : enemy.rail.phase === 'cross' ? enemy.rail.crossT
+      : THREE.MathUtils.clamp((enemy.group.position.z - enemy.rail.to.z) / (STRIKE_Z - enemy.rail.to.z), 0, 1);
     enemy.approachAmount = approachAmount;
     const scale = enemy.isBoss
       ? THREE.MathUtils.lerp(0.92, 1.12, approachAmount)
@@ -2683,24 +2481,6 @@ function updateLabels() {
 
     if (enemy.phraseBoss) {
       labelItems.push({ enemy, x: width / 2, y: 0, scale: 1, pinned: true });
-    } else if (enemy.isBoss) {
-      // Project the road edges at the boss's depth, or the boss's own outer edge
-      // where it is wider, so the label lands in the scenery clear of the boss.
-      const bossX = enemy.group.position.x;
-      const bossY = enemy.group.position.y;
-      const bossZ = enemy.group.position.z;
-      reusableVector.set(Math.max(5.8, bossX + enemy.bossHalfWidth), bossY, bossZ);
-      reusableVector.project(camera);
-      const rightRoadEdgeX = (reusableVector.x * 0.5 + 0.5) * width;
-      reusableVector.set(Math.min(-5.8, bossX - enemy.bossHalfWidth), bossY, bossZ);
-      reusableVector.project(camera);
-      const leftRoadEdgeX = (reusableVector.x * 0.5 + 0.5) * width;
-      // Project boss mid-height for vertical centering beside boss
-      reusableVector.copy(enemy.group.position);
-      reusableVector.y += 1.3 * enemy.type.scale * (enemy.isClimaxBoss ? 1.5 : 1.0);
-      reusableVector.project(camera);
-      const bossMidScreenY = (-reusableVector.y * 0.5 + 0.5) * height;
-      labelItems.push({ enemy, x, y, scale, rightRoadEdgeX, leftRoadEdgeX, bossMidScreenY });
     } else {
       labelItems.push({ enemy, x, y, scale });
     }
@@ -2734,19 +2514,6 @@ function updateLabels() {
       enemy.labelX = targetX;
       enemy.labelY = targetY;
       pinnedBottom = targetY;
-    } else if (enemy.isBoss) {
-      // Place label in the scenery area outside the road boundaries (±5.8 world units),
-      // using lane to decide left/right so boss bodies stay fully visible.
-      const useRight = enemy.labelSide ? enemy.labelSide === 'right' : enemy.lane >= 0;
-      const rawX = useRight
-        ? item.rightRoadEdgeX + BOSS_LABEL_GAP + labelWidth / 2
-        : item.leftRoadEdgeX - BOSS_LABEL_GAP - labelWidth / 2;
-      targetX = THREE.MathUtils.clamp(rawX, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
-      // Left-side labels clear the hud-grid (Score/Best/Life/Wave readouts),
-      // right-side labels the Hall of Wizards, unless that would push them off screen.
-      const panelBottom = useRight ? leaderboardBottom : hudBottom;
-      labelMinY = Math.min(maxY, Math.max(minY, panelBottom + LABEL_SAFE_MARGIN + labelHeight));
-      targetY = THREE.MathUtils.clamp(item.bossMidScreenY + labelHeight / 2, labelMinY, maxY);
     } else {
       targetX = THREE.MathUtils.clamp(item.x, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
       // Other cards (the rocks) keep below the boss's line.
@@ -2783,27 +2550,12 @@ function updateLabels() {
     enemy.label.style.top = `${enemy.labelY}px`;
     enemy.label.style.transform = `translate(-50%, -100%) scale(${scale.toFixed(3)})`;
     enemy.label.classList.toggle('is-target', enemy === activeTarget);
-    const railPhase = enemy.rail ? enemy.rail.phase : null;
-    enemy.label.classList.toggle('is-warning', enemy.rail ? enemy.approachAmount > 0.45 : enemy.group.position.z > -10);
-    enemy.label.classList.toggle('is-danger', enemy.rail ? enemy.approachAmount > 0.8 : enemy.group.position.z > -4);
-    enemy.label.classList.toggle('is-critical', enemy.rail ? railPhase === 'windup' || railPhase === 'strike' : enemy.group.position.z > 1);
+    const railPhase = enemy.rail.phase;
+    enemy.label.classList.toggle('is-warning', enemy.approachAmount > 0.45);
+    enemy.label.classList.toggle('is-danger', enemy.approachAmount > 0.8);
+    enemy.label.classList.toggle('is-critical', railPhase === 'windup' || railPhase === 'strike');
     enemy.label.classList.toggle('is-stunned', !!(enemy.stunTimer && enemy.stunTimer > 0));
   }
-}
-
-// Where the score panel and the Hall of Wizards end, measured a few times a
-// second rather than every frame, since reading layout every frame costs power.
-const panelBottomsCache = { at: -Infinity, hudBottom: 0, leaderboardBottom: 0 };
-function getPanelBottoms() {
-  const now = performance.now();
-  if (now - panelBottomsCache.at > 400) {
-    const hudRect = document.querySelector('.hud-grid')?.getBoundingClientRect();
-    const leaderboardRect = document.querySelector('.sw-leaderboard')?.getBoundingClientRect();
-    panelBottomsCache.hudBottom = hudRect ? hudRect.bottom : 0;
-    panelBottomsCache.leaderboardBottom = leaderboardRect && leaderboardRect.width > 0 ? leaderboardRect.bottom : 0;
-    panelBottomsCache.at = now;
-  }
-  return panelBottomsCache;
 }
 
 function resolveLabelStacks(items) {
@@ -2885,34 +2637,10 @@ function displayTypedBuffer() {
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
   if (!effectiveSP.startsWith(typed)) return typedBuffer;
-  if (activeTarget.limitedParts) return displayLimitedTypedBuffer(activeTarget, typed);
   if (effectiveSP !== activeTarget.searchPrompt) return typedBuffer;
   return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typed.length, {
     multiplicationAlias: activeTarget.isEquation,
   }));
-}
-
-function displayLimitedTypedBuffer(enemy, progressText) {
-  const promptOptions = { multiplicationAlias: enemy.isEquation };
-  let charsLeft = progressText.length;
-  const typedParts = [];
-
-  for (const part of enemy.limitedParts) {
-    if (!part.isHidden) continue;
-    const answerText = part.answerText || part.text;
-    const sp = buildSearchPrompt(answerText, promptOptions);
-    const typedCount = Math.min(charsLeft, sp.length);
-    charsLeft -= typedCount;
-
-    if (typedCount > 0) {
-      const charPos = promptIndexForProgress(answerText, typedCount, promptOptions);
-      typedParts.push(answerText.slice(0, charPos));
-    }
-
-    if (charsLeft <= 0) break;
-  }
-
-  return typedParts.join(' ');
 }
 
 function renderPrompt(enemy) {
@@ -2930,18 +2658,11 @@ function renderPrompt(enemy) {
   const matched = effectiveSP.startsWith(typed) && typed.length > 0;
   const typedProgress = matched ? typed.length : 0;
 
-  let html;
-  if (enemy.limitedParts) {
-    html = buildLimitedPromptHtml(enemy, typedProgress);
-  } else {
-    const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
-      multiplicationAlias: enemy.isEquation,
-    }) : 0;
-    const typedText = enemy.prompt.slice(0, typedLen);
-    const remainingText = enemy.maskPrompt ? enemy.hintMask.slice(typedLen) : enemy.prompt.slice(typedLen);
-    html = `<span class="typed">${wrapSups(escapeHtml(typedText))}</span>`
-         + `<span class="remaining">${wrapSups(escapeHtml(remainingText))}</span>`;
-  }
+  const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
+    multiplicationAlias: enemy.isEquation,
+  }) : 0;
+  const html = `<span class="typed">${wrapSups(escapeHtml(enemy.prompt.slice(0, typedLen)))}</span>`
+    + `<span class="remaining">${wrapSups(escapeHtml(enemy.prompt.slice(typedLen)))}</span>`;
 
   if (enemy.lastPromptHtml === html) return;
   enemy.lastPromptHtml = html;
@@ -2974,47 +2695,6 @@ function buildBossLineHtml(boss) {
 function bossTypedText(boss) {
   const { done } = bossWordProgress(boss);
   return [...boss.lineWordsList.slice(0, boss.wordIndex), done].filter(Boolean).join(' ');
-}
-
-function buildLimitedPromptHtml(enemy, typedProgress) {
-  let charsLeft = typedProgress;
-  let html = '';
-  for (const part of enemy.limitedParts) {
-    if (part.isWhitespace) {
-      html += wrapSups(escapeHtml(part.text));
-    } else if (!part.isHidden) {
-      html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
-    } else {
-      const promptOptions = { multiplicationAlias: enemy.isEquation };
-      const answerText = part.answerText || part.text;
-      const hintOptions = {
-        ...promptOptions,
-        leadingTypeableCount: enemy.hintLetterCount,
-      };
-      const sp = buildSearchPrompt(answerText, promptOptions);
-      const tokTyped = Math.min(charsLeft, sp.length);
-      charsLeft -= tokTyped;
-      const exponentHtml = part.exponentText ? wrapSups(escapeHtml(part.exponentText)) : '';
-      const wrapSquared = !!part.exponentText;
-      if (tokTyped > 0) {
-        const charPos = promptIndexForProgress(answerText, tokTyped, promptOptions);
-        const typedPart = answerText.slice(0, charPos);
-        const remainPart = answerText.slice(charPos);
-        if (wrapSquared) html += '(';
-        html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
-        if (remainPart) {
-          const maskedPart = buildBossHintPart(answerText, hintOptions).slice(charPos);
-          html += `<span class="remaining">${wrapSups(escapeHtml(maskedPart))}</span>`;
-        }
-        if (wrapSquared) html += `)${exponentHtml}`;
-      } else {
-        if (wrapSquared) html += '(';
-        html += `<span class="remaining">${wrapSups(escapeHtml(buildBossHintPart(answerText, hintOptions)))}</span>`;
-        if (wrapSquared) html += `)${exponentHtml}`;
-      }
-    }
-  }
-  return html;
 }
 
 function createLifeMeter() {
@@ -3078,13 +2758,8 @@ function updateHud(force) {
   updateTypingLabel();
 }
 
-function currentDifficulty() {
-  return GAME_PROFILE;
-}
-
 function updatePhaseDisplay() {
   if (!phaseValue) return;
-  const profile = currentDifficulty();
   if (mode === 'running') {
     const phase = wavePhase === 'boss' ? 'Boss wave' : 'Normal wave';
     phaseValue.textContent = `Wave ${waveSet} · ${phase}`;
@@ -3102,7 +2777,7 @@ function updatePhaseDisplay() {
     phaseValue.textContent = mode === 'ending' ? 'Victory' : 'Run ended';
     return;
   }
-  phaseValue.textContent = profile.phaseLabel;
+  phaseValue.textContent = 'Spellwave';
 }
 
 function getNormalEnemyTarget(wave) {
@@ -3111,13 +2786,6 @@ function getNormalEnemyTarget(wave) {
 
 function getNormalWaveTypingBudget(wave) {
   return NORMAL_TYPING_BUDGETS[Math.min(wave, NORMAL_TYPING_BUDGETS.length) - 1];
-}
-
-function getActiveTypingPressureLimit() {
-  return Math.min(
-    ACTIVE_TYPING_PRESSURE_MAX,
-    ACTIVE_TYPING_PRESSURE_BASE + Math.max(0, waveSet - 1) * ACTIVE_TYPING_PRESSURE_GROWTH
-  );
 }
 
 function getEnemyTypingCost(enemy) {
@@ -3132,51 +2800,13 @@ function registerNormalTypingCost(enemy) {
   normalTypingCostSpawned += getEnemyTypingCost(enemy);
 }
 
-function getActiveTypingPressure() {
-  return enemies.reduce((sum, enemy) => {
-    if (enemy.isBoss || enemy.dying) return sum;
-    return sum + getEnemyTypingCost(enemy);
-  }, 0);
-}
-
-function getActiveLongPromptCount() {
-  return enemies.reduce((count, enemy) => {
-    if (enemy.isBoss || enemy.isMedic || enemy.isMimic || enemy.dying) return count;
-    return count + (getEnemyTypingCost(enemy) >= LONG_ACTIVE_PROMPT_COST ? 1 : 0);
-  }, 0);
-}
-
-function getActiveLongPromptLimit() {
-  return waveSet >= 5 ? LATE_ACTIVE_LONG_PROMPT_LIMIT : ACTIVE_LONG_PROMPT_LIMIT;
-}
-
 function isNormalTypingBudgetReached() {
   return normalTypingCostSpawned >= getNormalWaveTypingBudget(waveSet);
 }
 
 function isNormalWaveComplete() {
   if (normalEnemiesSpawned >= normalEnemyTarget) return true;
-  if (isNormalTypingBudgetReached()) {
-    // If typing budget is reached, we only allow spawning scheduled boss previews
-    return !bossPreviewSchedule.has(normalEnemiesSpawned);
-  }
-  return false;
-}
-
-function getEnemySpeed(enemy) {
-  const profile = currentDifficulty();
-  if (enemy.isBoss) {
-    const responseTime = 18 + enemy.searchPrompt.length * 0.8;
-    return (WALL_Z - enemy.revealZ) / responseTime * bossSpeedMultiplier(waveSet);
-  }
-  const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
-  const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 6 : 8));
-  const lengthFactor = THREE.MathUtils.clamp(
-    1 / (1 + longPromptPenalty * (enemy.isBoss ? 0.08 : 0.06)),
-    enemy.isBoss ? 0.55 : 0.58,
-    1
-  );
-  return (enemy.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
+  return isNormalTypingBudgetReached();
 }
 
 // What the player has typed shows in the target's own card, under its word.
@@ -3209,9 +2839,7 @@ function spawnEnemy(options = {}) {
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
-  const showDefinition = !options.phraseBoss && !!wordData.definition && isBoss;
-  const type = options.type || (isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES));
-  const hintRange = isBoss ? { min: bossHintLetters(waveSet), max: bossHintLetters(waveSet) } : null;
+  const type = options.type || (isBoss ? options.bossType : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES));
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
@@ -3221,19 +2849,13 @@ function spawnEnemy(options = {}) {
     window.setTimeout(() => { if (mode === 'running') showBanner('MIMIC CHEST DETECTED!', 'mimic-hint'); }, 1100);
   }
   const group = options.customGroup || (isMimic ? createMimicChestMesh(type) : createEnemyMesh(type));
-  const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
-  const spawnSpread = Number.isFinite(options.delay)
-    ? options.delay
-    : Math.random() * (waveSet === 1 ? FIRST_WAVE_SPAWN_SPREAD : SPAWN_SPREAD);
-  const startZ = spawnBaseZ - spawnSpread;
-  const lane = Number.isFinite(options.lane) ? options.lane : chooseSpawnLane(startZ);
-  const revealZ = currentDifficulty().revealZ;
+  // A monster from an ambush is placed by setupRailEntry; bosses and rocks say where they start.
+  const startZ = Number.isFinite(options.startZ) ? options.startZ : 0;
+  const lane = Number.isFinite(options.lane) ? options.lane : 0;
   const isFlying = isBoss && !!type.isFlying;
   const spawnBaseY = isFlying ? FLYING_ENEMY_Y : isMedic ? MEDIC_ENEMY_Y : GROUND_ENEMY_Y;
   group.position.set(lane, spawnBaseY, startZ);
   group.scale.setScalar(type.scale * (isClimaxBoss ? 1.5 : 1.0));
-  // Half the boss's drawn width, so its card can sit clear of wings and arms.
-  const bossHalfWidth = isBoss ? new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3()).x / 2 : 0;
   enemyGroup.add(group);
 
   let shadowMesh = null;
@@ -3251,7 +2873,7 @@ function spawnEnemy(options = {}) {
     scene.add(shadowMesh);
   }
 
-  const promptKind = options.phraseBoss ? 'boss' : options.isProjectile ? 'rock' : (isBoss && isEquationPrompt) ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
+  const promptKind = options.phraseBoss ? 'boss' : options.isProjectile ? 'rock' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? 'word-tag is-boss is-hidden'
@@ -3278,16 +2900,7 @@ function spawnEnemy(options = {}) {
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
 
-  label.append(kindNode);
-
-  if (showDefinition) {
-    const definitionNode = document.createElement('span');
-    definitionNode.className = 'definition';
-    definitionNode.textContent = wordData.definition;
-    label.append(definitionNode, promptNode);
-  } else {
-    label.append(promptNode);
-  }
+  label.append(kindNode, promptNode);
 
   const typedNode = document.createElement('span');
   typedNode.className = 'typed-line';
@@ -3301,9 +2914,6 @@ function spawnEnemy(options = {}) {
   labelsLayer.append(label);
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
-  const twoWordData = isBoss && !options.phraseBoss
-    ? buildBossQuestion(wordData, bossAnswerLengthCap(waveSet))
-    : null;
   const enemy = {
     id: enemyId,
     type,
@@ -3315,40 +2925,26 @@ function spawnEnemy(options = {}) {
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
-    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: twoWordData ? twoWordData.altSearchPrompts : wordData.isSymbol ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
+    searchPrompt: buildSearchPrompt(wordData.term, promptOptions),
+    altSearchPrompts: wordData.isSymbol ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
     _matchedSearchPrompt: null,
-    limitedParts: twoWordData ? twoWordData.parts : null,
-    showDefinition,
-    maskPrompt: showDefinition && !isEquationPrompt,
-    hintMask: showDefinition && !isEquationPrompt
-      ? buildHintMask(wordData.term, {
-          ...promptOptions,
-          hintRange,
-          leadingTypeableCount: isBoss ? bossHintLetters(waveSet) : 1,
-        })
-      : null,
-    hintRange,
-    hintLetterCount: isBoss ? bossHintLetters(waveSet) : 1,
     lastPromptHtml: '',
     promptKind,
     isBoss,
     isMedic,
     isMimic,
     isClimaxBoss,
-    bossHalfWidth,
     lidOpenProgress: 0,
     hasOpened: false,
     isFlying,
     shadowMesh,
     lane,
     spawnZ: startZ,
-    revealZ,
-    revealed: startZ >= revealZ,
+    revealZ: startZ,
+    revealed: true,
     revealFlash: 0,
     speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : isMimic ? type.speed + Math.random() * 0.25 : type.speed + Math.random() * 0.35,
-    damage: isBoss ? BOSS_CONTACT_DAMAGE : isMedic ? 0 : MINION_DAMAGE,
-    shotTimer: isBoss ? BOSS_FIRST_ROCK_DELAY + Math.random() * 0.5 : 0,
+    damage: isBoss || isMedic ? 0 : MINION_DAMAGE,
     baseY: spawnBaseY,
     age: 0,
     wobbleAmount: isBoss ? 0.05 : 0.08 + Math.random() * 0.2,
@@ -3357,27 +2953,12 @@ function spawnEnemy(options = {}) {
     floatAmount: isFlying ? 0.22 : 0,
     phase: Math.random() * Math.PI * 2,
   };
-  if (!isBoss && previewableWordsThisSet.some(w => w.term === wordData.term)) {
-    introducedBossTermsThisSet.add(wordData.term);
-  }
   if (options.railSpot) setupRailEntry(enemy, options.railSpot);
   enemyId += 1;
   enemies.push(enemy);
   renderPrompt(enemy);
   selectTarget();
   return enemy;
-}
-
-function chooseSpawnZ() {
-  return waveSet === 1 ? FIRST_WAVE_SPAWN_Z : SPAWN_Z;
-}
-
-function chooseSpawnLane(startZ) {
-  const openLanes = PATH_LANES.filter((lane) => {
-    return !enemies.some((enemy) => Math.abs(enemy.lane - lane) < 1.5 && Math.abs(enemy.group.position.z - startZ) < 14);
-  });
-  const lanePool = openLanes.length > 0 ? openLanes : PATH_LANES;
-  return lanePool[Math.floor(Math.random() * lanePool.length)];
 }
 
 function createWorld() {
@@ -3838,49 +3419,6 @@ function spawnBeam(targetPosition) {
   }
 }
 
-function spawnBossRock(enemy) {
-  const start = enemy.group.position.clone();
-  start.y += 1.8 * enemy.type.scale * (enemy.isClimaxBoss ? 1.5 : 1.0);
-  const end = new THREE.Vector3(THREE.MathUtils.randFloat(-0.45, 0.45), 1.2 + Math.random() * 0.25, WALL_Z + 0.76);
-  const rockMaterial = new THREE.MeshStandardMaterial({
-    color: 0x5a4636,
-    emissive: enemy.type.trim,
-    emissiveIntensity: 0.5,
-    roughness: 0.92,
-    metalness: 0.02,
-  });
-  const emberMaterial = new THREE.MeshBasicMaterial({
-    color: glowColor(enemy.type.eye, 1.8),
-    transparent: true,
-    opacity: 0.44,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  });
-  const rock = new THREE.Group();
-  const core = new THREE.Mesh(new THREE.DodecahedronGeometry(0.34, 0), rockMaterial);
-  const glow = new THREE.Mesh(new THREE.DodecahedronGeometry(0.43, 0), emberMaterial);
-  core.castShadow = true;
-  glow.renderOrder = 2;
-  rock.add(core, glow);
-  rock.position.copy(start);
-  effectsGroup.add(rock);
-  beams.push({
-    kind: 'rock',
-    mesh: rock,
-    enemy,
-    start,
-    end,
-    age: 0,
-    flightTime: BOSS_ROCK_FLIGHT_TIME + Math.random() * 0.18,
-    arcHeight: BOSS_ROCK_ARC_HEIGHT + Math.random() * 0.65,
-    spin: new THREE.Vector3(
-      THREE.MathUtils.randFloat(5, 8),
-      THREE.MathUtils.randFloat(4, 7),
-      THREE.MathUtils.randFloat(6, 10)
-    ),
-  });
-}
-
 function spawnDebris(position, type, isBoss = false) {
   const count = isBoss ? 48 : 12;
   const baseScale = isBoss ? 0.32 : 0.18;
@@ -3998,7 +3536,6 @@ function clearEffects() {
     disposeObject(beam.mesh);
   }
   beams.length = 0;
-  lastBossShotTime = -999;
 
   for (const chunk of debris) {
     effectsGroup.remove(chunk.mesh);
@@ -4082,58 +3619,13 @@ function isLabelShown(enemy) {
   return isEnemyTargetable(enemy);
 }
 
-function getEquationQuantities(equationTerm) {
-  const normalizedEq = equationTerm.toLowerCase()
-    .replace(/[²³½0-9.×/=\-+()]/g, ' ')
-    .replace(/\s+/g, ' ');
-
-  const matched = [];
-  const tempEq = " " + normalizedEq + " ";
-  const sortedWords = [...ALL_WORDS].sort((a, b) => b.term.length - a.term.length);
-
-  let remainingEq = tempEq;
-  for (const word of sortedWords) {
-    const term = word.term.toLowerCase();
-    const termPattern = " " + term + " ";
-    if (remainingEq.includes(termPattern)) {
-      matched.push(word);
-      remainingEq = remainingEq.replace(termPattern, " ");
-    }
-  }
-  return matched;
-}
-
 function prepareWavePlan() {
-  bossWordsThisSet = chooseBossWordsForWave();
-  introducedBossTermsThisSet = new Set();
+  bossWordsThisSet = [];
   medicsSpawnedThisSet = 0;
   medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(waveSet));
   mimicsSpawnedThisSet = 0;
   mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(waveSet));
-  
-  const previewableWords = withinLength(definitionBossWordsForWave(), previewLengthCap(waveSet));
-  const equationWord = bossWordsThisSet.find(w => w.isEquation);
-  if (equationWord) {
-    const quantities = getEquationQuantities(equationWord.term);
-    const unseenQuantities = quantities.filter(q => !previewableWords.some(pw => pw.term === q.term));
-    if (unseenQuantities.length > 0) {
-      // Never turn a long equation quantity into a full-phrase minion.
-      const fitting = withinLength(unseenQuantities, previewLengthCap(waveSet));
-      if (fitting.length > 0) {
-        const chosenQuantity = fitting[Math.floor(Math.random() * fitting.length)];
-        previewableWords.push(chosenQuantity);
-      }
-    }
-  }
-  previewableWordsThisSet = previewableWords;
-
-  // Bosses speak whole lines now, so no boss words are previewed as monsters.
-  bossPreviewSchedule = new Map();
   hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
-}
-
-function definitionBossWordsForWave() {
-  return bossWordsThisSet.filter(w => !w.isEquation);
 }
 
 function getMedicCountForWave(wave) {
@@ -4166,10 +3658,9 @@ function shouldSpawnMedic() {
 }
 
 function chooseMimicPrompt() {
-  const reservedBossTerms = new Set(bossWordsThisSet.map((w) => w.term));
   const nearExisting = new Set(enemies.map((e) => e.prompt));
   const bossAnswers = liveAnswers(enemy => enemy.isBoss);
-  const pool = withinLength(currentKeywordPool(), 12).filter((entry) => !reservedBossTerms.has(entry.term));
+  const pool = withinLength(currentKeywordPool(), 12);
   const usablePool = pool.length > 0 ? pool : EASY_WORDS;
   const clear = entry => !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers);
   return monsterDeck.pick(usablePool, entry => !nearExisting.has(entry.term) && clear(entry))
@@ -4205,26 +3696,9 @@ function shouldSpawnMimic() {
 }
 
 
-function buildBossPreviewSchedule(target, words) {
-  const schedule = new Map();
-  if (target <= 0 || words.length === 0) return schedule;
-
-  words.forEach((word, index) => {
-    let slot = Math.floor(((index + 1) * target) / (words.length + 1));
-    slot = Math.max(0, Math.min(target - 1, slot));
-
-    while (schedule.has(slot) && slot < target - 1) slot += 1;
-    while (schedule.has(slot) && slot > 0) slot -= 1;
-    schedule.set(slot, word);
-  });
-
-  return schedule;
-}
-
 function buildHardGuestSchedule(target) {
   const count = hardGuestCount(waveSet);
-  const reservedTerms = new Set(bossWordsThisSet.map(w => w.term));
-  const available = withinLength(HARD_WORDS, normalPromptLengthCap(waveSet)).filter(w => !reservedTerms.has(w.term));
+  const available = withinLength(HARD_WORDS, normalPromptLengthCap(waveSet));
   if (count === 0 || available.length === 0) return new Map();
 
   const picked = [];
@@ -4241,88 +3715,19 @@ function buildHardGuestSchedule(target) {
   picked.forEach((word, i) => {
     let slot = half + Math.floor((i * (target - half)) / Math.max(1, picked.length));
     slot = Math.min(target - 1, slot);
-    while ((bossPreviewSchedule.has(slot) || schedule.has(slot)) && slot < target - 1) slot += 1;
+    while (schedule.has(slot) && slot < target - 1) slot += 1;
     schedule.set(slot, word);
   });
 
   return schedule;
 }
 
-function chooseBossWordsForWave() {
-  const chosen = [];
-  const usedTerms = new Set();
-  const vocabCount = Math.max(0, bossesPerWave(waveSet) - 1);
-
-  // Vocabulary bosses first, the freshest the deck has; one equation finishes the set.
-  for (let attempt = 0; attempt < 40 && chosen.length < vocabCount; attempt += 1) {
-    const answers = chosen.map(bossAnswer);
-    const entry = bossDeck.pick(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
-    if (!entry) continue;
-    usedTerms.add(entry.term);
-    chosen.push(entry);
-  }
-
-  while (chosen.length < vocabCount) {
-    const answers = chosen.map(bossAnswer);
-    const entry = firstShuffled(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
-    if (!entry) break;
-    usedTerms.add(entry.term);
-    chosen.push(entry);
-  }
-  chosen.push(chooseEquationWord(chosen));
-
-  // Shuffle so the equation boss can appear in any position
-  for (let i = chosen.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [chosen[i], chosen[j]] = [chosen[j], chosen[i]];
-  }
-
-  return chosen;
-}
-
-// Words on screen together must not be the same, or start one another: a
-// finished word would go to the nearest enemy whatever its clue says.
-function bossAnswer(entry) {
-  return buildBossQuestion(entry, bossAnswerLengthCap(waveSet))?.searchPrompt || '';
-}
-
 function sharesAnswer(answer, answers) {
   return answers.some(other => answer.startsWith(other) || other.startsWith(answer));
 }
 
-function sharesBossAnswer(entry, answers) {
-  return sharesAnswer(bossAnswer(entry), answers);
-}
-
 function liveAnswers(filter = () => true) {
   return enemies.filter(enemy => !enemy.dying && filter(enemy)).flatMap(enemyTypeableKeys);
-}
-
-// The first entry, in random order, that passes the test; random picks can
-// miss the few that fit when many answers are already on screen.
-function firstShuffled(entries, test) {
-  const order = [...entries];
-  for (let i = order.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
-  }
-  return order.find(test) || null;
-}
-
-function chooseEquationWord(otherBosses = []) {
-  const answers = otherBosses.map(bossAnswer);
-  return bossDeck.pick(EQUATION_WORDS, entry => !sharesBossAnswer(entry, answers))
-    || EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
-}
-
-// The list one vocabulary boss is drawn from; late waves favour the hard list.
-// Entries marked noBoss still appear as monsters but never as bosses.
-function chooseBossPool() {
-  const canBeBoss = entry => !entry.noBoss;
-  if (waveSet < 3) return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet)).filter(canBeBoss);
-  const hardShare = hardBossShare(waveSet);
-  if (hardShare === null) return [...MEDIUM_WORDS, ...HARD_WORDS].filter(canBeBoss);
-  return (Math.random() < hardShare ? HARD_WORDS : MEDIUM_WORDS).filter(canBeBoss);
 }
 
 function choosePrompt() {
@@ -4342,15 +3747,9 @@ function choosePrompt() {
 
   const pool = currentKeywordPool();
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
-  const reservedBossTerms = wavePhase === 'normal'
-    ? new Set(bossWordsThisSet.map((word) => word.term))
-    : new Set();
-
-  const regularPool = pool.filter((entry) => !reservedBossTerms.has(entry.term));
-  const usablePool = regularPool.length > 0 ? regularPool : pool;
-  return monsterDeck.pick(usablePool, entry => !nearExisting.has(entry.term) && !clashes(entry))
-    || monsterDeck.pick(usablePool, entry => !clashes(entry))
-    || monsterDeck.pick(usablePool);
+  return monsterDeck.pick(pool, entry => !nearExisting.has(entry.term) && !clashes(entry))
+    || monsterDeck.pick(pool, entry => !clashes(entry))
+    || monsterDeck.pick(pool);
 }
 
 // How often a normal monster carries a unit or a symbol equation instead of a word.
@@ -4362,9 +3761,8 @@ function symbolShare(wave) {
 }
 
 function chooseMedicPrompt() {
-  const reservedBossTerms = new Set(bossWordsThisSet.map((word) => word.term));
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
-  const pool = currentKeywordPool().filter((entry) => !reservedBossTerms.has(entry.term));
+  const pool = currentKeywordPool();
   const compactPool = pool.filter((entry) => {
     const length = buildSearchPrompt(entry.term).length;
     return length >= 4 && length <= 12;
@@ -4384,15 +3782,6 @@ function currentKeywordPool() {
   return withinLength(pool, normalPromptLengthCap(waveSet));
 }
 
-function refreshWaveBossOrder(count) {
-  const indices = BOSS_TYPES.map((_, i) => i);
-  for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [indices[i], indices[j]] = [indices[j], indices[i]];
-  }
-  waveBossOrder = indices.slice(0, count);
-}
-
 // One boss a wave, dealt from a shuffled bag, so no model returns until all have appeared.
 let bossTypeBag = [];
 function nextBossType() {
@@ -4406,11 +3795,6 @@ function nextBossType() {
   return BOSS_TYPES[bossTypeBag.pop()];
 }
 
-function chooseBossType(index) {
-  if (waveBossOrder.length === 0) refreshWaveBossOrder(bossesPerWave(waveSet));
-  return BOSS_TYPES[waveBossOrder[index % waveBossOrder.length]];
-}
-
 function weightedPick(items) {
   const total = items.reduce((sum, item) => sum + item.weight, 0);
   let roll = Math.random() * total;
@@ -4419,10 +3803,6 @@ function weightedPick(items) {
     if (roll <= 0) return item;
   }
   return items[items.length - 1];
-}
-
-function easeOutSine(value) {
-  return Math.sin((value * Math.PI) / 2);
 }
 
 function easeInOutCubic(t) {
@@ -4802,31 +4182,8 @@ function isFinalWave() {
   return waveSet === FINAL_WAVE_NUMBER;
 }
 
-function buildFinalWaveQueue() {
-  const queue = [
-    ...Array(bossesPerWave(FINAL_WAVE_NUMBER)).fill('boss'),
-    ...Array(4).fill('medic'),
-    ...Array(3).fill('mimic'),
-  ];
-  for (let i = queue.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [queue[i], queue[j]] = [queue[j], queue[i]];
-  }
-  const firstBossIndex = queue.indexOf('boss');
-  if (firstBossIndex > 0) {
-    [queue[0], queue[firstBossIndex]] = [queue[firstBossIndex], queue[0]];
-  }
-  return queue;
-}
-
 function startFinalWave() {
   wavePhase = 'boss';
-  bossesSpawned = 0;
-  bossesDefeated = 0;
-  bossSpawnTimer = currentDifficulty().bossWarningDelay;
-  finalWaveQueue = buildFinalWaveQueue();
-  finalWaveQueueIndex = 0;
-  refreshWaveBossOrder(bossesPerWave(waveSet));
   document.body.classList.add('final-wave-active');
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
@@ -4888,49 +4245,9 @@ function updateFinalWaveScenery(seconds, delta) {
 
 function startBossPhase() {
   wavePhase = 'boss';
-  bossesSpawned = 0;
-  bossesDefeated = 0;
-  bossSpawnTimer = currentDifficulty().bossWarningDelay;
-  refreshWaveBossOrder(bossesPerWave(waveSet));
   showBanner('BOSS WAVE');
   playBossWarningSound();
   updatePhaseDisplay();
-}
-
-function spawnBoss() {
-  const wordData = bossWordsThisSet[bossesSpawned] || chooseBossWord();
-  if (!bossWordsThisSet.some(w => w.term === wordData.term)) bossWordsThisSet.push(wordData);
-  const bossType = chooseBossType(bossesSpawned);
-  const lanes = [-5.0, 0, 5.0];
-  const lane = lanes[bossesSpawned % lanes.length];
-
-  const profile = currentDifficulty();
-  const isClimaxBoss = isFinalWave() && (bossesSpawned >= 7);
-  const enemy = spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, startZ: profile.revealZ, isClimaxBoss });
-  // A middle-lane boss puts its label on the side with fewer boss labels.
-  if (lane === 0) {
-    const liveBosses = enemies.filter(other => other.isBoss && other !== enemy && !other.dying);
-    const rightCount = liveBosses.filter(other => (other.labelSide || (other.lane >= 0 ? 'right' : 'left')) === 'right').length;
-    enemy.labelSide = rightCount > liveBosses.length - rightCount ? 'left' : 'right';
-  }
-  // Use the actual answer and movement speed for a consistent entrance.
-  enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * BOSS_APPROACH_TIME;
-  enemy.group.position.z = enemy.spawnZ;
-  enemy.revealed = false;
-  // The first rock comes soon after the boss arms; it throws nothing while approaching.
-  enemy.shotTimer = BOSS_FIRST_ROCK_DELAY + Math.random() * 0.5;
-}
-
-function chooseBossWord() {
-  const usedTerms = new Set(bossWordsThisSet.map(w => w.term));
-  const activeAnswers = liveAnswers();
-  const fits = entry => !usedTerms.has(entry.term) && !sharesBossAnswer(entry, activeAnswers);
-  const fromPool = bossDeck.pick(chooseBossPool(), fits);
-  if (fromPool) return fromPool;
-  const allBossWords = [...MEDIUM_WORDS, ...HARD_WORDS].filter(entry => !entry.noBoss);
-  return bossDeck.pick(allBossWords, fits)
-    || firstShuffled(allBossWords, entry => !sharesBossAnswer(entry, activeAnswers))
-    || allBossWords[Math.floor(Math.random() * allBossWords.length)];
 }
 
 function startWaveCleared() {
@@ -5132,14 +4449,6 @@ function activateFinalWaveCheat() {
     clearEffects();
     typedBuffer = '';
     activeTarget = null;
-    bossesSpawned = 0;
-    bossesDefeated = 0;
-    bossShotHits = 0;
-    bossSpawnTimer = 0;
-    waveBossOrder = [];
-    finalWaveQueue = [];
-    finalWaveQueueIndex = 0;
-    waveClearDelayTimer = 0;
     mode = 'running';
     document.body.classList.add('is-running');
     document.body.classList.remove('is-paused');
@@ -5170,21 +4479,12 @@ function advanceWaveSet() {
   document.body.classList.remove('final-wave-active');
   waveSet += 1;
   wavePhase = 'normal';
-  waveClearDelayTimer = 0;
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
   normalTypingCostSpawned = 0;
-  bossesSpawned = 0;
-  bossesDefeated = 0;
-  bossShotHits = 0;
-  bossSpawnTimer = 0;
-  waveBossOrder = [];
-  finalWaveQueue = [];
-  finalWaveQueueIndex = 0;
   prepareWavePlan();
   typedBuffer = '';
   activeTarget = null;
-  spawnTimer = 1.25;
   mode = 'running';
   startMusicLoop(false);
   document.body.classList.add('is-running');
@@ -5606,22 +4906,10 @@ function chooseChainBossInterrupts(firstEnemy, chainHopTargets) {
   return chosen;
 }
 
-function cancelBossRocks(enemy) {
-  for (let index = beams.length - 1; index >= 0; index -= 1) {
-    const effect = beams[index];
-    if (effect.kind !== 'rock' || effect.enemy !== enemy) continue;
-    effectsGroup.remove(effect.mesh);
-    disposeObject(effect.mesh);
-    beams.splice(index, 1);
-  }
-}
-
-// Long targeted interrupt: freeze that boss, clear its rocks, and delay the next throw.
+// Long targeted interrupt: freeze that boss.
 function interruptBossWithChain(enemy) {
   if (!enemy || !enemy.isBoss || enemy.dying) return;
   enemy.stunTimer = Math.max(enemy.stunTimer || 0, CHAIN_BOSS_STUN);
-  enemy.shotTimer = bossRockTier(waveSet).interval + Math.random() * 0.4;
-  cancelBossRocks(enemy);
 }
 
 function armChainLightningTimer(entry, delay) {

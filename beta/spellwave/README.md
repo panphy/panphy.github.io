@@ -1,6 +1,6 @@
 # Spellwave (beta rework)
 
-A working copy of Spellwave (`fun/spellwave.html`) for reworking it in the spirit of rail-shooter typing games. The live game is untouched; this copy has no leaderboard (`src/leaderboard.js` is a stub) and keeps its best score and word history under its own localStorage keys. The page is `beta/spellwave.html`. It needs no build step, and the files share the `?v=` value `beta4`: bump it in `beta/spellwave.html` and in every import when the files change.
+A working copy of Spellwave (`fun/spellwave.html`) for reworking it in the spirit of rail-shooter typing games. The live game is untouched; this copy has no leaderboard (`src/leaderboard.js` is a stub) and keeps its best score and word history under its own localStorage keys. The page is `beta/spellwave.html`. It needs no build step, and the files share the `?v=` value `beta5`: bump it in `beta/spellwave.html` and in every import when the files change.
 
 Run the tests with `node --test beta/spellwave/tests/*.test.mjs`.
 
@@ -16,5 +16,3 @@ Run the tests with `node --test beta/spellwave/tests/*.test.mjs`.
 - **Feel.** Every correct letter flicks a bolt from a wand and makes the monster flinch. A finishing letter adds a hit pause and a camera kick, and the last kill of an ambush plays in slow motion.
 
 - **Bosses.** Each wave ends with one boss in the arena. It speaks whole statements from `BOSS_PHRASES` in `src/question-bank.js`, shown under the health bar, clear of the rocks flying in; the letters typed turn blue in place. The player types them word by word, and each finished statement takes a segment off the health bar at the top. Between words the player can shatter the rocks it throws, each marked with a short unit; no rock starts with the same letter as the boss's next word or another rock. The ten boss models are dealt from a shuffled bag, so each wave of a run has a different one. `bossPlan` in `src/difficulty.js` sets the statements, the longest statement, the throw rate, the rock flight time and the rock damage for each wave. Wave 10 is a single eight-statement final boss. A line finished with chain lightning primed takes two segments and clears the rocks.
-
-The live game's clue-question code (hidden words, hint letters, boss previews) is still in the files but no longer runs.
