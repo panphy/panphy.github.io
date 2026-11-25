@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { STORY_BEATS, storyBeatForWave } from '../src/story.js';
 import { CHAPTERS, MINE_PALETTE, FINAL_WAVE_PALETTE, SEASON_PALETTES, WAVE_COUNT, chapterForWave } from '../src/chapters.js';
 
 test('five waves, one chapter each', () => {
@@ -51,4 +52,14 @@ test('the meadow is plain; every later chapter has a set-piece of its own', () =
   assert.equal(chapterForWave(1).setPiece, undefined);
   const pieces = [2, 3, 4, 5].map(wave => chapterForWave(wave).setPiece);
   assert.deepEqual(pieces, ['bridge', 'cart', 'blizzard', 'flight']);
+});
+
+test('every wave has a storyteller; only the first is not held by a myth', async () => {
+  assert.equal(STORY_BEATS.length, WAVE_COUNT);
+  for (let wave = 1; wave <= WAVE_COUNT; wave += 1) {
+    const beat = storyBeatForWave(wave);
+    assert.ok(beat.name && beat.lines.length >= 3 && beat.lines.length <= 4, `wave ${wave}`);
+    for (const line of beat.lines) assert.ok(line.length <= 80, line);
+    assert.equal(!!beat.plea, wave > 1);
+  }
 });

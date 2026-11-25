@@ -101,6 +101,17 @@ function buildAltSearchPrompts(term, options = {}) {
   return [...alts];
 }
 
+// The term as the player is spelling it: the variant of `term` whose typed form is
+// `searchPrompt` (color for colour, say), with its spaces and punctuation; null if none.
+function altTermFor(term, searchPrompt, options = {}) {
+  let variants = [''];
+  for (const token of term.split(/([a-z]+)/i)) {
+    const spellings = SPELLING_VARIANTS.get(token.toLowerCase()) || [token];
+    variants = variants.flatMap(prefix => spellings.map(spelling => prefix + spelling));
+  }
+  return variants.find(variant => buildSearchPrompt(variant, options) === searchPrompt) || null;
+}
+
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -139,6 +150,7 @@ export {
   isMathOperatorInput,
   buildSearchPrompt,
   buildAltSearchPrompts,
+  altTermFor,
   escapeHtml,
   wrapSups,
   promptIndexForProgress,
