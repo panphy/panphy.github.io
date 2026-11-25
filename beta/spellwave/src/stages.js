@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createLowPolyTree, createLowPolyRock } from './lowpoly.js';
-import { createStageKit } from './stage-kits.js?v=beta11';
+import { createStageKit } from './stage-kits.js?v=beta12';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
@@ -218,10 +218,10 @@ function disposeTree(root, keepMaterials) {
 
 // burstCount ambush stops, then the boss arena. `materials` are the scene's shared
 // tree and rock materials, so the palette recolours the stage's trees as well. `kit`
-// and `variant` choose the scenery (chapters.js).
-export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName = 'meadow', variant = 0 }) {
+// chooses the scenery (chapters.js).
+export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName = 'meadow' }) {
   const random = mulberry32(seed * 9973 + 17);
-  const kit = createStageKit(kitName, variant);
+  const kit = createStageKit(kitName);
   const mats = kit.materials();
   const keepMaterials = new Set([materials.trunk, ...materials.leaves, materials.rock]);
   const group = new THREE.Group();
@@ -234,7 +234,12 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
   const legLengths = [16];
   for (let index = 1; index < burstCount; index += 1) legLengths.push(30 + random() * 8);
   legLengths.push(36);
-  const crossingLeg = kit.crossing ? 1 + Math.floor(random() * (legLengths.length - 1)) : -1;
+  // A kit with a late part (the mine) changes over on the leg into stop `lateStop`;
+  // the crossing goes on some other leg.
+  const lateStop = kit.late ? Math.max(1, Math.floor(burstCount / 2)) : -1;
+  const crossingLegs = [];
+  for (let leg = 1; leg < legLengths.length; leg += 1) if (leg !== lateStop) crossingLegs.push(leg);
+  const crossingLeg = kit.crossing && crossingLegs.length > 0 ? crossingLegs[Math.floor(random() * crossingLegs.length)] : -1;
   if (crossingLeg > 0) legLengths[crossingLeg] += CROSSING_EXTRA;
   for (let leg = 0; leg < legLengths.length; leg += 1) {
     const bend = leg === legLengths.length - 1 ? side * 0.25 : side * (0.35 + random() * 0.35);
@@ -266,7 +271,7 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     const u = THREE.MathUtils.clamp(arc / length, 0, 1);
     const point = curve.getPointAt(u);
     const tangent = curve.getTangentAt(u);
-    return { x: point.x, z: point.z, yaw: yawOfTangent(tangent) + turn };
+    return { x: point.x, z: point.z, yaw: yawOfTangent(tangent) + turn, arc };
   };
 
   const stops = [];
@@ -292,13 +297,27 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     }
     return best;
   };
+  // Distance to the route, and (in nearestArc) how far along it the nearest point is.
+  let nearestArc = 0;
   const routeDistance = (px, pz) => {
     let best = Infinity;
-    for (const sample of samples) {
+    let bestIndex = 0;
+    for (let index = 0; index < samples.length; index += 1) {
+      const sample = samples[index];
       const d = (sample.x - px) ** 2 + (sample.z - pz) ** 2;
-      if (d < best) best = d;
+      if (d < best) {
+        best = d;
+        bestIndex = index;
+      }
     }
+    nearestArc = (bestIndex / (samples.length - 1)) * length;
     return Math.sqrt(best);
+  };
+  // Where the late part begins: past the ambush before it, at the next stop's doorstep.
+  const lateArc = lateStop > 0 ? stops[lateStop - 1].arc + 23 : Infinity;
+  const isLate = (px, pz) => {
+    routeDistance(px, pz);
+    return nearestArc > lateArc;
   };
   const openness = (px, pz) => Math.min(routeDistance(px, pz) - CORRIDOR_HALF_WIDTH, arenaDistance(px, pz));
 
@@ -329,11 +348,12 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
 
   const heightAt = (px, pz) => {
     const away = openness(px, pz);
+    const late = nearestArc > lateArc;
     const bump = (valueNoise(px * 0.21, pz * 0.21, seed) - 0.5) * 0.12;
     const base = GROUND_Y + bump;
     let height = base;
     if (away > 0) {
-      height = kit.hills({ away, base, bump, x: px, z: pz, noise: (frequency, salt) => valueNoise(px * frequency, pz * frequency, seed + salt) });
+      height = kit.hills({ away, base, bump, late, x: px, z: pz, noise: (frequency, salt) => valueNoise(px * frequency, pz * frequency, seed + salt) });
     }
     if (crossing) {
       // The cut fades out where it would run into an arena.
@@ -365,10 +385,10 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     heightAt,
     isPath,
     seed,
-    faceKind: kit.faceKind || null,
+    faceKind: kit.faceKind ? (face) => kit.faceKind({ ...face, late: isLate(face.x, face.z) }) : null,
     extras: kit.ground || null,
-    skip: kit.skipBelow != null || kit.skipAbove != null
-      ? (x, y) => (kit.skipBelow != null && y < kit.skipBelow) || (kit.skipAbove != null && y > kit.skipAbove)
+    skip: kit.skipBelow != null || kit.skip
+      ? (x, y, z) => (kit.skipBelow != null && y < kit.skipBelow) || (kit.skip ? kit.skip({ x, y, z, late: isLate(x, z) }) : false)
       : null,
   });
   group.add(ground.mesh);
@@ -383,8 +403,8 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
       cell: CELL * 1.6,
       faceKind: () => kit.roof.kind,
       extras: kit.ground,
-      // Leave out the roof where it would lie inside the rock.
-      skip: (x, y, z) => heightAt(x, z) > y + 2,
+      // Leave out the roof where it would lie inside the rock, or over open sky.
+      skip: (x, y, z) => heightAt(x, z) > y + 2 || (kit.roof.lateOnly && !isLate(x, z)),
       flip: true,
     });
     group.add(roof.mesh);
@@ -417,9 +437,9 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     return built;
   };
   const ctx = {
-    random, seed, variant, mats, shared: materials,
-    stops, bossStop: stops[stops.length - 1], startArc, length, crossing, bounds,
-    poseAtArc, heightAt, openness, arenaDistance, isFree, occupy, place, tree,
+    random, seed, mats, shared: materials,
+    stops, bossStop: stops[stops.length - 1], startArc, length, crossing, bounds, lateArc,
+    poseAtArc, heightAt, openness, arenaDistance, isFree, isLate, occupy, place, tree,
     at: frameToStage,
     rock: (scale) => {
       const rock = createLowPolyRock(materials.rock, Math.floor(random() * 1000));
@@ -444,9 +464,12 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
   };
 
   // Hiding spots for each ambush stop, with the cover that hides them.
-  const narrowCovers = kit.covers.filter((cover) => !cover.wide);
   for (const stop of stops) {
     if (stop.isBoss) continue;
+    // A cover marked `where` belongs to one part of the stage only.
+    const part = stop.arc > lateArc ? 'late' : 'early';
+    const covers = kit.covers.filter((cover) => !cover.where || cover.where === part);
+    const narrowCovers = covers.filter((cover) => !cover.wide);
     const sides = random() < 0.5 ? [-1, 1] : [1, -1];
     // Close enough that a monster stepping out is already in the player's face.
     const slots = [
@@ -455,7 +478,7 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
       { x: sides[0] * (3 + random() * 2), z: -14 - random() * 3 },
     ];
     for (const slot of slots) {
-      let cover = kit.covers[Math.floor(random() * kit.covers.length)];
+      let cover = covers[Math.floor(random() * covers.length)];
       if (Math.abs(slot.x) < 6 && cover.wide) cover = narrowCovers[Math.floor(random() * narrowCovers.length)];
       const p = frameToStage(stop.pose, slot.x, slot.z);
       // A prop with a front faces the camera's stand point, so a monster can step out toward it.
@@ -492,7 +515,7 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     const z = bounds.minZ + random() * (bounds.maxZ - bounds.minZ);
     const open = openness(x, z);
     if (open < 1) continue;
-    const choice = kit.tree({ open, height: heightAt(x, z), random });
+    const choice = kit.tree({ open, height: heightAt(x, z), random, late: nearestArc > lateArc });
     if (!choice || !isFree(x, z, 1.2)) continue;
     place(tree(choice.kind, choice.scale), x, z, 1.2);
   }
@@ -514,6 +537,8 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     startArc,
     length,
     crossing,
+    // Where the stage's late part begins (Infinity if it has none).
+    lateArc,
     triangles: Math.round(triangles),
     poseAtArc,
     // The pose while travelling from one stop (or the start) to the next, t from 0 to 1.

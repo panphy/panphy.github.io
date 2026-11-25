@@ -1,30 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CHAPTERS, MINE_PALETTE, FINAL_WAVE_PALETTE, SEASON_PALETTES, chapterForWave } from '../src/chapters.js';
+import { CHAPTERS, MINE_PALETTE, FINAL_WAVE_PALETTE, SEASON_PALETTES, WAVE_COUNT, chapterForWave } from '../src/chapters.js';
 
-test('five chapters cover two waves each', () => {
+test('five waves, one chapter each', () => {
+  assert.equal(WAVE_COUNT, 5);
   const kits = [];
-  for (let wave = 1; wave <= 10; wave += 1) kits.push(chapterForWave(wave).kit);
-  assert.deepEqual(kits, ['meadow', 'meadow', 'forest', 'forest', 'mountain', 'mountain', 'winter', 'winter', 'sky', 'sky']);
-  assert.equal(CHAPTERS.length, 5);
+  for (let wave = 1; wave <= WAVE_COUNT; wave += 1) kits.push(chapterForWave(wave).kit);
+  assert.deepEqual(kits, ['meadow', 'forest', 'mountain', 'winter', 'sky']);
 });
 
-test('a chapter opens with its first wave: variant 0 and a title', () => {
-  for (let wave = 1; wave <= 10; wave += 1) {
-    const chapter = chapterForWave(wave);
-    assert.equal(chapter.variant, (wave - 1) % 2);
-    if (chapter.variant === 0) assert.ok(chapter.title, `wave ${wave} has a title`);
+test('every chapter has a title and its own boss', () => {
+  const bosses = CHAPTERS.map(chapter => chapter.boss);
+  assert.equal(new Set(bosses).size, CHAPTERS.length);
+  for (const chapter of CHAPTERS) {
+    assert.ok(chapter.title, chapter.kit);
+    assert.ok(chapter.boss, chapter.kit);
   }
 });
 
-test('palettes follow the seasons, the mine and the night sky', () => {
-  assert.equal(chapterForWave(1).palette, SEASON_PALETTES[0]);
-  assert.equal(chapterForWave(4).palette, SEASON_PALETTES[1]);
-  assert.equal(chapterForWave(5).palette, SEASON_PALETTES[2]);
-  assert.equal(chapterForWave(6).palette, MINE_PALETTE);
-  assert.equal(chapterForWave(8).palette, SEASON_PALETTES[3]);
-  assert.equal(chapterForWave(9).palette, FINAL_WAVE_PALETTE);
-  assert.equal(chapterForWave(10).palette, FINAL_WAVE_PALETTE);
+test('palettes follow the seasons, then the night sky; the pass runs into the mine', () => {
+  for (let wave = 1; wave <= 4; wave += 1) assert.equal(chapterForWave(wave).palette, SEASON_PALETTES[wave - 1]);
+  assert.equal(chapterForWave(5).palette, FINAL_WAVE_PALETTE);
+  assert.equal(chapterForWave(3).late.palette, MINE_PALETTE);
+  assert.ok(chapterForWave(3).late.title);
+  for (const wave of [1, 2, 4, 5]) assert.equal(chapterForWave(wave).late, undefined);
 });
 
 test('every palette has the fields the game fades between', () => {
@@ -37,6 +36,13 @@ test('every palette has the fields the game fades between', () => {
 
 test('waves outside the run stay in range', () => {
   assert.equal(chapterForWave(0).kit, 'meadow');
-  assert.equal(chapterForWave(14).kit, 'sky');
-  assert.equal(chapterForWave(14).variant, 1);
+  assert.equal(chapterForWave(9).kit, 'sky');
+});
+
+test('each chapter boss is a boss model the game has', async () => {
+  const { readFileSync } = await import('node:fs');
+  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const start = main.indexOf('const BOSS_TYPES = [');
+  const table = main.slice(start, main.indexOf('\n];', start));
+  for (const { boss } of CHAPTERS) assert.ok(table.includes(`name: '${boss}'`), boss);
 });
