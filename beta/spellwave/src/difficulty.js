@@ -1,5 +1,5 @@
 // difficulty.js — how long a keyword may be on each wave, and each wave's boss fight.
-import { buildSearchPrompt } from './prompt-utils.js?v=beta12';
+import { buildSearchPrompt } from './prompt-utils.js?v=beta13';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -49,4 +49,36 @@ export const BOSS_PLAN_TABLE = [
 
 export function bossPlan(wave) {
   return [...BOSS_PLAN_TABLE].reverse().find(row => wave >= row.fromWave) || BOSS_PLAN_TABLE[0];
+}
+
+// Monsters with a behaviour of their own, by wave (1 to 5): how many of the wave's
+// monsters carry a shield (two words), split in two when beaten, or stand back and
+// cast. The meadow has none: it is where the player learns to type at monsters.
+export const VARIANT_COUNTS = [
+  { shield: 0, splitter: 0, caster: 0 },
+  { shield: 2, splitter: 0, caster: 0 },
+  { shield: 2, splitter: 2, caster: 0 },
+  { shield: 2, splitter: 2, caster: 2 },
+  { shield: 3, splitter: 2, caster: 3 },
+];
+
+export function variantCounts(wave) {
+  return VARIANT_COUNTS[Math.min(VARIANT_COUNTS.length, Math.max(1, Math.floor(wave))) - 1];
+}
+
+// Which of a wave's monsters (by spawn order, from 0) are variants. The first monster
+// of a wave and the slots in `taken` stay plain.
+export function planVariants(wave, target, taken = [], random = Math.random) {
+  const counts = variantCounts(wave);
+  const free = [];
+  for (let index = 1; index < target; index += 1) if (!taken.includes(index)) free.push(index);
+  for (let index = free.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(random() * (index + 1));
+    [free[index], free[swap]] = [free[swap], free[index]];
+  }
+  const plan = new Map();
+  for (const kind of ['caster', 'shield', 'splitter']) {
+    for (let count = 0; count < counts[kind] && free.length > 0; count += 1) plan.set(free.pop(), kind);
+  }
+  return plan;
 }

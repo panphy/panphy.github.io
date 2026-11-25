@@ -1,19 +1,20 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta12';
+import { createSpellwaveAudio } from './audio.js?v=beta13';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta12';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta12';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta12';
-import { createLeaderboard } from './leaderboard.js?v=beta12';
+import { createPotionSystem } from './potions.js?v=beta13';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta13';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta13';
+import { createLeaderboard } from './leaderboard.js?v=beta13';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta12';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta13';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt } from './monster-variants.js?v=beta13';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta12';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta12';
-import { createWordDeck } from './word-decks.js?v=beta12';
-import { createStage } from './stages.js?v=beta12';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta12';
-import { createWizardHands } from './wizard-hands.js?v=beta12';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta13';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta13';
+import { createWordDeck } from './word-decks.js?v=beta13';
+import { createStage } from './stages.js?v=beta13';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta13';
+import { createWizardHands } from './wizard-hands.js?v=beta13';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -416,6 +417,9 @@ let defeatedCount = 0;
 let leakedCount = 0;
 let encounteredTerms = [];
 let firstMedicHintShown = false;
+let variantSchedule = new Map();
+const variantHintsShown = new Set();
+const casterBolts = [];
 let sceneGround = null;
 let sceneRockMaterial = null;
 const rail = { stage: null, state: 'idle', stopIndex: -1, from: null, to: null, toIndex: 0, t: 0, duration: 1, bursts: [], encounter: null, walkPhase: 0 };
@@ -1169,6 +1173,11 @@ function defeatEnemy(enemy) {
     return;
   }
 
+  if (enemy.shield) {
+    breakShield(enemy);
+    return;
+  }
+
   if (enemy.isMimic) {
     awardMimicLoot(enemy);
     spawnBeam(enemy.group.position);
@@ -1189,6 +1198,7 @@ function defeatEnemy(enemy) {
   // The final letter lands hard: a hit pause, a kick, and slow motion on the last of an ambush.
   hitStopTimer = 0.06;
   kickTimer = Math.max(kickTimer, 0.14);
+  if (enemy.variant === 'splitter') spawnSplitChildren(enemy);
   const othersLeft = enemies.some(other => other !== enemy && !other.dying);
   if (!othersLeft && rail.state === 'encounter' && rail.encounter && rail.encounter.remaining <= 0 && !enemy.isBoss) slowMoTimer = 0.45;
   if (enemy.isMedic) playHealSound(healed);
@@ -1204,6 +1214,191 @@ function defeatEnemy(enemy) {
 }
 
 
+// ── Monsters with a behaviour of their own ───────────────────────────────
+// A shield-bearer needs two short words: one breaks the shield, one finishes it.
+// A splitter breaks into two small monsters with very short words. A caster stands
+// back and lobs a bolt every few seconds until its long word is typed.
+const VARIANT_HINTS = { shield: 'SHIELD: TWO WORDS!', splitter: 'IT SPLITS IN TWO!', caster: 'CASTER: STOP ITS SPELL!' };
+const CASTER_CHARGE_TIME = 1.2;
+const CASTER_BOLT_FLIGHT = 1.15;
+const CASTER_BOLT_DAMAGE = 1;
+const SPLIT_CHILD_SCALE = 0.6;
+
+// A word of the given typed length that no word on screen starts or is started by.
+function choosePromptOfLength(min, max) {
+  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt.toLowerCase());
+  const fits = (entry) => {
+    const key = buildSearchPrompt(entry.term).toLowerCase();
+    if (key.length < min || key.length > max || !/^[a-z]+$/.test(key)) return false;
+    return !liveKeys.some(other => other.startsWith(key) || key.startsWith(other));
+  };
+  return monsterDeck.pick(currentKeywordPool(), fits) || monsterDeck.pick(ALL_WORDS, fits) || choosePrompt();
+}
+
+function chooseVariantPrompt(variant) {
+  if (variant === 'shield') return choosePromptOfLength(3, 6);
+  if (variant === 'caster') return choosePromptOfLength(9, normalPromptLengthCap(monsterLevel()) + 2);
+  return choosePrompt();
+}
+
+function setEnemyWord(enemy, wordData) {
+  enemy.prompt = wordData.term;
+  enemy.definition = wordData.definition || null;
+  enemy.isEquation = false;
+  enemy.searchPrompt = buildSearchPrompt(wordData.term);
+  enemy.altSearchPrompts = buildAltSearchPrompts(wordData.term);
+  enemy._matchedSearchPrompt = null;
+  enemy.lastPromptHtml = '';
+  renderPrompt(enemy);
+}
+
+function setEnemyKind(enemy, kind) {
+  enemy.promptKind = kind;
+  enemy.label.dataset.kind = kind;
+  enemy.kindNode.textContent = kind;
+}
+
+function dressVariant(enemy, variant) {
+  enemy.variant = variant;
+  setEnemyKind(enemy, variant);
+  if (variant === 'shield') {
+    enemy.shield = createShieldPlate();
+    enemy.group.add(enemy.shield);
+    enemy.extraTypingCost = 5;
+  } else if (variant === 'splitter') {
+    enemy.cores = createSplitterCores(enemy.type);
+    enemy.group.add(enemy.cores);
+    enemy.extraTypingCost = 7;
+  } else if (variant === 'caster') {
+    enemy.orb = createCasterOrb(enemy.type);
+    enemy.group.add(enemy.orb);
+    enemy.damage = 0;
+  }
+  if (!variantHintsShown.has(variant)) {
+    variantHintsShown.add(variant);
+    window.setTimeout(() => { if (mode === 'running') showBanner(VARIANT_HINTS[variant], 'variant-hint'); }, 900);
+  }
+}
+
+function breakShield(enemy) {
+  const shield = enemy.shield;
+  enemy.shield = null;
+  const at = shield.getWorldPosition(new THREE.Vector3());
+  fx.burst(at, { color: 0x9fe8ff, color2: 0xf2c14e, count: 22, speed: 5.2, life: 0.5, size: 0.3, gravity: 5 });
+  fx.ring(at, 0x9fe8ff, { from: 0.3, to: 2.4, life: 0.4, opacity: 0.8, flat: false });
+  enemy.group.remove(shield);
+  disposeObject(shield);
+  streak += 1;
+  if (streak > peakStreak) peakStreak = streak;
+  const points = 20 + enemy.searchPrompt.length * 10;
+  score += points;
+  spawnScorePopup(points, enemy);
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: false, defeated: true });
+  }
+  hitStopTimer = 0.05;
+  kickTimer = Math.max(kickTimer, 0.1);
+  playChestClackSound();
+  spawnBeam(at);
+  // The blow drives it back a few steps, which buys the time for its second word.
+  enemy.pushbackTargetZ = Math.max(-30, enemy.group.position.z - 4);
+  typedBuffer = '';
+  activeTarget = null;
+  setEnemyKind(enemy, 'keyword');
+  setEnemyWord(enemy, choosePromptOfLength(3, 7));
+  updateHud(true);
+  updateTypedDisplay();
+}
+
+function spawnSplitChildren(parent) {
+  const origin = parent.group.position;
+  const parentTime = railTypingEstimate(parent);
+  [-1, 1].forEach((side, index) => {
+    const child = spawnEnemy({ wordData: choosePromptOfLength(3, 4), type: parent.type });
+    child.scaleBoost = SPLIT_CHILD_SCALE;
+    child.damage = 1;
+    child.noGlossary = true;
+    const from = new THREE.Vector3(origin.x, child.baseY, origin.z);
+    const to = new THREE.Vector3(
+      THREE.MathUtils.clamp(origin.x + side * 1.8, -5.4, 5.4),
+      child.baseY,
+      Math.min(origin.z - 1.2, STRIKE_Z - 4)
+    );
+    const walkTime = Math.max(2.2, railTypingEstimate(child) * 1.6 + index * 1.5 + parentTime * 0.2);
+    child.lane = to.x;
+    child.revealed = false;
+    child.spawnZ = to.z - 3;
+    child.revealZ = to.z - 2;
+    child.group.position.copy(from);
+    child.group.scale.setScalar(child.type.scale * SPLIT_CHILD_SCALE);
+    child.rail = {
+      phase: 'entry', kind: 'cover', t: 0, entryTime: 0.4, from, to,
+      speed: (STRIKE_Z - to.z) / walkTime, crossTo: 0, crossT: 0, crossTime: 1,
+    };
+  });
+}
+
+function throwCasterBolt(caster) {
+  const mesh = createCasterBolt(caster.type);
+  caster.orb.getWorldPosition(reusableVector);
+  const from = reusableVector.clone();
+  const to = new THREE.Vector3(from.x * 0.25, CAMERA_HEIGHT - 0.9, WALL_Z + 2);
+  mesh.position.copy(from);
+  effectsGroup.add(mesh);
+  casterBolts.push({ mesh, from, to, t: 0, owner: caster, colour: caster.type.eye });
+  playBossThrowSound(caster);
+}
+
+function removeCasterBolt(bolt, burst) {
+  const index = casterBolts.indexOf(bolt);
+  if (index >= 0) casterBolts.splice(index, 1);
+  if (burst) fx.burst(bolt.mesh.position, { color: bolt.colour, color2: 0xffffff, count: 12, speed: 3.4, life: 0.35, size: 0.26 });
+  effectsGroup.remove(bolt.mesh);
+  disposeObject(bolt.mesh);
+}
+
+function clearCasterBolts() {
+  for (const bolt of [...casterBolts]) removeCasterBolt(bolt, false);
+}
+
+// A bolt whose caster has been beaten fizzles in the air; the rest hit the player.
+function updateCasterBolts(delta) {
+  for (const bolt of [...casterBolts]) {
+    if (bolt.owner.dying || !enemies.includes(bolt.owner)) {
+      removeCasterBolt(bolt, true);
+      continue;
+    }
+    bolt.t = Math.min(1, bolt.t + delta / CASTER_BOLT_FLIGHT);
+    bolt.mesh.position.lerpVectors(bolt.from, bolt.to, bolt.t);
+    bolt.mesh.position.y += Math.sin(bolt.t * Math.PI) * 1.6;
+    bolt.mesh.rotation.x += delta * 6;
+    bolt.mesh.rotation.y += delta * 4;
+    if (bolt.t >= 1) {
+      removeCasterBolt(bolt, false);
+      strikePlayer(CASTER_BOLT_DAMAGE);
+      if (mode !== 'running') return;
+    }
+  }
+}
+
+// Damage that arrives without a monster reaching the player.
+function strikePlayer(damage) {
+  if (godMode) return;
+  if (potionsSystem.isShieldActive() && potionsSystem.blockLeak()) {
+    potionsSystem.triggerShieldHitVisual();
+    return;
+  }
+  health = Math.max(0, health - damage);
+  streak = 0;
+  playDamageSound();
+  damageTimer = 0.32;
+  damageFlash.classList.add('show');
+  window.setTimeout(() => damageFlash.classList.remove('show'), 160);
+  updateHud(true);
+  updateTypedDisplay();
+  if (health <= 0) endGame();
+}
+
 // Score is based on the characters the player actually types (hidden words only
 // on limited prompts), not the full displayed text.
 function awardKill(enemy) {
@@ -1215,7 +1410,7 @@ function awardKill(enemy) {
   const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
   score += points;
   if (healed > 0) health += healed;
-  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+  if (!enemy.noGlossary && !encounteredTerms.some(t => t.term === enemy.prompt)) {
     encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
   }
   return { points, healed };
@@ -1268,6 +1463,7 @@ function leakEnemy(enemy) {
     potionsSystem.triggerShieldHitVisual();
   } else {
     if (!godMode) health = Math.max(0, health - enemy.damage);
+    if (enemy.frost) frostBossLine();
     streak = 0;
     playDamageSound(enemy);
     damageTimer = 0.32;
@@ -1275,7 +1471,7 @@ function leakEnemy(enemy) {
     window.setTimeout(() => damageFlash.classList.remove('show'), 160);
   }
   leakedCount += 1;
-  if (!enemy.isProjectile && !encounteredTerms.some(t => t.term === enemy.prompt)) {
+  if (!enemy.isProjectile && !enemy.noGlossary && !encounteredTerms.some(t => t.term === enemy.prompt)) {
     encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
   }
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
@@ -1555,6 +1751,7 @@ function advanceBossLine(boss) {
   if (boss.hp > 0) {
     boss.stagger = 1.4;
     boss.attackTimer = Math.max(boss.attackTimer, 2.2);
+    boss.barrageLeft = 0;
     showBanner(`${boss.hp} ${boss.hp === 1 ? 'LINE' : 'LINES'} LEFT`);
     startBossLine(boss);
     updateHud(true);
@@ -1578,15 +1775,90 @@ function chooseRockWord(boss) {
   return free.length > 0 ? free[Math.floor(Math.random() * free.length)] : null;
 }
 
-function throwRock(boss) {
+// Each boss attacks in its own way. rock: one rock at a time. volley: a rock from each
+// hand. summon: every other attack raises an imp from the ground instead. frost: shards
+// of ice that also frost over the boss's line for a few seconds if they land.
+// barrage: three meteors, one after another.
+const BOSS_ATTACKS = {
+  'Verdant Colossus': 'rock',
+  'Crimson Bulwark': 'volley',
+  'Magma Sovereign': 'summon',
+  'Glacial Titan': 'frost',
+  'Stellar Dreadnought': 'barrage',
+};
+const BOSS_FROST_TIME = 3;
+const SUMMON_TYPE_NAME = 'Cinder Imp';
+
+function bossAttack(boss) {
+  const style = BOSS_ATTACKS[boss.type.name] || 'rock';
+  const inFlight = enemies.filter(enemy => enemy.isProjectile && !enemy.dying).length;
+  boss.attackCount = (boss.attackCount || 0) + 1;
+  let gapScale = 1;
+  if (style === 'volley') {
+    if (inFlight > 0) return 0.5;
+    throwRock(boss, { side: -1 });
+    throwRock(boss, { side: 1, flightScale: 1.3 });
+    gapScale = 1.4;
+  } else if (style === 'barrage') {
+    if (inFlight > 0) return 0.5;
+    boss.barrageLeft = 2;
+    boss.barrageTimer = 0.5;
+    throwRock(boss);
+    gapScale = 1.6;
+  } else if (style === 'summon' && boss.attackCount % 2 === 0 && !enemies.some(enemy => enemy.summoned && !enemy.dying)) {
+    summonMinion(boss);
+    gapScale = 1.2;
+  } else {
+    if (inFlight >= 2) return 1;
+    throwRock(boss, { frost: style === 'frost' });
+  }
+  boss.lunge = 1;
+  reusableVector.set(boss.group.position.x, 0.14, boss.group.position.z);
+  fx.ring(reusableVector, ROCK_TYPE.eye, { from: 0.4, to: 3.4, life: 0.4, opacity: 0.6 });
+  return gapScale;
+}
+
+// A small monster with a short word, raised from the ground in front of the boss.
+function summonMinion(boss) {
+  const initials = new Set(boss.lineWordsList.map(word => buildSearchPrompt(word).charAt(0).toLowerCase()));
+  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt.toLowerCase());
+  const fits = (entry) => {
+    const key = buildSearchPrompt(entry.term).toLowerCase();
+    if (key.length < 3 || key.length > 6 || !/^[a-z]+$/.test(key) || initials.has(key.charAt(0))) return false;
+    return !liveKeys.some(other => other.startsWith(key) || key.startsWith(other));
+  };
+  const wordData = monsterDeck.pick(ALL_WORDS, fits);
+  if (!wordData) {
+    throwRock(boss);
+    return;
+  }
+  const side = boss.group.position.x > 0 ? -1 : 1;
+  const spot = { kind: 'ground', x: THREE.MathUtils.clamp(boss.group.position.x + side * 3.2, -5, 5), z: boss.group.position.z + 4 };
+  const minion = spawnEnemy({ wordData, type: ENEMY_TYPES.find(type => type.name === SUMMON_TYPE_NAME), railSpot: spot });
+  minion.summoned = true;
+  minion.noGlossary = true;
+  minion.damage = 1;
+  playRevealSound(boss);
+}
+
+function frostBossLine() {
+  const boss = enemies.find(enemy => enemy.phraseBoss && !enemy.dying);
+  if (!boss) return;
+  boss.frostTimer = BOSS_FROST_TIME;
+  boss.label.classList.add('is-frosted');
+}
+
+function throwRock(boss, { side = Math.random() < 0.5 ? -1 : 1, flightScale = 1, frost = false } = {}) {
   const wordData = chooseRockWord(boss);
   if (!wordData) return;
   const plan = bossPlan(bossLevel());
   const group = new THREE.Group();
-  const rockMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0), new THREE.MeshStandardMaterial({ color: ROCK_TYPE.body, roughness: 1, flatShading: true }));
+  const rockMesh = frost
+    ? new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), new THREE.MeshStandardMaterial({ color: 0xcfefff, emissive: 0x4aa8d8, emissiveIntensity: 0.7, roughness: 0.25, flatShading: true }))
+    : new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0), new THREE.MeshStandardMaterial({ color: ROCK_TYPE.body, roughness: 1, flatShading: true }));
+  if (frost) rockMesh.scale.set(0.7, 1.7, 0.7);
   rockMesh.castShadow = true;
   group.add(rockMesh);
-  const side = Math.random() < 0.5 ? -1 : 1;
   const start = boss.group.position.clone().add(new THREE.Vector3(side * 1.6, 2.6 * boss.group.scale.y, 0.6));
   const end = new THREE.Vector3(side * (1.2 + Math.random() * 1.8), 2.2, WALL_Z - 0.6);
   const rock = spawnEnemy({ isProjectile: true, wordData, type: ROCK_TYPE, customGroup: group, lane: start.x, startZ: start.z, delay: 0 });
@@ -1595,7 +1867,9 @@ function throwRock(boss) {
   rock.revealed = true;
   rock.revealZ = start.z - 2;
   rock.baseY = start.y;
-  rock.rail = { phase: 'projectile', t: 0, flight: plan.rockFlight, from: start, to: end, spin: new THREE.Vector3(Math.random() * 4, Math.random() * 4, Math.random() * 4) };
+  rock.frost = frost;
+  if (frost) rock.kindNode.textContent = 'ice';
+  rock.rail = { phase: 'projectile', t: 0, flight: plan.rockFlight * flightScale, from: start, to: end, spin: new THREE.Vector3(Math.random() * 4, Math.random() * 4, Math.random() * 4) };
   rock.group.position.copy(start);
   playBossThrowSound(boss);
 }
@@ -1665,6 +1939,10 @@ function updatePhraseBoss(boss, delta, seconds) {
   boss.hurt = Math.max(0, boss.hurt - delta / 1.1);
   boss.lunge = Math.max(0, boss.lunge - delta / 0.4);
   boss.roar = Math.max(0, boss.roar - delta / 0.9);
+  if (boss.frostTimer > 0) {
+    boss.frostTimer -= delta;
+    if (boss.frostTimer <= 0) boss.label.classList.remove('is-frosted');
+  }
 
   // It prowls the arena instead of standing still: wider, faster and closer as it is hurt.
   const pace = 0.42 + rage * 0.3;
@@ -1698,17 +1976,20 @@ function updatePhraseBoss(boss, delta, seconds) {
   }
 
   boss.attackTimer -= delta;
-  const rocksInFlight = enemies.filter(enemy => enemy.isProjectile && !enemy.dying).length;
   boss.windup = boss.attackTimer <= BOSS_WINDUP_TIME ? THREE.MathUtils.clamp(1 - boss.attackTimer / BOSS_WINDUP_TIME, 0, 1) : 0;
+  if (boss.barrageLeft > 0) {
+    boss.barrageTimer -= delta;
+    if (boss.barrageTimer <= 0) {
+      boss.barrageLeft -= 1;
+      boss.barrageTimer = 0.5;
+      throwRock(boss, { flightScale: 1 + (2 - boss.barrageLeft) * 0.12 });
+      boss.lunge = 1;
+    }
+  }
   if (boss.attackTimer <= 0) {
     boss.windup = 0;
-    if (rocksInFlight < 2) {
-      throwRock(boss);
-      boss.lunge = 1;
-      reusableVector.set(position.x, 0.14, position.z);
-      fx.ring(reusableVector, ROCK_TYPE.eye, { from: 0.4, to: 3.4, life: 0.4, opacity: 0.6 });
-    }
-    boss.attackTimer = bossPlan(bossLevel()).attackGap * (0.85 + Math.random() * 0.3);
+    const gapScale = bossAttack(boss);
+    boss.attackTimer = bossPlan(bossLevel()).attackGap * gapScale * (0.85 + Math.random() * 0.3);
   }
 }
 
@@ -1724,6 +2005,12 @@ function startBossDeath(boss) {
   boss.rage = 1;
   boss.windup = 0;
   bossDeath = { boss, t: 0, nextBurst: 0, x: boss.group.position.x, z: boss.group.position.z };
+  boss.barrageLeft = 0;
+  boss.label.classList.remove('is-frosted');
+  for (const minion of enemies.filter(enemy => enemy.summoned && !enemy.dying)) {
+    spawnDebris(minion.group.position, minion.type);
+    removeEnemy(minion);
+  }
   typedBuffer = '';
   activeTarget = null;
   playBossImpactSound();
@@ -1970,7 +2257,8 @@ function spawnRailMember(encounter) {
   let spot = spots[encounter.nextSpot % spots.length];
   if (kind !== 'minion') spot = spots.find(candidate => candidate.kind === 'cover') || spot;
   encounter.nextSpot += 1;
-  const enemy = spawnEnemy({ isMedic: kind === 'medic', isMimic: kind === 'mimic', railSpot: spot });
+  const variant = kind === 'minion' ? variantSchedule.get(normalEnemiesSpawned) : null;
+  const enemy = spawnEnemy({ isMedic: kind === 'medic', isMimic: kind === 'mimic', railSpot: spot, variant });
   registerNormalTypingCost(enemy);
   if (kind === 'medic') medicsSpawnedThisSet += 1;
   else if (kind === 'mimic') mimicsSpawnedThisSet += 1;
@@ -2001,6 +2289,7 @@ function setupRailEntry(enemy, spot) {
     from = new THREE.Vector3(spot.x + (Math.random() - 0.5) * 3, baseY + 11, spot.z - 3);
     to = new THREE.Vector3(spot.x, baseY, spot.z);
   }
+  if (enemy.variant === 'caster') to.z = Math.min(to.z, -10);
   enemy.lane = to.x;
   enemy.revealed = false;
   enemy.revealZ = Math.min(from.z, to.z) - 2;
@@ -2022,6 +2311,15 @@ function setupRailEntry(enemy, spot) {
     crossT: 0,
     crossTime: (2 + railTypingEstimate(enemy)) * 1.5,
   };
+  if (enemy.variant === 'caster') {
+    // A caster walks to a stand well short of the player and casts from there. Its
+    // first bolt leaves a fair typist the time to finish its word.
+    const standZ = Math.min(-8, to.z + 2.5);
+    enemy.rail.standZ = standZ;
+    enemy.rail.speed = Math.max(2.5, (standZ - to.z) / 1.2);
+    enemy.rail.castEvery = Math.max(2.6, 4.2 - (monsterLevel() - 1) * 0.15);
+    enemy.rail.castTimer = Math.max(3, own + queue * 0.5);
+  }
   playAmbushSound(spot.kind, THREE.MathUtils.clamp(to.x / 9, -0.8, 0.8));
   if (spot.kind === 'ground') {
     reusableVector.set(to.x, 0.2, to.z);
@@ -2091,11 +2389,33 @@ function updateRailEnemy(enemy, delta, seconds) {
     position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
     position.y = enemy.baseY + Math.abs(Math.sin(seconds * 6.2 + enemy.phase)) * enemy.stepBounce * 1.6;
     enemy.group.rotation.y = facing + Math.sin(seconds * 2.4 + enemy.phase) * 0.12;
+    if (enemy.variant === 'caster') {
+      if (enemy.pushbackTargetZ === undefined && position.z >= plan.standZ) plan.phase = 'cast';
+      return false;
+    }
     if (position.z >= STRIKE_Z) {
       position.z = STRIKE_Z;
       plan.phase = 'windup';
       plan.t = 0;
       playWindupSound(THREE.MathUtils.clamp(position.x / 9, -0.8, 0.8));
+    }
+    return false;
+  }
+
+  if (plan.phase === 'cast') {
+    if (enemy.pushbackTargetZ !== undefined) {
+      plan.phase = 'advance';
+      return false;
+    }
+    position.x = enemy.lane + Math.sin(seconds * 1.3 + enemy.phase) * 0.5;
+    position.y = enemy.baseY + Math.abs(Math.sin(seconds * 3.1 + enemy.phase)) * 0.08;
+    enemy.group.rotation.y = facing;
+    if (!stunned) plan.castTimer -= delta;
+    enemy.charge = THREE.MathUtils.clamp(1 - plan.castTimer / CASTER_CHARGE_TIME, 0, 1);
+    enemy.group.rotation.x = -enemy.charge * 0.22;
+    if (plan.castTimer <= 0) {
+      throwCasterBolt(enemy);
+      plan.castTimer = plan.castEvery;
     }
     return false;
   }
@@ -2215,6 +2535,7 @@ function updateEnemies(delta, seconds) {
     }
     if (enemy.group.userData.animate && enemy.stunTimer <= 0) enemy.group.userData.animate(seconds, enemy);
 
+    if (enemy.variant) updateVariantParts(enemy, seconds);
     updateEnemyAura(enemy, delta);
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
 
@@ -2242,9 +2563,29 @@ function updateEnemies(delta, seconds) {
     }
   }
 
+  if (mode === 'running') updateCasterBolts(delta);
   if (mode === 'running') {
     selectTarget();
     dropOrphanedTyping();
+  }
+}
+
+function updateVariantParts(enemy, seconds) {
+  if (enemy.shield) {
+    enemy.shield.rotation.z = Math.sin(seconds * 1.7 + enemy.phase) * 0.12;
+    enemy.shield.userData.plate.material.emissiveIntensity = 0.75 + Math.sin(seconds * 5 + enemy.phase) * 0.3;
+  }
+  if (enemy.cores) {
+    const beat = 1 + Math.max(0, Math.sin(seconds * 7 + enemy.phase)) * 0.35;
+    for (const core of enemy.cores.userData.cores) core.scale.setScalar(beat);
+    enemy.cores.rotation.y = seconds * 2.2;
+  }
+  if (enemy.orb) {
+    const charge = enemy.charge || 0;
+    enemy.orb.userData.orb.scale.setScalar(0.7 + charge * 1.1 + Math.sin(seconds * 9) * 0.05);
+    enemy.orb.userData.halo.rotation.x = Math.PI / 2 + Math.sin(seconds * 2) * 0.4;
+    enemy.orb.userData.halo.rotation.z = seconds * 3;
+    enemy.orb.userData.halo.scale.setScalar(1 + charge * 0.8);
   }
 }
 
@@ -2929,7 +3270,7 @@ function getEnemyTypingCost(enemy) {
   if (!enemy) return 0;
   const length = Math.max(1, enemy.searchPrompt.length);
   if (enemy.isMedic || enemy.isMimic) return length * 0.65;
-  return length;
+  return length + (enemy.extraTypingCost || 0);
 }
 
 function registerNormalTypingCost(enemy) {
@@ -2973,6 +3314,8 @@ function spawnEnemy(options = {}) {
     ? chooseMedicPrompt()
     : isMimic
     ? chooseMimicPrompt()
+    : options.variant
+    ? chooseVariantPrompt(options.variant)
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
@@ -3055,6 +3398,7 @@ function spawnEnemy(options = {}) {
     type,
     group,
     label,
+    kindNode,
     promptNode,
     typedNode,
     lastTypedText: '',
@@ -3089,6 +3433,7 @@ function spawnEnemy(options = {}) {
     floatAmount: isFlying ? 0.22 : 0,
     phase: Math.random() * Math.PI * 2,
   };
+  if (options.variant) dressVariant(enemy, options.variant);
   if (options.railSpot) setupRailEntry(enemy, options.railSpot);
   enemyId += 1;
   enemies.push(enemy);
@@ -3586,6 +3931,7 @@ function removeEnemy(enemy) {
 
 function clearEnemies() {
   for (const enemy of [...enemies]) removeEnemy(enemy);
+  clearCasterBolts();
 }
 
 function clearEffects() {
@@ -3685,6 +4031,7 @@ function prepareWavePlan() {
   mimicsSpawnedThisSet = 0;
   mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(monsterLevel()));
   hardGuestSchedule = monsterLevel() <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
+  variantSchedule = planVariants(waveSet, normalEnemyTarget, [...hardGuestSchedule.keys()]);
 }
 
 function getMedicCountForWave(wave) {
