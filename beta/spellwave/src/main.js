@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta8';
+import { createSpellwaveAudio } from './audio.js?v=beta9';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta8';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta8';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta8';
-import { createLeaderboard } from './leaderboard.js?v=beta8';
+import { createPotionSystem } from './potions.js?v=beta9';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta9';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta9';
+import { createLeaderboard } from './leaderboard.js?v=beta9';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta8';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta9';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta8';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress, stripOptionalSymbols, buildOptionalSymbolPrompts, keyProgress } from './prompt-utils.js?v=beta8';
-import { createWordDeck } from './word-decks.js?v=beta8';
-import { createStage } from './stages.js?v=beta8';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta8';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta9';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta9';
+import { createWordDeck } from './word-decks.js?v=beta9';
+import { createStage } from './stages.js?v=beta9';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta9';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -425,6 +425,8 @@ const BOSS_STAND_Z = -15;
 const ROCK_TYPE = { name: 'Rock', body: 0x8a7f72, trim: 0xb8ab98, eye: 0xffb347, speed: 0, scale: 1, weight: 0, score: 20 };
 let bossHpBar = null;
 let bossFight = null;
+// The boss's last stand: it shudders and bursts apart before the wave can end.
+let bossDeath = null;
 let slowMoTimer = 0;
 let kickTimer = 0;
 let finalWaveScenery = null;
@@ -1148,7 +1150,10 @@ function registerMistake() {
 }
 
 function defeatEnemy(enemy) {
-  if (enemy.phraseBoss && advanceBossLine(enemy)) return;
+  if (enemy.phraseBoss) {
+    if (!advanceBossLine(enemy)) startBossDeath(enemy);
+    return;
+  }
   if (enemy.isProjectile) {
     shatterRock(enemy);
     return;
@@ -1452,8 +1457,16 @@ function spawnPhraseBoss() {
   boss.rail = { phase: 'boss-entry', t: 0, from: new THREE.Vector3(0, standY + 14, boss.standZ - 4), to: new THREE.Vector3(0, standY, boss.standZ) };
   boss.group.position.copy(boss.rail.from);
   boss.attackTimer = 2.4;
+  // What the model's own animation reads: rearing back to throw, recoiling from a
+  // finished line, and how hurt it is (0 fresh, 1 on its last line).
   boss.windup = 0;
+  boss.hurt = 0;
+  boss.rage = 0;
   boss.stagger = 0;
+  boss.lunge = 0;
+  boss.roar = 0;
+  boss.roarTimer = 5 + Math.random() * 3;
+  boss.prowlX = 0;
   startBossLine(boss);
   showBossHpBar(boss);
   return boss;
@@ -1524,8 +1537,21 @@ function advanceBossLine(boss) {
   reusableVector.y += 1.5 * boss.group.scale.y;
   fx.burst(reusableVector, { color: boss.type.eye, color2: 0xffffff, count: 28, speed: 6, life: 0.7, size: 0.4 });
   playBossImpactSound();
-  kickTimer = Math.max(kickTimer, 0.3);
-  hitStopTimer = 0.09;
+  kickTimer = Math.max(kickTimer, 0.42);
+  hitStopTimer = 0.12;
+  // Pieces fly off it, a shockwave rolls out and it reels back.
+  for (let piece = 0; piece < 3; piece += 1) {
+    reusableVector.copy(boss.group.position);
+    reusableVector.x += (Math.random() - 0.5) * 2.2 * boss.group.scale.x;
+    reusableVector.y += (0.8 + Math.random() * 1.8) * boss.group.scale.y;
+    spawnDebris(reusableVector, boss.type);
+  }
+  reusableVector.set(boss.group.position.x, 0.14, boss.group.position.z);
+  fx.ring(reusableVector, boss.type.eye, { from: 0.6, to: 9, life: 0.6, opacity: 0.9 });
+  boss.hurt = 1;
+  boss.rage = 1 - boss.hp / boss.maxHp;
+  boss.windup = 0;
+  slowMoTimer = Math.max(slowMoTimer, 0.35);
   if (boss.hp > 0) {
     boss.stagger = 1.4;
     boss.attackTimer = Math.max(boss.attackTimer, 2.2);
@@ -1535,7 +1561,7 @@ function advanceBossLine(boss) {
     updateTypedDisplay();
     return true;
   }
-  // Fallen: the normal defeat follows, with slow motion.
+  // Fallen: its last stand follows (startBossDeath), in slow motion.
   boss.searchPrompt = boss.prompt.replace(/[^a-z]/gi, '').toLowerCase().slice(0, 12);
   slowMoTimer = 0.9;
   hideBossHpBar();
@@ -1548,8 +1574,7 @@ function advanceBossLine(boss) {
 function chooseRockWord(boss) {
   const taken = new Set(enemies.filter(other => !other.dying && (other.isProjectile || other === boss))
     .map(other => other.searchPrompt.charAt(0).toLowerCase()));
-  const pool = SYMBOL_WORDS.filter(entry => !entry.term.includes('=') && buildSearchPrompt(entry.term).length <= 4);
-  const free = pool.filter(entry => !taken.has(buildSearchPrompt(entry.term).charAt(0).toLowerCase()));
+  const free = ROCK_UNITS.filter(entry => !taken.has(buildSearchPrompt(entry.term).charAt(0).toLowerCase()));
   return free.length > 0 ? free[Math.floor(Math.random() * free.length)] : null;
 }
 
@@ -1599,6 +1624,10 @@ function updateBossFight(delta) {
     bossFight = { boss: spawnPhraseBoss(), clearTimer: 0 };
     return;
   }
+  if (bossDeath) {
+    updateBossDeath(delta);
+    return;
+  }
   if (enemies.some(enemy => enemy.phraseBoss && !enemy.dying)) return;
   if (enemies.some(enemy => !enemy.dying)) return;
   bossFight.clearTimer += delta;
@@ -1631,26 +1660,123 @@ function updatePhraseBoss(boss, delta, seconds) {
     return;
   }
   const stunned = boss.stunTimer > 0;
-  boss.stagger = Math.max(0, (boss.stagger || 0) - delta);
-  const sway = Math.sin(seconds * 0.8 + boss.phase);
-  position.x = sway * 1.2;
-  position.z = boss.standZ - boss.stagger * 0.8;
-  if (boss.isFlying) position.y = boss.baseY + Math.sin(seconds * 1.4 + boss.phase) * boss.floatAmount;
+  const rage = boss.rage;
+  boss.stagger = Math.max(0, boss.stagger - delta);
+  boss.hurt = Math.max(0, boss.hurt - delta / 1.1);
+  boss.lunge = Math.max(0, boss.lunge - delta / 0.4);
+  boss.roar = Math.max(0, boss.roar - delta / 0.9);
+
+  // It prowls the arena instead of standing still: wider, faster and closer as it is hurt.
+  const pace = 0.42 + rage * 0.3;
+  const targetX = stunned ? boss.prowlX
+    : Math.sin(seconds * pace + boss.phase) * (3.4 + rage * 1.6) + Math.sin(seconds * pace * 2.7 + boss.phase * 2) * 0.9;
+  const previousX = boss.prowlX;
+  boss.prowlX += (targetX - boss.prowlX) * Math.min(1, delta * 3);
+  const stride = delta > 0 ? (boss.prowlX - previousX) / delta : 0;
+  const recoil = boss.hurt * boss.hurt;
+  position.x = boss.prowlX + (boss.hurt > 0 ? Math.sin(seconds * 60) * 0.12 * boss.hurt : 0);
+  position.z = boss.standZ + rage * 2.2 + Math.sin(seconds * 0.31 + boss.phase) * 1.2 - recoil * 3.2 + boss.lunge * 1.5;
+  if (boss.isFlying) position.y = boss.baseY + Math.sin(seconds * 1.4 + boss.phase) * boss.floatAmount * (1 + rage);
+  else position.y = boss.baseY + Math.abs(Math.sin(seconds * 4.4 + boss.phase)) * Math.min(0.16, Math.abs(stride) * 0.06);
   if (boss.shadowMesh) boss.shadowMesh.position.set(position.x, 0.04, position.z);
-  boss.group.rotation.y = Math.atan2(-position.x, CAMERA_DISTANCE - position.z) + sway * 0.12;
+  boss.group.rotation.y = Math.atan2(-position.x, CAMERA_DISTANCE - position.z) + THREE.MathUtils.clamp(stride * 0.06, -0.3, 0.3);
+  boss.group.rotation.z = THREE.MathUtils.clamp(-stride * 0.03, -0.14, 0.14);
+  // Rear back to throw, snap forward as it lets go, reel when a line lands, loom when it roars.
+  boss.group.rotation.x = -boss.windup * 0.34 + boss.lunge * 0.42 - recoil * 0.5 + Math.sin(boss.roar * Math.PI) * 0.22;
+  boss.scaleBoost = 1 + boss.windup * 0.06 + Math.sin(boss.roar * Math.PI) * 0.14;
   if (stunned || boss.stagger > 0) return;
+
+  // Between throws it roars: more often the angrier it is.
+  boss.roarTimer -= delta * (1 + rage);
+  if (boss.roarTimer <= 0 && boss.attackTimer > 1.6) {
+    boss.roar = 1;
+    boss.roarTimer = 6 + Math.random() * 4;
+    kickTimer = Math.max(kickTimer, 0.16);
+    reusableVector.set(position.x, 0.14, position.z);
+    fx.ring(reusableVector, boss.type.eye, { from: 0.5, to: 6.5, life: 0.7, opacity: 0.7 });
+    playRevealSound(boss);
+  }
 
   boss.attackTimer -= delta;
   const rocksInFlight = enemies.filter(enemy => enemy.isProjectile && !enemy.dying).length;
-  if (boss.attackTimer <= 0.75 && boss.attackTimer > 0) {
-    // Winding up: the boss rears back before it throws.
-    boss.group.rotation.x = -(0.75 - boss.attackTimer) * 0.4;
-  }
+  boss.windup = boss.attackTimer <= BOSS_WINDUP_TIME ? THREE.MathUtils.clamp(1 - boss.attackTimer / BOSS_WINDUP_TIME, 0, 1) : 0;
   if (boss.attackTimer <= 0) {
-    boss.group.rotation.x = 0;
-    if (rocksInFlight < 2) throwRock(boss);
+    boss.windup = 0;
+    if (rocksInFlight < 2) {
+      throwRock(boss);
+      boss.lunge = 1;
+      reusableVector.set(position.x, 0.14, position.z);
+      fx.ring(reusableVector, ROCK_TYPE.eye, { from: 0.4, to: 3.4, life: 0.4, opacity: 0.6 });
+    }
     boss.attackTimer = bossPlan(waveSet).attackGap * (0.85 + Math.random() * 0.3);
   }
+}
+
+// A beaten boss does not just vanish: it shudders, bursts in several places and then goes up.
+const BOSS_DEATH_TIME = 1.9;
+const BOSS_WINDUP_TIME = 0.9;
+
+function startBossDeath(boss) {
+  const { points } = awardKill(boss);
+  spawnScorePopup(points, boss, 0);
+  boss.dying = true;
+  boss.hurt = 1;
+  boss.rage = 1;
+  boss.windup = 0;
+  bossDeath = { boss, t: 0, nextBurst: 0, x: boss.group.position.x, z: boss.group.position.z };
+  typedBuffer = '';
+  activeTarget = null;
+  playBossImpactSound();
+  kickTimer = Math.max(kickTimer, 0.5);
+  hitStopTimer = 0.14;
+  updateHud(true);
+  updateTypedDisplay();
+}
+
+function updateBossDeath(delta) {
+  const { boss } = bossDeath;
+  bossDeath.t += delta;
+  const t = Math.min(1, bossDeath.t / BOSS_DEATH_TIME);
+  const position = boss.group.position;
+  // Shaking harder and harder, sagging back as it goes.
+  position.x = bossDeath.x + Math.sin(bossDeath.t * 70) * (0.08 + t * 0.3);
+  position.z = bossDeath.z - t * 1.6;
+  boss.group.rotation.x = -0.25 - t * 0.5;
+  boss.group.rotation.z = Math.sin(bossDeath.t * 9) * 0.1 * (1 + t);
+  boss.group.scale.setScalar(boss.type.scale * (boss.isClimaxBoss ? 1.5 : 1) * (1 + Math.sin(bossDeath.t * 30) * 0.03 + t * t * 0.12));
+  boss.hurt = 1;
+  if (boss.group.userData.animate) boss.group.userData.animate(gameTimeSeconds, boss);
+  if (boss.shadowMesh) boss.shadowMesh.position.set(position.x, 0.04, position.z);
+
+  bossDeath.nextBurst -= delta;
+  if (bossDeath.nextBurst <= 0 && t < 1) {
+    bossDeath.nextBurst = 0.26 - t * 0.16;
+    reusableVector.copy(position);
+    reusableVector.x += (Math.random() - 0.5) * 2.6 * boss.group.scale.x;
+    reusableVector.y += (0.5 + Math.random() * 2.2) * boss.group.scale.y;
+    reusableVector.z += 0.6;
+    fx.burst(reusableVector, { color: boss.type.eye, color2: 0xffffff, count: 14, speed: 5, life: 0.5, size: 0.42 });
+    spawnDebris(reusableVector, boss.type);
+    playBossImpactSound();
+    kickTimer = Math.max(kickTimer, 0.12 + t * 0.14);
+  }
+  if (t < 1) return;
+
+  // The end: everything that is left goes at once.
+  playDefeatSound(boss);
+  spawnBeam(position);
+  spawnDebris(position, boss.type, true);
+  reusableVector.set(position.x, 0.14, position.z);
+  fx.ring(reusableVector, boss.type.eye, { from: 1, to: 16, life: 0.9, opacity: 0.95 });
+  fx.ring(reusableVector, 0xffffff, { from: 0.5, to: 9, life: 0.6, opacity: 0.8 });
+  reusableVector.y = 1.6 * boss.group.scale.y;
+  fx.burst(reusableVector, { color: boss.type.eye, color2: 0xffffff, count: 60, speed: 9, life: 1.1, size: 0.5 });
+  kickTimer = Math.max(kickTimer, 0.6);
+  hitStopTimer = 0.12;
+  slowMoTimer = Math.max(slowMoTimer, 0.7);
+  removeEnemy(boss);
+  bossDeath = null;
+  updateHud(true);
 }
 
 function updateRock(rock, delta) {
@@ -1700,6 +1826,7 @@ function planBursts(wave) {
 function buildStageForWave(wave) {
   if (rail.stage) rail.stage.dispose();
   bossFight = null;
+  bossDeath = null;
   hideBossHpBar();
   rail.bursts = planBursts(wave);
   const chapter = chapterForWave(wave);
@@ -2075,7 +2202,7 @@ function updateEnemies(delta, seconds) {
     const pulseScale = enemy.isMedic
       ? 1 + Math.max(0, Math.sin(seconds * 12 + enemy.phase)) * 0.14
       : 1;
-    const finalScaleMultiplier = (enemy.isClimaxBoss ? 1.5 : 1.0) * (1 - (enemy.flinch || 0) * 0.12);
+    const finalScaleMultiplier = (enemy.isClimaxBoss ? 1.5 : 1.0) * (1 - (enemy.flinch || 0) * 0.12) * (enemy.scaleBoost || 1);
     if (enemy.flinch > 0) {
       enemy.flinch = Math.max(0, enemy.flinch - delta * 7);
       enemy.group.rotation.x = (enemy.group.rotation.x || 0) * 0.5 - enemy.flinch * 0.32;
@@ -2618,11 +2745,6 @@ function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget) return typedBuffer;
   const typed = bufferFor(activeTarget);
-  if (activeTarget.optionalSymbols) {
-    // A skipped / or = is filled in as the next letter lands.
-    const progress = keyProgress(activeTarget.searchPrompt, typed);
-    if (progress >= 0) return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, progress));
-  }
   const effectiveSP = activeTarget._matchedSearchPrompt?.startsWith(typed)
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
@@ -2646,8 +2768,7 @@ function renderPrompt(enemy) {
     ? enemy._matchedSearchPrompt
     : enemy.searchPrompt;
   const matched = effectiveSP.startsWith(typed) && typed.length > 0;
-  const typedProgress = enemy.optionalSymbols ? Math.max(0, keyProgress(enemy.searchPrompt, typed))
-    : matched ? typed.length : 0;
+  const typedProgress = matched ? typed.length : 0;
 
   const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
     multiplicationAlias: enemy.isEquation,
@@ -2885,7 +3006,6 @@ function spawnEnemy(options = {}) {
   kindNode.textContent = promptKind === 'mimic' ? 'loot'
     : options.isProjectile ? 'rock'
     : options.phraseBoss ? (options.bossType?.name || 'boss')
-    : wordData.isSymbol ? (wordData.term.includes('=') ? 'formula' : 'unit')
     : promptKind;
 
   const promptNode = document.createElement('span');
@@ -2917,11 +3037,7 @@ function spawnEnemy(options = {}) {
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
     searchPrompt: buildSearchPrompt(wordData.term, promptOptions),
-    // Units and symbol equations may be typed without their / and =.
-    altSearchPrompts: wordData.isSymbol
-      ? buildOptionalSymbolPrompts(buildSearchPrompt(wordData.term, promptOptions))
-      : buildAltSearchPrompts(wordData.term, promptOptions),
-    optionalSymbols: !!wordData.isSymbol,
+    altSearchPrompts: options.isProjectile ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
     _matchedSearchPrompt: null,
     lastPromptHtml: '',
     promptKind,
@@ -3729,31 +3845,17 @@ function choosePrompt() {
   const scheduledHardGuest = wavePhase === 'normal' ? hardGuestSchedule.get(normalEnemiesSpawned) : null;
   if (scheduledHardGuest) return scheduledHardGuest;
 
-  // Keys are compared without / and =, which the player may leave out (N/m and N m are both nm).
-  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => stripOptionalSymbols(enemy.searchPrompt.toLowerCase()));
+  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt.toLowerCase());
   // No word on screen may start another, or typing one would finish the other.
   const clashes = entry => {
-    const key = stripOptionalSymbols(buildSearchPrompt(entry.term).toLowerCase());
+    const key = buildSearchPrompt(entry.term).toLowerCase();
     return liveKeys.some(other => other.startsWith(key) || key.startsWith(other));
   };
-  if (Math.random() < symbolShare(waveSet)) {
-    const symbol = monsterDeck.pick(SYMBOL_WORDS, entry => !clashes(entry));
-    if (symbol) return symbol;
-  }
-
   const pool = currentKeywordPool();
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
   return monsterDeck.pick(pool, entry => !nearExisting.has(entry.term) && !clashes(entry))
     || monsterDeck.pick(pool, entry => !clashes(entry))
     || monsterDeck.pick(pool);
-}
-
-// How often a normal monster carries a unit or a symbol equation instead of a word.
-function symbolShare(wave) {
-  if (wave <= 1) return 0.55;
-  if (wave === 2) return 0.4;
-  if (wave <= 4) return 0.25;
-  return 0.15;
 }
 
 function chooseMedicPrompt() {

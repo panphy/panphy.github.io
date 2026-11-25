@@ -351,49 +351,26 @@ export const HARD_WORDS = [
 
 export const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 
-// Units and symbol equations for the quickest monsters. They are typed exactly as
-// shown, capitals included; a superscript is typed as a plain digit (m/s² is m/s2)
-// and spaces are optional. Symbols with no key (Ω, λ, ρ, Δ) are left out.
-export const SYMBOL_WORDS = [
-  { term: 'J', definition: 'joule, the unit of energy', isSymbol: true },
-  { term: 'N', definition: 'newton, the unit of force', isSymbol: true },
-  { term: 'W', definition: 'watt, the unit of power', isSymbol: true },
-  { term: 'Pa', definition: 'pascal, the unit of pressure', isSymbol: true },
-  { term: 'Hz', definition: 'hertz, the unit of frequency', isSymbol: true },
-  { term: 'kg', definition: 'kilogram, the unit of mass', isSymbol: true },
-  { term: 'm/s', definition: 'metres per second, the unit of speed and velocity', isSymbol: true },
-  { term: 'm/s²', definition: 'metres per second squared, the unit of acceleration', isSymbol: true },
-  { term: 'kg/m³', definition: 'kilograms per cubic metre, the unit of density', isSymbol: true },
-  { term: 'N/kg', definition: 'newtons per kilogram, the unit of gravitational field strength', isSymbol: true },
-  { term: 'N/m', definition: 'newtons per metre, the unit of the spring constant', isSymbol: true },
-  { term: 'N m', definition: 'newton metre, the unit of a moment', isSymbol: true },
-  { term: 'kg m/s', definition: 'kilogram metres per second, the unit of momentum', isSymbol: true },
-  { term: 'J/kg', definition: 'joules per kilogram, the unit of specific latent heat', isSymbol: true },
-  { term: 'A', definition: 'ampere, the unit of current', isSymbol: true },
-  { term: 'V', definition: 'volt, the unit of potential difference', isSymbol: true },
-  { term: 'C', definition: 'coulomb, the unit of charge', isSymbol: true },
-  { term: 'K', definition: 'kelvin, the unit of temperature', isSymbol: true },
-  { term: 'kWh', definition: 'kilowatt-hour, a unit of energy', isSymbol: true },
-  { term: 'Bq', definition: 'becquerel, the unit of activity', isSymbol: true },
-  { term: 'mA', definition: 'milliampere, a thousandth of an ampere', isSymbol: true },
-  { term: 'kJ', definition: 'kilojoule, a thousand joules', isSymbol: true },
-  { term: 'MJ', definition: 'megajoule, a million joules', isSymbol: true },
-  { term: 'mm', definition: 'millimetre, a thousandth of a metre', isSymbol: true },
-  { term: 'km', definition: 'kilometre, a thousand metres', isSymbol: true },
-  { term: 'F = ma', definition: 'resultant force = mass × acceleration', isSymbol: true },
-  { term: 'W = mg', definition: 'weight = mass × gravitational field strength', isSymbol: true },
-  { term: 'W = Fs', definition: 'work done = force × distance', isSymbol: true },
-  { term: 'p = mv', definition: 'momentum = mass × velocity', isSymbol: true },
-  { term: 's = vt', definition: 'distance = speed × time', isSymbol: true },
-  { term: 'F = ke', definition: 'force = spring constant × extension', isSymbol: true },
-  { term: 'V = IR', definition: 'potential difference = current × resistance', isSymbol: true },
-  { term: 'P = IV', definition: 'power = current × potential difference', isSymbol: true },
-  { term: 'Q = It', definition: 'charge = current × time', isSymbol: true },
-  { term: 'E = QV', definition: 'energy = charge × potential difference', isSymbol: true },
-  { term: 'P = E/t', definition: 'power = energy transferred / time', isSymbol: true },
-  { term: 'P = I²R', definition: 'power = current² × resistance', isSymbol: true },
-  { term: 'M = Fd', definition: 'moment = force × distance', isSymbol: true },
-  { term: 'p = F/A', definition: 'pressure = force / area', isSymbol: true },
+// Unit symbols for the rocks a boss throws: plain letters only, so each is a quick one- to
+// three-key target between the words of its line.
+export const ROCK_UNITS = [
+  { term: 'J', definition: 'joule, the unit of energy' },
+  { term: 'N', definition: 'newton, the unit of force' },
+  { term: 'W', definition: 'watt, the unit of power' },
+  { term: 'Pa', definition: 'pascal, the unit of pressure' },
+  { term: 'Hz', definition: 'hertz, the unit of frequency' },
+  { term: 'kg', definition: 'kilogram, the unit of mass' },
+  { term: 'A', definition: 'ampere, the unit of current' },
+  { term: 'V', definition: 'volt, the unit of potential difference' },
+  { term: 'C', definition: 'coulomb, the unit of charge' },
+  { term: 'K', definition: 'kelvin, the unit of temperature' },
+  { term: 'kWh', definition: 'kilowatt-hour, a unit of energy' },
+  { term: 'Bq', definition: 'becquerel, the unit of activity' },
+  { term: 'mA', definition: 'milliampere, a thousandth of an ampere' },
+  { term: 'kJ', definition: 'kilojoule, a thousand joules' },
+  { term: 'MJ', definition: 'megajoule, a million joules' },
+  { term: 'mm', definition: 'millimetre, a thousandth of a metre' },
+  { term: 'km', definition: 'kilometre, a thousand metres' },
 ];
 
 // AQA GCSE Physics 8463 word equations — used for the equation boss each wave.
