@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createLowPolyTree, createLowPolyRock } from './lowpoly.js';
-import { createStageKit, createGate, createGateMaterials } from './stage-kits.js?v=beta2';
+import { createStageKit, createGate, createGateMaterials } from './stage-kits.js?v=beta3';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
