@@ -10,6 +10,7 @@
   --ember: #d9591f;
   --gold: #a8651a;
   --aqua: #157a70;
+  --typed: #2452c8;
   --danger: #d63f47;
   --panel: rgba(250, 243, 224, 0.92);
   --panel-solid: rgba(251, 245, 228, 0.98);
@@ -3458,13 +3459,19 @@ body.loot-guide-open .potion-bar {
 
 /* Beta: what the player types shows in the target's own card, under its word. */
 
+/* The monster's word stays in ink, its typed letters fading; the player's own
+   letters below are blue, so the two lines never read as the same text. */
+.word-tag .prompt .typed {
+  color: rgba(61, 43, 28, 0.36);
+}
+
 .word-tag .typed-line {
   display: none;
   justify-self: stretch;
   margin-top: 2px;
   padding: 4px 6px 3px;
   border-top: 1px dashed rgba(110, 78, 40, 0.35);
-  color: var(--aqua);
+  color: var(--typed);
   font-size: clamp(0.82rem, 2vw, 1.05rem);
   font-weight: 700;
   letter-spacing: 0.02em;

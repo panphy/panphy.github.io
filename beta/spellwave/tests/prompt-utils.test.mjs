@@ -283,21 +283,21 @@ test('mid-word, the first letter of another prompt is a miss, not a switch', () 
   assert.equal(context.mistakes, 1);
 });
 
-test('units and symbols are case sensitive; words are not', () => {
+test('typing ignores capitals, for units and symbols as well as words', () => {
   const { context, targets } = createTypingHarness(['force']);
-  const unit = enemy(buildSearchPrompt('kg/m³', { keepCase: true }), -10);
-  Object.assign(unit, { altSearchPrompts: [], revealed: true, caseSensitive: true, type: { eye: 0 }, isEquation: false });
+  const unit = enemy(buildSearchPrompt('MW'), -10);
+  Object.assign(unit, { altSearchPrompts: [], revealed: true, type: { eye: 0 }, isEquation: false });
   unit.group.scale = { y: 1 };
   context.enemies = [targets[0], unit];
   context.typedBuffer = '';
   context.activeTarget = null;
-  context.enterCharacter('K');
-  assert.equal(context.mistakes, 1, 'KG is not kg');
-  for (const letter of 'kg/m3') context.enterCharacter(letter);
+  for (const letter of 'mw') context.enterCharacter(letter);
+  assert.equal(context.mistakes, 0);
   assert.equal(context.kills, 1);
   context.enemies = [targets[0]];
-  for (const letter of 'FORCE') context.enterCharacter(letter);
+  for (const letter of 'FoRcE') context.enterCharacter(letter);
   assert.equal(context.kills, 2);
+  assert.equal(context.mistakes, 0);
 });
 
 test('typing either spelling defeats normal enemies and equations without a mistake', () => {

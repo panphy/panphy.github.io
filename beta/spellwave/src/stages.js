@@ -6,9 +6,13 @@
 // route sits at the game's origin, facing −z. At a stop the game's frame and the
 // stop's own frame are the same, so hiding spots are written in stop coordinates
 // (x across, z ahead is negative) and the game spawns monsters there directly.
+//
+// What the place looks like comes from a kit (stage-kits.js): the shape and colour
+// of the land beside the route, the cover, the props and the landmark.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createLowPolyTree, createLowPolyRock } from './lowpoly.js';
+import { createStageKit, createGate, createGateMaterials } from './stage-kits.js?v=beta2';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
@@ -16,6 +20,10 @@ const BOSS_ARENA = { halfWidth: 16, minZ: -64, maxZ: 16 };
 const PATH_HALF_WIDTH = 2.8;
 const CORRIDOR_HALF_WIDTH = 9;
 const CELL = 2.5;
+// A leg with a crossing (a river, a chasm, a gap between islands) is this much longer,
+// which leaves room for it between one stop's arena and the next.
+const CROSSING_EXTRA = 18;
+const GROUND_Y = -0.1;
 
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -65,198 +73,80 @@ function yawOfTangent(tangent) {
   return Math.atan2(-tangent.x, -tangent.z);
 }
 
-function shadowed(mesh, cast = true) {
-  mesh.castShadow = cast;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-
-// ── Props ──────────────────────────────────────────────────────────────────
-
-function createKitMaterials() {
-  const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true, ...extra });
-  return {
-    hay: flat(0xd9b45a),
-    hayDark: flat(0xb98d3c),
-    wall: flat(0xd8bf94),
-    timber: flat(0x6b4a2c),
-    roof: flat(0xa5482c),
-    roofDark: flat(0x7e3522),
-    door: flat(0x4a3220),
-    stone: flat(0xb9ae98),
-    fence: flat(0x8a6a44),
-    bush: flat(0x4f7d3a),
-    petalA: flat(0xf2c6d6),
-    petalB: flat(0xf6e7a8),
-    petalC: flat(0xc9d8f4),
-    sail: flat(0xf3ead6),
-  };
-}
-
-function createHaystack(kit) {
-  const group = new THREE.Group();
-  const body = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.35, 1.3, 7), kit.hay));
-  body.position.y = 0.65;
-  const top = shadowed(new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.0, 7), kit.hayDark));
-  top.position.y = 1.78;
-  group.add(body, top);
-  return group;
-}
-
-function createCottage(kit, random) {
-  const group = new THREE.Group();
-  const width = 3.6 + random() * 1.2;
-  const depth = 3.0 + random() * 0.8;
-  const walls = shadowed(new THREE.Mesh(new THREE.BoxGeometry(width, 2.4, depth), kit.wall));
-  walls.position.y = 1.2;
-  const roofGeometry = new THREE.CylinderGeometry(0.01, depth * 0.78, width + 0.5, 3, 1);
-  const roof = shadowed(new THREE.Mesh(roofGeometry, random() < 0.5 ? kit.roof : kit.roofDark));
-  roof.rotation.z = Math.PI / 2;
-  roof.rotation.y = 0;
-  roof.scale.set(1, 1, 0.72);
-  roof.position.y = 2.4 + depth * 0.3;
-  const door = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.5, 0.1), kit.door);
-  door.position.set(-width * 0.18, 0.75, depth / 2 + 0.04);
-  const windowPane = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 0.1), kit.timber);
-  windowPane.position.set(width * 0.22, 1.45, depth / 2 + 0.04);
-  const chimney = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 0.5), kit.stone));
-  chimney.position.set(width * 0.3, 3.2, -depth * 0.15);
-  group.add(walls, roof, door, windowPane, chimney);
-  group.userData.doorOffset = new THREE.Vector3(-width * 0.18, 0, depth / 2 + 0.9);
-  return group;
-}
-
-function createFence(kit, length) {
-  const group = new THREE.Group();
-  const posts = Math.max(2, Math.round(length / 1.6) + 1);
-  for (let index = 0; index < posts; index += 1) {
-    const post = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.0, 0.16), kit.fence));
-    post.position.set(-length / 2 + (index / (posts - 1)) * length, 0.5, 0);
-    group.add(post);
-  }
-  for (const y of [0.42, 0.78]) {
-    const rail = shadowed(new THREE.Mesh(new THREE.BoxGeometry(length, 0.1, 0.08), kit.fence));
-    rail.position.y = y;
-    group.add(rail);
-  }
-  return group;
-}
-
-function createBush(kit, random) {
-  const group = new THREE.Group();
-  const lumps = 2 + Math.floor(random() * 2);
-  for (let index = 0; index < lumps; index += 1) {
-    const lump = shadowed(new THREE.Mesh(new THREE.IcosahedronGeometry(0.55 + random() * 0.35, 0), kit.bush));
-    lump.position.set((index - (lumps - 1) / 2) * 0.7, 0.42, (random() - 0.5) * 0.4);
-    lump.rotation.set(random() * 3, random() * 3, random() * 3);
-    group.add(lump);
-  }
-  return group;
-}
-
-function createFlowers(kit, random) {
-  const group = new THREE.Group();
-  const petals = [kit.petalA, kit.petalB, kit.petalC];
-  const count = 5 + Math.floor(random() * 5);
-  for (let index = 0; index < count; index += 1) {
-    const head = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), petals[Math.floor(random() * 3)]);
-    head.position.set((random() - 0.5) * 1.6, 0.28 + random() * 0.2, (random() - 0.5) * 1.6);
-    group.add(head);
-  }
-  return group;
-}
-
-function createWindmill(kit) {
-  const group = new THREE.Group();
-  const tower = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(1.3, 2.2, 8, 8), kit.wall));
-  tower.position.y = 4;
-  const cap = shadowed(new THREE.Mesh(new THREE.ConeGeometry(1.8, 2.2, 8), kit.roof));
-  cap.position.y = 9.1;
-  const door = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.8, 0.2), kit.door);
-  door.position.set(0, 0.9, 2.05);
-  group.add(tower, cap, door);
-  const hub = new THREE.Group();
-  hub.position.set(0, 7.6, 1.75);
-  for (let index = 0; index < 4; index += 1) {
-    const arm = new THREE.Group();
-    arm.rotation.z = (index / 4) * Math.PI * 2;
-    const spar = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.18, 5.2, 0.12), kit.timber));
-    spar.position.y = 2.6;
-    const sail = shadowed(new THREE.Mesh(new THREE.BoxGeometry(1.1, 3.8, 0.05), kit.sail));
-    sail.position.set(0.62, 3.1, 0.04);
-    arm.add(spar, sail);
-    hub.add(arm);
-  }
-  group.add(hub);
-  group.userData.hub = hub;
-  return group;
-}
-
 // ── Terrain ────────────────────────────────────────────────────────────────
 
-function createStageTerrain({ bounds, heightAt, isPath, seed }) {
-  const columns = Math.ceil((bounds.maxX - bounds.minX) / CELL);
-  const rows = Math.ceil((bounds.maxZ - bounds.minZ) / CELL);
+// A sheet of triangles over `bounds`. `faceKind` may name one of `extras` (fixed
+// colours a kit adds to the palette's path, grass and patch); `skip` leaves a face
+// out; `flip` turns the sheet to face down, for a roof.
+function createStageTerrain({ bounds, heightAt, isPath, seed, cell = CELL, faceKind = null, extras = null, skip = null, flip = false }) {
+  const columns = Math.ceil((bounds.maxX - bounds.minX) / cell);
+  const rows = Math.ceil((bounds.maxZ - bounds.minZ) / cell);
   const hash = (a, b, c) => {
     const v = Math.sin(a * 127.1 + b * 311.7 + c * 74.7 + seed * 13.3) * 43758.5453;
     return v - Math.floor(v);
   };
-  const vertex = (ix, iz, target) => {
-    let x = bounds.minX + ix * CELL;
-    let z = bounds.minZ + iz * CELL;
-    const edge = ix === 0 || iz === 0 || ix === columns || iz === rows;
-    if (!edge) {
-      x += (hash(ix, iz, 1) - 0.5) * CELL * 0.4;
-      z += (hash(ix, iz, 2) - 0.5) * CELL * 0.4;
+  // Heights are worked out once per grid point.
+  const stride = columns + 1;
+  const grid = new Float32Array(stride * (rows + 1) * 3);
+  for (let iz = 0; iz <= rows; iz += 1) {
+    for (let ix = 0; ix <= columns; ix += 1) {
+      let x = bounds.minX + ix * cell;
+      let z = bounds.minZ + iz * cell;
+      const edge = ix === 0 || iz === 0 || ix === columns || iz === rows;
+      if (!edge) {
+        x += (hash(ix, iz, 1) - 0.5) * cell * 0.4;
+        z += (hash(ix, iz, 2) - 0.5) * cell * 0.4;
+      }
+      const at = (iz * stride + ix) * 3;
+      grid[at] = x;
+      grid[at + 1] = heightAt(x, z);
+      grid[at + 2] = z;
     }
-    return target.set(x, heightAt(x, z), z);
-  };
+  }
 
-  const triangles = columns * rows * 2;
-  const positions = new Float32Array(triangles * 9);
-  const colors = new Float32Array(triangles * 9);
+  const positions = [];
   const faces = [];
-  const corners = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-  let offset = 0;
   for (let iz = 0; iz < rows; iz += 1) {
     for (let ix = 0; ix < columns; ix += 1) {
-      vertex(ix, iz, corners[0]);
-      vertex(ix + 1, iz, corners[1]);
-      vertex(ix + 1, iz + 1, corners[2]);
-      vertex(ix, iz + 1, corners[3]);
+      const corners = [iz * stride + ix, iz * stride + ix + 1, (iz + 1) * stride + ix + 1, (iz + 1) * stride + ix];
       // Winding keeps the faces pointing up (counter-clockwise seen from above, +z toward the viewer).
       const split = (ix + iz) % 2 === 0 ? [[0, 3, 1], [1, 3, 2]] : [[0, 2, 1], [0, 3, 2]];
-      for (const [a, b, c] of split) {
-        const cx = (corners[a].x + corners[b].x + corners[c].x) / 3;
-        const cz = (corners[a].z + corners[b].z + corners[c].z) / 3;
-        const cy = (corners[a].y + corners[b].y + corners[c].y) / 3;
-        for (const index of [a, b, c]) {
-          positions[offset] = corners[index].x;
-          positions[offset + 1] = corners[index].y;
-          positions[offset + 2] = corners[index].z;
-          offset += 3;
-        }
-        faces.push({ onRoad: isPath(cx, cz), height: cy, seed: hash(ix, iz, a + b * 3 + 5) });
+      for (const triangle of split) {
+        const [a, b, c] = flip ? [triangle[0], triangle[2], triangle[1]] : triangle;
+        const pa = corners[a] * 3;
+        const pb = corners[b] * 3;
+        const pc = corners[c] * 3;
+        const cx = (grid[pa] + grid[pb] + grid[pc]) / 3;
+        const cy = (grid[pa + 1] + grid[pb + 1] + grid[pc + 1]) / 3;
+        const cz = (grid[pa + 2] + grid[pb + 2] + grid[pc + 2]) / 3;
+        if (skip && skip(cx, cy, cz)) continue;
+        for (const p of [pa, pb, pc]) positions.push(grid[p], grid[p + 1], grid[p + 2]);
+        const onRoad = isPath(cx, cz);
+        const faceSeed = hash(ix, iz, a + b * 3 + 5);
+        faces.push({ onRoad, height: cy, seed: faceSeed, kind: faceKind ? faceKind({ x: cx, y: cy, z: cz, onPath: onRoad, seed: faceSeed }) : null });
       }
     }
   }
 
+  const colors = new Float32Array(positions.length);
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   geometry.computeVertexNormals();
   const material = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1, metalness: 0 });
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.receiveShadow = true;
+  mesh.receiveShadow = !flip;
 
   let blendFrom = null;
   let blendTo = null;
   const color = new THREE.Color();
   const fill = (target, { path, grass, patch, tone = 1 }) => {
     faces.forEach((face, index) => {
-      if (face.onRoad) color.setHSL(path.h, path.s, path.l + (face.seed - 0.5) * 0.07);
+      const extra = face.kind && extras ? extras[face.kind] : null;
+      if (extra) color.setHSL(extra.h, extra.s, extra.l + (face.seed - 0.5) * (extra.vary ?? 0.06));
+      else if (face.onRoad) color.setHSL(path.h, path.s, path.l + (face.seed - 0.5) * 0.07);
       else if (face.seed > 0.82) color.setHSL(patch.h, patch.s, patch.l);
-      else color.setHSL(grass.h, grass.s, grass.l + (face.seed - 0.5) * 0.09 - Math.min(0.08, face.height * 0.006));
+      else color.setHSL(grass.h, grass.s, grass.l + (face.seed - 0.5) * 0.09 - Math.min(0.08, Math.max(0, face.height) * 0.006));
       color.multiplyScalar(tone);
       for (let corner = 0; corner < 3; corner += 1) color.toArray(target, index * 9 + corner * 3);
     });
@@ -264,6 +154,7 @@ function createStageTerrain({ bounds, heightAt, isPath, seed }) {
 
   return {
     mesh,
+    triangles: faces.length,
     scroll() {},
     recolor(spec) {
       fill(colors, spec);
@@ -326,10 +217,13 @@ function disposeTree(root, keepMaterials) {
 // ── Stage ──────────────────────────────────────────────────────────────────
 
 // burstCount ambush stops, then the boss arena. `materials` are the scene's shared
-// tree and rock materials, so seasons recolour the stage's trees as well.
-export function createStage({ seed = 1, burstCount = 4, materials }) {
+// tree and rock materials, so the palette recolours the stage's trees as well. `kit`
+// and `variant` choose the scenery (chapters.js); `gate` stands a gate at the start.
+export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName = 'meadow', variant = 0, gate = false }) {
   const random = mulberry32(seed * 9973 + 17);
-  const kit = createKitMaterials();
+  const kit = createStageKit(kitName, variant);
+  const mats = kit.materials();
+  const gateMats = gate ? createGateMaterials() : null;
   const keepMaterials = new Set([materials.trunk, ...materials.leaves, materials.rock]);
   const group = new THREE.Group();
 
@@ -341,6 +235,8 @@ export function createStage({ seed = 1, burstCount = 4, materials }) {
   const legLengths = [16];
   for (let index = 1; index < burstCount; index += 1) legLengths.push(30 + random() * 8);
   legLengths.push(36);
+  const crossingLeg = kit.crossing ? 1 + Math.floor(random() * (legLengths.length - 1)) : -1;
+  if (crossingLeg > 0) legLengths[crossingLeg] += CROSSING_EXTRA;
   for (let leg = 0; leg < legLengths.length; leg += 1) {
     const bend = leg === legLengths.length - 1 ? side * 0.25 : side * (0.35 + random() * 0.35);
     heading += bend;
@@ -406,13 +302,46 @@ export function createStage({ seed = 1, burstCount = 4, materials }) {
     return Math.sqrt(best);
   };
   const openness = (px, pz) => Math.min(routeDistance(px, pz) - CORRIDOR_HALF_WIDTH, arenaDistance(px, pz));
+
+  // The crossing sits in the gap between the arenas of its leg's two stops. Its own
+  // frame has the path along z and the river (or chasm, or gap) along x.
+  let crossing = null;
+  if (crossingLeg > 0) {
+    const arc = (stops[crossingLeg - 1].arc - ARENA.minZ + stops[crossingLeg].arc - ARENA.maxZ) / 2;
+    const pose = poseAtArc(arc);
+    const { halfWidth, meander = 0 } = kit.crossing;
+    const phase = random() * Math.PI * 2;
+    // The line wanders away from the path, and stays straight where the bridge is.
+    const drift = (s) => Math.sin(s * 0.055 + phase) * meander * THREE.MathUtils.smoothstep(Math.abs(s), 8, 30);
+    crossing = {
+      arc,
+      pose,
+      yaw: pose.yaw,
+      halfWidth,
+      // Stage point at `s` along the line and `d` across it (positive d is the near bank).
+      point: (s, d, target = new THREE.Vector3()) => frameToStage(pose, s, d + drift(s), target),
+      // Signed distance across the line of a stage point.
+      across: (px, pz) => {
+        const local = stageToFrame(pose, px, pz);
+        return local.z - drift(local.x);
+      },
+    };
+  }
+
   const heightAt = (px, pz) => {
     const away = openness(px, pz);
     const bump = (valueNoise(px * 0.21, pz * 0.21, seed) - 0.5) * 0.12;
-    if (away <= 0) return -0.1 + bump;
-    const rise = THREE.MathUtils.smoothstep(away, 0, 16);
-    const hills = 2.5 + valueNoise(px * 0.045, pz * 0.045, seed + 3) * 11 + valueNoise(px * 0.12, pz * 0.12, seed + 7) * 2.5;
-    return -0.1 + bump + rise * hills * Math.min(1, 0.4 + away / 40);
+    const base = GROUND_Y + bump;
+    let height = base;
+    if (away > 0) {
+      height = kit.hills({ away, base, bump, x: px, z: pz, noise: (frequency, salt) => valueNoise(px * frequency, pz * frequency, seed + salt) });
+    }
+    if (crossing) {
+      // The cut fades out where it would run into an arena.
+      const mask = THREE.MathUtils.smoothstep(arenaDistance(px, pz), 0, 3);
+      if (mask > 0) height += (kit.crossing.carve(height, crossing.across(px, pz)) - height) * mask;
+    }
+    return height;
   };
 
   const bounds = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
@@ -431,23 +360,56 @@ export function createStage({ seed = 1, burstCount = 4, materials }) {
   const margin = 44;
   bounds.minX -= margin; bounds.maxX += margin; bounds.minZ -= margin; bounds.maxZ += margin;
 
-  const terrain = createStageTerrain({
+  const isPath = (x, z) => routeDistance(x, z) < PATH_HALF_WIDTH;
+  const ground = createStageTerrain({
     bounds,
     heightAt,
-    isPath: (x, z) => routeDistance(x, z) < PATH_HALF_WIDTH,
+    isPath,
     seed,
+    faceKind: kit.faceKind || null,
+    extras: kit.ground || null,
+    skip: kit.skipBelow != null || kit.skipAbove != null
+      ? (x, y) => (kit.skipBelow != null && y < kit.skipBelow) || (kit.skipAbove != null && y > kit.skipAbove)
+      : null,
   });
-  group.add(terrain.mesh);
+  group.add(ground.mesh);
+  const sheets = [ground];
+  if (kit.roof) {
+    const roofHeight = (px, pz) => kit.roof.height({ x: px, z: pz, noise: (frequency, salt) => valueNoise(px * frequency, pz * frequency, seed + salt) });
+    const roof = createStageTerrain({
+      bounds,
+      heightAt: roofHeight,
+      isPath: () => false,
+      seed: seed + 1,
+      cell: CELL * 1.6,
+      faceKind: () => kit.roof.kind,
+      extras: kit.ground,
+      // Leave out the roof where it would lie inside the rock.
+      skip: (x, y, z) => heightAt(x, z) > y + 2,
+      flip: true,
+    });
+    group.add(roof.mesh);
+    sheets.push(roof);
+  }
+  // The game recolours and blends the ground as one thing.
+  const terrain = {
+    mesh: ground.mesh,
+    scroll() {},
+    recolor: (spec) => sheets.forEach((sheet) => sheet.recolor(spec)),
+    startBlend: (spec) => sheets.forEach((sheet) => sheet.startBlend(spec)),
+    blend: (amount) => sheets.forEach((sheet) => sheet.blend(amount)),
+  };
 
   const staticRoot = new THREE.Group();
   const animated = [];
   const occupied = [];
   const isFree = (x, z, radius) => occupied.every((o) => (o.x - x) ** 2 + (o.z - z) ** 2 > (o.r + radius) ** 2);
+  const occupy = (x, z, radius) => occupied.push({ x, z, r: radius });
   const place = (object, x, z, radius, rotation = random() * Math.PI * 2) => {
     object.position.set(x, heightAt(x, z) - 0.05, z);
     object.rotation.y = rotation;
     staticRoot.add(object);
-    occupied.push({ x, z, r: radius });
+    occupy(x, z, radius);
     return object;
   };
   const tree = (kind, scale) => {
@@ -455,9 +417,44 @@ export function createStage({ seed = 1, burstCount = 4, materials }) {
     built.scale.setScalar(scale);
     return built;
   };
+  const ctx = {
+    random, seed, variant, mats, shared: materials,
+    stops, bossStop: stops[stops.length - 1], startArc, length, crossing, bounds,
+    poseAtArc, heightAt, openness, arenaDistance, isFree, occupy, place, tree,
+    at: frameToStage,
+    rock: (scale) => {
+      const rock = createLowPolyRock(materials.rock, Math.floor(random() * 1000));
+      rock.scale.multiplyScalar(scale);
+      return rock;
+    },
+    // A static prop at a given height, with no claim on the ground around it.
+    set: (object, x, y, z, rotation = 0) => {
+      object.position.set(x, y, z);
+      object.rotation.y = rotation;
+      staticRoot.add(object);
+      return object;
+    },
+    // Something that moves stays out of the merged meshes.
+    live: (object) => group.add(object),
+    animate: (step) => animated.push(step),
+    merge: (root, castShadow = true) => {
+      const merged = mergeStatic(root, castShadow);
+      disposeTree(root, new Set([...keepMaterials, ...Object.values(mats)]));
+      return merged;
+    },
+  };
+
+  if (gate) {
+    const pose = poseAtArc(startArc + 2);
+    place(createGate(gateMats), pose.x, pose.z, 0, pose.yaw);
+    for (const x of [-4.4, 4.4]) {
+      const pillar = frameToStage(pose, x, 0);
+      occupy(pillar.x, pillar.z, 1.4);
+    }
+  }
 
   // Hiding spots for each ambush stop, with the cover that hides them.
-  const COVER_KINDS = ['tree', 'haystack', 'cottage', 'bush', 'rock'];
+  const narrowCovers = kit.covers.filter((cover) => !cover.wide);
   for (const stop of stops) {
     if (stop.isBoss) continue;
     const sides = random() < 0.5 ? [-1, 1] : [1, -1];
@@ -468,32 +465,25 @@ export function createStage({ seed = 1, burstCount = 4, materials }) {
       { x: sides[0] * (3 + random() * 2), z: -14 - random() * 3 },
     ];
     for (const slot of slots) {
-      let kind = COVER_KINDS[Math.floor(random() * COVER_KINDS.length)];
-      if (Math.abs(slot.x) < 6 && kind === 'cottage') kind = 'haystack';
+      let cover = kit.covers[Math.floor(random() * kit.covers.length)];
+      if (Math.abs(slot.x) < 6 && cover.wide) cover = narrowCovers[Math.floor(random() * narrowCovers.length)];
       const p = frameToStage(stop.pose, slot.x, slot.z);
-      // Each prop faces the camera's stand point, so a monster can step out toward it.
+      // A prop with a front faces the camera's stand point, so a monster can step out toward it.
       const faceYaw = stop.pose.yaw + Math.atan2(-slot.x, 10 - slot.z);
-      let exit = { x: slot.x, z: slot.z + 1.4 };
-      if (kind === 'tree') place(tree('round', 1.7 + random() * 0.4), p.x, p.z, 1.6);
-      else if (kind === 'haystack') place(createHaystack(kit), p.x, p.z, 1.6);
-      else if (kind === 'bush') place(createBush(kit, random), p.x, p.z, 1.2);
-      else if (kind === 'rock') {
-        const rock = createLowPolyRock(materials.rock, Math.floor(random() * 1000));
-        rock.scale.multiplyScalar(2.4);
-        place(rock, p.x, p.z, 1.6);
-      } else {
-        const cottage = createCottage(kit, random);
-        place(cottage, p.x, p.z, 3.2, faceYaw);
-        const door = cottage.userData.doorOffset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), faceYaw - stop.pose.yaw);
+      const built = cover.build(ctx);
+      place(built.object, p.x, p.z, built.radius, built.face ? faceYaw : undefined);
+      let exit = null;
+      if (built.object.userData.doorOffset) {
+        const door = built.object.userData.doorOffset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), faceYaw - stop.pose.yaw);
         exit = { x: slot.x + door.x, z: slot.z + door.z };
       }
       // Monsters wait just behind the cover (further from the camera), out of sight.
       const away = new THREE.Vector2(slot.x, slot.z - 10).normalize();
       stop.spots.push({
-        kind: 'cover', prop: kind,
-        hideX: kind === 'cottage' ? exit.x : slot.x + away.x * 1.3,
-        hideZ: kind === 'cottage' ? exit.z - 0.6 : slot.z + away.y * 1.3,
-        x: exit.x, z: exit.z,
+        kind: 'cover', prop: cover.kind,
+        hideX: exit ? exit.x : slot.x + away.x * 1.3,
+        hideZ: exit ? exit.z - 0.6 : slot.z + away.y * 1.3,
+        x: exit ? exit.x : slot.x, z: exit ? exit.z : slot.z + 1.4,
       });
     }
     for (let index = 0; index < 2; index += 1) {
@@ -502,64 +492,30 @@ export function createStage({ seed = 1, burstCount = 4, materials }) {
     stop.spots.push({ kind: 'sky', x: (random() - 0.5) * 6, z: -4 - random() * 4 });
   }
 
-  // Fences along the path, outside the arenas.
-  for (let arc = 6; arc < length - 40; arc += 4.2) {
-    if (random() < 0.35) continue;
-    const pose = poseAtArc(arc);
-    for (const sideSign of [-1, 1]) {
-      if (random() < 0.4) continue;
-      const p = frameToStage(pose, sideSign * 6.6, 0);
-      if (arenaDistance(p.x, p.z) < 1.5 || !isFree(p.x, p.z, 1.2)) continue;
-      place(createFence(kit, 3.6), p.x, p.z, 1.0, pose.yaw);
-    }
-  }
+  kit.decorate(ctx);
 
-  // The village: cottages beside the path between stops, and a windmill over the boss arena.
-  const bossStop = stops[stops.length - 1];
-  const millPoint = frameToStage(bossStop.pose, 22 * (random() < 0.5 ? -1 : 1), -40);
-  const windmill = createWindmill(kit);
-  windmill.position.set(millPoint.x, heightAt(millPoint.x, millPoint.z) - 0.1, millPoint.z);
-  windmill.rotation.y = bossStop.pose.yaw + Math.atan2(-millPoint.x + bossStop.pose.x, 1);
-  group.add(windmill);
-  occupied.push({ x: millPoint.x, z: millPoint.z, r: 4 });
-  animated.push((seconds) => { windmill.userData.hub.rotation.z = seconds * 0.45; });
-
-  for (let arc = 20; arc < length - 60; arc += 18 + random() * 14) {
-    const pose = poseAtArc(arc);
-    const sideSign = random() < 0.5 ? -1 : 1;
-    const p = frameToStage(pose, sideSign * (14 + random() * 6), (random() - 0.5) * 6);
-    if (arenaDistance(p.x, p.z) < 3 || !isFree(p.x, p.z, 3.5)) continue;
-    place(createCottage(kit, random), p.x, p.z, 3.5, pose.yaw + (sideSign < 0 ? -Math.PI / 2 : Math.PI / 2));
-  }
-
-  // Woods on the slopes, thick enough to close the view; flowers and bushes near the path.
+  // Trees on the slopes, as thick as the kit asks.
   const area = (bounds.maxX - bounds.minX) * (bounds.maxZ - bounds.minZ);
-  // Trees thin out past the first ridge, where the hills hide most of them anyway.
-  const treeTries = Math.round(area / 30);
+  const treeTries = Math.round(area / kit.treeArea);
   for (let index = 0; index < treeTries; index += 1) {
     const x = bounds.minX + random() * (bounds.maxX - bounds.minX);
     const z = bounds.minZ + random() * (bounds.maxZ - bounds.minZ);
     const open = openness(x, z);
-    if (open < 1.5) continue;
-    const density = open < 22 ? Math.min(0.85, 0.3 + open / 16) : Math.max(0.08, 0.85 - (open - 22) / 20);
-    if (random() > density) continue;
-    if (!isFree(x, z, 1.2)) continue;
-    place(tree(random() < 0.35 ? 'pine' : 'round', 1.1 + random() * 0.9), x, z, 1.2);
+    if (open < 1) continue;
+    const choice = kit.tree({ open, height: heightAt(x, z), random });
+    if (!choice || !isFree(x, z, 1.2)) continue;
+    place(tree(choice.kind, choice.scale), x, z, 1.2);
   }
-  for (let index = 0; index < length / 2.2; index += 1) {
-    const pose = poseAtArc(random() * length);
-    const p = frameToStage(pose, (random() < 0.5 ? -1 : 1) * (3.6 + random() * 8), 0);
-    if (!isFree(p.x, p.z, 0.8)) continue;
-    // Bushes stay out of the arenas, where they would hide monsters coming up from the ground.
-    const isBush = random() >= 0.7;
-    if (isBush && arenaDistance(p.x, p.z) < 1) continue;
-    const decor = isBush ? createBush(kit, random) : createFlowers(kit, random);
-    decor.position.set(p.x, heightAt(p.x, p.z) - 0.05, p.z);
-    staticRoot.add(decor);
-  }
+  kit.scatter(ctx);
 
-  group.add(mergeStatic(staticRoot));
-  disposeTree(staticRoot, new Set([...keepMaterials, ...Object.values(kit)]));
+  const merged = mergeStatic(staticRoot);
+  group.add(merged);
+  disposeTree(staticRoot, new Set([...keepMaterials, ...Object.values(mats), ...Object.values(gateMats || {})]));
+
+  let triangles = 0;
+  group.traverse((child) => {
+    if (child.isMesh) triangles += (child.geometry.index ? child.geometry.index.count : child.geometry.attributes.position.count) / 3;
+  });
 
   return {
     group,
@@ -567,6 +523,8 @@ export function createStage({ seed = 1, burstCount = 4, materials }) {
     stops,
     startArc,
     length,
+    crossing,
+    triangles: Math.round(triangles),
     poseAtArc,
     // The pose while travelling from one stop (or the start) to the next, t from 0 to 1.
     travelPose(fromStop, toStop, t) {
