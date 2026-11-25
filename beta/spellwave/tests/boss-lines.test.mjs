@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BOSS_PHRASES, SYMBOL_WORDS } from '../src/question-bank.js';
+import { BOSS_PHRASES, ROCK_UNITS } from '../src/question-bank.js';
 import { bossPlan, BOSS_PLAN_TABLE } from '../src/difficulty.js';
 import { buildSearchPrompt } from '../src/prompt-utils.js';
 
@@ -33,7 +33,7 @@ test('bosses get harder, never easier, from wave to wave', () => {
 });
 
 test('there are rock units for many different first letters', () => {
-  const rocks = SYMBOL_WORDS.filter(entry => !entry.term.includes('=') && buildSearchPrompt(entry.term).length <= 4);
-  const firsts = new Set(rocks.map(entry => buildSearchPrompt(entry.term).charAt(0).toLowerCase()));
+  for (const { term } of ROCK_UNITS) assert.match(term, /^[A-Za-z]{1,3}$/, term);
+  const firsts = new Set(ROCK_UNITS.map(entry => buildSearchPrompt(entry.term).charAt(0).toLowerCase()));
   assert.ok(firsts.size >= 8, [...firsts].join(''));
 });

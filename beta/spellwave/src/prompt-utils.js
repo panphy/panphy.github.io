@@ -126,38 +126,6 @@ function promptIndexForProgress(term, progress, options = {}) {
 // Choose which enemy a typed prefix applies to. A target whose prompt is exactly
 // complete always wins, so a short word can't be blocked by a nearer, longer word
 // that merely starts the same way. Otherwise prefer the nearest (largest z).
-// In units and symbol equations the / and = may be left out: m/s can be typed ms.
-const OPTIONAL_SYMBOLS = new Set(['/', '=']);
-
-function stripOptionalSymbols(key) {
-  return [...key].filter(character => !OPTIONAL_SYMBOLS.has(character)).join('');
-}
-
-// Every way to type a key with some or all of its / and = left out (not the full key itself).
-function buildOptionalSymbolPrompts(key) {
-  const spots = [...key].flatMap((character, index) => (OPTIONAL_SYMBOLS.has(character) ? [index] : []));
-  if (spots.length === 0 || spots.length > 4) return [];
-  const variants = new Set();
-  for (let mask = 1; mask < 2 ** spots.length; mask += 1) {
-    const dropped = new Set(spots.filter((_, bit) => mask & (2 ** bit)));
-    variants.add([...key].filter((_, index) => !dropped.has(index)).join(''));
-  }
-  variants.delete(key);
-  return [...variants];
-}
-
-// How far along the full key the typed letters have reached, counting the symbols
-// they skipped, or -1 if they do not fit. Typing ms against m/s gives 3.
-function keyProgress(key, typed) {
-  let reached = 0;
-  for (const character of typed) {
-    while (reached < key.length && key[reached] !== character && OPTIONAL_SYMBOLS.has(key[reached])) reached += 1;
-    if (key[reached] !== character) return -1;
-    reached += 1;
-  }
-  return reached;
-}
-
 function pickTarget(matches, typed) {
   const byDepth = (a, b) => b.group.position.z - a.group.position.z || a.searchPrompt.length - b.searchPrompt.length;
   const complete = matches.filter(enemy => enemy._matchComplete ?? enemy._matchedSearchPrompt === typed);
@@ -174,7 +142,4 @@ export {
   escapeHtml,
   wrapSups,
   promptIndexForProgress,
-  stripOptionalSymbols,
-  buildOptionalSymbolPrompts,
-  keyProgress,
 };
