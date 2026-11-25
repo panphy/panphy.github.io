@@ -137,6 +137,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 .picked { margin: 24px 0 0; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 10px; background: #fff6de; }
 .picked ol { list-style: none; margin: 8px 0 0; padding: 0; }
 .picked li { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line); font-size: 15px; font-weight: 700; line-height: 1.3; }
+.picked li.draggable { cursor: grab; user-select: none; -webkit-user-select: none; }
+.picked li.moved { animation: pick-moved 1.1s ease-out; }
+@keyframes pick-moved { 0%, 40%, 80% { background: var(--hi); } 20%, 60%, 100% { background: transparent; } }
+.picked ol.sorting li { transition: transform .15s ease; }
+.picked ol.sorting li.dragging { position: relative; z-index: 2; cursor: grabbing; transition: none; border-top-color: transparent; border-radius: 8px; background: var(--hi); box-shadow: 0 6px 18px rgba(11, 42, 46, .3); }
+.pick-grip { flex: none; display: grid; place-items: center; width: 28px; height: 48px; margin-right: -4px; color: var(--muted); touch-action: none; }
+.pick-grip svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
 .picked button { flex: none; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: #fff; }
 .picked button:hover:not(:disabled) { background: var(--ink); color: #fff; }
 .picked button:disabled { opacity: .3; cursor: default; }
@@ -271,7 +278,7 @@ sub, sup { font-size: .68em; line-height: 0; }
   .launch .secondary { font-size: 15px; }
   .launch .primary { grid-column: 1 / -1; font-size: 18px; }
   .picked li { flex-wrap: wrap; }
-  .picked .pick-text { flex: 1 1 calc(100% - 46px); }
+  .picked .pick-text { flex: 1 1 calc(100% - 80px); }
   .picked li button:first-of-type { margin-left: auto; }
   .board-title span { display: none; }
   #cards .board-title { flex-wrap: wrap; gap: 4px 12px; }
@@ -304,7 +311,12 @@ sub, sup { font-size: .68em; line-height: 0; }
 .card-recap { margin: 0; font-size: .62em; font-weight: 700; color: var(--muted); }
 .card-unflip { align-self: center; min-height: 48px; margin-top: 10px; padding: 0 12px; border: 0; background: none; font-size: 15px; font-weight: 800; text-decoration: underline; color: var(--muted); }
 .card-unflip:hover { color: var(--ink); }
-@media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner { transition: none; }
+  .picked ol.sorting li { transition: none; }
+  /* No blinking: the moved question stays highlighted, then clears. */
+  @keyframes pick-moved { 0%, 90% { background: var(--hi); } 100% { background: transparent; } }
+}
 .card-topic { margin: 0 0 .9em; font-size: max(12px, .38em); font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .card-question { margin: 0; font-weight: 700; text-wrap: pretty; }
 .flashcard .q-answer { margin-top: .7em; }

@@ -16,6 +16,7 @@
   const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   const UP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
   const DOWN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
+  const GRIP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/></svg>';
   const SWAP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.5l1.7-2M20 20v-4.5h-4.5"/></svg>';
 
   const $ = (id) => document.getElementById(id);
@@ -38,6 +39,7 @@
     count: 5,
     mode: "random",      // "random" | "manual"
     picks: [],           // question Numbers ticked by the teacher, in the order ticked
+    movedPick: null,     // the picked question that has just changed place, to flash it
     methods: [],         // practical methods from methods.csv
     methodPicks: [],     // their Numbers, in the order ticked
     collapsed: new Set(), // unit names whose topic lists are folded away
@@ -461,7 +463,9 @@
   }
 
   // The ticked questions in board order, each with move and remove buttons.
-  function renderPicked() {
+  // A row can also be dragged to a new place: anywhere on it with a mouse, by
+  // its grip on a touch screen (so that a swipe on the text still scrolls).
+  function renderPicked(movedNumber) {
     const picked = pickedQuestions();
     els.picked.textContent = "";
     els.picked.hidden = picked.length === 0;
@@ -479,6 +483,7 @@
       button.setAttribute("aria-label", `${text}: ${plainText(question.Question)}`);
       button.addEventListener("click", () => {
         change();
+        state.movedPick = name === "remove" ? null : question.Number;
         refresh(false);
         // The list was rebuilt: keep the keyboard on the question that moved.
         const same = els.picked.querySelector(`[data-act="${name}-${question.Number}"]:not(:disabled)`);
@@ -492,24 +497,115 @@
     };
     picked.forEach((question, index) => {
       const row = document.createElement("li");
+      const grip = document.createElement("span");
+      grip.className = "pick-grip";
+      grip.innerHTML = GRIP_ICON;
       const order = document.createElement("span");
       order.className = "pick-order";
       order.textContent = index + 1;
       const text = document.createElement("span");
       text.className = "pick-text";
       setQuestionText(text, question.Question);
-      row.append(order, text,
+      row.append(grip, order, text,
         act(question, "up", UP_ICON, "Move up", index === 0, () => swap(question, picked[index - 1])),
         act(question, "down", DOWN_ICON, "Move down", index === picked.length - 1, () => swap(question, picked[index + 1])),
         act(question, "remove", CLOSE_ICON, "Remove", false, () => { state.picks = state.picks.filter((number) => number !== question.Number); }));
+      // Flash the question that has just changed place.
+      if (question.Number === movedNumber) row.classList.add("moved");
+      if (picked.length > 1) {
+        row.classList.add("draggable");
+        row.addEventListener("pointerdown", (event) => startPickDrag(event, list, row, index, picked));
+      }
       list.append(row);
     });
     els.picked.append(label, list);
   }
 
+  // Drag a picked question to a new place. The other rows slide aside to show
+  // where it will land; Escape puts it back.
+  function startPickDrag(event, list, row, index, picked) {
+    if (event.button !== 0 || event.target.closest("button")) return;
+    if (event.pointerType === "touch" && !event.target.closest(".pick-grip")) return;
+    const rows = [...list.children];
+    const pageY = (clientY) => clientY + window.scrollY;
+    const boxes = rows.map((item) => {
+      const box = item.getBoundingClientRect();
+      return { top: pageY(box.top), height: box.height };
+    });
+    const own = boxes[index];
+    const first = boxes[0].top, last = boxes[boxes.length - 1].top + boxes[boxes.length - 1].height;
+    const startY = pageY(event.clientY);
+    let clientY = event.clientY, target = index, dragging = false, frame = 0;
+
+    const place = () => {
+      const shift = Math.max(first - own.top, Math.min(last - own.height - own.top, pageY(clientY) - startY));
+      const centre = own.top + shift + own.height / 2;
+      row.style.transform = `translateY(${shift}px)`;
+      target = index;
+      rows.forEach((item, i) => {
+        if (i === index) return;
+        const middle = boxes[i].top + boxes[i].height / 2;
+        const aside = i < index ? centre < middle : centre > middle;
+        if (aside) target += i < index ? -1 : 1;
+        item.style.transform = aside ? `translateY(${i < index ? own.height : -own.height}px)` : "";
+      });
+    };
+    // Near the top or bottom of the window, scroll so a long list can be crossed.
+    const autoScroll = () => {
+      const edge = 60, step = clientY < edge ? -12 : clientY > window.innerHeight - edge ? 12 : 0;
+      if (step) { window.scrollBy(0, step); place(); }
+      frame = requestAnimationFrame(autoScroll);
+    };
+    const move = (moveEvent) => {
+      clientY = moveEvent.clientY;
+      if (!dragging) {
+        if (Math.abs(pageY(clientY) - startY) < 5) return;
+        dragging = true;
+        row.classList.add("dragging");
+        list.classList.add("sorting");
+        frame = requestAnimationFrame(autoScroll);
+      }
+      moveEvent.preventDefault();
+      place();
+    };
+    const finish = (commit) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", drop);
+      window.removeEventListener("pointercancel", cancel);
+      document.removeEventListener("keydown", escape, true);
+      if (!dragging) return;
+      cancelAnimationFrame(frame);
+      if (commit && target !== index) {
+        const numbers = picked.map((question) => question.Number);
+        const [moved] = numbers.splice(index, 1);
+        numbers.splice(target, 0, moved);
+        // Picks hidden by the course or target switch keep their places.
+        const shown = new Set(numbers);
+        let next = 0;
+        state.picks = state.picks.map((number) => (shown.has(number) ? numbers[next++] : number));
+        state.movedPick = moved;
+      }
+      refresh(false);
+    };
+    const drop = () => finish(true);
+    const cancel = () => finish(false);
+    const escape = (keyEvent) => {
+      if (keyEvent.key !== "Escape") return;
+      keyEvent.preventDefault();
+      keyEvent.stopPropagation();
+      finish(false);
+    };
+    // On the window, so a fast drag that leaves the row is still followed.
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", drop);
+    window.addEventListener("pointercancel", cancel);
+    document.addEventListener("keydown", escape, true);
+  }
+
   function renderPicker() {
     if (state.mode !== "manual") return;
-    renderPicked();
+    renderPicked(state.movedPick);
+    state.movedPick = null;
     const terms = els.pickSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const scroll = els.picker.scrollTop;
     const boardOrder = pickedQuestions().map((question) => question.Number);
