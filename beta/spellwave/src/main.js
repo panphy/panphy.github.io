@@ -1,17 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta1';
+import { createSpellwaveAudio } from './audio.js?v=beta2';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta1';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta1';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta1';
-import { createLeaderboard } from './leaderboard.js?v=beta1';
+import { createPotionSystem } from './potions.js?v=beta2';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta2';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta2';
+import { createLeaderboard } from './leaderboard.js?v=beta2';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta1';
+import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta2';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta1';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=beta1';
-import { createWordDeck } from './word-decks.js?v=beta1';
-import { createStage } from './stages.js?v=beta1';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta2';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=beta2';
+import { createWordDeck } from './word-decks.js?v=beta2';
+import { createStage } from './stages.js?v=beta2';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta2';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -383,80 +384,6 @@ const CLOUD_RESET_X = -46;
 // How far clouds take on the sky colour, so they dim at dusk and at night.
 const CLOUD_SKY_TINT = 0.42;
 
-// The palettes' ground colours are scaled down so the road stays moody under the bright sun and sky lights.
-const GROUND_TONE = 0.8;
-
-const SEASON_PALETTES = [
-  // Light levels stay modest in every season so sunlit ground does not cross the bloom threshold.
-  { // Spring (wave 1): paper-warm daylight, olive trees, sand road
-    name: 'spring',
-    bgColor: 0x9fd4c2, fogColor: 0xe6d6a4, fogNear: 42, fogFar: 118, skyTop: 0x3fa596,
-    hemiSky: 0xd8ecd8, hemiGround: 0x9a7a44, hemiIntensity: 0.85,
-    sunColor: 0xffe9bd, sunIntensity: 1.55,
-    emberColor: 0xffc078, emberIntensity: 1.6,
-    pathMarkerColor: 0xe9a45c, pathMarkerEmissive: 0x9a5a20,
-    leafColors: [0x7f9e2e, 0x9bb23a, 0x5f8428], trunkColor: 0xa85a26,
-    moonColor: 0xfff4d6, starOpacity: 0,
-    groundPath: { h: 0.105, s: 0.52, lBase: 0.56 },
-    groundAlt1: { h: 0.16, s: 0.55, l: 0.44 },
-    groundGrass: { h: 0.215, s: 0.6, l: 0.36 },
-  },
-  { // Summer (wave 2): moonlit night, deep greens, cool stone road
-    name: 'summer',
-    bgColor: 0x2c4c8a, fogColor: 0x2a4476, fogNear: 42, fogFar: 118, skyTop: 0x0c1740,
-    hemiSky: 0x7f9fe0, hemiGround: 0x2a4a34, hemiIntensity: 0.9,
-    sunColor: 0xd6e4ff, sunIntensity: 1.5,
-    emberColor: 0xffcc30, emberIntensity: 2.2,
-    pathMarkerColor: 0x58dfcf, pathMarkerEmissive: 0x0e6861,
-    leafColors: [0x2f8a4a, 0x43a058, 0x1f6a3c], trunkColor: 0x7a4a26,
-    moonColor: 0xfff1b8, starOpacity: 0.55,
-    groundPath: { h: 0.1, s: 0.22, lBase: 0.46 },
-    groundAlt1: { h: 0.3, s: 0.45, l: 0.38 },
-    groundGrass: { h: 0.36, s: 0.5, l: 0.3 },
-  },
-  { // Autumn (wave 3): amber dusk under a mauve sky, red and gold leaves
-    name: 'autumn',
-    bgColor: 0xf0b070, fogColor: 0xe2a264, fogNear: 42, fogFar: 118, skyTop: 0x7a5690,
-    hemiSky: 0xf0cf98, hemiGround: 0x8a4a24, hemiIntensity: 0.85,
-    sunColor: 0xffb060, sunIntensity: 1.5,
-    emberColor: 0xff4818, emberIntensity: 2.2,
-    pathMarkerColor: 0xe87830, pathMarkerEmissive: 0xa83808,
-    leafColors: [0xc8501a, 0xe08a1c, 0xd6aa28], trunkColor: 0x6a3418,
-    moonColor: 0xffe0a8, starOpacity: 0.12,
-    groundPath: { h: 0.09, s: 0.45, lBase: 0.5 },
-    groundAlt1: { h: 0.06, s: 0.55, l: 0.42 },
-    groundGrass: { h: 0.11, s: 0.52, l: 0.38 },
-  },
-  { // Winter (wave 4): pale snowfields in blue dusk, frosted trees
-    name: 'winter',
-    bgColor: 0x8fa8c8, fogColor: 0xbccadd, fogNear: 40, fogFar: 112, skyTop: 0x334c7c,
-    hemiSky: 0xd8e4f8, hemiGround: 0x7a8aa0, hemiIntensity: 0.72,
-    sunColor: 0xdde8ff, sunIntensity: 1.1,
-    emberColor: 0x6888ff, emberIntensity: 2.0,
-    pathMarkerColor: 0x88ccff, pathMarkerEmissive: 0x3870d0,
-    leafColors: [0xd6e2f0, 0xe6eef8, 0xb8cbe2], trunkColor: 0x5e4c46,
-    moonColor: 0xfff1d8, starOpacity: 0.35,
-    groundPath: { h: 0.6, s: 0.14, lBase: 0.56 },
-    groundAlt1: { h: 0.58, s: 0.3, l: 0.62 },
-    groundGrass: { h: 0.6, s: 0.25, l: 0.7 },
-  },
-];
-
-// Wave 10 leaves the seasons behind: a violet night among the stars, with dark stone underfoot.
-const FINAL_WAVE_PALETTE = {
-  name: 'final',
-  bgColor: 0x2a1a5e, fogColor: 0x1c1244, fogNear: 40, fogFar: 112, skyTop: 0x070418,
-  hemiSky: 0x9a88e8, hemiGround: 0x2a1e4a, hemiIntensity: 0.85,
-  sunColor: 0xd6c4ff, sunIntensity: 1.35,
-  emberColor: 0xc060ff, emberIntensity: 2.2,
-  pathMarkerColor: 0xe040fb, pathMarkerEmissive: 0x8a1aa8,
-  leafColors: [0x4a3c8c, 0x5c4aa6, 0x362a6c], trunkColor: 0x2c2240,
-  moonColor: 0xf3e8ff, starOpacity: 1,
-  groundPath: { h: 0.72, s: 0.22, lBase: 0.4 },
-  groundAlt1: { h: 0.8, s: 0.4, l: 0.36 },
-  groundGrass: { h: 0.72, s: 0.34, l: 0.27 },
-};
-
 const reusableVector = new THREE.Vector3();
 const reusableVectorTwo = new THREE.Vector3();
 const moonScreenVector = new THREE.Vector3();
@@ -561,7 +488,8 @@ let finalWaveScenery = null;
 let sceneLeafMaterials = [];
 let sceneTrunkMaterial = null;
 let sceneCrystalMat = null;
-let currentSeasonIndex = 0;
+// The palette of the chapter on screen (chapters.js), or the one being faded to.
+let activePalette = null;
 let seasonEmberIntensityBase = 2.1;
 let seasonFade = null;
 let seasonalEffects = null;
@@ -956,6 +884,7 @@ function startGame() {
   updatePhaseDisplay();
   buildStageForWave(waveSet);
   applySeasonForWave(waveSet, true);
+  showChapterBanner();
   focusKeyboard();
   scheduleFrame();
 }
@@ -1862,9 +1791,12 @@ function updateRock(rock, delta) {
 // hiding, and once the stop is clear it walks on; the last stop is the boss arena.
 
 function currentPalette() {
-  return document.body.classList.contains('final-wave-active')
-    ? FINAL_WAVE_PALETTE
-    : SEASON_PALETTES[currentSeasonIndex];
+  return chapterForWave(waveSet).palette;
+}
+
+// The last chapter is the night sky: no clouds or weather, and the moons and drifting rocks are out.
+function isSkyChapter() {
+  return currentPalette().name === 'final';
 }
 
 // Split the wave's monsters, healers and chests into ambushes.
@@ -1887,10 +1819,14 @@ function buildStageForWave(wave) {
   bossFight = null;
   hideBossHpBar();
   rail.bursts = planBursts(wave);
+  const chapter = chapterForWave(wave);
   rail.stage = createStage({
     seed: Math.floor(Math.random() * 1e6) + wave,
     burstCount: Math.max(1, rail.bursts.length),
     materials: { trunk: sceneTrunkMaterial, leaves: sceneLeafMaterials, rock: sceneRockMaterial },
+    kit: chapter.kit,
+    variant: chapter.variant,
+    gate: chapter.gate,
   });
   stageRig.add(rail.stage.group);
   sceneGround = rail.stage.terrain;
@@ -2551,7 +2487,8 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
       moonLight.position.set(0, 14, -22);
       targetMoonShadowStrength = 0;
     } else {
-      moon.visible = true;
+      // Underground there is no sky to hang it in.
+      moon.visible = !currentPalette().indoor;
       moonAngle += envDelta * (Math.PI / 200); // full crossing in ~200 s
       if (moonAngle >= Math.PI) {
         moonAngle = Math.PI;
@@ -3355,7 +3292,7 @@ function spawnEnemy(options = {}) {
 
   labelsLayer.append(label);
 
-  const promptOptions = { multiplicationAlias: isEquationPrompt, keepCase: !!wordData.isSymbol };
+  const promptOptions = { multiplicationAlias: isEquationPrompt };
   const twoWordData = isBoss && !options.phraseBoss
     ? buildBossQuestion(wordData, bossAnswerLengthCap(waveSet))
     : null;
@@ -3367,7 +3304,6 @@ function spawnEnemy(options = {}) {
     promptNode,
     typedNode,
     lastTypedText: '',
-    caseSensitive: !!wordData.isSymbol,
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
@@ -3658,7 +3594,7 @@ function resetMeteor(meteor, stagger = false) {
 }
 
 function updateMeteors(delta) {
-  const active = isFinalWave() && mode === 'running';
+  const active = isSkyChapter() && mode === 'running';
   for (const meteor of meteors) {
     if (!active) {
       meteor.group.visible = false;
@@ -3745,7 +3681,7 @@ function createClouds() {
 }
 
 function updateClouds(delta) {
-  if (isFinalWave() || mode === 'ending') {
+  if (isSkyChapter() || currentPalette().indoor || mode === 'ending') {
     for (const cloud of clouds) {
       cloud.group.visible = false;
     }
@@ -4105,9 +4041,9 @@ function findMatches(prefix, options = {}) {
   });
 }
 
-// Units and symbols are matched exactly (kg, not KG); words in lower case.
+// Typing ignores capitals everywhere: kg, KG and Kg all hit a monster marked kg.
 function bufferFor(enemy, buffer = typedBuffer) {
-  return enemy.caseSensitive ? buffer : buffer.toLowerCase();
+  return buffer.toLowerCase();
 }
 
 // Everything a player could type at an enemy: its answer and alternative spellings.
@@ -4541,27 +4477,28 @@ function applySeasonInstant(palette) {
   }
   if (sceneTrunkMaterial) sceneTrunkMaterial.color.setHex(palette.trunkColor);
   if (moon) moon.material.color.setHex(palette.moonColor).multiplyScalar(MOON_GLOW_GAIN);
-  if (starField) {
-    starField.size = 1;
-    starField.opacity = palette.starOpacity;
-  }
+  if (starField) starField.opacity = palette.starOpacity;
   skyTopColor.setHex(palette.skyTop);
   recolorGround(palette);
-  seasonalEffects.setSeason(palette.name);
 }
 
+// Sets the light, colour and weather of the wave's chapter. A change of palette comes
+// in through a fog bank that hides the new stage, then clears.
 function applySeasonForWave(wave, instant = false) {
-  const index = (wave - 1) % SEASON_PALETTES.length;
-  if (!instant && currentSeasonIndex === index) return;
-  currentSeasonIndex = index;
-  const palette = SEASON_PALETTES[index];
-  seasonalEffects.setSeason(palette.name);
+  const palette = chapterForWave(wave).palette;
+  const changed = palette !== activePalette;
+  activePalette = palette;
+  const sky = palette.name === 'final';
+  setFinalWaveScenery(sky);
+  if (starField) starField.size = sky ? 1.7 : 1;
+  if (sky || palette.indoor) seasonalEffects.stopWeather();
+  else seasonalEffects.setSeason(palette.name);
   if (instant) {
     applySeasonInstant(palette);
     seasonFade = null;
     return;
   }
-  startSeasonFade(palette);
+  if (changed) startSeasonFade(palette, { fogBank: true });
 }
 
 function updateSeasonFade(delta) {
@@ -4616,9 +4553,19 @@ function recolorGround(palette) {
 }
 
 // Starts a gradual change of season; the ground fades with the sky, lights and leaves.
-function startSeasonFade(palette) {
+function startSeasonFade(palette, { fogBank = false } = {}) {
   seasonFade = { from: buildSeasonFromScene(), to: buildSeasonTarget(palette), palette, t: 0, duration: 3.5 };
   if (sceneGround) sceneGround.startBlend(groundColours(palette));
+  if (fogBank) {
+    const { from, to } = seasonFade;
+    from.fogColor.copy(to.fogColor);
+    from.bgColor.copy(to.fogColor);
+    from.skyTop.copy(to.fogColor);
+    from.fogNear = 0.5;
+    from.fogFar = 9;
+    seasonFade.duration = 4;
+    updateSeasonFade(0);
+  }
 }
 
 function accuracy() {
@@ -4862,11 +4809,7 @@ function startFinalWave() {
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
   updatePhaseDisplay();
-  // The world fades to the starlit night; weather stops and the moons and drifting rocks appear.
-  seasonalEffects.stopWeather();
-  startSeasonFade(FINAL_WAVE_PALETTE);
-  if (starField) starField.size = 1.7;
-  setFinalWaveScenery(true);
+  applySeasonForWave(waveSet);
 }
 
 function setFinalWaveScenery(active) {
@@ -5203,7 +5146,6 @@ function advanceWaveSet() {
     potionsSystem.deactivateShield();
   }
   document.body.classList.remove('final-wave-active');
-  setFinalWaveScenery(false);
   waveSet += 1;
   wavePhase = 'normal';
   waveClearDelayTimer = 0;
@@ -5234,6 +5176,13 @@ function advanceWaveSet() {
   applySeasonForWave(waveSet);
   focusKeyboard();
   if (isFinalWave()) startFinalWave();
+  else showChapterBanner();
+}
+
+// Names the place when the camera arrives somewhere new.
+function showChapterBanner() {
+  const { title } = chapterForWave(waveSet);
+  if (title) showBanner(title.toUpperCase());
 }
 
 function updateComboDisplay() {
