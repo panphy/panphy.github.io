@@ -449,3 +449,74 @@ export const EQUATION_WORDS = [
   { term: 'primary potential difference / secondary potential difference = primary turns / secondary turns', definition: 'Vp / Vs = np / ns', isEquation: true, ask: 'turns turns' },
   { term: 'primary potential difference × primary current = secondary potential difference × secondary current', definition: 'VpIp = VsIs', isEquation: true, ask: 'current current' },
 ];
+
+// Boss lines: whole statements the player types word by word. Each finished line
+// takes a segment off the boss's health bar. `topic` heads the wave-clear list.
+// Words only (no symbols or hyphens), so every word is plain to type.
+export const BOSS_PHRASES = [
+  // Energy
+  { term: 'energy cannot be created or destroyed', topic: 'Conservation of energy' },
+  { term: 'power is the rate at which energy is transferred', topic: 'Power' },
+  { term: 'efficiency is useful output energy divided by total input energy', topic: 'Efficiency' },
+  { term: 'work done equals force times distance', topic: 'Work done' },
+  { term: 'kinetic energy depends on mass and speed', topic: 'Kinetic energy' },
+  { term: 'a hotter object has more internal energy', topic: 'Internal energy' },
+  { term: 'renewable resources can be replenished as they are used', topic: 'Energy resources' },
+  // Particles
+  { term: 'density is mass per unit volume', topic: 'Density' },
+  { term: 'pressure is force per unit area', topic: 'Pressure' },
+  { term: 'temperature stays the same while a substance changes state', topic: 'Changes of state' },
+  { term: 'specific latent heat is the energy to change the state of one kilogram', topic: 'Specific latent heat' },
+  { term: 'specific heat capacity is the energy to raise one kilogram by one degree', topic: 'Specific heat capacity' },
+  { term: 'gas particles collide with the walls and exert a pressure', topic: 'Gas pressure' },
+  // Electricity
+  { term: 'current is the rate of flow of charge', topic: 'Current' },
+  { term: 'potential difference equals current times resistance', topic: 'Ohm’s law' },
+  { term: 'in a series circuit the current is the same everywhere', topic: 'Series circuits' },
+  { term: 'in a parallel circuit each branch has the same potential difference', topic: 'Parallel circuits' },
+  { term: 'resistances in series add up to the total resistance', topic: 'Series circuits' },
+  { term: 'the resistance of a thermistor falls as it gets hotter', topic: 'Thermistors' },
+  { term: 'a fuse melts when the current is too large', topic: 'Mains safety' },
+  { term: 'the national grid uses a high potential difference to reduce energy losses', topic: 'National Grid' },
+  { term: 'like charges repel and unlike charges attract', topic: 'Static electricity' },
+  // Atoms and radiation
+  { term: 'isotopes have the same number of protons but different numbers of neutrons', topic: 'Isotopes' },
+  { term: 'half life is the time for half the nuclei to decay', topic: 'Half-life' },
+  { term: 'alpha particles are the most ionising radiation', topic: 'Alpha radiation' },
+  { term: 'radioactive decay is random', topic: 'Radioactive decay' },
+  { term: 'nuclear fission splits a large nucleus into two smaller nuclei', topic: 'Fission' },
+  { term: 'nuclear fusion joins two light nuclei to form a heavier nucleus', topic: 'Fusion' },
+  { term: 'irradiation does not make an object radioactive', topic: 'Irradiation' },
+  // Forces
+  { term: 'weight is the force acting on an object due to gravity', topic: 'Weight' },
+  { term: 'resultant force equals mass times acceleration', topic: 'Newton’s second law' },
+  { term: 'when two objects interact they exert equal and opposite forces', topic: 'Newton’s third law' },
+  { term: 'an object keeps the same velocity unless a resultant force acts on it', topic: 'Newton’s first law' },
+  { term: 'acceleration is the rate of change of velocity', topic: 'Acceleration' },
+  { term: 'velocity is speed in a given direction', topic: 'Velocity' },
+  { term: 'momentum is conserved in a closed system', topic: 'Momentum' },
+  { term: 'stopping distance is thinking distance plus braking distance', topic: 'Stopping distance' },
+  { term: 'terminal velocity is reached when the resultant force is zero', topic: 'Terminal velocity' },
+  { term: 'the extension of a spring is proportional to the force applied', topic: 'Hooke’s law' },
+  { term: 'a moment is the turning effect of a force', topic: 'Moments' },
+  // Waves
+  { term: 'wave speed equals frequency times wavelength', topic: 'Wave speed' },
+  { term: 'sound waves are longitudinal', topic: 'Longitudinal waves' },
+  { term: 'light waves are transverse', topic: 'Transverse waves' },
+  { term: 'the angle of incidence equals the angle of reflection', topic: 'Reflection' },
+  { term: 'all electromagnetic waves travel at the same speed in a vacuum', topic: 'Electromagnetic waves' },
+  { term: 'a wave changes speed when it is refracted', topic: 'Refraction' },
+  { term: 'gamma rays have the shortest wavelength', topic: 'Electromagnetic spectrum' },
+  { term: 'a black body absorbs all the radiation that falls on it', topic: 'Black body radiation' },
+  // Magnetism
+  { term: 'like poles repel and unlike poles attract', topic: 'Magnetism' },
+  { term: 'a current in a wire makes a magnetic field around it', topic: 'Electromagnetism' },
+  { term: 'a wire carrying a current in a magnetic field feels a force', topic: 'Motor effect' },
+  { term: 'a changing magnetic field induces a potential difference', topic: 'Induction' },
+  { term: 'a step up transformer increases the potential difference', topic: 'Transformers' },
+  // Space
+  { term: 'stars form from clouds of dust and gas', topic: 'Life cycle of a star' },
+  { term: 'in a main sequence star fusion balances gravity', topic: 'Main sequence' },
+  { term: 'red shift shows that distant galaxies are moving away', topic: 'Red shift' },
+  { term: 'gravity keeps planets and moons in their orbits', topic: 'Orbits' },
+];

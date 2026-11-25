@@ -109,3 +109,22 @@ export function bossRockTier(wave) {
   const tier = bossWaveTier(wave);
   return { fromWave: tier.fromWave, interval: tier.rockInterval, hitsPerUnit: tier.hitsPerUnit };
 }
+
+// Beta bosses: one per wave. A boss shows whole statements (BOSS_PHRASES); each one
+// typed takes a segment off its health bar. Between words the player can shatter
+// the rocks it throws, each marked with a short unit.
+// lines: segments on the health bar. maxLetters: longest statement, letters only.
+// attackGap: seconds between throws. rockFlight: seconds a rock takes to arrive.
+// rockDamage: life units (half hearts) lost to a rock that lands.
+export const BOSS_PLAN_TABLE = [
+  { fromWave: 1, lines: 3, maxLetters: 34, attackGap: 6.0, rockFlight: 3.4, rockDamage: 1 },
+  { fromWave: 2, lines: 3, maxLetters: 40, attackGap: 5.4, rockFlight: 3.2, rockDamage: 1 },
+  { fromWave: 3, lines: 4, maxLetters: 48, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1 },
+  { fromWave: 5, lines: 4, maxLetters: 64, attackGap: 4.6, rockFlight: 2.8, rockDamage: 1 },
+  { fromWave: 7, lines: 5, maxLetters: 64, attackGap: 4.2, rockFlight: 2.6, rockDamage: 2 },
+  { fromWave: 10, lines: 8, maxLetters: 64, attackGap: 3.6, rockFlight: 2.5, rockDamage: 2 },
+];
+
+export function bossPlan(wave) {
+  return [...BOSS_PLAN_TABLE].reverse().find(row => wave >= row.fromWave) || BOSS_PLAN_TABLE[0];
+}

@@ -12,4 +12,6 @@ Run the tests with `node --test beta/spellwave/tests/*.test.mjs`.
 - **Units and symbols.** `SYMBOL_WORDS` in `src/question-bank.js` are the quickest monsters. They are matched exactly, capitals included (`caseSensitive`); superscripts are typed as digits and spaces are optional.
 - **Feel.** Every correct letter flicks a bolt from a wand and makes the monster flinch. A finishing letter adds a hit pause and a camera kick, and the last kill of an ambush plays in slow motion.
 
-Bosses still use the live game's clue questions. Replacing them with long-phrase bosses that have a health bar is the next step, followed by the other chapters' stages.
+- **Bosses.** Each wave ends with one boss in the arena. It speaks whole statements from `BOSS_PHRASES` in `src/question-bank.js`, shown at the bottom of the screen. The player types them word by word, and each finished statement takes a segment off the health bar at the top. Between words the player can shatter the rocks it throws, each marked with a short unit; no rock starts with the same letter as the boss's next word or another rock. `bossPlan` in `src/difficulty.js` sets the statements, the longest statement, the throw rate, the rock flight time and the rock damage for each wave. Wave 10 is a single eight-statement final boss. A line finished with chain lightning primed takes two segments and clears the rocks.
+
+The live game's clue-question code (hidden words, hint letters, boss previews) is still in the files but no longer runs. The other chapters' stages come next.
