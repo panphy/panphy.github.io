@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta7';
+import { createSpellwaveAudio } from './audio.js?v=beta8';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta7';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta7';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta7';
-import { createLeaderboard } from './leaderboard.js?v=beta7';
+import { createPotionSystem } from './potions.js?v=beta8';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta8';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta8';
+import { createLeaderboard } from './leaderboard.js?v=beta8';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta7';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta8';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta7';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress, stripOptionalSymbols, buildOptionalSymbolPrompts, keyProgress } from './prompt-utils.js?v=beta7';
-import { createWordDeck } from './word-decks.js?v=beta7';
-import { createStage } from './stages.js?v=beta7';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta7';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta8';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress, stripOptionalSymbols, buildOptionalSymbolPrompts, keyProgress } from './prompt-utils.js?v=beta8';
+import { createWordDeck } from './word-decks.js?v=beta8';
+import { createStage } from './stages.js?v=beta8';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta8';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1923,7 +1923,8 @@ function updateRailEnemy(enemy, delta, seconds) {
     position.x = plan.to.x + (plan.crossTo - plan.to.x) * plan.crossT;
     position.z = plan.to.z;
     position.y = enemy.baseY + Math.abs(Math.sin(seconds * 6 + enemy.phase)) * 0.12;
-    enemy.group.rotation.y = plan.crossTo > plan.to.x ? -Math.PI / 2 + 0.5 : Math.PI / 2 - 0.5;
+    // Healers and chests keep facing the player as they cross, leaning a little the way they go.
+    enemy.group.rotation.y = facing + (plan.crossTo > plan.to.x ? 0.3 : -0.3);
     if (plan.crossT >= 1) {
       leakEnemy(enemy);
       return true;
