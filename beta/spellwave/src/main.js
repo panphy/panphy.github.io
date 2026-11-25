@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta20';
+import { createSpellwaveAudio } from './audio.js?v=beta22';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta20';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta20';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta20';
-import { createLeaderboard } from './leaderboard.js?v=beta20';
+import { createPotionSystem } from './potions.js?v=beta22';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta22';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta22';
+import { createLeaderboard } from './leaderboard.js?v=beta22';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta20';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta20';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta22';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta22';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta20';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta20';
-import { createWordDeck } from './word-decks.js?v=beta20';
-import { createStage } from './stages.js?v=beta20';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta20';
-import { storyBeatForWave } from './story.js?v=beta20';
-import { createStoryteller } from './storyteller.js?v=beta20';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta20';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta22';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta22';
+import { createWordDeck } from './word-decks.js?v=beta22';
+import { createStage } from './stages.js?v=beta22';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta22';
+import { storyBeatForWave } from './story.js?v=beta22';
+import { createStoryteller } from './storyteller.js?v=beta22';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta22';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1662,6 +1662,7 @@ function startBossLine(boss) {
   const line = boss.bossLines[boss.lineIndex];
   boss.prompt = line.term;
   boss.definition = line.topic;
+  boss.firstLetterAt = undefined;
   boss.lineKind = line.kind || 'line';
   boss.label.dataset.stage = boss.lineKind;
   boss.lineWordsList = lineWords(line);
@@ -1764,6 +1765,9 @@ function advanceBossLine(boss) {
     boss.hurt = Math.max(boss.hurt, 0.45);
     hitStopTimer = 0.04;
     kickTimer = Math.max(kickTimer, 0.14);
+    // Each word of a word stage is ranked like a monster's word.
+    spawnRankPopup(boss);
+    boss.firstLetterAt = undefined;
   }
   boss.wordIndex += 1;
   if (boss.wordIndex < boss.lineWordsList.length) {
@@ -1789,6 +1793,8 @@ function advanceBossLine(boss) {
   boss.hp = Math.max(0, boss.hp - lost);
   boss.lineIndex += lost;
   if (!stageWord) {
+    // A whole statement or story line is ranked as one, from its first letter to its last.
+    spawnRankPopup(boss, boss.prompt.replace(/[^a-z]/gi, '').length - 1);
     score += boss.prompt.replace(/[^a-z]/gi, '').length * 15;
     if (!encounteredTerms.some(t => t.term === boss.prompt)) {
       encounteredTerms.push({ term: boss.prompt, definition: boss.definition, defeated: true });
@@ -5053,9 +5059,13 @@ function startWaveCleared() {
 let endingStartTime = 0;
 let endingTimers = [];
 let endingLeaderboardOffered = false;
-// The defeated words that fly into the wands in the victory cinematic.
+// 'best' when the run beat the saved best score, 'unranked' when a cheat was used.
+let endingScoreNote = '';
+// The defeated words that fly into the cannon's core in the ending cinematic.
 const ENDING_WORD_COUNT = 10;
 const ENDING_WORD_MAX_LENGTH = 18;
+const endWords = document.getElementById('endWords');
+const endScoreNote = document.getElementById('endScoreNote');
 
 function startEndingSequence() {
   mode = 'ending';
@@ -5070,6 +5080,7 @@ function startEndingSequence() {
   updatePhaseDisplay();
 
   const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
+  endingScoreNote = isUnranked ? 'unranked' : score > bestScore ? 'best' : '';
   if (!isUnranked && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
@@ -5126,8 +5137,12 @@ function chooseEndingWords() {
 function showEndingStatsScreen(finalStats, { skipped = false } = {}) {
   clearEndingTimers();
   if (gameEnding) {
-    gameEnding.className = 'game-ending phase-stats phase-replay';
+    gameEnding.className = 'game-ending phase-stats';
+    // With a score list on screen the summary keeps to the space beside it.
+    gameEnding.classList.toggle('has-score-list', Boolean(document.querySelector('.sw-leaderboard')));
   }
+  // Lifts the score list over the closing shot, beside the summary.
+  document.body.classList.add('ending-summary');
   setEndingStats(finalStats, true);
   if (skipped) {
     endingCinematic?.skipToEnd();
@@ -5164,6 +5179,8 @@ function getEndingStats() {
   const healthHearts = formatHeartCount(health);
   return {
     score,
+    scoreNote: endingScoreNote,
+    wordsWon: defeatedCount,
     accuracy,
     peakStreak,
     mimicsLooted,
@@ -5182,18 +5199,24 @@ function formatRunTime(seconds) {
 function setEndingStats(stats, animate) {
   if (!stats) return;
   if (animate) {
-    animateCounter(endScore, 0, stats.score, 1400);
+    animateCounter(endScore, 0, stats.score, 1400, formatScore);
+    animateCounter(endWords, 0, stats.wordsWon, 1100);
     animateCounter(endAccuracy, 0, stats.accuracy, 1000, v => `${v}%`);
     animateCounter(endStreak, 0, stats.peakStreak, 900);
     animateCounter(endMimics, 0, stats.mimicsLooted, 850);
   } else {
     if (endScore) endScore.textContent = '0';
+    if (endWords) endWords.textContent = '0';
     if (endAccuracy) endAccuracy.textContent = '0%';
     if (endStreak) endStreak.textContent = '0';
     if (endMimics) endMimics.textContent = '0';
   }
   if (endHealth) endHealth.textContent = `${stats.healthHearts}/${HEART_COUNT}`;
   if (endTime) endTime.textContent = stats.time;
+  if (endScoreNote) {
+    endScoreNote.hidden = !stats.scoreNote;
+    endScoreNote.textContent = stats.scoreNote === 'best' ? 'New best' : stats.scoreNote === 'unranked' ? 'Unranked' : '';
+  }
 }
 
 function queueEndingStep(callback, delay) {
@@ -5210,6 +5233,7 @@ function dismissEndingSequence() {
   clearEndingTimers();
   gameEnding.hidden = true;
   gameEnding.className = 'game-ending';
+  document.body.classList.remove('ending-summary');
   endingCinematic?.stop();
   stopVictoryScore(0.2);
 }
@@ -5293,40 +5317,37 @@ function updateTypingLabel() {}
 const RANK_SPEEDS = [['S', 7], ['A', 5.5], ['B', 4.2], ['C', 3.1], ['D', 2.2]];
 const RANK_COLOURS = { S: 0xffd84a, A: 0x4fd8ff, B: 0x7be36a };
 
-function killRank(enemy) {
-  const letters = Math.max(1, enemy.searchPrompt.length - 1);
-  const seconds = Math.max(0.05, elapsed - (enemy.firstLetterAt ?? elapsed));
-  const speed = letters / seconds;
+function rankFor(letters, since) {
+  const seconds = Math.max(0.05, elapsed - (since ?? elapsed));
+  const speed = Math.max(1, letters) / seconds;
   return (RANK_SPEEDS.find(([, needed]) => speed >= needed) || ['E'])[0];
 }
 
-// Monsters, healers and chests are ranked; rocks and bosses are not. The rank is the
-// reward for a fast word, so it slams in: the better the rank, the bigger the show.
-function spawnRankPopup(enemy) {
-  if (enemy.isProjectile || enemy.isBoss) return;
+// The rank is the reward for a fast word, so it slams in: the better the rank, the
+// bigger the letter. Monsters, healers and chests are ranked word by word; a boss is
+// ranked for each word of a word stage and each finished line. Rocks are not ranked.
+function spawnRankPopup(enemy, letters = enemy.searchPrompt.length - 1) {
+  if (enemy.isProjectile) return;
   const label = enemy.label;
   if (!label || label.classList.contains('is-hidden')) return;
   const left = parseFloat(label.style.left);
   const top = parseFloat(label.style.top);
   if (!Number.isFinite(left) || !Number.isFinite(top)) return;
-  const rank = killRank(enemy);
+  const rank = rankFor(letters, enemy.firstLetterAt);
   const popup = document.createElement('div');
   popup.className = 'rank-popup';
   popup.dataset.rank = rank;
-  popup.innerHTML = `<span class="rank-rays"></span><span class="rank-ring"></span><span class="rank-word">RANK</span><b>${rank}</b>`;
+  popup.innerHTML = `<span class="rank-ring"></span><span class="rank-word">RANK</span><b>${rank}</b>`;
   popup.style.left = `${left}px`;
-  popup.style.top = `${top + 54}px`;
+  popup.style.top = `${top + (enemy.isBoss ? 78 : 54)}px`;
   document.body.appendChild(popup);
   popup.addEventListener('animationend', (event) => { if (event.target === popup && event.animationName === 'rank-life') popup.remove(); });
-  // The top ranks also burst at the monster itself.
+  // The top ranks also spark at the monster itself.
   const colour = RANK_COLOURS[rank];
-  if (colour) {
+  if (colour && !enemy.isBoss) {
     reusableVector.copy(enemy.group.position);
     reusableVector.y += 1.1;
-    const best = rank === 'S';
-    fx.burst(reusableVector, { color: colour, color2: 0xffffff, count: best ? 40 : 18, speed: best ? 8 : 5, life: best ? 0.9 : 0.6, size: best ? 0.42 : 0.3 });
-    fx.ring(reusableVector, colour, { from: 0.4, to: best ? 5 : 3, life: 0.45, opacity: 0.85, flat: false });
-    if (best) kickTimer = Math.max(kickTimer, 0.22);
+    fx.burst(reusableVector, { color: colour, color2: 0xffffff, count: 16, speed: 5, life: 0.6, size: 0.3 });
   }
 }
 
