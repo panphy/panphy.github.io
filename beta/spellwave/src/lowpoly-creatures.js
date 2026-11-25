@@ -401,7 +401,7 @@ export function buildCrimsonBulwark(type, kit) {
     const flare = 0.75 + roar * 0.4 + rage * 0.25 + Math.sin(seconds * 17 + phase) * 0.08;
     blaze.scale.set(flare, flare, flare);
     const glow = 1 + rage * 0.1 + Math.sin(t * 3.4) * (0.02 + rage * 0.05) + windup * 0.06;
-    embers.scale.set(glow, 1 + (glow - 1) * 4, glow);
+    embers.scale.set(glow, 1 + (glow - 1) * 2, glow);
     for (let index = 0; index < 2; index += 1) {
       const { arm, digits, side } = arms[index];
       arm.rotation.x = -0.15 + Math.sin(t * 1.9 + index * 1.4) * 0.14 * wide - windup * 0.5 - hurt * 0.4;
