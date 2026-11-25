@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   NORMAL_PROMPT_LENGTH_CAPS, HARD_GUEST_COUNTS,
-  typedLength, normalPromptLengthCap, withinLength, hardGuestCount,
+  typedLength, normalPromptLengthCap, withinLength, hardGuestCount, variantCounts, planVariants,
 } from '../src/difficulty.js';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
@@ -69,3 +69,24 @@ test('startup dependencies share the page release version to avoid mixed cached 
   assert.ok(difficulty.includes(`from './prompt-utils.js?v=${version}'`));
 });
 
+
+test('the meadow has only plain monsters, and later waves add variants', () => {
+  assert.deepEqual(variantCounts(1), { shield: 0, splitter: 0, caster: 0 });
+  assert.ok(variantCounts(2).shield > 0);
+  assert.ok(variantCounts(3).splitter > 0);
+  assert.ok(variantCounts(4).caster > 0);
+  assert.equal(variantCounts(9), variantCounts(5));
+});
+
+test('variants never take the first monster or a reserved slot', () => {
+  for (let wave = 1; wave <= 5; wave += 1) {
+    const plan = planVariants(wave, 14, [3, 7]);
+    const counts = variantCounts(wave);
+    assert.equal(plan.size, counts.shield + counts.splitter + counts.caster);
+    for (const slot of plan.keys()) assert.ok(slot >= 1 && slot < 14 && slot !== 3 && slot !== 7);
+    for (const kind of ['shield', 'splitter', 'caster']) {
+      assert.equal([...plan.values()].filter(value => value === kind).length, counts[kind]);
+    }
+  }
+  assert.equal(planVariants(5, 3).size, 2);
+});

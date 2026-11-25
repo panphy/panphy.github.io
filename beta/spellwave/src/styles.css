@@ -2952,6 +2952,7 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .boss-banner { font-size: clamp(1.5rem, 5vw, 2.8rem); }
 .boss-banner.is-medic-hint { color: #c2305c; }
 .boss-banner.is-mimic-hint { color: #9a2bb0; }
+.boss-banner.is-variant-hint { color: #0f6480; }
 .boss-banner.is-final-wave { color: #c81e0a; font-size: clamp(3rem, 10vw, 6.4rem); }
 .boss-banner.is-time-freeze { color: #157a70; }
 .boss-banner.is-shockwave { color: #0d63c9; }
@@ -3430,6 +3431,21 @@ body.loot-guide-open .potion-bar {
 
 .word-tag[data-kind="boss"].is-miss .current-word .typed {
   color: var(--danger);
+}
+
+.word-tag[data-kind="shield"] .prompt-kind {
+  background: rgba(42, 167, 201, 0.2);
+  color: #0f6480;
+}
+
+.word-tag[data-kind="splitter"] .prompt-kind {
+  background: rgba(122, 82, 190, 0.18);
+  color: #5a3596;
+}
+
+.word-tag[data-kind="caster"] .prompt-kind {
+  background: rgba(206, 60, 60, 0.18);
+  color: #9a2020;
 }
 
 .word-tag[data-kind="rock"] .prompt-kind {
