@@ -696,6 +696,8 @@ function mountainKit() {
     // The route starts in the open pass and walks into the mine: everything the stage
     // calls `late` lies beyond the mine's mouth.
     late: true,
+    // The leg into the mine is long enough for a cart ride.
+    ride: true,
     faceKind: ({ y, onPath, late }) => (late ? (onPath && y > -1 ? null : 'cave') : (y > 1.4 || y < -1 ? 'rock' : null)),
     skip: ({ y, late }) => late && y > 15,
     // The mine's roof: a rough rock ceiling over the late part of the stage.

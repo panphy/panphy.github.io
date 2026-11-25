@@ -1,20 +1,20 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta13';
+import { createSpellwaveAudio } from './audio.js?v=beta14';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta13';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta13';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta13';
-import { createLeaderboard } from './leaderboard.js?v=beta13';
+import { createPotionSystem } from './potions.js?v=beta14';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta14';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta14';
+import { createLeaderboard } from './leaderboard.js?v=beta14';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta13';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt } from './monster-variants.js?v=beta13';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta14';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta14';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta13';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta13';
-import { createWordDeck } from './word-decks.js?v=beta13';
-import { createStage } from './stages.js?v=beta13';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta13';
-import { createWizardHands } from './wizard-hands.js?v=beta13';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta14';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta14';
+import { createWordDeck } from './word-decks.js?v=beta14';
+import { createStage } from './stages.js?v=beta14';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta14';
+import { createWizardHands } from './wizard-hands.js?v=beta14';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -420,6 +420,7 @@ let firstMedicHintShown = false;
 let variantSchedule = new Map();
 const variantHintsShown = new Set();
 const casterBolts = [];
+let rideCart = null;
 let sceneGround = null;
 let sceneRockMaterial = null;
 const rail = { stage: null, state: 'idle', stopIndex: -1, from: null, to: null, toIndex: 0, t: 0, duration: 1, bursts: [], encounter: null, walkPhase: 0 };
@@ -863,6 +864,7 @@ function endGame() {
   clearChainLightningTimers();
   releaseChainBeams();
   potionsSystem.clear();
+  document.body.classList.remove('blizzard');
   document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
   startMusicLoop(false);
@@ -1314,7 +1316,7 @@ function spawnSplitChildren(parent) {
   const origin = parent.group.position;
   const parentTime = railTypingEstimate(parent);
   [-1, 1].forEach((side, index) => {
-    const child = spawnEnemy({ wordData: choosePromptOfLength(3, 4), type: parent.type });
+    const child = spawnEnemy({ wordData: choosePromptOfLength(3, 4), type: parent.type, flier: parent.flier });
     child.scaleBoost = SPLIT_CHILD_SCALE;
     child.damage = 1;
     child.noGlossary = true;
@@ -2127,6 +2129,14 @@ function buildStageForWave(wave) {
   hideBossHpBar();
   rail.bursts = planBursts(wave);
   const chapter = chapterForWave(wave);
+  // The bridge fight and the cart ride take one of the wave's ambushes for themselves.
+  rail.setPiece = chapter.setPiece || null;
+  rail.setPieceDone = false;
+  rail.setPieceCount = 0;
+  rail.ride = null;
+  if ((rail.setPiece === 'bridge' || rail.setPiece === 'cart') && rail.bursts.length >= 3) rail.setPieceCount = rail.bursts.pop();
+  document.body.classList.remove('blizzard');
+  if (rideCart) rideCart.visible = false;
   rail.stage = createStage({
     seed: Math.floor(Math.random() * 1e6) + wave,
     burstCount: Math.max(1, rail.bursts.length),
@@ -2177,6 +2187,7 @@ function updateRail(delta) {
     const pose = rail.stage.travelPose(rail.from, rail.to, rail.t);
     setRailPose(pose);
     enterLatePart(pose.arc);
+    if (updateSetPieceTravel(pose, delta)) return;
     if (rail.t >= 1) arriveAtStop();
     return;
   }
@@ -2193,8 +2204,82 @@ function enterLatePart(arc) {
   showBanner(late.title.toUpperCase());
 }
 
+// ── Set-pieces ───────────────────────────────────────────────────────────
+// Each chapter after the meadow has a moment of its own (chapters.js): a fight on the
+// river wood's bridge, a cart ride into the mine, a blizzard on the frozen lake, and
+// in the night sky every monster flies.
+const RIDE_SPEED = 7;
+const RIDE_START_Z = -32;
+const BLIZZARD_VEIL_Z = -6.5;
+const BLIZZARD_STOP = 1;
+const FLIER_Y = 1.5;
+
+// Called while the camera travels. Returns true when a set-piece has stopped the walk.
+function updateSetPieceTravel(pose, delta) {
+  if (rail.setPiece === 'bridge') {
+    const crossing = rail.stage.crossing;
+    if (rail.setPieceDone || rail.setPieceCount <= 0 || !crossing || pose.arc < crossing.arc - 5) return false;
+    rail.setPieceDone = true;
+    startBridgeFight();
+    return true;
+  }
+  if (rail.setPiece !== 'cart') return false;
+  if (!rail.ride) {
+    if (rail.setPieceDone || rail.setPieceCount <= 0 || !rail.lateDone) return false;
+    rail.setPieceDone = true;
+    const distance = rail.to.arc - (rail.from ? rail.from.arc : rail.stage.startArc);
+    rail.duration = distance / RIDE_SPEED;
+    const count = rail.setPieceCount + 2;
+    rail.ride = { left: count, gap: ((1 - rail.t) * rail.duration * 0.78) / count, timer: 1.2 };
+    rideCart.visible = true;
+    showBanner('MINE CART!');
+  }
+  // The cart rattles along and never stops; what flies at it must be typed in passing.
+  rail.walkPhase += delta * 9;
+  kickTimer = Math.max(kickTimer, 0.05);
+  rail.ride.timer -= delta;
+  if (rail.ride.left > 0 && rail.ride.timer <= 0) {
+    rail.ride.left -= 1;
+    rail.ride.timer = rail.ride.gap;
+    spawnRideMonster();
+  }
+  return false;
+}
+
+// Monsters climb over the rails from both sides while the camera stands on the bridge.
+function startBridgeFight() {
+  const spots = [];
+  for (let index = 0; index < 6; index += 1) spots.push({ kind: 'climb', x: (index % 2 ? 1 : -1) * 3.6, z: -2 - index * 1.3 });
+  startEncounter({ spots, isBoss: false, resume: true, minionsOnly: true }, rail.setPieceCount, false);
+  showBanner('HOLD THE BRIDGE!');
+}
+
+// A cave flier with a short word, rushing at the cart from far down the tunnel.
+function spawnRideMonster() {
+  const enemy = spawnEnemy({ wordData: choosePromptOfLength(3, 5), type: ENEMY_TYPES.find(type => type.name === 'Glowmite'), flier: true });
+  const x = (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random() * 2.6);
+  enemy.baseY = GROUND_ENEMY_Y + 1.1 + Math.random() * 1.2;
+  enemy.lane = x;
+  enemy.damage = 1;
+  enemy.spawnZ = RIDE_START_Z;
+  enemy.revealZ = RIDE_START_Z + 2;
+  const flight = Math.max(2.8, railTypingEstimate(enemy) * 1.6);
+  enemy.rail = { phase: 'ride', t: 0, to: new THREE.Vector3(x, enemy.baseY, RIDE_START_Z), speed: (WALL_Z - RIDE_START_Z) / flight };
+  enemy.group.position.copy(enemy.rail.to);
+  normalEnemiesSpawned += 1;
+  registerNormalTypingCost(enemy);
+}
+
+function beginBlizzard() {
+  rail.encounter.blizzard = true;
+  document.body.classList.add('blizzard');
+  showBanner('BLIZZARD!', 'variant-hint');
+}
+
 function arriveAtStop() {
   rail.stopIndex = rail.toIndex;
+  rail.ride = null;
+  if (rideCart) rideCart.visible = false;
   const stop = rail.to;
   if (stop.isBoss) {
     if (wavePhase === 'normal') startBossPhase();
@@ -2202,6 +2287,7 @@ function arriveAtStop() {
     return;
   }
   startEncounter(stop, rail.bursts[rail.stopIndex] || 0, rail.stopIndex >= rail.bursts.length - 1);
+  if (rail.setPiece === 'blizzard' && rail.stopIndex === BLIZZARD_STOP) beginBlizzard();
 }
 
 const FALLBACK_SPOTS = [
@@ -2237,6 +2323,13 @@ function updateEncounter(delta) {
   if (live.length > 0) return;
   encounter.clearTimer += delta;
   if (encounter.clearTimer < 0.8) return;
+  if (encounter.blizzard) document.body.classList.remove('blizzard');
+  // The bridge fight is fought mid-walk: once it is won the camera walks on.
+  if (encounter.stop.resume) {
+    rail.encounter = null;
+    rail.state = 'travel';
+    return;
+  }
   if (encounter.stop.isBoss) {
     arriveAtStop();
     return;
@@ -2247,7 +2340,8 @@ function updateEncounter(delta) {
 }
 
 function spawnRailMember(encounter) {
-  const kind = shouldSpawnMedic() ? 'medic' : shouldSpawnMimic() ? 'mimic' : !isNormalWaveComplete() ? 'minion' : null;
+  const kind = encounter.stop.minionsOnly ? 'minion'
+    : shouldSpawnMedic() ? 'medic' : shouldSpawnMimic() ? 'mimic' : !isNormalWaveComplete() ? 'minion' : null;
   if (!kind) {
     encounter.remaining = 0;
     return null;
@@ -2257,8 +2351,11 @@ function spawnRailMember(encounter) {
   let spot = spots[encounter.nextSpot % spots.length];
   if (kind !== 'minion') spot = spots.find(candidate => candidate.kind === 'cover') || spot;
   encounter.nextSpot += 1;
+  // In the night sky every monster flies in from above.
+  const flier = kind === 'minion' && rail.setPiece === 'flight';
+  if (flier) spot = { ...spot, kind: 'sky' };
   const variant = kind === 'minion' ? variantSchedule.get(normalEnemiesSpawned) : null;
-  const enemy = spawnEnemy({ isMedic: kind === 'medic', isMimic: kind === 'mimic', railSpot: spot, variant });
+  const enemy = spawnEnemy({ isMedic: kind === 'medic', isMimic: kind === 'mimic', railSpot: spot, variant, flier });
   registerNormalTypingCost(enemy);
   if (kind === 'medic') medicsSpawnedThisSet += 1;
   else if (kind === 'mimic') mimicsSpawnedThisSet += 1;
@@ -2285,6 +2382,9 @@ function setupRailEntry(enemy, spot) {
   } else if (spot.kind === 'ground') {
     from = new THREE.Vector3(spot.x, baseY - 2.4, spot.z);
     to = new THREE.Vector3(spot.x, baseY, spot.z);
+  } else if (spot.kind === 'climb') {
+    from = new THREE.Vector3(spot.x, baseY - 2.6, spot.z);
+    to = new THREE.Vector3(spot.x * (0.2 + Math.random() * 0.35), baseY, spot.z + 0.8);
   } else {
     from = new THREE.Vector3(spot.x + (Math.random() - 0.5) * 3, baseY + 11, spot.z - 3);
     to = new THREE.Vector3(spot.x, baseY, spot.z);
@@ -2311,6 +2411,12 @@ function setupRailEntry(enemy, spot) {
     crossT: 0,
     crossTime: (2 + railTypingEstimate(enemy)) * 1.5,
   };
+  if (rail.encounter && rail.encounter.blizzard && !crosser && enemy.variant !== 'caster') {
+    // In the blizzard a monster's card stays hidden until it is close. It hurries
+    // through the snow, then slows enough to leave time for its word.
+    enemy.veilZ = BLIZZARD_VEIL_Z;
+    enemy.rail.veilSpeed = Math.min(enemy.rail.speed, (STRIKE_Z - BLIZZARD_VEIL_Z) / (own * 1.15));
+  }
   if (enemy.variant === 'caster') {
     // A caster walks to a stand well short of the player and casts from there. Its
     // first bolt leaves a fair typist the time to finish its word.
@@ -2338,6 +2444,14 @@ function updateRailEnemy(enemy, delta, seconds) {
   const position = enemy.group.position;
   const stunned = enemy.stunTimer > 0;
   const facing = Math.atan2(-position.x, CAMERA_DISTANCE - position.z);
+
+  if (plan.phase === 'ride') {
+    if (!stunned) position.z += plan.speed * delta;
+    position.x = enemy.lane + Math.sin(seconds * 3.1 + enemy.phase) * 0.5;
+    position.y = enemy.baseY + Math.sin(seconds * 4.3 + enemy.phase) * 0.35;
+    enemy.group.rotation.y = facing;
+    return false;
+  }
 
   if (plan.phase === 'entry') {
     plan.t = Math.min(1, plan.t + delta / plan.entryTime);
@@ -2384,10 +2498,13 @@ function updateRailEnemy(enemy, delta, seconds) {
       position.z += (enemy.pushbackTargetZ - position.z) * Math.min(1.0, 10.0 * delta);
       if (Math.abs(position.z - enemy.pushbackTargetZ) < 0.1) delete enemy.pushbackTargetZ;
     } else if (!stunned) {
-      position.z += plan.speed * delta;
+      const veiled = enemy.veilZ !== undefined && position.z < enemy.veilZ;
+      position.z += (veiled ? plan.speed * 1.6 : plan.veilSpeed || plan.speed) * delta;
     }
     position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
-    position.y = enemy.baseY + Math.abs(Math.sin(seconds * 6.2 + enemy.phase)) * enemy.stepBounce * 1.6;
+    position.y = enemy.flier
+      ? enemy.baseY + Math.sin(seconds * 2.3 + enemy.phase) * 0.55
+      : enemy.baseY + Math.abs(Math.sin(seconds * 6.2 + enemy.phase)) * enemy.stepBounce * 1.6;
     enemy.group.rotation.y = facing + Math.sin(seconds * 2.4 + enemy.phase) * 0.12;
     if (enemy.variant === 'caster') {
       if (enemy.pushbackTargetZ === undefined && position.z >= plan.standZ) plan.phase = 'cast';
@@ -2536,6 +2653,11 @@ function updateEnemies(delta, seconds) {
     if (enemy.group.userData.animate && enemy.stunTimer <= 0) enemy.group.userData.animate(seconds, enemy);
 
     if (enemy.variant) updateVariantParts(enemy, seconds);
+    if (enemy.wings) {
+      for (const pivot of enemy.wings.userData.wings) {
+        pivot.rotation.z = pivot.userData.side * (0.2 + Math.sin(seconds * 15 + enemy.phase) * 0.6);
+      }
+    }
     updateEnemyAura(enemy, delta);
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
 
@@ -3333,7 +3455,7 @@ function spawnEnemy(options = {}) {
   const startZ = Number.isFinite(options.startZ) ? options.startZ : 0;
   const lane = Number.isFinite(options.lane) ? options.lane : 0;
   const isFlying = isBoss && !!type.isFlying;
-  const spawnBaseY = isFlying ? FLYING_ENEMY_Y : isMedic ? MEDIC_ENEMY_Y : GROUND_ENEMY_Y;
+  const spawnBaseY = isFlying ? FLYING_ENEMY_Y : isMedic ? MEDIC_ENEMY_Y : options.flier ? FLIER_Y : GROUND_ENEMY_Y;
   group.position.set(lane, spawnBaseY, startZ);
   group.scale.setScalar(type.scale * (isClimaxBoss ? 1.5 : 1.0));
   enemyGroup.add(group);
@@ -3433,6 +3555,13 @@ function spawnEnemy(options = {}) {
     floatAmount: isFlying ? 0.22 : 0,
     phase: Math.random() * Math.PI * 2,
   };
+  if (options.flier) {
+    enemy.flier = true;
+    enemy.wobbleAmount = 0.6 + Math.random() * 0.5;
+    enemy.wobbleSpeed = 1.4 + Math.random();
+    enemy.wings = createWings(type);
+    group.add(enemy.wings);
+  }
   if (options.variant) dressVariant(enemy, options.variant);
   if (options.railSpot) setupRailEntry(enemy, options.railSpot);
   enemyId += 1;
@@ -3512,6 +3641,23 @@ function createTorches() {
   wizardHands = createWizardHands({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
   for (const glow of wizardHands.glows) torchFlames.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
   lightningCrowns.push(...wizardHands.crowns);
+
+  // The front of the mine cart, seen only during the ride. It hangs from the camera too.
+  rideCart = new THREE.Group();
+  const cartIron = new THREE.MeshStandardMaterial({ color: 0x4a4e57, roughness: 0.8, metalness: 0.2, flatShading: true });
+  const cartTimber = new THREE.MeshStandardMaterial({ color: 0x7a5632, roughness: 0.9, flatShading: true });
+  const cartFront = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.7, 0.16), cartIron);
+  cartFront.position.set(0, -1.42, -2.5);
+  const cartRim = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.12, 0.3), cartTimber);
+  cartRim.position.set(0, -1.05, -2.5);
+  rideCart.add(cartFront, cartRim);
+  for (const x of [-1.2, 0, 1.2]) {
+    const rivet = new THREE.Mesh(new THREE.OctahedronGeometry(0.07, 0), cartTimber);
+    rivet.position.set(x, -1.2, -2.4);
+    rideCart.add(rivet);
+  }
+  rideCart.visible = false;
+  camera.add(rideCart);
 
   // The magic's glow on whatever reaches the player: two lights either side of the
   // path, where monsters stop to strike. They never move, so the light count is fixed.
@@ -4017,6 +4163,8 @@ function chooseTarget(matches) {
 function isEnemyTargetable(enemy) {
   if (enemy.dying || enemy.group.position.z >= WALL_Z) return false;
   if (enemy.isBoss) return true;
+  // In a blizzard a monster cannot be seen, or typed at, until it is close.
+  if (enemy.veilZ !== undefined && enemy.group.position.z < enemy.veilZ) return false;
   return enemy.revealed;
 }
 

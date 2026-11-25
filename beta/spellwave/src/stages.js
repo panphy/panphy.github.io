@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createLowPolyTree, createLowPolyRock } from './lowpoly.js';
-import { createStageKit } from './stage-kits.js?v=beta13';
+import { createStageKit } from './stage-kits.js?v=beta14';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
@@ -23,6 +23,9 @@ const CELL = 2.5;
 // A leg with a crossing (a river, a chasm, a gap between islands) is this much longer,
 // which leaves room for it between one stop's arena and the next.
 const CROSSING_EXTRA = 18;
+// The leg into a kit's late part is this much longer where the kit asks for a ride
+// (the mine cart), so the ride has somewhere to go.
+const RIDE_EXTRA = 90;
 const GROUND_Y = -0.1;
 
 function mulberry32(seed) {
@@ -241,6 +244,7 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
   for (let leg = 1; leg < legLengths.length; leg += 1) if (leg !== lateStop) crossingLegs.push(leg);
   const crossingLeg = kit.crossing && crossingLegs.length > 0 ? crossingLegs[Math.floor(random() * crossingLegs.length)] : -1;
   if (crossingLeg > 0) legLengths[crossingLeg] += CROSSING_EXTRA;
+  if (lateStop > 0 && kit.ride) legLengths[lateStop] += RIDE_EXTRA;
   for (let leg = 0; leg < legLengths.length; leg += 1) {
     const bend = leg === legLengths.length - 1 ? side * 0.25 : side * (0.35 + random() * 0.35);
     heading += bend;

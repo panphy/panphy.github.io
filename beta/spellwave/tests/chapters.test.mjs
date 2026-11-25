@@ -46,3 +46,9 @@ test('each chapter boss is a boss model the game has', async () => {
   const table = main.slice(start, main.indexOf('\n];', start));
   for (const { boss } of CHAPTERS) assert.ok(table.includes(`name: '${boss}'`), boss);
 });
+
+test('the meadow is plain; every later chapter has a set-piece of its own', () => {
+  assert.equal(chapterForWave(1).setPiece, undefined);
+  const pieces = [2, 3, 4, 5].map(wave => chapterForWave(wave).setPiece);
+  assert.deepEqual(pieces, ['bridge', 'cart', 'blizzard', 'flight']);
+});
