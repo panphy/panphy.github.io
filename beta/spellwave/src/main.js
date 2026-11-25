@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta5';
+import { createSpellwaveAudio } from './audio.js?v=beta6';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta5';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta5';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta5';
-import { createLeaderboard } from './leaderboard.js?v=beta5';
+import { createPotionSystem } from './potions.js?v=beta6';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta6';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta6';
+import { createLeaderboard } from './leaderboard.js?v=beta6';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta5';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta6';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta5';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta5';
-import { createWordDeck } from './word-decks.js?v=beta5';
-import { createStage } from './stages.js?v=beta5';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta5';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta6';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta6';
+import { createWordDeck } from './word-decks.js?v=beta6';
+import { createStage } from './stages.js?v=beta6';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta6';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -385,7 +385,6 @@ let godMode = false;
 let godModeUsedThisRun = false;
 let potionCheatUsedThisRun = false;
 let finalWaveCheatUsedThisRun = false;
-let killedByBoss = false;
 let inputTrace = '';
 let streak = 0;
 let peakStreak = 0;
@@ -770,7 +769,6 @@ function startGame() {
   // ranked; it only becomes unranked if the player re-enters the cheat mid-run.
   potionCheatUsedThisRun = false;
   finalWaveCheatUsedThisRun = false;
-  killedByBoss = false;
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
@@ -870,7 +868,7 @@ function endGame() {
     saveBestScore(score);
   }
   showMessage(
-    killedByBoss ? 'BOSS LEAKED' : 'OVERRUN',
+    'OVERRUN',
     'Game Over',
     isUnranked ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
@@ -881,8 +879,6 @@ function endGame() {
   updatePhaseDisplay();
   updateHud(true);
   submitRunToLeaderboard();
-  // Restart the idle frame loop — endGame can arrive via the boss_killing timeout,
-  // during which scheduleFrame refuses to run and the loop is left dead.
   scheduleFrame();
 }
 
@@ -1260,7 +1256,7 @@ function leakEnemy(enemy) {
   const wasActiveTarget = activeTarget === enemy;
   let wasBlocked = false;
   if (!godMode && enemy.damage > 0 && potionsSystem.isShieldActive()) {
-    wasBlocked = potionsSystem.blockLeak(enemy.isBoss);
+    wasBlocked = potionsSystem.blockLeak();
   }
 
   if (wasBlocked) {
@@ -1269,10 +1265,9 @@ function leakEnemy(enemy) {
     if (!godMode) health = Math.max(0, health - enemy.damage);
     streak = 0;
     playDamageSound(enemy);
-    damageTimer = enemy.isBoss ? 0.46 : 0.32;
+    damageTimer = 0.32;
     damageFlash.classList.add('show');
     window.setTimeout(() => damageFlash.classList.remove('show'), 160);
-    if (enemy.isBoss && (godMode || health > 0)) showBanner('BOSS BROKE THROUGH!');
   }
   leakedCount += 1;
   if (!enemy.isProjectile && !encounteredTerms.some(t => t.term === enemy.prompt)) {
@@ -1285,23 +1280,12 @@ function leakEnemy(enemy) {
   if (wasActiveTarget) typedBuffer = '';
   updateHud(true);
   updateTypedDisplay();
-  if (!godMode && health <= 0) {
-    if (enemy.isBoss) {
-      killedByBoss = true;
-      mode = 'boss_killing';
-      showBanner('BOSS LEAKED!', 'boss-kill');
-      window.setTimeout(() => {
-        endGame();
-      }, 2500);
-    } else {
-      endGame();
-    }
-  }
+  if (!godMode && health <= 0) endGame();
 }
 
 function scheduleFrame() {
   cancelFrame();
-  if (mode === 'paused' || mode === 'ending' || mode === 'boss_killing') return;
+  if (mode === 'paused' || mode === 'ending') return;
 
   if (mode !== 'running') {
     isTimeoutScheduled = true;
@@ -1328,7 +1312,7 @@ function cancelFrame() {
 }
 
 function animate(frameTime) {
-  if (mode === 'paused' || mode === 'ending' || mode === 'boss_killing') {
+  if (mode === 'paused' || mode === 'ending') {
     rafId = null;
     return;
   }

@@ -1,6 +1,6 @@
 # Spellwave (beta rework)
 
-A working copy of Spellwave (`fun/spellwave.html`) for reworking it in the spirit of rail-shooter typing games. The live game is untouched; this copy has no leaderboard (`src/leaderboard.js` is a stub) and keeps its best score and word history under its own localStorage keys. The page is `beta/spellwave.html`. It needs no build step, and the files share the `?v=` value `beta5`: bump it in `beta/spellwave.html` and in every import when the files change.
+A working copy of Spellwave (`fun/spellwave.html`) for reworking it in the spirit of rail-shooter typing games. The live game is untouched; this copy has no leaderboard (`src/leaderboard.js` is a stub) and keeps its best score and word history under its own localStorage keys. The page is `beta/spellwave.html`. It needs no build step, and the files share the `?v=` value `beta6`: bump it in `beta/spellwave.html` and in every import when the files change.
 
 Run the tests with `node --test beta/spellwave/tests/*.test.mjs`.
 
