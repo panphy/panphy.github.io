@@ -5,8 +5,9 @@ import assert from 'node:assert/strict';
 import {
   pickTarget, buildSearchPrompt, buildAltSearchPrompts,
   getInputCharacters, isMathOperatorInput, promptIndexForProgress,
+  stripOptionalSymbols, buildOptionalSymbolPrompts, keyProgress,
 } from '../src/prompt-utils.js';
-import { ALL_WORDS, EQUATION_WORDS } from '../src/question-bank.js';
+import { ALL_WORDS, EQUATION_WORDS, SYMBOL_WORDS } from '../src/question-bank.js';
 
 const enemy = (searchPrompt, z, matched = searchPrompt) => ({
   searchPrompt, _matchedSearchPrompt: matched, group: { position: { z } },
@@ -152,6 +153,34 @@ test('typing ignores capitals, for units and symbols as well as words', () => {
   for (const letter of 'FoRcE') context.enterCharacter(letter);
   assert.equal(context.kills, 2);
   assert.equal(context.mistakes, 0);
+});
+
+test('units and formulas can be typed without / and =', () => {
+  assert.deepEqual(buildOptionalSymbolPrompts('m/s'), ['ms']);
+  assert.deepEqual(buildOptionalSymbolPrompts('p=e/t').sort(), ['p=et', 'pe/t', 'pet']);
+  assert.deepEqual(buildOptionalSymbolPrompts('kg'), []);
+  assert.equal(stripOptionalSymbols('p=f/a'), 'pfa');
+  assert.equal(keyProgress('m/s', 'm'), 1);
+  assert.equal(keyProgress('m/s', 'ms'), 3);
+  assert.equal(keyProgress('m/s', 'm/'), 2);
+  assert.equal(keyProgress('m/s', 'mx'), -1);
+  assert.equal(keyProgress('p=f/a', 'pfa'), 5);
+  for (const { term } of SYMBOL_WORDS) {
+    const key = buildSearchPrompt(term);
+    for (const typed of [key, ...buildOptionalSymbolPrompts(key)]) {
+      const { context, targets } = createTypingHarness(['force']);
+      const unit = enemy(key, -10);
+      Object.assign(unit, { altSearchPrompts: buildOptionalSymbolPrompts(key), revealed: true, type: { eye: 0 }, isEquation: false });
+      unit.group.scale = { y: 1 };
+      context.enemies = [unit];
+      context.typedBuffer = '';
+      context.activeTarget = null;
+      for (const letter of typed) context.enterCharacter(letter);
+      assert.equal(context.kills, 1, `${term}: ${typed}`);
+      assert.equal(context.mistakes, 0, `${term}: ${typed}`);
+      assert.equal(keyProgress(key, typed), key.length, `${term}: ${typed}`);
+    }
+  }
 });
 
 test('typing either spelling defeats normal enemies and equations without a mistake', () => {

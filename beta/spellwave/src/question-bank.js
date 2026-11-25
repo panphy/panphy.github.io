@@ -2,8 +2,7 @@
 // Keep terms concise; definitions appear as hints in later rounds.
 // Medium and hard terms and the equations become boss questions: the definition
 // is the clue and one content word is hidden. `ask` names that word when the
-// automatic pick would hide the wrong one. `noBoss` keeps a term out of boss
-// questions.
+// automatic pick would hide the wrong one.
 export const EASY_WORDS = [
   // Quantities & units
   { term: 'force', definition: 'A push or pull that may change speed, shape or direction' },
@@ -240,8 +239,8 @@ export const MEDIUM_WORDS = [
   { term: 'iron core', definition: 'The magnetic centre of a transformer or electromagnet' },
   { term: 'motor effect', definition: 'Force on a current-carrying wire in a magnetic field', ask: 'motor' },
   { term: 'electric motor', definition: 'A coil in a magnetic field that spins when current passes through it' },
-  { term: 'alternator', definition: 'A generator that produces alternating current', noBoss: true },
-  { term: 'dynamo', definition: 'A generator that produces direct current', noBoss: true },
+  { term: 'alternator', definition: 'A generator that produces alternating current' },
+  { term: 'dynamo', definition: 'A generator that produces direct current' },
   { term: 'loudspeaker', definition: 'Uses the motor effect to turn current variations into sound waves' },
   { term: 'microphone', definition: 'Uses the generator effect to turn sound waves into current variations' },
   { term: 'primary coil', definition: 'The part of a transformer connected to the alternating supply' },

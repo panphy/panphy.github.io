@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta5';
+import { createSpellwaveAudio } from './audio.js?v=beta7';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta5';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta5';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta5';
-import { createLeaderboard } from './leaderboard.js?v=beta5';
+import { createPotionSystem } from './potions.js?v=beta7';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, SYMBOL_WORDS, BOSS_PHRASES } from './question-bank.js?v=beta7';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta7';
+import { createLeaderboard } from './leaderboard.js?v=beta7';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta5';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta7';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta5';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta5';
-import { createWordDeck } from './word-decks.js?v=beta5';
-import { createStage } from './stages.js?v=beta5';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta5';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta7';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress, stripOptionalSymbols, buildOptionalSymbolPrompts, keyProgress } from './prompt-utils.js?v=beta7';
+import { createWordDeck } from './word-decks.js?v=beta7';
+import { createStage } from './stages.js?v=beta7';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta7';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -385,7 +385,6 @@ let godMode = false;
 let godModeUsedThisRun = false;
 let potionCheatUsedThisRun = false;
 let finalWaveCheatUsedThisRun = false;
-let killedByBoss = false;
 let inputTrace = '';
 let streak = 0;
 let peakStreak = 0;
@@ -770,7 +769,6 @@ function startGame() {
   // ranked; it only becomes unranked if the player re-enters the cheat mid-run.
   potionCheatUsedThisRun = false;
   finalWaveCheatUsedThisRun = false;
-  killedByBoss = false;
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
@@ -870,7 +868,7 @@ function endGame() {
     saveBestScore(score);
   }
   showMessage(
-    killedByBoss ? 'BOSS LEAKED' : 'OVERRUN',
+    'OVERRUN',
     'Game Over',
     isUnranked ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
@@ -881,8 +879,6 @@ function endGame() {
   updatePhaseDisplay();
   updateHud(true);
   submitRunToLeaderboard();
-  // Restart the idle frame loop — endGame can arrive via the boss_killing timeout,
-  // during which scheduleFrame refuses to run and the loop is left dead.
   scheduleFrame();
 }
 
@@ -1260,7 +1256,7 @@ function leakEnemy(enemy) {
   const wasActiveTarget = activeTarget === enemy;
   let wasBlocked = false;
   if (!godMode && enemy.damage > 0 && potionsSystem.isShieldActive()) {
-    wasBlocked = potionsSystem.blockLeak(enemy.isBoss);
+    wasBlocked = potionsSystem.blockLeak();
   }
 
   if (wasBlocked) {
@@ -1269,10 +1265,9 @@ function leakEnemy(enemy) {
     if (!godMode) health = Math.max(0, health - enemy.damage);
     streak = 0;
     playDamageSound(enemy);
-    damageTimer = enemy.isBoss ? 0.46 : 0.32;
+    damageTimer = 0.32;
     damageFlash.classList.add('show');
     window.setTimeout(() => damageFlash.classList.remove('show'), 160);
-    if (enemy.isBoss && (godMode || health > 0)) showBanner('BOSS BROKE THROUGH!');
   }
   leakedCount += 1;
   if (!enemy.isProjectile && !encounteredTerms.some(t => t.term === enemy.prompt)) {
@@ -1285,23 +1280,12 @@ function leakEnemy(enemy) {
   if (wasActiveTarget) typedBuffer = '';
   updateHud(true);
   updateTypedDisplay();
-  if (!godMode && health <= 0) {
-    if (enemy.isBoss) {
-      killedByBoss = true;
-      mode = 'boss_killing';
-      showBanner('BOSS LEAKED!', 'boss-kill');
-      window.setTimeout(() => {
-        endGame();
-      }, 2500);
-    } else {
-      endGame();
-    }
-  }
+  if (!godMode && health <= 0) endGame();
 }
 
 function scheduleFrame() {
   cancelFrame();
-  if (mode === 'paused' || mode === 'ending' || mode === 'boss_killing') return;
+  if (mode === 'paused' || mode === 'ending') return;
 
   if (mode !== 'running') {
     isTimeoutScheduled = true;
@@ -1328,7 +1312,7 @@ function cancelFrame() {
 }
 
 function animate(frameTime) {
-  if (mode === 'paused' || mode === 'ending' || mode === 'boss_killing') {
+  if (mode === 'paused' || mode === 'ending') {
     rafId = null;
     return;
   }
@@ -2633,6 +2617,11 @@ function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget) return typedBuffer;
   const typed = bufferFor(activeTarget);
+  if (activeTarget.optionalSymbols) {
+    // A skipped / or = is filled in as the next letter lands.
+    const progress = keyProgress(activeTarget.searchPrompt, typed);
+    if (progress >= 0) return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, progress));
+  }
   const effectiveSP = activeTarget._matchedSearchPrompt?.startsWith(typed)
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
@@ -2656,7 +2645,8 @@ function renderPrompt(enemy) {
     ? enemy._matchedSearchPrompt
     : enemy.searchPrompt;
   const matched = effectiveSP.startsWith(typed) && typed.length > 0;
-  const typedProgress = matched ? typed.length : 0;
+  const typedProgress = enemy.optionalSymbols ? Math.max(0, keyProgress(enemy.searchPrompt, typed))
+    : matched ? typed.length : 0;
 
   const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
     multiplicationAlias: enemy.isEquation,
@@ -2926,7 +2916,11 @@ function spawnEnemy(options = {}) {
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
     searchPrompt: buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: wordData.isSymbol ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
+    // Units and symbol equations may be typed without their / and =.
+    altSearchPrompts: wordData.isSymbol
+      ? buildOptionalSymbolPrompts(buildSearchPrompt(wordData.term, promptOptions))
+      : buildAltSearchPrompts(wordData.term, promptOptions),
+    optionalSymbols: !!wordData.isSymbol,
     _matchedSearchPrompt: null,
     lastPromptHtml: '',
     promptKind,
@@ -3734,10 +3728,11 @@ function choosePrompt() {
   const scheduledHardGuest = wavePhase === 'normal' ? hardGuestSchedule.get(normalEnemiesSpawned) : null;
   if (scheduledHardGuest) return scheduledHardGuest;
 
-  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt.toLowerCase());
+  // Keys are compared without / and =, which the player may leave out (N/m and N m are both nm).
+  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => stripOptionalSymbols(enemy.searchPrompt.toLowerCase()));
   // No word on screen may start another, or typing one would finish the other.
   const clashes = entry => {
-    const key = buildSearchPrompt(entry.term).toLowerCase();
+    const key = stripOptionalSymbols(buildSearchPrompt(entry.term).toLowerCase());
     return liveKeys.some(other => other.startsWith(key) || key.startsWith(other));
   };
   if (Math.random() < symbolShare(waveSet)) {

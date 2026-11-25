@@ -299,19 +299,8 @@ export function createPotionSystem({
     }
   }
 
-  // A leaking minion costs one charge; a leaking boss is a lethal hit and
-  // shatters the whole shield.
-  function blockLeak(isBoss = false) {
-    if (!shieldActive) return false;
-    shieldCharges = isBoss ? 0 : shieldCharges - 1;
-    if (shieldCharges <= 0) {
-      shieldActive = false;
-      shieldFadeTimer = 1.0; // Start Z-scale fade out
-    }
-    return true;
-  }
-
-  function blockBossHit() {
+  // Anything that gets through (a monster's strike or a boss's rock) costs one charge.
+  function blockLeak() {
     if (!shieldActive) return false;
     shieldCharges -= 1;
     if (shieldCharges <= 0) {
@@ -547,7 +536,6 @@ export function createPotionSystem({
     isShieldActive: () => shieldActive,
     deactivateShield,
     blockLeak,
-    blockBossHit,
     triggerShieldHitVisual,
     getPotions: () => [...potions],
     getPotionIcon: (type) => POTION_SVGS[type] || ''

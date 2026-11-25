@@ -1781,58 +1781,6 @@ body.chain-lightning-primed .typing-strip {
   animation: final-wave-banner 3.4s ease-out forwards;
 }
 
-.boss-banner.is-boss-kill {
-  font-size: clamp(1.8rem, 5.5vw, 4.2rem);
-  color: #ff2200;
-  text-shadow:
-    3px 0 0 #000,
-    -3px 0 0 #000,
-    0 3px 0 #000,
-    0 -3px 0 #000,
-    0 0 28px rgba(255, 0, 0, 0.95),
-    0 0 54px rgba(255, 0, 0, 0.75);
-}
-
-.boss-banner.is-boss-kill.is-active {
-  animation: boss-kill-banner 2.5s ease-out forwards;
-}
-
-@keyframes boss-kill-banner {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(2.5);
-  }
-  8% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.85);
-  }
-  14% {
-    transform: translate(-50%, -50%) scale(1.05);
-  }
-  20% {
-    transform: translate(-50%, -50%) scale(0.98);
-  }
-  25% {
-    transform: translate(-50%, -50%) scale(1.0);
-  }
-  /* shake */
-  27% { transform: translate(calc(-50% + 12px), -50%) scale(1.0); }
-  30% { transform: translate(calc(-50% - 12px), -50%) scale(1.0); }
-  33% { transform: translate(calc(-50% + 8px), -50%) scale(1.0); }
-  36% { transform: translate(calc(-50% - 8px), -50%) scale(1.0); }
-  39% { transform: translate(calc(-50% + 4px), -50%) scale(1.0); }
-  42% { transform: translate(-50%, -50%) scale(1.0); }
-  
-  80% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-}
-
 @keyframes final-wave-banner {
   0% {
     opacity: 0;
@@ -2993,7 +2941,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .boss-banner.is-medic-hint,
 .boss-banner.is-mimic-hint,
 .boss-banner.is-final-wave,
-.boss-banner.is-boss-kill,
 .boss-banner.is-time-freeze,
 .boss-banner.is-shockwave,
 .boss-banner.is-chain-lightning {
@@ -3006,7 +2953,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .boss-banner.is-medic-hint { color: #c2305c; }
 .boss-banner.is-mimic-hint { color: #9a2bb0; }
 .boss-banner.is-final-wave { color: #c81e0a; font-size: clamp(3rem, 10vw, 6.4rem); }
-.boss-banner.is-boss-kill { color: #c81e0a; font-size: clamp(2.4rem, 7vw, 5.2rem); }
 .boss-banner.is-time-freeze { color: #157a70; }
 .boss-banner.is-shockwave { color: #0d63c9; }
 .boss-banner.is-chain-lightning { color: #a87400; }
