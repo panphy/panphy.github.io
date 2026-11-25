@@ -14,8 +14,6 @@
   const BOTH_PAPER_UNITS = ["Working scientifically"]; // skills assessed in every paper
   const CHEVRON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-  const UP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
-  const DOWN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
   const GRIP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/></svg>';
   const SWAP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.5l1.7-2M20 20v-4.5h-4.5"/></svg>';
 
@@ -39,7 +37,6 @@
     count: 5,
     mode: "random",      // "random" | "manual"
     picks: [],           // question Numbers ticked by the teacher, in the order ticked
-    movedPick: null,     // the picked question that has just changed place, to flash it
     methods: [],         // practical methods from methods.csv
     methodPicks: [],     // their Numbers, in the order ticked
     collapsed: new Set(), // unit names whose topic lists are folded away
@@ -462,10 +459,10 @@
     };
   }
 
-  // The ticked questions in board order, each with move and remove buttons.
-  // A row can also be dragged to a new place: anywhere on it with a mouse, by
-  // its grip on a touch screen (so that a swipe on the text still scrolls).
-  function renderPicked(movedNumber) {
+  // The ticked questions in board order. A row is dragged to a new place:
+  // anywhere on it with a mouse, by its grip on a touch screen (so that a swipe
+  // on the text still scrolls). On the keyboard, the grip takes the arrow keys.
+  function renderPicked() {
     const picked = pickedQuestions();
     els.picked.textContent = "";
     els.picked.hidden = picked.length === 0;
@@ -474,57 +471,65 @@
     label.className = "chosen-label";
     label.textContent = "On the board, in this order";
     const list = document.createElement("ol");
-    const act = (question, name, icon, text, disabled, change) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.innerHTML = icon;
-      button.disabled = disabled;
-      button.dataset.act = `${name}-${question.Number}`;
-      button.setAttribute("aria-label", `${text}: ${plainText(question.Question)}`);
-      button.addEventListener("click", () => {
-        change();
-        state.movedPick = name === "remove" ? null : question.Number;
-        refresh(false);
-        // The list was rebuilt: keep the keyboard on the question that moved.
-        const same = els.picked.querySelector(`[data-act="${name}-${question.Number}"]:not(:disabled)`);
-        (same || els.picked.querySelector(`[data-act$="-${question.Number}"]:not(:disabled)`) || els.pickSearch).focus();
-      });
-      return button;
-    };
-    const swap = (a, b) => {
-      const i = state.picks.indexOf(a.Number), j = state.picks.indexOf(b.Number);
-      [state.picks[i], state.picks[j]] = [state.picks[j], state.picks[i]];
-    };
+    const sortable = picked.length > 1;
     picked.forEach((question, index) => {
       const row = document.createElement("li");
-      const grip = document.createElement("span");
-      grip.className = "pick-grip";
-      grip.innerHTML = GRIP_ICON;
       const order = document.createElement("span");
       order.className = "pick-order";
       order.textContent = index + 1;
       const text = document.createElement("span");
       text.className = "pick-text";
       setQuestionText(text, question.Question);
-      row.append(grip, order, text,
-        act(question, "up", UP_ICON, "Move up", index === 0, () => swap(question, picked[index - 1])),
-        act(question, "down", DOWN_ICON, "Move down", index === picked.length - 1, () => swap(question, picked[index + 1])),
-        act(question, "remove", CLOSE_ICON, "Remove", false, () => { state.picks = state.picks.filter((number) => number !== question.Number); }));
-      // Flash the question that has just changed place.
-      if (question.Number === movedNumber) row.classList.add("moved");
-      if (picked.length > 1) {
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "pick-remove";
+      remove.innerHTML = CLOSE_ICON;
+      remove.setAttribute("aria-label", `Remove: ${plainText(question.Question)}`);
+      remove.addEventListener("click", () => {
+        state.picks = state.picks.filter((number) => number !== question.Number);
+        refresh(false);
+        // The list was rebuilt: keep the keyboard near the question that went.
+        const buttons = els.picked.querySelectorAll(".pick-remove");
+        (buttons[Math.min(index, buttons.length - 1)] || els.pickSearch).focus();
+      });
+      if (sortable) {
+        const grip = document.createElement("button");
+        grip.type = "button";
+        grip.className = "pick-grip";
+        grip.innerHTML = GRIP_ICON;
+        grip.setAttribute("aria-label", `Reorder with the up and down arrow keys, place ${index + 1} of ${picked.length}: ${plainText(question.Question)}`);
+        grip.addEventListener("keydown", (event) => {
+          const target = event.key === "ArrowUp" ? index - 1 : event.key === "ArrowDown" ? index + 1 : -1;
+          if (target < 0 || target >= picked.length) return;
+          event.preventDefault();
+          movePick(picked, index, target);
+          refresh(false);
+          els.picked.querySelectorAll(".pick-grip")[target].focus();
+        });
         row.classList.add("draggable");
         row.addEventListener("pointerdown", (event) => startPickDrag(event, list, row, index, picked));
+        row.append(grip);
       }
+      row.append(order, text, remove);
       list.append(row);
     });
     els.picked.append(label, list);
   }
 
+  // Move one of the shown picks to a new place among them. Picks hidden by the
+  // course or target switch keep their places.
+  function movePick(picked, from, to) {
+    const numbers = picked.map((question) => question.Number);
+    numbers.splice(to, 0, numbers.splice(from, 1)[0]);
+    const shown = new Set(numbers);
+    let next = 0;
+    state.picks = state.picks.map((number) => (shown.has(number) ? numbers[next++] : number));
+  }
+
   // Drag a picked question to a new place. The other rows slide aside to show
   // where it will land; Escape puts it back.
   function startPickDrag(event, list, row, index, picked) {
-    if (event.button !== 0 || event.target.closest("button")) return;
+    if (event.button !== 0 || event.target.closest(".pick-remove")) return;
     if (event.pointerType === "touch" && !event.target.closest(".pick-grip")) return;
     const rows = [...list.children];
     const pageY = (clientY) => clientY + window.scrollY;
@@ -575,16 +580,7 @@
       document.removeEventListener("keydown", escape, true);
       if (!dragging) return;
       cancelAnimationFrame(frame);
-      if (commit && target !== index) {
-        const numbers = picked.map((question) => question.Number);
-        const [moved] = numbers.splice(index, 1);
-        numbers.splice(target, 0, moved);
-        // Picks hidden by the course or target switch keep their places.
-        const shown = new Set(numbers);
-        let next = 0;
-        state.picks = state.picks.map((number) => (shown.has(number) ? numbers[next++] : number));
-        state.movedPick = moved;
-      }
+      if (commit && target !== index) movePick(picked, index, target);
       refresh(false);
     };
     const drop = () => finish(true);
@@ -604,8 +600,7 @@
 
   function renderPicker() {
     if (state.mode !== "manual") return;
-    renderPicked(state.movedPick);
-    state.movedPick = null;
+    renderPicked();
     const terms = els.pickSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const scroll = els.picker.scrollTop;
     const boardOrder = pickedQuestions().map((question) => question.Number);
