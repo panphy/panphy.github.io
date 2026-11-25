@@ -1,18 +1,19 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta9';
+import { createSpellwaveAudio } from './audio.js?v=beta10';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta9';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta9';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta9';
-import { createLeaderboard } from './leaderboard.js?v=beta9';
+import { createPotionSystem } from './potions.js?v=beta10';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES } from './question-bank.js?v=beta10';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta10';
+import { createLeaderboard } from './leaderboard.js?v=beta10';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta9';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan } from './difficulty.js?v=beta10';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta9';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta9';
-import { createWordDeck } from './word-decks.js?v=beta9';
-import { createStage } from './stages.js?v=beta9';
-import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta9';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta10';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta10';
+import { createWordDeck } from './word-decks.js?v=beta10';
+import { createStage } from './stages.js?v=beta10';
+import { chapterForWave, GROUND_TONE } from './chapters.js?v=beta10';
+import { createWizardHands } from './wizard-hands.js?v=beta10';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -354,8 +355,6 @@ const debris = [];
 const canopyBlocks = [];
 const torchFlames = [];
 const torchLights = [];
-const wandGroups = [];
-const wandSwings = [];
 const lightningCrowns = [];
 const pathMarkerBlocks = [];
 const scrollingTrees = [];
@@ -433,6 +432,7 @@ let finalWaveScenery = null;
 let sceneLeafMaterials = [];
 let sceneTrunkMaterial = null;
 let sceneCrystalMat = null;
+let wizardHands = null;
 // The palette of the chapter on screen (chapters.js), or the one being faded to.
 let activePalette = null;
 let seasonEmberIntensityBase = 2.1;
@@ -2103,15 +2103,14 @@ function updateRailEnemy(enemy, delta, seconds) {
   return false;
 }
 
-// Every correct letter lands: the monster flinches, sparks fly and a wand flicks a bolt.
+// Every correct letter lands: the monster flinches, sparks fly and the wand flicks a bolt.
 function hitEnemyWithLetter(enemy) {
   enemy.flinch = 1;
   reusableVector.copy(enemy.group.position);
   reusableVector.y += 0.9 * enemy.group.scale.y;
   fx.burst(reusableVector, { color: enemy.type.eye, color2: 0xffffff, count: 7, speed: 3.2, life: 0.3, size: 0.24 });
-  const side = enemy.group.position.x < 0 ? 0 : 1;
-  if (wandGroups[side]) triggerWandSwing(wandGroups[side]);
-  const start = new THREE.Vector3(side === 0 ? -5.35 : 5.35, 2.38, WALL_Z - 0.2);
+  wizardHands.cast(1, 0.45);
+  const start = wizardHands.origin(1);
   const end = reusableVector.clone();
   const distance = start.distanceTo(end);
   const bolt = new THREE.Mesh(
@@ -2375,7 +2374,6 @@ function updateEffects(delta) {
 
 function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   const envDelta = isTimeFrozen ? 0 : delta;
-  updateWandSwings(envDelta);
   updateMeteors(envDelta);
   emberLight.intensity = seasonEmberIntensityBase + Math.sin(seconds * 5.8) * 0.34;
   if (kickTimer > 0) kickTimer = Math.max(0, kickTimer - delta);
@@ -2387,6 +2385,11 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   camera.position.y = CAMERA_HEIGHT + Math.sin(seconds * 0.52) * 0.06 + bob + Math.cos(seconds * 37) * shake;
   camera.position.z = CAMERA_DISTANCE + Math.sin(seconds * 0.28) * 0.08 + Math.sin(seconds * 43) * shake;
   camera.lookAt(cameraTarget);
+  wizardHands.update(seconds, envDelta, {
+    target: activeTarget && !activeTarget.dying ? activeTarget.group.position : null,
+    walk: walking,
+    walkPhase: rail.walkPhase,
+  });
   if (rail.stage) rail.stage.update(seconds);
 
   if (moon) {
@@ -3132,72 +3135,24 @@ function createLightningCrown() {
 }
 
 function createTorches() {
-  const shaftMat = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.9, flatShading: true });
-  const bandMat = new THREE.MeshStandardMaterial({ color: 0xd9a441, roughness: 0.4, metalness: 0.6, flatShading: true });
-  const wandPart = (geometry, material, y) => {
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.y = y;
-    mesh.castShadow = true;
-    return mesh;
-  };
   sceneCrystalMat = new THREE.MeshStandardMaterial({
     color: 0x58dfcf, emissive: 0x2dd4bf, emissiveIntensity: 2.6,
     roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9, flatShading: true,
   });
 
+  // The wizard's hands hang from the camera, which must be in the scene for them to draw.
+  scene.add(camera);
+  wizardHands = createWizardHands({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
+  for (const glow of wizardHands.glows) torchFlames.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
+  lightningCrowns.push(...wizardHands.crowns);
+
+  // The magic's glow on whatever reaches the player: two lights either side of the
+  // path, where monsters stop to strike. They never move, so the light count is fixed.
   for (const x of [-5.35, 5.35]) {
-    const z = WALL_Z - 0.2;
-
-    // Wand group — pivot at the base so the whole wand rotates as one unit
-    const wandGroup = new THREE.Group();
-    wandGroup.position.set(x, 0, z);
-    world.add(wandGroup);
-    wandGroups.push(wandGroup);
-
-    // Shaft (local coords: x=0, z=0 relative to wand base)
-    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.07, 0.12, 1.9, 5), shaftMat, 0.95));
-    // Decorative bands
-    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.15, 0.15, 0.1, 6), bandMat, 0.38));
-    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.13, 0.13, 0.1, 6), bandMat, 1.0));
-    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.11, 0.11, 0.1, 6), bandMat, 1.74));
-    // Crystal cage (metal brackets framing the orb)
-    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.2, 0.12, 0.12, 6), bandMat, 1.88));
-    wandGroup.add(wandPart(new THREE.ConeGeometry(0.07, 0.16, 4), bandMat, 2.5));
-
-    // Crystal cluster group (pulsed as a unit, local to wandGroup)
-    const crystalGroup = new THREE.Group();
-    crystalGroup.position.set(0, 2.11, 0);
-    const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.26, 0), sceneCrystalMat);
-    core.scale.set(1, 1.35, 1);
-    core.castShadow = true;
-    crystalGroup.add(core);
-    const leftShard = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), sceneCrystalMat);
-    leftShard.scale.set(1, 1.6, 1);
-    leftShard.position.set(-0.2, 0.08, 0);
-    leftShard.rotation.z = 0.35;
-    leftShard.castShadow = true;
-    crystalGroup.add(leftShard);
-    const rightShard = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), sceneCrystalMat);
-    rightShard.scale.set(1, 1.6, 1);
-    rightShard.position.set(0.2, 0.08, 0);
-    rightShard.rotation.z = -0.35;
-    rightShard.castShadow = true;
-    crystalGroup.add(rightShard);
-    wandGroup.add(crystalGroup);
-    torchFlames.push({ mesh: crystalGroup, phase: Math.random() * Math.PI * 2 });
-
-    // Lightning crown — shown only when chain lightning is primed
-    const crown = createLightningCrown();
-    crown.position.set(0, 2.72, 0);
-    crown.visible = false;
-    wandGroup.add(crown);
-    lightningCrowns.push(crown);
-
-    // Point light parented to the wand so it follows the swing
     const light = new THREE.PointLight(0x2dd4bf, 1.6, 14, 2);
-    light.position.set(0, 2.2, 0);
+    light.position.set(x, 2.2, WALL_Z - 0.2);
     light.userData.phase = Math.random() * Math.PI * 2;
-    wandGroup.add(light);
+    world.add(light);
     torchLights.push(light);
   }
 }
@@ -3433,40 +3388,11 @@ function glowColor(hex, gain = GLOW_GAIN) {
   return new THREE.Color(hex).multiplyScalar(gain);
 }
 
-function triggerWandSwing(wandGroup) {
-  const existing = wandSwings.findIndex(s => s.group === wandGroup);
-  if (existing !== -1) wandSwings.splice(existing, 1);
-  wandSwings.push({ group: wandGroup, t: 0, duration: 0.42 });
-}
-
-function updateWandSwings(delta) {
-  for (let i = wandSwings.length - 1; i >= 0; i--) {
-    const swing = wandSwings[i];
-    swing.t = Math.min(swing.t + delta / swing.duration, 1);
-    const t = swing.t;
-    // Fast forward thrust (ease-out rise to peak at 28%), then smoothstep return
-    let angle;
-    if (t <= 0.28) {
-      const p = t / 0.28;
-      angle = (1 - (1 - p) * (1 - p)) * -0.48;
-    } else {
-      const p = (t - 0.28) / 0.72;
-      const eased = p * p * (3 - 2 * p);
-      angle = (1 - eased) * -0.48;
-    }
-    swing.group.rotation.x = angle;
-    if (swing.t >= 1) {
-      swing.group.rotation.x = 0;
-      wandSwings.splice(i, 1);
-    }
-  }
-}
-
 function spawnBeam(targetPosition) {
-  const side = Math.random() < 0.5 ? 0 : 1;
-  const staffX = side === 0 ? -5.35 : 5.35;
-  if (wandGroups[side]) triggerWandSwing(wandGroups[side]);
-  const start = new THREE.Vector3(staffX, 2.38, WALL_Z - 0.2);
+  // The finishing blow comes from the wand, with the open hand flaring beside it.
+  wizardHands.cast(1, 1);
+  wizardHands.cast(0, 1);
+  const start = wizardHands.origin(1);
   const end = targetPosition.clone();
   end.y += 1.2;
   playBeamSound(end.x);
@@ -4911,15 +4837,10 @@ function triggerChainLightning(firstEnemy) {
   playToggleSound();
   showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
-  // Select the wand tip on the side of the 1st monster (origin)
-  const side = origin.x < 0 ? 0 : 1;
-  const selectedWand = wandGroups[side];
-  if (selectedWand) {
-    triggerWandSwing(selectedWand);
-  }
-  const wandTip = selectedWand 
-    ? new THREE.Vector3(selectedWand.position.x, 2.38, selectedWand.position.z)
-    : new THREE.Vector3(side === 0 ? -5.35 : 5.35, 2.38, WALL_Z - 0.2);
+  // The chain leaps from the open hand's rune.
+  wizardHands.cast(0, 1);
+  wizardHands.cast(1, 1);
+  const wandTip = wizardHands.origin(0);
 
   const chainMonsters = [firstEnemy];
 
