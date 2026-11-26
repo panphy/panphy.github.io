@@ -3853,7 +3853,9 @@ function updateLabels() {
     const railPhase = enemy.rail.phase;
     enemy.label.classList.toggle('is-warning', enemy.approachAmount > 0.45);
     enemy.label.classList.toggle('is-danger', enemy.approachAmount > 0.8);
-    enemy.label.classList.toggle('is-critical', railPhase === 'windup' || railPhase === 'strike');
+    // About to hurt the player: winding up to strike, or a caster near the end of its charge.
+    const aboutToHit = railPhase === 'windup' || railPhase === 'strike' || (railPhase === 'cast' && (enemy.charge || 0) > 0.55);
+    enemy.label.classList.toggle('is-critical', aboutToHit);
     enemy.label.classList.toggle('is-stunned', !!(enemy.stunTimer && enemy.stunTimer > 0));
   }
 }
