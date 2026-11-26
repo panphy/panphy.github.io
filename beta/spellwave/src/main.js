@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta28';
+import { createSpellwaveAudio } from './audio.js?v=beta29';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta28';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta28';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta28';
-import { createLeaderboard } from './leaderboard.js?v=beta28';
+import { createPotionSystem } from './potions.js?v=beta29';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta29';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta29';
+import { createLeaderboard } from './leaderboard.js?v=beta29';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta28';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta28';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta29';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta29';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta28';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta28';
-import { createWordDeck } from './word-decks.js?v=beta28';
-import { createStage } from './stages.js?v=beta28';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta28';
-import { storyBeatForWave } from './story.js?v=beta28';
-import { createStoryteller } from './storyteller.js?v=beta28';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta28';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta29';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta29';
+import { createWordDeck } from './word-decks.js?v=beta29';
+import { createStage } from './stages.js?v=beta29';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta29';
+import { storyBeatForWave } from './story.js?v=beta29';
+import { createStoryteller } from './storyteller.js?v=beta29';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta29';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -425,7 +425,6 @@ const casterBolts = [];
 let rideCart = null;
 let storyCard = null;
 let challengeCard = null;
-let spaceHeld = false;
 let sceneGround = null;
 let sceneRockMaterial = null;
 const rail = { stage: null, state: 'idle', stopIndex: -1, from: null, to: null, toIndex: 0, t: 0, duration: 1, bursts: [], encounter: null, walkPhase: 0 };
@@ -712,9 +711,6 @@ document.addEventListener('fullscreenchange', updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 window.addEventListener('keydown', handleKeyDown);
 // Holding space hurries a storyteller's speech along.
-window.addEventListener('keydown', (event) => { if (event.key === ' ') spaceHeld = true; });
-window.addEventListener('keyup', (event) => { if (event.key === ' ') spaceHeld = false; });
-window.addEventListener('blur', () => { spaceHeld = false; });
 window.addEventListener('blur', () => {
   if (mode === 'running') pauseGame();
 });
@@ -1062,10 +1058,7 @@ function handleKeyDown(event) {
     // Let Space activate a focused button/link instead of swallowing it.
     if (event.key === ' ' && event.target !== keyboardInput && event.target.closest && event.target.closest('button, a')) return;
     event.preventDefault();
-    if (hurryStory()) {
-      event.preventDefault();
-      return;
-    }
+    if (hurryStory(event.repeat ? '' : event.key)) return;
     enterCharacter(event.key);
   }
 }
@@ -1114,7 +1107,7 @@ function handleBeforeInput(event) {
 
 // A key typed on a touch keyboard: it hurries a storyteller on, or else it is a letter.
 function typeOrHurry(character) {
-  if (!hurryStory()) enterCharacter(character);
+  if (!hurryStory(character)) enterCharacter(character);
 }
 
 function enterCharacter(character) {
@@ -2682,20 +2675,27 @@ function arriveAtStop() {
 // they talk, and thank the player with a heart.
 const STORY_SPOT = new THREE.Vector3(2.3, 0, -4.2);
 const STORY_RESCUE_HEAL = 2;
-const STORY_LETTERS_PER_SECOND = 34;
-// How much faster a line is spoken, and passed over, while space is held.
-const STORY_HURRY = 4;
+const STORY_LETTERS_PER_SECOND = 20;
 
 function showStoryLine(name, text) {
   if (!storyCard) {
     storyCard = document.createElement('div');
     storyCard.className = 'story-card';
-    storyCard.innerHTML = '<span class="story-name"></span><span class="story-line"></span>';
+    storyCard.innerHTML = '<span class="story-name"></span><span class="story-line"></span>'
+      + '<span class="story-next" aria-hidden="true"><kbd>Space</kbd></span>'
+      + '<button class="story-skip" type="button" title="Skip the story">Skip</button>';
+    storyCard.querySelector('.story-skip').addEventListener('click', () => {
+      skipStory();
+      focusKeyboard();
+    });
     document.getElementById('app').append(storyCard);
   }
   storyCard.querySelector('.story-name').textContent = name;
   // The line is typed out letter by letter (updateStoryText); it starts empty.
   storyCard.querySelector('.story-line').textContent = '';
+  storyCard.classList.remove('is-done');
+  // The story can be skipped once nothing holds the storyteller.
+  storyCard.querySelector('.story-skip').hidden = !!(rail.story && rail.story.held);
   storyCard.hidden = false;
   if (rail.story) Object.assign(rail.story, { text, shown: 0, blip: 0 });
   // Restart the entrance animation for each new line.
@@ -2740,10 +2740,14 @@ function advanceStoryLine() {
     if (storyCard) storyCard.hidden = true;
     return;
   }
-  const text = story.beat.lines[story.line];
-  showStoryLine(story.beat.name, text);
-  // How long the finished line stays up; any key moves on sooner.
-  story.timer = 1.5 + text.length * 0.028;
+  showStoryLine(story.beat.name, story.beat.lines[story.line]);
+}
+
+function skipStory() {
+  const story = rail.story;
+  if (rail.state !== 'story' || !story || story.held || story.leaving > 0) return;
+  story.leaving = 0.01;
+  if (storyCard) storyCard.hidden = true;
 }
 
 // Letters appear one at a time, with a blip of the speaker's voice for every other one.
@@ -2751,10 +2755,12 @@ function updateStoryText(delta) {
   const story = rail.story;
   if (!story.text || story.shown >= story.text.length) return false;
   const before = Math.floor(story.shown);
-  story.shown = Math.min(story.text.length, story.shown + delta * STORY_LETTERS_PER_SECOND * (spaceHeld ? STORY_HURRY : 1));
+  story.shown = Math.min(story.text.length, story.shown + delta * STORY_LETTERS_PER_SECOND);
   const now = Math.floor(story.shown);
   if (now === before) return true;
   storyCard.querySelector('.story-line').textContent = story.text.slice(0, now);
+  // A finished line (other than a plea for help) waits for Space, and says so.
+  if (now >= story.text.length && !story.held) storyCard.classList.add('is-done');
   story.blip += now - before;
   if (story.blip >= 2 && /\S/.test(story.text.charAt(now - 1))) {
     story.blip = 0;
@@ -2812,16 +2818,22 @@ function updateStory(delta) {
     if (story.age > 0.5) advanceStoryLine();
     return;
   }
-  if (speaking) return;
-  story.timer -= delta * (spaceHeld ? STORY_HURRY : 1);
-  if (story.timer <= 0) advanceStoryLine();
 }
 
-// While someone is talking, with nothing to type at, keys are not letters: holding
-// space speeds the speech up and the rest are ignored. Returns true if the key is taken.
-function hurryStory() {
+// While someone is talking, with nothing to type at, keys are not letters. Space (or
+// Enter) shows the rest of the line at once, or moves on from a finished line; other
+// keys are ignored. Returns true if the key is taken.
+function hurryStory(key) {
   const story = rail.story;
-  return rail.state === 'story' && !!story && !story.held;
+  if (rail.state !== 'story' || !story || story.held) return false;
+  if ((key === ' ' || key === 'Enter') && story.line >= 0 && story.leaving === 0) {
+    if (story.shown < story.text.length) {
+      story.shown = story.text.length - 0.5;
+    } else {
+      advanceStoryLine();
+    }
+  }
+  return true;
 }
 
 function endStory() {
