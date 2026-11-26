@@ -4520,10 +4520,20 @@ body.battery-saver .corner-controls .battery-saver-toggle.is-active {
   text-decoration-color: rgba(159, 232, 255, 0.8);
 }
 
-/* On the black plate the monster's typed letters fade to pale, and the player's own
-   letters below are bright cyan. */
+/* One line per card, like the boss's words: the letters typed so far light up cyan in
+   the word itself, so the separate line of typed letters is not shown. */
 .word-tag:not(.is-boss) .prompt .typed {
-  color: rgba(255, 246, 220, 0.38);
+  color: #5ff2e6;
+  text-shadow: 0 0 10px rgba(95, 242, 230, 0.55);
+}
+
+.word-tag .typed-line,
+.word-tag.has-typing .typed-line {
+  display: none;
+}
+
+.word-tag.is-miss .prompt .remaining {
+  color: #ff6a5a;
 }
 
 .word-tag .typed-line {
@@ -4535,4 +4545,38 @@ body.battery-saver .corner-controls .battery-saver-toggle.is-active {
 
 .word-tag.is-miss .typed-line {
   color: #ff6a5a;
+}
+
+/* Potion icons: chunky filled art, a little larger on their keys. */
+.potion-bar .potion-icon,
+.potion-bar .svg-magic.potion-art {
+  width: 34px;
+  height: 34px;
+}
+
+.svg-magic.potion-art,
+.svg-magic.potion-art * {
+  filter: none;
+  animation: none;
+}
+
+/* Each slot's arrow key sits on a small key at its top-left corner, clear of the icon. */
+.potion-bar .potion-slot .slot-key,
+.potion-bar .potion-slot.occupied .slot-key {
+  top: -9px;
+  right: auto;
+  bottom: auto;
+  left: -9px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 18px;
+  border: 2px solid var(--key-ink);
+  border-radius: 5px;
+  background: #fffaf0;
+  color: var(--key-ink);
+  font-size: 0.66rem;
+  line-height: 1;
+  opacity: 1;
 }

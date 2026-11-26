@@ -1,5 +1,5 @@
 /**
- * Potion System Factory for Spellwave 2
+ * Potion system for KeyFire (the Spellwave beta)
  * Encapsulates potion states, SVG icon templates, active timers,
  * 3D visual indicators for Shockwave travelling waves,
  * and the 'idkfa' potion cheat mechanism.
@@ -44,35 +44,40 @@ export function createPotionSystem({
   const activeShockwaves = [];
   const pendingWaves = [];
 
+  // Chunky icons in the keycap style: filled shapes with a thick ink outline.
+  const INK = '#3d2b1c';
   const POTION_SVGS = {
     time_freeze: `
-      <svg class="svg-magic magic-time" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <circle cx="22" cy="22" r="14" class="clock-rim"></circle>
-        <path d="M19 8h6M22 8v3" class="clock-top"></path>
-        <line x1="22" y1="22" x2="22" y2="15" class="clock-hand hour-hand"></line>
-        <line x1="22" y1="22" x2="28" y2="22" class="clock-hand minute-hand"></line>
-        <circle cx="22" cy="22" r="2" class="clock-center"></circle>
+      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+        <rect x="18" y="3.5" width="8" height="5" rx="1.5" fill="#8ef0e6" stroke="${INK}" stroke-width="2.6"/>
+        <circle cx="22" cy="24" r="15" fill="#fff6dc" stroke="${INK}" stroke-width="3.4"/>
+        <path d="M22 24V15.5M22 24l6 3.5" fill="none" stroke="#1a8fb0" stroke-width="3.4" stroke-linecap="round"/>
+        <circle cx="22" cy="24" r="2.6" fill="${INK}"/>
+        <path d="M13 14.5a14 14 0 0 1 5-3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
       </svg>
     `,
     chain_lightning: `
-      <svg class="svg-magic magic-lightning" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <path d="M25 4 L14 22 H22 L18 40 L30 20 H22 Z" class="bolt-path"></path>
-        <circle cx="10" cy="12" r="2" class="spark"></circle>
-        <circle cx="34" cy="30" r="2" class="spark spark-2"></circle>
+      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+        <path d="M26 3 L11 24 H20 L16 41 L33 18 H23.5 Z" fill="#ffd24a" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+        <path d="M24 9 L16.5 20" stroke="#fff6dc" stroke-width="2.2" stroke-linecap="round"/>
       </svg>
     `,
     shockwave: `
-      <svg class="svg-magic magic-shockwave" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <path d="M 12 36 Q 22 20 32 36" class="shockwave-crest shockwave-crest-1" fill="none" stroke-linecap="round"></path>
-        <path d="M 12 30 Q 22 14 32 30" class="shockwave-crest shockwave-crest-2" fill="none" stroke-linecap="round"></path>
-        <path d="M 12 24 Q 22 8 32 24" class="shockwave-crest shockwave-crest-3" fill="none" stroke-linecap="round"></path>
+      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+        <g fill="none" stroke-linecap="round">
+          <path d="M8 26 Q22 4 36 26" stroke="${INK}" stroke-width="8"/>
+          <path d="M8 26 Q22 4 36 26" stroke="#8ef0e6" stroke-width="3.6"/>
+          <path d="M12 33 Q22 17 32 33" stroke="${INK}" stroke-width="8"/>
+          <path d="M12 33 Q22 17 32 33" stroke="#4fd8d0" stroke-width="3.6"/>
+        </g>
+        <circle cx="22" cy="38" r="4" fill="#ff8a3a" stroke="${INK}" stroke-width="2.8"/>
       </svg>
     `,
     shield: `
-      <svg class="svg-magic magic-shield" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <polygon points="38,22 33,33 22,38 11,33 6,22 11,11 22,6 33,11" class="shield-oct shield-outer"></polygon>
-        <polygon points="33,22 30,30 22,33 14,30 11,22 14,14 22,11 30,14" class="shield-oct shield-middle"></polygon>
-        <polygon points="28,22 26,26 22,28 18,26 16,22 18,18 22,16 26,18" class="shield-oct shield-inner"></polygon>
+      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+        <path d="M22 4 L37 9.5 V21 C37 30 30.5 36.5 22 40 C13.5 36.5 7 30 7 21 V9.5 Z" fill="#8ef0e6" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+        <path d="M22 9.5 L32 13 V21 C32 27 28 31.5 22 34 Z" fill="#4fd8d0"/>
+        <path d="M12 13 V20" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
       </svg>
     `
   };
