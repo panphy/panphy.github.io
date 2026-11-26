@@ -384,23 +384,14 @@ body.blizzard .blizzard-veil::after {
   position: fixed;
   top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
   left: 14px;
-  /* A compact plate that hugs the logo and title, not a bar across the whole screen. */
+  /* No plate: the logo and the title artwork sit straight on the scene. */
   width: max-content;
   max-width: calc(100vw - 28px);
   z-index: 12;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 7px 20px 7px 8px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background:
-    linear-gradient(135deg, rgba(14, 32, 24, 0.86), rgba(4, 12, 15, 0.66)),
-    repeating-linear-gradient(90deg, transparent 0 18px, rgba(239, 195, 92, 0.08) 18px 19px);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38), inset 0 -1px 0 rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(14px);
+  gap: 22px;
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
@@ -423,22 +414,34 @@ body.is-running:not(.is-paused) .game-bar {
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(239, 195, 92, 0.26);
+  width: 52px;
+  height: 52px;
   border-radius: 8px;
-  background: rgba(239, 195, 92, 0.08);
 }
 
 .brand-mark img {
   display: block;
-  width: 32px;
+  width: 48px;
   height: auto;
-  filter: drop-shadow(0 0 12px rgba(84, 196, 110, 0.5));
+  filter: drop-shadow(0 3px 6px rgba(40, 25, 10, 0.45));
 }
 
 .game-title {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
   min-width: 0;
+}
+
+.game-title span:empty {
+  display: none;
+}
+
+.game-title span {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--panel-solid);
+  box-shadow: var(--paper-shadow);
 }
 
 .game-title span,
@@ -455,17 +458,16 @@ body.is-running:not(.is-paused) .game-bar {
 }
 
 .game-title h1 {
-  overflow: hidden;
   margin: 0;
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: clamp(1.42rem, 2.8vw, 2rem);
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  text-shadow: 0 0 18px rgba(88, 223, 207, 0.34);
-  white-space: nowrap;
+  line-height: 0;
+}
+
+.game-title h1 img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: clamp(54px, 7vw, 72px);
+  filter: drop-shadow(0 4px 8px rgba(40, 25, 10, 0.35));
 }
 
 .icon-button,
@@ -672,14 +674,19 @@ body.is-running:not(.is-paused) .game-bar {
 
 .hud-grid {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 82px);
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + clamp(64px, 7vw + 10px, 82px));
   left: 14px;
   z-index: 11;
   display: grid;
   width: min(238px, calc(100vw - 28px));
   gap: 8px;
   pointer-events: none;
-  transition: top 0.35s ease;
+  transition: top 0.35s ease, transform 0.35s ease;
+}
+
+/* A status line above the title (paused, cleared, run ended) pushes the HUD down. */
+body:is(:not(.is-running), .is-paused) .game-bar:has(#phaseValue:not(:empty)) ~ .hud-grid {
+  transform: translateY(26px);
 }
 
 body.is-running:not(.is-paused) .hud-grid {
@@ -1603,17 +1610,20 @@ body.is-running:not(.is-paused) .hud-grid {
 
 @media (max-width: 760px) {
   .game-bar {
-    gap: 10px;
-    min-height: 58px;
+    gap: 16px;
   }
 
   .brand-mark {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 
   .brand-mark img {
-    width: 29px;
+    width: 40px;
+  }
+
+  .game-title h1 img {
+    height: 50px;
   }
 
   .corner-controls {
@@ -1621,7 +1631,7 @@ body.is-running:not(.is-paused) .hud-grid {
   }
 
   .hud-grid {
-    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 72px);
+    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 62px);
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: calc(100vw - 28px);
   }
@@ -2581,7 +2591,6 @@ body.ending-summary .sw-leaderboard {
 }
 
 /* ── Battery Saver overrides (performance optimization) ── */
-body.battery-saver .game-bar,
 body.battery-saver .readout,
 body.battery-saver .typing-strip,
 body.battery-saver .message-panel,
@@ -2589,10 +2598,6 @@ body.battery-saver .god-mode-badge,
 body.battery-saver .potion-bar {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-}
-
-body.battery-saver .game-bar {
-  background: var(--paper) !important;
 }
 
 body.battery-saver .readout {
@@ -2897,7 +2902,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   mask-image: none;
 }
 
-.game-bar,
 .typing-strip,
 .message-panel,
 .readout,
@@ -2911,7 +2915,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   backdrop-filter: none;
 }
 
-.game-bar,
 .typing-strip,
 .message-panel,
 .sw-initials-card {
@@ -2922,19 +2925,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .sw-leaderboard,
 .potion-bar {
   border-radius: 12px;
-}
-
-.game-title h1 {
-  text-shadow: none;
-}
-
-.brand-mark {
-  border-color: var(--border);
-  background: rgba(168, 101, 26, 0.1);
-}
-
-.brand-mark img {
-  filter: none;
 }
 
 .icon-button,
