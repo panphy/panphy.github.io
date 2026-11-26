@@ -416,7 +416,7 @@ body.is-running:not(.is-paused) .game-bar {
   place-items: center;
   /* Line up with the lettering, not the flames above it. */
   align-self: end;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   width: 52px;
   height: 52px;
   border-radius: 8px;
@@ -469,7 +469,7 @@ body.is-running:not(.is-paused) .game-bar {
   display: block;
   width: auto;
   max-width: 100%;
-  height: clamp(66px, 8.5vw, 88px);
+  height: clamp(74px, 9.6vw, 99px);
   filter: drop-shadow(0 4px 8px rgba(40, 25, 10, 0.35));
 }
 
@@ -677,7 +677,7 @@ body.is-running:not(.is-paused) .game-bar {
 
 .hud-grid {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + clamp(74px, 8.5vw + 8px, 96px));
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + clamp(80px, 9.6vw + 6px, 105px));
   left: 14px;
   z-index: 11;
   display: grid;
@@ -1626,7 +1626,7 @@ body.is-running:not(.is-paused) .hud-grid {
   }
 
   .game-title h1 img {
-    height: 60px;
+    height: 68px;
   }
 
   .corner-controls {
@@ -1634,7 +1634,7 @@ body.is-running:not(.is-paused) .hud-grid {
   }
 
   .hud-grid {
-    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 70px);
+    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 74px);
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: calc(100vw - 28px);
   }
