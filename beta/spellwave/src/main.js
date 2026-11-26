@@ -3752,7 +3752,7 @@ function updateLabels() {
     const x = (reusableVector.x * 0.5 + 0.5) * width;
     const y = (-reusableVector.y * 0.5 + 0.5) * height;
     const approachAmount = enemy.isProjectile ? enemy.rail.t
-      : enemy.phraseBoss ? 0
+      : enemy.phraseBoss || enemy.satellite ? 0
       : enemy.rail.phase === 'cross' ? enemy.rail.crossT
       : THREE.MathUtils.clamp((enemy.group.position.z - enemy.rail.to.z) / (STRIKE_Z - enemy.rail.to.z), 0, 1);
     enemy.approachAmount = approachAmount;
