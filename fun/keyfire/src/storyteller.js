@@ -3,11 +3,11 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const LOOKS = {
-  professor: { skin: 0x975f49, hair: 0xd4c6ae, cloth: 0x315b60, shoulders: 0.32, height: 1.04 },
+  professor: { skin: 0xcf9877, hair: 0xd4c6ae, cloth: 0x315b60, shoulders: 0.32, height: 1.04 },
   miller: { skin: 0xd49a72, hair: 0x69412f, cloth: 0x677255, shoulders: 0.41, height: 0.95 },
   miner: { skin: 0xb77556, hair: 0x402d36, cloth: 0x424a5b, shoulders: 0.32, height: 0.93 },
   captain: { skin: 0xc58972, hair: 0xd3cebe, cloth: 0x263b51, shoulders: 0.42, height: 1.04 },
-  stargazer: { skin: 0x865943, hair: 0x302638, cloth: 0xe8dcc0, shoulders: 0.29, height: 1.07 },
+  stargazer: { skin: 0xc98f6c, hair: 0x302638, cloth: 0xe8dcc0, shoulders: 0.29, height: 1.07 },
 };
 
 // A pierced brass instrument, with a slanted sighting rule and a suspension ring.
