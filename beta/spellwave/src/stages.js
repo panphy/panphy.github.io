@@ -11,15 +11,19 @@
 // of the land beside the route, the cover, the props and the landmark.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { isDetailed } from './detail.js?v=beta32';
 import { createLowPolyTree, createLowPolyRock } from './lowpoly.js';
-import { createStageKit } from './stage-kits.js?v=beta31';
+import { createStageKit } from './stage-kits.js?v=beta32';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
 const BOSS_ARENA = { halfWidth: 16, minZ: -64, maxZ: 16 };
 const PATH_HALF_WIDTH = 2.8;
 const CORRIDOR_HALF_WIDTH = 9;
-const CELL = 2.5;
+// Ground facet size: finer at full detail (detail.js).
+const CELL_COARSE = 2.5;
+const CELL_FINE = 1.6;
+const cellSize = () => (isDetailed() ? CELL_FINE : CELL_COARSE);
 // A leg with a crossing (a river, a chasm, a gap between islands) is this much longer,
 // which leaves room for it between one stop's arena and the next.
 const CROSSING_EXTRA = 18;
@@ -81,7 +85,7 @@ function yawOfTangent(tangent) {
 // A sheet of triangles over `bounds`. `faceKind` may name one of `extras` (fixed
 // colours a kit adds to the palette's path, grass and patch); `skip` leaves a face
 // out; `flip` turns the sheet to face down, for a roof.
-function createStageTerrain({ bounds, heightAt, isPath, seed, cell = CELL, faceKind = null, extras = null, skip = null, flip = false }) {
+function createStageTerrain({ bounds, heightAt, isPath, seed, cell = cellSize(), faceKind = null, extras = null, skip = null, flip = false }) {
   const columns = Math.ceil((bounds.maxX - bounds.minX) / cell);
   const rows = Math.ceil((bounds.maxZ - bounds.minZ) / cell);
   const hash = (a, b, c) => {
@@ -404,7 +408,7 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
       heightAt: roofHeight,
       isPath: () => false,
       seed: seed + 1,
-      cell: CELL * 1.6,
+      cell: cellSize() * 1.6,
       faceKind: () => kit.roof.kind,
       extras: kit.ground,
       // Leave out the roof where it would lie inside the rock, or over open sky.

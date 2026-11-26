@@ -5,6 +5,7 @@
 // Nothing here adds a light: glows are emissive materials, so the light count never
 // changes between stages. A kit's own materials are made per stage and disposed with it.
 import * as THREE from 'three';
+import { roundSides, polyDetail, roughen } from './detail.js?v=beta32';
 
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true, ...extra });
 const lit = (color, intensity = 1.6, extra = {}) => flat(color, { emissive: color, emissiveIntensity: intensity, roughness: 0.5, ...extra });
@@ -19,12 +20,12 @@ function part(geometry, material, x = 0, y = 0, z = 0) {
 const box = (material, w, h, d, x, y, z) => part(new THREE.BoxGeometry(w, h, d), material, x, y, z);
 // Round things get more sides than the sketch asks for; three- and four-sided shapes
 // (spires, obelisks, tubs) are deliberate and stay as written.
-const rounder = (sides) => (sides <= 4 ? sides : Math.round(sides * 1.6));
+const rounder = (sides) => roundSides(sides);
 const cyl = (material, top, bottom, h, sides, x, y, z) => part(new THREE.CylinderGeometry(top, bottom, h, rounder(sides)), material, x, y, z);
 const cone = (material, r, h, sides, x, y, z) => part(new THREE.ConeGeometry(r, h, rounder(sides)), material, x, y, z);
-const ico = (material, r, x, y, z) => part(new THREE.IcosahedronGeometry(r, 0), material, x, y, z);
+const ico = (material, r, x, y, z) => part(roughen(new THREE.IcosahedronGeometry(r, polyDetail(0)), 0.1, Math.round(r * 97 + x * 13 + z * 7)), material, x, y, z);
 // A rounder lump, for the few big shapes seen close up (ico is for scattered clutter).
-const ball = (material, r, x, y, z) => part(new THREE.IcosahedronGeometry(r, 1), material, x, y, z);
+const ball = (material, r, x, y, z) => part(new THREE.IcosahedronGeometry(r, polyDetail(1)), material, x, y, z);
 const octa = (material, r, x, y, z) => part(new THREE.OctahedronGeometry(r, 0), material, x, y, z);
 const dodeca = (material, r, x, y, z) => part(new THREE.DodecahedronGeometry(r, 0), material, x, y, z);
 

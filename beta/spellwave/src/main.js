@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta31';
+import { createSpellwaveAudio } from './audio.js?v=beta32';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta31';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta31';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta31';
-import { createLeaderboard } from './leaderboard.js?v=beta31';
+import { createPotionSystem } from './potions.js?v=beta32';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta32';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta32';
+import { createLeaderboard } from './leaderboard.js?v=beta32';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta31';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta31';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta32';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta32';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta31';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta31';
-import { createWordDeck } from './word-decks.js?v=beta31';
-import { createStage } from './stages.js?v=beta31';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta31';
-import { storyBeatForWave } from './story.js?v=beta31';
-import { createStoryteller } from './storyteller.js?v=beta31';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta31';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta32';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta32';
+import { createWordDeck } from './word-decks.js?v=beta32';
+import { createStage } from './stages.js?v=beta32';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta32';
+import { storyBeatForWave } from './story.js?v=beta32';
+import { createStoryteller } from './storyteller.js?v=beta32';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta32';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1373,6 +1373,7 @@ function breakShield(enemy) {
   setEnemyKind(enemy, 'keyword');
   setEnemyWord(enemy, choosePromptOfLength(3, 7));
   enemy.firstLetterAt = undefined;
+  enemy.shownAt = elapsed;
   updateHud(true);
   updateTypedDisplay();
 }
@@ -1712,6 +1713,7 @@ function startBossLine(boss) {
   boss.prompt = line.term;
   boss.definition = line.topic;
   boss.firstLetterAt = undefined;
+  boss.shownAt = elapsed;
   boss.lineKind = line.kind || 'line';
   boss.label.dataset.stage = boss.lineKind;
   boss.lineWordsList = lineWords(line);
@@ -1968,6 +1970,7 @@ function advanceBossLine(boss) {
     // Each word of a word stage is ranked like a monster's word.
     spawnRankPopup(boss);
     boss.firstLetterAt = undefined;
+    boss.shownAt = elapsed;
   }
   boss.wordIndex += 1;
   if (boss.wordIndex < boss.lineWordsList.length) {
@@ -1994,7 +1997,7 @@ function advanceBossLine(boss) {
   boss.lineIndex += lost;
   if (!stageWord) {
     // A whole statement or story line is ranked as one, from its first letter to its last.
-    spawnRankPopup(boss, boss.prompt.replace(/[^a-z]/gi, '').length - 1);
+    spawnRankPopup(boss, boss.prompt.replace(/[^a-z]/gi, '').length);
     score += boss.prompt.replace(/[^a-z]/gi, '').length * 15;
     if (!encounteredTerms.some(t => t.term === boss.prompt)) {
       encounteredTerms.push({ term: boss.prompt, definition: boss.definition, defeated: true });
@@ -3757,6 +3760,7 @@ function updateLabels() {
     reusableVector.project(camera);
 
     const isVisible = isLabelShown(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
+    if (isVisible && enemy.shownAt === undefined) enemy.shownAt = elapsed;
     enemy.label.classList.toggle('is-hidden', !isVisible);
     enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
     if (!isVisible) continue;
@@ -5838,8 +5842,12 @@ function updateTypingLabel() {}
 const RANK_SPEEDS = [['S', 8.5], ['A', 6.5], ['B', 4.8], ['C', 3.4], ['D', 2.3]];
 const RANK_COLOURS = { S: 0xffd84a, A: 0x4fd8ff, B: 0x7be36a };
 
+// A rank is timed from the moment the word appears, not from the first key, so waiting
+// before typing costs as much as typing slowly. A short grace covers spotting the word.
+const RANK_GRACE = 0.4;
+
 function rankFor(letters, since) {
-  const seconds = Math.max(0.05, elapsed - (since ?? elapsed));
+  const seconds = Math.max(0.05, elapsed - (since ?? elapsed) - RANK_GRACE);
   const speed = Math.max(1, letters) / seconds;
   return (RANK_SPEEDS.find(([, needed]) => speed >= needed) || ['E'])[0];
 }
@@ -5847,14 +5855,14 @@ function rankFor(letters, since) {
 // The rank is the reward for a fast word, so it slams in: the better the rank, the
 // bigger the letter. Monsters, healers and chests are ranked word by word; a boss is
 // ranked for each word of a word stage and each finished line. Rocks are not ranked.
-function spawnRankPopup(enemy, letters = enemy.searchPrompt.length - 1) {
+function spawnRankPopup(enemy, letters = enemy.searchPrompt.length) {
   if (enemy.isProjectile) return;
   const label = enemy.label;
   if (!label || label.classList.contains('is-hidden')) return;
   const left = parseFloat(label.style.left);
   const top = parseFloat(label.style.top);
   if (!Number.isFinite(left) || !Number.isFinite(top)) return;
-  const rank = rankFor(letters, enemy.firstLetterAt);
+  const rank = rankFor(letters, enemy.shownAt ?? enemy.firstLetterAt);
   const popup = document.createElement('div');
   popup.className = 'rank-popup';
   popup.dataset.rank = rank;

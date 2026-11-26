@@ -4580,3 +4580,61 @@ body.battery-saver .corner-controls .battery-saver-toggle.is-active {
   line-height: 1;
   opacity: 1;
 }
+
+/* ── Boss health bar: the enemy's hazard plate, like the word cards ── */
+body .boss-hp-bar {
+  isolation: isolate;
+  padding: 10px 28px 12px 36px;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 5px 0 rgba(0, 0, 0, 0.45));
+}
+
+body .boss-hp-bar::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 3px solid #000;
+  background:
+    repeating-linear-gradient(45deg, var(--boss-accent, #ffb020) 0 6px, #1a1311 6px 12px) left / 12px 100% no-repeat,
+    #1a1311;
+  content: '';
+  transform: skewX(-10deg);
+}
+
+body .boss-hp-bar .boss-hp-name {
+  color: var(--boss-accent, #ffb020);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+body .boss-hp-bar .boss-hp-segments {
+  gap: 6px;
+  transform: skewX(-10deg);
+}
+
+body .boss-hp-bar .boss-hp-segments i {
+  height: 15px;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(#ff8a6a, #e2302a);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+}
+
+body .boss-hp-bar .boss-hp-segments i.is-gone {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+body .boss-hp-bar .boss-beam {
+  height: 8px;
+  border: 0;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.12);
+  transform: skewX(-10deg);
+}
+
+body .boss-hp-bar .boss-beam i {
+  background: linear-gradient(90deg, #d9fffa, #4fd8d0);
+}
