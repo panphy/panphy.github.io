@@ -256,6 +256,52 @@ body.blizzard .blizzard-veil::after {
   color: #5b2bb0;
 }
 
+/* A held storyteller's cry for help, a speech bubble above their head. */
+.help-bubble {
+  position: fixed;
+  z-index: 7;
+  padding: 6px 14px;
+  border: 2.5px solid #2e2416;
+  border-radius: 14px;
+  background: #fffdf6;
+  box-shadow: 0 4px 0 rgba(46, 36, 22, 0.35);
+  color: #c0392b;
+  font-family: var(--font-chunky);
+  font-size: clamp(0.85rem, 1.9vw, 1.05rem);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  animation: help-shake 0.5s ease-in-out infinite;
+}
+
+.help-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -11px;
+  width: 14px;
+  height: 14px;
+  border-right: 2.5px solid #2e2416;
+  border-bottom: 2.5px solid #2e2416;
+  background: #fffdf6;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.help-bubble[hidden] {
+  display: none;
+}
+
+@keyframes help-shake {
+  0%, 100% { transform: translate(-50%, -100%) rotate(0deg); }
+  25% { transform: translate(-50%, calc(-100% - 3px)) rotate(-3deg); }
+  75% { transform: translate(-50%, calc(-100% - 3px)) rotate(3deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-bubble { animation: none; }
+}
+
 /* The storyteller's words, low in the middle of the view. */
 .story-card {
   position: fixed;

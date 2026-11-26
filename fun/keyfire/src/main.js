@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=3';
-import { createSeasonalEffects } from './seasonal-effects.js?v=3';
-import { createPowerUpSystem } from './power-ups.js?v=3';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=3';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=3';
-import { createLeaderboard } from './leaderboard.js?v=3';
-import { createEnemyMesh } from './enemy-meshes.js?v=3';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=3';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=3';
-import { createLowPolyCloud } from './lowpoly.js?v=3';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=3';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=3';
-import { createWordDeck } from './word-decks.js?v=3';
-import { createStage } from './stages.js?v=3';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=3';
-import { storyBeatForWave } from './story.js?v=3';
-import { createStoryteller, settleLantern } from './storyteller.js?v=3';
-import { createPlasmaCannon } from './plasma-cannon.js?v=3';
-import { createRideCart } from './ride-cart.js?v=3';
+import { createKeyFireAudio } from './audio.js?v=4';
+import { createSeasonalEffects } from './seasonal-effects.js?v=4';
+import { createPowerUpSystem } from './power-ups.js?v=4';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=4';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=4';
+import { createLeaderboard } from './leaderboard.js?v=4';
+import { createEnemyMesh } from './enemy-meshes.js?v=4';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=4';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=4';
+import { createLowPolyCloud } from './lowpoly.js?v=4';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=4';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=4';
+import { createWordDeck } from './word-decks.js?v=4';
+import { createStage } from './stages.js?v=4';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=4';
+import { storyBeatForWave } from './story.js?v=4';
+import { createStoryteller, settleLantern } from './storyteller.js?v=4';
+import { createPlasmaCannon } from './plasma-cannon.js?v=4';
+import { createRideCart } from './ride-cart.js?v=4';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -326,6 +326,7 @@ const variantHintsShown = new Set();
 const casterBolts = [];
 let rideCart = null;
 let storyCard = null;
+let helpBubble = null;
 let challengeCard = null;
 let sceneGround = null;
 let sceneRockMaterial = null;
@@ -2568,10 +2569,11 @@ function arriveAtStop() {
     startChallenge();
     return;
   }
-  // The wave can run out of monsters early (its typing budget): the camera walks
-  // straight through a stop that has nothing left to send.
+  // The wave can run out of monsters early (its typing budget). A stop left with
+  // nothing to send gets a breather instead: one or two easy monsters and a chest.
   if (isNormalWaveComplete() && !shouldSpawnMedic() && !shouldSpawnMimic()) {
-    railBeginTravel(nextStopIndex());
+    startEncounter(stop, 0, false);
+    rail.encounter.bonus = Math.random() < 0.5 ? ['easy', 'chest'] : ['easy', 'chest', 'easy'];
     return;
   }
   startEncounter(stop, rail.bursts[rail.stopIndex] || 0, rail.stopIndex >= rail.lastAmbush);
@@ -2586,6 +2588,31 @@ function arriveAtStop() {
 const STORY_SPOT = new THREE.Vector3(2.3, 0, -4.2);
 const STORY_RESCUE_HEAL = 2;
 const STORY_LETTERS_PER_SECOND = 20;
+// Done with talking, the storyteller turns and runs off to the right, a little toward
+// the camera so the scenery beside the route does not hide them, until out of view.
+const STORY_RUN_DIRECTION = Math.atan2(1, 0.45);
+const STORY_RUN_TIME = 2;
+
+// A held storyteller cries for help above their head, rather than in the card, so the
+// player can type at the myth at once without missing a line of the story.
+function placeHelpBubble(npc) {
+  if (!helpBubble) {
+    helpBubble = document.createElement('div');
+    helpBubble.className = 'help-bubble';
+    helpBubble.textContent = 'Help! Help! Help!';
+    document.getElementById('app').append(helpBubble);
+  }
+  reusableVector.copy(npc.position);
+  reusableVector.y += 3.1;
+  reusableVector.project(camera);
+  helpBubble.style.left = `${((reusableVector.x * 0.5 + 0.5) * window.innerWidth).toFixed(1)}px`;
+  helpBubble.style.top = `${((-reusableVector.y * 0.5 + 0.5) * window.innerHeight).toFixed(1)}px`;
+  helpBubble.hidden = false;
+}
+
+function hideHelpBubble() {
+  if (helpBubble) helpBubble.hidden = true;
+}
 
 function showStoryLine(name, text) {
   if (!storyCard) {
@@ -2622,8 +2649,8 @@ function startStory() {
   npc.scale.setScalar(0.01);
   enemyGroup.add(npc);
   rail.state = 'story';
-  rail.story = { beat, npc, line: -1, age: 0, guard: null, held: !!beat.plea, leaving: 0 };
-  if (beat.plea) {
+  rail.story = { beat, npc, line: -1, age: 0, guard: null, held: !!beat.held, leaving: 0 };
+  if (beat.held) {
     // The myth that holds them: it stands its ground and does no harm, but will not leave.
     const guard = spawnEnemy({ wordData: choosePromptOfLength(4, 8), type: ENEMY_TYPES.find(type => type.name === 'Bog Shambler') });
     const at = new THREE.Vector3(STORY_SPOT.x - 1.9, guard.baseY, STORY_SPOT.z - 0.6);
@@ -2635,7 +2662,7 @@ function startStory() {
     playAppearSound(guard, 0.3);
     rail.story.guard = guard;
     npc.userData.parts.dome.visible = true;
-    showStoryLine(beat.name, beat.plea);
+    placeHelpBubble(npc);
   }
 }
 
@@ -2667,8 +2694,8 @@ function updateStoryText(delta) {
   const now = Math.floor(story.shown);
   if (now === before) return true;
   storyCard.querySelector('.story-line').textContent = story.text.slice(0, now);
-  // A finished line (other than a plea for help) waits for Space, and says so.
-  if (now >= story.text.length && !story.held) storyCard.classList.add('is-done');
+  // A finished line waits for Space, and says so.
+  if (now >= story.text.length) storyCard.classList.add('is-done');
   story.blip += now - before;
   if (story.blip >= 2 && /\S/.test(story.text.charAt(now - 1))) {
     story.blip = 0;
@@ -2682,8 +2709,12 @@ function updateStory(delta) {
   if (!story) return;
   story.age += delta;
   const { head, arms, dome } = story.npc.userData.parts;
+  if (story.leaving > 0) {
+    runStorytellerOff(story, delta);
+    return;
+  }
   const grow = Math.min(1, story.age / 0.35);
-  story.npc.scale.setScalar(Math.max(0.01, 1.26 * (1 - (1 - grow) ** 3) * (1 - Math.min(1, story.leaving / 0.4))));
+  story.npc.scale.setScalar(Math.max(0.01, 1.26 * (1 - (1 - grow) ** 3)));
   story.npc.rotation.y = Math.atan2(-story.npc.position.x, CAMERA_DISTANCE - story.npc.position.z);
   story.npc.position.y = GROUND_ENEMY_Y + Math.abs(Math.sin(story.age * (story.held ? 9 : 3))) * (story.held ? 0.05 : 0.03);
   head.rotation.z = Math.sin(story.age * 2.2) * 0.08;
@@ -2697,10 +2728,14 @@ function updateStory(delta) {
   updateStoryText(delta);
 
   if (story.held) {
-    if (story.guard && !story.guard.dying && enemies.includes(story.guard)) return;
+    if (story.guard && !story.guard.dying && enemies.includes(story.guard)) {
+      placeHelpBubble(story.npc);
+      return;
+    }
     // Freed: the dome bursts, the player is thanked with a heart, and the tale begins.
     story.held = false;
     story.guard = null;
+    hideHelpBubble();
     dome.visible = false;
     reusableVector.copy(story.npc.position);
     reusableVector.y += 1;
@@ -2715,14 +2750,32 @@ function updateStory(delta) {
     advanceStoryLine();
     return;
   }
-  if (story.leaving > 0) {
-    story.leaving += delta;
-    if (story.leaving < 0.5) return;
-    endStory();
-    railBeginTravel(nextStopIndex());
-    return;
-  }
   if (story.line < 0 && story.age > 0.5) advanceStoryLine();
+}
+
+// The storyteller turns away and runs off to the right, arms pumping, picking up speed;
+// once they are out of view the camera walks on.
+function runStorytellerOff(story, delta) {
+  story.leaving += delta;
+  const { npc } = story;
+  const { arms } = npc.userData.parts;
+  if (story.runFrom === undefined) story.runFrom = npc.rotation.y;
+  const turn = Math.min(1, story.leaving / 0.18);
+  npc.rotation.y = THREE.MathUtils.lerp(story.runFrom, STORY_RUN_DIRECTION, turn);
+  const speed = turn < 1 ? 0 : Math.min(9, 3 + (story.leaving - 0.18) * 10);
+  npc.position.x += Math.sin(STORY_RUN_DIRECTION) * speed * delta;
+  npc.position.z += Math.cos(STORY_RUN_DIRECTION) * speed * delta;
+  npc.position.y = GROUND_ENEMY_Y + Math.abs(Math.sin(story.leaving * 15)) * 0.14;
+  for (const arm of arms) {
+    arm.rotation.z = arm.userData.side * 0.25;
+    arm.rotation.x = arm.userData.side * Math.sin(story.leaving * 15) * 0.9;
+  }
+  settleLantern(npc.userData.parts);
+  reusableVector.copy(npc.position);
+  reusableVector.project(camera);
+  if (story.leaving < STORY_RUN_TIME && reusableVector.x < 1.25) return;
+  endStory();
+  railBeginTravel(nextStopIndex());
 }
 
 // While someone is talking, with nothing to type at, keys are not letters. Space shows
@@ -2743,6 +2796,7 @@ function hurryStory(key) {
 
 function endStory() {
   if (storyCard) storyCard.hidden = true;
+  hideHelpBubble();
   if (!rail.story) return;
   enemyGroup.remove(rail.story.npc);
   disposeObject(rail.story.npc);
@@ -2874,7 +2928,7 @@ function startEncounter(stop, count, isLast) {
 function updateEncounter(delta) {
   const encounter = rail.encounter;
   const live = enemies.filter(enemy => !enemy.dying);
-  const wantsMore = encounter.remaining > 0
+  const wantsMore = encounter.remaining > 0 || (encounter.bonus && encounter.bonus.length > 0)
     || (encounter.isLast && wavePhase === 'normal' && !isNormalWaveComplete());
   if (wantsMore) {
     encounter.clearTimer = 0;
@@ -2904,6 +2958,7 @@ function nextStopIndex() {
 }
 
 function spawnRailMember(encounter) {
+  if (encounter.bonus && encounter.bonus.length > 0) return spawnBonusMember(encounter);
   let kind = encounter.stop.minionsOnly ? 'minion'
     : shouldSpawnMedic() ? 'medic' : shouldSpawnMimic() ? 'mimic' : !isNormalWaveComplete() ? 'minion' : null;
   // One healer or chest per ambush: a second one waits for a later stop while monsters remain.
@@ -2929,6 +2984,22 @@ function spawnRailMember(encounter) {
   else normalEnemiesSpawned += 1;
   encounter.remaining -= 1;
   return enemy;
+}
+
+// A breather stop's easy monsters (plain, with short words) and its chest. They sit
+// outside the wave's count, so the healer and chest schedules are left as they were.
+function spawnBonusMember(encounter) {
+  const kind = encounter.bonus.shift();
+  const spots = encounter.spots;
+  let spot = spots[encounter.nextSpot % spots.length];
+  encounter.nextSpot += 1;
+  if (kind === 'chest') {
+    spot = spots.find(candidate => candidate.kind === 'cover') || spot;
+    return spawnEnemy({ isMimic: true, railSpot: spot });
+  }
+  const flier = rail.setPiece === 'flight';
+  if (flier) spot = { ...spot, kind: 'sky' };
+  return spawnEnemy({ wordData: choosePromptOfLength(3, 5), railSpot: spot, flier });
 }
 
 // Seconds a player at this wave needs for a word, from a gentle 24 words a minute upward.

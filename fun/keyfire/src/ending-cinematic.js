@@ -9,13 +9,13 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=3';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=3';
-import { createWatermill, createWindmill } from './stage-kits.js?v=3';
-import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=3';
-import { STORY_BEATS } from './story.js?v=3';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=3';
-import { buildCannon } from './plasma-cannon.js?v=3';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=4';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=4';
+import { createWatermill, createWindmill } from './stage-kits.js?v=4';
+import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=4';
+import { STORY_BEATS } from './story.js?v=4';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=4';
+import { buildCannon } from './plasma-cannon.js?v=4';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -622,7 +622,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     const moteGeometry = new THREE.IcosahedronGeometry(0.5, 0);
     const motes = [[-4.5, 1.6, -2], [-2.4, 2.7, -4.5], [2.7, 2.3, -3.2], [4.6, 1.4, -0.8], [-1.2, 3.4, -7], [1.5, 3.1, -6], [6.5, 2.5, -5]]
       .map(([x, y, z]) => add(group, moteGeometry, moteMaterial, x, y, z));
-    return { group, look: lookFromPalette(palette), npc, motes, held: Boolean(STORY_BEATS[index].plea), animate: () => {} };
+    return { group, look: lookFromPalette(palette), npc, motes, held: Boolean(STORY_BEATS[index].held), animate: () => {} };
   }
 
   // Spring meadow. A boulder and an apple hang in the air until the myth breaks, then land together.
