@@ -9,13 +9,13 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=9';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=9';
-import { createWatermill, createWindmill } from './stage-kits.js?v=9';
-import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=9';
-import { STORY_BEATS } from './story.js?v=9';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=9';
-import { buildCannon } from './plasma-cannon.js?v=9';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=10';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=10';
+import { createWatermill, createWindmill } from './stage-kits.js?v=10';
+import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=10';
+import { STORY_BEATS } from './story.js?v=10';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=10';
+import { buildCannon } from './plasma-cannon.js?v=10';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -41,6 +41,11 @@ const TITLE_TEXT = 'Thank you for playing!';
 const TITLE_FONT_SIZE = 112;
 // The game's heading face (Fredoka), as in the menu title and banners.
 const GAME_FONT_FAMILY = 'Fredoka, Manrope, system-ui, sans-serif';
+// The defeated words' lettering: the game's chunky title face (see makeTag).
+const TAG_FONT_FAMILY = "'Lilita One', Fredoka, system-ui, sans-serif";
+const TAG_FONT_SIZE = 84;
+const TAG_HEIGHT = 124;
+const TAG_PAD_X = 36;
 
 const landStart = (index) => T.lands + index * T.landLength;
 
@@ -201,12 +206,6 @@ function waitForFont(spec, timeout = 2500) {
     document.fonts.load(spec).catch(() => {}),
     new Promise((resolve) => window.setTimeout(resolve, timeout)),
   ]);
-}
-
-function roundedRect(ctx, x, y, width, height, radius) {
-  ctx.beginPath();
-  if (ctx.roundRect) ctx.roundRect(x, y, width, height, radius);
-  else ctx.rect(x, y, width, height);
 }
 
 // ── The cinematic ────────────────────────────────────────────────────────────
@@ -1071,29 +1070,69 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
   }
 
   // ── Word tags: built for each run ──
+  // Each defeated word is drawn as charged plasma lettering, with no card: the game's
+  // chunky title face, white-hot to cyan, outlined in night ink, in a cyan glow, with a
+  // spark at each end. It is drawn at once and again when the face has loaded.
   function makeTag(text) {
-    const font = `600 64px ${GAME_FONT_FAMILY}`;
+    const font = `400 ${TAG_FONT_SIZE}px ${TAG_FONT_FAMILY}`;
     const canvasEl = document.createElement('canvas');
     const probe = canvasEl.getContext('2d');
     probe.font = font;
-    canvasEl.width = Math.ceil(probe.measureText(text).width) + 88;
-    canvasEl.height = 116;
-    const ctx = canvasEl.getContext('2d');
-    // The game's own word card: ink on paper.
-    ctx.fillStyle = '#fbf5e4';
-    roundedRect(ctx, 4, 4, canvasEl.width - 8, canvasEl.height - 8, 26);
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = 'rgba(110, 78, 40, 0.6)';
-    ctx.stroke();
-    ctx.fillStyle = '#3d2b1c';
-    ctx.font = font;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, canvasEl.width / 2, canvasEl.height / 2 + 4);
+    canvasEl.width = Math.ceil(probe.measureText(text).width * 1.04) + TAG_PAD_X * 2;
+    canvasEl.height = TAG_HEIGHT;
     const texture = new THREE.CanvasTexture(canvasEl);
     texture.colorSpace = THREE.SRGBColorSpace;
+    const draw = () => {
+      const ctx = canvasEl.getContext('2d');
+      const { width, height } = canvasEl;
+      const midY = height / 2 + 4;
+      ctx.clearRect(0, 0, width, height);
+      ctx.font = font;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineJoin = 'round';
+      const maxWidth = width - TAG_PAD_X * 2;
+      // The glow, then the ink outline, then the white-hot fill.
+      ctx.save();
+      ctx.shadowColor = 'rgba(95, 240, 230, 0.95)';
+      ctx.shadowBlur = 26;
+      ctx.lineWidth = 14;
+      ctx.strokeStyle = '#1b1240';
+      ctx.strokeText(text, width / 2, midY, maxWidth);
+      ctx.restore();
+      ctx.lineWidth = 11;
+      ctx.strokeStyle = '#1b1240';
+      ctx.strokeText(text, width / 2, midY, maxWidth);
+      const fill = ctx.createLinearGradient(0, midY - TAG_FONT_SIZE / 2, 0, midY + TAG_FONT_SIZE / 2);
+      fill.addColorStop(0, '#ffffff');
+      fill.addColorStop(0.45, '#d9fffb');
+      fill.addColorStop(1, '#5fe6dc');
+      ctx.fillStyle = fill;
+      ctx.fillText(text, width / 2, midY, maxWidth);
+      for (const x of [TAG_PAD_X * 0.45, width - TAG_PAD_X * 0.45]) drawSpark(ctx, x, midY, 15);
+      texture.needsUpdate = true;
+    };
+    draw();
+    waitForFont(font).then(draw);
     return { texture, aspect: canvasEl.width / canvasEl.height };
+  }
+
+  // A small four-pointed spark, white with a cyan halo.
+  function drawSpark(ctx, x, y, radius) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.shadowColor = 'rgba(95, 240, 230, 1)';
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    for (let index = 0; index < 8; index += 1) {
+      const angle = (index / 8) * Math.PI * 2;
+      const reach = index % 2 === 0 ? radius : radius * 0.28;
+      ctx.lineTo(Math.sin(angle) * reach, -Math.cos(angle) * reach);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
 
   function clearTags() {
@@ -1385,7 +1424,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
       }
       const room = wordHome(word, aspect, halfHeight, tempVector);
       tempVector.y += Math.sin(t * 1.1 + word.phase) * 0.12;
-      const tall = Math.min(aspect >= 1 ? 0.66 : 0.5, (room * 0.94) / word.aspect);
+      const tall = Math.min(aspect >= 1 ? 0.84 : 0.62, (room * 0.94) / word.aspect);
       const depart = word.arrive - 0.5;
       let size = easeOutBack((t - appear) / 0.35);
       let flight = 0;
