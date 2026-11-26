@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta24';
+import { createSpellwaveAudio } from './audio.js?v=beta25';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta24';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta24';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta24';
-import { createLeaderboard } from './leaderboard.js?v=beta24';
+import { createPotionSystem } from './potions.js?v=beta25';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta25';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta25';
+import { createLeaderboard } from './leaderboard.js?v=beta25';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta24';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta24';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta25';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta25';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta24';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta24';
-import { createWordDeck } from './word-decks.js?v=beta24';
-import { createStage } from './stages.js?v=beta24';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta24';
-import { storyBeatForWave } from './story.js?v=beta24';
-import { createStoryteller } from './storyteller.js?v=beta24';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta24';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta25';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta25';
+import { createWordDeck } from './word-decks.js?v=beta25';
+import { createStage } from './stages.js?v=beta25';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta25';
+import { storyBeatForWave } from './story.js?v=beta25';
+import { createStoryteller } from './storyteller.js?v=beta25';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta25';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -5501,9 +5501,9 @@ function updateComboDisplay() {
 function updateTypingLabel() {}
 
 // Letters a second, from the first letter typed at a monster to its last, that earn
-// each rank. S is for really quick typing (10 a second is about 120 words a minute);
+// each rank. S is for really quick typing (8.5 a second is about 100 words a minute);
 // a good speed earns an A.
-const RANK_SPEEDS = [['S', 10], ['A', 6.5], ['B', 4.8], ['C', 3.4], ['D', 2.3]];
+const RANK_SPEEDS = [['S', 8.5], ['A', 6.5], ['B', 4.8], ['C', 3.4], ['D', 2.3]];
 const RANK_COLOURS = { S: 0xffd84a, A: 0x4fd8ff, B: 0x7be36a };
 
 function rankFor(letters, since) {
