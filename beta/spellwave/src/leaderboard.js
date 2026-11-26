@@ -12,19 +12,11 @@ const SCORE_FIELD = 'score';
 // older keys are from old rules and are removed on load.
 const CACHE_KEY = 'keyfireLeaderboardCacheV1';
 const OLD_CACHE_KEYS = ['spellwaveBetaLeaderboardCacheV1'];
-const BOARD_SIZE = 5;
+const BOARD_SIZE = 10;
 const MIN_SCORE = 1;
 // Matches the server check (keyfire_score_range).
 const MAX_SCORE = 200000;
 const HIGHLIGHT_MS = 6000;
-// Benchmark scores compete for the same five places as submitted scores.
-const PLACEHOLDER_SCORES = [
-  { initials: 'AAA', score: 15000 },
-  { initials: 'BBB', score: 13000 },
-  { initials: 'CCC', score: 10000 },
-  { initials: 'DDD', score: 5000 },
-  { initials: 'EEE', score: 1000 },
-];
 
 export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
   const supabaseScript = document.getElementById('supabaseScript');
@@ -139,8 +131,10 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
     return true;
   }
 
+  // Until the board is full any score makes it; after that it must beat the last place.
   function isHighScore(score) {
-    return score > rankedScores()[BOARD_SIZE - 1].score;
+    const ranked = rankedScores();
+    return ranked.length < BOARD_SIZE ? score >= MIN_SCORE : score > ranked[BOARD_SIZE - 1].score;
   }
 
   async function fetchTopScoresRest() {
@@ -228,18 +222,20 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
   }
 
   function rankedScores() {
-    // Keep the placeholder ahead of a submitted score on a tie.
-    return [...PLACEHOLDER_SCORES, ...topScores]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, BOARD_SIZE);
+    return [...topScores].sort((a, b) => b.score - a.score).slice(0, BOARD_SIZE);
   }
 
   function renderTopScores() {
     if (!scoreList) return;
     scoreList.innerHTML = '';
-    rankedScores().forEach((entry) => {
+    const ranked = rankedScores();
+    if (ranked.length === 0) {
+      scoreList.innerHTML = '<li class="sw-loading">No scores yet. Be the first!</li>';
+      return;
+    }
+    ranked.forEach((entry) => {
       const li = document.createElement('li');
-      if (!PLACEHOLDER_SCORES.includes(entry) && isRecentSubmission(entry)) li.classList.add('sw-highlight');
+      if (isRecentSubmission(entry)) li.classList.add('sw-highlight');
       const initialsSpan = document.createElement('span');
       initialsSpan.className = 'sw-initials';
       initialsSpan.textContent = entry.initials;
