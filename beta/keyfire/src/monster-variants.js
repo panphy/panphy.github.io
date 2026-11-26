@@ -20,6 +20,15 @@ export function createShieldPlate() {
   const stud = new THREE.Mesh(new THREE.OctahedronGeometry(0.2, 0), rimMaterial);
   stud.scale.z = 0.5;
   group.add(plate, rim, stud);
+  // Interrupted braces leave the bearer visible through the glass.
+  for (let i = 0; i < 3; i++) {
+    const angle = Math.PI / 2 + i * 2 * Math.PI / 3;
+    const brace = new THREE.Mesh(new THREE.OctahedronGeometry(0.32), rimMaterial);
+    brace.scale.set(0.28, 1, 0.16);
+    brace.rotation.z = angle - Math.PI / 2;
+    brace.position.set(Math.cos(angle) * 0.63, Math.sin(angle) * 0.63, 0.07);
+    group.add(brace);
+  }
   group.position.set(0, 1.0, 1.0);
   group.userData.plate = plate;
   return group;
@@ -31,6 +40,10 @@ export function createSplitterCores(type) {
   const material = new THREE.MeshBasicMaterial({ color: new THREE.Color(type.eye).multiplyScalar(1.5) });
   const cores = [-1, 1].map((side) => {
     const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.26, 0), material);
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.31, 0.043, 4, 6),
+      new THREE.MeshStandardMaterial({ color: 0x614a68, roughness: 0.56, flatShading: true }));
+    collar.rotation.set(0.4, side * 0.55, 0);
+    core.add(collar);
     core.position.set(side * 0.42, 1.95, 0);
     group.add(core);
     return core;
@@ -51,6 +64,9 @@ export function createCasterOrb(type) {
     new THREE.TorusGeometry(0.56, 0.045, 4, 12),
     new THREE.MeshBasicMaterial({ color: colour, transparent: true, opacity: 0.7, depthWrite: false })
   );
+  const meridian = new THREE.Mesh(new THREE.TorusGeometry(0.43, 0.033, 4, 10), halo.material);
+  meridian.rotation.y = 1.05;
+  halo.add(meridian);
   group.add(orb, halo);
   group.position.set(0, 2.3, 0.1);
   group.userData.orb = orb;
@@ -78,11 +94,14 @@ export function createWings(type) {
     color: type.trim, emissive: type.trim, emissiveIntensity: 0.35, roughness: 0.6,
     flatShading: true, side: THREE.DoubleSide, transparent: true, opacity: 0.88,
   });
+  // A raised knuckle and alternating tips give the membrane a folded, scalloped edge.
+  const root = [0, 0, 0], knuckle = [0.64, 0.39, 0.12];
+  const edge = [[0.91,0.51,0.02],[1.65,0.6,-0.1],[1.22,0.08,-0.04],[1.36,-0.22,-0.09],
+    [0.95,-0.16,0],[0.93,-0.45,-0.06],[0.52,-0.3,0.03],[0.43,-0.45,-0.08],root];
+  const positions = [...root, ...knuckle, ...edge[0]];
+  for (let i = 1; i < edge.length; i++) positions.push(...knuckle, ...edge[i - 1], ...edge[i]);
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute([
-    0, 0, 0, 1.6, 0.55, 0, 1.35, -0.3, 0,
-    0, 0, 0, 1.35, -0.3, 0, 0.6, -0.55, 0,
-  ], 3));
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geometry.computeVertexNormals();
   const wings = [-1, 1].map((side) => {
     const pivot = new THREE.Group();
@@ -116,6 +135,12 @@ export function createSpaceBat(type) {
   for (const side of [-1, 1]) {
     const ear = add(new THREE.ConeGeometry(0.17, 0.5, 4), fur, side * 0.26, 1.58, -0.02);
     ear.rotation.z = side * -0.3;
+    const inner = add(new THREE.OctahedronGeometry(0.12), glow, side * 0.28, 1.54, 0.09);
+    inner.scale.set(0.52, 1.45, 0.25);
+    inner.rotation.z = ear.rotation.z;
+    const mane = add(new THREE.OctahedronGeometry(0.21), fur, side * 0.33, 0.97, 0.08);
+    mane.scale.set(0.74, 1.35, 0.72);
+    mane.rotation.z = side * 0.64;
     add(new THREE.IcosahedronGeometry(0.085, 0), glow, side * 0.17, 1.14, 0.38);
     const fang = add(new THREE.ConeGeometry(0.035, 0.13, 3), bone, side * 0.08, 0.86, 0.36);
     fang.rotation.x = Math.PI;

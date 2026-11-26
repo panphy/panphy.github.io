@@ -5,7 +5,8 @@
 // Nothing here adds a light: glows are emissive materials, so the light count never
 // changes between stages. A kit's own materials are made per stage and disposed with it.
 import * as THREE from 'three';
-import { roundSides, polyDetail, roughen } from './detail.js?v=beta38';
+import { firCrown } from './lowpoly.js?v=beta39';
+import { roundSides, polyDetail, roughen } from './detail.js?v=beta39';
 
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true, ...extra });
 const lit = (color, intensity = 1.6, extra = {}) => flat(color, { emissive: color, emissiveIntensity: intensity, roughness: 0.5, ...extra });
@@ -314,6 +315,41 @@ function meadowKit() {
     }
     return group;
   };
+  function plantOrchard(ctx) {
+    const { mats, random } = ctx;
+    for (const [index, stop] of ctx.stops.entries()) {
+      const pose = stop.pose;
+      const side = index % 2 ? 1 : -1;
+      // The terrace runs across the field above the arena. The near wall is low
+      // enough to see an emerging enemy's shoulders even on the inside of a bend.
+      for (let i = 0; i < 5; i++) {
+        const p = ctx.at(pose, side * (10 + i * 2.8), -14 - i * 0.9);
+        if (ctx.routeDistance(p.x, p.z) < 8 || !ctx.isFree(p.x, p.z, 1.4)) continue;
+        const stones = new THREE.Group();
+        for (let course = 0; course < 2; course++) {
+          for (let j = 0; j < 3; j++) {
+            const stone = dodeca((i + j) % 4 === 0 ? mats.fence : mats.stone, 1, (j - 1) * 0.95 + course * 0.16, 0.16 + course * 0.35, 0);
+            stone.scale.set(0.76, 0.33 + random() * 0.08, 0.53);
+            stone.rotation.y = random() * 0.27;
+            stones.add(stone);
+          }
+        }
+        ctx.place(stones, p.x, p.z, 1.45, pose.yaw + side * 0.28);
+      }
+      for (let row = 0; row < 2; row++) {
+        for (let tree = 0; tree < 4; tree++) {
+          const p = ctx.at(pose, side * (11 + tree * 4.7), -20 - row * 6.1);
+          if (ctx.routeDistance(p.x, p.z) < 12 || !ctx.isFree(p.x, p.z, 2.1)) continue;
+          const apple = ctx.tree('round', 1.65 + random() * 0.42);
+          for (let i = 0; i < 5; i++) {
+            const angle = i * 1.26 + random() * 0.3;
+            apple.add(dodeca(mats.apple, 0.14, Math.cos(angle) * 0.83, 1.89 + random() * 0.36, Math.sin(angle) * 0.83));
+          }
+          ctx.place(apple, p.x, p.z, 2.1, pose.yaw);
+        }
+      }
+    }
+  }
   const createWindmill = (mats) => {
     const group = groupOf(
       cyl(mats.wall, 1.3, 2.2, 8, 8, 0, 4, 0),
@@ -324,6 +360,8 @@ function meadowKit() {
     hub.position.set(0, 7.6, 1.75);
     for (let index = 0; index < 4; index += 1) {
       const arm = groupOf(box(mats.timber, 0.18, 5.2, 0.12, 0, 2.6, 0), box(mats.sail, 1.1, 3.8, 0.05, 0.62, 3.1, 0.04));
+      arm.add(box(mats.timber, 0.085, 4, 0.08, 1.2, 3.1, 0.11));
+      for (let rib = 0; rib < 5; rib++) arm.add(box(mats.hayDark, 1.18, 0.065, 0.07, 0.62, 1.3 + rib * 0.88, 0.12));
       arm.rotation.z = (index / 4) * Math.PI * 2;
       hub.add(arm);
     }
@@ -334,7 +372,7 @@ function meadowKit() {
 
   return {
     materials: () => ({
-      hay: flat(0xd9b45a), hayDark: flat(0xb98d3c), wall: flat(0xd8bf94), timber: flat(0x6b4a2c),
+      apple: flat(0xb45d3d), hay: flat(0xd9b45a), hayDark: flat(0xb98d3c), wall: flat(0xd8bf94), timber: flat(0x6b4a2c),
       roof: flat(0xa5482c), roofDark: flat(0x7e3522), door: flat(0x4a3220), stone: flat(0xb9ae98),
       fence: flat(0x8a6a44), bush: flat(0x4f7d3a), petalA: flat(0xf2c6d6), petalB: flat(0xf6e7a8),
       petalC: flat(0xc9d8f4), sail: flat(0xf3ead6), pane: flat(0x6f8fa6),
@@ -361,6 +399,7 @@ function meadowKit() {
     ],
     decorate(ctx) {
       const { random, mats } = ctx;
+      plantOrchard(ctx);
       // Fences along the path, outside the arenas.
       for (let arc = 6; arc < ctx.length - 40; arc += 4.2) {
         if (random() < 0.35) continue;
@@ -377,7 +416,7 @@ function meadowKit() {
       const millPoint = ctx.at(boss.pose, 22 * sideOf(random), -40);
       const windmill = createWindmill(mats);
       windmill.position.set(millPoint.x, ctx.heightAt(millPoint.x, millPoint.z) - 0.1, millPoint.z);
-      windmill.rotation.y = boss.pose.yaw + Math.atan2(-millPoint.x + boss.pose.x, 1);
+      windmill.rotation.y = Math.atan2(boss.pose.x - millPoint.x, boss.pose.z - millPoint.z);
       ctx.live(windmill);
       ctx.occupy(millPoint.x, millPoint.z, 4);
       ctx.animate((seconds) => { windmill.userData.hub.rotation.z = seconds * 0.45; });
@@ -408,7 +447,7 @@ function meadowKit() {
 // ── Summer forest and river ────────────────────────────────────────────────
 
 function forestKit() {
-  const RIVER = 3.6;
+  const RIVER = 6.0;
   const createFern = (mats, random) => {
     const group = new THREE.Group();
     const fronds = 4 + Math.floor(random() * 3);
@@ -447,46 +486,182 @@ function forestKit() {
   };
   const createStump = (mats) => groupOf(cyl(mats.timber, 0.42, 0.55, 0.6, 6, 0, 0.3, 0), cyl(mats.plank, 0.36, 0.36, 0.05, 6, 0, 0.62, 0));
   const createMossyBoulder = (ctx) => groupOf(ctx.rock(2.6), tilt(ico(ctx.mats.moss, 0.7, 0.2, 1.15, 0.1), ctx.random));
-  // The mill's wheel turns about z; the house stands behind it, on the bank.
-  const createMill = (mats) => {
-    const house = groupOf(
-      box(mats.stone, 5.0, 1.4, 4.2, 0, 0.5, 0),
-      box(mats.wall, 4.6, 3.2, 3.8, 0, 2.8, 0),
-      box(mats.door, 1.0, 1.7, 0.12, 1.2, 2.05, 1.94),
-      box(mats.timber, 0.8, 0.7, 0.12, -1.0, 3.1, 1.94),
-    );
-    house.add(
-      part(createGableGeometry(5.6, 5.0, 2.6), mats.roof, 0, 4.4, 0),
-      part(createGableGeometry(4.6, 3.8, 2.0), mats.wall, 0, 4.4, 0),
-      box(mats.timber, 5.7, 0.16, 0.22, 0, 7.04, 0),
-      box(mats.pane, 0.6, 0.5, 0.14, -1.0, 3.1, 1.95),
-    );
+  // A front-facing timber gable and an attached wheel share one foundation.
+  function createMill(mats) {
+    const house = new THREE.Group();
+    const width = 6.4, depth = 5.4, eave = 5.1, rise = 2.9;
+    const gable = (span, length, height, material, y) => {
+      const mesh = part(createGableGeometry(length, span, height), material, 0, y, 0);
+      mesh.rotation.y = Math.PI / 2;
+      house.add(mesh);
+    };
+    house.add(box(mats.stone, width + 0.35, 1.2, depth + 0.35, 0, 0.55, 0));
+    house.add(box(mats.wall, width, eave - 1.1, depth, 0, (eave + 1.1) / 2, 0));
+    gable(width, depth, rise, mats.wall, eave);
+    const slope = Math.atan2(rise, width / 2);
+    const roofLength = (width / 2 + 0.45) / Math.cos(slope);
+    for (const side of [-1, 1]) {
+      // Overlapping rows give the blue slate a broken edge as the camera rounds the bend.
+      for (let row = 0; row < 5; row++) {
+        for (let tile = 0; tile < 6; tile++) {
+          const down = (row + 0.5) * roofLength / 5;
+          const x = side * down * Math.cos(slope);
+          const y = eave + rise - down * Math.sin(slope) + 0.09;
+          const z = (tile - 2.5) * 1.08;
+          const shingle = box((row + tile * 3) % 4 ? mats.roof : mats.slate,
+            roofLength / 5 + 0.09, 0.13, 1.1, x, y + 0.015 * ((tile + row) % 3), z);
+          shingle.rotation.z = -side * slope;
+          house.add(shingle);
+        }
+      }
+    }
+    const front = depth / 2 + 0.05;
+    for (const x of [-3.12, -1.32, 1.3, 3.12]) house.add(box(mats.timber, 0.18, 4.05, 0.2, x, 3.1, front));
+    for (const y of [1.15, 3.05, eave]) house.add(box(mats.timber, width + 0.18, 0.2, 0.25, 0, y, front));
+    for (const side of [-1, 1]) {
+      const brace = box(mats.timber, 0.16, 2.5, 0.18, side * 2.18, 4.09, front);
+      brace.rotation.z = -side * 0.72;
+      house.add(brace);
+      const bar = box(mats.timber, 0.17, Math.hypot(width / 2, rise), 0.22, side * width / 4, eave + rise / 2, front);
+      bar.rotation.z = side * (Math.PI / 2 - slope);
+      house.add(bar);
+    }
+    for (const x of [-width / 2, width / 2]) {
+      for (const z of [-2.6, 0, 2.6]) house.add(box(mats.timber, 0.19, 4, 0.2, x, 3.12, z));
+      for (const y of [1.18, 3.05, eave]) house.add(box(mats.timber, 0.22, 0.19, depth + 0.06, x, y, 0));
+    }
+    // A mullioned window on the river-facing side is visible through the wheel.
+    const sideWall = width / 2;
+    house.add(box(mats.timber, 0.2, 1.65, 1.9, sideWall + 0.03, 3.98, 1.18));
+    house.add(box(mats.pane, 0.23, 1.32, 1.56, sideWall + 0.06, 3.98, 1.18));
+    house.add(box(mats.timber, 0.26, 1.35, 0.10, sideWall + 0.09, 3.98, 1.18));
+    house.add(box(mats.timber, 0.26, 0.10, 1.58, sideWall + 0.09, 3.98, 1.18));
+    house.add(box(mats.plank, 0.42, 0.13, 2.1, sideWall + 0.12, 3.10, 1.18));
+    for (let row = 0; row < 3; row++) {
+      for (let i = 0; i < 6; i++) {
+        const block = box(i % 3 === 0 ? mats.stone : mats.slate, 0.97, 0.29, 0.18, -2.74 + i * 1.05 + (row % 2) * 0.16, 0.17 + row * 0.36, front + 0.16);
+        house.add(block);
+      }
+    }
+    house.add(box(mats.timber, 0.2, rise, 0.2, 0, eave + rise / 2, front));
+    house.add(box(mats.door, 1.28, 2.1, 0.2, 1.99, 2.1, front));
+    house.add(box(mats.timber, 1.84, 1.66, 0.23, -0.03, 4.08, front));
+    house.add(box(mats.pane, 1.48, 1.32, 0.25, -0.03, 4.08, front + 0.03));
+    house.add(box(mats.timber, 0.12, 1.37, 0.3, -0.03, 4.08, front + 0.05));
+    house.add(box(mats.timber, 1.53, 0.12, 0.3, -0.03, 4.08, front + 0.05));
+    house.add(box(mats.stone, 0.85, 3, 0.92, -1.56, 6.65, -1.2));
+    house.add(box(mats.timber, 1.05, 0.22, 1.1, -1.56, 8.13, -1.2));
+
     const wheel = new THREE.Group();
-    const rimGeometry = new THREE.TorusGeometry(2.3, 0.14, 5, 24);
-    for (const z of [-0.45, 0.45]) wheel.add(part(rimGeometry, mats.timber, 0, 0, z));
-    for (let index = 0; index < 12; index += 1) {
-      const angle = (index / 12) * Math.PI * 2;
-      const paddle = box(mats.plank, 0.12, 0.7, 1.0, Math.cos(angle) * 2.3, Math.sin(angle) * 2.3, 0);
-      paddle.rotation.z = angle;
-      wheel.add(paddle);
-      if (index % 3 === 0) {
-        const spoke = box(mats.timber, 4.5, 0.14, 0.14, 0, 0, 0);
-        spoke.rotation.z = angle;
+    const radius = 2.65, count = 12;
+    for (const z of [-0.52, 0.52]) {
+      const rim = new THREE.TorusGeometry(radius, 0.23, 5, count);
+      wheel.add(part(rim, mats.rim, 0, 0, z));
+      for (let i = 0; i < 4; i++) {
+        const spoke = box(mats.timber, radius * 2, 0.25, 0.21, 0, 0, z);
+        spoke.rotation.z = i * Math.PI / 4;
         wheel.add(spoke);
       }
     }
-    const axle = cyl(mats.timber, 0.2, 0.2, 2.4, 6, 0, 0, 0);
-    axle.rotation.x = Math.PI / 2;
-    wheel.add(axle);
+    for (let i = 0; i < count; i++) {
+      const angle = i * 2 * Math.PI / count;
+      const paddle = box(mats.plank, 0.7, 0.17, 1.26, radius * Math.cos(angle), radius * Math.sin(angle), 0);
+      paddle.rotation.z = angle;
+      paddle.rotation.x = 0.33;
+      wheel.add(paddle);
+    }
+    const hub = cyl(mats.rim, 0.42, 0.42, 1.65, 8, 0, 0, 0);
+    hub.rotation.x = Math.PI / 2;
+    wheel.add(hub);
     return { house, wheel };
-  };
+  }
+
+  // Bent alders on the near bank and two rows of wind-shaped spruce on the far
+  // bank silhouette the river. Their crowns stay above the words at bridge height.
+  function dressRiverBanks(ctx) {
+    const { mats, crossing, random } = ctx;
+    const local = new THREE.Group();
+    const timber = (start, end, bottom, top) => {
+      const from = new THREE.Vector3(...start), to = new THREE.Vector3(...end);
+      const axis = to.clone().sub(from);
+      const branch = cyl(mats.bark, top, bottom, axis.length(), 6);
+      branch.position.copy(from).lerp(to, 0.5);
+      branch.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axis.normalize());
+      local.add(branch);
+    };
+    for (const side of [-1, 1]) {
+      const x = side * (side < 0 ? 10.5 : 9), z = 6;
+      timber([x, -1.1, z], [x * 1.04, 5.1, z - 0.3], 1.15, 0.8);
+      timber([x * 1.04, 5.1, z - 0.3], [x * 0.66, 7.1, z - 0.7], 0.82, 0.47);
+      timber([x * 0.66, 7.1, z - 0.7], [x * 0.42, 10, z - 1.4], 0.48, 0.15);
+      timber([x * 1.04, 5.1, z - 0.3], [x * 1.37, 9.8, z + 1], 0.62, 0.17);
+      for (let i = 0; i < 9; i++) {
+        const crown = part(new THREE.IcosahedronGeometry(1, 0), i % 3 === 1 ? mats.canopy : mats.leafShade);
+        crown.position.set(x * (0.53 + i * 0.13), 8.3 + random() * 1.5, z - 1 + random() * 3);
+        crown.rotation.set(random() * 0.4, random() * 3, random() * 0.3);
+        crown.scale.set(3.8 + random() * 1.3, 2.6 + random(), 3.4);
+        local.add(crown);
+      }
+    }
+    for (let row = 0; row < 2; row++) {
+      for (let i = 0; i < 37; i++) {
+        const x = -67 + i * 3.7 + random() * 1.3;
+        const z = -28 - row * 24 - Math.cos(i * 0.74) * 3.7;
+        if (Math.abs(x) < (row ? 7 : 10)) continue;
+        const h = (row ? 9 : 6) + 6 * random() + 3 * Math.cos(i * 0.54);
+        const w = h * (0.24 + random() * 0.11);
+        // Use the straight bridge frame for placement while querying actual terrain.
+        const framePoint = ctx.at(crossing.pose, x, z);
+        if (ctx.openness(framePoint.x, framePoint.z) < w || !ctx.isFree(framePoint.x, framePoint.z, w)) continue;
+        const base = ctx.heightAt(framePoint.x, framePoint.z) - 0.45;
+        for (let tier = 0; tier < 4; tier++) {
+          const t = tier / 4;
+          const foliage = part(firCrown(w * (1 - t * 0.79), h * (0.59 - t * 0.28), i + tier * 41),
+            row ? mats.distantFir : mats.fir, x + 0.35 * t, base + h * (0.23 + 0.79 * t), z);
+          foliage.rotation.y = i + tier * 0.46;
+          local.add(foliage);
+        }
+      }
+    }
+    ctx.set(local, crossing.pose.x, 0, crossing.pose.z, crossing.yaw);
+  }
+
+  // Tapered facets sit on the river surface. Grouping by material keeps the water
+  // animated in just a few draws, including the window's broken gold reflection.
+  function createRiverGlints(ctx, millX) {
+    const { crossing, mats, random } = ctx;
+    const root = new THREE.Group();
+    function stroke(s, d, length, width, material) {
+      const points = [[-0.5,0],[-0.12,-0.5],[0.5,-0.1],[0.19,0.5]];
+      const verts = points.map(([x,z]) => crossing.point(s + x * length, d + z * width));
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute([0,2,1,0,3,2].flatMap(i => [verts[i].x, -0.53, verts[i].z]), 3));
+      geometry.computeVertexNormals();
+      root.add(part(geometry, material));
+    }
+    for (let i = 0; i < 124; i++) {
+      const s = (random() - 0.5) * 65;
+      if (Math.abs(s) > 3.25) stroke(s, (random() - 0.5) * RIVER * 1.85, 0.5 + random() * 3.5, 0.05 + random() * 0.16, mats.ripple);
+    }
+    for (let i = 0; i < 19; i++) {
+      const t = i / 19;
+      stroke(millX + t * 2.4 + (random() - 0.5) * (0.55 + t), -RIVER + t * RIVER * 1.9, 0.36 + random() * (0.6 + t), 0.1 + random() * 0.15, mats.gold);
+    }
+    const glints = ctx.merge(root, false);
+    ctx.live(glints);
+    ctx.animate(seconds => { glints.position.x = Math.sin(seconds * 0.94) * 0.13; });
+  }
 
   return {
     materials: () => ({
-      timber: flat(0x5a3d24), plank: flat(0x9a7448), wall: flat(0x7d5a36), roof: flat(0x4d5a34), door: flat(0x33231a),
-      stone: flat(0x8a8d86), bush: flat(0x2c6a3c), fern: flat(0x3c8a4a), moss: flat(0x5c9440),
-      cap: flat(0xd9483a), stem: flat(0xeadfc8), pane: lit(0xffc66a, 1.3),
-      water: flat(0x3a8fc0, { roughness: 0.25, metalness: 0.15, emissive: 0x16466e, emissiveIntensity: 0.55 }),
+      timber: flat(0x3e3543), plank: flat(0x826f73), wall: flat(0x847683), roof: flat(0x455774), slate: flat(0x616e8b),
+      rim: flat(0x89838c), door: flat(0x3c3645), stone: flat(0x797884), bush: flat(0x286365),
+      fern: flat(0x427873), moss: flat(0x598078), cap: flat(0x90635f), stem: flat(0xd9d2c2), pane: lit(0xffac56, 1.1),
+      water: flat(0x255780, { roughness: 0.62, emissive: 0x15395a, emissiveIntensity: 0.65 }),
+      ripple: flat(0x63a9c9, { emissive: 0x396b8c, emissiveIntensity: 0.6, side: THREE.DoubleSide }),
+      bark: flat(0x332d3b), canopy: flat(0x235350), leafShade: flat(0x193f42),
+      distantFir: flat(0x34526b), fir: flat(0x184c51),
+      gold: flat(0xe7a764, { emissive: 0xe39648, emissiveIntensity: 0.7, side: THREE.DoubleSide }),
       firefly: lit(0xe9ff8a, 2.6),
     }),
     treeArea: 31,
@@ -527,26 +702,53 @@ function forestKit() {
         ctx.live(water);
         ctx.animate((seconds) => { water.position.y = Math.sin(seconds * 0.9) * 0.04; });
         const centre = crossing.point(0, 0);
-        ctx.set(createBridge(mats, RIVER * 2 + 5.2), centre.x, 0, centre.z, crossing.yaw);
+        const span = RIVER * 2 + 7;
+        const deck = createBridge(mats, span, 7.2);
+        for (const side of [-1, 1]) {
+          const x = side * 3.48;
+          deck.add(box(mats.plank, 0.23, 0.18, span + 0.25, x, 1.21, 0));
+          for (let i = 0; i <= 8; i++) {
+            const z = -span / 2 + i * span / 8;
+            deck.add(box(mats.timber, 0.34, 1.62, 0.34, x, 0.63, z));
+            deck.add(box(mats.rim, 0.39, 0.09, 0.39, x, 1.47, z));
+          }
+        }
+        ctx.set(deck, centre.x, 0, centre.z, crossing.yaw);
 
-        // The watermill stands on the near bank, its wheel in the stream.
-        const side = sideOf(random);
+        const millX = -11.8;
         const { house, wheel } = createMill(mats);
-        const housePoint = crossing.point(side * 12.5, RIVER + 4.6);
-        ctx.place(house, housePoint.x, housePoint.z, 4, crossing.yaw + Math.PI);
-        const wheelPoint = crossing.point(side * 12.5, RIVER - 0.4);
-        const wheelMount = groupOf(wheel);
-        wheelMount.position.set(wheelPoint.x, 1.5, wheelPoint.z);
-        wheelMount.rotation.y = crossing.yaw;
-        ctx.live(wheelMount);
-        ctx.animate((seconds) => { wheel.rotation.z = -seconds * 0.5 * side; });
+        const bank = crossing.point(millX, -RIVER - 3.3);
+        const millYaw = crossing.yaw - 0.62;
+        ctx.set(house, bank.x, -0.26, bank.z, millYaw);
+        ctx.occupy(bank.x, bank.z, 5);
+        // Wide slate courses bed the mill into the slope and step into the stream.
+        const quay = new THREE.Group();
+        for (let i = 0; i < 10; i++) {
+          const boulder = part(new THREE.DodecahedronGeometry(1), i % 3 === 0 ? mats.moss : mats.stone);
+          boulder.position.set(-4.5 + i % 5 * 2, -0.46 - Math.floor(i / 5) * 0.25, 1.8 + Math.floor(i / 5) * 1.25);
+          boulder.rotation.y = i * 2.2;
+          boulder.scale.set(1.85, 0.73, 1.5);
+          quay.add(boulder);
+        }
+        ctx.set(quay, bank.x, 0, bank.z, millYaw);
+        const millFrame = { x: bank.x, z: bank.z, yaw: millYaw };
+        const axle = ctx.at(millFrame, 3.6, 3.8);
+        const mount = groupOf(ctx.merge(wheel));
+        mount.position.set(axle.x, 1.7, axle.z);
+        mount.rotation.y = millYaw + 0.1;
+        ctx.live(mount);
+        ctx.animate(seconds => { mount.children[0].rotation.z = -seconds * 0.36; });
+        createRiverGlints(ctx, millX + 3.25);
+        dressRiverBanks(ctx);
+
         // Stepping stones and reeds along the banks.
         for (let s = -34; s <= 34; s += 3.2) {
           if (Math.abs(s) < 5) continue;
           const bank = sideOf(random);
           const p = crossing.point(s + random() * 2, bank * (RIVER + 0.6 + random() * 1.6));
           if (!ctx.isFree(p.x, p.z, 0.8)) continue;
-          const stone = ctx.rock(0.9 + random() * 0.9);
+          const stone = tilt(ico(mats.moss, 0.65 + random() * 0.8, 0, 0, 0), random);
+          stone.scale.set(1.5, 0.72, 0.9);
           ctx.set(stone, p.x, ctx.heightAt(p.x, p.z) + 0.1, p.z, random() * 3);
         }
       }
@@ -642,13 +844,23 @@ function mountainKit() {
     return group;
   };
   // Posts either side of the tunnel and a beam across the roof.
-  const createSupport = (mats, halfSpan, height) => groupOf(
-    box(mats.timber, 0.5, height, 0.5, -halfSpan, height / 2, 0),
-    box(mats.timber, 0.5, height, 0.5, halfSpan, height / 2, 0),
-    box(mats.timber, halfSpan * 2 + 1.4, 0.55, 0.6, 0, height, 0),
-    box(mats.plank, 0.3, 0.3, 2.4, -halfSpan + 0.9, height - 0.9, 0),
-    box(mats.plank, 0.3, 0.3, 2.4, halfSpan - 0.9, height - 0.9, 0),
-  );
+  function createSupport(mats, halfSpan, height) {
+    const frame = groupOf(box(mats.timber, halfSpan * 2 + 1.6, 0.62, 0.77, 0, height, 0));
+    for (const side of [-1, 1]) {
+      const x = side * halfSpan;
+      frame.add(box(mats.timber, 0.65, height, 0.72, x, height / 2, 0));
+      const diagonal = box(mats.plank, 0.36, 3.4, 0.52, x - side * 1.13, height - 1.12, 0);
+      diagonal.rotation.z = side * Math.PI / 4;
+      frame.add(diagonal);
+      for (const y of [1.4, height - 0.72]) frame.add(box(mats.iron, 0.72, 0.19, 0.77, x, y, 0));
+    }
+    const x = -halfSpan + 1.7;
+    frame.add(box(mats.iron, 0.08, 0.83, 0.08, x, height - 0.66, 0.43));
+    frame.add(cyl(mats.flame, 0.22, 0.18, 0.45, 4, x, height - 1.27, 0.43));
+    frame.add(cone(mats.iron, 0.38, 0.22, 4, x, height - 0.96, 0.43));
+    return frame;
+  }
+
   const createPortal = (mats, random) => {
     const group = new THREE.Group();
     // A cliff face closes the valley, with the mine's mouth cut through it: the route walks in.
@@ -684,7 +896,7 @@ function mountainKit() {
 
   return {
     materials: () => ({
-      rock: flat(0x8b7d70), caveRock: flat(0x5a4a44), timber: flat(0x5c3d22), plank: flat(0x8f6a3e),
+      rock: flat(0x997e76), caveRock: flat(0x514561), timber: flat(0x5c3d22), plank: flat(0x8f6a3e),
       rope: flat(0xb89a64), iron: flat(0x4b4f58, { roughness: 0.6, metalness: 0.5 }), wall: flat(0x7a5a38),
       roof: flat(0x5a3a26), door: flat(0x2e2018), stone: flat(0x6a5a52), pane: lit(0xffb45a, 1.3),
       flame: lit(0xffa040, 2.8), crystal: lit(0x58e6d4, 1.7), crystalB: lit(0xb48cff, 1.6), crystalC: lit(0xffc44d, 1.9),
@@ -692,7 +904,7 @@ function mountainKit() {
     treeArea: 34,
     ground: {
       rock: { h: 0.07, s: 0.14, l: 0.42, vary: 0.12 },
-      cave: { h: 0.06, s: 0.18, l: 0.27, vary: 0.1 },
+      cave: { h: 0.705, s: 0.25, l: 0.28, vary: 0.1 },
     },
     // The route starts in the open pass and walks into the mine: everything the stage
     // calls `late` lies beyond the mine's mouth.
@@ -757,6 +969,23 @@ function mountainKit() {
         ctx.occupy(p.x, p.z, 4.5);
       }
       layTrack(ctx, mats, Math.max(4, mouth - 30), boss.arc - 6);
+
+      // Layered escarpments point down the pass toward the mine entrance.
+      for (let arc = 16; arc < mouth - 12; arc += 24) {
+        const pose = ctx.poseAtArc(arc);
+        const side = sideOf(random);
+        const p = ctx.at(pose, side * (21 + random() * 6), 0);
+        if (ctx.openness(p.x, p.z) < 3 || !ctx.isFree(p.x, p.z, 4)) continue;
+        const bluff = new THREE.Group();
+        for (let layer = 0; layer < 4; layer++) {
+          const shelf = cyl(layer === 1 ? mats.caveRock : mats.rock, 3.4 - layer * 0.52, 3.8 - layer * 0.5,
+            1.8, 4, side * layer * 0.31, 0.4 + layer * 1.37, layer * 0.22);
+          shelf.scale.z = 1.48;
+          shelf.rotation.z = side * 0.1;
+          bluff.add(shelf);
+        }
+        ctx.place(bluff, p.x, p.z, 4, pose.yaw + side * 0.34);
+      }
 
       // Outside: boulders and scree along the foot of the cliffs.
       for (let index = 0; index < ctx.length / 2.6; index += 1) {
@@ -898,6 +1127,39 @@ function winterKit() {
     drift.scale.set(1.5, 0.32, 1.1);
     return groupOf(drift);
   };
+  // A thin, folded curtain above the storm tower. Vertex alpha tapers each end
+  // and the upper edge into the sky without textures or post-processing.
+  function hangAurora(ctx) {
+    const { stops, mats } = ctx;
+    for (let n = 0; n < stops.length; n += 2) {
+      const pose = stops[n].pose;
+      const points = [], colors = [], indices = [];
+      for (let i = 0; i <= 36; i++) {
+        const t = i / 36;
+        const x = (t - 0.5) * 103;
+        const sweep = Math.sin(t * 6.3 + n);
+        const point = ctx.at(pose, x, -56 + sweep * 9 + Math.sin(t * 14.2) * 2);
+        const y = 13 + 4 * sweep + 1.5 * Math.cos(t * 12.4);
+        const fade = Math.sin(t * Math.PI) ** 0.7;
+        for (const [rise,r,g,b,alpha] of [[0,0.17,0.76,0.57,0],[1.0,0.3,0.92,0.71,0.52],[5.4,0.45,0.55,0.89,0.19],[10,0.49,0.34,0.72,0]]) {
+          points.push(point.x, y + rise * (0.83 + 0.17 * Math.sin(t * 32)), point.z - rise * 0.3);
+          colors.push(r,g,b,alpha * fade);
+        }
+        if (i > 0) for (let k = 0; k < 3; k++) {
+          const j = (i - 1) * 4 + k;
+          indices.push(j,j+4,j+1,j+1,j+4,j+5);
+        }
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(points,3));
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors,4));
+      geometry.setIndex(indices);
+      const ribbon = new THREE.Mesh(geometry, mats.aurora);
+      ctx.live(ribbon);
+      ctx.animate(seconds => { ribbon.position.y = Math.sin(seconds * 0.19 + n) * 0.64; });
+    }
+  }
+
   const createMarker = (mats) => groupOf(
     cyl(mats.timber, 0.06, 0.09, 2.3, 5, 0, 1.15, 0),
     box(mats.timber, 0.5, 0.07, 0.07, 0.2, 2.2, 0),
@@ -962,7 +1224,9 @@ function winterKit() {
 
   return {
     materials: () => ({
-      ice: flat(0xa8dcf0, { roughness: 0.3, emissive: 0x2a6f92, emissiveIntensity: 0.45 }), snow: flat(0xf2f6fc),
+      aurora: new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false,
+        blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false }),
+      ice: flat(0x83c9e2, { roughness: 0.3, emissive: 0x2a6f92, emissiveIntensity: 0.45 }), snow: flat(0xf2f6fc),
       stone: flat(0x7d8794), timber: flat(0x5a4636), plank: flat(0x8a7458), wall: flat(0x8c6a4a),
       door: flat(0x33261e), pane: lit(0xffc66a, 1.4), coal: flat(0x1c1d22), carrot: flat(0xf08a2c), scarf: flat(0xc8323c), sail: flat(0xd9d2c0),
       lantern: lit(0xffc45a, 2.4), tower: flat(0x3a4152), towerTrim: flat(0x2a2f3c), towerRoof: flat(0x30486e),
@@ -995,6 +1259,7 @@ function winterKit() {
     decorate(ctx) {
       const { random, mats } = ctx;
       const boss = ctx.bossStop;
+      hangAurora(ctx);
       // The lake leads to the storm tower, and the boss guards its door.
       const { tower, storm, rod, spark } = createTower(mats, random);
       const point = ctx.at(boss.pose, 0, -80);
@@ -1016,6 +1281,24 @@ function winterKit() {
         mats.storm.emissiveIntensity = 2.4 + flicker + Math.sin(seconds * 2.2) * 0.5;
       });
 
+      // Pressure ridges expose the blue underside of the lake in overlapping slabs.
+      // The snow cap follows each inclined ice face.
+      for (let arc = 12; arc < boss.arc + 8; arc += 19) {
+        const pose = ctx.poseAtArc(arc);
+        const side = sideOf(random);
+        const p = ctx.at(pose, side * (13 + random() * 6), -3);
+        if (ctx.heightAt(p.x, p.z) > 0.7 || !ctx.isFree(p.x, p.z, 4.2)) continue;
+        const ridge = new THREE.Group();
+        for (let i = 0; i < 6; i++) {
+          const r = 1.5 + random() * 0.95;
+          const slab = groupOf(cyl(mats.ice, r, r * 0.82, 0.6, 5, 0, 0, 0),
+            cyl(mats.snow, r * 0.91, r, 0.12, 5, 0, 0.34, 0));
+          slab.position.set((i % 2 - 0.5) * 1.2, 0.11 + random() * 0.33, (i - 2.5) * 1.08);
+          slab.rotation.set(0.06, random() * 0.54, side * (0.23 + random() * 0.34));
+          ridge.add(slab);
+        }
+        ctx.place(ridge, p.x, p.z, 4.2, pose.yaw + side * 0.35);
+      }
       // Lantern poles mark the safe line across the ice.
       for (let arc = 4; arc < ctx.length - 20; arc += 7.5) {
         const pose = ctx.poseAtArc(arc);
@@ -1130,7 +1413,7 @@ function skyKit() {
     materials: () => ({
       stone: flat(0x6a5aa8), stoneDark: flat(0x3a2f6a), turf: flat(0x4a3c8c),
       ring: flat(0x8f7fe0, { emissive: 0x5a3fd0, emissiveIntensity: 0.9 }),
-      rune: lit(0xe040fb, 2.0), crystal: lit(0x58e6ff, 1.8), star: lit(0xffe08a, 2.6),
+      brass: flat(0xc59962), rune: lit(0xca72ea, 1.5), crystal: lit(0x58e6ff, 1.8), star: lit(0xffe08a, 2.6),
       light: lit(0xb9f0ff, 1.5, { roughness: 0.3 }),
     }),
     treeArea: 22,
@@ -1186,6 +1469,32 @@ function skyKit() {
         }
       }
 
+      // Ruined celestial instruments on the outlying islands echo the boss's astrolabe.
+      for (let arc = 18; arc < boss.arc; arc += 50) {
+        const pose = ctx.poseAtArc(arc);
+        const side = sideOf(random);
+        const p = ctx.at(pose, side * (23 + random() * 7), -9);
+        if (!ctx.isFree(p.x, p.z, 6) || ctx.openness(p.x, p.z) < 3) continue;
+        const radius = 3.8 + random() * 1.5;
+        const pedestal = groupOf(cyl(mats.stoneDark, 2.5, 0.35, 3.6, 7, 0, -1.8, 0), cyl(mats.stone, 1.55, 2.55, 1.4, 7, 0, 0.6, 0));
+        const instrument = new THREE.Group();
+        const north = new THREE.TorusGeometry(radius, 0.16, 5, 22, Math.PI * 1.73);
+        instrument.add(part(north, mats.stone, 0, 0, 0));
+        const equator = part(new THREE.TorusGeometry(radius * 0.79, 0.09, 5, 24), mats.brass, 0, 0, 0);
+        equator.rotation.x = 1.04;
+        instrument.add(equator, dodeca(mats.star, 0.48, 0, 0, 0));
+        for (let mark = 0; mark < 8; mark++) {
+          const a = mark * Math.PI / 5;
+          const tick = box(mats.brass, 0.13, 0.52, 0.16, radius * Math.cos(a), radius * Math.sin(a), 0);
+          tick.rotation.z = a - Math.PI / 2;
+          instrument.add(tick);
+        }
+        instrument.rotation.z = side * 0.36;
+        instrument.position.y = radius + 1.4;
+        pedestal.add(instrument);
+        ctx.set(pedestal, p.x, 1.4 + random() * 2.3, p.z, pose.yaw + side * 0.35);
+        ctx.occupy(p.x, p.z, 5.5);
+      }
       // A star gate hangs beyond the boss, and standing stones circle the arena.
       const gate = createRing(mats, 13, 1.1);
       const inner = createRing(mats, 8.6, 0.5);

@@ -1,6 +1,6 @@
 // lowpoly.js — faceted, flat-shaded scenery: trees, rocks and clouds.
 import * as THREE from 'three';
-import { roundSides, polyDetail, roughen } from './detail.js?v=beta38';
+import { roundSides, polyDetail, roughen } from './detail.js?v=beta39';
 
 function hash(a, b, c = 0) {
   const value = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453;
@@ -11,6 +11,29 @@ function shadowed(mesh) {
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
+}
+
+// Fold a few uneven boughs around a leaning spine. The notches break up the
+// lower edge even at a distance, where a stack of perfect cones reads as rings.
+export function firCrown(radius, height, seed) {
+  const boughs = roundSides(6, 1, 1.3);
+  const tip = [(hash(seed, 1) - 0.5) * radius * 0.34, height * 0.58, 0];
+  const rim = [];
+  for (let i = 0; i < boughs * 2; i++) {
+    const angle = i * Math.PI / boughs;
+    const notch = i % 2;
+    const reach = radius * ((notch ? 0.62 : 0.91) + 0.15 * hash(seed, i, 3));
+    rim.push([Math.cos(angle) * reach, height * (-0.41 + notch * 0.18 + hash(seed, i, 5) * 0.08), Math.sin(angle) * reach]);
+  }
+  const vertices = [];
+  for (let i = 0; i < rim.length; i++) {
+    const next = rim[(i + 1) % rim.length];
+    vertices.push(...tip, ...next, ...rim[i], 0, -height * 0.38, 0, ...rim[i], ...next);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.computeVertexNormals();
+  return geometry;
 }
 
 export function createLowPolyTree({ kind, trunkMaterial, leafMaterials, seed }) {
@@ -26,7 +49,7 @@ export function createLowPolyTree({ kind, trunkMaterial, leafMaterials, seed }) 
     for (let tier = 0; tier < tiers; tier += 1) {
       const radius = 1.05 - tier * 0.26;
       const height = 1.15 - tier * 0.12;
-      const cone = shadowed(new THREE.Mesh(new THREE.ConeGeometry(radius, height, roundSides(6, 1, 2), polyDetail(1)), leafMaterials[2]));
+      const cone = shadowed(new THREE.Mesh(firCrown(radius, height, seed + tier), leafMaterials[tier === 2 ? 0 : 2]));
       cone.position.y = trunkHeight + 0.4 + tier * 0.62;
       cone.rotation.y = random(10 + tier) * Math.PI;
       group.add(cone);

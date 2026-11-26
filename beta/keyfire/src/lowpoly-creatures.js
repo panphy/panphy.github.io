@@ -1,7 +1,7 @@
 // lowpoly-creatures.js — faceted, flat-shaded monsters. Each is a handful of simple
 // solids on pivots, plus an animate(seconds, enemy) function that moves the pivots.
 import * as THREE from 'three';
-import { roundSides, polyDetail } from './detail.js?v=beta38';
+import { roundSides, polyDetail } from './detail.js?v=beta39';
 
 const BONE = 0xf3e6c8;
 
@@ -19,6 +19,25 @@ function pivot(parent, x, y, z) {
   parent.add(group);
   return group;
 }
+
+// A cut stone, leaf or plate with an authored outline. Both sides taper from the
+// rim to a ridge, so even a thin piece keeps its facets when it turns in profile.
+function cutFacet(outline, ridge = [0, 0, 0.55]) {
+  const vertices = [];
+  const clockwise = THREE.ShapeUtils.isClockWise(outline.map(([x, y]) => new THREE.Vector2(x, y)));
+  const points = clockwise ? outline.slice().reverse() : outline;
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i], b = points[(i + 1) % points.length];
+    vertices.push(...a, 0, ...b, 0, ...ridge, ...b, 0, ...a, 0, ridge[0], ridge[1], -ridge[2] * 0.55);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+const LEAF = [[0, -1], [-0.62, -0.14], [-0.56, 0.6], [-0.14, 0.94], [0.24, 1.12], [0.64, 0.25], [0.48, -0.38]];
+const SCUTE = [[0, -1], [-0.91, -0.15], [-1, 0.53], [-0.55, 0.88], [0.58, 0.8], [1, 0.38], [0.8, -0.3]];
 
 // kit: { mesh(geometry, material), mat(color, options), glow(color, intensity) }, supplied
 // by enemy-meshes.js so that shadows and stun tinting work as for every other monster.
@@ -68,12 +87,18 @@ function buildMudlug(type, kit) {
   b.place(head, b.ico(0.5, 1), body, [0, 0.04, 0], [1.2, 0.6, 0.95]);
   b.place(head, b.ico(0.5, 1), dark, [0, -0.1, 0.03], [1.12, 0.16, 0.9]);
   b.place(head, b.ico(0.47, 1), bellyLight, [0, -0.2, 0.03], [1.16, 0.3, 0.92]);
+  // Spreading cheek frills give the toad a broad, low silhouette.
+  for (const side of [-1, 1]) {
+    const fin = cutFacet([[0,-0.16],[0.4,-0.26],[0.35,-0.07],[0.62,0.08],[0.39,0.14],[0.56,0.4],[0.13,0.31],[0,0.16]], [0.18,0.07,0.12]);
+    b.place(head, fin, belly, [side * 0.37, 0, 0.09], [side, 1, 1], [0, side * 0.32, 0]);
+    b.place(torso, cutFacet(LEAF), bodyDark, [side * 0.29, 0.83, -0.23], [0.39, 0.48, 0.41], [-0.9, 0, -side * 0.46]);
+  }
   const eyes = pivot(head, 0, 0, 0);
   for (const side of [-1, 1]) {
     b.place(head, b.ico(0.2, 0), body, [side * 0.3, 0.26, 0.16]);
     b.place(eyes, b.ico(0.13, 0), eyeGlow, [side * 0.3, 0.27, 0.3]);
     b.place(head, b.octa(0.055), dark, [side * 0.28, 0.26, 0.42]);
-    b.place(head, b.box(0.36, 0.08, 0.24), bodyDark, [side * 0.31, 0.42, 0.26], null, [0.25, 0, side * -0.32]);
+    b.place(head, b.box(0.36, 0.08, 0.24), bodyDark, [side * 0.31, 0.375, 0.27], null, [0.25, 0, side * 0.25]);
     b.place(head, b.cone(0.11, 0.36, 4), belly, [side * 0.66, 0.14, -0.02], null, [0, 0, side * -1.15]);
     b.place(head, b.cone(0.05, 0.17, 4), bone, [side * 0.2, -0.05, 0.43]);
     b.place(head, b.octa(0.03), dark, [side * 0.07, 0.1, 0.47]);
@@ -274,6 +299,14 @@ function buildCrimsonBulwark(type, kit) {
       b.spike(head, bone, [side * x, -0.09, z], [side * 0.1, -1, 0.1], length, 0.04);
     });
   }
+  // Broad sweep-back cheek plates frame the dragon's head against its wings.
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 3; i++) {
+      b.place(head, cutFacet(LEAF), i === 1 ? crest : plate, [side * (0.26 + i * 0.075), 0.12 - i * 0.11, -i * 0.055],
+        [0.18, 0.43 - i * 0.045, 0.19], [-0.35, side * 0.3, -side * (0.68 + i * 0.35)]);
+    }
+    b.place(body, cutFacet(SCUTE), crest, [side * 0.58, 0.36, 0.22], [0.47, 0.34, 0.47], [-0.4, side * 0.4, side * 0.32]);
+  }
   // One horn is whole and one is snapped off short.
   b.spike(head, bone, [0.2, 0.18, -0.12], [0.3, 0.62, -1], 0.8, 0.11, 5);
   b.bar(head, bone, [-0.2, 0.18, -0.12], [-0.33, 0.44, -0.54], 0.11, 0.075, 5);
@@ -422,6 +455,13 @@ function buildGlowmite(type, kit) {
     antenna.rotation.set(0.5, 0, side * -0.35);
     antennae.push(antenna);
   }
+  const covers = [];
+  for (const side of [-1, 1]) {
+    const cover = pivot(abdomen, side * 0.08, 0.19, 0.04);
+    b.place(cover, cutFacet(LEAF), shell, [side * 0.21, 0, -0.29], [0.37, 0.62, 0.32], [-1.23, 0, side * 0.19]);
+    b.place(cover, cutFacet(LEAF), lamp, [side * 0.34, 0.12, -0.38], [0.11, 0.26, 0.13], [-1.24, 0, side * 0.19]);
+    covers.push(cover);
+  }
   const legs = [];
   [-0.12, 0.08, 0.28].forEach((z, index) => {
     for (const side of [-1, 1]) {
@@ -437,6 +477,9 @@ function buildGlowmite(type, kit) {
     const step = seconds * 9 + phase;
     for (const { leg, offset } of legs) leg.rotation.y = Math.sin(step + offset) * 0.42;
     antennae.forEach((antenna, index) => { antenna.rotation.x = 0.5 + Math.sin(seconds * 3 + phase + index) * 0.2; });
+    const lift = enemy.flier ? 0.74 : 0.12;
+    covers[0].rotation.z = lift + Math.sin(step * 0.6) * 0.08;
+    covers[1].rotation.z = -covers[0].rotation.z;
     const pulse = 1 + Math.sin(seconds * 4 + phase) * 0.06;
     abdomen.scale.set(pulse, pulse, pulse);
     head.rotation.y = Math.sin(seconds * 2.3 + phase) * 0.25;
@@ -459,6 +502,12 @@ function buildAshOaf(type, kit) {
   b.place(torso, b.dodeca(0.45), rockLight, [0, -0.36, 0.12], null, [0.8, 0.2, 0.5]);
   b.place(torso, b.box(0.05, 0.34, 0.03), eyeGlow, [0.12, 0.02, 0.5], null, [0, 0, 0.5]);
   b.place(torso, b.box(0.04, 0.22, 0.03), eyeGlow, [-0.02, -0.12, 0.5], null, [0, 0, -0.7]);
+  // Stacked basalt shelves split at the glowing fault beneath the left shoulder.
+  for (let layer = 0; layer < 3; layer++) {
+    b.place(torso, cutFacet(SCUTE), layer === 1 ? rock : rockLight,
+      [-0.64 - layer * 0.085, 0.49 - layer * 0.14, 0.02], [0.52 - layer * 0.05, 0.26, 0.65], [-0.37, -0.36, 0.3]);
+  }
+  b.place(torso, cutFacet(SCUTE), rockDark, [0.29, 0.02, 0.44], [0.43, 0.48, 0.31], [0, 0.3, -0.24]);
   const head = pivot(torso, 0, 0.5, 0.2);
   b.place(head, b.dodeca(0.3), rockLight, [0, 0, 0], [1.1, 0.8, 1], [0.2, 0.6, 0]);
   b.place(head, b.box(0.5, 0.09, 0.2), rockDark, [0, 0.1, 0.2], null, [0.3, 0, 0]);
@@ -517,13 +566,23 @@ function buildCinderImp(type, kit) {
     b.place(head, b.octa(0.05), ember, [side * 0.31, 0.56, -0.02]);
     b.place(head, b.cone(0.07, 0.3, 3), skinDark, [side * 0.36, 0.04, -0.03], null, [0, 0, side * -1.3]);
   }
+  head.scale.set(1.2, 1.03, 1.07);
+  for (const side of [-1, 1]) {
+    const horn = cutFacet([[0,0],[-0.06,0.18],[0.09,0.43],[0.35,0.68],[0.27,0.35],[0.2,0.02]], [0.12,0.22,0.13]);
+    b.place(head, horn, accent, [side * 0.16, 0.18, -0.03], [side, 1, 1]);
+    b.place(torso, cutFacet(SCUTE), skinDark, [side * 0.18, 0.18, 0.15], [0.23, 0.19, 0.24], [0, side * 0.3, side * 0.35]);
+  }
   const limbs = {};
   for (const [name, side] of [['Left', -1], ['Right', 1]]) {
     const arm = pivot(group, side * 0.3, 0.98, 0);
+    b.place(arm, b.dodeca(0.13), skin, [side * 0.03, -0.08, 0.02], [1, 1.45, 0.92]);
+    b.place(arm, b.dodeca(0.12), skinDark, [side * 0.03, -0.37, 0.05], [0.91, 1.15, 0.84]);
     b.place(arm, b.cylinder(0.045, 0.055, 0.46, 4), skin, [0, -0.2, 0]);
     b.place(arm, b.cone(0.05, 0.12, 4), bone, [0, -0.47, 0.02], null, [Math.PI, 0, 0]);
     limbs[`arm${name}`] = arm;
     const leg = pivot(group, side * 0.14, 0.5, 0);
+    b.place(leg, b.dodeca(0.11), skin, [0, -0.14, 0], [0.95, 1.55, 1.04]);
+    b.place(leg, cutFacet(SCUTE), skinDark, [0, -0.39, 0.07], [0.095, 0.17, 0.13]);
     b.place(leg, b.cylinder(0.06, 0.07, 0.44, 4), skinDark, [0, -0.22, 0]);
     b.place(leg, b.cylinder(0.03, 0.09, 0.26, 4), skinDark, [0, -0.45, 0.1], [1, 1, 0.5], [Math.PI / 2, 0, 0]);
     limbs[`leg${name}`] = leg;
@@ -568,32 +627,47 @@ function buildBogShambler(type, kit) {
   const eyeGlow = kit.glow(type.eye, 1.6);
   const group = new THREE.Group();
 
-  const robe = pivot(group, 0, 0, 0);
-  b.place(robe, b.cone(0.62, 1.5, 7), cloak, [0, 0.75, 0]);
-  b.place(robe, b.cone(0.74, 0.7, 7), cloakDark, [0, 0.36, 0], null, [0, 0.4, 0]);
-  b.place(group, b.ico(0.32, 0), accent, [0, 1.4, 0], [1.5, 0.6, 1]);
-  const head = pivot(group, 0, 1.75, 0.05);
-  b.place(head, b.ico(0.37, 1), cloak, [0, 0, 0], [1, 1.1, 1]);
-  b.place(head, b.ico(0.26, 0), voidDark, [0, -0.03, 0.18], [1, 1.05, 0.6]);
-  b.place(head, b.cone(0.2, 0.4, 5), cloakDark, [0, 0.42, -0.14], null, [-0.6, 0, 0]);
-  for (const side of [-1, 1]) b.place(head, b.octa(0.065), eyeGlow, [side * 0.11, 0.0, 0.33], [1.2, 0.8, 1]);
+  const moss = kit.mat(0x657650);
+  for (const side of [-1, 1]) {
+    const foot = pivot(group, side * 0.32, 0, side * 0.11);
+    b.place(foot, b.dodeca(0.23), cloakDark, [0, 0.19, 0.12], [1.03, 0.75, 1.53]);
+    b.place(foot, b.dodeca(0.24), cloak, [0, 0.42, -0.02], [0.81, 1.46, 0.97]);
+  }
+  const robe = pivot(group, 0, 0.96, 0);
+  b.place(robe, b.dodeca(0.61), cloak, [0, 0.12, -0.05], [1.3, 1.05, 0.88], [0.2, 0.3, 0]);
+  const head = pivot(robe, 0, 0.65, 0.28);
+  b.place(head, cutFacet(SCUTE, [0, 0.44, 0.83]), cloakDark, [0, 0.02, 0.02], [0.41, 0.49, 0.61]);
+  b.place(head, cutFacet(SCUTE), voidDark, [0, -0.02, 0.34], [0.29, 0.32, 0.18]);
   const arms = [];
   for (const side of [-1, 1]) {
-    const arm = pivot(group, side * 0.5, 1.38, 0.05);
-    b.place(arm, b.cylinder(0.05, 0.11, 0.95, 4), cloakDark, [0, -0.45, 0.1], null, [-0.3, 0, 0]);
-    b.place(arm, b.octa(0.1), accent, [0, -0.95, 0.26], [0.8, 1.4, 0.8]);
-    arms.push(arm);
+    b.place(head, b.octa(0.09), eyeGlow, [side * 0.125, 0.055, 0.43], [1.2, 0.56, 0.4], [0, 0, side * 0.42]);
+    b.place(robe, cutFacet(LEAF), cloakDark, [side * 0.31, -0.4, 0.19], [0.39, 0.52, 0.42], [0.1, side * 0.24, -side * 0.23]);
+    const arm = pivot(robe, side * 0.61, 0.36, -0.02);
+    b.place(arm, b.dodeca(0.31), accent, [side * 0.08, -0.04, 0], [1.25, 1, 1]);
+    b.place(arm, cutFacet(LEAF), moss, [side * 0.13, 0, 0.19], [0.33, 0.43, 0.25], [0, side * 0.42, side * 0.2]);
+    b.place(arm, b.cylinder(0.18, 0.13, 0.53, 5), cloak, [side * 0.08, -0.32, 0]);
+    const elbow = pivot(arm, side * 0.08, -0.57, 0);
+    b.place(elbow, b.dodeca(0.22), cloak, [0, -0.25, 0.03], [0.86, 1.65, 0.9]);
+    b.place(elbow, b.dodeca(0.17), cloakDark, [0, -0.53, 0.08], [1.25, 0.78, 1]);
+    for (let finger = -1; finger <= 1; finger++) {
+      b.place(elbow, b.cone(0.058, 0.25, 4), accent, [finger * 0.095, -0.68, 0.13], null, [2.8, 0, finger * 0.16]);
+    }
+    arms.push({ arm, elbow });
   }
-
   group.userData.animate = (seconds, enemy) => {
-    const phase = enemy.phase || 0;
-    const sway = Math.sin(seconds * 2 + phase);
-    robe.rotation.z = sway * 0.05;
-    robe.scale.x = 1 + Math.sin(seconds * 3.1 + phase) * 0.04;
-    head.rotation.z = sway * 0.12;
-    head.rotation.x = Math.sin(seconds * 1.3 + phase) * 0.08;
-    arms[0].rotation.x = -0.25 + Math.sin(seconds * 2.4 + phase) * 0.3;
-    arms[1].rotation.x = -0.25 - Math.sin(seconds * 2.4 + phase) * 0.3;
+    const step = Math.sin(seconds * 3.2 + (enemy.phase || 0));
+    const climb = enemy.rail?.kind === 'climb' && enemy.rail.phase === 'entry'
+      ? Math.sin(Math.PI * enemy.rail.t) : 0;
+    robe.rotation.x = 0.18 + climb * 0.34;
+    robe.rotation.z = step * 0.085;
+    head.rotation.x = -0.12 - climb * 0.28;
+    for (const [index, { arm, elbow }] of arms.entries()) {
+      const side = index ? 1 : -1;
+      const reach = index ? 0.42 : 1;
+      arm.rotation.x = -0.24 + side * step * 0.32 - climb * reach * 1.9;
+      arm.rotation.z = side * 0.2;
+      elbow.rotation.x = -0.45 - side * step * 0.13 - climb * (1 - reach) * 1.3;
+    }
   };
   group.userData.animate(0, {});
   return group;
@@ -606,11 +680,27 @@ export function buildPulseHeart(type, kit) {
   const highlight = kit.glow(type.trim, 0.55);
   const cross = kit.glow(type.eye, 0.9);
   const group = new THREE.Group();
-  for (const side of [-1, 1]) b.place(group, b.ico(0.5, 1), heart, [side * 0.36, 1.78, 0], [1, 1, 0.74]);
-  b.place(group, b.cone(0.86, 1.1, 8), heart, [0, 1.12, 0], [1, 1, 0.66], [Math.PI, 0, 0]);
-  b.place(group, b.ico(0.13, 0), highlight, [-0.46, 2.02, 0.3]);
-  b.place(group, b.box(0.42, 0.13, 0.08), cross, [0, 1.52, 0.4]);
-  b.place(group, b.box(0.13, 0.42, 0.08), cross, [0, 1.52, 0.4]);
+  const ruby = pivot(group, 0, 1.42, 0);
+  const heartCut = [[0,0.49],[-0.32,0.78],[-0.64,0.74],[-0.83,0.47],[-0.78,0.1],[-0.54,-0.26],[0,-0.9],[0.54,-0.26],[0.78,0.1],[0.83,0.47],[0.64,0.74],[0.32,0.78]];
+  b.place(ruby, cutFacet(heartCut, [-0.06, 0.08, 0.42]), heart, [0, 0, 0]);
+  b.place(ruby, b.box(0.42, 0.13, 0.07), cross, [0, 0.12, 0.41]);
+  b.place(ruby, b.box(0.13, 0.42, 0.07), cross, [0, 0.12, 0.41]);
+  const wings = [];
+  for (const side of [-1, 1]) {
+    const wing = pivot(ruby, side * 0.66, 0.17, -0.06);
+    for (let i = 0; i < 3; i++) {
+      b.place(wing, cutFacet(LEAF), i === 0 ? cross : highlight, [side * (0.27 - i * 0.045), 0.26 - i * 0.16, -i * 0.04],
+        [0.15, 0.43 - i * 0.07, 0.13], [0, 0, -side * (0.86 + i * 0.23)]);
+    }
+    wings.push(wing);
+  }
+  group.userData.animate = (seconds, enemy) => {
+    const t = seconds + (enemy.phase || 0);
+    const beat = Math.max(0, Math.sin(t * 5)) ** 5;
+    ruby.scale.setScalar(1 + beat * 0.07);
+    wings[0].rotation.z = Math.sin(t * 6) * 0.2;
+    wings[1].rotation.z = -wings[0].rotation.z;
+  };
   return group;
 }
 
@@ -653,6 +743,16 @@ function buildVerdantColossus(type, kit) {
     b.spike(torso, index === 4 ? accent : bone, [x, y - 0.1, index === 4 ? -0.7 : -0.4], [tilt, 1, index === 4 ? -1.2 : -0.5], length, 0.11);
   });
 
+  // A pollarded tree grows from the heavy shoulder, with long bronze-green leaves.
+  const copperLeaf = kit.mat(0xbca458);
+  for (const [x, y, dx] of [[-0.64,1.18,-0.58],[0.68,1.09,0.38]]) {
+    const fork = [x + dx, y + 0.49, -0.12];
+    b.bar(torso, wood, [x,y,-0.14], fork, 0.17, 0.085, 5);
+    b.bar(torso, wood, fork, [x + dx * 1.35,y + 0.91,-0.16], 0.087, 0.025);
+    b.bar(torso, wood, fork, [x + dx * 1.8,y + 0.62,-0.06], 0.077, 0.03);
+    for (let i = 0; i < 3; i++) b.place(torso, cutFacet(LEAF), i === 1 ? copperLeaf : accent,
+      [x + dx * (1.24 + 0.32 * i), y + 0.76 - i * 0.08, -0.08], [0.18, 0.3, 0.13], [0.12, 0.2, -Math.sign(x) * (0.38 + i * 0.35)]);
+  }
   const head = pivot(torso, 0, 1.2, 0.56);
   b.place(head, b.ico(0.3, 1), hide, [0, 0, 0], [1.1, 0.9, 1]);
   b.place(head, b.box(0.62, 0.13, 0.3), hideDark, [0, 0.14, 0.2], null, [0.35, 0, 0]);
@@ -812,6 +912,13 @@ function buildGlacialTitan(type, kit) {
     b.spike(torso, crystal, [x, y - 0.1, -0.5], [tilt, 1, -0.7], length, 0.13);
   });
 
+  // A glacier calving at one shoulder: tall sapphire prisms, tipped in milky ice.
+  for (const [x,y,lean,height] of [[-0.68,1.17,0.42,0.74],[-0.91,1.03,0.75,0.64],[-1.08,0.92,1.02,0.46],[0.76,1.09,-0.5,0.43]]) {
+    const shard = pivot(torso, x, y, -0.07);
+    shard.rotation.z = lean;
+    b.place(shard, b.cylinder(0.16, 0.22, height, 5), crystal, [0, height / 2, 0]);
+    b.place(shard, b.cone(0.17, 0.27, 5), frost, [0, height + 0.13, 0]);
+  }
   const head = pivot(torso, 0, 1.44, 0.52);
   b.place(head, b.dodeca(0.26), rockDark, [0, 0, 0], [1.2, 0.95, 1], [0.3, 0.5, 0]);
   b.place(head, b.box(0.56, 0.13, 0.3), frost, [0, 0.11, 0.14], null, [0.35, 0, 0]);
@@ -919,10 +1026,25 @@ function buildMagmaSovereign(type, kit) {
   const eyeGlow = kit.glow(type.eye, 1.9);
   const group = new THREE.Group();
 
-  const flat = [Math.PI / 2, 0, 0];
-  b.place(group, b.ring(0.85, 0.3, 10), rockDark, [0, 0.3, 0], null, flat);
-  b.place(group, b.ring(0.6, 0.27, 9), rock, [0.05, 0.76, -0.05], null, [Math.PI / 2, 0, 0.4]);
-  const seam = b.place(group, b.ring(0.85, 0.06, 10), lava, [0, 0.53, 0], [1.13, 1.13, 1], flat);
+  // One tapering coil runs from the tail to the raised neck. Slightly uneven
+  // radii leave a broken line of fire visible between turns.
+  const spine = [];
+  for (let i = 0; i <= 36; i++) {
+    const t = i / 36;
+    const angle = t * Math.PI * 4.4 + 0.7;
+    const r = 0.99 - 0.63 * t + 0.055 * Math.sin(angle * 3);
+    spine.push(new THREE.Vector3(r * Math.cos(angle), 0.28 + t * 0.71, r * Math.sin(angle) - 0.08 * t));
+  }
+  const coil = new THREE.CatmullRomCurve3(spine);
+  b.place(group, new THREE.TubeGeometry(coil, 54, 0.29, 7, false), rock, [0,0,0]);
+  const seam = pivot(group, 0, 0.02, 0);
+  for (let i = 1; i < spine.length; i += 2) {
+    const point = spine[i];
+    const angle = Math.atan2(point.x, point.z);
+    b.place(seam, cutFacet(SCUTE), i % 4 === 1 ? belly : lava,
+      [point.x + 0.27 * Math.sin(angle), point.y, point.z + 0.27 * Math.cos(angle)],
+      [0.19, 0.095, 0.075], [0, angle, 0.22]);
+  }
   for (let index = 0; index < 11; index += 1) {
     const angle = (index / 11) * Math.PI * 2 + 0.3;
     const x = Math.cos(angle);
@@ -968,6 +1090,14 @@ function buildMagmaSovereign(type, kit) {
     });
   }
 
+  // A pair of furnace eyes cut into the cobra's hood, visible behind the real head.
+  for (const side of [-1, 1]) {
+    const eye = pivot(hood, side * 0.58, 0.31, 0.17);
+    eye.rotation.z = side * 0.48;
+    b.place(eye, cutFacet(SCUTE), belly, [0, 0, 0], [0.38, 0.31, 0.17]);
+    b.place(eye, b.octa(0.2), lava, [0, 0, 0.1], [1.4, 0.7, 0.24]);
+    b.place(eye, b.octa(0.13), rockDark, [0, 0, 0.15], [0.32, 0.91, 0.18]);
+  }
   const head = pivot(neckParent, 0, 0.38, 0);
   head.scale.setScalar(1.25);
   b.place(head, b.ico(0.3, 1), rock, [0, 0.05, 0.12], [1.2, 0.7, 1.35]);
@@ -1035,8 +1165,7 @@ function buildMagmaSovereign(type, kit) {
     throat.scale.set(heat, heat, heat);
     const flare = 1 + Math.sin(t * 1.8) * 0.06 * wide + windup * 0.16 + rage * 0.06 - hurt * 0.1;
     hood.scale.set(flare, 1 + (flare - 1) * 0.5, 1);
-    const glow = 1.13 + rage * 0.05 + Math.sin(t * 2.8) * (0.012 + rage * 0.03);
-    seam.scale.set(glow, glow, 1 + rage * 1.2 + Math.sin(t * 2.8) * 0.3 * wide);
+    seam.scale.setScalar(1 + rage * 0.024 + Math.sin(t * 2.8) * 0.012);
     for (let index = 0; index < tail.length; index += 1) {
       tail[index].rotation.y = (index === 0 ? 0.5 : 0.1) + Math.sin(t * 2.4 - index * 0.9) * 0.22 * wide;
       tail[index].rotation.z = (index === 0 ? 0.1 : 0.42) + windup * 0.12 + Math.sin(seconds * 40) * (hurt + rage * 0.3) * (index === 3 ? 0.12 : 0);
@@ -1158,6 +1287,16 @@ export function buildStellarDreadnought(type, kit) {
     b.spike(mace, lamp, [direction[0] / length * 0.2, 1.15 + direction[1] / length * 0.2, direction[2] / length * 0.2], direction, 0.38, 0.08);
   }
 
+  // An eclipsed astrolabe rides behind the knight, its brass crescents turning
+  // on the same axis as the star in the breastplate.
+  const dial = pivot(torso, 0, 1.2, -0.46);
+  for (const turn of [0.23, Math.PI + 0.23]) {
+    const arc = new THREE.TorusGeometry(0.91, 0.045, 5, 16, Math.PI * 0.82);
+    b.place(dial, arc, gold, [0, 0, 0], null, [0, 0, turn]);
+    b.place(dial, b.octa(0.105), lamp, [0.91 * Math.cos(turn), 0.91 * Math.sin(turn), 0], [0.7, 1, 0.55]);
+  }
+  for (const side of [-1,1]) b.place(torso, cutFacet(SCUTE), plateDark, [side * 0.44, 0.62, 0.43],
+    [0.36, 0.45, 0.32], [0, side * 0.36, side * 0.38]);
   const clock = rageClock();
   group.userData.animate = (seconds, enemy) => {
     const phase = enemy.phase || 0;
@@ -1179,6 +1318,7 @@ export function buildStellarDreadnought(type, kit) {
     head.rotation.z = shake * 0.1;
     const pulse = 1 + rage * 0.35 + Math.sin(t * 2.8) * (0.07 + rage * 0.2) + windup * 0.25;
     star.scale.set(pulse, pulse, 1);
+    dial.rotation.z = 0.15 * t + windup * 0.32;
     star.rotation.z = Math.sin(t * 0.9) * 0.1 + rage * Math.sin(t * 2.8) * 0.2;
     // The shield stays braced in front, and is knocked wide by a hit.
     arms[0].arm.rotation.x = -0.5 + step * 0.05 + hurt * 0.3;
@@ -1204,7 +1344,7 @@ export function buildStellarDreadnought(type, kit) {
 // game swings open; the base and lid meet in two rows of teeth.
 export function buildMimicChest(type, kit) {
   const b = builder(kit);
-  const wood = kit.mat(mix(type.body, 0x8a5226, 0.5));
+  const wood = kit.mat(mix(type.body, 0x65403a, 0.84));
   const woodDark = kit.mat(mix(type.body, 0x5a3418, 0.7));
   const gold = kit.mat(type.trim);
   const inside = kit.mat(0x1a0a1c);
@@ -1224,6 +1364,10 @@ export function buildMimicChest(type, kit) {
     b.place(group, b.cone(0.055, 0.17, 4), bone, [-0.4 + index * 0.2, 0.62, 0.36], null, [0.25, 0, 0]);
   }
 
+  for (const x of [-0.52, 0.52]) {
+    b.place(group, b.box(0.1, 0.42, 0.09), gold, [x, 0.28, 0.44]);
+    b.place(group, b.octa(0.045), woodDark, [x, 0.21, 0.498]);
+  }
   const lid = pivot(group, 0, 0.58, -0.46);
   // Half of a seven-sided drum, lying on its side, is the domed lid.
   const dome = new THREE.CylinderGeometry(0.47, 0.47, 1.22, 7, 1, false, 0, Math.PI);
@@ -1238,6 +1382,17 @@ export function buildMimicChest(type, kit) {
   for (let index = 0; index < 6; index += 1) {
     b.place(lid, b.cone(0.05, 0.17, 4), bone, [-0.46 + index * 0.185, -0.06, 0.82], null, [Math.PI - 0.25, 0, 0]);
   }
+  // Brass corner claws carry the coffer. Its eye-shaped lock moves with the jaw.
+  for (const side of [-1, 1]) {
+    for (const z of [-0.3, 0.32]) {
+      b.place(group, cutFacet(SCUTE), woodDark, [side * 0.52, 0.13, z], [0.19, 0.18, 0.24], [0, side * 0.54, 0]);
+      b.place(group, b.octa(0.13), gold, [side * 0.62, 0.055, z + 0.08], [1.1, 0.48, 1.4]);
+    }
+    b.place(lid, cutFacet(LEAF), gold, [side * 0.29, 0.13, 0.86], [0.16, 0.32, 0.12], [0.3, side * 0.18, -side * 0.94]);
+  }
+  b.place(lid, cutFacet(SCUTE), woodDark, [0, 0.03, 1.01], [0.19, 0.22, 0.11]);
+  b.place(lid, b.octa(0.12), gem, [0, 0.055, 1.08], [1.25, 0.53, 0.5]);
+  b.place(group, cutFacet(LEAF), kit.mat(0xa74870), [0.12, 0.58, 0.41], [0.18, 0.26, 0.14], [-1.18, 0, -0.25]);
   return { group, lid };
 }
 
