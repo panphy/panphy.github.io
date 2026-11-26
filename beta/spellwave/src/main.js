@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta26';
+import { createSpellwaveAudio } from './audio.js?v=beta27';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta26';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta26';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta26';
-import { createLeaderboard } from './leaderboard.js?v=beta26';
+import { createPotionSystem } from './potions.js?v=beta27';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta27';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta27';
+import { createLeaderboard } from './leaderboard.js?v=beta27';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta26';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta26';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta27';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta27';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta26';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta26';
-import { createWordDeck } from './word-decks.js?v=beta26';
-import { createStage } from './stages.js?v=beta26';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta26';
-import { storyBeatForWave } from './story.js?v=beta26';
-import { createStoryteller } from './storyteller.js?v=beta26';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta26';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta27';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta27';
+import { createWordDeck } from './word-decks.js?v=beta27';
+import { createStage } from './stages.js?v=beta27';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta27';
+import { storyBeatForWave } from './story.js?v=beta27';
+import { createStoryteller } from './storyteller.js?v=beta27';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta27';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -2736,8 +2736,11 @@ function updateEncounter(delta) {
 }
 
 function spawnRailMember(encounter) {
-  const kind = encounter.stop.minionsOnly ? 'minion'
+  let kind = encounter.stop.minionsOnly ? 'minion'
     : shouldSpawnMedic() ? 'medic' : shouldSpawnMimic() ? 'mimic' : !isNormalWaveComplete() ? 'minion' : null;
+  // One healer or chest per ambush: a second one waits for a later stop while monsters remain.
+  if ((kind === 'medic' || kind === 'mimic') && encounter.helperSpawned && !isNormalWaveComplete()) kind = 'minion';
+  if (kind === 'medic' || kind === 'mimic') encounter.helperSpawned = true;
   if (!kind) {
     encounter.remaining = 0;
     return null;
@@ -4611,7 +4614,7 @@ function prepareWavePlan() {
   medicsSpawnedThisSet = 0;
   medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(monsterLevel()));
   mimicsSpawnedThisSet = 0;
-  mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(monsterLevel()));
+  mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(monsterLevel()), medicSpawnSlots);
   hardGuestSchedule = monsterLevel() <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
   variantSchedule = planVariants(waveSet, normalEnemyTarget, [...hardGuestSchedule.keys()]);
 }
@@ -4662,16 +4665,17 @@ function getMimicCountForWave(wave) {
   return 2;
 }
 
-function chooseMimicSpawnSlots(target, count) {
+// Chests fall between the healers rather than on the same monster count, so one
+// ambush does not get a healer and a chest back to back.
+function chooseMimicSpawnSlots(target, count, medicSlots = []) {
   if (target <= 0 || count <= 0) return [];
   const slots = [];
   const usableTarget = Math.max(1, target - 1);
+  const taken = new Set(medicSlots);
   for (let index = 0; index < count; index += 1) {
-    const slot = THREE.MathUtils.clamp(
-      Math.round(((index + 1) * usableTarget) / (count + 1)),
-      1,
-      usableTarget
-    );
+    let slot = THREE.MathUtils.clamp(Math.round(((index + 0.5) * usableTarget) / count), 1, usableTarget);
+    while (taken.has(slot) && slot < usableTarget) slot += 1;
+    taken.add(slot);
     slots.push(slot);
   }
   return slots;
@@ -5481,6 +5485,12 @@ function activateFinalWaveCheat() {
   finalWaveCheatUsedThisRun = true;
   waveSet = FINAL_WAVE_NUMBER;
   health = savedHealth;
+  // Plan the final wave from scratch: a jump from mid-run must not carry the old wave's
+  // spawn count, or every healer and chest is due at once.
+  wavePhase = 'normal';
+  normalEnemyTarget = getNormalEnemyTarget(monsterLevel());
+  normalEnemiesSpawned = 0;
+  normalTypingCostSpawned = 0;
   prepareWavePlan();
   buildStageForWave(FINAL_WAVE_NUMBER);
   startFinalWave();
