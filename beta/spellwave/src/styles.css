@@ -4637,23 +4637,22 @@ body .boss-hp-bar .boss-beam i {
 }
 
 /* The threat bar pulses while the monster winds up to strike (or a caster is about to
-   cast): a full red bar that throbs and flashes white. */
+   cast): a full red bar that flashes white, at its usual thickness. */
 .word-tag.is-critical .threat-meter {
-  height: 6px;
   background: rgba(255, 59, 47, 0.25);
-  animation: threat-pulse-bar 0.28s ease-in-out infinite alternate;
+  animation: threat-pulse-bar 0.16s ease-in-out infinite alternate;
 }
 
 .word-tag.is-critical .threat-meter i {
   background: linear-gradient(90deg, #ff3b2f, #fff2e0, #ff3b2f);
   background-size: 200% 100%;
   transform: scaleX(1);
-  animation: threat-pulse-fill 0.28s ease-in-out infinite alternate;
+  animation: threat-pulse-fill 0.16s ease-in-out infinite alternate;
 }
 
 @keyframes threat-pulse-bar {
-  from { box-shadow: 0 0 0 rgba(255, 59, 47, 0); transform: scaleY(1); }
-  to { box-shadow: 0 0 10px rgba(255, 59, 47, 0.9); transform: scaleY(1.5); }
+  from { box-shadow: 0 0 0 rgba(255, 59, 47, 0); }
+  to { box-shadow: 0 0 10px rgba(255, 59, 47, 0.9); }
 }
 
 @keyframes threat-pulse-fill {

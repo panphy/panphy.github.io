@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import { createSpellwaveAudio } from './audio.js?v=beta33';
-import { createSeasonalEffects } from './seasonal-effects.js';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta33';
 import { createPotionSystem } from './potions.js?v=beta33';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta33';
 import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta33';
 import { createLeaderboard } from './leaderboard.js?v=beta33';
-import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
+import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js?v=beta33';
 import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta33';
 import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta33';
-import { createLowPolyCloud } from './lowpoly.js';
+import { createLowPolyCloud } from './lowpoly.js?v=beta33';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta33';
 import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta33';
 import { createWordDeck } from './word-decks.js?v=beta33';

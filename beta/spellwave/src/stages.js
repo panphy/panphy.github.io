@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { isDetailed } from './detail.js?v=beta33';
-import { createLowPolyTree, createLowPolyRock } from './lowpoly.js';
+import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=beta33';
 import { createStageKit } from './stage-kits.js?v=beta33';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.

@@ -9,8 +9,8 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js';
-import { buildStellarDreadnought } from './lowpoly-creatures.js';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta33';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta33';
 import { createStoryteller } from './storyteller.js?v=beta33';
 import { STORY_BEATS } from './story.js?v=beta33';
 import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta33';
