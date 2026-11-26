@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@500;600;700&family=Manrope:wght@500;700;800&family=Fredoka:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@500;600;700&family=Manrope:wght@500;700;800&family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap');
 
 :root {
   /* Paper theme: cream cards, warm brown ink, and accents dark enough to read on cream. */
@@ -22,6 +22,8 @@
   --font-mono: 'IBM Plex Mono', monospace;
   /* Headings and banners. The name is historical: this used to be a pixel font. */
   --font-pixel: 'Fredoka', 'Manrope', system-ui, sans-serif;
+  /* The chunky face of the title art, for the score. */
+  --font-chunky: 'Lilita One', 'Fredoka', system-ui, sans-serif;
 }
 
 * {
@@ -265,7 +267,7 @@ body.blizzard .blizzard-veil::after {
   display: grid;
   gap: 4px;
   width: min(560px, calc(100vw - 32px));
-  padding: 12px 18px 14px;
+  padding: 12px 52px 30px;
   border: 2px solid #b08a4a;
   border-radius: 12px;
   background: linear-gradient(135deg, #fff8ea, #fbefd6);
@@ -294,7 +296,72 @@ body.blizzard .blizzard-veil::after {
 
 .story-line {
   font-size: clamp(1rem, 2.4vw, 1.25rem);
-  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  word-spacing: 0.35em;
+  line-height: 1.5;
+}
+
+/* A finished line waits for Space: a keycap pulses in the corner. */
+.story-next {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.story-card.is-done .story-next {
+  opacity: 1;
+  animation: story-next-pulse 1.1s ease-in-out infinite;
+}
+
+.story-next kbd {
+  display: inline-block;
+  padding: 2px 9px 3px;
+  border: 1.5px solid #8a5a1c;
+  border-radius: 6px;
+  background: #fffaf0;
+  box-shadow: 0 2px 0 #8a5a1c;
+  color: #8a5a1c;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@keyframes story-next-pulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+/* Skip the rest of the story: a small button in the top corner. */
+.story-skip {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  min-width: 44px;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #8a5a1c;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  pointer-events: auto;
+  text-transform: uppercase;
+}
+
+.story-skip:hover,
+.story-skip:focus-visible {
+  background: rgba(138, 90, 28, 0.12);
+}
+
+.story-skip[hidden] {
+  display: none;
 }
 
 @keyframes story-in {
@@ -304,6 +371,7 @@ body.blizzard .blizzard-veil::after {
 
 @media (prefers-reduced-motion: reduce) {
   .story-card.is-in { animation: none; }
+  .story-card.is-done .story-next { animation: none; }
 }
 
 .damage-flash {
@@ -3873,5 +3941,98 @@ body.needs-keyboard .potion-bar {
 
   .loading-screen {
     transition: none;
+  }
+}
+
+/* ── Score and life: no boxes, lettered like the title art ── */
+.hud-grid .readout,
+body.battery-saver .hud-grid .readout {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+.hud-grid {
+  gap: 4px;
+}
+
+.hud-grid .readout[hidden] {
+  display: none;
+}
+
+.hud-grid .readout > span {
+  margin-bottom: -4px;
+  color: #4fd8d0;
+  font-family: var(--font-chunky);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  -webkit-text-stroke: 4px var(--ink);
+  paint-order: stroke fill;
+}
+
+.hud-grid .readout strong {
+  display: block;
+  color: #fff6dc;
+  font-family: var(--font-chunky);
+  font-size: clamp(2rem, 3.6vw, 2.6rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-align: left;
+  text-shadow: 0 4px 0 var(--ink);
+  -webkit-text-stroke: 7px var(--ink);
+  paint-order: stroke fill;
+}
+
+/* The hearts say "life" on their own; the word stays for screen readers. */
+.hud-grid .life-readout > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.hud-grid .life-meter {
+  justify-content: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hud-grid .life-heart {
+  width: 32px;
+  height: 32px;
+}
+
+.hud-grid .life-heart svg {
+  filter: drop-shadow(0 3px 0 var(--ink));
+}
+
+.hud-grid .life-heart .heart-shell {
+  fill: #fff6dc;
+  stroke: var(--ink);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+}
+
+.hud-grid .life-heart .heart-fill {
+  fill: #e8453a;
+  stroke: none;
+}
+
+@media (max-width: 760px) {
+  .hud-grid .readout strong {
+    font-size: 1.8rem;
+  }
+
+  .hud-grid .life-heart {
+    width: 26px;
+    height: 26px;
   }
 }
