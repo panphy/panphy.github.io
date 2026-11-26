@@ -2,7 +2,7 @@
 // by a difficulty step from 1 to 10, not by wave: the game's five waves use steps 1, 3,
 // 5, 7, 9 for their monsters and 2, 4, 6, 8, 10 for their bosses (monsterLevel and
 // bossLevel in main.js), so some rows are steps the game passes over.
-import { buildSearchPrompt } from './prompt-utils.js?v=11';
+import { buildSearchPrompt } from './prompt-utils.js?v=12';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask at steps 1, 2, 3… Later steps keep the final cap.
