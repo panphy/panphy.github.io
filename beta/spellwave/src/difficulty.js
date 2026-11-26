@@ -1,5 +1,5 @@
 // difficulty.js — how long a keyword may be on each wave, and each wave's boss fight.
-import { buildSearchPrompt } from './prompt-utils.js?v=beta22';
+import { buildSearchPrompt } from './prompt-utils.js?v=beta23';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.

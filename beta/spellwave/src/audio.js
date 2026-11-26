@@ -1353,6 +1353,12 @@ export function createSpellwaveAudio({
 
   // Menu and typing
 
+  // One blip of a storyteller's speech, as their words appear letter by letter.
+  function playTalkSound(voice = 0) {
+    const pitch = 360 + voice * 70 + Math.random() * 30;
+    playTone(pitch, 0.045, { type: 'square', attack: 0.002, gain: 0.02, endFrequency: pitch * 0.92, cutoff: 2200 });
+  }
+
   function playToggleSound() {
     zap(1100, 1500, 0.04, 0.03, { cutoff: 3600 });
     zap(1650, 2200, 0.05, 0.022, { delay: 0.045, cutoff: 4200 });
@@ -2127,6 +2133,7 @@ export function createSpellwaveAudio({
     startMusicLoop,
     stopMusicLoop,
     playToggleSound,
+    playTalkSound,
     playStartSound,
     playPauseSound,
     playTypeSound,

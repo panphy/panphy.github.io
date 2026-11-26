@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta22';
+import { createSpellwaveAudio } from './audio.js?v=beta23';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta22';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta22';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta22';
-import { createLeaderboard } from './leaderboard.js?v=beta22';
+import { createPotionSystem } from './potions.js?v=beta23';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta23';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta23';
+import { createLeaderboard } from './leaderboard.js?v=beta23';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta22';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings } from './monster-variants.js?v=beta22';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta23';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta23';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta22';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta22';
-import { createWordDeck } from './word-decks.js?v=beta22';
-import { createStage } from './stages.js?v=beta22';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta22';
-import { storyBeatForWave } from './story.js?v=beta22';
-import { createStoryteller } from './storyteller.js?v=beta22';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta22';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta23';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta23';
+import { createWordDeck } from './word-decks.js?v=beta23';
+import { createStage } from './stages.js?v=beta23';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta23';
+import { storyBeatForWave } from './story.js?v=beta23';
+import { createStoryteller } from './storyteller.js?v=beta23';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta23';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -424,6 +424,8 @@ const variantHintsShown = new Set();
 const casterBolts = [];
 let rideCart = null;
 let storyCard = null;
+let challengeCard = null;
+let spaceHeld = false;
 let sceneGround = null;
 let sceneRockMaterial = null;
 const rail = { stage: null, state: 'idle', stopIndex: -1, from: null, to: null, toIndex: 0, t: 0, duration: 1, bursts: [], encounter: null, walkPhase: 0 };
@@ -461,6 +463,7 @@ const {
   startMusicLoop,
   stopMusicLoop,
   playToggleSound,
+  playTalkSound,
   playStartSound,
   playPauseSound,
   playTypeSound,
@@ -706,6 +709,10 @@ window.addEventListener('resize', resizeRenderer);
 document.addEventListener('fullscreenchange', updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 window.addEventListener('keydown', handleKeyDown);
+// Holding space hurries a storyteller's speech along.
+window.addEventListener('keydown', (event) => { if (event.key === ' ') spaceHeld = true; });
+window.addEventListener('keyup', (event) => { if (event.key === ' ') spaceHeld = false; });
+window.addEventListener('blur', () => { spaceHeld = false; });
 window.addEventListener('blur', () => {
   if (mode === 'running') pauseGame();
 });
@@ -841,7 +848,7 @@ function pauseGame() {
   suspendChainLightningTimers();
   document.body.classList.add('is-paused');
   setPauseButtonState(false, false);
-  showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
+  showMessage('PAUSED', 'Stage Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
   updatePhaseDisplay();
 }
 
@@ -868,6 +875,7 @@ function endGame() {
   releaseChainBeams();
   potionsSystem.clear();
   endStory();
+  endChallenge();
   document.body.classList.remove('blizzard');
   document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
@@ -911,9 +919,9 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
   } else if (buttonText === 'Resume') {
     startButton.title = 'Resume the paused run';
   } else if (buttonText === 'Try Again') {
-    startButton.title = 'Restart the run from Wave 1';
-  } else if (buttonText === 'Next Wave') {
-    startButton.title = 'Proceed to the next wave';
+    startButton.title = 'Restart the run from Stage 1';
+  } else if (buttonText === 'Next Stage') {
+    startButton.title = 'Proceed to the next stage';
   } else if (buttonText === 'Unavailable') {
     startButton.title = 'Simulation requires WebGL support';
   } else {
@@ -1107,12 +1115,31 @@ function enterCharacter(character) {
     }
   }
 
+  // No word is locked: a letter that does not continue this word but starts another
+  // switches to that one, so a rock can be dealt with in the middle of a long word.
+  if (typedBuffer) {
+    for (const inputOption of inputOptions) {
+      const others = findMatches(inputOption.value, inputOption).filter(enemy => enemy !== activeTarget);
+      if (others.length === 0) continue;
+      typedBuffer = inputOption.value;
+      activeTarget = pickTarget(others, typedBuffer);
+      if (activeTarget._matchComplete) {
+        defeatEnemy(activeTarget);
+      } else {
+        playTypeSound(typedBuffer.length / Math.max(1, activeTarget._matchedSearchPrompt.length));
+        hitEnemyWithLetter(activeTarget);
+      }
+      updateTypedDisplay();
+      return;
+    }
+  }
+
   if (isMathOperatorInput(character) && hasActiveEquationPrefix()) {
     updateTypedDisplay();
     return;
   }
 
-  // A wrong key is only a miss: the letters typed so far, and the target, stay.
+  // A key that fits nothing is only a miss: the letters typed so far, and the target, stay.
   registerMistake();
   updateTypedDisplay();
 }
@@ -2215,6 +2242,15 @@ function buildStageForWave(wave) {
   endStory();
   rail.storyIndex = Math.max(1, Math.min(2, rail.bursts.length - 1));
   rail.bursts.splice(rail.storyIndex, 0, 0);
+  // The night sky trades its last ambush for a challenge at its second stop: a swarm of bats.
+  endChallenge();
+  rail.challengeIndex = -1;
+  if (rail.setPiece === 'flight' && rail.bursts.length >= 4) {
+    rail.bursts.pop();
+    rail.challengeIndex = 1;
+    rail.bursts.splice(rail.challengeIndex, 0, 0);
+    rail.storyIndex += 1;
+  }
   rail.stage = createStage({
     seed: Math.floor(Math.random() * 1e6) + wave,
     burstCount: Math.max(1, rail.bursts.length),
@@ -2271,6 +2307,7 @@ function updateRail(delta) {
   }
   if (rail.state === 'encounter') updateEncounter(delta);
   if (rail.state === 'story') updateStory(delta);
+  if (rail.state === 'challenge') updateChallenge(delta);
 }
 
 // Some stages change partway along (the pass runs into the mine): as the camera steps
@@ -2373,6 +2410,10 @@ function arriveAtStop() {
     startStory();
     return;
   }
+  if (rail.stopIndex === rail.challengeIndex) {
+    startChallenge();
+    return;
+  }
   startEncounter(stop, rail.bursts[rail.stopIndex] || 0, rail.stopIndex >= rail.bursts.length - 1);
   // The blizzard is the second ambush, whichever stop that falls on.
   if (rail.setPiece === 'blizzard' && rail.stopIndex === (rail.storyIndex === BLIZZARD_STOP ? BLIZZARD_STOP + 1 : BLIZZARD_STOP)) beginBlizzard();
@@ -2384,6 +2425,9 @@ function arriveAtStop() {
 // they talk, and thank the player with a heart.
 const STORY_SPOT = new THREE.Vector3(2.3, 0, -4.2);
 const STORY_RESCUE_HEAL = 2;
+const STORY_LETTERS_PER_SECOND = 34;
+// How much faster a line is spoken, and passed over, while space is held.
+const STORY_HURRY = 4;
 
 function showStoryLine(name, text) {
   if (!storyCard) {
@@ -2393,8 +2437,10 @@ function showStoryLine(name, text) {
     document.getElementById('app').append(storyCard);
   }
   storyCard.querySelector('.story-name').textContent = name;
-  storyCard.querySelector('.story-line').textContent = text;
+  // The line is typed out letter by letter (updateStoryText); it starts empty.
+  storyCard.querySelector('.story-line').textContent = '';
   storyCard.hidden = false;
+  if (rail.story) Object.assign(rail.story, { text, shown: 0, blip: 0 });
   // Restart the entrance animation for each new line.
   storyCard.classList.remove('is-in');
   void storyCard.offsetWidth;
@@ -2428,6 +2474,7 @@ function startStory() {
   }
 }
 
+
 function advanceStoryLine() {
   const story = rail.story;
   story.line += 1;
@@ -2438,8 +2485,25 @@ function advanceStoryLine() {
   }
   const text = story.beat.lines[story.line];
   showStoryLine(story.beat.name, text);
-  // Long enough to read at a steady pace; any key moves on sooner.
-  story.timer = 1.8 + text.length * 0.06;
+  // How long the finished line stays up; any key moves on sooner.
+  story.timer = 1.5 + text.length * 0.028;
+}
+
+// Letters appear one at a time, with a blip of the speaker's voice for every other one.
+function updateStoryText(delta) {
+  const story = rail.story;
+  if (!story.text || story.shown >= story.text.length) return false;
+  const before = Math.floor(story.shown);
+  story.shown = Math.min(story.text.length, story.shown + delta * STORY_LETTERS_PER_SECOND * (spaceHeld ? STORY_HURRY : 1));
+  const now = Math.floor(story.shown);
+  if (now === before) return true;
+  storyCard.querySelector('.story-line').textContent = story.text.slice(0, now);
+  story.blip += now - before;
+  if (story.blip >= 2 && /\S/.test(story.text.charAt(now - 1))) {
+    story.blip = 0;
+    playTalkSound(story.beat.voice);
+  }
+  return story.shown < story.text.length;
 }
 
 function updateStory(delta) {
@@ -2458,6 +2522,7 @@ function updateStory(delta) {
     arm.rotation.z = arm.userData.side * wave;
   }
   dome.rotation.y = story.age * 1.4;
+  const speaking = updateStoryText(delta);
 
   if (story.held) {
     if (story.guard && !story.guard.dying && enemies.includes(story.guard)) return;
@@ -2490,16 +2555,16 @@ function updateStory(delta) {
     if (story.age > 0.5) advanceStoryLine();
     return;
   }
-  story.timer -= delta;
+  if (speaking) return;
+  story.timer -= delta * (spaceHeld ? STORY_HURRY : 1);
   if (story.timer <= 0) advanceStoryLine();
 }
 
-// Any key hurries the storyteller on to the next line. Returns true if it did.
+// While someone is talking, with nothing to type at, keys are not letters: holding
+// space speeds the speech up and the rest are ignored. Returns true if the key is taken.
 function hurryStory() {
   const story = rail.story;
-  if (rail.state !== 'story' || !story || story.held || story.leaving > 0 || story.line < 0) return false;
-  if (story.timer > 0.25) story.timer = 0;
-  return true;
+  return rail.state === 'story' && !!story && !story.held;
 }
 
 function endStory() {
@@ -2508,6 +2573,115 @@ function endStory() {
   enemyGroup.remove(rail.story.npc);
   disposeObject(rail.story.npc);
   rail.story = null;
+}
+
+// ── The bat swarm ────────────────────────────────────────────────────────
+// A challenge at one stop of the night sky: space bats flit about, each marked with a
+// unit, and the player has half a minute to bring ten down. They do no harm; clearing
+// the swarm earns points and a heart, and running out of time only loses the prize.
+const BAT_TYPE = { name: 'Space Bat', body: 0x2b1d5c, trim: 0x8b5cf6, eye: 0x7ff5e6, speed: 0, scale: 1.25, weight: 0, score: 60 };
+const BAT_GOAL = 10;
+const BAT_TIME = 30;
+const BATS_AT_ONCE = 3;
+const BAT_BONUS = 1500;
+const BAT_HEAL = 2;
+
+function showChallengeCard(text) {
+  if (!challengeCard) {
+    challengeCard = document.createElement('div');
+    challengeCard.className = 'challenge-card';
+    challengeCard.setAttribute('role', 'status');
+    document.getElementById('app').append(challengeCard);
+  }
+  if (challengeCard.textContent !== text) challengeCard.textContent = text;
+  challengeCard.hidden = false;
+}
+
+function startChallenge() {
+  rail.state = 'challenge';
+  rail.challenge = { time: BAT_TIME, spawned: 0, spawnTimer: 0.6, over: 0 };
+  showBanner('BAT SWARM!', 'variant-hint');
+}
+
+function liveBats() {
+  return enemies.filter(enemy => enemy.isBat && !enemy.dying);
+}
+
+function spawnBat() {
+  const taken = new Set(enemies.filter(other => !other.dying).map(other => other.searchPrompt.charAt(0).toLowerCase()));
+  const free = ROCK_UNITS.filter(entry => !taken.has(buildSearchPrompt(entry.term).charAt(0).toLowerCase()));
+  if (free.length === 0) return false;
+  const bat = spawnEnemy({ wordData: free[Math.floor(Math.random() * free.length)], type: BAT_TYPE, customGroup: createSpaceBat(BAT_TYPE), flier: true });
+  // Each takes one of three patches of sky, spread across the view and kept right of
+  // the readouts in the top left corner.
+  const patch = [-0.8, 1.8, 4.2][rail.challenge.spawned % BATS_AT_ONCE];
+  const home = new THREE.Vector3(patch + (Math.random() - 0.5) * 0.8, 0.9 + Math.random() * 1.4, -3.5 - Math.random() * 2.5);
+  bat.isBat = true;
+  bat.damage = 0;
+  bat.noGlossary = true;
+  bat.lane = home.x;
+  bat.baseY = home.y;
+  bat.spawnZ = home.z - 3;
+  bat.revealZ = home.z - 2;
+  bat.rail = { phase: 'bat', t: 0, to: home, from: new THREE.Vector3(home.x + (Math.random() - 0.5) * 6, home.y + 9, home.z - 4) };
+  bat.group.position.copy(bat.rail.from);
+  setEnemyKind(bat, 'bat');
+  return true;
+}
+
+function updateChallenge(delta) {
+  const challenge = rail.challenge;
+  if (!challenge) return;
+  const live = liveBats();
+  const killed = challenge.spawned - live.length;
+  if (challenge.over > 0) {
+    challenge.over += delta;
+    if (challenge.over < 1.6) return;
+    endChallenge();
+    const stops = rail.stage.stops;
+    railBeginTravel(rail.stopIndex + 1 < rail.bursts.length ? rail.stopIndex + 1 : stops.length - 1);
+    return;
+  }
+  challenge.time = Math.max(0, challenge.time - delta);
+  showChallengeCard(`SPACE BATS ${Math.min(BAT_GOAL, killed)}/${BAT_GOAL} · ${Math.ceil(challenge.time)}s`);
+  if (killed >= BAT_GOAL) {
+    // Cleared: the stragglers scatter, and the prize is points and a heart.
+    for (const bat of live) removeEnemy(bat);
+    score += BAT_BONUS;
+    const healed = Math.min(BAT_HEAL, MAX_LIFE - health);
+    if (healed > 0) {
+      health += healed;
+      playHealSound(healed);
+    }
+    showBanner('SWARM CLEARED!', 'variant-hint');
+    showChallengeCard(`SWARM CLEARED · +${formatScore(BAT_BONUS)}`);
+    challenge.over = 0.01;
+    updateHud(true);
+    return;
+  }
+  if (challenge.time <= 0) {
+    for (const bat of live) {
+      fx.burst(bat.group.position, { color: BAT_TYPE.trim, color2: 0xffffff, count: 10, speed: 3, life: 0.4, size: 0.26 });
+      removeEnemy(bat);
+    }
+    typedBuffer = '';
+    activeTarget = null;
+    showBanner('THE SWARM ESCAPES', 'variant-hint');
+    showChallengeCard(`TIME UP · ${killed}/${BAT_GOAL}`);
+    challenge.over = 0.01;
+    updateTypedDisplay();
+    return;
+  }
+  challenge.spawnTimer -= delta;
+  if (challenge.spawnTimer <= 0 && live.length < BATS_AT_ONCE) {
+    if (spawnBat()) challenge.spawned += 1;
+    challenge.spawnTimer = 0.45;
+  }
+}
+
+function endChallenge() {
+  if (challengeCard) challengeCard.hidden = true;
+  rail.challenge = null;
 }
 
 const FALLBACK_SPOTS = [
@@ -2665,6 +2839,20 @@ function updateRailEnemy(enemy, delta, seconds) {
   const position = enemy.group.position;
   const stunned = enemy.stunTimer > 0;
   const facing = Math.atan2(-position.x, CAMERA_DISTANCE - position.z);
+
+  if (plan.phase === 'bat') {
+    // A swoop in, then a restless flit about its own patch of sky.
+    plan.t = Math.min(1, plan.t + delta / 0.6);
+    const ease = 1 - (1 - plan.t) ** 3;
+    const flit = plan.t >= 1 ? 1 : ease;
+    position.lerpVectors(plan.from, plan.to, ease);
+    position.x += Math.sin(seconds * 2.1 + enemy.phase) * 0.8 * flit;
+    position.y += Math.sin(seconds * 3.3 + enemy.phase * 2) * 0.45 * flit;
+    position.z += Math.sin(seconds * 1.7 + enemy.phase) * 0.7 * flit;
+    enemy.group.rotation.y = facing + Math.sin(seconds * 2.1 + enemy.phase) * 0.4;
+    enemy.group.rotation.z = Math.cos(seconds * 2.1 + enemy.phase) * 0.25;
+    return false;
+  }
 
   if (plan.phase === 'guard') {
     position.x = plan.to.x + Math.sin(seconds * 1.7 + enemy.phase) * 0.25;
@@ -3601,16 +3789,16 @@ function updateHud(force) {
 function updatePhaseDisplay() {
   if (!phaseValue) return;
   if (mode === 'running') {
-    const phase = wavePhase === 'boss' ? 'Boss wave' : 'Normal wave';
-    phaseValue.textContent = `Wave ${waveSet} · ${phase}`;
+    const phase = wavePhase === 'boss' ? 'Boss' : 'On the road';
+    phaseValue.textContent = `Stage ${waveSet} · ${phase}`;
     return;
   }
   if (mode === 'paused') {
-    phaseValue.textContent = `Paused · Wave ${waveSet}`;
+    phaseValue.textContent = `Paused · Stage ${waveSet}`;
     return;
   }
   if (mode === 'wave_cleared') {
-    phaseValue.textContent = `Wave ${waveSet} cleared`;
+    phaseValue.textContent = `Stage ${waveSet} cleared`;
     return;
   }
   if (mode === 'gameover' || mode === 'ending') {
@@ -4966,7 +5154,7 @@ function isFinalWave() {
 
 function startFinalWave() {
   document.body.classList.add('final-wave-active');
-  showBanner('FINAL WAVE!', 'final-wave');
+  showBanner('FINAL STAGE!', 'final-wave');
   playBossWarningSound();
   updatePhaseDisplay();
   applySeasonForWave(waveSet);
@@ -5026,7 +5214,7 @@ function updateFinalWaveScenery(seconds, delta) {
 
 function startBossPhase() {
   wavePhase = 'boss';
-  showBanner('BOSS WAVE');
+  showBanner('BOSS!');
   playBossWarningSound();
   updatePhaseDisplay();
 }
@@ -5041,13 +5229,13 @@ function startWaveCleared() {
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
   const copyText = streak >= 2
-    ? `${streak}-chain streak carries into wave ${waveSet + 1}!`
-    : 'Boss terms from this wave:';
+    ? `${streak}-chain streak carries into stage ${waveSet + 1}!`
+    : 'Boss terms from this stage:';
   showMessage(
-    `WAVE ${waveSet} CLEARED`,
-    'Wave Clear',
+    `STAGE ${waveSet} CLEARED`,
+    'Stage Clear',
     `Score ${formatScore(score)}`,
-    'Next Wave',
+    'Next Stage',
     copyText
   );
   renderWaveBossGlossary();

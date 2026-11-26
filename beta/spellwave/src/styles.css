@@ -226,6 +226,36 @@ body.blizzard .blizzard-veil::after {
   body.blizzard .blizzard-veil::after { animation: none; }
 }
 
+/* The bat swarm's tally and clock, top centre. */
+.challenge-card {
+  position: fixed;
+  left: 50%;
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  z-index: 12;
+  padding: 9px 18px;
+  border: 2px solid #6d4fb3;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f3ecff, #fff8ea);
+  box-shadow: 0 6px 16px rgba(40, 24, 80, 0.3);
+  color: #2e1c5c;
+  font-family: var(--font-mono);
+  font-size: clamp(0.9rem, 2.2vw, 1.15rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.challenge-card[hidden] {
+  display: none;
+}
+
+.word-tag[data-kind="bat"] .prompt-kind {
+  background: rgba(139, 92, 246, 0.2);
+  color: #5b2bb0;
+}
+
 /* The storyteller's words, low in the middle of the view. */
 .story-card {
   position: fixed;

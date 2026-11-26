@@ -6,55 +6,60 @@
 // is first held by a myth, which the player frees them from by typing its word.
 // name: who speaks. plea: what they call out while held (later chapters only).
 // lines: what they say once safe, shown one at a time.
-// coat, hat: the colours that tell the five apart.
+// coat, hat: the colours that tell the five apart. voice: the pitch of their speech blips.
 export const STORY_BEATS = [
   {
     name: 'Professor Ada',
     coat: 0xf2f0e6, hat: 0x8a5a2b,
+    voice: 0,
     lines: [
-      "You came! The myths are loose.",
-      "Bad science made them. True words break them.",
-      "The Colossus says heavy things fall faster. Go!",
+      "Oh, thank goodness, a real wizard! I was starting to think nobody would come.",
+      "These myths crawled out of every bad idea people ever believed. Type the truth at them and they fall apart.",
+      "Mind the Colossus up ahead. It keeps telling everyone that heavy things fall faster. Honestly!",
     ],
   },
   {
     name: 'Tom the miller',
     coat: 0xc98d4b, hat: 0x5b7f3a,
-    plea: "Help! It won't stop talking nonsense!",
+    plea: "Hey! Over here! Get this thing off me, it won't stop talking!",
+    voice: 1,
     lines: [
-      "Thanks! It said my mill runs on nothing.",
-      "Nothing runs for free. Energy in, energy out.",
-      "The Bulwark sells free energy. Shut it down.",
+      "Phew, thanks. It kept saying my mill could turn for ever without the river. I nearly believed it.",
+      "But you never get energy out of nothing, do you? Something always has to put it in.",
+      "The Bulwark's on the far bank, selling free energy to anyone who'll listen. Go and spoil its day.",
     ],
   },
   {
     name: 'Mina the miner',
     coat: 0xd8a23a, hat: 0xe0483a,
-    plea: 'Over here! It says cold creeps in!',
+    plea: "Oi, wizard! Down here! This one's been filling my head with rubbish!",
+    voice: 2,
     lines: [
-      "Cheers! Cold doesn't creep in.",
-      "Heat flows out. Hot to cold. Always.",
-      "The Sovereign says heat is a liquid. Melt that idea.",
+      "Ta very much. It swore blind the cold was creeping into my bones. Cold doesn't creep anywhere!",
+      "It's the heat that moves. Out of something hot and into something colder, every time.",
+      "The Sovereign's deeper in. Thinks heat is some sort of liquid you can pour. Go and set it straight.",
     ],
   },
   {
     name: 'Captain Frost',
     coat: 0x3f6fa8, hat: 0xf2f0e6,
-    plea: 'Ahoy! It says my boat must sink!',
+    plea: "Ahoy there! A hand, if you please! It says my boat ought to sink!",
+    voice: 3,
     lines: [
-      "Bless you! It said heavy things can't float.",
-      "Density decides, not weight.",
-      "The Titan says ice sinks. Look around you!",
+      "Much obliged. It told me anything heavy must go straight to the bottom. My boat weighs a tonne and she floats fine.",
+      "It isn't the weight that matters, you see. It's how dense a thing is next to the water.",
+      "The Titan out on the lake says ice sinks. It is standing on the stuff!",
     ],
   },
   {
     name: 'Astra the stargazer',
     coat: 0x6d4fb3, hat: 0xf2c14e,
-    plea: 'Quick! It says the Earth is flat!',
+    plea: "Up here, quickly! It keeps insisting the Earth is flat!",
+    voice: 4,
     lines: [
-      "At last! Look, you can see the curve.",
-      "One myth left: the stars rule our lives.",
-      "End the Dreadnought. Give us back the sky.",
+      "Oh, well done. Flat, it said! From up here you can see the curve with your own eyes.",
+      "There's only one myth left now. The Dreadnought says the stars decide our lives for us.",
+      "They don't, you know. They're just very far away and very beautiful. Go and finish this.",
     ],
   },
 ];
