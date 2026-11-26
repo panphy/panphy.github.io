@@ -11,13 +11,17 @@
 // of the land beside the route, the cover, the props and the landmark.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { isDetailed } from './detail.js?v=6';
-import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=6';
-import { createStageKit } from './stage-kits.js?v=6';
+import { isDetailed } from './detail.js?v=7';
+import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=7';
+import { createStageKit } from './stage-kits.js?v=7';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
 const BOSS_ARENA = { halfWidth: 16, minZ: -64, maxZ: 16 };
+// Props this wide or wider count as solid for runners crossing a stop. A prop's ground
+// claim is snug, so a cottage's corners reach past it: solids are given SOLID_REACH more.
+const SOLID_RADIUS = 1.5;
+const SOLID_REACH = 1.3;
 const PATH_HALF_WIDTH = 2.8;
 const CORRIDOR_HALF_WIDTH = 9;
 // Ground facet size: finer at full detail (detail.js).
@@ -429,8 +433,15 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
   const staticRoot = new THREE.Group();
   const animated = [];
   const occupied = [];
+  // The big, solid things (cottages, the windmill, cover trees, haystacks, rocks), which a
+  // healer or chest running across a stop must not run through. Small things (fences,
+  // bushes, the trees on the slopes) are left out.
+  const solids = [];
   const isFree = (x, z, radius) => occupied.every((o) => (o.x - x) ** 2 + (o.z - z) ** 2 > (o.r + radius) ** 2);
-  const occupy = (x, z, radius) => occupied.push({ x, z, r: radius });
+  const occupy = (x, z, radius) => {
+    occupied.push({ x, z, r: radius });
+    if (radius >= SOLID_RADIUS) solids.push({ x, z, r: radius * SOLID_REACH });
+  };
   const place = (object, x, z, radius, rotation = random() * Math.PI * 2) => {
     object.position.set(x, heightAt(x, z) - 0.05, z);
     object.rotation.y = rotation;
@@ -500,7 +511,7 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
       // Monsters wait just behind the cover (further from the camera), out of sight.
       const away = new THREE.Vector2(slot.x, slot.z - 10).normalize();
       stop.spots.push({
-        kind: 'cover', prop: cover.kind,
+        kind: 'cover', prop: cover.kind, coverX: slot.x, coverZ: slot.z,
         hideX: exit ? exit.x : slot.x + away.x * 1.3,
         hideZ: exit ? exit.z - 0.6 : slot.z + away.y * 1.3,
         x: exit ? exit.x : slot.x, z: exit ? exit.z : slot.z + 1.4,
@@ -548,6 +559,20 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     lateArc,
     triangles: Math.round(triangles),
     poseAtArc,
+    // Whether a straight run across a stop, from x0 to x1 at depth z (in the stop's frame),
+    // keeps `margin` clear of every solid prop. `skip` ({ x, z }, in the stop's frame) is the
+    // runner's own cover, which it starts beside.
+    pathClear(stop, x0, x1, z, margin = 0.8, skip = null) {
+      const own = skip ? frameToStage(stop.pose, skip.x, skip.z) : null;
+      const near = solids.filter((solid) => !own || (solid.x - own.x) ** 2 + (solid.z - own.z) ** 2 > 0.25);
+      const steps = Math.max(1, Math.ceil(Math.abs(x1 - x0) / 0.5));
+      const point = new THREE.Vector3();
+      for (let index = 0; index <= steps; index += 1) {
+        frameToStage(stop.pose, x0 + ((x1 - x0) * index) / steps, z, point);
+        if (near.some((solid) => (solid.x - point.x) ** 2 + (solid.z - point.z) ** 2 < (solid.r + margin) ** 2)) return false;
+      }
+      return true;
+    },
     // The pose while travelling from one stop (or the start) to the next, t from 0 to 1.
     travelPose(fromStop, toStop, t) {
       const fromArc = fromStop ? fromStop.arc : startArc;
