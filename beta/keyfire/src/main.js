@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=beta41';
-import { createSeasonalEffects } from './seasonal-effects.js?v=beta41';
-import { createPowerUpSystem } from './power-ups.js?v=beta41';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta41';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta41';
-import { createLeaderboard } from './leaderboard.js?v=beta41';
-import { createEnemyMesh } from './enemy-meshes.js?v=beta41';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta41';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta41';
-import { createLowPolyCloud } from './lowpoly.js?v=beta41';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta41';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta41';
-import { createWordDeck } from './word-decks.js?v=beta41';
-import { createStage } from './stages.js?v=beta41';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta41';
-import { storyBeatForWave } from './story.js?v=beta41';
-import { createStoryteller, settleLantern } from './storyteller.js?v=beta41';
-import { createPlasmaCannon } from './plasma-cannon.js?v=beta41';
+import { createKeyFireAudio } from './audio.js?v=beta42';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta42';
+import { createPowerUpSystem } from './power-ups.js?v=beta42';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta42';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta42';
+import { createLeaderboard } from './leaderboard.js?v=beta42';
+import { createEnemyMesh } from './enemy-meshes.js?v=beta42';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta42';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta42';
+import { createLowPolyCloud } from './lowpoly.js?v=beta42';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta42';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta42';
+import { createWordDeck } from './word-decks.js?v=beta42';
+import { createStage } from './stages.js?v=beta42';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta42';
+import { storyBeatForWave } from './story.js?v=beta42';
+import { createStoryteller, settleLantern } from './storyteller.js?v=beta42';
+import { createPlasmaCannon } from './plasma-cannon.js?v=beta42';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1261,7 +1261,6 @@ function breakShield(enemy) {
   setEnemyKind(enemy, 'keyword');
   setEnemyWord(enemy, choosePromptOfLength(3, 7));
   enemy.firstLetterAt = undefined;
-  enemy.shownAt = elapsed;
   updateHud(true);
 }
 
@@ -1594,7 +1593,6 @@ function startBossLine(boss) {
   boss.prompt = line.term;
   boss.definition = line.topic;
   boss.firstLetterAt = undefined;
-  boss.shownAt = elapsed;
   boss.lineKind = line.kind || 'line';
   boss.label.dataset.stage = boss.lineKind;
   boss.lineWordsList = lineWords(line);
@@ -1857,7 +1855,6 @@ function advanceBossLine(boss) {
     // Each word of a word stage is ranked like a monster's word.
     spawnRankPopup(boss);
     boss.firstLetterAt = undefined;
-    boss.shownAt = elapsed;
   }
   boss.wordIndex += 1;
   if (boss.wordIndex < boss.lineWordsList.length) {
@@ -1882,7 +1879,7 @@ function advanceBossLine(boss) {
   boss.lineIndex += lost;
   if (!stageWord) {
     // A whole statement or story line is ranked as one, from its first letter to its last.
-    spawnRankPopup(boss, boss.prompt.replace(/[^a-z]/gi, '').length);
+    spawnRankPopup(boss, boss.prompt.replace(/[^a-z]/gi, '').length - 1);
     score += boss.prompt.replace(/[^a-z]/gi, '').length * 15;
     if (!encounteredTerms.some(t => t.term === boss.prompt)) {
       encounteredTerms.push({ term: boss.prompt, definition: boss.definition, defeated: true });
@@ -3634,7 +3631,6 @@ function updateLabels() {
     reusableVector.project(camera);
 
     const isVisible = isEnemyTargetable(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
-    if (isVisible && enemy.shownAt === undefined) enemy.shownAt = elapsed;
     enemy.label.classList.toggle('is-hidden', !isVisible);
     enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
     if (!isVisible) continue;
@@ -3818,19 +3814,12 @@ function renderPrompt(enemy) {
   const matched = effectiveSP.startsWith(typed) && typed.length > 0;
   const typedProgress = matched ? typed.length : 0;
 
-  // Typed on another accepted spelling (colour for color): the card shows that spelling,
-  // so the letters lit up are the ones the player actually typed.
-  if (matched && effectiveSP !== enemy.searchPrompt) {
-    const html = `<span class="typed">${escapeHtml(typed)}</span><span class="remaining">${escapeHtml(effectiveSP.slice(typed.length))}</span>`;
-    if (enemy.lastPromptHtml === html) return;
-    enemy.lastPromptHtml = html;
-    enemy.promptNode.innerHTML = html;
-    return;
-  }
-
-  const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress) : 0;
-  const html = `<span class="typed">${escapeHtml(enemy.prompt.slice(0, typedLen))}</span>`
-    + `<span class="remaining">${escapeHtml(enemy.prompt.slice(typedLen))}</span>`;
+  // Typed on another accepted spelling (color for colour): the card shows that spelling,
+  // spaces and all, so the letters lit up are the ones the player actually typed.
+  const term = matched && effectiveSP !== enemy.searchPrompt ? altTermFor(enemy.prompt, effectiveSP) : enemy.prompt;
+  const typedLen = typedProgress > 0 ? promptIndexForProgress(term, typedProgress) : 0;
+  const html = `<span class="typed">${escapeHtml(term.slice(0, typedLen))}</span>`
+    + `<span class="remaining">${escapeHtml(term.slice(typedLen))}</span>`;
 
   if (enemy.lastPromptHtml === html) return;
   enemy.lastPromptHtml = html;
@@ -3843,7 +3832,11 @@ function bossWordProgress(boss) {
   const typed = activeTarget === boss ? typedBuffer : '';
   const key = boss._matchedSearchPrompt?.startsWith(typed) ? boss._matchedSearchPrompt : boss.searchPrompt;
   if (!typed || !key.startsWith(typed)) return { word, done: '' };
-  if (key !== boss.searchPrompt) return { word, done: typed };
+  // Typed on another accepted spelling: the word shows as the player spells it.
+  if (key !== boss.searchPrompt) {
+    const spelled = altTermFor(word, key);
+    return { word: spelled, done: spelled.slice(0, promptIndexForProgress(spelled, typed.length)) };
+  }
   return { word, done: word.slice(0, promptIndexForProgress(word, typed.length)) };
 }
 
@@ -5616,12 +5609,8 @@ function showChapterBanner() {
 const RANK_SPEEDS = [['S', 8.5], ['A', 6.5], ['B', 4.8], ['C', 3.4], ['D', 2.3]];
 const RANK_COLOURS = { S: 0xffd84a, A: 0x4fd8ff, B: 0x7be36a };
 
-// A rank is timed from the moment the word appears, not from the first key, so waiting
-// before typing costs as much as typing slowly. A short grace covers spotting the word.
-const RANK_GRACE = 0.4;
-
 function rankFor(letters, since) {
-  const seconds = Math.max(0.05, elapsed - (since ?? elapsed) - RANK_GRACE);
+  const seconds = Math.max(0.05, elapsed - (since ?? elapsed));
   const speed = Math.max(1, letters) / seconds;
   return (RANK_SPEEDS.find(([, needed]) => speed >= needed) || ['E'])[0];
 }
@@ -5629,14 +5618,14 @@ function rankFor(letters, since) {
 // The rank is the reward for a fast word, so it slams in: the better the rank, the
 // bigger the letter. Monsters, healers and chests are ranked word by word; a boss is
 // ranked for each word of a word stage and each finished line. Rocks are not ranked.
-function spawnRankPopup(enemy, letters = enemy.searchPrompt.length) {
+function spawnRankPopup(enemy, letters = enemy.searchPrompt.length - 1) {
   if (enemy.isProjectile) return;
   const label = enemy.label;
   if (!label || label.classList.contains('is-hidden')) return;
   const left = parseFloat(label.style.left);
   const top = parseFloat(label.style.top);
   if (!Number.isFinite(left) || !Number.isFinite(top)) return;
-  const rank = rankFor(letters, enemy.shownAt ?? enemy.firstLetterAt);
+  const rank = rankFor(letters, enemy.firstLetterAt);
   const popup = document.createElement('div');
   popup.className = 'rank-popup';
   popup.dataset.rank = rank;
