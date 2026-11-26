@@ -5917,14 +5917,14 @@ function spawnMagicAcquiredBurst(addedType) {
   const el = document.createElement('div');
   el.className = 'magic-acquired-burst';
   const name = addedType.replace('_', ' ').toUpperCase();
-  el.innerHTML = `<span class="mab-line1">MAGIC ACQUIRED</span><span class="mab-line2">+1 ${name}</span>`;
+  el.innerHTML = `<span class="mab-line1">POWER-UP!</span><span class="mab-line2">+1 ${name}</span>`;
   document.body.appendChild(el);
   el.addEventListener('animationend', () => el.remove(), { once: true });
 }
 
 // ── First-loot guide ──
 // The first time a player ever loots a potion, the game pauses once to show how
-// to cast magic and invites them to find out what each kind does by trying it.
+// to use a power-up and invites them to find out what each kind does by trying it.
 const LOOT_GUIDE_KEY = 'panphySpellwaveBetaLootGuideSeenV1';
 const LOOT_GUIDE_DELAY = 0.8;
 const SLOT_KEYS = [
@@ -5958,8 +5958,8 @@ function showLootGuide() {
 
   const key = SLOT_KEYS[slot];
   lootGuideIcon.innerHTML = potionsSystem.getPotionIcon(type);
-  lootGuideHow.innerHTML = `To cast it, press <kbd>${key.symbol}</kbd> or tap it in your potion tray. Each slot has its own arrow key.`;
-  lootGuideCast.textContent = `Cast it now (${key.symbol})`;
+  lootGuideHow.innerHTML = `To use it, press <kbd>${key.symbol}</kbd> or tap it in your tray. Each slot has its own arrow key.`;
+  lootGuideCast.textContent = `Use it now (${key.symbol})`;
 
   mode = 'paused';
   lootGuideSlot = slot;
