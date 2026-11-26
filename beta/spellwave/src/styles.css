@@ -3961,7 +3961,7 @@ body.battery-saver .hud-grid .readout {
 }
 
 .hud-grid .readout[hidden] {
-  display: none;
+  display: none !important;
 }
 
 .hud-grid .readout > span {
@@ -4330,7 +4330,8 @@ body.battery-saver .corner-controls .icon-button {
   transform: translateY(4px);
 }
 
-.corner-controls .battery-saver-toggle.is-active {
+.corner-controls .battery-saver-toggle.is-active,
+body.battery-saver .corner-controls .battery-saver-toggle.is-active {
   background: linear-gradient(#d9fffa, #8ef0e6 55%, #4fd8d0) !important;
 }
 
@@ -4517,4 +4518,21 @@ body.battery-saver .corner-controls .icon-button {
 
 .word-tag[data-kind="boss"].is-shielded .prompt {
   text-decoration-color: rgba(159, 232, 255, 0.8);
+}
+
+/* On the black plate the monster's typed letters fade to pale, and the player's own
+   letters below are bright cyan. */
+.word-tag:not(.is-boss) .prompt .typed {
+  color: rgba(255, 246, 220, 0.38);
+}
+
+.word-tag .typed-line {
+  border-top-color: rgba(255, 246, 220, 0.25);
+  color: #5ff2e6;
+  font-family: var(--font-chunky);
+  font-weight: 400;
+}
+
+.word-tag.is-miss .typed-line {
+  color: #ff6a5a;
 }
