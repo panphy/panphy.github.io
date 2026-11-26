@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=beta39';
-import { createSeasonalEffects } from './seasonal-effects.js?v=beta39';
-import { createPowerUpSystem } from './power-ups.js?v=beta39';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta39';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta39';
-import { createLeaderboard } from './leaderboard.js?v=beta39';
-import { createEnemyMesh } from './enemy-meshes.js?v=beta39';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta39';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta39';
-import { createLowPolyCloud } from './lowpoly.js?v=beta39';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta39';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta39';
-import { createWordDeck } from './word-decks.js?v=beta39';
-import { createStage } from './stages.js?v=beta39';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta39';
-import { storyBeatForWave } from './story.js?v=beta39';
-import { createStoryteller } from './storyteller.js?v=beta39';
-import { createPlasmaCannon } from './plasma-cannon.js?v=beta39';
+import { createKeyFireAudio } from './audio.js?v=beta40';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta40';
+import { createPowerUpSystem } from './power-ups.js?v=beta40';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta40';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta40';
+import { createLeaderboard } from './leaderboard.js?v=beta40';
+import { createEnemyMesh } from './enemy-meshes.js?v=beta40';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta40';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta40';
+import { createLowPolyCloud } from './lowpoly.js?v=beta40';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta40';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta40';
+import { createWordDeck } from './word-decks.js?v=beta40';
+import { createStage } from './stages.js?v=beta40';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta40';
+import { storyBeatForWave } from './story.js?v=beta40';
+import { createStoryteller, settleLantern } from './storyteller.js?v=beta40';
+import { createPlasmaCannon } from './plasma-cannon.js?v=beta40';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -2695,7 +2695,7 @@ function updateStory(delta) {
   story.age += delta;
   const { head, arms, dome } = story.npc.userData.parts;
   const grow = Math.min(1, story.age / 0.35);
-  story.npc.scale.setScalar(Math.max(0.01, (1 - (1 - grow) ** 3) * (1 - Math.min(1, story.leaving / 0.4))));
+  story.npc.scale.setScalar(Math.max(0.01, 1.26 * (1 - (1 - grow) ** 3) * (1 - Math.min(1, story.leaving / 0.4))));
   story.npc.rotation.y = Math.atan2(-story.npc.position.x, CAMERA_DISTANCE - story.npc.position.z);
   story.npc.position.y = GROUND_ENEMY_Y + Math.abs(Math.sin(story.age * (story.held ? 9 : 3))) * (story.held ? 0.05 : 0.03);
   head.rotation.z = Math.sin(story.age * 2.2) * 0.08;
@@ -2704,6 +2704,7 @@ function updateStory(delta) {
     const wave = story.held ? 2.6 + Math.sin(story.age * 14) * 0.2 : arm.userData.side > 0 ? 0.5 + Math.sin(story.age * 5) * 0.5 : 0.1;
     arm.rotation.z = arm.userData.side * wave;
   }
+  settleLantern(story.npc.userData.parts);
   dome.rotation.y = story.age * 1.4;
   updateStoryText(delta);
 

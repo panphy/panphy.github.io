@@ -11,9 +11,9 @@
 // of the land beside the route, the cover, the props and the landmark.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { isDetailed } from './detail.js?v=beta39';
-import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=beta39';
-import { createStageKit } from './stage-kits.js?v=beta39';
+import { isDetailed } from './detail.js?v=beta40';
+import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=beta40';
+import { createStageKit } from './stage-kits.js?v=beta40';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };

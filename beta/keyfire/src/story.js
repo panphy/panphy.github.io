@@ -9,7 +9,7 @@
 // coat, hat: the colours that tell the five apart. voice: the pitch of their speech blips.
 export const STORY_BEATS = [
   {
-    name: 'Professor Ada',
+    name: 'Professor Ada', role: 'professor',
     coat: 0xf2f0e6, hat: 0x8a5a2b,
     voice: 0,
     lines: [
@@ -19,7 +19,7 @@ export const STORY_BEATS = [
     ],
   },
   {
-    name: 'Tom the miller',
+    name: 'Tom the miller', role: 'miller',
     coat: 0xc98d4b, hat: 0x5b7f3a,
     plea: "Hey! Over here! Get this thing off me, it won't stop talking!",
     voice: 1,
@@ -30,7 +30,7 @@ export const STORY_BEATS = [
     ],
   },
   {
-    name: 'Mina the miner',
+    name: 'Mina the miner', role: 'miner',
     coat: 0xd8a23a, hat: 0xe0483a,
     plea: "Oi, you with the cannon! Down here! This one's been filling my head with rubbish!",
     voice: 2,
@@ -41,7 +41,7 @@ export const STORY_BEATS = [
     ],
   },
   {
-    name: 'Captain Frost',
+    name: 'Captain Frost', role: 'captain',
     coat: 0x3f6fa8, hat: 0xf2f0e6,
     plea: "Ahoy there! A hand, if you please! It says my boat ought to sink!",
     voice: 3,
@@ -52,7 +52,7 @@ export const STORY_BEATS = [
     ],
   },
   {
-    name: 'Astra the stargazer',
+    name: 'Astra the stargazer', role: 'stargazer',
     coat: 0x6d4fb3, hat: 0xf2c14e,
     plea: "Up here, quickly! It keeps insisting the Earth is flat!",
     voice: 4,
