@@ -1,22 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=2';
-import { createSeasonalEffects } from './seasonal-effects.js?v=2';
-import { createPowerUpSystem } from './power-ups.js?v=2';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=2';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=2';
-import { createLeaderboard } from './leaderboard.js?v=2';
-import { createEnemyMesh } from './enemy-meshes.js?v=2';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=2';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=2';
-import { createLowPolyCloud } from './lowpoly.js?v=2';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=2';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=2';
-import { createWordDeck } from './word-decks.js?v=2';
-import { createStage } from './stages.js?v=2';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=2';
-import { storyBeatForWave } from './story.js?v=2';
-import { createStoryteller, settleLantern } from './storyteller.js?v=2';
-import { createPlasmaCannon } from './plasma-cannon.js?v=2';
+import { createKeyFireAudio } from './audio.js?v=3';
+import { createSeasonalEffects } from './seasonal-effects.js?v=3';
+import { createPowerUpSystem } from './power-ups.js?v=3';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=3';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=3';
+import { createLeaderboard } from './leaderboard.js?v=3';
+import { createEnemyMesh } from './enemy-meshes.js?v=3';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=3';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=3';
+import { createLowPolyCloud } from './lowpoly.js?v=3';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=3';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=3';
+import { createWordDeck } from './word-decks.js?v=3';
+import { createStage } from './stages.js?v=3';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=3';
+import { storyBeatForWave } from './story.js?v=3';
+import { createStoryteller, settleLantern } from './storyteller.js?v=3';
+import { createPlasmaCannon } from './plasma-cannon.js?v=3';
+import { createRideCart } from './ride-cart.js?v=3';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -2355,7 +2356,7 @@ function buildStageForWave(wave) {
   rail.ride = null;
   if ((rail.setPiece === 'bridge' || rail.setPiece === 'cart') && rail.bursts.length >= 3) rail.setPieceCount = rail.bursts.pop();
   document.body.classList.remove('blizzard');
-  if (rideCart) rideCart.visible = false;
+  if (rideCart) rideCart.group.visible = false;
   // One stop of the wave has no ambush: someone waits there with the story.
   endStory();
   rail.storyIndex = Math.max(1, Math.min(2, rail.bursts.length - 1));
@@ -2503,11 +2504,12 @@ function updateSetPieceTravel(pose, delta) {
     rail.duration = distance / RIDE_SPEED;
     const count = rail.setPieceCount + 2;
     rail.ride = { left: count, gap: ((1 - rail.t) * rail.duration * 0.78) / count, timer: 1.2 };
-    rideCart.visible = true;
+    rideCart.group.visible = true;
     showBanner('MINE CART!');
   }
   // The cart rattles along and never stops; what flies at it must be typed in passing.
   rail.walkPhase += delta * 9;
+  rideCart.update(rail.walkPhase);
   kickTimer = Math.max(kickTimer, 0.05);
   rail.ride.timer -= delta;
   if (rail.ride.left > 0 && rail.ride.timer <= 0) {
@@ -2551,7 +2553,7 @@ function beginBlizzard() {
 function arriveAtStop() {
   rail.stopIndex = rail.toIndex;
   rail.ride = null;
-  if (rideCart) rideCart.visible = false;
+  if (rideCart) rideCart.group.visible = false;
   const stop = rail.to;
   if (stop.isBoss) {
     if (wavePhase === 'normal') startBossPhase();
@@ -4146,22 +4148,8 @@ function createWeapon() {
   for (const glow of weapon.glows) cannonGlows.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
   lightningCrowns.push(...weapon.crowns);
 
-  // The front of the mine cart, seen only during the ride. It hangs from the camera too.
-  rideCart = new THREE.Group();
-  const cartIron = new THREE.MeshStandardMaterial({ color: 0x4a4e57, roughness: 0.8, metalness: 0.2, flatShading: true });
-  const cartTimber = new THREE.MeshStandardMaterial({ color: 0x7a5632, roughness: 0.9, flatShading: true });
-  const cartFront = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.7, 0.16), cartIron);
-  cartFront.position.set(0, -1.42, -2.5);
-  const cartRim = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.12, 0.3), cartTimber);
-  cartRim.position.set(0, -1.05, -2.5);
-  rideCart.add(cartFront, cartRim);
-  for (const x of [-1.2, 0, 1.2]) {
-    const rivet = new THREE.Mesh(new THREE.OctahedronGeometry(0.07, 0), cartTimber);
-    rivet.position.set(x, -1.2, -2.4);
-    rideCart.add(rivet);
-  }
-  rideCart.visible = false;
-  camera.add(rideCart);
+  // The mine cart the player rides in, seen only during the ride. It hangs from the camera too.
+  rideCart = createRideCart(camera);
 
   // The power-up's glow on whatever reaches the player: two lights either side of the
   // path, where monsters stop to strike. They never move, so the light count is fixed.
