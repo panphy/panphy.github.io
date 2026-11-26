@@ -1212,6 +1212,19 @@ body.is-running:not(.is-paused) .hud-grid {
   animation: rank-ring 520ms ease-out both;
 }
 
+/* The rank's bonus points, under the letter. */
+.rank-popup .rank-bonus {
+  position: relative;
+  margin-top: 0.15em;
+  color: var(--rank-colour);
+  font-family: var(--font-chunky);
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  font-weight: 400;
+  -webkit-text-stroke: 4px rgba(20, 14, 6, 0.85);
+  paint-order: stroke fill;
+  animation: rank-word 1150ms ease-out both;
+}
+
 .rank-popup[data-rank="S"] { --rank-colour: #ffd84a; --rank-size: clamp(3.2rem, 8.5vw, 5.4rem); }
 .rank-popup[data-rank="A"] { --rank-colour: #4fd8ff; --rank-size: clamp(3rem, 8vw, 5rem); }
 .rank-popup[data-rank="B"] { --rank-colour: #7be36a; }
@@ -2265,41 +2278,6 @@ body.ending-summary .kf-leaderboard {
   background: rgba(255, 255, 255, 0.55);
 }
 
-/* Each boss's myth, struck out. */
-.ending-myths {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  gap: 0.4rem;
-}
-
-.ending-myths ul {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.35rem 0.45rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ending-myths li {
-  padding: 0.2rem 0.6rem;
-  border: 1px solid rgba(109, 79, 179, 0.3);
-  border-radius: 999px;
-  background: rgba(109, 79, 179, 0.1);
-  color: #5a4590;
-  font-family: var(--font-pixel);
-  font-size: clamp(0.78rem, 1.25vw, 0.88rem);
-  font-weight: 500;
-}
-
-.ending-myths s {
-  text-decoration-color: #a4501c;
-  text-decoration-thickness: 2px;
-}
-
 .ending-replay {
   flex: 0 0 auto;
   min-height: 48px;
@@ -2395,7 +2373,7 @@ body.ending-summary .kf-leaderboard {
   }
 
   .ending-stats {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .ending-stat {
@@ -3662,6 +3640,185 @@ body.battery-saver .power-up-bar {
   text-shadow: 0 4px 0 var(--key-ink);
   -webkit-text-stroke: 7px var(--key-ink);
   paint-order: stroke fill;
+}
+
+/* The summary card after the ending: a key-plate with the title's lettering, the score
+   on a gold key well, a row of rank keys S to E, then the run's stats. */
+.ending-content {
+  width: min(620px, calc(100% - 28px));
+  gap: 0.75rem;
+  border: 3px solid var(--key-ink);
+  border-radius: 18px;
+  background: var(--key-plate);
+  box-shadow: 0 7px 0 var(--key-ink), 0 22px 50px rgba(20, 12, 34, 0.5);
+}
+
+.ending-kicker {
+  color: #4fd8d0;
+  font-family: var(--font-chunky);
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  word-spacing: 0.25em;
+  -webkit-text-stroke: 3.5px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.ending-title {
+  color: #fff6dc;
+  font-family: var(--font-chunky);
+  font-size: clamp(2rem, 6vw, 3.1rem);
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  word-spacing: 0.2em;
+  text-shadow: 0 4px 0 var(--key-ink);
+  -webkit-text-stroke: 8px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.ending-content .stat-label {
+  color: #8a6a44;
+  font-family: var(--font-chunky);
+  font-size: clamp(0.76rem, 1.3vw, 0.86rem);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ending-content .stat-value {
+  color: var(--key-ink);
+  font-family: var(--font-chunky);
+  font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.ending-score {
+  gap: 0.05rem;
+  padding: 0.55rem 1rem 0.7rem;
+  border: 3px solid var(--key-ink);
+  border-radius: 14px;
+  background: linear-gradient(#ffe9a8, #f6c35a);
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.45), 0 4px 0 var(--key-ink);
+}
+
+.ending-content .ending-score .stat-label {
+  color: #7a4a10;
+}
+
+.ending-content .ending-score .stat-value {
+  color: #fff6dc;
+  font-size: clamp(2.4rem, 7vw, 3.4rem);
+  text-shadow: 0 4px 0 var(--key-ink);
+  -webkit-text-stroke: 8px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.ending-score-note {
+  top: -0.85rem;
+  right: 0.7rem;
+  padding: 0.2rem 0.7rem;
+  border: 2.5px solid var(--key-ink);
+  background: #4fd8d0;
+  box-shadow: 0 3px 0 var(--key-ink);
+  color: #fff6dc;
+  font-family: var(--font-chunky);
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 3px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+/* Rank keys: the letter in its popup colour, how many words earned it below. */
+.ending-ranks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 0.4rem;
+}
+
+.ending-ranks ul {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  width: 100%;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rank-key {
+  --rank-colour: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.2rem 0.4rem;
+  border: 2.5px solid var(--key-ink);
+  border-radius: 11px;
+  background: linear-gradient(#fffaf0, #f1dcae);
+  box-shadow: 0 4px 0 var(--key-ink);
+  transition: opacity 0.3s ease;
+}
+
+.rank-key b {
+  color: var(--rank-colour);
+  font-family: var(--font-chunky);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1;
+  -webkit-text-stroke: 6px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.rank-key .rank-count {
+  color: var(--key-ink);
+  font-family: var(--font-chunky);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1;
+}
+
+.rank-key[data-rank="S"] { --rank-colour: #ffd84a; }
+.rank-key[data-rank="A"] { --rank-colour: #4fd8ff; }
+.rank-key[data-rank="B"] { --rank-colour: #7be36a; }
+.rank-key[data-rank="C"] { --rank-colour: #ffe9a6; }
+.rank-key[data-rank="D"] { --rank-colour: #ffab66; }
+.rank-key[data-rank="E"] { --rank-colour: #ff7a7a; }
+
+.rank-key.is-empty {
+  opacity: 0.4;
+}
+
+/* The best rank earned is pressed in and glows. */
+.rank-key.is-best {
+  background: linear-gradient(#fff3c4, #ffd77a);
+  box-shadow: 0 4px 0 var(--key-ink), 0 0 18px var(--rank-colour);
+}
+
+.ending-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.ending-stat {
+  gap: 0.1rem;
+  padding: 0.45rem 0.4rem;
+  border: 2px solid rgba(61, 43, 28, 0.28);
+  border-radius: 11px;
+  background: rgba(255, 252, 242, 0.8);
+}
+
+@media (max-width: 520px) {
+  .ending-ranks ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-height: 620px) and (min-width: 600px) {
+  .ending-content { gap: 0.45rem; }
+  .ending-content .ending-score .stat-value { font-size: clamp(1.8rem, 4.6vw, 2.4rem); }
+  .rank-key { padding: 0.2rem; }
+  .rank-key b { font-size: 1.4rem; }
 }
 
 /* Storyteller card. */

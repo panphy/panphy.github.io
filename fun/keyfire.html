@@ -55,7 +55,7 @@
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <link rel="stylesheet" href="../assets/standalone-top.css">
   <style>:root { --standalone-top-bg: #efe3c4; }</style>
-  <link rel="stylesheet" href="./keyfire/src/styles.css?v=8">
+  <link rel="stylesheet" href="./keyfire/src/styles.css?v=9">
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
     defer
@@ -80,7 +80,7 @@
 
 <body>
   <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite">
-    <img src="./keyfire/keyfire-title.svg?v=8" alt="KeyFire" width="425" height="130">
+    <img src="./keyfire/keyfire-title.svg?v=9" alt="KeyFire" width="425" height="130">
     <div class="loading-bar" aria-hidden="true"><i></i></div>
     <p>Loading…</p>
   </div>
@@ -133,7 +133,7 @@
       </a>
       <div class="game-title">
         <span id="phaseValue"></span>
-        <h1><img src="./keyfire/keyfire-title.svg?v=8" alt="KeyFire" width="425" height="130"></h1>
+        <h1><img src="./keyfire/keyfire-title.svg?v=9" alt="KeyFire" width="425" height="130"></h1>
       </div>
     </header>
 
@@ -272,23 +272,20 @@ On an iPad with a keyboard attached? Press any key to play.</p>
           <span class="stat-value" id="endScore">0</span>
           <span class="ending-score-note" id="endScoreNote" hidden></span>
         </div>
-        <div class="ending-stats">
-          <div class="ending-stat"><span class="stat-label">Words won</span><span class="stat-value" id="endWords">0</span></div>
-          <div class="ending-stat"><span class="stat-label">Accuracy</span><span class="stat-value" id="endAccuracy">0%</span></div>
-          <div class="ending-stat"><span class="stat-label">Best chain</span><span class="stat-value" id="endStreak">0</span></div>
-          <div class="ending-stat"><span class="stat-label">Chests looted</span><span class="stat-value" id="endMimics">0</span></div>
-          <div class="ending-stat"><span class="stat-label">Life left</span><span class="stat-value" id="endHealth">0/5</span></div>
-          <div class="ending-stat"><span class="stat-label">Time</span><span class="stat-value" id="endTime">0:00</span></div>
-        </div>
-        <div class="ending-myths">
-          <p class="stat-label" id="endingMythsLabel">Myths broken</p>
-          <ul aria-labelledby="endingMythsLabel">
-            <li><s>Heavy things fall faster</s></li>
-            <li><s>Energy comes free</s></li>
-            <li><s>Heat is a liquid</s></li>
-            <li><s>Ice sinks</s></li>
-            <li><s>The stars rule our lives</s></li>
+        <div class="ending-ranks">
+          <p class="stat-label" id="endingRanksLabel">Ranks</p>
+          <ul aria-labelledby="endingRanksLabel">
+            <li class="rank-key" data-rank="S"><b>S</b><span class="rank-count">0</span></li>
+            <li class="rank-key" data-rank="A"><b>A</b><span class="rank-count">0</span></li>
+            <li class="rank-key" data-rank="B"><b>B</b><span class="rank-count">0</span></li>
+            <li class="rank-key" data-rank="C"><b>C</b><span class="rank-count">0</span></li>
+            <li class="rank-key" data-rank="D"><b>D</b><span class="rank-count">0</span></li>
+            <li class="rank-key" data-rank="E"><b>E</b><span class="rank-count">0</span></li>
           </ul>
+        </div>
+        <div class="ending-stats">
+          <div class="ending-stat"><span class="stat-label">Accuracy</span><span class="stat-value" id="endAccuracy">0%</span></div>
+          <div class="ending-stat"><span class="stat-label">Time</span><span class="stat-value" id="endTime">0:00</span></div>
         </div>
         <button class="ending-replay" id="endingReplay" type="button" title="Begin a new run">Play Again</button>
         <a class="support-link" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" title="Support my projects on BuyMeACoffee">Support My Projects</a>
@@ -297,7 +294,7 @@ On an iPad with a keyboard attached? Press any key to play.</p>
     </div>
   </div>
 
-  <script type="module" src="./keyfire/src/main.js?v=8"></script>
+  <script type="module" src="./keyfire/src/main.js?v=9"></script>
 </body>
 
 </html>

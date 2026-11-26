@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=8';
-import { createSeasonalEffects } from './seasonal-effects.js?v=8';
-import { createPowerUpSystem } from './power-ups.js?v=8';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=8';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=8';
-import { createLeaderboard } from './leaderboard.js?v=8';
-import { createEnemyMesh } from './enemy-meshes.js?v=8';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=8';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=8';
-import { createLowPolyCloud } from './lowpoly.js?v=8';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=8';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=8';
-import { createWordDeck } from './word-decks.js?v=8';
-import { createStage } from './stages.js?v=8';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=8';
-import { storyBeatForWave } from './story.js?v=8';
-import { createStoryteller, settleLantern } from './storyteller.js?v=8';
-import { createPlasmaCannon } from './plasma-cannon.js?v=8';
-import { createRideCart } from './ride-cart.js?v=8';
+import { createKeyFireAudio } from './audio.js?v=9';
+import { createSeasonalEffects } from './seasonal-effects.js?v=9';
+import { createPowerUpSystem } from './power-ups.js?v=9';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=9';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=9';
+import { createLeaderboard } from './leaderboard.js?v=9';
+import { createEnemyMesh } from './enemy-meshes.js?v=9';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=9';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=9';
+import { createLowPolyCloud } from './lowpoly.js?v=9';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=9';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=9';
+import { createWordDeck } from './word-decks.js?v=9';
+import { createStage } from './stages.js?v=9';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=9';
+import { storyBeatForWave } from './story.js?v=9';
+import { createStoryteller, settleLantern } from './storyteller.js?v=9';
+import { createPlasmaCannon } from './plasma-cannon.js?v=9';
+import { createRideCart } from './ride-cart.js?v=9';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -79,10 +79,8 @@ const endingSkip = document.getElementById('endingSkip');
 let endingCinematic = null;
 const endScore = document.getElementById('endScore');
 const endAccuracy = document.getElementById('endAccuracy');
-const endStreak = document.getElementById('endStreak');
-const endMimics = document.getElementById('endMimics');
-const endHealth = document.getElementById('endHealth');
 const endTime = document.getElementById('endTime');
+const endRankKeys = [...document.querySelectorAll('#gameEnding .rank-key')];
 
 const STORAGE_KEY = 'keyfireBestV1';
 const AUDIO_STORAGE_KEY = 'keyfireAudioV1';
@@ -297,8 +295,9 @@ let powerUpCheatUsedThisRun = false;
 let finalWaveCheatUsedThisRun = false;
 let inputTrace = '';
 let streak = 0;
-let peakStreak = 0;
-let mimicsLooted = 0;
+// How many words of the run earned each rank, S to E, for the summary card.
+const RANK_LETTERS = ['S', 'A', 'B', 'C', 'D', 'E'];
+let rankCounts = {};
 let typedBuffer = '';
 let activeTarget = null;
 let lastFrameTime = 0;
@@ -735,8 +734,7 @@ function startGame() {
   normalTypingCostSpawned = 0;
   prepareWavePlan();
   streak = 0;
-  peakStreak = 0;
-  mimicsLooted = 0;
+  rankCounts = {};
   typedAttempts = 0;
   mistakeCount = 0;
   defeatedCount = 0;
@@ -1229,7 +1227,6 @@ function breakShield(enemy) {
   enemy.group.remove(shield);
   disposeObject(shield);
   streak += 1;
-  if (streak > peakStreak) peakStreak = streak;
   const points = 20 + enemy.searchPrompt.length * 10;
   score += points;
   spawnScorePopup(points, enemy);
@@ -1341,7 +1338,6 @@ function strikePlayer(damage) {
 function awardKill(enemy) {
   const typedLength = Math.max(1, enemy.searchPrompt.length);
   streak += 1;
-  if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
   const points = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
   const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
@@ -1832,7 +1828,6 @@ function advanceBossLine(boss) {
   typedBuffer = '';
   activeTarget = null;
   streak += 1;
-  if (streak > peakStreak) peakStreak = streak;
   score += 10 + boss.searchPrompt.length * 8;
   boss.flinch = 1;
   // In a word stage, the word or long term that this word completes, if it completes one.
@@ -2115,7 +2110,6 @@ function splitComet(rock) {
 function shatterRock(rock, scored = true) {
   if (scored) {
     streak += 1;
-    if (streak > peakStreak) peakStreak = streak;
     score += 40 + rock.searchPrompt.length * 10;
     hitStopTimer = 0.04;
     kickTimer = Math.max(kickTimer, 0.1);
@@ -5472,7 +5466,6 @@ let endingScoreNote = '';
 // The defeated words that fly into the cannon's core in the ending cinematic.
 const ENDING_WORD_COUNT = 10;
 const ENDING_WORD_MAX_LENGTH = 18;
-const endWords = document.getElementById('endWords');
 const endScoreNote = document.getElementById('endScoreNote');
 
 function startEndingSequence() {
@@ -5580,16 +5573,12 @@ function animateCounter(el, from, to, duration, format = v => String(v)) {
 }
 
 function getEndingStats() {
-  const healthHearts = formatHeartCount(health);
   return {
     score,
     scoreNote: endingScoreNote,
-    wordsWon: defeatedCount,
     accuracy: Math.round(accuracy() * 100),
-    peakStreak,
-    mimicsLooted,
-    healthHearts,
     time: formatRunTime(Math.max(1, elapsed)),
+    ranks: RANK_LETTERS.map(letter => rankCounts[letter] || 0),
   };
 }
 
@@ -5603,18 +5592,21 @@ function formatRunTime(seconds) {
 function setEndingStats(stats, animate) {
   if (animate) {
     animateCounter(endScore, 0, stats.score, 1400, formatScore);
-    animateCounter(endWords, 0, stats.wordsWon, 1100);
     animateCounter(endAccuracy, 0, stats.accuracy, 1000, v => `${v}%`);
-    animateCounter(endStreak, 0, stats.peakStreak, 900);
-    animateCounter(endMimics, 0, stats.mimicsLooted, 850);
   } else {
     if (endScore) endScore.textContent = '0';
-    if (endWords) endWords.textContent = '0';
     if (endAccuracy) endAccuracy.textContent = '0%';
-    if (endStreak) endStreak.textContent = '0';
-    if (endMimics) endMimics.textContent = '0';
   }
-  if (endHealth) endHealth.textContent = `${stats.healthHearts}/${HEART_COUNT}`;
+  // The rank keys: an unearned rank is dimmed; the best rank earned is lit.
+  const best = stats.ranks.findIndex(count => count > 0);
+  endRankKeys.forEach((key, index) => {
+    const count = stats.ranks[index] || 0;
+    const value = key.querySelector('.rank-count');
+    key.classList.toggle('is-empty', count === 0);
+    key.classList.toggle('is-best', index === best);
+    if (animate) animateCounter(value, 0, count, 700 + index * 80);
+    else value.textContent = '0';
+  });
   if (endTime) endTime.textContent = stats.time;
   if (endScoreNote) {
     endScoreNote.hidden = !stats.scoreNote;
@@ -5744,6 +5736,9 @@ function showChapterBanner() {
 // a good speed earns an A.
 const RANK_SPEEDS = [['S', 8.5], ['A', 6.5], ['B', 4.8], ['C', 3.4], ['D', 2.3]];
 const RANK_COLOURS = { S: 0xffd84a, A: 0x4fd8ff, B: 0x7be36a };
+// A better rank scores more: a bonus for each letter of the word (or line), on top of
+// the word's own points, so a fast long word is worth more than a fast short one.
+const RANK_BONUS_PER_LETTER = { S: 12, A: 8, B: 5, C: 3, D: 1, E: 0 };
 
 function rankFor(letters, since) {
   const seconds = Math.max(0.05, rankClock - since);
@@ -5757,16 +5752,23 @@ function rankFor(letters, since) {
 // nor is anything of a single letter, which has no typing time to measure.
 function spawnRankPopup(enemy, letters = enemy.searchPrompt.length - 1) {
   if (enemy.isProjectile || enemy.firstLetterAt === undefined) return;
+  const rank = rankFor(letters, enemy.firstLetterAt);
+  rankCounts[rank] = (rankCounts[rank] || 0) + 1;
+  const bonus = RANK_BONUS_PER_LETTER[rank] * (Math.max(1, letters) + 1);
+  if (bonus > 0) {
+    score += bonus;
+    updateHud(true);
+  }
   const label = enemy.label;
   if (!label || label.classList.contains('is-hidden')) return;
   const left = parseFloat(label.style.left);
   const top = parseFloat(label.style.top);
   if (!Number.isFinite(left) || !Number.isFinite(top)) return;
-  const rank = rankFor(letters, enemy.firstLetterAt);
   const popup = document.createElement('div');
   popup.className = 'rank-popup';
   popup.dataset.rank = rank;
-  popup.innerHTML = `<span class="rank-ring"></span><span class="rank-word">RANK</span><b>${rank}</b>`;
+  popup.innerHTML = `<span class="rank-ring"></span><span class="rank-word">RANK</span><b>${rank}</b>`
+    + (bonus > 0 ? `<span class="rank-bonus">+${bonus}</span>` : '');
   popup.style.left = `${left}px`;
   popup.style.top = `${top + (enemy.isBoss ? 78 : 54)}px`;
   document.body.appendChild(popup);
@@ -5928,7 +5930,6 @@ function awardMimicLoot(enemy) {
   const slot = powerUps.getPowerUps().indexOf(null);
   const success = powerUps.addPowerUp(type);
   playChestLootSound();
-  mimicsLooted += 1;
   if (success) queueLootGuide(type, slot);
 
   if (!enemy.label.classList.contains('is-hidden')) {
