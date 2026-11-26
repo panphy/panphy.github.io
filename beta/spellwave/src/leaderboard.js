@@ -5,16 +5,16 @@
 
 const SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
-const TABLE = 'spellwave_beta_leaderboard';
-const SUBMIT_RPC = 'submit_spellwave_beta_score';
+const TABLE = 'keyfire_leaderboard';
+const SUBMIT_RPC = 'submit_keyfire_score';
 const SCORE_FIELD = 'score';
 // Bumped whenever the board is reset after a gameplay change; lists saved under
 // older keys are from old rules and are removed on load.
-const CACHE_KEY = 'spellwaveBetaLeaderboardCacheV1';
-const OLD_CACHE_KEYS = [];
+const CACHE_KEY = 'keyfireLeaderboardCacheV1';
+const OLD_CACHE_KEYS = ['spellwaveBetaLeaderboardCacheV1'];
 const BOARD_SIZE = 5;
 const MIN_SCORE = 1;
-// Matches the server check (spellwave_beta_score_range).
+// Matches the server check (keyfire_score_range).
 const MAX_SCORE = 200000;
 const HIGHLIGHT_MS = 6000;
 // Benchmark scores compete for the same five places as submitted scores.
