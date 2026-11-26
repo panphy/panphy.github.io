@@ -1673,6 +1673,27 @@ body.is-running:not(.is-paused) .hud-grid {
     padding: 20px;
   }
 
+  /* Start, pause and result cards sit under the HUD instead of over it, and scroll if tall. */
+  #messagePanel {
+    --panel-top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 140px);
+    top: var(--panel-top);
+    max-height: calc(100dvh - var(--panel-top) - max(14px, env(safe-area-inset-bottom)));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-50%);
+  }
+
+  /* The status line above the title pushes the HUD down 26px (see .hud-grid); follow it. */
+  body:is(:not(.is-running), .is-paused) .game-bar:has(#phaseValue:not(:empty)) ~ #messagePanel {
+    --panel-top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 166px);
+  }
+
+  /* The raised corner buttons clear the typing strip during a run; between runs they can sit low. */
+  body:not(.is-running) .corner-controls,
+  body.is-paused .corner-controls {
+    bottom: max(18px, env(safe-area-inset-bottom));
+  }
+
 }
 
 @media (pointer: coarse) {
