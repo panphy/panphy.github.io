@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {
   pickTarget, buildSearchPrompt, buildAltSearchPrompts,
-  getInputCharacter, promptIndexForProgress,
+  getInputCharacter, promptIndexForProgress, altTermFor,
 } from '../src/prompt-utils.js';
 import { ALL_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from '../src/question-bank.js';
 
@@ -171,4 +171,17 @@ test('typing either spelling defeats an enemy without a mistake', () => {
       assert.equal(context.mistakes, 0, `${term}: ${key}`);
     }
   }
+});
+
+test('a card typed in another spelling keeps its spaces, punctuation and capitals', () => {
+  const shown = (term, typed) => {
+    const key = [buildSearchPrompt(term), ...buildAltSearchPrompts(term)].find(entry => entry.startsWith(typed));
+    const spelled = altTermFor(term, key);
+    return spelled.slice(0, promptIndexForProgress(spelled, typed.length)) + '|' + spelled.slice(promptIndexForProgress(spelled, typed.length));
+  };
+  assert.equal(shown('centre of mass', 'cente'), 'cente|r of mass');
+  assert.equal(shown('centre of mass', 'centerofm'), 'center of m|ass');
+  assert.equal(shown('Colour, metre', 'colo'), 'Colo|ur, metre');
+  assert.equal(shown('Colour, metre', 'color'), 'Color|, metre');
+  assert.equal(altTermFor('half-life', 'halflife'), 'half-life');
 });

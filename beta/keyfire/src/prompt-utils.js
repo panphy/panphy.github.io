@@ -78,6 +78,19 @@ function buildAltSearchPrompts(term) {
   return [...alts];
 }
 
+// The term as the player is spelling it: the variant of `term` whose typed form is
+// `searchPrompt` (center for centre, say), keeping its spaces, punctuation and capitals.
+function altTermFor(term, searchPrompt) {
+  let variants = [''];
+  for (const token of term.split(/([a-z]+)/i)) {
+    const spellings = (SPELLING_VARIANTS.get(token.toLowerCase()) || [token]).map(spelling => (
+      /^[A-Z]/.test(token) ? spelling[0].toUpperCase() + spelling.slice(1) : spelling
+    ));
+    variants = variants.flatMap(prefix => spellings.map(spelling => prefix + spelling));
+  }
+  return variants.find(variant => buildSearchPrompt(variant) === searchPrompt) || term;
+}
+
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -111,6 +124,7 @@ export {
   getInputCharacter,
   buildSearchPrompt,
   buildAltSearchPrompts,
+  altTermFor,
   escapeHtml,
   promptIndexForProgress,
 };
