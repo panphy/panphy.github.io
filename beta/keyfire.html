@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <link rel="stylesheet" href="../assets/standalone-top.css">
   <style>:root { --standalone-top-bg: #efe3c4; }</style>
-  <link rel="stylesheet" href="./spellwave/src/styles.css?v=beta33">
+  <link rel="stylesheet" href="./keyfire/src/styles.css?v=beta35">
   <script
     id="supabaseScript"
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
@@ -39,7 +39,7 @@
 
 <body>
   <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite">
-    <img src="./spellwave/keyfire-title.svg?v=beta33" alt="KeyFire" width="425" height="130">
+    <img src="./keyfire/keyfire-title.svg?v=beta35" alt="KeyFire" width="425" height="130">
     <div class="loading-bar" aria-hidden="true"><i></i></div>
     <p>Loading…</p>
   </div>
@@ -67,22 +67,22 @@
     <div class="boss-banner" id="bossBanner" aria-live="assertive" aria-atomic="true"></div>
     <div class="labels-layer" id="labelsLayer" aria-hidden="true"></div>
 
-    <div class="potion-bar" id="potionBar" aria-label="Potions" title="Potion inventory — press the arrow keys to activate">
-      <div class="potion-slot" data-slot="0" aria-label="Potion Slot 1 (Left Arrow or 1)">
+    <div class="power-up-bar" id="powerUpBar" aria-label="Power-ups" title="Power-ups: press an arrow key to use one">
+      <div class="power-up-slot" data-slot="0" aria-label="Power-up slot 1 (Left Arrow or 1)">
         <span class="slot-key">←</span>
-        <div class="potion-icon"></div>
+        <div class="power-up-icon"></div>
       </div>
-      <div class="potion-slot" data-slot="1" aria-label="Potion Slot 2 (Up Arrow or 2)">
+      <div class="power-up-slot" data-slot="1" aria-label="Power-up slot 2 (Up Arrow or 2)">
         <span class="slot-key">↑</span>
-        <div class="potion-icon"></div>
+        <div class="power-up-icon"></div>
       </div>
-      <div class="potion-slot" data-slot="2" aria-label="Potion Slot 3 (Right Arrow or 3)">
+      <div class="power-up-slot" data-slot="2" aria-label="Power-up slot 3 (Right Arrow or 3)">
         <span class="slot-key">→</span>
-        <div class="potion-icon"></div>
+        <div class="power-up-icon"></div>
       </div>
-      <div class="potion-slot" data-slot="3" aria-label="Potion Slot 4 (Down Arrow or 4)">
+      <div class="power-up-slot" data-slot="3" aria-label="Power-up slot 4 (Down Arrow or 4)">
         <span class="slot-key">↓</span>
-        <div class="potion-icon"></div>
+        <div class="power-up-icon"></div>
       </div>
     </div>
 
@@ -92,7 +92,7 @@
       </a>
       <div class="game-title">
         <span id="phaseValue"></span>
-        <h1><img src="./spellwave/keyfire-title.svg?v=beta33" alt="KeyFire" width="425" height="130"></h1>
+        <h1><img src="./keyfire/keyfire-title.svg?v=beta35" alt="KeyFire" width="425" height="130"></h1>
       </div>
     </header>
 
@@ -268,7 +268,7 @@ On an iPad with a keyboard attached? Press any key to play.</p>
     </div>
   </div>
 
-  <script type="module" src="./spellwave/src/main.js?v=beta33"></script>
+  <script type="module" src="./keyfire/src/main.js?v=beta35"></script>
 </body>
 
 </html>

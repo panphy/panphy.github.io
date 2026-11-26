@@ -1,5 +1,5 @@
-// visuals.js — Spellwave's look: post-processing with automatic quality tiers,
-// the gradient sky, stars, drifting motes, and the pooled spell effects
+// visuals.js — KeyFire's look: post-processing with automatic quality tiers,
+// the gradient sky, stars, drifting motes, and the pooled hit effects
 // (sparks, rings, glow flashes, light pulses).
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';

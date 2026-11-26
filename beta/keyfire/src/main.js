@@ -1,28 +1,51 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta33';
-import { createSeasonalEffects } from './seasonal-effects.js?v=beta33';
-import { createPotionSystem } from './potions.js?v=beta33';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta33';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta33';
-import { createLeaderboard } from './leaderboard.js?v=beta33';
-import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js?v=beta33';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta33';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta33';
-import { createLowPolyCloud } from './lowpoly.js?v=beta33';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta33';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta33';
-import { createWordDeck } from './word-decks.js?v=beta33';
-import { createStage } from './stages.js?v=beta33';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta33';
-import { storyBeatForWave } from './story.js?v=beta33';
-import { createStoryteller } from './storyteller.js?v=beta33';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta33';
+import { createKeyFireAudio } from './audio.js?v=beta35';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta35';
+import { createPowerUpSystem } from './power-ups.js?v=beta35';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta35';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta35';
+import { createLeaderboard } from './leaderboard.js?v=beta35';
+import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js?v=beta35';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta35';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta35';
+import { createLowPolyCloud } from './lowpoly.js?v=beta35';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta35';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta35';
+import { createWordDeck } from './word-decks.js?v=beta35';
+import { createStage } from './stages.js?v=beta35';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta35';
+import { storyBeatForWave } from './story.js?v=beta35';
+import { createStoryteller } from './storyteller.js?v=beta35';
+import { createPlasmaCannon } from './plasma-cannon.js?v=beta35';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
 const monsterDeck = createWordDeck();
 const bossDeck = createWordDeck();
-const LAST_RUN_TERMS_KEY = 'panphySpellwaveBetaLastRunTermsV1';
+// Saved data moved from the old Spellwave names to KeyFire ones. Anything saved under an
+// old name is copied across once, so best scores and settings carry over. The old
+// entries are left alone: the live Spellwave game still reads the shared ones.
+const RENAMED_STORAGE_KEYS = [
+  ['panphySpellwaveBetaLastRunTermsV1', 'keyfireLastRunTermsV1'],
+  ['panphySpellwaveBetaBestV1', 'keyfireBestV1'],
+  ['panphySpellwaveAudioV1', 'keyfireAudioV1'],
+  ['spellwave_battery_saver_active', 'keyfireBatterySaver'],
+  ['spellwaveBetaHasKeyboard', 'keyfireHasKeyboard'],
+  ['panphySpellwaveBetaLootGuideSeenV1', 'keyfireLootGuideSeenV1'],
+];
+carryOverSavedData();
+
+function carryOverSavedData() {
+  try {
+    for (const [oldKey, newKey] of RENAMED_STORAGE_KEYS) {
+      if (localStorage.getItem(newKey) !== null) continue;
+      const value = localStorage.getItem(oldKey);
+      if (value !== null) localStorage.setItem(newKey, value);
+    }
+  } catch {}
+}
+
+const LAST_RUN_TERMS_KEY = 'keyfireLastRunTermsV1';
 
 function loadLastRunTerms() {
   try {
@@ -65,8 +88,8 @@ const lightningFlash = document.getElementById('lightningFlash');
 let godModeBadge = null; // created dynamically on activation, never in static HTML
 const runGlossary = document.getElementById('runGlossary');
 const bossBanner = document.getElementById('bossBanner');
-const potionBar = document.getElementById('potionBar');
-const potionSlots = document.querySelectorAll('.potion-slot');
+const powerUpBar = document.getElementById('powerUpBar');
+const powerUpSlots = document.querySelectorAll('.power-up-slot');
 const lootGuide = document.getElementById('lootGuide');
 const lootGuideIcon = document.getElementById('lootGuideIcon');
 const lootGuideHow = document.getElementById('lootGuideHow');
@@ -86,8 +109,8 @@ const endMimics = document.getElementById('endMimics');
 const endHealth = document.getElementById('endHealth');
 const endTime = document.getElementById('endTime');
 
-const STORAGE_KEY = 'panphySpellwaveBetaBestV1';
-const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
+const STORAGE_KEY = 'keyfireBestV1';
+const AUDIO_STORAGE_KEY = 'keyfireAudioV1';
 const MAX_DELTA = 0.06;
 // Play is drawn at no more than about 60 frames a second, so a 120 Hz screen
 // does half the work. The slack lets a 60 Hz screen's slightly early frames through.
@@ -385,7 +408,7 @@ let mimicSpawnSlots = [];
 let firstMimicHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
-let potionCheatUsedThisRun = false;
+let powerUpCheatUsedThisRun = false;
 let finalWaveCheatUsedThisRun = false;
 let inputTrace = '';
 let streak = 0;
@@ -397,7 +420,7 @@ let lastFrameTime = 0;
 let rafId = null;
 let isTimeoutScheduled = false;
 let batterySaver = false;
-const BATTERY_SAVER_STORAGE_KEY = 'spellwave_battery_saver_active';
+const BATTERY_SAVER_STORAGE_KEY = 'keyfireBatterySaver';
 
 let elapsed = 0;
 let mistakeTimer = 0;
@@ -447,7 +470,7 @@ let activePalette = null;
 let seasonEmberIntensityBase = 2.1;
 let seasonFade = null;
 let seasonalEffects = null;
-let potionsSystem = null;
+let powerUps = null;
 let baseCloudMaterial = null;
 let weatherCloudMaterial = null;
 let cloudWeatherBlend = 0;
@@ -496,7 +519,7 @@ const {
   playChainZapSound,
   playTimeFreezeSound,
   playTimeResumeSound,
-} = createSpellwaveAudio({
+} = createKeyFireAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
   saveAudioSetting,
@@ -506,7 +529,7 @@ const {
   getIsFinalWave: () => isFinalWave(),
   getTypedLength: () => typedBuffer.length,
   getHealth: () => health,
-  getIsTimeFrozen: () => Boolean(potionsSystem) && potionsSystem.isTimeFrozen(),
+  getIsTimeFrozen: () => Boolean(powerUps) && powerUps.isTimeFrozen(),
   lowHealth: LOW_LIFE_MUSIC_THRESHOLD,
   pathLanes: PATH_LANES,
 });
@@ -611,14 +634,14 @@ seasonalEffects = createSeasonalEffects({
   pathMarkerWrapZ: PATH_MARKER_WRAP_Z,
 });
 seasonalEffects.create();
-potionsSystem = createPotionSystem({
+powerUps = createPowerUpSystem({
   getMode: () => mode,
   getEnemies: () => enemies,
   getGameTime: () => gameTimeSeconds,
   defeatEnemy: (enemy) => defeatEnemy(enemy),
   showBanner,
-  potionBar,
-  potionSlots,
+  powerUpBar,
+  powerUpSlots,
   scene,
   effectsGroup,
   playShockwaveSound,
@@ -807,9 +830,9 @@ function startGame() {
   clearEffects();
   godMode = false;
   godModeUsedThisRun = false;
-  // The potion cheat is cleared by potionsSystem.clear() below, so a fresh run starts
+  // The power-up cheat is cleared by powerUps.clear() below, so a fresh run starts
   // ranked; it only becomes unranked if the player re-enters the cheat mid-run.
-  potionCheatUsedThisRun = false;
+  powerUpCheatUsedThisRun = false;
   finalWaveCheatUsedThisRun = false;
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
@@ -817,7 +840,7 @@ function startGame() {
   score = 0;
   health = MAX_LIFE;
   renderedHealth = null;
-  potionsSystem.clear();
+  powerUps.clear();
   gameTimeSeconds = 0;
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
@@ -899,7 +922,7 @@ function endGame() {
   saveRunTerms();
   clearChainLightningTimers();
   releaseChainBeams();
-  potionsSystem.clear();
+  powerUps.clear();
   endStory();
   endChallenge();
   document.body.classList.remove('blizzard');
@@ -908,7 +931,7 @@ function endGame() {
   startMusicLoop(false);
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
-  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
+  const isUnranked = godModeUsedThisRun || powerUpCheatUsedThisRun || finalWaveCheatUsedThisRun;
   if (!isUnranked && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
@@ -929,7 +952,7 @@ function endGame() {
 }
 
 function submitRunToLeaderboard() {
-  if (godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun) return;
+  if (godModeUsedThisRun || powerUpCheatUsedThisRun || finalWaveCheatUsedThisRun) return;
   leaderboard.handleScore(score);
 }
 
@@ -982,7 +1005,7 @@ function handleKeyDown(event) {
   resumeAudio();
 
   // Special sequence detection — runs in all game states. Mid-run, the keys still
-  // reach the potion/typing handlers below; the cheat tolerates that noise.
+  // reach the power-up/typing handlers below; the cheat tolerates that noise.
   cosmicBuffer.push(event.key);
   if (cosmicBuffer.length > 10) cosmicBuffer.shift();
   if (cosmicBuffer.length === 10 && fnv1a(cosmicBuffer.join(',')) === COSMIC_WAVE_THRESHOLD) {
@@ -1021,12 +1044,12 @@ function handleKeyDown(event) {
     return;
   }
 
-  // While the loot guide is open, the new potion's own key casts it.
+  // While the loot guide is open, the new power-up's own key casts it.
   if (lootGuideSlot !== -1 && mode === 'paused') {
     const keys = SLOT_KEYS[lootGuideSlot];
     if (event.key === keys.arrow || event.key === String(lootGuideSlot + 1)) {
       event.preventDefault();
-      castGuidedPotion();
+      castGuidedPowerUp();
     }
     return;
   }
@@ -1043,7 +1066,7 @@ function handleKeyDown(event) {
     else if (event.key === 'ArrowUp') slotIndex = 1;
     else if (event.key === 'ArrowRight') slotIndex = 2;
     else if (event.key === 'ArrowDown') slotIndex = 3;
-    if (slotIndex !== -1) potionsSystem.activatePotionSlot(slotIndex);
+    if (slotIndex !== -1) powerUps.activatePowerUpSlot(slotIndex);
     return;
   }
 
@@ -1195,9 +1218,9 @@ function checkCheatCode(character) {
     toggleGodMode();
     inputTrace = '';
   } else if (traceHash === PARTICLE_GRAVITY_COEFFS) {
-    potionsSystem.togglePotionCheat();
-    if (potionsSystem.isPotionCheatActive()) {
-      potionCheatUsedThisRun = true;
+    powerUps.togglePowerUpCheat();
+    if (powerUps.isPowerUpCheatActive()) {
+      powerUpCheatUsedThisRun = true;
     }
     inputTrace = '';
   }
@@ -1229,8 +1252,8 @@ function defeatEnemy(enemy) {
     shatterRock(enemy);
     return;
   }
-  if (potionsSystem.isChainLightningPrimed()) {
-    potionsSystem.clearChainLightningPrimed();
+  if (powerUps.isChainLightningPrimed()) {
+    powerUps.clearChainLightningPrimed();
     enemy.dying = true;
     typedBuffer = '';
     activeTarget = null;
@@ -1286,7 +1309,7 @@ function defeatEnemy(enemy) {
 // A shield-bearer needs two short words: one breaks the shield, one finishes it.
 // A splitter breaks into two small monsters with very short words. A caster stands
 // back and lobs a bolt every few seconds until its long word is typed.
-const VARIANT_HINTS = { shield: 'SHIELD: TWO WORDS!', splitter: 'IT SPLITS IN TWO!', caster: 'CASTER: STOP ITS SPELL!' };
+const VARIANT_HINTS = { shield: 'SHIELD: TWO WORDS!', splitter: 'IT SPLITS IN TWO!', caster: 'CASTER: STOP ITS BOLTS!' };
 const CASTER_CHARGE_TIME = 1.2;
 const CASTER_BOLT_FLIGHT = 1.15;
 const CASTER_BOLT_DAMAGE = 1;
@@ -1455,8 +1478,8 @@ function updateCasterBolts(delta) {
 // Damage that arrives without a monster reaching the player.
 function strikePlayer(damage) {
   if (godMode) return;
-  if (potionsSystem.isShieldActive() && potionsSystem.blockLeak()) {
-    potionsSystem.triggerShieldHitVisual();
+  if (powerUps.isShieldActive() && powerUps.blockLeak()) {
+    powerUps.triggerShieldHitVisual();
     return;
   }
   health = Math.max(0, health - damage);
@@ -1526,12 +1549,12 @@ function leakEnemy(enemy) {
 
   const wasActiveTarget = activeTarget === enemy;
   let wasBlocked = false;
-  if (!godMode && enemy.damage > 0 && potionsSystem.isShieldActive()) {
-    wasBlocked = potionsSystem.blockLeak();
+  if (!godMode && enemy.damage > 0 && powerUps.isShieldActive()) {
+    wasBlocked = powerUps.blockLeak();
   }
 
   if (wasBlocked) {
-    potionsSystem.triggerShieldHitVisual();
+    powerUps.triggerShieldHitVisual();
   } else {
     if (!godMode) health = Math.max(0, health - enemy.damage);
     if (enemy.frost) frostBossLine();
@@ -1608,15 +1631,15 @@ function animate(frameTime) {
     }
   }
 
-  potionsSystem.update(delta);
+  powerUps.update(delta);
 
-  const isTimeFrozen = (mode === 'running' && potionsSystem.isTimeFrozen());
+  const isTimeFrozen = (mode === 'running' && powerUps.isTimeFrozen());
   const animationDelta = isTimeFrozen ? 0 : delta;
   gameTimeSeconds += animationDelta;
 
   if (mode === 'running') {
     let currentDelta = delta;
-    if (potionsSystem.isTimeFrozen()) {
+    if (powerUps.isTimeFrozen()) {
       currentDelta = 0;
       document.body.classList.add('time-frozen');
     } else {
@@ -1987,9 +2010,9 @@ function advanceBossLine(boss) {
 
   // A whole line: a heavy hit and a segment off the health bar.
   let lost = 1;
-  if (potionsSystem.isChainLightningPrimed()) {
+  if (powerUps.isChainLightningPrimed()) {
     // Chain lightning doubles the blow and clears the rocks in the air.
-    potionsSystem.clearChainLightningPrimed();
+    powerUps.clearChainLightningPrimed();
     if (boss.hp > 2) lost = 2;
     lightningFlash.classList.add('show');
     window.setTimeout(() => lightningFlash.classList.remove('show'), 180);
@@ -3535,7 +3558,7 @@ function updateEffects(delta) {
 
   for (let index = debris.length - 1; index >= 0; index -= 1) {
     const chunk = debris[index];
-    if (!potionsSystem.isTimeFrozen()) {
+    if (!powerUps.isTimeFrozen()) {
       chunk.life -= delta;
       chunk.velocity.y -= 8.8 * delta;
       chunk.mesh.position.addScaledVector(chunk.velocity, delta);
@@ -3629,7 +3652,7 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
     marker.mesh.position.y = marker.baseY + Math.sin(seconds * 3.2 + marker.phase) * 0.018;
   }
 
-  const isChainLightningPrimed = potionsSystem ? potionsSystem.isChainLightningPrimed() : false;
+  const isChainLightningPrimed = powerUps ? powerUps.isChainLightningPrimed() : false;
   if (isChainLightningPrimed && !wandsArePrimed) {
     wandsArePrimed = true;
     sceneCrystalMat.color.setHex(0xfde068);
@@ -4072,7 +4095,7 @@ function updateHud(force) {
   if (!force && hudTimer > 0) return;
   hudTimer = 6;
   scoreValue.textContent = formatScore(score);
-  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
+  const isUnranked = godModeUsedThisRun || powerUpCheatUsedThisRun || finalWaveCheatUsedThisRun;
   bestValue.textContent = formatScore(isUnranked ? bestScore : Math.max(bestScore, score));
   updateLifeMeter(force);
   waveValue.textContent = String(waveSet);
@@ -4360,7 +4383,7 @@ function createTorches() {
 
   // The cannon hangs from the camera, which must be in the scene for it to draw.
   scene.add(camera);
-  weapon = createArcaneCannon({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
+  weapon = createPlasmaCannon({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
   for (const glow of weapon.glows) torchFlames.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
   lightningCrowns.push(...weapon.crowns);
 
@@ -4381,7 +4404,7 @@ function createTorches() {
   rideCart.visible = false;
   camera.add(rideCart);
 
-  // The magic's glow on whatever reaches the player: two lights either side of the
+  // The power-up's glow on whatever reaches the player: two lights either side of the
   // path, where monsters stop to strike. They never move, so the light count is fixed.
   for (const x of [-5.35, 5.35]) {
     const light = new THREE.PointLight(0x2dd4bf, 1.6, 14, 2);
@@ -5257,7 +5280,7 @@ function isTouchOnlyDevice() {
 
 function setUpDeviceGate() {
   // Declared here, not at module level: this runs before the module's later constants exist.
-  const DEVICE_GATE_KEY = 'spellwaveBetaHasKeyboard';
+  const DEVICE_GATE_KEY = 'keyfireHasKeyboard';
   const gate = document.getElementById('deviceGate');
   if (!gate || !isTouchOnlyDevice()) return;
   try {
@@ -5603,7 +5626,7 @@ function startEndingSequence() {
   clearEffects();
   updatePhaseDisplay();
 
-  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
+  const isUnranked = godModeUsedThisRun || powerUpCheatUsedThisRun || finalWaveCheatUsedThisRun;
   endingScoreNote = isUnranked ? 'unranked' : score > bestScore ? 'best' : '';
   if (!isUnranked && score > bestScore) {
     bestScore = score;
@@ -5809,8 +5832,8 @@ function activateFinalWaveCheat() {
 function advanceWaveSet() {
   playStartSound();
   clearEffects();
-  if (potionsSystem) {
-    potionsSystem.deactivateShield();
+  if (powerUps) {
+    powerUps.deactivateShield();
   }
   document.body.classList.remove('final-wave-active');
   waveSet += 1;
@@ -5942,21 +5965,21 @@ function spawnLootEscapedPopup(left, top) {
   popup.addEventListener('animationend', () => popup.remove(), { once: true });
 }
 
-function spawnMagicAcquiredBurst(addedType) {
-  const existing = document.querySelector('.magic-acquired-burst');
+function spawnPowerUpBurst(addedType) {
+  const existing = document.querySelector('.power-up-burst');
   if (existing) existing.remove();
   const el = document.createElement('div');
-  el.className = 'magic-acquired-burst';
+  el.className = 'power-up-burst';
   const name = addedType.replace('_', ' ').toUpperCase();
-  el.innerHTML = `<span class="mab-line1">POWER-UP!</span><span class="mab-line2">+1 ${name}</span>`;
+  el.innerHTML = `<span class="power-up-burst-line1">POWER-UP!</span><span class="power-up-burst-line2">+1 ${name}</span>`;
   document.body.appendChild(el);
   el.addEventListener('animationend', () => el.remove(), { once: true });
 }
 
 // ── First-loot guide ──
-// The first time a player ever loots a potion, the game pauses once to show how
+// The first time a player ever loots a power-up, the game pauses once to show how
 // to use a power-up and invites them to find out what each kind does by trying it.
-const LOOT_GUIDE_KEY = 'panphySpellwaveBetaLootGuideSeenV1';
+const LOOT_GUIDE_KEY = 'keyfireLootGuideSeenV1';
 const LOOT_GUIDE_DELAY = 0.8;
 const SLOT_KEYS = [
   { arrow: 'ArrowLeft', symbol: '\u2190' },
@@ -5983,12 +6006,12 @@ function queueLootGuide(type, slot) {
 function showLootGuide() {
   const { type, slot } = pendingLootGuide;
   pendingLootGuide = null;
-  // Skip it if the potion was already used or the run is no longer in play.
-  if (mode !== 'running' || potionsSystem.getPotions()[slot] !== type) return;
+  // Skip it if the power-up was already used or the run is no longer in play.
+  if (mode !== 'running' || powerUps.getPowerUps()[slot] !== type) return;
   markLootGuideSeen();
 
   const key = SLOT_KEYS[slot];
-  lootGuideIcon.innerHTML = potionsSystem.getPotionIcon(type);
+  lootGuideIcon.innerHTML = powerUps.getPowerUpIcon(type);
   lootGuideHow.innerHTML = `To use it, press <kbd>${key.symbol}</kbd> or tap it in your tray. Each slot has its own arrow key.`;
   lootGuideCast.textContent = `Use it now (${key.symbol})`;
 
@@ -5999,7 +6022,7 @@ function showLootGuide() {
   suspendChainLightningTimers();
   playChestOpenSound();
   document.body.classList.add('is-paused', 'loot-guide-open');
-  potionSlots[slot]?.classList.add('is-guided');
+  powerUpSlots[slot]?.classList.add('is-guided');
   setPauseButtonState(false, false);
   lootGuide.hidden = false;
   lootGuideCast.focus({ preventScroll: true });
@@ -6008,23 +6031,23 @@ function showLootGuide() {
 
 function hideLootGuide() {
   if (lootGuideSlot === -1) return;
-  potionSlots[lootGuideSlot]?.classList.remove('is-guided');
+  powerUpSlots[lootGuideSlot]?.classList.remove('is-guided');
   lootGuideSlot = -1;
   lootGuide.hidden = true;
   document.body.classList.remove('loot-guide-open');
 }
 
-function castGuidedPotion() {
+function castGuidedPowerUp() {
   const slot = lootGuideSlot;
   if (slot === -1) return;
   resumeGame();
-  potionsSystem.activatePotionSlot(slot);
+  powerUps.activatePowerUpSlot(slot);
 }
 
 if (lootGuideCast) {
   lootGuideCast.addEventListener('click', () => {
     resumeAudio();
-    castGuidedPotion();
+    castGuidedPowerUp();
   });
 }
 
@@ -6038,8 +6061,8 @@ if (lootGuideLater) {
 function awardMimicLoot(enemy) {
   const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
   const type = types[Math.floor(Math.random() * types.length)];
-  const slot = potionsSystem.getPotions().indexOf(null);
-  const success = potionsSystem.addPotion(type);
+  const slot = powerUps.getPowerUps().indexOf(null);
+  const success = powerUps.addPowerUp(type);
   mimicsLooted += 1;
   if (success) queueLootGuide(type, slot);
 
@@ -6049,7 +6072,7 @@ function awardMimicLoot(enemy) {
     if (Number.isFinite(left) && Number.isFinite(top)) {
       if (success) {
         spawnLootRewardPopup(left, top, type);
-        spawnMagicAcquiredBurst(type);
+        spawnPowerUpBurst(type);
       } else {
         spawnInventoryFullPopup(left, top);
       }
@@ -6146,11 +6169,11 @@ function showBanner(text, variant = '') {
   bossBanner.classList.add('is-active');
 }
 
-// Potion system logic is imported from src/potions.js
+// Power-up system logic is imported from src/power-ups.js
 
 function triggerChainLightning(firstEnemy) {
-  if (potionsSystem) {
-    potionsSystem.clearChainLightningPrimed();
+  if (powerUps) {
+    powerUps.clearChainLightningPrimed();
   }
   
   const origin = firstEnemy.group.position.clone();
@@ -6526,15 +6549,15 @@ function spawnLightningVisual(startPos, targetPos, hold = false) {
   });
 }
 
-// Hook up event listeners for potion slots
-potionSlots.forEach((slot, index) => {
+// Hook up event listeners for power-up slots
+powerUpSlots.forEach((slot, index) => {
   slot.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     resumeAudio();
     if (lootGuideSlot !== -1) {
-      if (index === lootGuideSlot) castGuidedPotion();
+      if (index === lootGuideSlot) castGuidedPowerUp();
       return;
     }
-    potionsSystem.activatePotionSlot(index);
+    powerUps.activatePowerUpSlot(index);
   });
 });

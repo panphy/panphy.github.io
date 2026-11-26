@@ -1,7 +1,7 @@
 // lowpoly-creatures.js — faceted, flat-shaded monsters. Each is a handful of simple
 // solids on pivots, plus an animate(seconds, enemy) function that moves the pivots.
 import * as THREE from 'three';
-import { roundSides, polyDetail } from './detail.js?v=beta33';
+import { roundSides, polyDetail } from './detail.js?v=beta35';
 
 const BONE = 0xf3e6c8;
 

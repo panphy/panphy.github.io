@@ -1,7 +1,7 @@
 // The ending cinematic: a 42-second low-poly short rendered with Three.js.
 //
 // Story: the Stellar Dreadnought breaks apart and its myth rises into the night
-// sky; the words the player defeated fly into the arcane cannon's crystal core;
+// sky; the words the player defeated fly into the plasma cannon's crystal core;
 // the cannon fires one beam that breaks the last myth; a wave of light crosses
 // the five lands, freeing each storyteller in turn; dawn comes, the five gather
 // on a hill and the game's name appears over them.
@@ -9,12 +9,12 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta33';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta33';
-import { createStoryteller } from './storyteller.js?v=beta33';
-import { STORY_BEATS } from './story.js?v=beta33';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta33';
-import { buildCannon } from './arcane-cannon.js?v=beta33';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta35';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta35';
+import { createStoryteller } from './storyteller.js?v=beta35';
+import { STORY_BEATS } from './story.js?v=beta35';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta35';
+import { buildCannon } from './plasma-cannon.js?v=beta35';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -573,7 +573,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     beamHalo.frustumCulled = false;
   }
 
-  // The arcane cannon, hung from the camera as in the game, but higher so its core shows.
+  // The plasma cannon, hung from the camera as in the game, but higher so its core shows.
   function buildCannonRig() {
     const lit = (hex, emissive, intensity, extra) => new THREE.MeshStandardMaterial({ color: hex, emissive, emissiveIntensity: intensity, flatShading: true, ...extra });
     gunMaterials = {
