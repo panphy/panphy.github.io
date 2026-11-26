@@ -4,8 +4,8 @@
 //
 // In the meadow the player simply listens. In every later chapter the storyteller
 // is first held by a myth, which the player frees them from by typing its word.
-// name: who speaks. plea: what they call out while held (later chapters only).
-// lines: what they say once safe, shown one at a time.
+// name: who speaks. held: a myth holds them (later chapters only); they cry for help
+// above their head until freed. lines: what they say once safe, shown one at a time.
 // coat, hat: the colours that tell the five apart. voice: the pitch of their speech blips.
 export const STORY_BEATS = [
   {
@@ -21,10 +21,10 @@ export const STORY_BEATS = [
   {
     name: 'Tom the miller', role: 'miller',
     coat: 0xc98d4b, hat: 0x5b7f3a,
-    plea: "Hey! Over here! Get this thing off me, it won't stop talking!",
+    held: true,
     voice: 1,
     lines: [
-      "Phew, thanks. It kept saying my mill could turn for ever without the river. I nearly believed it.",
+      "Phew, thanks! That thing never stopped talking. It kept saying my mill could turn for ever without the river.",
       "But you never get energy out of nothing, do you? Something always has to put it in.",
       "The Bulwark's on the far bank, selling free energy to anyone who'll listen. Go and spoil its day.",
     ],
@@ -32,10 +32,10 @@ export const STORY_BEATS = [
   {
     name: 'Mina the miner', role: 'miner',
     coat: 0xd8a23a, hat: 0xe0483a,
-    plea: "Oi, you with the cannon! Down here! This one's been filling my head with rubbish!",
+    held: true,
     voice: 2,
     lines: [
-      "Ta very much. It swore blind the cold was creeping into my bones. Cold doesn't creep anywhere!",
+      "Ta very much! That one swore blind the cold was creeping into my bones. Cold doesn't creep anywhere!",
       "It's the heat that moves. Out of something hot and into something colder, every time.",
       "The Sovereign's deeper in. Thinks heat is some sort of liquid you can pour. Go and set it straight.",
     ],
@@ -43,10 +43,10 @@ export const STORY_BEATS = [
   {
     name: 'Captain Frost', role: 'captain',
     coat: 0x3f6fa8, hat: 0xf2f0e6,
-    plea: "Ahoy there! A hand, if you please! It says my boat ought to sink!",
+    held: true,
     voice: 3,
     lines: [
-      "Much obliged. It told me anything heavy must go straight to the bottom. My boat weighs a tonne and she floats fine.",
+      "Much obliged! It kept saying my boat ought to sink, as heavy things go to the bottom. She weighs a tonne and floats fine.",
       "It isn't the weight that matters, you see. It's how dense a thing is next to the water.",
       "The Titan out on the lake says ice sinks. It is standing on the stuff!",
     ],
@@ -54,10 +54,10 @@ export const STORY_BEATS = [
   {
     name: 'Astra the stargazer', role: 'stargazer',
     coat: 0x6d4fb3, hat: 0xf2c14e,
-    plea: "Up here, quickly! It keeps insisting the Earth is flat!",
+    held: true,
     voice: 4,
     lines: [
-      "Oh, well done. Flat, it said! From up here you can see the curve with your own eyes.",
+      "Oh, well done! It kept insisting the Earth is flat. From up here you can see the curve with your own eyes.",
       "There's only one myth left now. The Dreadnought says the stars decide our lives for us.",
       "They don't, you know. They're just very far away and very beautiful. Go and finish this.",
     ],

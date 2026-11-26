@@ -60,6 +60,6 @@ test('every wave has a storyteller; only the first is not held by a myth', async
     const beat = storyBeatForWave(wave);
     assert.ok(beat.name && beat.lines.length >= 3 && beat.lines.length <= 4, `wave ${wave}`);
     for (const line of beat.lines) assert.ok(line.length <= 125, line);
-    assert.equal(!!beat.plea, wave > 1);
+    assert.equal(!!beat.held, wave > 1);
   }
 });
