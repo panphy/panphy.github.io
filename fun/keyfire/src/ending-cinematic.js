@@ -9,13 +9,13 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=11';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=11';
-import { createWatermill, createWindmill } from './stage-kits.js?v=11';
-import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=11';
-import { STORY_BEATS } from './story.js?v=11';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=11';
-import { buildCannon } from './plasma-cannon.js?v=11';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=12';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=12';
+import { createWatermill, createWindmill } from './stage-kits.js?v=12';
+import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=12';
+import { STORY_BEATS } from './story.js?v=12';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=12';
+import { buildCannon } from './plasma-cannon.js?v=12';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -700,10 +700,12 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
       wall: flat(0xceae88), timber: flat(0x51392c), roof: flat(0x46566b), slate: flat(0x667386),
       door: flat(0x533825), pane: windowMaterial, plank: flat(0xb38d61), rim: flat(0x634935), stone: flat(0x93877b),
     });
-    house.position.set(3.65, 0, -6.1);
+    // The river runs along z, beside the mill's windowed side wall: the wheel hangs off
+    // that wall, its axle across the river, so the water runs under its paddles.
+    house.position.set(3.0, 0, -6.1);
     house.scale.setScalar(0.54);
-    house.rotation.y = -0.22;
-    wheel.position.set(3.6, 2.15, 3.8);
+    wheel.position.set(4.3, 2.15, 1.18);
+    wheel.rotation.y = Math.PI / 2;
     house.add(wheel);
     land.group.add(house);
 
@@ -716,7 +718,8 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
 
     land.animate = (u, t) => {
       const turning = Math.max(0, freedFor(5.4, u));
-      wheel.rotation.z = -(turning < 1 ? 1.3 * turning * turning : 1.3 + 2.6 * (turning - 1));
+      // Turned this way, the paddles at the bottom move with the water (toward −z).
+      wheel.rotation.z = turning < 1 ? 1.3 * turning * turning : 1.3 + 2.6 * (turning - 1);
       windowMaterial.emissiveIntensity = 0.2 + 1.5 * smooth(0, 0.5, freedFor(4.2, u));
       ripples.forEach((ripple, index) => {
         // The water only runs once the myth has gone.

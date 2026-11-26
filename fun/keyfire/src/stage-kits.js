@@ -5,8 +5,8 @@
 // Nothing here adds a light: glows are emissive materials, so the light count never
 // changes between stages. A kit's own materials are made per stage and disposed with it.
 import * as THREE from 'three';
-import { firCrown } from './lowpoly.js?v=11';
-import { roundSides, polyDetail, roughen } from './detail.js?v=11';
+import { firCrown } from './lowpoly.js?v=12';
+import { roundSides, polyDetail, roughen } from './detail.js?v=12';
 
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true, ...extra });
 const lit = (color, intensity = 1.6, extra = {}) => flat(color, { emissive: color, emissiveIntensity: intensity, roughness: 0.5, ...extra });
@@ -720,7 +720,11 @@ function forestKit() {
         const millX = -11.8;
         const { house, wheel } = createWatermill(mats);
         const bank = crossing.point(millX, -RIVER - 3.3);
-        const millYaw = crossing.yaw - 0.62;
+        // The mill squares up to the river by its wheel, 3.6 along the front (the river
+        // bends): its front faces the stream and the wheel turns in line with the water.
+        const upstream = crossing.point(millX + 3.6 - 1, 0);
+        const downstream = crossing.point(millX + 3.6 + 1, 0);
+        const millYaw = Math.atan2(upstream.z - downstream.z, downstream.x - upstream.x);
         ctx.set(house, bank.x, -0.26, bank.z, millYaw);
         ctx.occupy(bank.x, bank.z, 5);
         // Wide slate courses bed the mill into the slope and step into the stream.
@@ -737,7 +741,7 @@ function forestKit() {
         const axle = ctx.at(millFrame, 3.6, 3.8);
         const mount = groupOf(ctx.merge(wheel));
         mount.position.set(axle.x, 1.7, axle.z);
-        mount.rotation.y = millYaw + 0.1;
+        mount.rotation.y = millYaw;
         ctx.live(mount);
         ctx.animate(seconds => { mount.children[0].rotation.z = -seconds * 0.36; });
         createRiverGlints(ctx, millX + 3.25);
