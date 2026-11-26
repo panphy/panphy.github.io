@@ -129,12 +129,15 @@ test('a wrong key is only a miss: the prefix and target stay', () => {
   assert.equal(context.typedAttempts, 3);
 });
 
-test('mid-word, the first letter of another prompt is a miss, not a switch', () => {
+test('no word is locked: mid-word, the first letter of another prompt switches to it', () => {
   const { context, targets } = createTypingHarness();
   context.enterCharacter('m');
-  assert.equal(context.typedBuffer, 'for');
-  assert.equal(context.activeTarget, targets[0]);
-  assert.equal(context.mistakes, 1);
+  assert.equal(context.typedBuffer, 'm');
+  assert.equal(context.activeTarget, targets[1]);
+  assert.equal(context.mistakes, 0);
+  assert.equal(context.streak, 3);
+  for (const letter of 'ass') context.enterCharacter(letter);
+  assert.equal(context.kills, 1);
 });
 
 test('typing ignores capitals, for units as well as words', () => {

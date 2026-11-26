@@ -97,3 +97,29 @@ export function createWings(type) {
   group.userData.wings = wings;
   return group;
 }
+
+// A space bat for the night sky's swarm challenge: a round body with big ears, bright
+// eyes and fangs. Its wings come from createWings, like every flier's.
+export function createSpaceBat(type) {
+  const group = new THREE.Group();
+  const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, flatShading: true, ...extra });
+  const fur = flat(type.body, { emissive: type.trim, emissiveIntensity: 0.25 });
+  const glow = new THREE.MeshBasicMaterial({ color: new THREE.Color(type.eye).multiplyScalar(1.5) });
+  const bone = flat(0xf4f1e6);
+  const add = (geometry, material, x, y, z) => {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+    group.add(mesh);
+    return mesh;
+  };
+  add(new THREE.IcosahedronGeometry(0.46, 1), fur, 0, 1.05, 0).scale.set(1, 0.92, 0.9);
+  for (const side of [-1, 1]) {
+    const ear = add(new THREE.ConeGeometry(0.17, 0.5, 4), fur, side * 0.26, 1.58, -0.02);
+    ear.rotation.z = side * -0.3;
+    add(new THREE.IcosahedronGeometry(0.085, 0), glow, side * 0.17, 1.14, 0.38);
+    const fang = add(new THREE.ConeGeometry(0.035, 0.13, 3), bone, side * 0.08, 0.86, 0.36);
+    fang.rotation.x = Math.PI;
+    add(new THREE.ConeGeometry(0.05, 0.16, 3), fur, side * 0.14, 0.56, 0.05).rotation.x = Math.PI;
+  }
+  return group;
+}

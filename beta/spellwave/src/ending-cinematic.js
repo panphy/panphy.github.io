@@ -11,10 +11,10 @@
 import * as THREE from 'three';
 import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js';
 import { buildStellarDreadnought } from './lowpoly-creatures.js';
-import { createStoryteller } from './storyteller.js?v=beta22';
-import { STORY_BEATS } from './story.js?v=beta22';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta22';
-import { buildCannon } from './arcane-cannon.js?v=beta22';
+import { createStoryteller } from './storyteller.js?v=beta23';
+import { STORY_BEATS } from './story.js?v=beta23';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta23';
+import { buildCannon } from './arcane-cannon.js?v=beta23';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
