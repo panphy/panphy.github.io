@@ -251,6 +251,73 @@ body.blizzard .blizzard-veil::after {
   display: none;
 }
 
+/* What the bat swarm takes, shown big before the first bat arrives. */
+.challenge-intro {
+  position: fixed;
+  left: 50%;
+  top: 40%;
+  z-index: 16;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.challenge-intro[hidden] {
+  display: none;
+}
+
+.challenge-intro strong {
+  color: #fff6dc;
+  font-family: var(--font-chunky);
+  font-size: clamp(2.6rem, 8vw, 4.6rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 5px 0 var(--key-ink, #3d2b1c), 0 0 28px rgba(139, 92, 246, 0.7);
+  -webkit-text-stroke: 9px var(--key-ink, #3d2b1c);
+  paint-order: stroke fill;
+}
+
+.challenge-intro span {
+  padding: 8px 18px;
+  border: 3px solid var(--key-ink, #3d2b1c);
+  border-radius: 12px;
+  background: linear-gradient(#fffaf0, #f4e4bd);
+  box-shadow: 0 5px 0 var(--key-ink, #3d2b1c);
+  color: #2e1c5c;
+  font-family: var(--font-chunky);
+  font-size: clamp(1.05rem, 2.6vw, 1.45rem);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.challenge-intro.is-in strong {
+  animation: challenge-intro-slam 0.45s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+.challenge-intro.is-in span {
+  animation: challenge-intro-rise 0.4s ease-out 0.25s both;
+}
+
+@keyframes challenge-intro-slam {
+  from { opacity: 0; transform: scale(1.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes challenge-intro-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .challenge-intro.is-in strong,
+  .challenge-intro.is-in span { animation: none; }
+}
+
 .word-tag[data-kind="bat"] .prompt-kind {
   background: rgba(139, 92, 246, 0.2);
   color: #5b2bb0;
@@ -1578,48 +1645,69 @@ body.is-god-mode .god-mode-veil {
   opacity: 1;
 }
 
+/* GOD MODE: chunky gold lettering with the title's ink outline, low in the middle of
+   the view, under the golden cannon. No box. */
 .god-mode-badge {
+  position: fixed;
+  left: 50%;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 9;
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 9px 11px;
-  border: 1px solid rgba(255, 200, 50, 0.44);
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(28, 20, 4, 0.92), rgba(18, 14, 2, 0.88));
-  box-shadow: 0 0 16px rgba(255, 196, 0, 0.08), inset 0 0 12px rgba(255, 196, 0, 0.05);
-  backdrop-filter: blur(10px);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  gap: 0.35em;
+  color: #ffd23f;
+  font-family: var(--font-chunky);
+  font-size: clamp(1.5rem, 3.6vw, 2.3rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  word-spacing: 0.18em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 4px 0 var(--key-ink, #3d2b1c), 0 0 22px rgba(255, 196, 0, 0.55);
+  -webkit-text-stroke: 7px var(--key-ink, #3d2b1c);
+  paint-order: stroke fill;
+  transform: translateX(-50%);
+  transition: opacity 0.2s ease;
   animation:
-    godMode-appear 0.52s cubic-bezier(0.2, 0.9, 0.2, 1) both,
-    godMode-pulse 2.8s ease-in-out 0.52s infinite;
+    godMode-appear 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both,
+    godMode-glow 2.4s ease-in-out 0.5s infinite;
+}
+
+.god-mode-badge .god-mode-spark {
+  color: #fff3b0;
+  font-size: 0.62em;
+  -webkit-text-stroke: 5px var(--key-ink, #3d2b1c);
+  animation: godMode-twinkle 1.6s ease-in-out infinite;
+}
+
+.god-mode-badge .god-mode-spark:last-child {
+  animation-delay: 0.8s;
+}
+
+/* The storyteller's card sits in the same place, so the lettering steps aside for it. */
+body:has(.story-card:not([hidden])) .god-mode-badge {
+  opacity: 0;
 }
 
 @keyframes godMode-appear {
-  from {
-    opacity: 0;
-    transform: scaleY(0.5);
-    letter-spacing: 0.32em;
-  }
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-    letter-spacing: 0.14em;
-  }
+  from { opacity: 0; transform: translateX(-50%) translateY(18px) scale(0.6); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
-@keyframes godMode-pulse {
-  0%, 100% {
-    border-color: rgba(255, 200, 50, 0.38);
-    box-shadow: 0 0 12px rgba(255, 196, 0, 0.06), inset 0 0 10px rgba(255, 196, 0, 0.03);
-  }
-  50% {
-    border-color: rgba(255, 200, 50, 0.78);
-    box-shadow: 0 0 30px rgba(255, 196, 0, 0.26), inset 0 0 18px rgba(255, 196, 0, 0.11);
-  }
+@keyframes godMode-glow {
+  0%, 100% { text-shadow: 0 4px 0 var(--key-ink, #3d2b1c), 0 0 14px rgba(255, 196, 0, 0.35); }
+  50% { text-shadow: 0 4px 0 var(--key-ink, #3d2b1c), 0 0 30px rgba(255, 210, 60, 0.85); }
+}
+
+@keyframes godMode-twinkle {
+  0%, 100% { opacity: 0.55; transform: scale(0.8) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.15) rotate(45deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .god-mode-badge,
+  .god-mode-badge .god-mode-spark { animation: none; }
 }
 
 body.is-god-mode .life-heart svg {
@@ -2318,7 +2406,6 @@ body.ending-summary .kf-leaderboard {
 /* ── Battery Saver overrides (performance optimization) ── */
 body.battery-saver .readout,
 body.battery-saver .message-panel,
-body.battery-saver .god-mode-badge,
 body.battery-saver .power-up-bar {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -2330,10 +2417,6 @@ body.battery-saver .readout {
 }
 
 body.battery-saver .message-panel {
-  background: var(--paper) !important;
-}
-
-body.battery-saver .god-mode-badge {
   background: var(--paper) !important;
 }
 
@@ -2573,8 +2656,7 @@ body.is-running:not(.is-paused) .kf-leaderboard {
 .readout,
 .power-up-bar,
 .kf-leaderboard,
-.kf-initials-card,
-.god-mode-badge {
+.kf-initials-card {
   border: 1px solid var(--border);
   background: var(--paper);
   box-shadow: var(--paper-shadow);
@@ -2802,11 +2884,6 @@ body.is-running:not(.is-paused) .kf-leaderboard {
   font-weight: 700;
   color: #8a22a0;
   text-shadow: 0 0 6px #fff, 0 0 18px rgba(255, 255, 255, 0.92), 0 3px 0 rgba(255, 255, 255, 0.85);
-}
-
-.god-mode-badge {
-  color: #8a5a00;
-  text-shadow: none;
 }
 
 .power-up-slot.occupied {
