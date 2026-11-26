@@ -5,8 +5,8 @@
 // Nothing here adds a light: glows are emissive materials, so the light count never
 // changes between stages. A kit's own materials are made per stage and disposed with it.
 import * as THREE from 'three';
-import { firCrown } from './lowpoly.js?v=beta39';
-import { roundSides, polyDetail, roughen } from './detail.js?v=beta39';
+import { firCrown } from './lowpoly.js?v=beta40';
+import { roundSides, polyDetail, roughen } from './detail.js?v=beta40';
 
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true, ...extra });
 const lit = (color, intensity = 1.6, extra = {}) => flat(color, { emissive: color, emissiveIntensity: intensity, roughness: 0.5, ...extra });
@@ -275,6 +275,116 @@ function createMineCart(mats, random) {
   return group;
 }
 
+export function createWindmill(mats) {
+  const group = groupOf(
+    cyl(mats.wall, 1.3, 2.2, 8, 8, 0, 4, 0),
+    cone(mats.roof, 1.8, 2.2, 8, 0, 9.1, 0),
+    box(mats.door, 1.0, 1.8, 0.2, 0, 0.9, 2.05),
+  );
+  const hub = new THREE.Group();
+  hub.position.set(0, 7.6, 1.75);
+  for (let index = 0; index < 4; index += 1) {
+    const arm = groupOf(box(mats.timber, 0.18, 5.2, 0.12, 0, 2.6, 0), box(mats.sail, 1.1, 3.8, 0.05, 0.62, 3.1, 0.04));
+    arm.add(box(mats.timber, 0.085, 4, 0.08, 1.2, 3.1, 0.11));
+    for (let rib = 0; rib < 5; rib++) arm.add(box(mats.hayDark, 1.18, 0.065, 0.07, 0.62, 1.3 + rib * 0.88, 0.12));
+    arm.rotation.z = (index / 4) * Math.PI * 2;
+    hub.add(arm);
+  }
+  group.add(hub);
+  group.userData.hub = hub;
+  return group;
+}
+
+// A front-facing timber gable and an attached wheel share one foundation.
+export function createWatermill(mats) {
+  const house = new THREE.Group();
+  const width = 6.4, depth = 5.4, eave = 5.1, rise = 2.9;
+  const gable = (span, length, height, material, y) => {
+    const mesh = part(createGableGeometry(length, span, height), material, 0, y, 0);
+    mesh.rotation.y = Math.PI / 2;
+    house.add(mesh);
+  };
+  house.add(box(mats.stone, width + 0.35, 1.2, depth + 0.35, 0, 0.55, 0));
+  house.add(box(mats.wall, width, eave - 1.1, depth, 0, (eave + 1.1) / 2, 0));
+  gable(width, depth, rise, mats.wall, eave);
+  const slope = Math.atan2(rise, width / 2);
+  const roofLength = (width / 2 + 0.45) / Math.cos(slope);
+  for (const side of [-1, 1]) {
+    // Overlapping rows give the blue slate a broken edge as the camera rounds the bend.
+    for (let row = 0; row < 5; row++) {
+      for (let tile = 0; tile < 6; tile++) {
+        const down = (row + 0.5) * roofLength / 5;
+        const x = side * down * Math.cos(slope);
+        const y = eave + rise - down * Math.sin(slope) + 0.09;
+        const z = (tile - 2.5) * 1.08;
+        const shingle = box((row + tile * 3) % 4 ? mats.roof : mats.slate,
+          roofLength / 5 + 0.09, 0.13, 1.1, x, y + 0.015 * ((tile + row) % 3), z);
+        shingle.rotation.z = -side * slope;
+        house.add(shingle);
+      }
+    }
+  }
+  const front = depth / 2 + 0.05;
+  for (const x of [-3.12, -1.32, 1.3, 3.12]) house.add(box(mats.timber, 0.18, 4.05, 0.2, x, 3.1, front));
+  for (const y of [1.15, 3.05, eave]) house.add(box(mats.timber, width + 0.18, 0.2, 0.25, 0, y, front));
+  for (const side of [-1, 1]) {
+    const brace = box(mats.timber, 0.16, 2.5, 0.18, side * 2.18, 4.09, front);
+    brace.rotation.z = -side * 0.72;
+    house.add(brace);
+    const bar = box(mats.timber, 0.17, Math.hypot(width / 2, rise), 0.22, side * width / 4, eave + rise / 2, front);
+    bar.rotation.z = side * (Math.PI / 2 - slope);
+    house.add(bar);
+  }
+  for (const x of [-width / 2, width / 2]) {
+    for (const z of [-2.6, 0, 2.6]) house.add(box(mats.timber, 0.19, 4, 0.2, x, 3.12, z));
+    for (const y of [1.18, 3.05, eave]) house.add(box(mats.timber, 0.22, 0.19, depth + 0.06, x, y, 0));
+  }
+  // A mullioned window on the river-facing side is visible through the wheel.
+  const sideWall = width / 2;
+  house.add(box(mats.timber, 0.2, 1.65, 1.9, sideWall + 0.03, 3.98, 1.18));
+  house.add(box(mats.pane, 0.23, 1.32, 1.56, sideWall + 0.06, 3.98, 1.18));
+  house.add(box(mats.timber, 0.26, 1.35, 0.10, sideWall + 0.09, 3.98, 1.18));
+  house.add(box(mats.timber, 0.26, 0.10, 1.58, sideWall + 0.09, 3.98, 1.18));
+  house.add(box(mats.plank, 0.42, 0.13, 2.1, sideWall + 0.12, 3.10, 1.18));
+  for (let row = 0; row < 3; row++) {
+    for (let i = 0; i < 6; i++) {
+      const block = box(i % 3 === 0 ? mats.stone : mats.slate, 0.97, 0.29, 0.18, -2.74 + i * 1.05 + (row % 2) * 0.16, 0.17 + row * 0.36, front + 0.16);
+      house.add(block);
+    }
+  }
+  house.add(box(mats.timber, 0.2, rise, 0.2, 0, eave + rise / 2, front));
+  house.add(box(mats.door, 1.28, 2.1, 0.2, 1.99, 2.1, front));
+  house.add(box(mats.timber, 1.84, 1.66, 0.23, -0.03, 4.08, front));
+  house.add(box(mats.pane, 1.48, 1.32, 0.25, -0.03, 4.08, front + 0.03));
+  house.add(box(mats.timber, 0.12, 1.37, 0.3, -0.03, 4.08, front + 0.05));
+  house.add(box(mats.timber, 1.53, 0.12, 0.3, -0.03, 4.08, front + 0.05));
+  house.add(box(mats.stone, 0.85, 3, 0.92, -1.56, 6.65, -1.2));
+  house.add(box(mats.timber, 1.05, 0.22, 1.1, -1.56, 8.13, -1.2));
+
+  const wheel = new THREE.Group();
+  const radius = 2.65, count = 12;
+  for (const z of [-0.52, 0.52]) {
+    const rim = new THREE.TorusGeometry(radius, 0.23, 5, count);
+    wheel.add(part(rim, mats.rim, 0, 0, z));
+    for (let i = 0; i < 4; i++) {
+      const spoke = box(mats.timber, radius * 2, 0.25, 0.21, 0, 0, z);
+      spoke.rotation.z = i * Math.PI / 4;
+      wheel.add(spoke);
+    }
+  }
+  for (let i = 0; i < count; i++) {
+    const angle = i * 2 * Math.PI / count;
+    const paddle = box(mats.plank, 0.7, 0.17, 1.26, radius * Math.cos(angle), radius * Math.sin(angle), 0);
+    paddle.rotation.z = angle;
+    paddle.rotation.x = 0.33;
+    wheel.add(paddle);
+  }
+  const hub = cyl(mats.rim, 0.42, 0.42, 1.65, 8, 0, 0, 0);
+  hub.rotation.x = Math.PI / 2;
+  wheel.add(hub);
+  return { house, wheel };
+}
+
 // ── Spring meadow and village edge ─────────────────────────────────────────
 
 function meadowKit() {
@@ -350,25 +460,6 @@ function meadowKit() {
       }
     }
   }
-  const createWindmill = (mats) => {
-    const group = groupOf(
-      cyl(mats.wall, 1.3, 2.2, 8, 8, 0, 4, 0),
-      cone(mats.roof, 1.8, 2.2, 8, 0, 9.1, 0),
-      box(mats.door, 1.0, 1.8, 0.2, 0, 0.9, 2.05),
-    );
-    const hub = new THREE.Group();
-    hub.position.set(0, 7.6, 1.75);
-    for (let index = 0; index < 4; index += 1) {
-      const arm = groupOf(box(mats.timber, 0.18, 5.2, 0.12, 0, 2.6, 0), box(mats.sail, 1.1, 3.8, 0.05, 0.62, 3.1, 0.04));
-      arm.add(box(mats.timber, 0.085, 4, 0.08, 1.2, 3.1, 0.11));
-      for (let rib = 0; rib < 5; rib++) arm.add(box(mats.hayDark, 1.18, 0.065, 0.07, 0.62, 1.3 + rib * 0.88, 0.12));
-      arm.rotation.z = (index / 4) * Math.PI * 2;
-      hub.add(arm);
-    }
-    group.add(hub);
-    group.userData.hub = hub;
-    return group;
-  };
 
   return {
     materials: () => ({
@@ -486,95 +577,6 @@ function forestKit() {
   };
   const createStump = (mats) => groupOf(cyl(mats.timber, 0.42, 0.55, 0.6, 6, 0, 0.3, 0), cyl(mats.plank, 0.36, 0.36, 0.05, 6, 0, 0.62, 0));
   const createMossyBoulder = (ctx) => groupOf(ctx.rock(2.6), tilt(ico(ctx.mats.moss, 0.7, 0.2, 1.15, 0.1), ctx.random));
-  // A front-facing timber gable and an attached wheel share one foundation.
-  function createMill(mats) {
-    const house = new THREE.Group();
-    const width = 6.4, depth = 5.4, eave = 5.1, rise = 2.9;
-    const gable = (span, length, height, material, y) => {
-      const mesh = part(createGableGeometry(length, span, height), material, 0, y, 0);
-      mesh.rotation.y = Math.PI / 2;
-      house.add(mesh);
-    };
-    house.add(box(mats.stone, width + 0.35, 1.2, depth + 0.35, 0, 0.55, 0));
-    house.add(box(mats.wall, width, eave - 1.1, depth, 0, (eave + 1.1) / 2, 0));
-    gable(width, depth, rise, mats.wall, eave);
-    const slope = Math.atan2(rise, width / 2);
-    const roofLength = (width / 2 + 0.45) / Math.cos(slope);
-    for (const side of [-1, 1]) {
-      // Overlapping rows give the blue slate a broken edge as the camera rounds the bend.
-      for (let row = 0; row < 5; row++) {
-        for (let tile = 0; tile < 6; tile++) {
-          const down = (row + 0.5) * roofLength / 5;
-          const x = side * down * Math.cos(slope);
-          const y = eave + rise - down * Math.sin(slope) + 0.09;
-          const z = (tile - 2.5) * 1.08;
-          const shingle = box((row + tile * 3) % 4 ? mats.roof : mats.slate,
-            roofLength / 5 + 0.09, 0.13, 1.1, x, y + 0.015 * ((tile + row) % 3), z);
-          shingle.rotation.z = -side * slope;
-          house.add(shingle);
-        }
-      }
-    }
-    const front = depth / 2 + 0.05;
-    for (const x of [-3.12, -1.32, 1.3, 3.12]) house.add(box(mats.timber, 0.18, 4.05, 0.2, x, 3.1, front));
-    for (const y of [1.15, 3.05, eave]) house.add(box(mats.timber, width + 0.18, 0.2, 0.25, 0, y, front));
-    for (const side of [-1, 1]) {
-      const brace = box(mats.timber, 0.16, 2.5, 0.18, side * 2.18, 4.09, front);
-      brace.rotation.z = -side * 0.72;
-      house.add(brace);
-      const bar = box(mats.timber, 0.17, Math.hypot(width / 2, rise), 0.22, side * width / 4, eave + rise / 2, front);
-      bar.rotation.z = side * (Math.PI / 2 - slope);
-      house.add(bar);
-    }
-    for (const x of [-width / 2, width / 2]) {
-      for (const z of [-2.6, 0, 2.6]) house.add(box(mats.timber, 0.19, 4, 0.2, x, 3.12, z));
-      for (const y of [1.18, 3.05, eave]) house.add(box(mats.timber, 0.22, 0.19, depth + 0.06, x, y, 0));
-    }
-    // A mullioned window on the river-facing side is visible through the wheel.
-    const sideWall = width / 2;
-    house.add(box(mats.timber, 0.2, 1.65, 1.9, sideWall + 0.03, 3.98, 1.18));
-    house.add(box(mats.pane, 0.23, 1.32, 1.56, sideWall + 0.06, 3.98, 1.18));
-    house.add(box(mats.timber, 0.26, 1.35, 0.10, sideWall + 0.09, 3.98, 1.18));
-    house.add(box(mats.timber, 0.26, 0.10, 1.58, sideWall + 0.09, 3.98, 1.18));
-    house.add(box(mats.plank, 0.42, 0.13, 2.1, sideWall + 0.12, 3.10, 1.18));
-    for (let row = 0; row < 3; row++) {
-      for (let i = 0; i < 6; i++) {
-        const block = box(i % 3 === 0 ? mats.stone : mats.slate, 0.97, 0.29, 0.18, -2.74 + i * 1.05 + (row % 2) * 0.16, 0.17 + row * 0.36, front + 0.16);
-        house.add(block);
-      }
-    }
-    house.add(box(mats.timber, 0.2, rise, 0.2, 0, eave + rise / 2, front));
-    house.add(box(mats.door, 1.28, 2.1, 0.2, 1.99, 2.1, front));
-    house.add(box(mats.timber, 1.84, 1.66, 0.23, -0.03, 4.08, front));
-    house.add(box(mats.pane, 1.48, 1.32, 0.25, -0.03, 4.08, front + 0.03));
-    house.add(box(mats.timber, 0.12, 1.37, 0.3, -0.03, 4.08, front + 0.05));
-    house.add(box(mats.timber, 1.53, 0.12, 0.3, -0.03, 4.08, front + 0.05));
-    house.add(box(mats.stone, 0.85, 3, 0.92, -1.56, 6.65, -1.2));
-    house.add(box(mats.timber, 1.05, 0.22, 1.1, -1.56, 8.13, -1.2));
-
-    const wheel = new THREE.Group();
-    const radius = 2.65, count = 12;
-    for (const z of [-0.52, 0.52]) {
-      const rim = new THREE.TorusGeometry(radius, 0.23, 5, count);
-      wheel.add(part(rim, mats.rim, 0, 0, z));
-      for (let i = 0; i < 4; i++) {
-        const spoke = box(mats.timber, radius * 2, 0.25, 0.21, 0, 0, z);
-        spoke.rotation.z = i * Math.PI / 4;
-        wheel.add(spoke);
-      }
-    }
-    for (let i = 0; i < count; i++) {
-      const angle = i * 2 * Math.PI / count;
-      const paddle = box(mats.plank, 0.7, 0.17, 1.26, radius * Math.cos(angle), radius * Math.sin(angle), 0);
-      paddle.rotation.z = angle;
-      paddle.rotation.x = 0.33;
-      wheel.add(paddle);
-    }
-    const hub = cyl(mats.rim, 0.42, 0.42, 1.65, 8, 0, 0, 0);
-    hub.rotation.x = Math.PI / 2;
-    wheel.add(hub);
-    return { house, wheel };
-  }
 
   // Bent alders on the near bank and two rows of wind-shaped spruce on the far
   // bank silhouette the river. Their crowns stay above the words at bridge height.
@@ -716,7 +718,7 @@ function forestKit() {
         ctx.set(deck, centre.x, 0, centre.z, crossing.yaw);
 
         const millX = -11.8;
-        const { house, wheel } = createMill(mats);
+        const { house, wheel } = createWatermill(mats);
         const bank = crossing.point(millX, -RIVER - 3.3);
         const millYaw = crossing.yaw - 0.62;
         ctx.set(house, bank.x, -0.26, bank.z, millYaw);

@@ -9,12 +9,13 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta39';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta39';
-import { createStoryteller } from './storyteller.js?v=beta39';
-import { STORY_BEATS } from './story.js?v=beta39';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta39';
-import { buildCannon } from './plasma-cannon.js?v=beta39';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta40';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta40';
+import { createWatermill, createWindmill } from './stage-kits.js?v=beta40';
+import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=beta40';
+import { STORY_BEATS } from './story.js?v=beta40';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta40';
+import { buildCannon } from './plasma-cannon.js?v=beta40';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -50,6 +51,15 @@ const LAND_TRUTHS = [
   'Ice floats.',
   'The stars rule no one.',
 ];
+
+// The arm holding the book, lamp or dial stays forward and clear of the coat.
+const GREETINGS = {
+  professor: { wave: 2.15, speed: 5, arc: 0.20, lift: 0.16, reach: 0.65 },
+  miller: { wave: 2.55, speed: 7, arc: 0.38, lift: 0.48, reach: 0.12 },
+  miner: { wave: 0.58, speed: 4, arc: 0.15, lift: 1.23, reach: 0.48 },
+  captain: { wave: 2.23, speed: 3, arc: 0.07, lift: 0.16, reach: 0.16 },
+  stargazer: { wave: 1.42, speed: 4, arc: 0.18, lift: 0.82, reach: 0.54 },
+};
 
 const CAPTIONS = [
   { from: 0.35, to: T.charge - 0.35, text: 'The Dreadnought falls.' },
@@ -372,21 +382,31 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     const npc = createStoryteller(STORY_BEATS[index]);
     npc.position.set(x, y, z);
     npc.userData.baseY = y;
+    npc.userData.role = STORY_BEATS[index].role;
     npc.traverse((child) => { child.castShadow = false; });
     parent.add(npc);
+    const shadow = add(parent, new THREE.PlaneGeometry(1.7, 0.95), new THREE.MeshBasicMaterial({
+      map: glowTexture, color: 0x251c29, transparent: true, depthWrite: false, opacity: 0.48,
+      polygonOffset: true, polygonOffsetFactor: -1,
+    }), x, y + 0.055, z);
+    shadow.rotation.x = -Math.PI / 2;
     return npc;
   }
 
   // Held: head bowed. Free: a hop, a look up and a wave.
   function poseStoryteller(npc, free, t, phase = 0) {
-    const { head, arms } = npc.userData.parts;
+    const { head, arms, forearms } = npc.userData.parts;
     const rise = smooth(0, 0.35, free);
     const hop = free > 0 ? Math.abs(Math.sin(free * 7)) * 0.24 * Math.exp(-free * 0.8) : 0;
     npc.position.y = npc.userData.baseY + hop;
     head.rotation.x = lerp(0.32, -0.12, rise);
     head.rotation.z = Math.sin(t * 3 + phase) * 0.08 * rise;
-    arms[1].rotation.z = rise * (2.55 + Math.sin(t * 11 + phase) * 0.38);
-    arms[0].rotation.z = -rise * (0.5 + Math.sin(t * 5.5 + phase) * 0.12);
+    const gesture = GREETINGS[npc.userData.role];
+    arms[1].rotation.z = rise * (gesture.wave + Math.sin(t * gesture.speed + phase) * gesture.arc);
+    arms[0].rotation.z = -rise * gesture.lift;
+    arms[0].rotation.x = -rise * gesture.reach;
+    forearms[1].rotation.z = rise * (npc.userData.role === 'captain' ? 1.74 : 0.53);
+    settleLantern(npc.userData.parts);
   }
 
   // ── The world, built once ──
@@ -609,7 +629,15 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     const palette = SEASON_PALETTES[0];
     const land = startLand(0, palette);
     addTrees(land.group, palette, [[-6, -5, 1.5, 'round'], [-9.5, -1, 1.3, 'round'], [6.5, -6.5, 1.6, 'round'], [10.5, -2.5, 1.2, 'round'],
-      [-3.5, -11, 1.7, 'round'], [3.5, -12.5, 1.5, 'round'], [-14, -9, 1.8, 'round'], [15, -10, 1.6, 'round'], [0, -18, 1.9, 'round']]);
+      [-10, -15, 1.7, 'round'], [3.5, -12.5, 1.5, 'round'], [-14, -9, 1.8, 'round'], [15, -10, 1.6, 'round'], [0, -18, 1.9, 'round']]);
+    const windmill = createWindmill({
+      wall: flat(0xe3cda1), roof: flat(0xac513c), door: flat(0x573c2f),
+      timber: flat(0x705039), sail: flat(0xffedc9), hayDark: flat(0xc19363),
+    });
+    windmill.position.set(-1.2, 0, -13.4);
+    windmill.scale.setScalar(0.42);
+    windmill.rotation.y = 0.24;
+    land.group.add(windmill);
     const cloudMaterial = flat(0xffffff, { emissive: 0xfff4dc, emissiveIntensity: 0.25 });
     [[-22, 17, -46, 2.4], [14, 21, -60, 3], [38, 15, -40, 2.1]].forEach(([x, y, z, size], index) => {
       const cloud = createLowPolyCloud(cloudMaterial, index);
@@ -641,6 +669,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
       return 0.22 * Math.abs(Math.sin((since - FALL_TIME) * 9)) * Math.exp(-(since - FALL_TIME) * 5);
     };
     land.animate = (u) => {
+      windmill.userData.hub.rotation.z = 0.35 - Math.max(0, freedFor(-1.2, u)) ** 1.4 * 0.42;
       const drop = fall(freedFor(2.6, u));
       boulder.position.set(2.3, 0.3 + drop, -0.9);
       apple.position.set(3.45, 0.17 + drop, -0.6);
@@ -666,29 +695,17 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
       ripples.push(add(land.group, new THREE.BoxGeometry(0.9 + hash(index, 71), 0.02, 0.09), glowing(0xbfe0ff, 0.9), 5.6 + hash(index, 72) * 4.2, 0.07, 0));
     }
 
-    const mill = new THREE.Group();
-    mill.position.set(3.5, 0, -4.2);
-    add(mill, new THREE.BoxGeometry(3, 2.6, 3), flat(0xd9c7a0), 0, 1.3, 0);
-    const roof = add(mill, new THREE.ConeGeometry(2.7, 1.7, 4), flat(0x7a3a26), 0, 3.45, 0);
-    roof.rotation.y = Math.PI / 4;
-    add(mill, new THREE.BoxGeometry(0.7, 1.3, 0.08), flat(0x5a3a22), -0.5, 0.65, 1.52);
-    const windowMaterial = glowing(0xffd27a, 0.2);
-    add(mill, new THREE.BoxGeometry(0.6, 0.6, 0.08), windowMaterial, 0.7, 1.6, 1.52);
-    const wheel = new THREE.Group();
-    wheel.position.set(1.95, 1.35, 0.2);
-    const wood = flat(0x6a4426);
-    const rim = add(wheel, new THREE.TorusGeometry(1.3, 0.09, 5, 12), wood);
-    rim.rotation.y = Math.PI / 2;
-    add(wheel, new THREE.CylinderGeometry(0.16, 0.16, 0.7, 6), wood).rotation.z = Math.PI / 2;
-    for (let index = 0; index < 8; index += 1) {
-      const angle = (index / 8) * Math.PI * 2;
-      const paddle = add(wheel, new THREE.BoxGeometry(0.5, 0.08, 0.5), wood, 0, Math.cos(angle) * 1.3, Math.sin(angle) * 1.3);
-      paddle.rotation.x = angle;
-      const spoke = add(wheel, new THREE.BoxGeometry(0.07, 0.07, 1.3), wood, 0, Math.cos(angle) * 0.65, Math.sin(angle) * 0.65);
-      spoke.rotation.x = angle - Math.PI / 2;
-    }
-    mill.add(wheel);
-    land.group.add(mill);
+    const windowMaterial = glowing(0xffc675, 0.2);
+    const { house, wheel } = createWatermill({
+      wall: flat(0xceae88), timber: flat(0x51392c), roof: flat(0x46566b), slate: flat(0x667386),
+      door: flat(0x533825), pane: windowMaterial, plank: flat(0xb38d61), rim: flat(0x634935), stone: flat(0x93877b),
+    });
+    house.position.set(3.65, 0, -6.1);
+    house.scale.setScalar(0.54);
+    house.rotation.y = -0.22;
+    wheel.position.set(3.6, 2.15, 3.8);
+    house.add(wheel);
+    land.group.add(house);
 
     const flyCount = lite ? 12 : 30;
     const flySeeds = Array.from({ length: flyCount }, (_, index) => [(hash(index, 73) - 0.5) * 16, 0.6 + hash(index, 74) * 2.6, 3 - hash(index, 75) * 11, hash(index, 76) * 6]);
@@ -699,7 +716,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
 
     land.animate = (u, t) => {
       const turning = Math.max(0, freedFor(5.4, u));
-      wheel.rotation.x = -(turning < 1 ? 1.3 * turning * turning : 1.3 + 2.6 * (turning - 1));
+      wheel.rotation.z = -(turning < 1 ? 1.3 * turning * turning : 1.3 + 2.6 * (turning - 1));
       windowMaterial.emissiveIntensity = 0.2 + 1.5 * smooth(0, 0.5, freedFor(4.2, u));
       ripples.forEach((ripple, index) => {
         // The water only runs once the myth has gone.
@@ -729,8 +746,8 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
       size: 60, cells: 16, heightAt: (x, z) => smooth(7, 16, Math.hypot(x, z)) * 2.5,
       tint: (x, z, seed, out) => out.setHSL(path.h, path.s, path.lBase * 0.6 + (seed - 0.5) * 0.08),
     }));
-    const rock = flat(0x4a3a30);
-    const darkRock = flat(0x2c221c);
+    const rock = flat(0x474259);
+    const darkRock = flat(0x302d41);
     for (let index = 0; index < 26; index += 1) {
       const angle = (index / 26) * Math.PI * 2;
       const reach = 10.5 + hash(index, 81) * 4;
@@ -753,6 +770,19 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
         shard.rotation.z = (part - 1) * -0.32 + (hash(index, part) - 0.5) * 0.2;
       }
     });
+    // A split face of slate exposes a vein. Its bends catch Mina's lantern in sequence.
+    const vein = [];
+    const ledge = add(land.group, new THREE.DodecahedronGeometry(1), rock, -2.6, 1.38, -5.3);
+    ledge.scale.set(3.6, 2.2, 1.2);
+    const fault = [[-5.25, 1.32], [-4.2, 1.72], [-3.45, 1.54], [-2.68, 2.06], [-1.92, 1.96], [-1.12, 2.48]];
+    for (let i = 1; i < fault.length; i++) {
+      const [x, y] = fault[i - 1], [endX, endY] = fault[i];
+      const material = glowing(0x72ded3, 0.14);
+      const seam = add(land.group, new THREE.OctahedronGeometry(1), material, (x + endX) / 2, (y + endY) / 2, -4.22);
+      seam.scale.set(Math.hypot(endX - x, endY - y) * 0.56, 0.082, 0.08);
+      seam.rotation.z = Math.atan2(endY - y, endX - x);
+      vein.push(material);
+    }
     // Rails and Mina's cart.
     const iron = flat(0x5a5f6a, { metalness: 0.4, roughness: 0.5 });
     const timber = flat(0x5a3a22);
@@ -784,6 +814,9 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
 
     land.animate = (u, t) => {
       const lit = smooth(0, 0.6, freedFor(0, u));
+      vein.forEach((material, i) => {
+        material.emissiveIntensity = 0.08 + 0.68 * smooth(0.02, 0.58, freedFor(0, u) - i * 0.10);
+      });
       crystalMaterials.forEach((material, index) => {
         material.emissiveIntensity = 0.3 + lit * (1.6 + Math.sin(t * 3 + index * 2) * 0.25);
       });
@@ -834,6 +867,30 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     sail.scale.z = 0.08;
     land.group.add(boat);
 
+    // A folded curtain above the ice. Transparent upper vertices let the stars show through.
+    const positions = [], colors = [], indices = [];
+    for (let i = 0; i <= 48; i++) {
+      const f = i / 48;
+      const fold = Math.sin(f * 10) + 0.48 * Math.sin(f * 21);
+      const x = -24 + f * 52, y = 4.8 + fold * 1.3, z = -22 + Math.cos(f * 12) * 3;
+      const fade = Math.sin(Math.PI * f);
+      for (const [height, r, g, b, alpha] of [[0, 0.18, 0.75, 0.64, 0], [0.36, 0.23, 1, 0.76, 0.88],
+        [1.6, 0.30, 0.83, 0.85, 0.48], [4.3, 0.55, 0.34, 0.84, 0]]) {
+        positions.push(x, y + height * (1 + 0.22 * Math.sin(f * 48)), z - height * 0.3);
+        colors.push(r, g, b, alpha * fade);
+      }
+      if (i > 0) for (let k = 0; k < 3; k++) {
+        const j = (i - 1) * 4 + k;
+        indices.push(j, j + 4, j + 1, j + 1, j + 4, j + 5);
+      }
+    }
+    const curtain = new THREE.BufferGeometry();
+    curtain.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    curtain.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4));
+    curtain.setIndex(indices);
+    const aurora = add(land.group, curtain, new THREE.MeshBasicMaterial(additive({
+      vertexColors: true, side: THREE.DoubleSide, blending: THREE.NormalBlending, toneMapped: false,
+    })));
     const flakeCount = lite ? 50 : 140;
     const flakes = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, map: glowTexture, transparent: true, opacity: 0.95, depthWrite: false }));
     flakes.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(flakeCount * 3), 3));
@@ -841,6 +898,8 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     land.group.add(flakes);
 
     land.animate = (u, t) => {
+      aurora.material.opacity = 0.07 + 0.72 * smooth(0, 0.8, freedFor(0, u));
+      aurora.position.y = Math.sin(t * 0.9) * 0.24;
       floes.forEach((floe, index) => {
         const free = freedFor(floe.position.x, u) - index * 0.06;
         floe.position.y = lerp(-0.45, 0.13, easeOutBack(free / 0.5)) + (free > 0 ? Math.sin(t * 2.4 + index) * 0.03 : 0);
@@ -868,22 +927,33 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     });
     top.position.y = 0;
     land.group.add(top);
-    addTrees(land.group, palette, [[-4.6, -2.6, 1.3, 'round'], [4.8, -3.4, 1.1, 'pine']]);
+    addTrees(land.group, palette, [[-4.6, -2.6, 1.3, 'round'], [6.1, -5.8, 1.1, 'pine']]);
     const crystal = glowing(0xe040fb, 1.3);
     [[-2.8, -4.6, 1], [3.2, -1.2, 0.7], [-5.2, 0.8, 0.6]].forEach(([x, z, size]) => {
       add(land.group, new THREE.OctahedronGeometry(0.4 * size, 0), crystal, x, 0.7 * size, z).scale.y = 2.3;
     });
-    const brass = flat(0xd8a84a, { metalness: 0.5, roughness: 0.4, emissive: 0x4a3410, emissiveIntensity: 0.5 });
+    const brass = flat(0xd8a84a, { metalness: 0.5, roughness: 0.4, emissive: 0xc89345, emissiveIntensity: 0.34 });
     const scope = new THREE.Group();
     scope.position.set(-2.1, 0, -0.5);
     for (let index = 0; index < 3; index += 1) {
       const angle = (index / 3) * Math.PI * 2;
       const leg = add(scope, new THREE.CylinderGeometry(0.035, 0.035, 1.3, 4), flat(0x3a2f4a), Math.cos(angle) * 0.25, 0.6, Math.sin(angle) * 0.25);
-      leg.rotation.set(Math.sin(angle) * 0.4, 0, -Math.cos(angle) * 0.4);
+      leg.rotation.set(-Math.sin(angle) * 0.4, 0, Math.cos(angle) * 0.4);
     }
+    add(scope, new THREE.SphereGeometry(0.15, 8, 5), brass, 0, 1.21, 0);
     const tube = add(scope, new THREE.CylinderGeometry(0.13, 0.17, 1.5, 7), brass, 0, 1.35, 0);
     tube.rotation.set(0, 0, 0.8);
     land.group.add(scope);
+
+    const plinth = flat(0x5a5274);
+    add(land.group, new THREE.CylinderGeometry(0.87, 1.13, 0.32, 8), plinth, 2.9, 0.16, -3.3);
+    add(land.group, new THREE.CylinderGeometry(0.27, 0.65, 0.87, 8), plinth, 2.9, 0.73, -3.3);
+    const instrument = createAstrolabe(brass, glowing(0x8fdcdd, 0.7));
+    instrument.position.set(2.9, 2.36, -3.3);
+    instrument.scale.setScalar(1.32);
+    const meridian = add(land.group, new THREE.TorusGeometry(1.35, 0.045, 5, 40), brass, 2.9, 2.36, -3.3);
+    meridian.rotation.set(0.48, 1.13, 0.20);
+    land.group.add(instrument);
 
     // Shooting stars, once the sky is free.
     const streakMaterial = new THREE.MeshBasicMaterial(additive({ color: 0xfff6dc }));
@@ -894,6 +964,9 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
       return streak;
     });
     land.animate = (u) => {
+      const free = Math.max(0, freedFor(2.9, u));
+      instrument.rotation.y = -0.38 + Math.sin(free * 0.85) * 0.51;
+      meridian.rotation.z = 0.20 + free * 0.26;
       streaks.forEach((streak) => {
         const flight = (freedFor(0, u) - streak.userData.delay) / 0.7;
         streak.visible = flight > 0 && flight < 1;
