@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>KeyFire stage preview</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    :root { --ink: #3d2b1c; --muted: #7d6748; --border: rgba(110, 78, 40, 0.3); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; display: flex; flex-direction: column; background: #efe3c4; color: var(--ink); font: 15px/1.4 system-ui, sans-serif; }
+    header, .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 8px 14px; background: #fbf5e4; border-bottom: 1px solid var(--border); }
+    header h1 { margin: 0 6px 0 0; font-size: 17px; }
+    label { display: inline-flex; gap: 6px; align-items: center; }
+    select, button, input[type="number"] { font: inherit; color: inherit; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: #fdf8ea; min-height: 36px; }
+    input[type="number"] { width: 6.5em; }
+    button[aria-pressed="true"] { background: #3d2b1c; color: #fdf8ea; }
+    #arc { flex: 1 1 240px; min-width: 160px; }
+    #view { flex: 1 1 auto; min-height: 0; position: relative; }
+    #view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+    #stats { margin-left: auto; color: var(--muted); font: 13px/1.3 ui-monospace, monospace; }
+    #error { padding: 0 14px; color: #a11; white-space: pre-wrap; }
+    footer { padding: 6px 14px; color: var(--muted); font-size: 13px; background: #fbf5e4; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>KeyFire stages</h1>
+    <label>Wave <select id="wave"></select></label>
+    <label>Ambushes <input id="bursts" type="number" min="1" max="7" value="4"></label>
+    <label>Seed <input id="seed" type="number" min="1" max="999999" value="1"></label>
+    <button id="reseed" type="button">New seed</button>
+    <button id="overhead" type="button" aria-pressed="false">Overhead</button>
+    <button id="spots" type="button" aria-pressed="false">Hiding spots</button>
+    <span id="stats" role="status"></span>
+  </header>
+  <div class="bar">
+    <button id="play" type="button" aria-pressed="false">Fly through</button>
+    <input id="arc" type="range" min="0" max="1000" value="0" aria-label="Position along the route">
+    <span id="stops"></span>
+  </div>
+  <div id="error"></div>
+  <div id="view"><canvas id="canvas"></canvas></div>
+  <footer>&copy; PanPhy Labs. All rights reserved. Drag to look around; arrow keys step between stops. Lighting is approximate: the game adds its sky, weather and post-processing.</footer>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { createStage } from './src/stages.js?v=1';
+    import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './src/chapters.js?v=1';
+
+    const $ = (id) => document.getElementById(id);
+    const canvas = $('canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color();
+    scene.fog = new THREE.Fog(0, 40, 118);
+    const hemiLight = new THREE.HemisphereLight();
+    const sunLight = new THREE.DirectionalLight();
+    sunLight.position.set(10, 13, -22);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(1024, 1024);
+    Object.assign(sunLight.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22, near: 0.5, far: 70 });
+    sunLight.shadow.bias = -0.0004;
+    sunLight.shadow.normalBias = 0.02;
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    rimLight.position.set(0, 9, -46);
+    rimLight.target.position.set(0, 1, 6);
+    scene.add(hemiLight, sunLight, rimLight, rimLight.target);
+
+    // The same camera as the game: the stage moves under it.
+    const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 120);
+    const overheadCamera = new THREE.PerspectiveCamera(50, 1, 1, 900);
+    const stageRig = new THREE.Group();
+    scene.add(stageRig);
+    const markers = new THREE.Group();
+    scene.add(markers);
+
+    const materials = {
+      trunk: new THREE.MeshStandardMaterial({ roughness: 0.95, flatShading: true }),
+      leaves: [0, 1, 2].map(() => new THREE.MeshStandardMaterial({ roughness: 0.95, flatShading: true })),
+      rock: new THREE.MeshStandardMaterial({ color: 0xd6ccb4, roughness: 1, flatShading: true }),
+    };
+
+    const state = { stage: null, arc: 0, playing: false, overhead: false, spots: false, look: 0, pitch: 0 };
+
+    for (let wave = 1; wave <= WAVE_COUNT; wave += 1) {
+      $('wave').add(new Option(`${wave} · ${chapterForWave(wave).title}`, wave));
+    }
+
+    function applyPalette(palette) {
+      scene.background.setHex(palette.bgColor);
+      scene.fog.color.setHex(palette.fogColor);
+      scene.fog.near = palette.fogNear;
+      scene.fog.far = palette.fogFar;
+      hemiLight.color.setHex(palette.hemiSky);
+      hemiLight.groundColor.setHex(palette.hemiGround);
+      hemiLight.intensity = palette.hemiIntensity;
+      sunLight.color.setHex(palette.sunColor);
+      sunLight.intensity = palette.sunIntensity;
+      rimLight.color.setHex(palette.hemiSky);
+      materials.leaves.forEach((material, index) => material.color.setHex(palette.leafColors[index]));
+      materials.trunk.color.setHex(palette.trunkColor);
+      state.stage.terrain.recolor({
+        path: { h: palette.groundPath.h, s: palette.groundPath.s, l: palette.groundPath.lBase },
+        grass: palette.groundGrass,
+        patch: palette.groundAlt1,
+        tone: GROUND_TONE,
+      });
+    }
+
+    function build() {
+      try {
+        buildStage();
+      } catch (error) {
+        $('error').textContent = String(error && error.stack || error);
+      }
+    }
+
+    function buildStage() {
+      $('error').textContent = '';
+      const wave = Number($('wave').value);
+      const chapter = chapterForWave(wave);
+      if (state.stage) state.stage.dispose();
+      const started = performance.now();
+      state.stage = createStage({
+        seed: Number($('seed').value) || 1,
+        burstCount: THREE.MathUtils.clamp(Number($('bursts').value) || 1, 1, 7),
+        materials,
+        kit: chapter.kit,
+      });
+      state.buildTime = performance.now() - started;
+      stageRig.add(state.stage.group);
+      state.palette = null;
+      state.arc = state.stage.startArc;
+      const stops = $('stops');
+      stops.replaceChildren();
+      const add = (label, arc) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.addEventListener('click', () => { state.arc = arc; state.playing = false; syncControls(); });
+        stops.append(button, ' ');
+      };
+      add('Start', state.stage.startArc);
+      state.stage.stops.forEach((stop, index) => add(stop.isBoss ? 'Boss' : String(index + 1), stop.arc));
+      if (state.stage.crossing) add('Crossing', state.stage.crossing.arc - 14);
+      if (Number.isFinite(state.stage.lateArc)) add(chapter.late ? chapter.late.title : 'Late part', state.stage.lateArc - 12);
+      rebuildMarkers();
+      syncControls();
+      window.__stagePreview = state;
+    }
+
+    // The route pose at an arc length, turning toward each stop's own facing as the game does.
+    function poseAt(arc) {
+      const { stage } = state;
+      const pose = stage.poseAtArc(arc);
+      let fromArc = stage.startArc;
+      let fromTurn = 0;
+      for (const stop of stage.stops) {
+        if (arc <= stop.arc) {
+          const t = THREE.MathUtils.clamp((arc - fromArc) / Math.max(0.001, stop.arc - fromArc), 0, 1);
+          pose.yaw += fromTurn + (stop.turn - fromTurn) * t;
+          return pose;
+        }
+        fromArc = stop.arc;
+        fromTurn = stop.turn;
+      }
+      return pose;
+    }
+
+    function setRailPose(pose) {
+      const c = Math.cos(pose.yaw);
+      const sn = Math.sin(pose.yaw);
+      stageRig.rotation.set(0, -pose.yaw, 0);
+      stageRig.position.set(-(pose.x * c - pose.z * sn), 0, -(pose.x * sn + pose.z * c));
+    }
+
+    function currentStop() {
+      return state.stage.stops.find((stop) => Math.abs(stop.arc - state.arc) < 0.5) || null;
+    }
+
+    function rebuildMarkers() {
+      markers.traverse((peg) => {
+        if (!peg.isMesh) return;
+        peg.geometry.dispose();
+        peg.material.dispose();
+      });
+      markers.clear();
+      const colors = { cover: 0xff5a4a, ground: 0xffc93a, sky: 0x4ab8ff };
+      state.stage.stops.forEach((stop) => {
+        const set = new THREE.Group();
+        set.userData.stop = stop;
+        for (const spot of stop.spots) {
+          const peg = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.6, 6), new THREE.MeshBasicMaterial({ color: colors[spot.kind] }));
+          peg.rotation.x = Math.PI;
+          peg.position.set(spot.x, spot.kind === 'sky' ? 6 : 2.6, spot.z);
+          set.add(peg);
+        }
+        markers.add(set);
+      });
+    }
+
+    function syncControls() {
+      const { stage } = state;
+      const last = stage.stops[stage.stops.length - 1].arc;
+      $('arc').value = String(Math.round(((state.arc - stage.startArc) / (last - stage.startArc)) * 1000));
+      $('play').setAttribute('aria-pressed', String(state.playing));
+      $('overhead').setAttribute('aria-pressed', String(state.overhead));
+      $('spots').setAttribute('aria-pressed', String(state.spots));
+    }
+
+    $('wave').addEventListener('change', build);
+    $('seed').addEventListener('change', build);
+    $('bursts').addEventListener('change', build);
+    $('reseed').addEventListener('click', () => { $('seed').value = String(1 + Math.floor(Math.random() * 999999)); build(); });
+    $('play').addEventListener('click', () => {
+      const last = state.stage.stops[state.stage.stops.length - 1].arc;
+      if (!state.playing && state.arc >= last - 0.5) state.arc = state.stage.startArc;
+      state.playing = !state.playing;
+      syncControls();
+    });
+    $('overhead').addEventListener('click', () => { state.overhead = !state.overhead; syncControls(); });
+    $('spots').addEventListener('click', () => { state.spots = !state.spots; syncControls(); });
+    $('arc').addEventListener('input', () => {
+      const { stage } = state;
+      const last = stage.stops[stage.stops.length - 1].arc;
+      state.arc = stage.startArc + (Number($('arc').value) / 1000) * (last - stage.startArc);
+      state.playing = false;
+      $('play').setAttribute('aria-pressed', 'false');
+    });
+    window.addEventListener('keydown', (event) => {
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) return;
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      const arcs = [state.stage.startArc, ...state.stage.stops.map((stop) => stop.arc)];
+      const next = event.key === 'ArrowRight'
+        ? arcs.find((arc) => arc > state.arc + 0.5)
+        : arcs.slice().reverse().find((arc) => arc < state.arc - 0.5);
+      if (next === undefined) return;
+      state.arc = next;
+      state.playing = false;
+      syncControls();
+    });
+
+    let drag = null;
+    canvas.addEventListener('pointerdown', (event) => {
+      drag = { x: event.clientX, y: event.clientY, look: state.look, pitch: state.pitch };
+      canvas.setPointerCapture(event.pointerId);
+    });
+    canvas.addEventListener('pointermove', (event) => {
+      if (!drag) return;
+      state.look = drag.look + (event.clientX - drag.x) * 0.005;
+      state.pitch = THREE.MathUtils.clamp(drag.pitch + (event.clientY - drag.y) * 0.004, -0.6, 0.9);
+    });
+    canvas.addEventListener('pointerup', () => { drag = null; });
+    canvas.addEventListener('dblclick', () => { state.look = 0; state.pitch = 0; });
+
+    function resize() {
+      const { clientWidth: width, clientHeight: height } = $('view');
+      if (canvas.width !== Math.round(width * renderer.getPixelRatio()) || canvas.height !== Math.round(height * renderer.getPixelRatio())) {
+        renderer.setSize(width, height, false);
+        camera.aspect = overheadCamera.aspect = width / Math.max(1, height);
+        camera.updateProjectionMatrix();
+        overheadCamera.updateProjectionMatrix();
+      }
+    }
+
+    let previous = 0;
+    let statsTimer = 0;
+    function frame(time) {
+      requestAnimationFrame(frame);
+      const delta = Math.min(0.1, (time - previous) / 1000 || 0);
+      previous = time;
+      const { stage } = state;
+      if (!stage) return;
+      resize();
+      if (state.playing) {
+        const last = stage.stops[stage.stops.length - 1].arc;
+        state.arc = Math.min(last, state.arc + delta * 7);
+        if (state.arc >= last) state.playing = false;
+        syncControls();
+      }
+      // A stage with a late part (the mine) takes its other palette once the camera is inside.
+      const chapter = chapterForWave(Number($('wave').value));
+      const palette = chapter.late && state.arc > stage.lateArc + 7 ? chapter.late.palette : chapter.palette;
+      if (palette !== state.palette) {
+        state.palette = palette;
+        applyPalette(palette);
+      }
+      setRailPose(poseAt(state.arc));
+      stage.update(time / 1000);
+
+      const stop = currentStop();
+      for (const set of markers.children) set.visible = state.spots && set.userData.stop === stop;
+
+      // The game looks from (0, 3.5, 10.5) at (0, 1.5, −12); dragging turns the head.
+      camera.position.set(0, 3.5, 10.5);
+      const yaw = state.look;
+      const pitch = Math.atan2(-2, 22.5) - state.pitch;
+      camera.lookAt(-Math.sin(yaw) * 22.5 * Math.cos(pitch), 3.5 + Math.sin(pitch) * 22.6, 10.5 - Math.cos(yaw) * 22.5 * Math.cos(pitch));
+      overheadCamera.position.set(0, 150, 40);
+      overheadCamera.lookAt(0, 0, -30);
+      scene.fog.far = state.overhead ? 5000 : palette.fogFar;
+      scene.fog.near = state.overhead ? 4000 : palette.fogNear;
+      renderer.render(scene, state.overhead ? overheadCamera : camera);
+
+      statsTimer -= delta;
+      if (statsTimer <= 0) {
+        statsTimer = 0.5;
+        const info = renderer.info.render;
+        $('stats').textContent = `${stage.triangles.toLocaleString('en-GB')} triangles in the stage · ${info.triangles.toLocaleString('en-GB')} drawn · ${info.calls} draw calls · built in ${Math.round(state.buildTime)} ms`
+          + (stop ? ` · cover: ${stop.spots.filter((spot) => spot.kind === 'cover').map((spot) => spot.prop).join(', ') || 'none'}` : '');
+      }
+    }
+
+    build();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

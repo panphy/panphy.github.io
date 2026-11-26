@@ -13,7 +13,7 @@ This file holds the rules for every task. Section rules and occasional procedure
 | Adding or promoting a general published app | skill `publish-app` |
 | Changing a cached file, `sw.js` or `assets/sw-register.js` | skill `service-worker` |
 | Changing a workbook, sheet or other printed resource's source | skill `workbook-pdfs` |
-| A Spellwave gameplay change | skill `spellwave-reset` |
+| A KeyFire gameplay change | skill `keyfire-reset` |
 | Checking or sweeping teaching decks | skill `deck-audit` |
 | Writing or changing a Three.js or WebGL scene | skill `three-d` |
 
@@ -21,7 +21,7 @@ Claude Code loads a folder's `CLAUDE.md` (the same text as its `AGENTS.md`) by i
 
 ## Working rules
 
-- Use American English everywhere, including documentation, unless the user asks otherwise. Exceptions: everything under `gcsephy/` uses British English, and Spellwave (`fun/spellwave.html`, `fun/spellwave/`) uses British English in its UI and accepts British and American spellings as answers.
+- Use American English everywhere, including documentation, unless the user asks otherwise. Exceptions: everything under `gcsephy/` uses British English, and KeyFire (`fun/keyfire.html`, `fun/keyfire/`) uses British English in its UI and accepts British and American spellings as answers.
 - Edit HTML, CSS and vanilla JavaScript directly: the served site needs no framework, bundler or build step. Local development dependencies stay ignored and optional. Follow the existing CDN or local-library patterns.
 - Keep each app reachable through its own HTML entry point. Split CSS/JS when useful, with stable, unhashed filenames.
 - Each `AGENTS.md` (the root, `gcsephy/` and `ibdpphy/`) has a `CLAUDE.md` beside it, identical apart from the title; update both when a rule changes, and keep the table above in step with the folder files and skills.
@@ -53,7 +53,7 @@ Claude Code loads a folder's `CLAUDE.md` (the same text as its `AGENTS.md`) by i
 ## Code and interface conventions
 
 - camelCase for variables and functions, UPPER_SNAKE_CASE for constants, and a shared state object where useful.
-- General published apps use the Spectrum house style in `/assets/design.css`; beta, `gcsephy/`, `ibdpphy/` and Spellwave keep their own. Load `/assets/fonts/fonts.css`, then `/assets/design.css`, before the app's CSS, and map the app's variables onto its tokens rather than rewriting every rule.
+- General published apps use the Spectrum house style in `/assets/design.css`; beta, `gcsephy/`, `ibdpphy/` and KeyFire keep their own. Load `/assets/fonts/fonts.css`, then `/assets/design.css`, before the app's CSS, and map the app's variables onto its tokens rather than rewriting every rule.
   - Fonts: Figtree for body text, Unbounded for page and app titles only (it needs smaller sizes than a serif display face), IBM Plex Mono for numbers and readouts.
   - The `--spectrum` gradient is decoration and never encodes data. Keep colors that carry meaning (series, waves, sources, charges, particle types) and 3D scene colors unless they clash in dark mode.
   - Apps use solid panels and never blur over live content; glass blur and spectrum-colored title text are for the homepage only.
