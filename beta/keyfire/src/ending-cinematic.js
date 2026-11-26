@@ -4,18 +4,18 @@
 // sky; the words the player defeated fly into the plasma cannon's crystal core;
 // the cannon fires one beam that breaks the last myth; a wave of light crosses
 // the five lands, freeing each storyteller in turn; dawn comes, the five gather
-// on a hill and the game's name appears over them.
+// on a hill for a final thank-you.
 //
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta40';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta40';
-import { createWatermill, createWindmill } from './stage-kits.js?v=beta40';
-import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=beta40';
-import { STORY_BEATS } from './story.js?v=beta40';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta40';
-import { buildCannon } from './plasma-cannon.js?v=beta40';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta41';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta41';
+import { createWatermill, createWindmill } from './stage-kits.js?v=beta41';
+import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=beta41';
+import { STORY_BEATS } from './story.js?v=beta41';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta41';
+import { buildCannon } from './plasma-cannon.js?v=beta41';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -31,13 +31,14 @@ export const ENDING_TIMELINE = {
   lands: 8 * BAR, // the first of the five lands
   landLength: 2 * BAR,
   dawn: 18 * BAR, // the five gather at sunrise
-  title: 22 * BAR, // the game's name
+  title: 22 * BAR, // the closing message
   end: 25 * BAR, // the summary
 };
 
 const T = ENDING_TIMELINE;
 const LAND_COUNT = 5;
-const TITLE_TEXT = 'KeyFire';
+const TITLE_TEXT = 'Thank you for playing!';
+const TITLE_FONT_SIZE = 112;
 // The game's heading face (Fredoka), as in the menu title and banners.
 const GAME_FONT_FAMILY = 'Fredoka, Manrope, system-ui, sans-serif';
 
@@ -1040,30 +1041,30 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     });
   }
 
-  // The game's name, drawn once the heading font is ready.
+  // Draw the closing message immediately, then again when Fredoka is ready.
   function buildTitle() {
     const canvasEl = document.createElement('canvas');
     canvasEl.width = 1280;
-    canvasEl.height = 360;
+    canvasEl.height = 200;
     const texture = new THREE.CanvasTexture(canvasEl);
     texture.colorSpace = THREE.SRGBColorSpace;
     titleAspect = canvasEl.width / canvasEl.height;
     const draw = () => {
       const ctx = canvasEl.getContext('2d');
       ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-      ctx.font = `700 220px ${GAME_FONT_FAMILY}`;
+      ctx.font = `700 ${TITLE_FONT_SIZE}px ${GAME_FONT_FAMILY}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.lineJoin = 'round';
-      ctx.lineWidth = 26;
+      ctx.lineWidth = 12;
       ctx.strokeStyle = '#3a1f5c';
-      ctx.strokeText(TITLE_TEXT, canvasEl.width / 2, canvasEl.height / 2 + 6);
+      ctx.strokeText(TITLE_TEXT, canvasEl.width / 2, canvasEl.height / 2, canvasEl.width - 48);
       ctx.fillStyle = '#fff6d8';
-      ctx.fillText(TITLE_TEXT, canvasEl.width / 2, canvasEl.height / 2 + 6);
+      ctx.fillText(TITLE_TEXT, canvasEl.width / 2, canvasEl.height / 2, canvasEl.width - 48);
       texture.needsUpdate = true;
     };
     draw();
-    waitForFont(`700 220px Fredoka`).then(draw);
+    waitForFont(`700 ${TITLE_FONT_SIZE}px Fredoka`).then(draw);
     titleGlow = glowSprite(dawnSet, 0xffd98a);
     title = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, fog: false, toneMapped: false }));
     dawnSet.add(title);
@@ -1500,11 +1501,11 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
       npc.userData.parts.dome.visible = false;
     });
 
-    // The name arrives over their heads, and steps aside for the summary.
+    // The thank-you arrives over their heads, and steps aside for the summary.
     const shown = t - T.title;
     const distance = Math.abs(camera.position.z - -1);
     const halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * distance * aspect;
-    const wide = Math.min(9.6, halfWidth * 2 * 0.86);
+    const wide = Math.min(8.8, halfWidth * 2 * 0.82);
     const arrive = easeOutBack(shown / 0.55);
     const leave = 1 - smooth(T.end + 0.2, T.end + 1.2, t);
     title.visible = shown > 0 && leave > 0;
@@ -1513,7 +1514,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     title.material.opacity = clamp01(shown / 0.3) * leave;
     titleGlow.visible = title.visible;
     titleGlow.position.set(0, 5.3, -1.6);
-    titleGlow.scale.set(wide * 1.5, wide * 0.6, 1);
+    titleGlow.scale.set(wide * 1.25, wide * 0.32, 1);
     titleGlow.material.opacity = (0.3 + 0.55 * Math.exp(-Math.max(0, shown) * 2.2)) * clamp01(shown / 0.2) * leave;
   }
 
