@@ -38,7 +38,7 @@ export const ENDING_TIMELINE = {
 
 const T = ENDING_TIMELINE;
 const LAND_COUNT = 5;
-const TITLE_TEXT = 'Spellwave';
+const TITLE_TEXT = 'KeyFire';
 // The game's heading face (Fredoka), as in the menu title and banners.
 const GAME_FONT_FAMILY = 'Fredoka, Manrope, system-ui, sans-serif';
 
@@ -207,7 +207,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
   } catch (error) {
-    console.warn('Spellwave could not start the ending cinematic.', error);
+    console.warn('KeyFire could not start the ending cinematic.', error);
   }
   if (!renderer) {
     return {

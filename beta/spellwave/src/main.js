@@ -939,7 +939,7 @@ function showWebGLUnavailable() {
   showMessage(
     'WEBGL REQUIRED',
     'Graphics Unavailable',
-    'Spellwave needs browser WebGL support',
+    'KeyFire needs browser WebGL support',
     'Unavailable',
     'Enable hardware acceleration or try a browser/device with WebGL enabled.'
   );
@@ -5008,7 +5008,7 @@ function createRenderer() {
       available: true,
     };
   } catch (error) {
-    console.warn('Spellwave could not create a WebGL renderer.', error);
+    console.warn('KeyFire could not create a WebGL renderer.', error);
     return {
       renderer: createFallbackRenderer(),
       available: false,
