@@ -4,9 +4,9 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {
   pickTarget, buildSearchPrompt, buildAltSearchPrompts,
-  getInputCharacters, isMathOperatorInput, promptIndexForProgress,
+  getInputCharacter, promptIndexForProgress,
 } from '../src/prompt-utils.js';
-import { ALL_WORDS, EQUATION_WORDS } from '../src/question-bank.js';
+import { ALL_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from '../src/question-bank.js';
 
 const enemy = (searchPrompt, z, matched = searchPrompt) => ({
   searchPrompt, _matchedSearchPrompt: matched, group: { position: { z } },
@@ -24,15 +24,16 @@ test('pickTarget falls back to the nearest match', () => {
   assert.equal(pickTarget([far, near], 'for'), near);
 });
 
-test('search prompts skip spaces and punctuation, fold accents, map superscripts', () => {
+test('search prompts skip spaces and punctuation, fold accents and capitals', () => {
   assert.equal(buildSearchPrompt("Hooke's law"), 'hookeslaw');
   assert.equal(buildSearchPrompt('café'), 'cafe');
-  assert.equal(buildSearchPrompt('speed²'), 'speed2');
+  assert.equal(buildSearchPrompt('kWh'), 'kwh');
 });
 
-test('× types as x only for equations', () => {
-  assert.deepEqual(getInputCharacters('×').map(i => i.value), ['x']);
-  assert.equal(getInputCharacters('×')[0].equationOnly, true);
+test('a key types its lower-case letter, or nothing', () => {
+  assert.equal(getInputCharacter('K'), 'k');
+  assert.equal(getInputCharacter('é'), 'e');
+  for (const key of [' ', '-', '×', '=']) assert.equal(getInputCharacter(key), '', key);
 });
 
 test('British/American spelling alternatives', () => {
@@ -61,7 +62,7 @@ test('spelling alternatives work in either direction and combine across a phrase
     'colourcolourcenter', 'colourcolorcentre', 'colourcolorcenter',
     'colorcolourcentre', 'colorcolourcenter', 'colorcolorcentre', 'colorcolorcenter',
   ]));
-  assert.ok(buildAltSearchPrompts('colour = metre × litre', { multiplicationAlias: true }).includes('color=meterxliter'));
+  assert.ok(buildAltSearchPrompts('colour, metre, litre').includes('colormeterliter'));
 });
 
 test('spelling alternatives preserve measuring instruments and other unrelated words', () => {
@@ -76,16 +77,20 @@ test('promptIndexForProgress maps typed count onto the displayed text', () => {
 
 test('every question-bank term is typeable and unique', () => {
   const seen = new Set();
-  for (const { term } of [...ALL_WORDS, ...EQUATION_WORDS]) {
-    assert.ok(buildSearchPrompt(term, { multiplicationAlias: true }).length > 0, term);
+  for (const { term } of ALL_WORDS) {
+    assert.ok(buildSearchPrompt(term).length > 0, term);
     assert.ok(!seen.has(term), `duplicate term: ${term}`);
     seen.add(term);
-    const leftover = [...term].filter(ch => !/[a-z0-9\s'=+\-*/.×²³−°½]/i.test(ch));
-    assert.deepEqual(leftover, [], `untypeable, unexpected characters in "${term}"`);
+    assert.match(term, /^[a-z' -]+$/i, `unexpected characters in "${term}"`);
   }
 });
 
-const hiddenWords = prompt => prompt.parts.filter(part => part.isHidden).map(part => buildSearchPrompt(part.answerText));
+test('boss lines and rock units are plain letters', () => {
+  for (const { term } of ROCK_UNITS) assert.match(term, /^[a-z]+$/i, term);
+  for (const term of [...BOSS_PHRASES.map(entry => entry.term), ...BOSS_STORIES.flatMap(story => story.lines)]) {
+    assert.match(term, /^[a-z ]+$/i, term);
+  }
+});
 
 const mainSource = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
 const mainSlice = (from, to) => mainSource.slice(mainSource.indexOf(from), mainSource.indexOf(to));
@@ -94,11 +99,8 @@ function createTypingHarness(prompts = ['force', 'mass']) {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const inputCode = source.slice(source.indexOf('function enterCharacter(character)'), source.indexOf('// Simple FNV-1a'));
   const targets = prompts.map(prompt => {
-    const isEquation = prompt.includes('=');
-    const promptOptions = { multiplicationAlias: isEquation };
-    const target = enemy(buildSearchPrompt(prompt, promptOptions), -20);
-    target.altSearchPrompts = buildAltSearchPrompts(prompt, promptOptions);
-    target.isEquation = isEquation;
+    const target = enemy(buildSearchPrompt(prompt), -20);
+    target.altSearchPrompts = buildAltSearchPrompts(prompt);
     target.revealed = true;
     target.type = { eye: 0 };
     target.group.scale = { y: 1 };
@@ -107,8 +109,8 @@ function createTypingHarness(prompts = ['force', 'mass']) {
   const context = vm.createContext({
     typedBuffer: 'for', activeTarget: targets[0], typedAttempts: 0, mistakes: 0, kills: 0, streak: 3,
     enemies: targets, WALL_Z: 0,
-    getInputCharacters, pickTarget, isMathOperatorInput,
-    checkCheatCode() {}, playTypeSound() {}, updateTypedDisplay() {}, hitEnemyWithLetter() {},
+    getInputCharacter, pickTarget,
+    checkCheatCode() {}, playTypeSound() {}, hitEnemyWithLetter() {},
     reusableVector: { y: 0, copy() {} }, fx: { burst() {} },
   });
   context.registerMistake = () => { context.mistakes += 1; context.streak = 0; };
@@ -143,7 +145,7 @@ test('no word is locked: mid-word, the first letter of another prompt switches t
 test('typing ignores capitals, for units as well as words', () => {
   const { context, targets } = createTypingHarness(['force']);
   const unit = enemy(buildSearchPrompt('MW'), -10);
-  Object.assign(unit, { altSearchPrompts: [], revealed: true, type: { eye: 0 }, isEquation: false });
+  Object.assign(unit, { altSearchPrompts: [], revealed: true, type: { eye: 0 } });
   unit.group.scale = { y: 1 };
   context.enemies = [targets[0], unit];
   context.typedBuffer = '';
@@ -157,12 +159,11 @@ test('typing ignores capitals, for units as well as words', () => {
   assert.equal(context.mistakes, 0);
 });
 
-test('typing either spelling defeats normal enemies and equations without a mistake', () => {
-  for (const { term, isEquation } of [...ALL_WORDS, ...EQUATION_WORDS]) {
-    const options = { multiplicationAlias: !!isEquation };
-    const alternatives = buildAltSearchPrompts(term, options);
+test('typing either spelling defeats an enemy without a mistake', () => {
+  for (const { term } of ALL_WORDS) {
+    const alternatives = buildAltSearchPrompts(term);
     if (!alternatives.length) continue;
-    for (const key of [buildSearchPrompt(term, options), ...alternatives]) {
+    for (const key of [buildSearchPrompt(term), ...alternatives]) {
       const { context } = createTypingHarness([term]);
       context.typedBuffer = '';
       for (const letter of key) context.enterCharacter(letter);
@@ -170,27 +171,4 @@ test('typing either spelling defeats normal enemies and equations without a mist
       assert.equal(context.mistakes, 0, `${term}: ${key}`);
     }
   }
-});
-
-test('chain lightning interrupts at most two bosses and prefers the hop target', () => {
-  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
-  const start = source.indexOf('function chooseChainBossInterrupts(');
-  const end = source.indexOf('// Long targeted interrupt');
-  assert.ok(start >= 0 && end > start);
-  const boss = (id, z) => ({ id, isBoss: true, dying: false, group: { position: { x: 0, y: 0, z, distanceToSquared(other) { return (this.z - other.z) ** 2; } } } });
-  const near = boss('near', -10);
-  const mid = boss('mid', -20);
-  const far = boss('far', -40);
-  const context = vm.createContext({
-    CHAIN_BOSS_MAX: 2,
-    enemies: [near, mid, far],
-  });
-  vm.runInContext(source.slice(start, end), context);
-  const ids = (first, hops) => context.chooseChainBossInterrupts(first, hops).map(enemy => enemy.id).join(',');
-  const typedBoss = boss('typed', 0);
-  assert.equal(ids(typedBoss, [near]), 'near');
-  assert.equal(ids(typedBoss, []), 'near');
-  const typedMinion = { id: 'minion', isBoss: false, dying: true, group: { position: { x: 0, y: 0, z: 0 } } };
-  assert.equal(ids(typedMinion, [near]), 'near,mid');
-  assert.equal(ids(typedMinion, []), '');
 });

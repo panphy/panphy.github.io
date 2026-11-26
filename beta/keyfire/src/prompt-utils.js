@@ -54,79 +54,41 @@ const SPELLING_ALTS = [
 // Match complete words: a measuring device such as "ammeter" keeps its spelling.
 const SPELLING_VARIANTS = new Map(SPELLING_ALTS.flatMap(group => group.map(word => [word, group])));
 
-const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
-const MATH_OPERATOR_INPUTS = new Set(['*', '+', '-', '=', '/', '×', 'x', 'X']);
-
-const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
-// Typeable characters are a-z, 0-9 and = + - * / . ; accented letters are folded
-// to their base letter and everything else (spaces, punctuation, symbols) is skipped.
-function normalizeCharacter(character, options = {}) {
-  if (/\s/.test(character)) return '';
-  if (SUPERSCRIPT_MAP[character]) return SUPERSCRIPT_MAP[character];
-  const folded = character.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const normalized = options.keepCase ? folded : folded.toLowerCase();
-  if (normalized === '×') return options.multiplicationAlias ? 'x' : '';
-  if (normalized === '*') return options.multiplicationAlias ? 'x' : '';
-  return /^[a-zA-Z0-9=+\-*/.]$/.test(normalized) ? normalized : '';
+// What a character types: a-z and 0-9, in lower case. Accented letters are folded to
+// their base letter and everything else (spaces, punctuation, symbols) types nothing.
+function getInputCharacter(character) {
+  const folded = character.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return /^[a-z0-9]$/.test(folded) ? folded : '';
 }
 
-function getInputCharacters(character) {
-  const inputs = [];
-  // Case is kept so units and symbols can be checked exactly (kg, not KG); words compare in lower case.
-  const base = normalizeCharacter(character, { keepCase: true });
-  const alias = normalizeCharacter(character, { multiplicationAlias: true, keepCase: true });
-  if (base) inputs.push({ value: base, equationOnly: false });
-  if (alias && alias !== base) inputs.push({ value: alias, equationOnly: true });
-  return inputs;
+function buildSearchPrompt(term) {
+  return [...term].map(getInputCharacter).join('');
 }
 
-function isMathOperatorInput(character) {
-  return MATH_OPERATOR_INPUTS.has(character);
-}
-
-function buildSearchPrompt(term, options = {}) {
-  return [...term].map(character => normalizeCharacter(character, options)).join('');
-}
-
-function buildAltSearchPrompts(term, options = {}) {
-  const canonical = buildSearchPrompt(term, options);
+function buildAltSearchPrompts(term) {
+  const canonical = buildSearchPrompt(term);
   let variants = [''];
   // Build every combination, including repeated words and mixed UK/US spellings.
   for (const token of term.toLowerCase().split(/([a-z]+)/)) {
     const spellings = SPELLING_VARIANTS.get(token) || [token];
     variants = variants.flatMap(prefix => spellings.map(spelling => prefix + spelling));
   }
-  const alts = new Set(variants.map(variant => buildSearchPrompt(variant, options)));
+  const alts = new Set(variants.map(buildSearchPrompt));
   alts.delete(canonical);
   return [...alts];
-}
-
-// The term as the player is spelling it: the variant of `term` whose typed form is
-// `searchPrompt` (color for colour, say), with its spaces and punctuation; null if none.
-function altTermFor(term, searchPrompt, options = {}) {
-  let variants = [''];
-  for (const token of term.split(/([a-z]+)/i)) {
-    const spellings = SPELLING_VARIANTS.get(token.toLowerCase()) || [token];
-    variants = variants.flatMap(prefix => spellings.map(spelling => prefix + spelling));
-  }
-  return variants.find(variant => buildSearchPrompt(variant, options) === searchPrompt) || null;
 }
 
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function wrapSups(text) {
-  return text.replace(new RegExp(`[${SUPERSCRIPT_DIGITS}]+`, 'g'), match => `<sup class="given-sup">${match}</sup>`);
-}
-
-// Equation wording that names no quantity, so it is never the word asked for.
-function promptIndexForProgress(term, progress, options = {}) {
+// The index in `term` just past its first `progress` typeable characters.
+function promptIndexForProgress(term, progress) {
   if (progress <= 0) return 0;
 
   let matched = 0;
   for (let index = 0; index < term.length; index += 1) {
-    if (!normalizeCharacter(term[index], options)) continue;
+    if (!getInputCharacter(term[index])) continue;
     matched += 1;
     if (matched >= progress) return index + 1;
   }
@@ -146,12 +108,9 @@ function pickTarget(matches, typed) {
 
 export {
   pickTarget,
-  getInputCharacters,
-  isMathOperatorInput,
+  getInputCharacter,
   buildSearchPrompt,
   buildAltSearchPrompts,
-  altTermFor,
   escapeHtml,
-  wrapSups,
   promptIndexForProgress,
 };

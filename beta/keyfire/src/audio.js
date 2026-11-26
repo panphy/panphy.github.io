@@ -1,7 +1,7 @@
 // The output limiter adds about 2 dB of make-up gain, so the master sits a little lower than it used to.
 const MASTER_VOLUME = 0.78;
 const MUSIC_GAIN = 0.82;
-// Trims the driving score against the effects; the quiet ending reprise is left alone.
+// Trims the looping music against the effects.
 const GROOVE_TRIM = 0.67;
 const MUSIC_TIMER_INTERVAL = 80;
 const MUSIC_SCHEDULE_AHEAD = 0.34;
@@ -27,6 +27,8 @@ const BASS_FILTER_FLOOR = 190;
 const PUMP_DEPTH = 0.42;
 const BOSS_TEMPO = 0.95;
 const LANE_PAN_WIDTH = 0.7;
+// Monsters come at the player within about this far either side of the middle.
+const PATH_HALF_WIDTH = 5.8;
 const NOISE_BUFFER_SECONDS = 2;
 // How long the cannon whines before its blast; a kill's burst waits the same time.
 const BEAM_CHARGE_TIME = 0.07;
@@ -204,11 +206,9 @@ export function createKeyFireAudio({
   getWavePhase = () => 'normal',
   getWaveSet,
   getIsFinalWave = () => false,
-  getTypedLength,
   getHealth = () => Infinity,
   getIsTimeFrozen = () => false,
   lowHealth = 0,
-  pathLanes,
 }) {
   let audioEnabled = initialEnabled;
   let audioContext = null;
@@ -436,9 +436,7 @@ export function createKeyFireAudio({
   }
 
   function lanePan(enemy) {
-    const lane = enemy && Number.isFinite(enemy.lane) ? enemy.lane : 0;
-    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
-    return (lane / widest) * LANE_PAN_WIDTH;
+    return laneOf(enemy && Number.isFinite(enemy.lane) ? enemy.lane : 0);
   }
 
   // Small random pitch and level changes so repeated sounds are not identical.
@@ -1348,8 +1346,7 @@ export function createKeyFireAudio({
   }
 
   function laneOf(targetX) {
-    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
-    return Math.max(-1, Math.min(1, targetX / widest)) * LANE_PAN_WIDTH;
+    return Math.max(-1, Math.min(1, targetX / PATH_HALF_WIDTH)) * LANE_PAN_WIDTH;
   }
 
   // Menu and typing
@@ -1381,7 +1378,7 @@ export function createKeyFireAudio({
   // Each letter is a plasma shot: a driven low thump under a crackle of bright noise
   // and a quick falling zap. The top layers brighten as the word fills in. It fires on
   // every key, so it stays short and the bright parts stay quiet.
-  function playTypeSound(progress = Math.min(getTypedLength(), 12) / 12) {
+  function playTypeSound(progress) {
     const amount = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
     // Shots alternate a little left and right, like barrels firing in turn.
     typeShotSide = -typeShotSide;
@@ -1429,19 +1426,13 @@ export function createKeyFireAudio({
 
   // Monsters
 
-  // For bosses this is the arm cue: rocks unlock after their first-shot delay.
-  function playRevealSound(enemy) {
-    const pan = lanePan(enemy);
-    if (enemy?.isBoss) {
-      thud(70, 0.6, 0.09, { pan });
-      growl(55, 1.1, 0.09, { pan, cutoff: 1000, endFrequency: 73.42 });
-      growl(82.41, 0.9, 0.05, { pan: -pan, cutoff: 700, delay: 0.12 });
-      burst(0.9, 0.03, { pan, swell: true, filterType: 'lowpass', filterFrequency: 200, endFilterFrequency: 1400 });
-      return;
-    }
-    const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy?.lane));
-    const pitch = 520 + laneIndex * 27;
-    zap(pitch, pitch * 1.5, 0.14, 0.03, { pan, cutoff: 2800, hold: 0.4 });
+  // A boss's cue: landing in the arena, roaring, raising a minion or its satellites.
+  function playRevealSound(boss) {
+    const pan = lanePan(boss);
+    thud(70, 0.6, 0.09, { pan });
+    growl(55, 1.1, 0.09, { pan, cutoff: 1000, endFrequency: 73.42 });
+    growl(82.41, 0.9, 0.05, { pan: -pan, cutoff: 700, delay: 0.12 });
+    burst(0.9, 0.03, { pan, swell: true, filterType: 'lowpass', filterFrequency: 200, endFilterFrequency: 1400 });
   }
 
   // The monster bursting: mid-range noise and a falling sweep. It leaves the low end

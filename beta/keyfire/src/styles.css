@@ -6,7 +6,6 @@
   --ink: #3d2b1c;
   --muted: #7d6748;
   --grass: #3f9c58;
-  --moss: #20583b;
   --ember: #d9591f;
   --gold: #a8651a;
   --aqua: #157a70;
@@ -159,6 +158,12 @@ body.final-wave-active {
     linear-gradient(180deg, rgba(183, 220, 255, 0.5), rgba(255, 255, 255, 0.16) 48%, transparent 82%);
   mix-blend-mode: screen;
   transition: opacity 80ms ease-out;
+}
+
+/* Chain lightning's flash. The weather sets this element's opacity inline every frame,
+   so the class has to outrank it. */
+.lightning-flash.show {
+  opacity: 0.92 !important;
 }
 
 /* The frozen lake's blizzard: mist closes in and flakes of several sizes drift across,
@@ -517,7 +522,6 @@ body.is-running:not(.is-paused) .game-bar {
 
 .game-title span,
 .readout span,
-.typing-strip span,
 .message-panel p {
   display: block;
   color: var(--gold);
@@ -659,11 +663,6 @@ body.is-running:not(.is-paused) .game-bar {
   transition: stroke 170ms ease;
 }
 
-.battery-saver-toggle .leaf-stem {
-  stroke: var(--muted);
-  transition: stroke 170ms ease;
-}
-
 .battery-saver-toggle .saver-slash {
   opacity: 1;
   stroke: var(--danger);
@@ -675,10 +674,6 @@ body.is-running:not(.is-paused) .game-bar {
 }
 
 .battery-saver-toggle.is-active .leaf-path {
-  stroke: var(--grass);
-}
-
-.battery-saver-toggle.is-active .leaf-stem {
   stroke: var(--grass);
 }
 
@@ -848,52 +843,6 @@ body.is-running:not(.is-paused) .hud-grid {
 
 .life-heart.is-hit .heart-shell {
   animation: heart-shell-flash 420ms ease;
-}
-
-.typing-strip {
-  position: fixed;
-  left: 50%;
-  bottom: max(18px, env(safe-area-inset-bottom));
-  z-index: 12;
-  display: grid;
-  grid-template-columns: auto minmax(160px, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  width: min(680px, calc(100vw - 28px));
-  min-height: 58px;
-  padding: 10px 14px;
-  border: 1px solid rgba(239, 195, 92, 0.42);
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(8, 18, 16, 0.86), rgba(33, 15, 15, 0.78));
-  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.4), inset 0 0 24px rgba(242, 106, 61, 0.08);
-  transform: translateX(-50%);
-  backdrop-filter: blur(14px);
-}
-
-.typing-strip strong {
-  overflow: hidden;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: clamp(1rem, 3vw, 1.28rem);
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1.1;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.typing-strip small {
-  color: var(--aqua);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.typing-strip.mistake {
-  border-color: rgba(243, 78, 85, 0.82);
-  animation: shake 190ms linear;
 }
 
 .message-panel {
@@ -1226,11 +1175,6 @@ body.is-running:not(.is-paused) .hud-grid {
   border-color: color-mix(in srgb, var(--boss-accent, var(--danger)) 82%, white 18%);
 }
 
-#comboValue.is-hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* Only the score and the life meter show during play; the other readouts stay in the
    page for the code that fills them. */
 .readout[hidden] {
@@ -1423,16 +1367,6 @@ body.is-running:not(.is-paused) .hud-grid {
   line-height: 1.35;
 }
 
-.glossary-item.is-equation {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 3px;
-}
-
-.glossary-item.is-equation .gl-term {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-}
-
 .keyboard-input {
   position: fixed;
   left: 50%;
@@ -1595,21 +1529,6 @@ body.is-running:not(.is-paused) .hud-grid {
   }
 }
 
-@keyframes boss-arm-flash {
-  0% {
-    filter: brightness(1.7);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--boss-glow, var(--gold)) 70%, transparent), 0 0 36px color-mix(in srgb, var(--boss-glow, var(--gold)) 55%, transparent);
-  }
-
-  55% {
-    filter: brightness(1.25);
-  }
-
-  100% {
-    filter: brightness(1);
-  }
-}
-
 @keyframes critical-pulse {
   0%,
   100% {
@@ -1726,17 +1645,6 @@ body.is-running:not(.is-paused) .hud-grid {
     height: 19px;
   }
 
-  .typing-strip {
-    grid-template-columns: 1fr;
-    gap: 4px;
-    min-height: 72px;
-    text-align: center;
-  }
-
-  .typing-strip small {
-    justify-self: center;
-  }
-
   .message-panel {
     padding: 20px;
   }
@@ -1756,7 +1664,7 @@ body.is-running:not(.is-paused) .hud-grid {
     --panel-top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 166px);
   }
 
-  /* The raised corner buttons clear the typing strip during a run; between runs they can sit low. */
+  /* The corner buttons sit raised during a run; between runs they can sit low. */
   body:not(.is-running) .corner-controls,
   body.is-paused .corner-controls {
     bottom: max(18px, env(safe-area-inset-bottom));
@@ -1953,14 +1861,6 @@ body:not(.is-running) .power-up-bar {
   width: 32px;
   height: 32px;
   display: block;
-}
-
-body.chain-lightning-primed .typing-strip {
-  border-color: rgba(239, 195, 92, 0.88);
-  box-shadow:
-    0 18px 52px rgba(0, 0, 0, 0.4),
-    inset 0 0 24px rgba(242, 106, 61, 0.08),
-    0 0 24px rgba(191, 85, 236, 0.22);
 }
 
 @keyframes power-up-shake {
@@ -2548,7 +2448,6 @@ body.ending-summary .sw-leaderboard {
 
 /* ── Battery Saver overrides (performance optimization) ── */
 body.battery-saver .readout,
-body.battery-saver .typing-strip,
 body.battery-saver .message-panel,
 body.battery-saver .god-mode-badge,
 body.battery-saver .power-up-bar {
@@ -2559,10 +2458,6 @@ body.battery-saver .power-up-bar {
 body.battery-saver .readout {
   background: var(--panel-solid) !important;
   box-shadow: var(--paper-shadow) !important;
-}
-
-body.battery-saver .typing-strip {
-  background: var(--paper) !important;
 }
 
 body.battery-saver .message-panel {
@@ -2858,7 +2753,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   mask-image: none;
 }
 
-.typing-strip,
 .message-panel,
 .readout,
 .power-up-bar,
@@ -2871,7 +2765,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   backdrop-filter: none;
 }
 
-.typing-strip,
 .message-panel,
 .sw-initials-card {
   border-radius: 16px;
@@ -3185,21 +3078,6 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   width: max-content;
 }
 
-@keyframes boss-arm-flash-paper {
-  0% {
-    filter: brightness(1.35);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--boss-accent, var(--danger)) 55%, transparent), 0 10px 26px rgba(74, 52, 28, 0.4);
-  }
-
-  55% {
-    filter: brightness(1.12);
-  }
-
-  100% {
-    filter: none;
-  }
-}
-
 /* Power-up icons on paper: the original neon strokes were drawn for a dark tray and
    faded in and out, so they all but vanished on cream. These keep each powerUp's
    hue, darkened to read as ink, at full strength; only a gentle pulse remains. */
@@ -3380,45 +3258,9 @@ body.loot-guide-open .power-up-bar {
   color: rgba(61, 43, 28, 0.36);
 }
 
-.word-tag .typed-line {
-  display: none;
-  justify-self: stretch;
-  margin-top: 2px;
-  padding: 4px 6px 3px;
-  border-top: 1px dashed rgba(110, 78, 40, 0.35);
-  color: var(--typed);
-  font-size: clamp(0.82rem, 2vw, 1.05rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.word-tag.has-typing .typed-line {
-  display: block;
-}
-
-.word-tag.has-typing .typed-line::after {
-  content: "";
-  display: inline-block;
-  width: 0.08em;
-  height: 0.95em;
-  margin-left: 2px;
-  vertical-align: -0.12em;
-  background: currentColor;
-  animation: typed-caret 0.9s steps(1) infinite;
-}
-
-@keyframes typed-caret {
-  50% { opacity: 0; }
-}
-
 .word-tag.is-miss {
   border-color: var(--danger);
   animation: word-miss 220ms ease-out;
-}
-
-.word-tag.is-miss .typed-line {
-  color: var(--danger);
 }
 
 @keyframes word-miss {
@@ -3471,8 +3313,7 @@ body.loot-guide-open .power-up-bar {
 }
 
 /* The boss's line is typed in place: finished words fade, and the letters typed of
-   the current word turn blue. No second line, so the card stays shallow. */
-.word-tag[data-kind="boss"] .typed-line,
+   the current word turn blue. */
 .word-tag[data-kind="boss"] .prompt-kind {
   display: none;
 }
@@ -4337,29 +4178,13 @@ body.battery-saver .corner-controls .battery-saver-toggle.is-active {
 }
 
 /* One line per card, like the boss's words: the letters typed so far light up cyan in
-   the word itself, so the separate line of typed letters is not shown. */
+   the word itself. */
 .word-tag:not(.is-boss) .prompt .typed {
   color: #5ff2e6;
   text-shadow: 0 0 10px rgba(95, 242, 230, 0.55);
 }
 
-.word-tag .typed-line,
-.word-tag.has-typing .typed-line {
-  display: none;
-}
-
 .word-tag.is-miss .prompt .remaining {
-  color: #ff6a5a;
-}
-
-.word-tag .typed-line {
-  border-top-color: rgba(255, 246, 220, 0.25);
-  color: #5ff2e6;
-  font-family: var(--font-chunky);
-  font-weight: 400;
-}
-
-.word-tag.is-miss .typed-line {
   color: #ff6a5a;
 }
 

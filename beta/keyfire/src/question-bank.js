@@ -1,8 +1,5 @@
-// AQA GCSE Physics 8463-style prompts grouped by typing difficulty.
-// Keep terms concise; definitions appear as hints in later rounds.
-// Medium and hard terms and the equations become boss questions: the definition
-// is the clue and one content word is hidden. `ask` names that word when the
-// automatic pick would hide the wrong one.
+// High school physics vocabulary, grouped by typing difficulty. Keep terms concise:
+// plain words only, so every one is easy to type. Definitions show in the end-of-run list.
 export const EASY_WORDS = [
   // Quantities & units
   { term: 'force', definition: 'A push or pull that may change speed, shape or direction' },
@@ -118,7 +115,7 @@ export const MEDIUM_WORDS = [
   { term: 'insulation', definition: 'Material used to reduce unwanted energy transfer by heating' },
   { term: 'lubricant', definition: 'A substance reducing friction between moving surfaces' },
   { term: 'renewable', definition: 'An energy resource that can be replaced as it is used' },
-  { term: 'non renewable', definition: 'An energy resource that will run out', ask: 'non renewable' },
+  { term: 'non renewable', definition: 'An energy resource that will run out' },
   { term: 'fossil fuels', definition: 'Coal, oil and gas formed from the remains of ancient organisms' },
   { term: 'biofuel', definition: 'A renewable fuel made from recently living plant or animal matter' },
   { term: 'geothermal', definition: 'An energy resource using hot rocks underground' },
@@ -156,19 +153,19 @@ export const MEDIUM_WORDS = [
   { term: 'gas pressure', definition: 'Force per unit area from particles colliding with walls' },
   // Atomic & nuclear
   { term: 'atomic number', definition: 'How many protons a nucleus contains' },
-  { term: 'mass number', definition: 'How many protons and neutrons a nucleus contains in total', ask: 'mass' },
+  { term: 'mass number', definition: 'How many protons and neutrons a nucleus contains in total' },
   { term: 'energy level', definition: 'One of the fixed distances from the nucleus at which electrons orbit' },
   { term: 'nuclear model', definition: 'The atom as a tiny positive centre with electrons orbiting around it' },
   { term: 'alpha scattering', definition: 'Experiment firing particles at gold foil that revealed the nucleus' },
-  { term: 'alpha particle', definition: 'Two protons and two neutrons emitted together; a helium nucleus', ask: 'alpha' },
-  { term: 'beta particle', definition: 'A fast electron emitted when a neutron turns into a proton', ask: 'beta' },
+  { term: 'alpha particle', definition: 'Two protons and two neutrons emitted together; a helium nucleus' },
+  { term: 'beta particle', definition: 'A fast electron emitted when a neutron turns into a proton' },
   { term: 'half life', definition: 'Time for the count rate, or number of unstable nuclei, to fall to 50%' },
   { term: 'activity', definition: 'The rate at which unstable nuclei decay' },
   { term: 'radioactive decay', definition: 'Spontaneous emission of radiation from an unstable nucleus' },
   { term: 'random', definition: 'Describes decay: nobody can predict which nucleus will go next' },
   { term: 'count rate', definition: 'The number of decays recorded each second by a detector' },
   { term: 'ionising radiation', definition: 'Radiation that can knock electrons out of atoms' },
-  { term: 'radiation dose', definition: 'A measure of the risk of harm from exposure, in sieverts', ask: 'dose' },
+  { term: 'radiation dose', definition: 'A measure of the risk of harm from exposure, in sieverts' },
   { term: 'irradiation', definition: 'Exposing an object to nuclear radiation without making it radioactive' },
   { term: 'contamination', definition: 'Unwanted radioactive material on or inside an object' },
   { term: 'tracer', definition: 'A radioactive isotope used to follow a substance through the body' },
@@ -181,9 +178,9 @@ export const MEDIUM_WORDS = [
   { term: 'deceleration', definition: 'The rate at which an object slows down' },
   { term: 'gradient', definition: 'The steepness of a line on a graph' },
   { term: 'contact force', definition: 'A force that acts only when two objects are touching' },
-  { term: 'non contact force', definition: 'A force that acts between objects that are physically separated', ask: 'non contact' },
+  { term: 'non contact force', definition: 'A force that acts between objects that are physically separated' },
   { term: 'resultant force', definition: 'A single force that has the same effect as all the forces acting on an object' },
-  { term: 'free body diagram', definition: 'A diagram with arrows showing all the forces acting on a single object', ask: 'free body' },
+  { term: 'free body diagram', definition: 'A diagram with arrows showing all the forces acting on a single object' },
   { term: 'friction', definition: 'A force opposing motion between surfaces' },
   { term: 'drag', definition: 'Resistive force on an object moving through a fluid' },
   { term: 'air resistance', definition: 'The drag on an object moving through the atmosphere' },
@@ -192,7 +189,7 @@ export const MEDIUM_WORDS = [
   { term: 'momentum', definition: 'Mass multiplied by velocity' },
   { term: 'deformation', definition: 'A change in shape of a material caused by an applied force' },
   { term: 'extension', definition: 'Increase in length of a stretched object' },
-  { term: 'spring constant', definition: 'The force needed per metre of extension; a measure of stiffness', ask: 'spring' },
+  { term: 'spring constant', definition: 'The force needed per metre of extension; a measure of stiffness' },
   { term: 'Hooke\'s law', definition: 'Extension is directly proportional to force, up to a limit' },
   { term: 'stopping distance', definition: 'How far a car travels from seeing a hazard until it stops' },
   { term: 'reaction time', definition: 'How long a person takes to respond to a stimulus' },
@@ -225,7 +222,7 @@ export const MEDIUM_WORDS = [
   { term: 'concave lens', definition: 'Diverges parallel light; thinner in the middle' },
   { term: 'principal focus', definition: 'The point where rays parallel to the axis meet after a convex lens' },
   { term: 'focal length', definition: 'Distance from the centre of a lens to its principal focus' },
-  { term: 'real image', definition: 'Formed where light rays actually meet; can be projected on a screen', ask: 'real' },
+  { term: 'real image', definition: 'Formed where light rays actually meet; can be projected on a screen' },
   { term: 'virtual image', definition: 'Formed where light rays only appear to come from; cannot be projected' },
   { term: 'transparent', definition: 'Describes an object that transmits light without scattering it' },
   { term: 'translucent', definition: 'Describes an object that transmits light but scatters it' },
@@ -237,7 +234,7 @@ export const MEDIUM_WORDS = [
   { term: 'solenoid', definition: 'A coil of wire that produces a magnetic field when carrying current' },
   { term: 'electromagnet', definition: 'A magnet produced by current in a coil' },
   { term: 'iron core', definition: 'The magnetic centre of a transformer or electromagnet' },
-  { term: 'motor effect', definition: 'Force on a current-carrying wire in a magnetic field', ask: 'motor' },
+  { term: 'motor effect', definition: 'Force on a current-carrying wire in a magnetic field' },
   { term: 'electric motor', definition: 'A coil in a magnetic field that spins when current passes through it' },
   { term: 'alternator', definition: 'A generator that produces alternating current' },
   { term: 'dynamo', definition: 'A generator that produces direct current' },
@@ -246,8 +243,8 @@ export const MEDIUM_WORDS = [
   { term: 'primary coil', definition: 'The part of a transformer connected to the alternating supply' },
   { term: 'secondary coil', definition: 'The part of a transformer in which a potential difference is induced' },
   // Space
-  { term: 'solar system', definition: 'The Sun and all the objects that orbit it', ask: 'solar' },
-  { term: 'dwarf planet', definition: 'A small round body orbiting the Sun, such as Pluto', ask: 'dwarf' },
+  { term: 'solar system', definition: 'The Sun and all the objects that orbit it' },
+  { term: 'dwarf planet', definition: 'A small round body orbiting the Sun, such as Pluto' },
   { term: 'Milky Way', definition: 'The galaxy that contains our solar system' },
   { term: 'circular orbit', definition: 'A path in which speed is constant but velocity keeps changing' },
   { term: 'nebula', definition: 'A cloud of gas and dust in space where stars can form' },
@@ -289,7 +286,7 @@ export const HARD_WORDS = [
   { term: 'thermal energy', definition: 'The energy store that increases when a substance is heated' },
   { term: 'elastic potential energy', definition: 'Stored in an object that is stretched, squashed or bent' },
   { term: 'specific heat capacity', definition: 'Energy to raise the temperature of 1 kg of a substance by 1 °C' },
-  { term: 'specific latent heat', definition: 'Energy to change the state of 1 kg with no change in temperature', ask: 'latent' },
+  { term: 'specific latent heat', definition: 'Energy to change the state of 1 kg with no change in temperature' },
   { term: 'specific latent heat of fusion', definition: 'Energy to change 1 kg from solid to liquid at constant temperature' },
   { term: 'specific latent heat of vaporisation', definition: 'Energy to change 1 kg from liquid to gas at constant temperature' },
   { term: 'thermal conductivity', definition: 'A measure of how quickly energy passes through a material by heating' },
@@ -319,8 +316,8 @@ export const HARD_WORDS = [
   { term: 'gravitational field strength', definition: 'The weight of each kilogram at a point; about 9.8 N/kg on Earth' },
   { term: 'terminal velocity', definition: 'The constant speed reached when the resultant force becomes zero' },
   { term: 'uniform acceleration', definition: 'Velocity changing by the same amount every second' },
-  { term: 'distance time graph', definition: 'Its gradient gives the speed of the object', ask: 'distance' },
-  { term: 'velocity time graph', definition: 'Its gradient gives acceleration; the area under it gives distance travelled', ask: 'velocity' },
+  { term: 'distance time graph', definition: 'Its gradient gives the speed of the object' },
+  { term: 'velocity time graph', definition: 'Its gradient gives acceleration; the area under it gives distance travelled' },
   { term: 'inertial mass', definition: 'Measure of how difficult it is to change velocity' },
   { term: 'conservation of momentum', definition: 'In a closed system, total momentum before an event equals total momentum after' },
   { term: 'centre of mass', definition: 'The point through which an object\'s weight appears to act' },
@@ -332,11 +329,11 @@ export const HARD_WORDS = [
   { term: 'braking distance', definition: 'How far a vehicle travels from pressing the pedal until it stops' },
   { term: 'atmospheric pressure', definition: 'Force per unit area caused by the weight of the air above' },
   // Waves
-  { term: 'wave equation', definition: 'Speed equals frequency multiplied by wavelength', ask: 'wave' },
+  { term: 'wave equation', definition: 'Speed equals frequency multiplied by wavelength' },
   { term: 'angle of incidence', definition: 'Measured between the incoming ray and the normal' },
   { term: 'angle of refraction', definition: 'Measured between the ray inside the new medium and the normal' },
   { term: 'critical angle', definition: 'The angle of incidence above which total internal reflection occurs' },
-  { term: 'total internal reflection', definition: 'All the light stays inside the denser medium beyond the critical angle', ask: 'internal' },
+  { term: 'total internal reflection', definition: 'All the light stays inside the denser medium beyond the critical angle' },
   { term: 'specular reflection', definition: 'Light bouncing off a smooth surface in a single direction' },
   { term: 'diffuse reflection', definition: 'Light bouncing off a rough surface and scattering in all directions' },
   { term: 'electromagnetic wave', definition: 'A transverse oscillation that can travel through a vacuum' },
@@ -356,7 +353,7 @@ export const HARD_WORDS = [
   { term: 'split ring commutator', definition: 'Reverses the current in a motor coil every half turn' },
   { term: 'generator effect', definition: 'Inducing a potential difference by moving a conductor through a magnetic field' },
   { term: 'electromagnetic induction', definition: 'Producing a potential difference by changing the magnetic field through a coil' },
-  { term: 'induced potential difference', definition: 'The potential difference produced across a conductor that cuts magnetic field lines', ask: 'induced' },
+  { term: 'induced potential difference', definition: 'The potential difference produced across a conductor that cuts magnetic field lines' },
   { term: 'transformer', definition: 'Device changing alternating potential difference using induction' },
   { term: 'step up transformer', definition: 'Has more turns on its secondary coil, so potential difference increases' },
   { term: 'step down transformer', definition: 'Has fewer turns on its secondary coil, so potential difference decreases' },
@@ -422,59 +419,6 @@ export const ROCK_UNITS = [
   { term: 'MJ', definition: 'megajoule, a million joules' },
   { term: 'mm', definition: 'millimetre, a thousandth of a metre' },
   { term: 'km', definition: 'kilometre, a thousand metres' },
-];
-
-// AQA GCSE Physics 8463 word equations — used for the equation boss each wave.
-// term = the word equation the player types; definition = compact symbolic form shown on label.
-export const EQUATION_WORDS = [
-  // Forces & motion
-  { term: 'weight = mass × gravitational field strength', definition: 'W = mg', isEquation: true },
-  { term: 'resultant force = mass × acceleration', definition: 'F = ma', isEquation: true },
-  { term: 'work done = force × distance', definition: 'W = Fs', isEquation: true },
-  { term: 'distance travelled = speed × time', definition: 's = vt', isEquation: true },
-  { term: 'acceleration = change in velocity / time taken', definition: 'a = Δv / t', isEquation: true },
-  { term: 'momentum = mass × velocity', definition: 'p = mv', isEquation: true },
-  { term: 'force = change in momentum / time taken', definition: 'F = mΔv / Δt', isEquation: true },
-  { term: 'moment of a force = force × distance', definition: 'M = Fd', isEquation: true },
-  { term: 'force = spring constant × extension', definition: 'F = ke', isEquation: true },
-  { term: 'final velocity² − initial velocity² = 2 × acceleration × distance', definition: 'v² − u² = 2as', isEquation: true },
-
-  // Energy
-  { term: 'kinetic energy = 0.5 × mass × speed²', definition: 'Ek = ½mv²', isEquation: true },
-  { term: 'gravitational potential energy = mass × gravitational field strength × height', definition: 'Ep = mgh', isEquation: true, ask: 'height' },
-  { term: 'elastic potential energy = 0.5 × spring constant × extension²', definition: 'Ee = ½ke²', isEquation: true },
-  { term: 'power = energy transferred / time', definition: 'P = E / t', isEquation: true, ask: 'energy' },
-  { term: 'power = work done / time', definition: 'P = W / t', isEquation: true },
-  { term: 'energy transferred = power × time', definition: 'E = Pt', isEquation: true, ask: 'energy' },
-  { term: 'efficiency = useful power output / total power input', definition: 'efficiency = Pout / Pin', isEquation: true, ask: 'useful' },
-  { term: 'efficiency = useful output energy transfer / total input energy transfer', definition: 'efficiency = Eout / Ein', isEquation: true, ask: 'output' },
-
-  // Materials & pressure
-  { term: 'density = mass / volume', definition: 'ρ = m / V', isEquation: true },
-  { term: 'pressure = force / area', definition: 'p = F / A', isEquation: true },
-  { term: 'pressure = height × density × gravitational field strength', definition: 'p = hρg', isEquation: true },
-  { term: 'pressure × volume = constant', definition: 'pV = constant', isEquation: true },
-
-  // Thermal
-  { term: 'change in thermal energy = mass × specific heat capacity × temperature change', definition: 'ΔE = mcΔθ', isEquation: true },
-  { term: 'thermal energy for a change of state = mass × specific latent heat', definition: 'E = mL', isEquation: true },
-
-  // Waves & light
-  { term: 'wave speed = frequency × wavelength', definition: 'v = fλ', isEquation: true },
-  { term: 'period = 1 / frequency', definition: 'T = 1 / f', isEquation: true },
-  { term: 'magnification = image height / object height', definition: 'magnification = hi / ho', isEquation: true },
-
-  // Electricity
-  { term: 'charge flow = current × time', definition: 'Q = It', isEquation: true },
-  { term: 'potential difference = current × resistance', definition: 'V = IR', isEquation: true },
-  { term: 'power = potential difference × current', definition: 'P = VI', isEquation: true, ask: 'current' },
-  { term: 'power = current² × resistance', definition: 'P = I²R', isEquation: true },
-  { term: 'energy transferred = charge flow × potential difference', definition: 'E = QV', isEquation: true },
-
-  // Magnetism & induction
-  { term: 'force = magnetic flux density × current × length', definition: 'F = BIl', isEquation: true },
-  { term: 'primary potential difference / secondary potential difference = primary turns / secondary turns', definition: 'Vp / Vs = np / ns', isEquation: true, ask: 'turns turns' },
-  { term: 'primary potential difference × primary current = secondary potential difference × secondary current', definition: 'VpIp = VsIs', isEquation: true, ask: 'current current' },
 ];
 
 // Boss lines: whole statements the player types word by word. Each finished line

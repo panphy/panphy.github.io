@@ -9,7 +9,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 export const GLOW_GAIN = 2.6;
 export const MOON_GLOW_GAIN = 1.2;
 
-export const QUALITY_LEVELS = ['basic', 'medium', 'high'];
+const QUALITY_LEVELS = ['basic', 'medium', 'high'];
 
 const EXPOSURE = 1.12;
 // Above 1.5 the low-poly scene looks the same but costs much more power; page
@@ -259,7 +259,7 @@ function createMotes(scene, glowTexture, count = 110) {
 
 const WHITE = new THREE.Color(0xffffff);
 
-function createSpellEffects(scene, glowTexture) {
+function createBurstEffects(scene, glowTexture) {
   const MAX_SPARKS = 900;
   const sparks = createGlowPoints(scene, MAX_SPARKS, glowTexture);
   const velocities = new Float32Array(MAX_SPARKS * 3);
@@ -498,7 +498,7 @@ export function createVisuals({ renderer, scene, camera, available, onQualityCha
   const sky = createSky(scene);
   const stars = createStars(scene);
   const motes = createMotes(scene, glowTexture);
-  const effects = createSpellEffects(scene, glowTexture);
+  const effects = createBurstEffects(scene, glowTexture);
 
   let composer = null;
   let aoPass = null;
@@ -518,7 +518,7 @@ export function createVisuals({ renderer, scene, camera, available, onQualityCha
   if (available) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = EXPOSURE;
-    // A soft neutral environment so metal (chest trim, wand bands) has something to reflect.
+    // A soft neutral environment so metal (chest trim, the cannon) has something to reflect.
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environmentIntensity = 0.3;
@@ -643,12 +643,6 @@ export function createVisuals({ renderer, scene, camera, available, onQualityCha
     setSize,
     setBatterySaver(active) {
       saver = active;
-      applyQuality();
-    },
-    getQuality: () => quality,
-    setAutoQuality(level) {
-      if (!QUALITY_LEVELS.includes(level)) return;
-      autoQuality = level;
       applyQuality();
     },
   };

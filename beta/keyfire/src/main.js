@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=beta35';
-import { createSeasonalEffects } from './seasonal-effects.js?v=beta35';
-import { createPowerUpSystem } from './power-ups.js?v=beta35';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta35';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta35';
-import { createLeaderboard } from './leaderboard.js?v=beta35';
-import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js?v=beta35';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta35';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta35';
-import { createLowPolyCloud } from './lowpoly.js?v=beta35';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta35';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta35';
-import { createWordDeck } from './word-decks.js?v=beta35';
-import { createStage } from './stages.js?v=beta35';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta35';
-import { storyBeatForWave } from './story.js?v=beta35';
-import { createStoryteller } from './storyteller.js?v=beta35';
-import { createPlasmaCannon } from './plasma-cannon.js?v=beta35';
+import { createKeyFireAudio } from './audio.js?v=beta36';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta36';
+import { createPowerUpSystem } from './power-ups.js?v=beta36';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta36';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta36';
+import { createLeaderboard } from './leaderboard.js?v=beta36';
+import { createEnemyMesh } from './enemy-meshes.js?v=beta36';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta36';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta36';
+import { createLowPolyCloud } from './lowpoly.js?v=beta36';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta36';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta36';
+import { createWordDeck } from './word-decks.js?v=beta36';
+import { createStage } from './stages.js?v=beta36';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta36';
+import { storyBeatForWave } from './story.js?v=beta36';
+import { createStoryteller } from './storyteller.js?v=beta36';
+import { createPlasmaCannon } from './plasma-cannon.js?v=beta36';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -64,11 +64,8 @@ function saveRunTerms() {
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
 const scoreValue = document.getElementById('scoreValue');
-const bestValue = document.getElementById('bestValue');
 const healthValue = document.getElementById('healthValue');
-const waveValue = document.getElementById('waveValue');
 const phaseValue = document.getElementById('phaseValue');
-const comboValue = document.getElementById('comboValue');
 const gameBar = document.querySelector('.game-bar');
 const moonHaze = document.querySelector('.moon-haze');
 const startButton = document.getElementById('startButton');
@@ -123,10 +120,8 @@ const MAX_LIFE = HEART_COUNT * 2;
 // Two hearts or fewer: the music darkens and a heartbeat joins it.
 const LOW_LIFE_MUSIC_THRESHOLD = 4;
 const MINION_DAMAGE = 2;
-// Chain lightning vs bosses: a long interrupt (not a global freeze like time freeze),
-// and at most this many bosses are touched by one cast (a typed boss kill counts).
+// Seconds a boss is stunned when chain lightning leaps to it.
 const CHAIN_BOSS_STUN = 5.5;
-const CHAIN_BOSS_MAX = 2;
 // Bosses are drawn this much bigger than their listed scale, so they dominate
 // the scene in boss waves. The model gallery shows the listed scale.
 const BOSS_SIZE = 1.35;
@@ -150,18 +145,6 @@ const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
 const LABEL_X_EASE = 0.14;
 const LABEL_Y_EASE = 0.07;
-const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
-const PATH_MARKER_MIN_Z = -44;
-const PATH_MARKER_MAX_Z = 4;
-const PATH_MARKER_SPACING = 6;
-const PATH_MARKER_SPAN = PATH_MARKER_MAX_Z - PATH_MARKER_MIN_Z + PATH_MARKER_SPACING;
-const TREE_MIN_Z = -58;
-const TREE_MAX_Z = 18;
-const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
-const PATH_MARKER_WRAP_Z = 14;
-const SCENERY_SCROLL_SPEED = 0.58;
-const PATH_MARKER_SCROLL_MULTIPLIER = 1.0;
-const ROAD_SCROLL_MULTIPLIER = 1.0;
 // Monsters are modelled with their feet at y = 0, and the road surface undulates between
 // about -0.14 and -0.06, so walkers stand at its high points; any higher and they visibly
 // float above their own shadows.
@@ -175,7 +158,6 @@ const ENEMY_TYPES = [
     body: 0x6d5137,
     trim: 0xa07b4f,
     eye: 0x58dfcf,
-    speed: 2.15,
     scale: 0.94,
     weight: 6,
     score: 35,
@@ -185,7 +167,6 @@ const ENEMY_TYPES = [
     body: 0x235a50,
     trim: 0x54c46e,
     eye: 0xefc35c,
-    speed: 2.75,
     scale: 0.9,
     weight: 4,
     score: 45,
@@ -195,7 +176,6 @@ const ENEMY_TYPES = [
     body: 0x393b40,
     trim: 0x6d7075,
     eye: 0xf26a3d,
-    speed: 1.72,
     scale: 1.22,
     weight: 3,
     score: 55,
@@ -205,7 +185,6 @@ const ENEMY_TYPES = [
     body: 0x5e2322,
     trim: 0xf26a3d,
     eye: 0xf2f0df,
-    speed: 3.25,
     scale: 0.85,
     weight: 2,
     score: 70,
@@ -215,7 +194,6 @@ const ENEMY_TYPES = [
     body: 0x2a1640,
     trim: 0x8b4fc8,
     eye: 0x78ff6e,
-    speed: 2.0,
     scale: 1.06,
     weight: 3,
     score: 50,
@@ -227,9 +205,7 @@ const MEDIC_TYPE = {
   body: 0xff315f,
   trim: 0xff8fb3,
   eye: 0xf2f0df,
-  speed: 7.9,
   scale: 0.92,
-  weight: 0,
   score: 45,
 };
 const MIMIC_TYPE = {
@@ -238,9 +214,7 @@ const MIMIC_TYPE = {
   body: 0xd4a020,
   trim: 0xffd040,
   eye: 0xef44fb,
-  speed: 7.3,
   scale: 1.2,
-  weight: 0,
   score: 0,
 };
 
@@ -252,9 +226,7 @@ const BOSS_TYPES = [
     body: 0x5b0614,
     trim: 0xff351f,
     eye: 0xfff05a,
-    speed: 1.1,
     scale: 1.62,
-    weight: 1,
     score: 150,
   },
   {
@@ -263,32 +235,7 @@ const BOSS_TYPES = [
     body: 0x0e3b2f,
     trim: 0x2dd4bf,
     eye: 0xd9ff66,
-    speed: 1.05,
     scale: 1.64,
-    weight: 1,
-    score: 150,
-  },
-  {
-    name: 'Storm Warden',
-    isBoss: true,
-    body: 0x1f2a5f,
-    trim: 0x70a5ff,
-    eye: 0xf2f0df,
-    speed: 1.14,
-    scale: 1.6,
-    weight: 1,
-    score: 150,
-  },
-  {
-    name: 'Solar Anvil',
-    isBoss: true,
-    isFlying: true,
-    body: 0x4b2509,
-    trim: 0xfbbf24,
-    eye: 0x7dd3fc,
-    speed: 1.08,
-    scale: 1.66,
-    weight: 1,
     score: 150,
   },
   {
@@ -297,9 +244,7 @@ const BOSS_TYPES = [
     body: 0x1a3045,
     trim: 0x9ee8ff,
     eye: 0xfff8b0,
-    speed: 0.95,
     scale: 1.68,
-    weight: 1,
     score: 150,
   },
   {
@@ -308,45 +253,7 @@ const BOSS_TYPES = [
     body: 0x3d0a00,
     trim: 0xff6a00,
     eye: 0xffffff,
-    speed: 1.08,
     scale: 1.63,
-    weight: 1,
-    score: 150,
-  },
-  {
-    name: 'Void Specter',
-    isBoss: true,
-    isFlying: true,
-    body: 0x08060f,
-    trim: 0x00e5ff,
-    eye: 0x00e5ff,
-    speed: 1.18,
-    scale: 1.58,
-    weight: 1,
-    score: 150,
-  },
-  {
-    name: 'Celestial Arbiter',
-    isBoss: true,
-    isFlying: true,
-    body: 0xf0f4ff,
-    trim: 0xffd700,
-    eye: 0x1a3aff,
-    speed: 1.02,
-    scale: 1.65,
-    weight: 1,
-    score: 150,
-  },
-  {
-    name: 'Phantom Rift',
-    isBoss: true,
-    isFlying: true,
-    body: 0x0a2a2a,
-    trim: 0xe040fb,
-    eye: 0xe040fb,
-    speed: 1.13,
-    scale: 1.61,
-    weight: 1,
     score: 150,
   },
   {
@@ -355,9 +262,7 @@ const BOSS_TYPES = [
     body: 0x050d1a,
     trim: 0xd4a017,
     eye: 0xffffff,
-    speed: 0.92,
     scale: 1.72,
-    weight: 1,
     score: 150,
   },
 ];
@@ -378,12 +283,9 @@ const cameraTarget = new THREE.Vector3(0, 1.5, -12);
 const enemies = [];
 const beams = [];
 const debris = [];
-const canopyBlocks = [];
-const torchFlames = [];
-const torchLights = [];
+const cannonGlows = [];
+const strikeLights = [];
 const lightningCrowns = [];
-const pathMarkerBlocks = [];
-const scrollingTrees = [];
 const clouds = [];
 const meteors = [];
 
@@ -391,7 +293,7 @@ let mode = 'idle';
 let score = 0;
 let bestScore = loadBestScore();
 let health = MAX_LIFE;
-let wandsArePrimed = false;
+let cannonIsPrimed = false;
 let gameTimeSeconds = 0;
 let waveSet = 1;
 let wavePhase = 'normal';
@@ -423,13 +325,11 @@ let batterySaver = false;
 const BATTERY_SAVER_STORAGE_KEY = 'keyfireBatterySaver';
 
 let elapsed = 0;
-let mistakeTimer = 0;
 let damageTimer = 0;
 let hudTimer = 0;
 let renderedHealth = null;
 let enemyId = 0;
 let labelMeasureGen = 0; // bumped on resize; invalidates cached label dimensions
-let pathMarkerMaterial = null;
 let moon = null;
 let moonAngle = INITIAL_MOON_ANGLE;
 let moonWaitTimer = 0;
@@ -453,7 +353,7 @@ let sceneRockMaterial = null;
 const rail = { stage: null, state: 'idle', stopIndex: -1, from: null, to: null, toIndex: 0, t: 0, duration: 1, bursts: [], encounter: null, walkPhase: 0 };
 let hitStopTimer = 0;
 const BOSS_STAND_Z = -15;
-const ROCK_TYPE = { name: 'Rock', body: 0x8a7f72, trim: 0xb8ab98, eye: 0xffb347, speed: 0, scale: 1, weight: 0, score: 20 };
+const ROCK_TYPE = { name: 'Rock', body: 0x8a7f72, trim: 0xb8ab98, eye: 0xffb347, scale: 1, score: 20 };
 let bossHpBar = null;
 let bossFight = null;
 // The boss's last stand: it shudders and bursts apart before the wave can end.
@@ -527,11 +427,9 @@ const {
   getWavePhase: () => wavePhase,
   getWaveSet: () => waveSet,
   getIsFinalWave: () => isFinalWave(),
-  getTypedLength: () => typedBuffer.length,
   getHealth: () => health,
   getIsTimeFrozen: () => Boolean(powerUps) && powerUps.isTimeFrozen(),
   lowHealth: LOW_LIFE_MUSIC_THRESHOLD,
-  pathLanes: PATH_LANES,
 });
 
 const leaderboard = createLeaderboard({
@@ -614,6 +512,9 @@ rimLight.position.set(0, 9, -46);
 rimLight.target.position.set(0, 1, 6);
 scene.add(rimLight, rimLight.target);
 
+// Read before anything is built: battery saver also picks the coarse shapes (detail.js).
+batterySaver = loadBatterySaverSetting();
+document.body.classList.toggle('battery-saver', batterySaver);
 createWorld();
 createShaderKeepers();
 createSky();
@@ -621,35 +522,23 @@ createMeteors();
 createClouds();
 seasonalEffects = createSeasonalEffects({
   scene,
-  world,
-  groundDecor: false,
   lightningFlash,
   getMode: () => mode,
-  treeMinZ: TREE_MIN_Z,
-  treeMaxZ: TREE_MAX_Z,
-  treeSpan: TREE_SPAN,
-  pathMarkerMinZ: PATH_MARKER_MIN_Z,
-  pathMarkerMaxZ: PATH_MARKER_MAX_Z,
-  pathMarkerSpan: PATH_MARKER_SPAN,
-  pathMarkerWrapZ: PATH_MARKER_WRAP_Z,
 });
 seasonalEffects.create();
 powerUps = createPowerUpSystem({
   getMode: () => mode,
   getEnemies: () => enemies,
   getGameTime: () => gameTimeSeconds,
-  defeatEnemy: (enemy) => defeatEnemy(enemy),
   showBanner,
   powerUpBar,
   powerUpSlots,
-  scene,
   effectsGroup,
   playShockwaveSound,
   playShieldActivateSound,
   playShieldBlockSound,
   playGodModeOnSound,
   playGodModeOffSound,
-  playToggleSound,
   playStartSound,
   playChainPrimeSound,
   playTimeFreezeSound,
@@ -662,7 +551,6 @@ buildStageForWave(1);
 applySeasonForWave(1, true);
 createLifeMeter();
 
-bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
 updateAudioButton();
 setPauseButtonState(true, true);
@@ -703,7 +591,9 @@ audioButton.addEventListener('click', () => {
   if (audioEnabled) {
     resumeAudio();
     playToggleSound();
-    if (mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending') startMusicLoop(false);
+    // Not under the ending film: its own score has the stage until the summary.
+    const filmPlaying = mode === 'ending' && gameEnding?.classList.contains('phase-cinematic');
+    if ((mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending') && !filmPlaying) startMusicLoop(false);
   } else {
     stopMusicLoop(0.03);
   }
@@ -733,7 +623,6 @@ window.addEventListener('resize', resizeRenderer);
 document.addEventListener('fullscreenchange', updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 window.addEventListener('keydown', handleKeyDown);
-// Holding space hurries a storyteller's speech along.
 window.addEventListener('blur', () => {
   if (mode === 'running') pauseGame();
 });
@@ -759,10 +648,7 @@ keyboardInput.addEventListener('input', resetKeyboardInput);
 keyboardInput.addEventListener('compositionend', () => { composedText = ''; });
 
 resizeRenderer();
-batterySaver = loadBatterySaverSetting();
 applyBatterySaver();
-// The opening stage was built before the setting was read; build it again coarse.
-if (batterySaver) rebuildIdleStage();
 scheduleFrame();
 revealWhenReady();
 
@@ -847,7 +733,7 @@ function startGame() {
   document.body.classList.remove('final-wave-active');
   setFinalWaveScenery(false);
   dismissEndingSequence();
-  wandsArePrimed = false;
+  cannonIsPrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
   normalEnemyTarget = getNormalEnemyTarget(monsterLevel());
@@ -869,15 +755,16 @@ function startGame() {
   elapsed = 0;
   moonAngle = INITIAL_MOON_ANGLE;
   moonWaitTimer = 0;
-  mistakeTimer = 0;
   damageTimer = 0;
+  hitStopTimer = 0;
+  slowMoTimer = 0;
+  kickTimer = 0;
   mode = 'running';
   startMusicLoop(!transitionFromGameOver);
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
   setPauseButtonState(true, false);
-  updateTypedDisplay();
   updateHud(true);
   updatePhaseDisplay();
   buildStageForWave(waveSet);
@@ -925,8 +812,7 @@ function endGame() {
   powerUps.clear();
   endStory();
   endChallenge();
-  document.body.classList.remove('blizzard');
-  document.body.classList.remove('chain-lightning-primed');
+  document.body.classList.remove('blizzard', 'chain-lightning-primed', 'time-frozen');
   playGameOverSound();
   startMusicLoop(false);
   setPauseButtonState(true, true);
@@ -1014,6 +900,14 @@ function handleKeyDown(event) {
     return;
   }
 
+  // During the ending film Enter skips to the summary, where the score is offered to
+  // the board; only from the summary does it start a new run.
+  if (event.key === 'Enter' && mode === 'ending' && gameEnding?.classList.contains('phase-cinematic')) {
+    event.preventDefault();
+    showEndingStatsScreen(getEndingStats(), { skipped: true });
+    return;
+  }
+
   if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover' || mode === 'ending')) {
     event.preventDefault();
     startGame();
@@ -1046,8 +940,7 @@ function handleKeyDown(event) {
 
   // While the loot guide is open, the new power-up's own key casts it.
   if (lootGuideSlot !== -1 && mode === 'paused') {
-    const keys = SLOT_KEYS[lootGuideSlot];
-    if (event.key === keys.arrow || event.key === String(lootGuideSlot + 1)) {
+    if (event.key === SLOT_KEYS[lootGuideSlot].arrow) {
       event.preventDefault();
       castGuidedPowerUp();
     }
@@ -1075,7 +968,6 @@ function handleKeyDown(event) {
     typedBuffer = typedBuffer.slice(0, -1);
     playBackspaceSound();
     selectTarget();
-    updateTypedDisplay();
     return;
   }
 
@@ -1118,7 +1010,6 @@ function handleBeforeInput(event) {
     typedBuffer = typedBuffer.slice(0, -1);
     playBackspaceSound();
     selectTarget();
-    updateTypedDisplay();
     return;
   }
 
@@ -1138,56 +1029,34 @@ function typeOrHurry(character) {
 function enterCharacter(character) {
   checkCheatCode(character);
 
-  const inputOptions = getInputCharacters(character);
-  if (inputOptions.length === 0) return;
+  const letter = getInputCharacter(character);
+  if (!letter) return;
   typedAttempts += 1;
   dropOrphanedTyping();
 
-  for (const inputOption of inputOptions) {
-    const next = typedBuffer + inputOption.value;
-    const nextMatches = findMatches(next, inputOption);
-
-    if (nextMatches.length > 0) {
-      typedBuffer = next;
-      activeTarget = pickTarget(nextMatches, next);
-      if (activeTarget._matchComplete) {
-        defeatEnemy(activeTarget);
-      } else {
-        playTypeSound(typedBuffer.length / Math.max(1, activeTarget._matchedSearchPrompt.length));
-        hitEnemyWithLetter(activeTarget);
-      }
-      updateTypedDisplay();
-      return;
-    }
-  }
-
+  let typed = typedBuffer + letter;
+  let matches = findMatches(typed);
   // No word is locked: a letter that does not continue this word but starts another
   // switches to that one, so a rock can be dealt with in the middle of a long word.
-  if (typedBuffer) {
-    for (const inputOption of inputOptions) {
-      const others = findMatches(inputOption.value, inputOption).filter(enemy => enemy !== activeTarget);
-      if (others.length === 0) continue;
-      typedBuffer = inputOption.value;
-      activeTarget = pickTarget(others, typedBuffer);
-      if (activeTarget._matchComplete) {
-        defeatEnemy(activeTarget);
-      } else {
-        playTypeSound(typedBuffer.length / Math.max(1, activeTarget._matchedSearchPrompt.length));
-        hitEnemyWithLetter(activeTarget);
-      }
-      updateTypedDisplay();
-      return;
-    }
+  if (matches.length === 0 && typedBuffer) {
+    typed = letter;
+    matches = findMatches(typed).filter(enemy => enemy !== activeTarget);
   }
 
-  if (isMathOperatorInput(character) && hasActiveEquationPrefix()) {
-    updateTypedDisplay();
+  if (matches.length > 0) {
+    typedBuffer = typed;
+    activeTarget = pickTarget(matches, typed);
+    if (activeTarget._matchComplete) {
+      defeatEnemy(activeTarget);
+    } else {
+      playTypeSound(typedBuffer.length / Math.max(1, activeTarget._matchedSearchPrompt.length));
+      hitEnemyWithLetter(activeTarget);
+    }
     return;
   }
 
   // A key that fits nothing is only a miss: the letters typed so far, and the target, stay.
   registerMistake();
-  updateTypedDisplay();
 }
 
 // Letters typed at a monster that has died or got away are dropped, so the next word starts clean.
@@ -1196,7 +1065,6 @@ function dropOrphanedTyping() {
   if (activeTarget && !activeTarget.dying && enemies.includes(activeTarget) && isEnemyTargetable(activeTarget)) return;
   typedBuffer = '';
   activeTarget = null;
-  updateTypedDisplay();
 }
 
 // Simple FNV-1a 32-bit hash function
@@ -1231,7 +1099,6 @@ function registerMistake() {
   if (rail.state === 'story' && !enemies.some(enemy => !enemy.dying)) return;
   streak = 0;
   mistakeCount += 1;
-  mistakeTimer = 0.2;
   playMistakeSound();
   const missLabel = activeTarget?.label;
   if (missLabel) {
@@ -1240,7 +1107,6 @@ function registerMistake() {
     missLabel.classList.add('is-miss');
     window.setTimeout(() => missLabel.classList.remove('is-miss'), 220);
   }
-  updateComboDisplay();
 }
 
 function defeatEnemy(enemy) {
@@ -1258,7 +1124,6 @@ function defeatEnemy(enemy) {
     typedBuffer = '';
     activeTarget = null;
     updateHud(true);
-    updateTypedDisplay();
     triggerChainLightning(enemy);
     return;
   }
@@ -1276,10 +1141,8 @@ function defeatEnemy(enemy) {
     if (activeTarget === enemy) {
       activeTarget = null;
       typedBuffer = '';
-      updateTypedDisplay();
     }
     updateHud(true);
-    updateTypedDisplay();
     return;
   }
 
@@ -1301,7 +1164,6 @@ function defeatEnemy(enemy) {
   typedBuffer = '';
   activeTarget = null;
   updateHud(true);
-  updateTypedDisplay();
 }
 
 
@@ -1335,7 +1197,6 @@ function chooseVariantPrompt(variant) {
 function setEnemyWord(enemy, wordData) {
   enemy.prompt = wordData.term;
   enemy.definition = wordData.definition || null;
-  enemy.isEquation = false;
   enemy.searchPrompt = buildSearchPrompt(wordData.term);
   enemy.altSearchPrompts = buildAltSearchPrompts(wordData.term);
   enemy._matchedSearchPrompt = null;
@@ -1344,7 +1205,6 @@ function setEnemyWord(enemy, wordData) {
 }
 
 function setEnemyKind(enemy, kind) {
-  enemy.promptKind = kind;
   enemy.label.dataset.kind = kind;
   enemy.kindNode.textContent = kind;
 }
@@ -1385,7 +1245,7 @@ function breakShield(enemy) {
   score += points;
   spawnScorePopup(points, enemy);
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: false, defeated: true });
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: true });
   }
   hitStopTimer = 0.05;
   kickTimer = Math.max(kickTimer, 0.1);
@@ -1400,7 +1260,6 @@ function breakShield(enemy) {
   enemy.firstLetterAt = undefined;
   enemy.shownAt = elapsed;
   updateHud(true);
-  updateTypedDisplay();
 }
 
 function spawnSplitChildren(parent) {
@@ -1420,8 +1279,6 @@ function spawnSplitChildren(parent) {
     const walkTime = Math.max(2.2, railTypingEstimate(child) * 1.6 + index * 1.5 + parentTime * 0.2);
     child.lane = to.x;
     child.revealed = false;
-    child.spawnZ = to.z - 3;
-    child.revealZ = to.z - 2;
     child.group.position.copy(from);
     child.group.scale.setScalar(child.type.scale * SPLIT_CHILD_SCALE);
     child.rail = {
@@ -1489,7 +1346,6 @@ function strikePlayer(damage) {
   damageFlash.classList.add('show');
   window.setTimeout(() => damageFlash.classList.remove('show'), 160);
   updateHud(true);
-  updateTypedDisplay();
   if (health <= 0) endGame();
 }
 
@@ -1504,8 +1360,8 @@ function awardKill(enemy) {
   const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
   score += points;
   if (healed > 0) health += healed;
-  if (!enemy.noGlossary && !encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
+  if (!enemy.noGlossary && !enemy.isProjectile && !encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: true });
   }
   return { points, healed };
 }
@@ -1522,7 +1378,6 @@ function leakEnemy(enemy) {
     spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
     removeEnemy(enemy);
     if (wasActiveTarget) typedBuffer = '';
-    updateTypedDisplay();
     return;
   }
 
@@ -1537,12 +1392,11 @@ function leakEnemy(enemy) {
       if (Number.isFinite(left) && Number.isFinite(top)) spawnLootEscapedPopup(left, top);
     }
     if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-      encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
+      encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: false });
     }
     spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
     removeEnemy(enemy);
     if (wasActiveTarget) typedBuffer = '';
-    updateTypedDisplay();
     return;
   }
 
@@ -1566,7 +1420,7 @@ function leakEnemy(enemy) {
   }
   leakedCount += 1;
   if (!enemy.isProjectile && !enemy.noGlossary && !encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: false });
   }
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
   removeEnemy(enemy);
@@ -1574,7 +1428,6 @@ function leakEnemy(enemy) {
   // was the one being typed (matches the medic/mimic leak behaviour).
   if (wasActiveTarget) typedBuffer = '';
   updateHud(true);
-  updateTypedDisplay();
   if (!godMode && health <= 0) endGame();
 }
 
@@ -1904,7 +1757,7 @@ function spawnPhraseBoss() {
     else if (step.kind === 'story') lines.push(...chooseBossStory());
   }
   bossWordsThisSet = lines.filter(line => line.kind !== 'words')
-    .map(line => ({ term: line.term, definition: line.topic, isLine: true }));
+    .map(line => ({ term: line.term, definition: line.topic }));
   const boss = spawnEnemy({
     isBoss: true,
     phraseBoss: true,
@@ -1924,7 +1777,6 @@ function spawnPhraseBoss() {
   boss.maxHp = lines.length;
   boss.damage = 0;
   boss.revealed = true;
-  boss.revealZ = boss.standZ - 2;
   const standY = boss.baseY;
   boss.rail = { phase: 'boss-entry', t: 0, from: new THREE.Vector3(0, standY + 14, boss.standZ - 4), to: new THREE.Vector3(0, standY, boss.standZ) };
   boss.group.position.copy(boss.rail.from);
@@ -2004,7 +1856,6 @@ function advanceBossLine(boss) {
     else playTypeSound(1);
     hitEnemyWithLetter(boss);
     updateHud(true);
-    updateTypedDisplay();
     return true;
   }
 
@@ -2014,8 +1865,7 @@ function advanceBossLine(boss) {
     // Chain lightning doubles the blow and clears the rocks in the air.
     powerUps.clearChainLightningPrimed();
     if (boss.hp > 2) lost = 2;
-    lightningFlash.classList.add('show');
-    window.setTimeout(() => lightningFlash.classList.remove('show'), 180);
+    flashLightning();
     for (const rock of enemies.filter(other => other.isProjectile && !other.dying)) shatterRock(rock, false);
   }
   boss.hp = Math.max(0, boss.hp - lost);
@@ -2072,7 +1922,6 @@ function advanceBossLine(boss) {
     else if (stageWord && next.kind !== 'words') showBanner('FINISH IT!');
     startBossLine(boss);
     updateHud(true);
-    updateTypedDisplay();
     return true;
   }
   // Fallen: its last stand follows (startBossDeath), in slow motion.
@@ -2219,7 +2068,6 @@ function launchRock({ start, end, wordData, flight, frost = false, comet = false
   rock.isProjectile = true;
   rock.damage = plan.rockDamage;
   rock.revealed = true;
-  rock.revealZ = start.z - 2;
   rock.baseY = start.y;
   rock.frost = frost;
   rock.split = split;
@@ -2253,7 +2101,6 @@ function splitComet(rock) {
     }
     playBossThrowSound(boss);
   }
-  updateTypedDisplay();
 }
 
 function shatterRock(rock, scored = true) {
@@ -2272,7 +2119,6 @@ function shatterRock(rock, scored = true) {
     activeTarget = null;
   }
   updateHud(true);
-  updateTypedDisplay();
 }
 
 function updateBossFight(delta) {
@@ -2394,7 +2240,6 @@ function startBossDeath(boss) {
   kickTimer = Math.max(kickTimer, 0.5);
   hitStopTimer = 0.14;
   updateHud(true);
-  updateTypedDisplay();
 }
 
 function updateBossDeath(delta) {
@@ -2502,7 +2347,6 @@ function planBursts(wave) {
 }
 
 function buildStageForWave(wave) {
-  if (rail.stage) rail.stage.dispose();
   bossFight = null;
   bossDeath = null;
   hideBossHpBar();
@@ -2520,23 +2364,21 @@ function buildStageForWave(wave) {
   endStory();
   rail.storyIndex = Math.max(1, Math.min(2, rail.bursts.length - 1));
   rail.bursts.splice(rail.storyIndex, 0, 0);
-  // The night sky trades its last ambush for a challenge at its second stop: a swarm of bats.
+  // The night sky trades its last ambush for two challenges, swarms of bats: one at its
+  // second stop and one at a stop of its own, the last before the boss.
   endChallenge();
-  rail.challengeIndex = -1;
+  rail.challengeStops = [];
   if (rail.setPiece === 'flight' && rail.bursts.length >= 4) {
     rail.bursts.pop();
-    rail.challengeIndex = 1;
-    rail.bursts.splice(rail.challengeIndex, 0, 0);
+    rail.bursts.splice(1, 0, 0);
     rail.storyIndex += 1;
+    rail.bursts.push(0);
+    rail.challengeStops = [1, rail.bursts.length - 1];
   }
-  rail.stage = createStage({
-    seed: Math.floor(Math.random() * 1e6) + wave,
-    burstCount: Math.max(1, rail.bursts.length),
-    materials: { trunk: sceneTrunkMaterial, leaves: sceneLeafMaterials, rock: sceneRockMaterial },
-    kit: chapter.kit,
-  });
-  stageRig.add(rail.stage.group);
-  sceneGround = rail.stage.terrain;
+  // The wave's last ambush keeps going until all its monsters are out.
+  rail.lastAmbush = rail.bursts.findLastIndex((count, index) => index !== rail.storyIndex && !rail.challengeStops.includes(index));
+  rail.seed = Math.floor(Math.random() * 1e6) + wave;
+  mountStage(chapter);
   recolorGround(chapter.palette);
   rail.lateDone = false;
   rail.state = 'idle';
@@ -2546,6 +2388,43 @@ function buildStageForWave(wave) {
   rail.encounter = null;
   rail.t = 0;
   setRailPose(rail.stage.travelPose(null, rail.stage.stops[0], 0));
+}
+
+// Builds the stage for rail.seed and hangs it from the rig, in place of the last one.
+function mountStage(chapter) {
+  if (rail.stage) rail.stage.dispose();
+  rail.stage = createStage({
+    seed: rail.seed,
+    burstCount: Math.max(1, rail.bursts.length),
+    materials: { trunk: sceneTrunkMaterial, leaves: sceneLeafMaterials, rock: sceneRockMaterial },
+    kit: chapter.kit,
+  });
+  stageRig.add(rail.stage.group);
+  sceneGround = rail.stage.terrain;
+}
+
+// Battery saver swaps the fine shapes for the coarse ones (detail.js). The stage is built
+// again from the same seed, so the place and the route stay as they are, even in the
+// middle of a run, and only the facets change. Monsters on screen keep their shape.
+function rebuildSceneryDetail() {
+  const fromIndex = rail.stage.stops.indexOf(rail.from);
+  const toIndex = rail.stage.stops.indexOf(rail.to);
+  mountStage(chapterForWave(waveSet));
+  if (fromIndex >= 0) rail.from = rail.stage.stops[fromIndex];
+  if (toIndex >= 0) rail.to = rail.stage.stops[toIndex];
+  recolorGround(seasonFade ? seasonFade.palette : currentPalette());
+  for (const cloud of clouds) {
+    const fresh = createLowPolyCloud(cloud.weatherOnly ? weatherCloudMaterial : baseCloudMaterial, cloud.template);
+    fresh.position.copy(cloud.group.position);
+    fresh.scale.copy(cloud.group.scale);
+    fresh.visible = cloud.group.visible;
+    scene.remove(cloud.group);
+    cloud.group.traverse((child) => { if (child.isMesh) child.geometry.dispose(); });
+    scene.add(fresh);
+    cloud.group = fresh;
+  }
+  // Nothing is drawn while paused, so show the change now.
+  if (mode === 'paused') visuals.render(0, { measure: false });
 }
 
 // Place the stage so the given route pose sits at the game's origin, facing −z.
@@ -2659,8 +2538,6 @@ function spawnRideMonster() {
   enemy.baseY = GROUND_ENEMY_Y + 1.1 + Math.random() * 1.2;
   enemy.lane = x;
   enemy.damage = 1;
-  enemy.spawnZ = RIDE_START_Z;
-  enemy.revealZ = RIDE_START_Z + 2;
   const flight = Math.max(2.8, railTypingEstimate(enemy) * 1.6);
   enemy.rail = { phase: 'ride', t: 0, to: new THREE.Vector3(x, enemy.baseY, RIDE_START_Z), speed: (WALL_Z - RIDE_START_Z) / flight };
   enemy.group.position.copy(enemy.rail.to);
@@ -2688,11 +2565,17 @@ function arriveAtStop() {
     startStory();
     return;
   }
-  if (rail.stopIndex === rail.challengeIndex) {
+  if (rail.challengeStops.includes(rail.stopIndex)) {
     startChallenge();
     return;
   }
-  startEncounter(stop, rail.bursts[rail.stopIndex] || 0, rail.stopIndex >= rail.bursts.length - 1);
+  // The wave can run out of monsters early (its typing budget): the camera walks
+  // straight through a stop that has nothing left to send.
+  if (isNormalWaveComplete() && !shouldSpawnMedic() && !shouldSpawnMimic()) {
+    railBeginTravel(nextStopIndex());
+    return;
+  }
+  startEncounter(stop, rail.bursts[rail.stopIndex] || 0, rail.stopIndex >= rail.lastAmbush);
   // The blizzard is the second ambush, whichever stop that falls on.
   if (rail.setPiece === 'blizzard' && rail.stopIndex === (rail.storyIndex === BLIZZARD_STOP ? BLIZZARD_STOP + 1 : BLIZZARD_STOP)) beginBlizzard();
 }
@@ -2746,10 +2629,7 @@ function startStory() {
     const guard = spawnEnemy({ wordData: choosePromptOfLength(4, 8), type: ENEMY_TYPES.find(type => type.name === 'Bog Shambler') });
     const at = new THREE.Vector3(STORY_SPOT.x - 1.9, guard.baseY, STORY_SPOT.z - 0.6);
     guard.damage = 0;
-    guard.noGlossary = false;
     guard.lane = at.x;
-    guard.spawnZ = at.z - 3;
-    guard.revealZ = at.z - 2;
     guard.rail = { phase: 'guard', t: 0, to: at };
     guard.group.position.copy(at);
     setEnemyKind(guard, 'myth');
@@ -2813,7 +2693,7 @@ function updateStory(delta) {
     arm.rotation.z = arm.userData.side * wave;
   }
   dome.rotation.y = story.age * 1.4;
-  const speaking = updateStoryText(delta);
+  updateStoryText(delta);
 
   if (story.held) {
     if (story.guard && !story.guard.dying && enemies.includes(story.guard)) return;
@@ -2838,23 +2718,19 @@ function updateStory(delta) {
     story.leaving += delta;
     if (story.leaving < 0.5) return;
     endStory();
-    const stops = rail.stage.stops;
-    railBeginTravel(rail.stopIndex + 1 < rail.bursts.length ? rail.stopIndex + 1 : stops.length - 1);
+    railBeginTravel(nextStopIndex());
     return;
   }
-  if (story.line < 0) {
-    if (story.age > 0.5) advanceStoryLine();
-    return;
-  }
+  if (story.line < 0 && story.age > 0.5) advanceStoryLine();
 }
 
-// While someone is talking, with nothing to type at, keys are not letters. Space (or
-// Enter) shows the rest of the line at once, or moves on from a finished line; other
-// keys are ignored. Returns true if the key is taken.
+// While someone is talking, with nothing to type at, keys are not letters. Space shows
+// the rest of the line at once, or moves on from a finished line; other keys are
+// ignored. Returns true if the key is taken.
 function hurryStory(key) {
   const story = rail.story;
   if (rail.state !== 'story' || !story || story.held) return false;
-  if ((key === ' ' || key === 'Enter') && story.line >= 0 && story.leaving === 0) {
+  if (key === ' ' && story.line >= 0 && story.leaving === 0) {
     if (story.shown < story.text.length) {
       story.shown = story.text.length - 0.5;
     } else {
@@ -2876,7 +2752,7 @@ function endStory() {
 // A challenge at one stop of the night sky: space bats flit about, each marked with a
 // unit, and the player has half a minute to bring ten down. They do no harm; clearing
 // the swarm earns points and a heart, and running out of time only loses the prize.
-const BAT_TYPE = { name: 'Space Bat', body: 0x2b1d5c, trim: 0x8b5cf6, eye: 0x7ff5e6, speed: 0, scale: 1.25, weight: 0, score: 60 };
+const BAT_TYPE = { name: 'Space Bat', body: 0x2b1d5c, trim: 0x8b5cf6, eye: 0x7ff5e6, scale: 1.25, score: 60 };
 const BAT_GOAL = 10;
 const BAT_TIME = 30;
 const BATS_AT_ONCE = 3;
@@ -2918,8 +2794,6 @@ function spawnBat() {
   bat.noGlossary = true;
   bat.lane = home.x;
   bat.baseY = home.y;
-  bat.spawnZ = home.z - 3;
-  bat.revealZ = home.z - 2;
   bat.rail = { phase: 'bat', t: 0, to: home, from: new THREE.Vector3(home.x + (Math.random() - 0.5) * 6, home.y + 9, home.z - 4) };
   bat.group.position.copy(bat.rail.from);
   setEnemyKind(bat, 'bat');
@@ -2935,8 +2809,7 @@ function updateChallenge(delta) {
     challenge.over += delta;
     if (challenge.over < 1.6) return;
     endChallenge();
-    const stops = rail.stage.stops;
-    railBeginTravel(rail.stopIndex + 1 < rail.bursts.length ? rail.stopIndex + 1 : stops.length - 1);
+    railBeginTravel(nextStopIndex());
     return;
   }
   challenge.time = Math.max(0, challenge.time - delta);
@@ -2966,7 +2839,6 @@ function updateChallenge(delta) {
     showBanner('THE SWARM ESCAPES', 'variant-hint');
     showChallengeCard(`TIME UP · ${killed}/${BAT_GOAL}`);
     challenge.over = 0.01;
-    updateTypedDisplay();
     return;
   }
   challenge.spawnTimer -= delta;
@@ -3021,13 +2893,12 @@ function updateEncounter(delta) {
     rail.state = 'travel';
     return;
   }
-  if (encounter.stop.isBoss) {
-    arriveAtStop();
-    return;
-  }
-  const stops = rail.stage.stops;
-  const next = rail.stopIndex + 1 < rail.bursts.length ? rail.stopIndex + 1 : stops.length - 1;
-  railBeginTravel(next);
+  railBeginTravel(nextStopIndex());
+}
+
+// The stop after this one; after the wave's last ambush, the boss arena.
+function nextStopIndex() {
+  return rail.stopIndex + 1 < rail.bursts.length ? rail.stopIndex + 1 : rail.stage.stops.length - 1;
 }
 
 function spawnRailMember(encounter) {
@@ -3087,7 +2958,6 @@ function setupRailEntry(enemy, spot) {
   if (enemy.flier) to.x = Math.max(FLIER_MIN_X, to.x);
   enemy.lane = to.x;
   enemy.revealed = false;
-  enemy.revealZ = Math.min(from.z, to.z) - 2;
   enemy.group.position.copy(from);
   const own = railTypingEstimate(enemy) * Math.max(1.12, 1.6 - (monsterLevel() - 1) * 0.05);
   const queue = enemies
@@ -3308,7 +3178,6 @@ function updateEnemies(delta, seconds) {
   for (let index = enemies.length - 1; index >= 0; index -= 1) {
     const enemy = enemies[index];
     if (enemy.dying) continue;
-    enemy.age += delta;
 
     if (enemy.isMimic) {
       const isTargeted = (activeTarget === enemy && isEnemyTargetable(enemy));
@@ -3486,14 +3355,12 @@ function updateEnemyMarkers(enemy, seconds) {
   if (incomingBeacon) {
     incomingBeacon.visible = !enemy.revealed;
     if (!enemy.revealed) {
-      const revealDistance = Math.max(1, enemy.revealZ - enemy.spawnZ);
-      const revealProgress = THREE.MathUtils.clamp((enemy.group.position.z - enemy.spawnZ) / revealDistance, 0, 1);
       const pulse = 0.5 + Math.sin(seconds * 7.5 + enemy.phase) * 0.16;
-      incomingBeacon.scale.setScalar(THREE.MathUtils.lerp(1.7, 0.8, revealProgress) + pulse * 0.18);
+      incomingBeacon.scale.setScalar(1.7 + pulse * 0.18);
       incomingBeacon.position.y = 2.72 + Math.sin(seconds * 5.2 + enemy.phase) * 0.16;
       incomingBeacon.rotation.y = seconds * 1.8 + enemy.phase;
       incomingBeacon.rotation.x = seconds * 1.2;
-      incomingBeacon.material.opacity = THREE.MathUtils.lerp(0.62, 0.34, revealProgress) + pulse * 0.12;
+      incomingBeacon.material.opacity = 0.62 + pulse * 0.12;
     }
   }
 
@@ -3576,7 +3443,6 @@ function updateEffects(delta) {
   }
 
   if (damageTimer > 0) damageTimer -= delta;
-  if (mistakeTimer > 0) mistakeTimer -= delta;
 }
 
 function updateEnvironment(seconds, delta, isTimeFrozen = false) {
@@ -3600,7 +3466,7 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   if (rail.stage) rail.stage.update(seconds);
 
   if (moon) {
-    let targetMoonShadowStrength = 1;
+    let targetMoonShadowStrength;
     if (moonWaitTimer > 0) {
       // Moon has set — hide it and wait before rising again from the left
       moonWaitTimer -= envDelta;
@@ -3636,42 +3502,26 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   visuals.motes.update(seconds, emberLight.color);
   fx.update(delta, camera);
 
-  if (pathMarkerMaterial) {
-    pathMarkerMaterial.emissiveIntensity = 1.5 + Math.sin(seconds * 2.8) * 0.5;
-  }
-
-  const scrollDelta = SCENERY_SCROLL_SPEED * delta * (isTimeFrozen ? 0 : mode === 'running' ? 1 : 0.35);
-
-  updateRoad(scrollDelta);
-
-  for (const marker of pathMarkerBlocks) {
-    marker.mesh.position.z += scrollDelta * PATH_MARKER_SCROLL_MULTIPLIER;
-    if (marker.mesh.position.z > PATH_MARKER_WRAP_Z) {
-      marker.mesh.position.z -= PATH_MARKER_SPAN;
-    }
-    marker.mesh.position.y = marker.baseY + Math.sin(seconds * 3.2 + marker.phase) * 0.018;
-  }
-
   const isChainLightningPrimed = powerUps ? powerUps.isChainLightningPrimed() : false;
-  if (isChainLightningPrimed && !wandsArePrimed) {
-    wandsArePrimed = true;
+  if (isChainLightningPrimed && !cannonIsPrimed) {
+    cannonIsPrimed = true;
     sceneCrystalMat.color.setHex(0xfde068);
     sceneCrystalMat.emissive.setHex(0xfde068);
     sceneCrystalMat.emissiveIntensity = 3.5;
     for (const crown of lightningCrowns) crown.visible = true;
-    for (const light of torchLights) light.color.setHex(0xfde068);
-  } else if (!isChainLightningPrimed && wandsArePrimed) {
-    wandsArePrimed = false;
+    for (const light of strikeLights) light.color.setHex(0xfde068);
+  } else if (!isChainLightningPrimed && cannonIsPrimed) {
+    cannonIsPrimed = false;
     sceneCrystalMat.color.setHex(0x58dfcf);
     sceneCrystalMat.emissive.setHex(0x2dd4bf);
     sceneCrystalMat.emissiveIntensity = 2.6;
     for (const crown of lightningCrowns) crown.visible = false;
-    for (const light of torchLights) light.color.setHex(0x2dd4bf);
+    for (const light of strikeLights) light.color.setHex(0x2dd4bf);
   }
 
-  if (wandsArePrimed) {
+  if (cannonIsPrimed) {
     const pulse = 1.1 + Math.sin(seconds * 12.0) * 0.18;
-    for (const flame of torchFlames) {
+    for (const flame of cannonGlows) {
       flame.mesh.scale.set(pulse, pulse, pulse);
     }
     sceneCrystalMat.emissiveIntensity = 3.2 + Math.sin(seconds * 9.0) * 0.8;
@@ -3680,39 +3530,23 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
       const cs = 1.0 + Math.sin(seconds * 11.0) * 0.12;
       crown.scale.set(cs, cs, cs);
     }
-    for (const light of torchLights) {
+    for (const light of strikeLights) {
       light.intensity = 2.6 + Math.sin(seconds * 10.0 + light.userData.phase) * 0.5;
     }
   } else {
-    for (const flame of torchFlames) {
+    for (const flame of cannonGlows) {
       const flamePulse = 1 + Math.sin(seconds * 8.5 + flame.phase) * 0.12;
       flame.mesh.scale.set(flamePulse, 1 + Math.cos(seconds * 7.2 + flame.phase) * 0.16, flamePulse);
     }
-    for (const light of torchLights) {
+    for (const light of strikeLights) {
       light.intensity = 1.55 + Math.sin(seconds * 7.8 + light.userData.phase) * 0.26;
     }
   }
 
-  for (const canopy of canopyBlocks) {
-    canopy.mesh.position.y = canopy.baseY + Math.sin(seconds * 0.92 + canopy.phase) * canopy.amount;
-    canopy.mesh.rotation.y = Math.sin(seconds * 0.55 + canopy.phase) * 0.035;
-  }
-
-  for (const tree of scrollingTrees) {
-    tree.group.position.z += scrollDelta * tree.speed;
-    if (tree.group.position.z > TREE_MAX_Z) {
-      tree.group.position.z -= TREE_SPAN;
-    }
-  }
-
-  seasonalEffects.update(seconds, envDelta, scrollDelta);
+  seasonalEffects.update(seconds, envDelta);
   updateFinalWaveScenery(seconds, envDelta);
 
   updateClouds(envDelta);
-}
-
-function updateRoad(scrollDelta) {
-  if (sceneGround) sceneGround.scroll(scrollDelta * ROAD_SCROLL_MULTIPLIER);
 }
 
 function positionMoonOnArc() {
@@ -3784,7 +3618,7 @@ function updateLabels() {
     reusableVector.y += 3.2 * enemy.type.scale * (enemy.isClimaxBoss ? 1.5 : 1.0);
     reusableVector.project(camera);
 
-    const isVisible = isLabelShown(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
+    const isVisible = isEnemyTargetable(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
     if (isVisible && enemy.shownAt === undefined) enemy.shownAt = elapsed;
     enemy.label.classList.toggle('is-hidden', !isVisible);
     enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
@@ -3954,24 +3788,6 @@ function getLabelSafeBounds(height) {
   };
 }
 
-function displayTypedBuffer() {
-  if (!typedBuffer) return '';
-  if (!activeTarget) return typedBuffer;
-  const typed = bufferFor(activeTarget);
-  const effectiveSP = activeTarget._matchedSearchPrompt?.startsWith(typed)
-    ? activeTarget._matchedSearchPrompt
-    : activeTarget.searchPrompt;
-  if (!effectiveSP.startsWith(typed)) return typedBuffer;
-  if (effectiveSP !== activeTarget.searchPrompt) {
-    // Another spelling (color for colour): show it as the player spells it, spaces and all.
-    const term = altTermFor(activeTarget.prompt, effectiveSP);
-    return term ? term.slice(0, promptIndexForProgress(term, typed.length)) : typedBuffer;
-  }
-  return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typed.length, {
-    multiplicationAlias: activeTarget.isEquation,
-  }));
-}
-
 function renderPrompt(enemy) {
   if (enemy.phraseBoss) {
     const html = buildBossLineHtml(enemy);
@@ -3980,7 +3796,7 @@ function renderPrompt(enemy) {
     enemy.promptNode.innerHTML = html;
     return;
   }
-  const typed = enemy === activeTarget ? bufferFor(enemy) : '';
+  const typed = enemy === activeTarget ? typedBuffer : '';
   const effectiveSP = enemy._matchedSearchPrompt?.startsWith(typed)
     ? enemy._matchedSearchPrompt
     : enemy.searchPrompt;
@@ -3997,11 +3813,9 @@ function renderPrompt(enemy) {
     return;
   }
 
-  const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
-    multiplicationAlias: enemy.isEquation,
-  }) : 0;
-  const html = `<span class="typed">${wrapSups(escapeHtml(enemy.prompt.slice(0, typedLen)))}</span>`
-    + `<span class="remaining">${wrapSups(escapeHtml(enemy.prompt.slice(typedLen)))}</span>`;
+  const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress) : 0;
+  const html = `<span class="typed">${escapeHtml(enemy.prompt.slice(0, typedLen))}</span>`
+    + `<span class="remaining">${escapeHtml(enemy.prompt.slice(typedLen))}</span>`;
 
   if (enemy.lastPromptHtml === html) return;
   enemy.lastPromptHtml = html;
@@ -4011,7 +3825,7 @@ function renderPrompt(enemy) {
 // Typed words, the word in progress (its typed letters marked) and the words to come.
 function bossWordProgress(boss) {
   const word = boss.lineWordsList[boss.wordIndex] || '';
-  const typed = activeTarget === boss ? bufferFor(boss) : '';
+  const typed = activeTarget === boss ? typedBuffer : '';
   const key = boss._matchedSearchPrompt?.startsWith(typed) ? boss._matchedSearchPrompt : boss.searchPrompt;
   if (!typed || !key.startsWith(typed)) return { word, done: '' };
   if (key !== boss.searchPrompt) return { word, done: typed };
@@ -4035,11 +3849,6 @@ function buildBossLineHtml(boss) {
     return `<span class="current-word"><span class="typed">${escapeHtml(typedPart)}</span><span class="remaining">${escapeHtml(rest)}</span></span>`;
   });
   return parts.join(' ');
-}
-
-function bossTypedText(boss) {
-  const { done } = bossWordProgress(boss);
-  return [...boss.lineWordsList.slice(0, boss.wordIndex), done].filter(Boolean).join(' ');
 }
 
 function createLifeMeter() {
@@ -4095,12 +3904,7 @@ function updateHud(force) {
   if (!force && hudTimer > 0) return;
   hudTimer = 6;
   scoreValue.textContent = formatScore(score);
-  const isUnranked = godModeUsedThisRun || powerUpCheatUsedThisRun || finalWaveCheatUsedThisRun;
-  bestValue.textContent = formatScore(isUnranked ? bestScore : Math.max(bestScore, score));
   updateLifeMeter(force);
-  waveValue.textContent = String(waveSet);
-  updateComboDisplay();
-  updateTypingLabel();
 }
 
 function updatePhaseDisplay() {
@@ -4154,20 +3958,6 @@ function isNormalWaveComplete() {
   return isNormalTypingBudgetReached();
 }
 
-// What the player has typed shows in the target's own card, under its word.
-function updateTypedDisplay() {
-  const shown = displayTypedBuffer();
-  for (const enemy of enemies) {
-    if (!enemy.typedNode) continue;
-    const text = enemy.phraseBoss ? bossTypedText(enemy) : enemy === activeTarget ? shown : '';
-    if (enemy.lastTypedText === text) continue;
-    enemy.lastTypedText = text;
-    enemy.typedNode.innerHTML = text ? wrapSups(escapeHtml(text)) : '';
-    enemy.label.classList.toggle('has-typing', !!text);
-  }
-  updateComboDisplay();
-}
-
 function spawnEnemy(options = {}) {
   const isBoss = options.isBoss || false;
   const isMedic = options.isMedic || false;
@@ -4175,8 +3965,6 @@ function spawnEnemy(options = {}) {
   const isClimaxBoss = options.isClimaxBoss || false;
   const wordData = options.wordData
     ? options.wordData
-    : options.forcedPrompt
-    ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null })
     : isMedic
     ? chooseMedicPrompt()
     : isMimic
@@ -4185,7 +3973,6 @@ function spawnEnemy(options = {}) {
     ? chooseVariantPrompt(options.variant)
     : choosePrompt();
 
-  const isEquationPrompt = !!wordData.isEquation;
   const type = options.type || (isBoss ? options.bossType : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES));
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
@@ -4195,7 +3982,7 @@ function spawnEnemy(options = {}) {
     firstMimicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('MIMIC CHEST DETECTED!', 'mimic-hint'); }, 1100);
   }
-  const group = options.customGroup || (isMimic ? createMimicChestMesh(type) : createEnemyMesh(type));
+  const group = options.customGroup || createEnemyMesh(type);
   // A monster from an ambush is placed by setupRailEntry; bosses and rocks say where they start.
   const startZ = Number.isFinite(options.startZ) ? options.startZ : 0;
   const lane = Number.isFinite(options.lane) ? options.lane : 0;
@@ -4248,10 +4035,6 @@ function spawnEnemy(options = {}) {
 
   label.append(kindNode, promptNode);
 
-  const typedNode = document.createElement('span');
-  typedNode.className = 'typed-line';
-  label.append(typedNode);
-
   const threatNode = document.createElement('span');
   threatNode.className = 'threat-meter';
   threatNode.append(document.createElement('i'));
@@ -4259,7 +4042,6 @@ function spawnEnemy(options = {}) {
 
   labelsLayer.append(label);
 
-  const promptOptions = { multiplicationAlias: isEquationPrompt };
   const enemy = {
     id: enemyId,
     type,
@@ -4267,33 +4049,24 @@ function spawnEnemy(options = {}) {
     label,
     kindNode,
     promptNode,
-    typedNode,
-    lastTypedText: '',
     prompt: wordData.term,
     definition: wordData.definition || null,
-    isEquation: isEquationPrompt,
-    searchPrompt: buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: options.isProjectile ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
+    searchPrompt: buildSearchPrompt(wordData.term),
+    altSearchPrompts: options.isProjectile ? [] : buildAltSearchPrompts(wordData.term),
     _matchedSearchPrompt: null,
     lastPromptHtml: '',
-    promptKind,
     isBoss,
     isMedic,
     isMimic,
     isClimaxBoss,
     lidOpenProgress: 0,
-    hasOpened: false,
     isFlying,
     shadowMesh,
     lane,
-    spawnZ: startZ,
-    revealZ: startZ,
     revealed: true,
     revealFlash: 0,
-    speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : isMimic ? type.speed + Math.random() * 0.25 : type.speed + Math.random() * 0.35,
     damage: isBoss || isMedic ? 0 : MINION_DAMAGE,
     baseY: spawnBaseY,
-    age: 0,
     wobbleAmount: isBoss ? 0.05 : 0.08 + Math.random() * 0.2,
     wobbleSpeed: isBoss ? 0.7 : 1.2 + Math.random() * 1.4,
     stepBounce: isFlying ? 0 : isBoss ? 0.04 : 0.06 + Math.random() * 0.08,
@@ -4317,7 +4090,7 @@ function spawnEnemy(options = {}) {
 }
 
 function createWorld() {
-  createTorches();
+  createWeapon();
   createSceneryMaterials();
 }
 
@@ -4375,7 +4148,7 @@ function createLightningCrown() {
   return crown;
 }
 
-function createTorches() {
+function createWeapon() {
   sceneCrystalMat = new THREE.MeshStandardMaterial({
     color: 0x58dfcf, emissive: 0x2dd4bf, emissiveIntensity: 2.6,
     roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9, flatShading: true,
@@ -4384,7 +4157,7 @@ function createTorches() {
   // The cannon hangs from the camera, which must be in the scene for it to draw.
   scene.add(camera);
   weapon = createPlasmaCannon({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
-  for (const glow of weapon.glows) torchFlames.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
+  for (const glow of weapon.glows) cannonGlows.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
   lightningCrowns.push(...weapon.crowns);
 
   // The front of the mine cart, seen only during the ride. It hangs from the camera too.
@@ -4411,7 +4184,7 @@ function createTorches() {
     light.position.set(x, 2.2, WALL_Z - 0.2);
     light.userData.phase = Math.random() * Math.PI * 2;
     world.add(light);
-    torchLights.push(light);
+    strikeLights.push(light);
   }
 }
 
@@ -4540,10 +4313,6 @@ function updateMeteors(delta) {
   }
 }
 
-function buildCloudGroup(material, template) {
-  return createLowPolyCloud(material, template);
-}
-
 function createClouds() {
   // Lit, so the facets show, with enough self-glow that clouds stay bright.
   baseCloudMaterial = new THREE.MeshLambertMaterial({
@@ -4579,7 +4348,7 @@ function createClouds() {
   ];
   for (const cfg of configs) {
     const material = cfg.weatherOnly ? weatherCloudMaterial : baseCloudMaterial;
-    const group = buildCloudGroup(material, cfg.t);
+    const group = createLowPolyCloud(material, cfg.t);
     group.position.set(cfg.x, cfg.y, cfg.z);
     group.scale.setScalar(cfg.scale);
     group.visible = !cfg.weatherOnly;
@@ -4588,6 +4357,7 @@ function createClouds() {
       group,
       speed: cfg.speed,
       baseScale: cfg.scale,
+      template: cfg.t,
       weatherOnly: Boolean(cfg.weatherOnly),
     });
   }
@@ -4696,7 +4466,7 @@ function spawnBeam(targetPosition) {
   effectsGroup.add(flashMesh);
   beams.push({ mesh: flashMesh, life: 0.22, maxLife: 0.22, kind: 'beam_flash' });
 
-  // Muzzle flash at caster
+  // Muzzle flash
   const muzzleGeo = new THREE.DodecahedronGeometry(0.1, 0);
   const muzzleMat = new THREE.MeshBasicMaterial({
     color: 0xffffff, transparent: true, opacity: 0.9,
@@ -4867,29 +4637,24 @@ function selectTarget() {
     return;
   }
   const matches = findMatches(typedBuffer);
-  activeTarget = matches.length > 0 ? chooseTarget(matches) : null;
+  activeTarget = matches.length > 0 ? pickTarget(matches, typedBuffer) : null;
 }
 
-function findMatches(prefix, options = {}) {
+// Typing ignores capitals everywhere: the typed letters and every answer are lower case,
+// so kg, KG and Kg all hit a monster marked kg.
+function findMatches(prefix) {
   if (!prefix) return [];
   return enemies.filter((enemy) => {
-    if (options.equationOnly && !enemy.isEquation) return false;
     if (!isEnemyTargetable(enemy)) return false;
     if (enemy.shielded) return false;
-    const typed = bufferFor(enemy, prefix);
     // A finished word wins over one it merely starts.
     const keys = enemyTypeableKeys(enemy);
-    const match = keys.find(key => key === typed) || keys.find(key => key.startsWith(typed));
+    const match = keys.find(key => key === prefix) || keys.find(key => key.startsWith(prefix));
     if (!match) return false;
     enemy._matchedSearchPrompt = match;
-    enemy._matchComplete = match === typed;
+    enemy._matchComplete = match === prefix;
     return true;
   });
-}
-
-// Typing ignores capitals everywhere: kg, KG and Kg all hit a monster marked kg.
-function bufferFor(enemy, buffer = typedBuffer) {
-  return buffer.toLowerCase();
 }
 
 // Everything a player could type at an enemy: its answer and alternative spellings.
@@ -4897,29 +4662,14 @@ function enemyTypeableKeys(enemy) {
   return [enemy.searchPrompt, ...(enemy.altSearchPrompts || [])];
 }
 
-function hasActiveEquationPrefix() {
-  return enemies.some((enemy) => {
-    if (!enemy.isEquation || !isEnemyTargetable(enemy)) return false;
-    return enemyTypeableKeys(enemy).some(key => key.startsWith(bufferFor(enemy)));
-  });
-}
-
-function chooseTarget(matches) {
-  return pickTarget(matches, typedBuffer);
-}
-
-// Bosses are typeable as soon as their card appears (during the approach). Rocks
-// still wait until revealZ so early answers are a skill reward, not free damage.
+// A boss can be typed at from the moment it drops in; a monster once it has finished
+// jumping out of hiding.
 function isEnemyTargetable(enemy) {
   if (enemy.dying || enemy.group.position.z >= WALL_Z) return false;
   if (enemy.isBoss) return true;
   // In a blizzard a monster cannot be seen, or typed at, until it is close.
   if (enemy.veilZ !== undefined && enemy.group.position.z < enemy.veilZ) return false;
   return enemy.revealed;
-}
-
-function isLabelShown(enemy) {
-  return isEnemyTargetable(enemy);
 }
 
 function prepareWavePlan() {
@@ -5108,8 +4858,6 @@ function buildSeasonFromScene() {
     sunIntensity: moonLightBaseIntensity,
     emberColor: emberLight.color.clone(),
     emberIntensity: seasonEmberIntensityBase,
-    pathMarkerColor: pathMarkerMaterial ? pathMarkerMaterial.color.clone() : new THREE.Color(0x58dfcf),
-    pathMarkerEmissive: pathMarkerMaterial ? pathMarkerMaterial.emissive.clone() : new THREE.Color(0x0e6861),
     leafColors: sceneLeafMaterials.map(m => m.color.clone()),
     trunkColor: sceneTrunkMaterial ? sceneTrunkMaterial.color.clone() : new THREE.Color(0x513820),
     moonColor: moon ? moon.material.color.clone() : new THREE.Color(0xfff1b8),
@@ -5131,8 +4879,6 @@ function buildSeasonTarget(palette) {
     sunIntensity: palette.sunIntensity,
     emberColor: new THREE.Color(palette.emberColor),
     emberIntensity: palette.emberIntensity,
-    pathMarkerColor: new THREE.Color(palette.pathMarkerColor),
-    pathMarkerEmissive: new THREE.Color(palette.pathMarkerEmissive),
     leafColors: palette.leafColors.map(c => new THREE.Color(c)),
     trunkColor: new THREE.Color(palette.trunkColor),
     moonColor: new THREE.Color(palette.moonColor).multiplyScalar(MOON_GLOW_GAIN),
@@ -5154,11 +4900,6 @@ function applySeasonInstant(palette) {
   updateMoonShadowLighting();
   emberLight.color.setHex(palette.emberColor);
   seasonEmberIntensityBase = palette.emberIntensity;
-  // crystal head stays permanently at summer teal — not season-dependent
-  if (pathMarkerMaterial) {
-    pathMarkerMaterial.color.setHex(palette.pathMarkerColor);
-    pathMarkerMaterial.emissive.setHex(palette.pathMarkerEmissive);
-  }
   for (let i = 0; i < sceneLeafMaterials.length; i++) {
     sceneLeafMaterials[i].color.setHex(palette.leafColors[i]);
   }
@@ -5209,11 +4950,6 @@ function updateSeasonFade(delta) {
   updateMoonShadowLighting();
   emberLight.color.lerpColors(from.emberColor, to.emberColor, t);
   seasonEmberIntensityBase = THREE.MathUtils.lerp(from.emberIntensity, to.emberIntensity, t);
-  // crystal head stays permanently at summer teal — not season-dependent
-  if (pathMarkerMaterial) {
-    pathMarkerMaterial.color.lerpColors(from.pathMarkerColor, to.pathMarkerColor, t);
-    pathMarkerMaterial.emissive.lerpColors(from.pathMarkerEmissive, to.pathMarkerEmissive, t);
-  }
   for (let i = 0; i < sceneLeafMaterials.length; i++) {
     sceneLeafMaterials[i].color.lerpColors(from.leafColors[i], to.leafColors[i], t);
   }
@@ -5427,16 +5163,8 @@ function toggleBatterySaver() {
   batterySaver = !batterySaver;
   saveBatterySaverSetting(batterySaver);
   applyBatterySaver();
-  // Battery saver also uses the coarse low-poly shapes (detail.js). On the start screen
-  // the stage is rebuilt at once; during a run the change shows from the next stage.
-  if (mode === 'idle') rebuildIdleStage();
+  rebuildSceneryDetail();
   if (mode === 'running') focusKeyboard();
-}
-
-function rebuildIdleStage() {
-  if (mode !== 'idle') return;
-  buildStageForWave(waveSet);
-  applySeasonForWave(waveSet, true);
 }
 
 function readStoredValue(key, fallback) {
@@ -5672,7 +5400,7 @@ function chooseEndingWords() {
     }
     return order;
   };
-  const defeated = shuffle(encounteredTerms.filter(entry => entry.defeated && !entry.isEquation && fits(entry.term)).map(entry => entry.term));
+  const defeated = shuffle(encounteredTerms.filter(entry => entry.defeated && fits(entry.term)).map(entry => entry.term));
   const words = [...new Set(defeated)].slice(0, ENDING_WORD_COUNT);
   for (const entry of shuffle(EASY_WORDS)) {
     if (words.length >= Math.min(6, ENDING_WORD_COUNT)) break;
@@ -5793,6 +5521,7 @@ function activateFinalWaveCheat() {
   if (mode === 'idle' || mode === 'gameover' || mode === 'ending') {
     startGame();
   } else {
+    hideLootGuide();
     clearEnemies();
     clearEffects();
     typedBuffer = '';
@@ -5850,7 +5579,6 @@ function advanceWaveSet() {
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
   setPauseButtonState(true, false);
-  updateTypedDisplay();
   updateHud(true);
   updatePhaseDisplay();
   buildStageForWave(waveSet);
@@ -5865,12 +5593,6 @@ function showChapterBanner() {
   const { title } = chapterForWave(waveSet);
   if (title) showBanner(title.toUpperCase());
 }
-
-function updateComboDisplay() {
-  comboValue.textContent = String(streak);
-}
-
-function updateTypingLabel() {}
 
 // Letters a second, from the first letter typed at a monster to its last, that earn
 // each rank. S is for really quick typing (8.5 a second is about 100 words a minute);
@@ -6080,7 +5802,7 @@ function awardMimicLoot(enemy) {
   }
 
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: true });
   }
 }
 
@@ -6102,16 +5824,15 @@ function renderRunGlossary() {
 
   for (const entry of sorted) {
     const item = document.createElement('div');
-    item.className = `glossary-item ${entry.defeated ? 'is-defeated' : 'is-leaked'}${entry.isEquation ? ' is-equation' : ''}`;
+    item.className = `glossary-item ${entry.defeated ? 'is-defeated' : 'is-leaked'}`;
 
     const term = document.createElement('span');
     term.className = 'gl-term';
-    // For equations show the compact symbol form as the label; full word eq as the definition
-    term.textContent = entry.isEquation ? (entry.definition || entry.term) : entry.term;
+    term.textContent = entry.term;
 
     const def = document.createElement('span');
     def.className = 'gl-def';
-    def.textContent = entry.isEquation ? entry.term : (entry.definition || '—');
+    def.textContent = entry.definition;
 
     item.append(term, def);
     runGlossary.append(item);
@@ -6134,15 +5855,16 @@ function renderWaveBossGlossary() {
     const wasDefeated = encountered?.defeated === true;
 
     const item = document.createElement('div');
-    item.className = `glossary-item ${wasDefeated ? 'is-defeated' : 'is-leaked'}${word.isEquation ? ' is-equation' : ''}`;
+    item.className = `glossary-item ${wasDefeated ? 'is-defeated' : 'is-leaked'}`;
 
+    // A boss line is listed under its topic.
     const term = document.createElement('span');
     term.className = 'gl-term';
-    term.textContent = word.isLine ? word.definition : word.isEquation ? (word.definition || word.term) : word.term;
+    term.textContent = word.definition;
 
     const def = document.createElement('span');
     def.className = 'gl-def';
-    def.textContent = word.isLine || word.isEquation ? word.term : (word.definition || '—');
+    def.textContent = word.term;
 
     item.append(term, def);
     runGlossary.append(item);
@@ -6169,145 +5891,42 @@ function showBanner(text, variant = '') {
   bossBanner.classList.add('is-active');
 }
 
-// Power-up system logic is imported from src/power-ups.js
-
+// Chain lightning: the bolt strikes the monster whose word was just typed, then leaps
+// to the nearest other target. A monster it reaches dies too; a boss is stunned instead.
 function triggerChainLightning(firstEnemy) {
-  if (powerUps) {
-    powerUps.clearChainLightningPrimed();
-  }
-  
-  const origin = firstEnemy.group.position.clone();
-  const N = 1; // Chain to up to 1 additional monster (total 2 including the 1st one)
-  const targets = [];
-  let currentPosition = origin.clone();
-  
-  const candidates = enemies.filter(e => 
-    isEnemyTargetable(e) && 
-    !e.dying && 
-    e !== firstEnemy
-  );
-  
-  for (let i = 0; i < N; i++) {
-    if (candidates.length === 0) break;
-    let closestEnemy = null;
-    let closestDistSq = Infinity;
-    let closestIndex = -1;
-    for (let j = 0; j < candidates.length; j++) {
-      const distSq = candidates[j].group.position.distanceToSquared(currentPosition);
-      if (distSq < closestDistSq) {
-        closestDistSq = distSq;
-        closestEnemy = candidates[j];
-        closestIndex = j;
-      }
-    }
-    if (closestEnemy) {
-      targets.push(closestEnemy);
-      currentPosition = closestEnemy.group.position.clone();
-      candidates.splice(closestIndex, 1);
-    } else {
-      break;
-    }
-  }
-
-  // Bosses get a long rock-clearing interrupt instead of a short freeze; a typed
-  // boss kill counts toward the cap, so one cast touches at most CHAIN_BOSS_MAX bosses.
-  const bossInterrupts = chooseChainBossInterrupts(firstEnemy, targets);
+  const origin = firstEnemy.group.position;
+  const hop = enemies
+    .filter(enemy => enemy !== firstEnemy && isEnemyTargetable(enemy))
+    .sort((a, b) => a.group.position.distanceToSquared(origin) - b.group.position.distanceToSquared(origin))[0];
 
   playToggleSound();
   showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
-  // The chain leaps from the open hand's rune.
+  // The chain leaps from the cannon's core; each bolt is held until the burst.
   weapon.cast(0, 1);
   weapon.cast(1, 1);
-  const coreTip = weapon.origin(0);
+  const chain = [firstEnemy];
+  let from = weapon.origin(0);
+  const strike = (enemy) => {
+    const to = enemy.group.position.clone();
+    to.y += 0.8;
+    spawnLightningVisual(from, to, true);
+    from = to;
+  };
+  strike(firstEnemy);
 
-  const chainMonsters = [firstEnemy];
-
-  // 1st segment: coreTip -> 1st monster (immediately, held)
-  const p1 = origin.clone();
-  p1.y += 0.8;
-  spawnLightningVisual(coreTip, p1, true);
-
-  let currentChainOrigin = p1;
-
-  const finishChain = () => {
-    // Zap any pulsed bosses that were not on the hop path, then resolve the burst.
-    const pulsed = bossInterrupts.filter(boss => (
-      !chainMonsters.includes(boss) && enemies.includes(boss) && !boss.dying
-    ));
-    for (const boss of pulsed) {
-      const targetPos = boss.group.position.clone();
-      targetPos.y += 0.8;
-      spawnLightningVisual(currentChainOrigin, targetPos, true);
-      currentChainOrigin = targetPos;
-      chainMonsters.push(boss);
+  if (!hop) {
+    scheduleChainLightningTimer(() => burstChain(chain), 100);
+    return;
+  }
+  scheduleChainLightningTimer(() => {
+    if (enemies.includes(hop) && isEnemyTargetable(hop)) {
+      if (!hop.isBoss) hop.dying = true;
+      chain.push(hop);
+      strike(hop);
     }
-    scheduleChainLightningTimer(() => {
-      for (const boss of bossInterrupts) interruptBossWithChain(boss);
-      burstChain(chainMonsters);
-    }, pulsed.length > 0 ? 80 : 0);
-  };
-
-  if (targets.length === 0) {
-    scheduleChainLightningTimer(() => {
-      finishChain();
-    }, 100);
-  } else {
-    targets.forEach((enemy, index) => {
-      scheduleChainLightningTimer(() => {
-        if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
-          if (!enemy.isBoss) enemy.dying = true;
-          chainMonsters.push(enemy);
-
-          const targetPos = enemy.group.position.clone();
-          targetPos.y += 0.8;
-
-          spawnLightningVisual(currentChainOrigin, targetPos, true);
-          currentChainOrigin = targetPos;
-        }
-
-        if (index === targets.length - 1) {
-          scheduleChainLightningTimer(() => {
-            finishChain();
-          }, 80);
-        }
-      }, (index + 1) * 60);
-    });
-  }
-}
-
-// Up to CHAIN_BOSS_MAX bosses per cast. A typed boss defeat uses one slot; remaining
-// slots go to the hop target first, then the nearest other live bosses (the pulse).
-function chooseChainBossInterrupts(firstEnemy, chainHopTargets) {
-  let slots = CHAIN_BOSS_MAX;
-  if (firstEnemy.isBoss) slots -= 1;
-  if (slots <= 0) return [];
-
-  const chosen = [];
-  const tryAdd = (enemy) => {
-    if (!enemy || !enemy.isBoss || enemy.dying || enemy === firstEnemy) return;
-    if (chosen.includes(enemy) || chosen.length >= slots) return;
-    chosen.push(enemy);
-  };
-
-  for (const target of chainHopTargets) tryAdd(target);
-
-  const bossInvolved = firstEnemy.isBoss || chainHopTargets.some(enemy => enemy.isBoss);
-  if (bossInvolved && chosen.length < slots) {
-    const origin = firstEnemy.group.position;
-    const others = enemies
-      .filter(enemy => enemy.isBoss && !enemy.dying && enemy !== firstEnemy && !chosen.includes(enemy))
-      .sort((a, b) => a.group.position.distanceToSquared(origin) - b.group.position.distanceToSquared(origin));
-    for (const enemy of others) tryAdd(enemy);
-  }
-
-  return chosen;
-}
-
-// Long targeted interrupt: freeze that boss.
-function interruptBossWithChain(enemy) {
-  if (!enemy || !enemy.isBoss || enemy.dying) return;
-  enemy.stunTimer = Math.max(enemy.stunTimer || 0, CHAIN_BOSS_STUN);
+    scheduleChainLightningTimer(() => burstChain(chain), 80);
+  }, 60);
 }
 
 function armChainLightningTimer(entry, delay) {
@@ -6331,7 +5950,7 @@ function clearChainLightningTimers() {
     window.clearTimeout(entry.id);
   }
   chainLightningTimers = [];
-  if (lightningFlash) lightningFlash.style.opacity = '0';
+  lightningFlash.classList.remove('show');
 }
 
 // Pausing must not let the chain sequence resolve behind the pause overlay,
@@ -6359,112 +5978,49 @@ function releaseChainBeams() {
   }
 }
 
-function burstChain(chainMonsters) {
+function burstChain(chain) {
   releaseChainBeams();
+  for (const enemy of chain) defeatEnemyChainBurst(enemy);
+  flashLightning();
+}
 
-  chainMonsters.forEach(enemy => {
-    defeatEnemyChainBurst(enemy);
-  });
-
-  if (lightningFlash) {
-    lightningFlash.style.opacity = '0.92';
-    scheduleChainLightningTimer(() => {
-      lightningFlash.style.opacity = '0';
-    }, 100);
-  }
+// A white flash over the whole view (styles.css: .lightning-flash.show).
+function flashLightning() {
+  lightningFlash.classList.add('show');
+  window.setTimeout(() => lightningFlash.classList.remove('show'), 140);
 }
 
 function defeatEnemyChainBurst(enemy) {
-  if (enemy.isBoss && !enemy.dying) {
-    const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
-    const flashMat = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.95,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    const flashMesh = new THREE.Mesh(flashGeo, flashMat);
-    flashMesh.position.copy(enemy.group.position);
-    flashMesh.position.y += 0.8;
-    effectsGroup.add(flashMesh);
-    
-    beams.push({
-      kind: 'beam_flash',
-      mesh: flashMesh,
-      life: 0.15,
-      maxLife: 0.15
-    });
+  if (!enemies.includes(enemy)) return;
+  const flash = new THREE.Mesh(
+    new THREE.DodecahedronGeometry(0.85, 0),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  flash.position.copy(enemy.group.position);
+  flash.position.y += 0.8;
+  effectsGroup.add(flash);
+  beams.push({ kind: 'beam_flash', mesh: flash, life: 0.15, maxLife: 0.15 });
 
-    playToggleSound();
+  // A boss is not killed by the chain: it is stunned, a long interrupt of its attacks.
+  if (enemy.isBoss) {
+    if (!enemy.dying) {
+      enemy.stunTimer = Math.max(enemy.stunTimer || 0, CHAIN_BOSS_STUN);
+      playToggleSound();
+    }
     return;
   }
 
   if (enemy.isMimic) {
     awardMimicLoot(enemy);
-    spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
-
-    // Spark impact flash mesh at the target position
-    const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
-    const flashMat = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.95,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    const flashMesh = new THREE.Mesh(flashGeo, flashMat);
-    flashMesh.position.copy(enemy.group.position);
-    flashMesh.position.y += 0.8;
-    effectsGroup.add(flashMesh);
-    
-    beams.push({
-      kind: 'beam_flash',
-      mesh: flashMesh,
-      life: 0.15,
-      maxLife: 0.15
-    });
-
-    removeEnemy(enemy);
-    updateHud(true);
-    updateTypedDisplay();
-    return;
+  } else {
+    const { points, healed } = awardKill(enemy);
+    spawnScorePopup(points, enemy, healed);
+    if (enemy.isMedic) playHealSound(healed);
+    else playDefeatSound(enemy);
   }
-
-  const { points, healed } = awardKill(enemy);
-
-  spawnScorePopup(points, enemy, healed);
-  
-  if (enemy.isMedic) playHealSound(healed);
-  else playDefeatSound(enemy);
-
-  spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
-
-  // Spark impact flash mesh at the target position
-  const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
-  const flashMat = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.95,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  const flashMesh = new THREE.Mesh(flashGeo, flashMat);
-  flashMesh.position.copy(enemy.group.position);
-  flashMesh.position.y += 0.8;
-  effectsGroup.add(flashMesh);
-  
-  beams.push({
-    kind: 'beam_flash',
-    mesh: flashMesh,
-    life: 0.15,
-    maxLife: 0.15
-  });
-
+  spawnDebris(enemy.group.position, enemy.type);
   removeEnemy(enemy);
-  
   updateHud(true);
-  updateTypedDisplay();
 }
 
 function spawnLightningVisual(startPos, targetPos, hold = false) {

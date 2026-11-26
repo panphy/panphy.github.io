@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GLOW_GAIN } from './visuals.js?v=beta35';
-import { LOW_POLY_CREATURES, buildPulseHeart, buildMimicChest } from './lowpoly-creatures.js?v=beta35';
+import { GLOW_GAIN } from './visuals.js?v=beta36';
+import { LOW_POLY_CREATURES, buildPulseHeart, buildMimicChest } from './lowpoly-creatures.js?v=beta36';
 
 const materialCache = new Map();
 
@@ -49,9 +49,9 @@ const lowPolyKit = {
       color, roughness: 0.92, metalness: 0, flatShading: true, vertexColors: false, ...options,
     });
   },
-  glow(color, intensity = 1.5, options = {}) {
-    return getCachedMaterial(`lowpoly-glow-${color}-${intensity}-${options.wireframe ? 'wire' : 'solid'}`, {
-      color, emissive: color, emissiveIntensity: intensity, roughness: 0.4, flatShading: true, vertexColors: false, ...options,
+  glow(color, intensity = 1.5) {
+    return getCachedMaterial(`lowpoly-glow-${color}-${intensity}`, {
+      color, emissive: color, emissiveIntensity: intensity, roughness: 0.4, flatShading: true, vertexColors: false,
     });
   },
   mesh(geometry, material) {
@@ -99,12 +99,11 @@ function createMedicHeartMesh(type) {
   return group;
 }
 
-function finishBossGroup(group, type, beaconY = 2.9) {
+function finishBossGroup(group, type) {
   const glow = createGlowAnchor(type.eye, 1.35, 5.5, 2.1);
   glow.position.set(0, 1.45, 0.45);
   group.add(glow);
   const incomingBeacon = createIncomingBeacon(type);
-  incomingBeacon.position.set(0, beaconY, 0);
   const targetMarker = createTargetMarker(type);
   group.add(incomingBeacon, targetMarker);
   group.userData.incomingBeacon = incomingBeacon;
@@ -112,7 +111,7 @@ function finishBossGroup(group, type, beaconY = 2.9) {
   return group;
 }
 
-export function createMimicChestMesh(type) {
+function createMimicChestMesh(type) {
   const { group: g, lid: lidGroup } = buildMimicChest(type, lowPolyKit);
 
   // Glow inside the chest (intensity driven each frame)
@@ -138,21 +137,8 @@ export function createMimicChestMesh(type) {
   return g;
 }
 
-// Height of the "incoming" beacon above each boss, to clear its head, horns, wings or weapon.
-const BOSS_BEACON_HEIGHTS = {
-  'Verdant Colossus': 3.2,
-  'Solar Anvil': 3.2,
-  'Glacial Titan': 3.3,
-  'Magma Sovereign': 3.3,
-  'Void Specter': 3.1,
-  'Celestial Arbiter': 3.2,
-  'Phantom Rift': 3.2,
-  'Stellar Dreadnought': 3.4,
-};
-
 function createSpecificBossMesh(type) {
-  const build = LOW_POLY_CREATURES[type.name] || LOW_POLY_CREATURES['Crimson Bulwark'];
-  return finishBossGroup(build(type, lowPolyKit), type, BOSS_BEACON_HEIGHTS[type.name] ?? 2.9);
+  return finishBossGroup(LOW_POLY_CREATURES[type.name](type, lowPolyKit), type);
 }
 
 function createIncomingBeacon(type) {

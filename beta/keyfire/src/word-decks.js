@@ -22,7 +22,6 @@ export function createWordDeck({ random = Math.random } = {}) {
       uses.set(entry.term, (uses.get(entry.term) || 0) + 1);
       return entry;
     },
-    hasUsed: term => uses.has(term),
     usedTerms: () => [...uses.keys()],
     // Start a run: forget this run's uses and remember the given terms as last run's.
     reset(lastRunTerms = []) {

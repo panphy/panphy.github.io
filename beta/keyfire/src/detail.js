@@ -1,7 +1,7 @@
 // detail.js — how finely the world is faceted. The look stays flat-shaded and faceted;
 // full detail just cuts round things into more, smaller facets. Battery saver keeps the
-// coarse low-poly shapes. Geometry is built per stage, so a change of setting shows from
-// the next stage on.
+// coarse low-poly shapes. The game rebuilds the stage and the clouds when the setting
+// changes (rebuildSceneryDetail in main.js); monsters take it from their next spawn.
 import * as THREE from 'three';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 

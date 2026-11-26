@@ -5,7 +5,7 @@
 // Nothing here adds a light: glows are emissive materials, so the light count never
 // changes between stages. A kit's own materials are made per stage and disposed with it.
 import * as THREE from 'three';
-import { roundSides, polyDetail, roughen } from './detail.js?v=beta35';
+import { roundSides, polyDetail, roughen } from './detail.js?v=beta36';
 
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true, ...extra });
 const lit = (color, intensity = 1.6, extra = {}) => flat(color, { emissive: color, emissiveIntensity: intensity, roughness: 0.5, ...extra });
@@ -130,7 +130,7 @@ function createGableGeometry(length, span, rise) {
 
 // A small building with a door on its +z side; `doorOffset` is where a monster steps out.
 // Stone footing, timber corner posts, a pitched roof with eaves, shuttered windows and a chimney.
-function createHut(mats, random, { width = 3.6, depth = 3.0, height = 2.4, roofMaterial, chimney = true }) {
+function createHut(mats, { width = 3.6, depth = 3.0, height = 2.4, roofMaterial, chimney = true }) {
   const group = new THREE.Group();
   const trim = mats.timber;
   const footing = mats.stone || mats.timber;
@@ -291,7 +291,7 @@ function meadowKit() {
     cone(mats.hayDark, 1.2, 1.0, 7, 0, 1.78, 0),
   );
   const createCottage = (mats, random) => {
-    return createHut(mats, random, {
+    return createHut(mats, {
       width: 3.6 + random() * 1.2,
       depth: 3.0 + random() * 0.8,
       roofMaterial: random() < 0.5 ? mats.roof : mats.roofDark,
@@ -485,7 +485,7 @@ function forestKit() {
     materials: () => ({
       timber: flat(0x5a3d24), plank: flat(0x9a7448), wall: flat(0x7d5a36), roof: flat(0x4d5a34), door: flat(0x33231a),
       stone: flat(0x8a8d86), bush: flat(0x2c6a3c), fern: flat(0x3c8a4a), moss: flat(0x5c9440),
-      cap: flat(0xd9483a), stem: flat(0xeadfc8), rope: flat(0xb89a64), pane: lit(0xffc66a, 1.3),
+      cap: flat(0xd9483a), stem: flat(0xeadfc8), pane: lit(0xffc66a, 1.3),
       water: flat(0x3a8fc0, { roughness: 0.25, metalness: 0.15, emissive: 0x16466e, emissiveIntensity: 0.55 }),
       firefly: lit(0xe9ff8a, 2.6),
     }),
@@ -517,7 +517,7 @@ function forestKit() {
       { kind: 'rock', build: (ctx) => ({ object: createMossyBoulder(ctx), radius: 1.7 }) },
       {
         kind: 'hut', wide: true,
-        build: (ctx) => ({ object: createHut(ctx.mats, ctx.random, { width: 3.4, depth: 3.0, roofMaterial: ctx.mats.roof }), radius: 3.1, face: true }),
+        build: (ctx) => ({ object: createHut(ctx.mats, { width: 3.4, depth: 3.0, roofMaterial: ctx.mats.roof }), radius: 3.1, face: true }),
       },
     ],
     decorate(ctx) {
@@ -732,7 +732,7 @@ function mountainKit() {
       { kind: 'cairn', where: 'early', build: (ctx) => ({ object: createCairn(ctx.mats, ctx.random), radius: 1.4 }) },
       {
         kind: 'shed', wide: true,
-        build: (ctx) => ({ object: createHut(ctx.mats, ctx.random, { width: 3.2, depth: 2.8, height: 2.3, roofMaterial: ctx.mats.roof }), radius: 3, face: true }),
+        build: (ctx) => ({ object: createHut(ctx.mats, { width: 3.2, depth: 2.8, height: 2.3, roofMaterial: ctx.mats.roof }), radius: 3, face: true }),
       },
     ],
     decorate(ctx) {
@@ -903,8 +903,8 @@ function winterKit() {
     box(mats.timber, 0.5, 0.07, 0.07, 0.2, 2.2, 0),
     octa(mats.lantern, 0.16, 0.4, 1.95, 0),
   );
-  const createFishingHut = (mats, random) => {
-    const hut = createHut(mats, random, { width: 2.4, depth: 2.2, height: 2.0, roofMaterial: mats.snow, chimney: false });
+  const createFishingHut = (mats) => {
+    const hut = createHut(mats, { width: 2.4, depth: 2.2, height: 2.0, roofMaterial: mats.snow, chimney: false });
     hut.add(cyl(mats.coal, 0.6, 0.6, 0.04, 8, 0, 0.02, 2.6));
     return hut;
   };
@@ -963,7 +963,7 @@ function winterKit() {
   return {
     materials: () => ({
       ice: flat(0xa8dcf0, { roughness: 0.3, emissive: 0x2a6f92, emissiveIntensity: 0.45 }), snow: flat(0xf2f6fc),
-      stone: flat(0x7d8794), timber: flat(0x5a4636), plank: flat(0x8a7458), wall: flat(0x8c6a4a), roof: flat(0x6a4030),
+      stone: flat(0x7d8794), timber: flat(0x5a4636), plank: flat(0x8a7458), wall: flat(0x8c6a4a),
       door: flat(0x33261e), pane: lit(0xffc66a, 1.4), coal: flat(0x1c1d22), carrot: flat(0xf08a2c), scarf: flat(0xc8323c), sail: flat(0xd9d2c0),
       lantern: lit(0xffc45a, 2.4), tower: flat(0x3a4152), towerTrim: flat(0x2a2f3c), towerRoof: flat(0x30486e),
       window: lit(0xffb84a, 2.2), storm: lit(0x9fd8ff, 3.0), cloud: flat(0x2e3444),
@@ -1031,7 +1031,7 @@ function winterKit() {
         const side = sideOf(random);
         const p = ctx.at(pose, side * (15 + random() * 7), (random() - 0.5) * 6);
         if (ctx.arenaDistance(p.x, p.z) < 2 || !ctx.isFree(p.x, p.z, 3)) continue;
-        if (random() < 0.6) ctx.place(createFishingHut(mats, random), p.x, p.z, 3, pose.yaw + (side < 0 ? -Math.PI / 2 : Math.PI / 2));
+        if (random() < 0.6) ctx.place(createFishingHut(mats), p.x, p.z, 3, pose.yaw + (side < 0 ? -Math.PI / 2 : Math.PI / 2));
         else ctx.place(createBoat(mats), p.x, p.z, 3);
       }
       // Ice thrown up in ridges further out.
@@ -1259,8 +1259,6 @@ function skyKit() {
 }
 
 const KIT_BUILDERS = { meadow: meadowKit, forest: forestKit, mountain: mountainKit, winter: winterKit, sky: skyKit };
-
-export const STAGE_KIT_NAMES = Object.keys(KIT_BUILDERS);
 
 export function createStageKit(name) {
   return (KIT_BUILDERS[name] || meadowKit)();

@@ -11,9 +11,9 @@
 // of the land beside the route, the cover, the props and the landmark.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { isDetailed } from './detail.js?v=beta35';
-import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=beta35';
-import { createStageKit } from './stage-kits.js?v=beta35';
+import { isDetailed } from './detail.js?v=beta36';
+import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=beta36';
+import { createStageKit } from './stage-kits.js?v=beta36';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
@@ -62,7 +62,7 @@ function valueNoise(x, z, seed) {
 }
 
 // Stop frame → stage space. Forward (z = −1 in the frame) is (−sin yaw, 0, −cos yaw).
-export function frameToStage(pose, x, z, target = new THREE.Vector3()) {
+function frameToStage(pose, x, z, target = new THREE.Vector3()) {
   const c = Math.cos(pose.yaw);
   const s = Math.sin(pose.yaw);
   return target.set(pose.x + x * c + z * s, 0, pose.z - x * s + z * c);
@@ -161,8 +161,6 @@ function createStageTerrain({ bounds, heightAt, isPath, seed, cell = cellSize(),
 
   return {
     mesh,
-    triangles: faces.length,
-    scroll() {},
     recolor(spec) {
       fill(colors, spec);
       geometry.attributes.color.needsUpdate = true;
@@ -244,8 +242,11 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
   // A kit with a late part (the mine) changes over on the leg into stop `lateStop`;
   // the crossing goes on some other leg.
   const lateStop = kit.late ? Math.max(1, Math.floor(burstCount / 2)) : -1;
-  const crossingLegs = [];
+  // It keeps off the leg into the boss arena where it can: the bridge fight there
+  // would come after the wave's last ambush.
+  let crossingLegs = [];
   for (let leg = 1; leg < legLengths.length; leg += 1) if (leg !== lateStop) crossingLegs.push(leg);
+  if (crossingLegs.length > 1) crossingLegs = crossingLegs.filter(leg => leg < legLengths.length - 1);
   const crossingLeg = kit.crossing && crossingLegs.length > 0 ? crossingLegs[Math.floor(random() * crossingLegs.length)] : -1;
   if (crossingLeg > 0) legLengths[crossingLeg] += CROSSING_EXTRA;
   if (lateStop > 0 && kit.ride) legLengths[lateStop] += RIDE_EXTRA;
@@ -420,8 +421,6 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
   }
   // The game recolours and blends the ground as one thing.
   const terrain = {
-    mesh: ground.mesh,
-    scroll() {},
     recolor: (spec) => sheets.forEach((sheet) => sheet.recolor(spec)),
     startBlend: (spec) => sheets.forEach((sheet) => sheet.startBlend(spec)),
     blend: (amount) => sheets.forEach((sheet) => sheet.blend(amount)),
@@ -440,13 +439,13 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
     return object;
   };
   const tree = (kind, scale) => {
-    const { group: built } = createLowPolyTree({ kind, trunkMaterial: materials.trunk, leafMaterials: materials.leaves, seed: Math.floor(random() * 1e6) });
+    const built = createLowPolyTree({ kind, trunkMaterial: materials.trunk, leafMaterials: materials.leaves, seed: Math.floor(random() * 1e6) });
     built.scale.setScalar(scale);
     return built;
   };
   const ctx = {
-    random, seed, mats, shared: materials,
-    stops, bossStop: stops[stops.length - 1], startArc, length, crossing, bounds, lateArc,
+    random, mats, shared: materials,
+    bossStop: stops[stops.length - 1], length, crossing, lateArc,
     poseAtArc, heightAt, openness, arenaDistance, isFree, isLate, occupy, place, tree,
     at: frameToStage,
     rock: (scale) => {
