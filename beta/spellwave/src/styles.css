@@ -4093,6 +4093,10 @@ body.battery-saver .potion-bar {
   paint-order: stroke fill;
 }
 
+.message-panel h2 {
+  font-size: clamp(1.9rem, 5.6vw, 2.7rem);
+}
+
 .message-score {
   font-family: var(--font-chunky);
   font-weight: 400;
@@ -4149,6 +4153,7 @@ body.battery-saver .potion-bar {
 
 .sw-modal-score {
   color: #fff6dc;
+  font-size: 2.4rem;
   font-family: var(--font-chunky);
   text-shadow: 0 4px 0 var(--key-ink);
   -webkit-text-stroke: 7px var(--key-ink);
@@ -4289,14 +4294,14 @@ body.battery-saver .potion-bar {
 }
 
 /* Potion tray: each potion sits on a keycap with its arrow key in the corner. */
-.potion-slot {
+.potion-bar .potion-slot {
   border: 3px solid var(--key-ink);
   border-radius: 12px;
   background: linear-gradient(#fffaf0, #f1dcae);
   box-shadow: 0 4px 0 var(--key-ink);
 }
 
-.potion-slot .slot-key {
+.potion-bar .potion-slot .slot-key {
   color: var(--key-ink);
   font-weight: 800;
 }
