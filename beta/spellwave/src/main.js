@@ -649,6 +649,8 @@ updatePhaseDisplay();
 updateHud(true);
 if (!webGLAvailable) showWebGLUnavailable();
 
+setUpDeviceGate();
+
 startButton.addEventListener('click', () => {
   resumeAudio();
   if (mode === 'paused') {
@@ -4948,6 +4950,37 @@ function accuracy() {
 function formatAccuracySummary() {
   if (typedAttempts <= 0) return 'No typed attempts';
   return `${Math.round(accuracy() * 100)}% accuracy`;
+}
+
+// Phones and tablets without a keyboard cannot play a typing game. A touch-only device
+// (no fine pointer) is asked to use a computer; a key press from a physical keyboard,
+// such as an iPad's keyboard case, lets it through. Nothing on the gate takes focus
+// that would raise the on-screen keyboard.
+function isTouchOnlyDevice() {
+  if (!window.matchMedia) return false;
+  return window.matchMedia('(any-pointer: coarse)').matches && !window.matchMedia('(any-pointer: fine)').matches;
+}
+
+function setUpDeviceGate() {
+  // Declared here, not at module level: this runs before the module's later constants exist.
+  const DEVICE_GATE_KEY = 'spellwaveBetaHasKeyboard';
+  const gate = document.getElementById('deviceGate');
+  if (!gate || !isTouchOnlyDevice()) return;
+  try {
+    if (localStorage.getItem(DEVICE_GATE_KEY) === '1') return;
+  } catch {}
+  gate.hidden = false;
+  document.body.classList.add('needs-keyboard');
+  const unlock = (event) => {
+    if (event.isComposing || event.key === 'Unidentified' || event.key === 'Process') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.removeEventListener('keydown', unlock, true);
+    gate.hidden = true;
+    document.body.classList.remove('needs-keyboard');
+    try { localStorage.setItem(DEVICE_GATE_KEY, '1'); } catch {}
+  };
+  window.addEventListener('keydown', unlock, true);
 }
 
 function focusKeyboard() {

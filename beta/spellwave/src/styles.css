@@ -3681,3 +3681,41 @@ body.loot-guide-open .potion-bar {
   box-shadow: none;
   transform: scaleY(0.6);
 }
+
+/* ── Keyboard needed: shown on touch-only devices ── */
+.device-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(61, 43, 28, 0.45);
+  touch-action: none;
+}
+
+.device-gate[hidden] {
+  display: none;
+}
+
+.device-gate .message-panel {
+  z-index: auto;
+}
+
+.device-gate-home {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 3px 8px rgba(74, 52, 28, 0.2);
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+body.needs-keyboard #messagePanel,
+body.needs-keyboard .sw-leaderboard,
+body.needs-keyboard .corner-controls,
+body.needs-keyboard .hud-grid,
+body.needs-keyboard .potion-bar {
+  visibility: hidden;
+}
