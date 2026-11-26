@@ -6,7 +6,7 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRAS
 import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta28';
 import { createLeaderboard } from './leaderboard.js?v=beta28';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta28';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta28';
 import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta28';
 import { createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta28';
@@ -1388,7 +1388,8 @@ function spawnSplitChildren(parent) {
 
 function throwCasterBolt(caster) {
   const mesh = createCasterBolt(caster.type);
-  caster.orb.getWorldPosition(reusableVector);
+  if (caster.orb) caster.orb.getWorldPosition(reusableVector);
+  else reusableVector.copy(caster.group.position);
   const from = reusableVector.clone();
   const to = new THREE.Vector3(from.x * 0.25, CAMERA_HEIGHT - 0.9, WALL_Z + 2);
   mesh.position.copy(from);
@@ -1696,17 +1697,168 @@ function startBossLine(boss) {
   boss.label.dataset.stage = boss.lineKind;
   boss.lineWordsList = lineWords(line);
   boss.wordIndex = 0;
+  boss.beam = null;
   setBossWord(boss);
   renderPrompt(boss);
+  if (line.core) deploySatellites(boss, line.satellites);
+  updateBossBeamBar(boss);
+}
+
+// ── The Dreadnought's satellites and beam ────────────────────────────────
+// Satellites orbit in front of the boss, each with a short word. While any is up the
+// boss is shielded: its word shows but cannot be typed. Each fires a small bolt now
+// and then, which fizzles if the satellite falls first.
+const SATELLITE_BOLT_EVERY = 5;
+
+function chooseSatelliteWord() {
+  const initials = new Set(enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt.charAt(0).toLowerCase()));
+  const fits = (entry) => {
+    const key = buildSearchPrompt(entry.term).toLowerCase();
+    return /^[a-z]+$/.test(key) && key.length >= 3 && key.length <= 6 && !initials.has(key.charAt(0));
+  };
+  return monsterDeck.pick(currentKeywordPool(), fits) || monsterDeck.pick(ALL_WORDS, fits);
+}
+
+function createSatelliteMesh(colour) {
+  const group = new THREE.Group();
+  const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.4, 0), new THREE.MeshStandardMaterial({ color: 0xe8eef8, emissive: colour, emissiveIntensity: 0.9, roughness: 0.35, flatShading: true }));
+  const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x2d4f8a, emissive: 0x1a3a7a, emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.3 });
+  for (const side of [-1, 1]) {
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.05, 0.42), panelMaterial);
+    panel.position.x = side * 0.72;
+    group.add(panel);
+  }
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.04, 6, 24), new THREE.MeshBasicMaterial({ color: glowColor(colour, 1.4) }));
+  ring.rotation.x = Math.PI / 2;
+  group.add(core, ring);
+  return group;
+}
+
+function deploySatellites(boss, count = 3) {
+  const type = { ...ROCK_TYPE, name: 'Satellite', eye: boss.type.eye, score: 40 };
+  for (let index = 0; index < count; index += 1) {
+    const wordData = chooseSatelliteWord();
+    if (!wordData) continue;
+    const at = boss.group.position;
+    const satellite = spawnEnemy({ wordData, type, customGroup: createSatelliteMesh(boss.type.eye), lane: at.x, startZ: at.z, delay: 0 });
+    satellite.satellite = true;
+    satellite.summoned = true;
+    satellite.damage = 0;
+    satellite.revealed = true;
+    satellite.group.position.copy(at);
+    setEnemyKind(satellite, 'satellite');
+    satellite.rail = { phase: 'orbit', t: 0, boss, angle: (index / count) * Math.PI * 2, boltTimer: 2.5 + index * (SATELLITE_BOLT_EVERY / count) };
+  }
+  boss.shielded = true;
+  playRevealSound(boss);
+}
+
+function updateSatellite(satellite, delta, seconds) {
+  const plan = satellite.rail;
+  const boss = plan.boss;
+  const position = satellite.group.position;
+  plan.t = Math.min(1, plan.t + delta / 0.8);
+  const ease = 1 - (1 - plan.t) ** 3;
+  const angle = plan.angle + seconds * 0.55;
+  const centre = boss.group.position;
+  reusableVector.set(
+    centre.x + Math.cos(angle) * 4.4,
+    centre.y + 1.6 + Math.sin(angle * 2 + plan.angle) * 0.5,
+    centre.z + 5 + Math.sin(angle) * 1.6
+  );
+  position.lerpVectors(centre, reusableVector, ease);
+  satellite.group.rotation.y += delta * 1.2;
+  satellite.group.rotation.z = Math.sin(seconds * 1.3 + plan.angle) * 0.25;
+  if (satellite.stunTimer > 0 || plan.t < 1) return;
+  plan.boltTimer -= delta;
+  if (plan.boltTimer <= 0) {
+    throwCasterBolt(satellite);
+    plan.boltTimer = SATELLITE_BOLT_EVERY * (0.85 + Math.random() * 0.3);
+  }
+}
+
+function updateBossShield(boss) {
+  const shielded = enemies.some(enemy => enemy.satellite && !enemy.dying);
+  if (!!boss.shielded === shielded && boss.label.classList.contains('is-shielded') === shielded) return;
+  const wasShielded = boss.label.classList.contains('is-shielded');
+  boss.shielded = shielded;
+  boss.label.classList.toggle('is-shielded', shielded);
+  boss.kindNode.textContent = shielded ? 'shielded' : boss.type.name;
+  if (wasShielded && !shielded) {
+    reusableVector.copy(boss.group.position);
+    reusableVector.y += 1.5 * boss.group.scale.y;
+    fx.ring(reusableVector, 0x9fe8ff, { from: 1, to: 9, life: 0.6, opacity: 0.85, flat: false });
+    playChestClackSound();
+  }
+}
+
+// During a story line the Dreadnought charges a beam; the line must be finished
+// before the charge is full. A full charge fires and the beam starts again.
+function updateBossBeam(boss, delta) {
+  const plan = bossPlan(bossLevel());
+  if (!boss.beam) {
+    const letters = boss.prompt.replace(/[^a-z]/gi, '').length;
+    boss.beam = { charge: 0, time: beamChargeTime(plan, letters), warned: false };
+  }
+  const beam = boss.beam;
+  beam.charge = Math.min(1, beam.charge + delta / beam.time);
+  boss.windup = beam.charge > 0.8 ? (beam.charge - 0.8) / 0.2 : 0;
+  if (beam.charge > 0.8 && !beam.warned) {
+    beam.warned = true;
+    playWindupSound(THREE.MathUtils.clamp(boss.group.position.x / 9, -0.8, 0.8));
+  }
+  if (beam.charge >= 1) {
+    fireBossBeam(boss, plan.beamDamage);
+    beam.charge = 0;
+    beam.warned = false;
+    boss.windup = 0;
+  }
+  updateBossBeamBar(boss);
+}
+
+function fireBossBeam(boss, damage) {
+  const start = boss.group.position.clone();
+  start.y += 1.6 * boss.group.scale.y;
+  const end = new THREE.Vector3(0, CAMERA_HEIGHT - 0.6, WALL_Z + 1);
+  const distance = start.distanceTo(end);
+  const geometry = new THREE.CylinderGeometry(0.25, 1.1, distance, 8, 1, true).rotateX(Math.PI / 2);
+  const material = new THREE.MeshBasicMaterial({ color: glowColor(boss.type.eye, 1.6), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.copy(start).lerp(end, 0.5);
+  mesh.lookAt(end);
+  effectsGroup.add(mesh);
+  beams.push({ mesh, life: 0.4, maxLife: 0.4, kind: 'beam_core' });
+  fx.ring(start, boss.type.eye, { from: 0.5, to: 5, life: 0.4, opacity: 0.8, flat: false });
+  boss.lunge = 1;
+  kickTimer = Math.max(kickTimer, 0.3);
+  playBossImpactSound();
+  strikePlayer(damage);
+}
+
+function updateBossBeamBar(boss) {
+  if (!bossHpBar) return;
+  const bar = bossHpBar.querySelector('.boss-beam');
+  if (!bar) return;
+  const charging = boss.lineKind === 'story' && !!bossPlan(bossLevel()).beamLettersPerSecond && !boss.dying;
+  bar.hidden = !charging;
+  bar.style.setProperty('--charge', String(boss.beam ? boss.beam.charge : 0));
+  bar.classList.toggle('is-hot', !!boss.beam && boss.beam.charge > 0.8);
 }
 
 function spawnPhraseBoss() {
   const plan = bossPlan(bossLevel());
   const isFinal = isFinalWave();
   const used = new Set();
-  const closing = plan.story ? chooseBossStory() : chooseBossLines(bossLevel(), plan.finishers);
-  const lines = [...plan.stages.map(count => chooseBossWordStage(count, used)), ...closing];
-  bossWordsThisSet = closing.map(line => ({ term: line.term, definition: line.topic, isLine: true }));
+  const statements = chooseBossLines(bossLevel(), plan.finishers);
+  const lines = [];
+  for (const step of bossFightOrder(plan)) {
+    if (step.kind === 'words') lines.push(chooseBossWordStage(step.count, used));
+    else if (step.kind === 'line') lines.push(statements.shift());
+    else if (step.kind === 'core') lines.push({ ...chooseBossWordStage(1, used), core: true, satellites: step.satellites });
+    else if (step.kind === 'story') lines.push(...chooseBossStory());
+  }
+  bossWordsThisSet = lines.filter(line => line.kind !== 'words')
+    .map(line => ({ term: line.term, definition: line.topic, isLine: true }));
   const boss = spawnEnemy({
     isBoss: true,
     phraseBoss: true,
@@ -1753,7 +1905,7 @@ function showBossHpBar(boss) {
     bossHpBar.setAttribute('role', 'img');
     document.getElementById('app').append(bossHpBar);
   }
-  bossHpBar.innerHTML = `<span class="boss-hp-name">${escapeHtml(boss.type.name)}</span><span class="boss-hp-segments">${'<i></i>'.repeat(boss.maxHp)}</span>`;
+  bossHpBar.innerHTML = `<span class="boss-hp-name">${escapeHtml(boss.type.name)}</span><span class="boss-hp-segments">${'<i></i>'.repeat(boss.maxHp)}</span><span class="boss-beam" hidden><i></i></span>`;
   bossHpBar.style.setProperty('--boss-accent', hexColor(boss.type.trim));
   bossHpBar.hidden = false;
   updateBossHpBar(boss);
@@ -1853,10 +2005,23 @@ function advanceBossLine(boss) {
   if (boss.hp > 0) {
     boss.stagger = 1.4;
     boss.attackTimer = Math.max(boss.attackTimer, 2.2);
-    boss.barrageLeft = 0;
-    // Only the turn to the finishing blow is announced.
+    const finished = boss.bossLines[boss.lineIndex - lost];
     const next = boss.bossLines[boss.lineIndex];
-    if (stageWord && next.kind === 'story') showBanner(`THE TALE OF ${next.story.toUpperCase()}`);
+    const newStage = finished.kind !== next.kind || !!finished.core !== !!next.core;
+    if (boss.isClimaxBoss && newStage) {
+      // The last boss gives back a heart at each change of weapon, and names the next one.
+      const healed = Math.min(2, MAX_LIFE - health);
+      if (healed > 0) {
+        health += healed;
+        playHealSound(healed);
+      }
+      if (next.kind === 'story') {
+        showBanner(`THE TALE OF ${next.story.toUpperCase()}`);
+        window.setTimeout(() => { if (mode === 'running') showBanner('BEAT THE BEAM!', 'variant-hint'); }, 1600);
+      } else if (next.core) showBanner('BREAK THE SATELLITES!', 'variant-hint');
+      else if (next.kind !== 'words') showBanner('COMETS SPLIT IF YOU WAIT!', 'variant-hint');
+    } else if (stageWord && next.kind === 'story') showBanner(`THE TALE OF ${next.story.toUpperCase()}`);
+    // Only the turn to the finishing blow is announced.
     else if (stageWord && next.kind !== 'words') showBanner('FINISH IT!');
     startBossLine(boss);
     updateHud(true);
@@ -1873,23 +2038,26 @@ function advanceBossLine(boss) {
 
 // Rocks carry a short unit; none may start with the same letter as the boss's
 // next word or another rock, so the first key always picks one target.
-function chooseRockWord(boss) {
-  const taken = new Set(enemies.filter(other => !other.dying && (other.isProjectile || other === boss))
+function chooseRockWord(boss, { minLength = 1, maxLength = Infinity } = {}) {
+  const taken = new Set(enemies.filter(other => !other.dying && (other.isProjectile || other.satellite || other === boss))
     .map(other => other.searchPrompt.charAt(0).toLowerCase()));
-  const free = ROCK_UNITS.filter(entry => !taken.has(buildSearchPrompt(entry.term).charAt(0).toLowerCase()));
+  const free = ROCK_UNITS.filter((entry) => {
+    const key = buildSearchPrompt(entry.term).toLowerCase();
+    return key.length >= minLength && key.length <= maxLength && !taken.has(key.charAt(0));
+  });
   return free.length > 0 ? free[Math.floor(Math.random() * free.length)] : null;
 }
 
 // Each boss attacks in its own way. rock: one rock at a time. volley: a rock from each
 // hand. summon: every other attack raises an imp from the ground instead. frost: shards
 // of ice that also frost over the boss's line for a few seconds if they land.
-// barrage: three meteors, one after another.
+// dreadnought: a weapon for each stage of the fight (see dreadnoughtAttack).
 const BOSS_ATTACKS = {
   'Verdant Colossus': 'rock',
   'Crimson Bulwark': 'volley',
   'Magma Sovereign': 'summon',
   'Glacial Titan': 'frost',
-  'Stellar Dreadnought': 'barrage',
+  'Stellar Dreadnought': 'dreadnought',
 };
 const BOSS_FROST_TIME = 3;
 const SUMMON_TYPE_NAME = 'Cinder Imp';
@@ -1904,12 +2072,10 @@ function bossAttack(boss) {
     throwRock(boss, { side: -1 });
     throwRock(boss, { side: 1, flightScale: 1.3 });
     gapScale = 1.4;
-  } else if (style === 'barrage') {
-    if (inFlight > 0) return 0.5;
-    boss.barrageLeft = 2;
-    boss.barrageTimer = 0.5;
-    throwRock(boss);
-    gapScale = 1.6;
+  } else if (style === 'dreadnought') {
+    const result = dreadnoughtAttack(boss, inFlight);
+    if (result.wait !== undefined) return result.wait;
+    gapScale = result.gapScale;
   } else if (style === 'summon' && boss.attackCount % 2 === 0 && !enemies.some(enemy => enemy.summoned && !enemy.dying)) {
     summonMinion(boss);
     gapScale = 1.2;
@@ -1953,19 +2119,55 @@ function frostBossLine() {
   boss.label.classList.add('is-frosted');
 }
 
-function throwRock(boss, { side = Math.random() < 0.5 ? -1 : 1, flightScale = 1, frost = false } = {}) {
-  const wordData = chooseRockWord(boss);
-  if (!wordData) return;
-  const plan = bossPlan(bossLevel());
-  const group = new THREE.Group();
-  const rockMesh = frost
-    ? new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), new THREE.MeshStandardMaterial({ color: 0xcfefff, emissive: 0x4aa8d8, emissiveIntensity: 0.7, roughness: 0.25, flatShading: true }))
-    : new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0), new THREE.MeshStandardMaterial({ color: ROCK_TYPE.body, roughness: 1, flatShading: true }));
-  if (frost) rockMesh.scale.set(0.7, 1.7, 0.7);
-  rockMesh.castShadow = true;
-  group.add(rockMesh);
+// The Stellar Dreadnought changes weapons with each stage of its fight: comets while
+// its words are typed, comets that split while its statement is, a shield of
+// satellites round its core word, and a charging beam (no throws) during its story.
+function dreadnoughtAttack(boss, inFlight) {
+  const line = boss.bossLines[boss.lineIndex] || {};
+  if (line.kind === 'story') return { wait: 1 };
+  if (line.core) {
+    if (inFlight >= 1) return { wait: 1 };
+    throwRock(boss, { comet: true });
+    return { gapScale: 1.5 };
+  }
+  if (inFlight >= 2) return { wait: 1 };
+  const split = line.kind !== 'words' && boss.attackCount % 2 === 0;
+  throwRock(boss, { comet: true, split });
+  return { gapScale: 1 };
+}
+
+function throwRock(boss, { side = Math.random() < 0.5 ? -1 : 1, flightScale = 1, frost = false, comet = false, split = false } = {}) {
+  const wordData = chooseRockWord(boss, split ? { minLength: 2 } : {});
+  if (!wordData) return null;
   const start = boss.group.position.clone().add(new THREE.Vector3(side * 1.6, 2.6 * boss.group.scale.y, 0.6));
   const end = new THREE.Vector3(side * (1.2 + Math.random() * 1.8), 2.2, WALL_Z - 0.6);
+  const rock = launchRock({ start, end, wordData, flight: bossPlan(bossLevel()).rockFlight * flightScale, frost, comet, split });
+  playBossThrowSound(boss);
+  return rock;
+}
+
+function createRockMesh({ frost, comet, split, small }) {
+  let mesh;
+  if (frost) {
+    mesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), new THREE.MeshStandardMaterial({ color: 0xcfefff, emissive: 0x4aa8d8, emissiveIntensity: 0.7, roughness: 0.25, flatShading: true }));
+    mesh.scale.set(0.7, 1.7, 0.7);
+  } else if (comet) {
+    const colour = split ? 0xffc27a : 0xdfeaff;
+    const glow = split ? 0xff7a2a : 0x6fb8ff;
+    mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5, 0), new THREE.MeshStandardMaterial({ color: colour, emissive: glow, emissiveIntensity: 0.85, roughness: 0.35, flatShading: true }));
+    mesh.scale.setScalar(split ? 1.3 : small ? 0.62 : 1);
+  } else {
+    mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0), new THREE.MeshStandardMaterial({ color: ROCK_TYPE.body, roughness: 1, flatShading: true }));
+  }
+  mesh.castShadow = true;
+  const group = new THREE.Group();
+  group.add(mesh);
+  return group;
+}
+
+function launchRock({ start, end, wordData, flight, frost = false, comet = false, split = false, small = false }) {
+  const plan = bossPlan(bossLevel());
+  const group = createRockMesh({ frost, comet, split, small });
   const rock = spawnEnemy({ isProjectile: true, wordData, type: ROCK_TYPE, customGroup: group, lane: start.x, startZ: start.z, delay: 0 });
   rock.isProjectile = true;
   rock.damage = plan.rockDamage;
@@ -1973,10 +2175,38 @@ function throwRock(boss, { side = Math.random() < 0.5 ? -1 : 1, flightScale = 1,
   rock.revealZ = start.z - 2;
   rock.baseY = start.y;
   rock.frost = frost;
+  rock.split = split;
   if (frost) rock.kindNode.textContent = 'ice';
-  rock.rail = { phase: 'projectile', t: 0, flight: plan.rockFlight * flightScale, from: start, to: end, spin: new THREE.Vector3(Math.random() * 4, Math.random() * 4, Math.random() * 4) };
+  else if (comet) rock.kindNode.textContent = split ? 'splitter' : 'comet';
+  rock.rail = { phase: 'projectile', t: 0, flight, from: start.clone(), to: end, spin: new THREE.Vector3(Math.random() * 4, Math.random() * 4, Math.random() * 4) };
   rock.group.position.copy(start);
-  playBossThrowSound(boss);
+  return rock;
+}
+
+// A splitting comet left alone until halfway breaks into two small comets, each
+// marked with a one-letter unit, which finish the flight a little more slowly.
+function splitComet(rock) {
+  const boss = enemies.find(enemy => enemy.phraseBoss && !enemy.dying);
+  const at = rock.group.position.clone();
+  const remaining = (1 - rock.rail.t) * rock.rail.flight;
+  const wasTarget = activeTarget === rock;
+  fx.burst(at, { color: 0xff9a4a, color2: 0xffffff, count: 18, speed: 4.6, life: 0.45, size: 0.3 });
+  removeEnemy(rock);
+  if (wasTarget) {
+    typedBuffer = '';
+    activeTarget = null;
+  }
+  if (boss) {
+    for (const side of [-1, 1]) {
+      const wordData = chooseRockWord(boss, { maxLength: 1 });
+      if (!wordData) continue;
+      const end = new THREE.Vector3(side * (1.4 + Math.random() * 1.6), 2.2, WALL_Z - 0.6);
+      const piece = launchRock({ start: at.clone(), end, wordData, flight: Math.max(1.6, remaining * 1.25), comet: true, small: true });
+      piece.rail.arc = 1.2;
+    }
+    playBossThrowSound(boss);
+  }
+  updateTypedDisplay();
 }
 
 function shatterRock(rock, scored = true) {
@@ -2067,7 +2297,12 @@ function updatePhraseBoss(boss, delta, seconds) {
   // Rear back to throw, snap forward as it lets go, reel when a line lands, loom when it roars.
   boss.group.rotation.x = -boss.windup * 0.34 + boss.lunge * 0.42 - recoil * 0.5 + Math.sin(boss.roar * Math.PI) * 0.22;
   boss.scaleBoost = 1 + boss.windup * 0.06 + Math.sin(boss.roar * Math.PI) * 0.14;
+  if (boss.lineKind === 'words' || boss.shielded) updateBossShield(boss);
   if (stunned || boss.stagger > 0) return;
+  if (boss.lineKind === 'story' && bossPlan(bossLevel()).beamLettersPerSecond) {
+    updateBossBeam(boss, delta);
+    return;
+  }
 
   // Between throws it roars: more often the angrier it is.
   boss.roarTimer -= delta * (1 + rage);
@@ -2082,15 +2317,6 @@ function updatePhraseBoss(boss, delta, seconds) {
 
   boss.attackTimer -= delta;
   boss.windup = boss.attackTimer <= BOSS_WINDUP_TIME ? THREE.MathUtils.clamp(1 - boss.attackTimer / BOSS_WINDUP_TIME, 0, 1) : 0;
-  if (boss.barrageLeft > 0) {
-    boss.barrageTimer -= delta;
-    if (boss.barrageTimer <= 0) {
-      boss.barrageLeft -= 1;
-      boss.barrageTimer = 0.5;
-      throwRock(boss, { flightScale: 1 + (2 - boss.barrageLeft) * 0.12 });
-      boss.lunge = 1;
-    }
-  }
   if (boss.attackTimer <= 0) {
     boss.windup = 0;
     const gapScale = bossAttack(boss);
@@ -2110,7 +2336,6 @@ function startBossDeath(boss) {
   boss.rage = 1;
   boss.windup = 0;
   bossDeath = { boss, t: 0, nextBurst: 0, x: boss.group.position.x, z: boss.group.position.z };
-  boss.barrageLeft = 0;
   boss.label.classList.remove('is-frosted');
   for (const minion of enemies.filter(enemy => enemy.summoned && !enemy.dying)) {
     spawnDebris(minion.group.position, minion.type);
@@ -2175,8 +2400,12 @@ function updateRock(rock, delta) {
   const plan = rock.rail;
   plan.t = Math.min(1, plan.t + delta / plan.flight);
   const t = plan.t;
+  if (rock.split && t >= 0.5 && !rock.dying) {
+    splitComet(rock);
+    return true;
+  }
   rock.group.position.lerpVectors(plan.from, plan.to, t);
-  rock.group.position.y += Math.sin(t * Math.PI) * 2.4;
+  rock.group.position.y += Math.sin(t * Math.PI) * (plan.arc ?? 2.4);
   rock.group.rotation.x += plan.spin.x * delta;
   rock.group.rotation.y += plan.spin.y * delta;
   rock.group.rotation.z += plan.spin.z * delta;
@@ -2836,6 +3065,10 @@ function setupRailEntry(enemy, spot) {
 // Moves a monster that came out of an ambush. Returns true once it has gone.
 function updateRailEnemy(enemy, delta, seconds) {
   if (enemy.isProjectile) return updateRock(enemy, delta);
+  if (enemy.satellite) {
+    updateSatellite(enemy, delta, seconds);
+    return false;
+  }
   if (enemy.phraseBoss) {
     updatePhraseBoss(enemy, delta, seconds);
     return false;
@@ -4563,6 +4796,7 @@ function findMatches(prefix, options = {}) {
   return enemies.filter((enemy) => {
     if (options.equationOnly && !enemy.isEquation) return false;
     if (!isEnemyTargetable(enemy)) return false;
+    if (enemy.shielded) return false;
     const typed = bufferFor(enemy, prefix);
     // A finished word wins over one it merely starts.
     const keys = enemyTypeableKeys(enemy);
@@ -5464,6 +5698,8 @@ function dismissEndingSequence() {
 }
 
 function activateFinalWaveCheat() {
+  // Entered again during the final stage it jumps on to the boss (for testing; the run stays unranked).
+  const toBoss = finalWaveCheatUsedThisRun && mode === 'running' && waveSet === FINAL_WAVE_NUMBER && wavePhase === 'normal';
   const savedHealth = (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') ? health : MAX_LIFE;
 
   if (mode === 'idle' || mode === 'gameover' || mode === 'ending') {
@@ -5494,6 +5730,7 @@ function activateFinalWaveCheat() {
   prepareWavePlan();
   buildStageForWave(FINAL_WAVE_NUMBER);
   startFinalWave();
+  if (toBoss) startBossPhase();
   showBanner('CHEAT CODE ACTIVATED', 'mimic-hint');
   updateHud(true);
   focusKeyboard();

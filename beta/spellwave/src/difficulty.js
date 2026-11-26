@@ -41,17 +41,40 @@ export function hardGuestCount(wave, random = Math.random) {
 // story: end with a story instead. maxLetters: longest statement, letters only.
 // attackGap: seconds between throws. rockFlight: seconds a rock takes to arrive.
 // rockDamage: life units (half hearts) lost to a rock that lands.
+// satellites: a stage with one core word, shielded until that many satellites are shot down.
+// beamDamage, beamLettersPerSecond, beamGrace: during a story line the boss charges a beam
+// that fires (beamDamage) unless the line is typed in time (see beamChargeTime).
 export const BOSS_PLAN_TABLE = [
   { fromWave: 1, stages: [3], finishers: 1, maxLetters: 32, attackGap: 6.0, rockFlight: 3.4, rockDamage: 1 },
   { fromWave: 2, stages: [3, 3], finishers: 1, maxLetters: 34, attackGap: 5.4, rockFlight: 3.2, rockDamage: 1 },
   { fromWave: 3, stages: [3, 4], finishers: 1, maxLetters: 36, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1 },
   { fromWave: 5, stages: [4, 4], finishers: 1, maxLetters: 42, attackGap: 4.6, rockFlight: 2.8, rockDamage: 1 },
   { fromWave: 7, stages: [4, 5], finishers: 2, maxLetters: 46, attackGap: 4.2, rockFlight: 2.6, rockDamage: 2 },
-  { fromWave: 10, stages: [4, 5, 5], finishers: 0, story: true, maxLetters: 50, attackGap: 3.6, rockFlight: 2.5, rockDamage: 2 },
+  // The last boss: four words under comets, one statement under splitting comets, a
+  // core word behind a shield of satellites, then a story raced against its beam.
+  { fromWave: 10, stages: [4], finishers: 1, satellites: 3, story: true, maxLetters: 40, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1,
+    beamDamage: 2, beamLettersPerSecond: 2.2, beamGrace: 4 },
 ];
 
 export function bossPlan(wave) {
   return [...BOSS_PLAN_TABLE].reverse().find(row => wave >= row.fromWave) || BOSS_PLAN_TABLE[0];
+}
+
+// The order of a boss fight, stage by stage: word stages, then statements, then the
+// shielded core word, then the story. Each entry is one segment of the health bar,
+// apart from the story, whose lines are one segment each.
+export function bossFightOrder(plan) {
+  const order = plan.stages.map(count => ({ kind: 'words', count }));
+  for (let index = 0; index < plan.finishers; index += 1) order.push({ kind: 'line' });
+  if (plan.satellites) order.push({ kind: 'core', satellites: plan.satellites });
+  if (plan.story) order.push({ kind: 'story' });
+  return order;
+}
+
+// Seconds the boss's beam takes to charge over a story line of the given letters.
+export function beamChargeTime(plan, letters) {
+  if (!plan.beamLettersPerSecond) return Infinity;
+  return letters / plan.beamLettersPerSecond + plan.beamGrace;
 }
 
 // Monsters with a behaviour of their own, by wave (1 to 5): how many of the wave's
