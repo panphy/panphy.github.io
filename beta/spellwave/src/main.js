@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta27';
+import { createSpellwaveAudio } from './audio.js?v=beta28';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta27';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta27';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta27';
-import { createLeaderboard } from './leaderboard.js?v=beta27';
+import { createPotionSystem } from './potions.js?v=beta28';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta28';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta28';
+import { createLeaderboard } from './leaderboard.js?v=beta28';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta27';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta27';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta28';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta28';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta27';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta27';
-import { createWordDeck } from './word-decks.js?v=beta27';
-import { createStage } from './stages.js?v=beta27';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta27';
-import { storyBeatForWave } from './story.js?v=beta27';
-import { createStoryteller } from './storyteller.js?v=beta27';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta27';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta28';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta28';
+import { createWordDeck } from './word-decks.js?v=beta28';
+import { createStage } from './stages.js?v=beta28';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta28';
+import { storyBeatForWave } from './story.js?v=beta28';
+import { createStoryteller } from './storyteller.js?v=beta28';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta28';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.

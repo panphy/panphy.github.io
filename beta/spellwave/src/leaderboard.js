@@ -1,4 +1,4 @@
-// Hall of Wizards for the beta: Supabase-backed top-score list and the initials modal.
+// High Scores board for the beta: Supabase-backed top-score list and the initials modal.
 // The beta has its own table and submit function, so its scores never reach the live
 // game's board (fun/spellwave), which is played under different rules.
 // Self-contained; main.js supplies score formatting and receives modal-close events.
