@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <link rel="stylesheet" href="../assets/standalone-top.css">
   <style>:root { --standalone-top-bg: #efe3c4; }</style>
-  <link rel="stylesheet" href="./spellwave/src/styles.css?v=beta27">
+  <link rel="stylesheet" href="./spellwave/src/styles.css?v=beta28">
   <script
     id="supabaseScript"
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
@@ -38,6 +38,15 @@
 </head>
 
 <body>
+  <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite">
+    <img src="./spellwave/keyfire-title.svg?v=beta28" alt="KeyFire" width="425" height="130">
+    <div class="loading-bar" aria-hidden="true"><i></i></div>
+    <p>Loading…</p>
+  </div>
+  <script>
+    // If the game cannot start (a blocked script, an old browser), do not hide the page for ever.
+    window.setTimeout(() => document.getElementById('loadingScreen')?.classList.add('is-done'), 20000);
+  </script>
   <div id="app">
     <div id="starfield" aria-hidden="true"></div>
     <canvas id="gameCanvas" aria-label="KeyFire 3D game scene"></canvas>
@@ -83,7 +92,7 @@
       </a>
       <div class="game-title">
         <span id="phaseValue"></span>
-        <h1><img src="./spellwave/keyfire-title.svg?v=beta27" alt="KeyFire" width="425" height="130"></h1>
+        <h1><img src="./spellwave/keyfire-title.svg?v=beta28" alt="KeyFire" width="425" height="130"></h1>
       </div>
     </header>
 
@@ -157,7 +166,7 @@
 
     <aside class="sw-leaderboard" aria-label="Top scores">
       <div class="sw-leaderboard-header">
-        <p>Hall of Wizards</p>
+        <p>High Scores</p>
         <span id="swLeaderboardStatus">Live</span>
       </div>
       <ol id="swScoreList" class="sw-score-list"></ol>
@@ -165,8 +174,8 @@
 
     <div class="sw-initials-modal" id="swInitialsModal" role="dialog" aria-modal="true" aria-labelledby="swInitialsTitle" hidden>
       <div class="sw-initials-card" id="swInitialsCard">
-        <p class="sw-modal-kicker">Top Wizard</p>
-        <h2 id="swInitialsTitle">Enter the Tome</h2>
+        <p class="sw-modal-kicker">New High Score</p>
+        <h2 id="swInitialsTitle">Make the Board</h2>
         <div class="sw-modal-score" id="swModalScore">0</div>
         <label for="swInitialsInput">Enter 3 initials</label>
         <input id="swInitialsInput" type="text" maxlength="3" placeholder="AAA" autocomplete="off" inputmode="text">
@@ -184,7 +193,7 @@
 Bosses: type their lines to break their health bar, and the units on their rocks to smash them.
 A wrong key is only a miss, so keep typing!</p>
       <button id="startButton" type="button" title="Start run">Start</button>
-      <a class="support-link" id="supportLink" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" title="Support my projects on BuyMeACoffee" hidden>Support My Projects</a>
+      <a class="support-link" id="supportLink" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" title="Support my projects on BuyMeACoffee">Support My Projects</a>
       <div class="run-glossary" id="runGlossary" hidden></div>
       <p class="message-copyright">&copy; PanPhy Labs. All rights reserved.</p>
     </section>
@@ -254,12 +263,13 @@ On an iPad with a keyboard attached? Press any key to play.</p>
           </ul>
         </div>
         <button class="ending-replay" id="endingReplay" type="button" title="Begin a new run">Play Again</button>
+        <a class="support-link" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" title="Support my projects on BuyMeACoffee">Support My Projects</a>
       </div>
       <button class="ending-skip" id="endingSkip" type="button" title="Skip cinematic">Skip</button>
     </div>
   </div>
 
-  <script type="module" src="./spellwave/src/main.js?v=beta27"></script>
+  <script type="module" src="./spellwave/src/main.js?v=beta28"></script>
 </body>
 
 </html>

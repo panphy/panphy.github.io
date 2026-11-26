@@ -347,7 +347,7 @@ export const HARD_WORDS = [
   { term: 'visible light', definition: 'The only part of the electromagnetic spectrum that human eyes detect' },
   { term: 'ultraviolet', definition: 'Radiation between visible light and X-rays; causes sunburn' },
   { term: 'x rays', definition: 'High-energy electromagnetic waves used for medical imaging' },
-  { term: 'gamma rays', definition: 'Electromagnetic radiation with the shortest wavelength and highest frequency' },
+  { term: 'gamma rays', definition: 'The electromagnetic waves with the shortest wavelength and highest frequency in the spectrum' },
   { term: 'perfect black body', definition: 'An object that absorbs all the radiation that falls on it' },
   // Magnetism & induction
   { term: 'permanent magnet', definition: 'Produces its own magnetic field all the time' },
@@ -621,7 +621,7 @@ export const BOSS_PHRASES = [
   { term: 'the angle of incidence equals the angle of reflection', topic: 'Reflection' },
   { term: 'all electromagnetic waves travel at the same speed in a vacuum', topic: 'Electromagnetic waves' },
   { term: 'a wave changes speed when it is refracted', topic: 'Refraction' },
-  { term: 'gamma rays have the shortest wavelength', topic: 'Electromagnetic spectrum' },
+  { term: 'gamma rays are electromagnetic waves', topic: 'Electromagnetic spectrum' },
   { term: 'a black body absorbs all the radiation that falls on it', topic: 'Black body radiation' },
   // Magnetism
   { term: 'like poles repel and unlike poles attract', topic: 'Magnetism' },
