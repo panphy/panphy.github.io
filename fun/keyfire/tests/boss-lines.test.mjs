@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BOSS_PHRASES, BOSS_STORIES, ROCK_UNITS } from '../src/question-bank.js';
-import { bossPlan, bossFightOrder, beamChargeTime, BOSS_PLAN_TABLE } from '../src/difficulty.js';
-import { buildSearchPrompt } from '../src/prompt-utils.js';
+import { ALL_WORDS, BOSS_PHRASES, BOSS_STORIES, ROCK_UNITS } from '../src/question-bank.js';
+import { bossPlan, bossFightOrder, beamChargeTime, BOSS_PLAN_TABLE, LONGEST_MONSTER_WORD, typedLength } from '../src/difficulty.js';
+import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
+import { buildSearchPrompt, escapeHtml, altTermFor, promptIndexForProgress } from '../src/prompt-utils.js';
+import { createWordDeck } from '../src/word-decks.js';
 
 const letters = line => line.term.replace(/[^a-z]/gi, '').length;
 
@@ -89,4 +92,71 @@ test('splitting comets have long units to start and one-letter units to split in
   const firstsOf = list => new Set(list.map(key => key.charAt(0)));
   assert.ok(firstsOf(keys.filter(key => key.length >= 2)).size >= 3);
   assert.ok(firstsOf(keys.filter(key => key.length === 1)).size >= 5);
+});
+
+test('every term too long for a monster ends a boss word stage somewhere', () => {
+  const longTerms = ALL_WORDS.filter(entry => typedLength(entry) > LONGEST_MONSTER_WORD);
+  assert.ok(longTerms.length >= 40);
+  // The last boss takes any of them, and each earlier boss has plenty within its cap.
+  assert.ok(longTerms.every(entry => typedLength(entry) <= bossPlan(10).longTerm));
+  for (const row of BOSS_PLAN_TABLE) {
+    const fitting = longTerms.filter(entry => typedLength(entry) <= row.longTerm);
+    assert.ok(fitting.length >= row.stages.length * 6, `from step ${row.fromWave}: ${fitting.length} long terms`);
+  }
+  // Caps never fall from one boss to the next.
+  const caps = BOSS_PLAN_TABLE.map(row => row.longTerm);
+  assert.deepEqual(caps, [...caps].sort((a, b) => a - b));
+});
+
+// The game's own stage builder and line renderer, run outside the page.
+function createStageHarness() {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const slice = (from, to) => source.slice(source.indexOf(from), source.indexOf(to));
+  const context = vm.createContext({
+    ALL_WORDS, LONGEST_MONSTER_WORD, buildSearchPrompt, escapeHtml, altTermFor, promptIndexForProgress,
+    monsterDeck: createWordDeck(), bossDeck: createWordDeck(), currentKeywordPool: () => ALL_WORDS,
+    activeTarget: null, typedBuffer: '',
+  });
+  vm.runInContext(slice('function chooseBossWordStage(', 'function chooseBossStory(')
+    + slice('function lineWords(', 'function setBossWord(')
+    + slice('function bossWordProgress(', 'function createLifeMeter('), context);
+  return context;
+}
+
+test('a word stage ends on a long term within the cap; a stage without a cap has none', () => {
+  const context = createStageHarness();
+  for (const row of BOSS_PLAN_TABLE) {
+    const used = new Set();
+    for (const count of row.stages) {
+      const stage = context.chooseBossWordStage(count, used, row.longTerm);
+      assert.equal(stage.entries.length, count);
+      const lengths = stage.entries.map(typedLength);
+      assert.ok(lengths.slice(0, -1).every(length => length <= 10), stage.term);
+      assert.ok(lengths.at(-1) > LONGEST_MONSTER_WORD && lengths.at(-1) <= row.longTerm, stage.term);
+    }
+  }
+  const core = context.chooseBossWordStage(1, new Set());
+  assert.ok(typedLength(core.entries[0]) <= 10);
+});
+
+test('a long term shows whole and is typed word by word, one pip for the term', () => {
+  const context = createStageHarness();
+  const entries = [{ term: 'force' }, { term: 'specific heat capacity' }];
+  const line = { kind: 'words', term: entries.map(entry => entry.term).join(' '), entries };
+  const boss = { lineKind: 'words', bossLines: [line], lineIndex: 0, lineWordsList: context.lineWords(line), stageSlots: context.wordStageSlots(line), wordIndex: 0, searchPrompt: 'force' };
+  const text = html => html.replace(/<span class="stage-pips">.*$/, '').replace(/<[^>]+>/g, '');
+  const pipsDone = html => (html.match(/is-done/g) || []).length;
+  assert.equal(text(context.buildBossLineHtml(boss)), 'force');
+  // Second word of the term: "specific" is done, "heat" is in progress.
+  Object.assign(boss, { wordIndex: 2, searchPrompt: 'heat' });
+  context.activeTarget = boss;
+  context.typedBuffer = 'he';
+  const html = context.buildBossLineHtml(boss);
+  assert.equal(text(html), 'specific heat capacity');
+  assert.match(html, /<span class="typed">specific<\/span> <span class="current-word"><span class="typed">he<\/span><span class="remaining">at<\/span><\/span> <span class="remaining">capacity<\/span>/);
+  assert.equal(pipsDone(html), 1);
+  assert.equal((html.match(/<i /g) || []).length, 2);
+  // Only the term's last word completes it.
+  const slots = boss.stageSlots;
+  assert.deepEqual(Array.from(slots, (slot, index) => index === slot.end - 1), [true, false, false, true]);
 });
