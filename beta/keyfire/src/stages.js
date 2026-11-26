@@ -11,9 +11,9 @@
 // of the land beside the route, the cover, the props and the landmark.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { isDetailed } from './detail.js?v=beta38';
-import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=beta38';
-import { createStageKit } from './stage-kits.js?v=beta38';
+import { isDetailed } from './detail.js?v=beta39';
+import { createLowPolyTree, createLowPolyRock } from './lowpoly.js?v=beta39';
+import { createStageKit } from './stage-kits.js?v=beta39';
 
 // The flat, clear ground each stop needs, in its own frame. Bosses walk in from far away.
 const ARENA = { halfWidth: 13, minZ: -30, maxZ: 16 };
@@ -130,7 +130,7 @@ function createStageTerrain({ bounds, heightAt, isPath, seed, cell = cellSize(),
         for (const p of [pa, pb, pc]) positions.push(grid[p], grid[p + 1], grid[p + 2]);
         const onRoad = isPath(cx, cz);
         const faceSeed = hash(ix, iz, a + b * 3 + 5);
-        faces.push({ onRoad, height: cy, seed: faceSeed, kind: faceKind ? faceKind({ x: cx, y: cy, z: cz, onPath: onRoad, seed: faceSeed }) : null });
+        faces.push({ onRoad, height: cy, patchNoise: valueNoise(cx * 0.19, cz * 0.19, seed + 5), seed: faceSeed, kind: faceKind ? faceKind({ x: cx, y: cy, z: cz, onPath: onRoad, seed: faceSeed }) : null });
       }
     }
   }
@@ -151,9 +151,9 @@ function createStageTerrain({ bounds, heightAt, isPath, seed, cell = cellSize(),
     faces.forEach((face, index) => {
       const extra = face.kind && extras ? extras[face.kind] : null;
       if (extra) color.setHSL(extra.h, extra.s, extra.l + (face.seed - 0.5) * (extra.vary ?? 0.06));
-      else if (face.onRoad) color.setHSL(path.h, path.s, path.l + (face.seed - 0.5) * 0.07);
-      else if (face.seed > 0.82) color.setHSL(patch.h, patch.s, patch.l);
-      else color.setHSL(grass.h, grass.s, grass.l + (face.seed - 0.5) * 0.09 - Math.min(0.08, Math.max(0, face.height) * 0.006));
+      else if (face.onRoad) color.setHSL(path.h, path.s, path.l + (face.seed - 0.5) * 0.04);
+      else if (face.patchNoise > 0.65) color.setHSL(patch.h, patch.s, patch.l);
+      else color.setHSL(grass.h, grass.s, grass.l + (face.seed - 0.5) * 0.055 - Math.min(0.08, Math.max(0, face.height) * 0.006));
       color.multiplyScalar(tone);
       for (let corner = 0; corner < 3; corner += 1) color.toArray(target, index * 9 + corner * 3);
     });
@@ -445,8 +445,8 @@ export function createStage({ seed = 1, burstCount = 4, materials, kit: kitName 
   };
   const ctx = {
     random, mats, shared: materials,
-    bossStop: stops[stops.length - 1], length, crossing, lateArc,
-    poseAtArc, heightAt, openness, arenaDistance, isFree, isLate, occupy, place, tree,
+    stops, bossStop: stops[stops.length - 1], length, crossing, lateArc,
+    poseAtArc, heightAt, routeDistance, openness, arenaDistance, isFree, isLate, occupy, place, tree,
     at: frameToStage,
     rock: (scale) => {
       const rock = createLowPolyRock(materials.rock, Math.floor(random() * 1000));

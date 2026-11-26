@@ -20,15 +20,15 @@ export const SEASON_PALETTES = [
   },
   { // Summer: moonlit night, deep greens, cool stone road
     name: 'summer',
-    bgColor: 0x2c4c8a, fogColor: 0x2a4476, fogNear: 42, fogFar: 118, skyTop: 0x0c1740,
-    hemiSky: 0x7f9fe0, hemiGround: 0x2a4a34, hemiIntensity: 0.9,
-    sunColor: 0xd6e4ff, sunIntensity: 1.5,
+    bgColor: 0x405e9a, fogColor: 0x354e80, fogNear: 22, fogFar: 105, skyTop: 0x101c42,
+    hemiSky: 0x99b6f2, hemiGround: 0x54577f, hemiIntensity: 0.86,
+    sunColor: 0xabcaff, sunIntensity: 1.2,
     emberColor: 0xffcc30, emberIntensity: 2.2,
-    leafColors: [0x2f8a4a, 0x43a058, 0x1f6a3c], trunkColor: 0x7a4a26,
+    leafColors: [0x286461, 0x3d736d, 0x244f5b], trunkColor: 0x604b50,
     moonColor: 0xfff1b8, starOpacity: 0.55,
-    groundPath: { h: 0.1, s: 0.22, lBase: 0.46 },
-    groundAlt1: { h: 0.3, s: 0.45, l: 0.38 },
-    groundGrass: { h: 0.36, s: 0.5, l: 0.3 },
+    groundPath: { h: 0.64, s: 0.23, lBase: 0.24 },
+    groundAlt1: { h: 0.46, s: 0.5, l: 0.19 },
+    groundGrass: { h: 0.48, s: 0.55, l: 0.17 },
   },
   { // Autumn: amber dusk under a mauve sky, red and gold leaves
     name: 'autumn',
@@ -44,7 +44,7 @@ export const SEASON_PALETTES = [
   },
   { // Winter: pale snowfields in blue dusk, frosted trees
     name: 'winter',
-    bgColor: 0x8fa8c8, fogColor: 0xbccadd, fogNear: 40, fogFar: 112, skyTop: 0x334c7c,
+    bgColor: 0x6e89b0, fogColor: 0x98acc9, fogNear: 40, fogFar: 112, skyTop: 0x29385b,
     hemiSky: 0xd8e4f8, hemiGround: 0x7a8aa0, hemiIntensity: 0.72,
     sunColor: 0xdde8ff, sunIntensity: 1.1,
     emberColor: 0x6888ff, emberIntensity: 2.0,
@@ -59,7 +59,7 @@ export const SEASON_PALETTES = [
 // The last chapter leaves the seasons behind: a violet night among the stars, with dark stone underfoot.
 export const FINAL_WAVE_PALETTE = {
   name: 'final',
-  bgColor: 0x2a1a5e, fogColor: 0x1c1244, fogNear: 40, fogFar: 112, skyTop: 0x070418,
+  bgColor: 0x34275b, fogColor: 0x292443, fogNear: 40, fogFar: 112, skyTop: 0x070418,
   hemiSky: 0x9a88e8, hemiGround: 0x2a1e4a, hemiIntensity: 0.85,
   sunColor: 0xd6c4ff, sunIntensity: 1.35,
   emberColor: 0xc060ff, emberIntensity: 2.2,
@@ -74,13 +74,13 @@ export const FINAL_WAVE_PALETTE = {
 export const MINE_PALETTE = {
   name: 'mine',
   indoor: true,
-  bgColor: 0x0d0907, fogColor: 0x150e0a, fogNear: 18, fogFar: 78, skyTop: 0x050302,
-  hemiSky: 0xffcf9c, hemiGround: 0x4a3020, hemiIntensity: 0.82,
+  bgColor: 0x282138, fogColor: 0x30263f, fogNear: 18, fogFar: 78, skyTop: 0x141120,
+  hemiSky: 0xd7c7f0, hemiGround: 0x614963, hemiIntensity: 0.91,
   sunColor: 0xffbf85, sunIntensity: 0.95,
   emberColor: 0xff7a30, emberIntensity: 2.4,
   leafColors: [0xc8501a, 0xe08a1c, 0xd6aa28], trunkColor: 0x6a3418,
   moonColor: 0xffe0a8, starOpacity: 0,
-  groundPath: { h: 0.075, s: 0.3, lBase: 0.4 },
+  groundPath: { h: 0.69, s: 0.16, lBase: 0.34 },
   groundAlt1: { h: 0.06, s: 0.2, l: 0.3 },
   groundGrass: { h: 0.07, s: 0.18, l: 0.26 },
 };

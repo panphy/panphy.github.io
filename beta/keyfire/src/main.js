@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=beta38';
-import { createSeasonalEffects } from './seasonal-effects.js?v=beta38';
-import { createPowerUpSystem } from './power-ups.js?v=beta38';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta38';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta38';
-import { createLeaderboard } from './leaderboard.js?v=beta38';
-import { createEnemyMesh } from './enemy-meshes.js?v=beta38';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta38';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta38';
-import { createLowPolyCloud } from './lowpoly.js?v=beta38';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta38';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta38';
-import { createWordDeck } from './word-decks.js?v=beta38';
-import { createStage } from './stages.js?v=beta38';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta38';
-import { storyBeatForWave } from './story.js?v=beta38';
-import { createStoryteller } from './storyteller.js?v=beta38';
-import { createPlasmaCannon } from './plasma-cannon.js?v=beta38';
+import { createKeyFireAudio } from './audio.js?v=beta39';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta39';
+import { createPowerUpSystem } from './power-ups.js?v=beta39';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta39';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta39';
+import { createLeaderboard } from './leaderboard.js?v=beta39';
+import { createEnemyMesh } from './enemy-meshes.js?v=beta39';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta39';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta39';
+import { createLowPolyCloud } from './lowpoly.js?v=beta39';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta39';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta39';
+import { createWordDeck } from './word-decks.js?v=beta39';
+import { createStage } from './stages.js?v=beta39';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta39';
+import { storyBeatForWave } from './story.js?v=beta39';
+import { createStoryteller } from './storyteller.js?v=beta39';
+import { createPlasmaCannon } from './plasma-cannon.js?v=beta39';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1628,6 +1628,12 @@ function createSatelliteMesh(colour) {
   for (const side of [-1, 1]) {
     const panel = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.05, 0.42), panelMaterial);
     panel.position.x = side * 0.72;
+    panel.rotation.x = 0.6;
+    for (const x of [-0.24, 0, 0.24]) {
+      const bus = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.065, 0.43), core.material);
+      bus.position.x = x;
+      panel.add(bus);
+    }
     group.add(panel);
   }
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.04, 6, 24), new THREE.MeshBasicMaterial({ color: glowColor(colour, 1.4) }));
@@ -4386,12 +4392,13 @@ function updateClouds(delta) {
   cloudWeatherBlend += (weatherTarget - cloudWeatherBlend) * Math.min(1, delta * 2.4);
 
   if (baseCloudMaterial) {
-    baseCloudMaterial.color.setHex(isRainySummer ? 0xc9d1df : isSnowyWinter ? 0xf4fbff : 0xf0f2f8);
+    baseCloudMaterial.emissive.setHex(weather.seasonName === 'summer' ? 0x18213c : 0x6a6670);
+    baseCloudMaterial.color.setHex(weather.seasonName === 'summer' ? 0x3f5579 : isSnowyWinter ? 0xf4fbff : 0xf0f2f8);
     baseCloudMaterial.color.lerp(scene.background, CLOUD_SKY_TINT);
     baseCloudMaterial.opacity = 0.9 + cloudWeatherBlend * 0.06;
   }
   if (weatherCloudMaterial) {
-    weatherCloudMaterial.color.setHex(isRainySummer ? 0xb7c2d4 : 0xeaf6ff);
+    weatherCloudMaterial.color.setHex(isRainySummer ? 0x344769 : 0xeaf6ff);
     weatherCloudMaterial.color.lerp(scene.background, CLOUD_SKY_TINT);
     weatherCloudMaterial.opacity = cloudWeatherBlend * (isSnowyWinter ? 0.92 : 0.86);
   }
@@ -4410,7 +4417,7 @@ function updateClouds(delta) {
 
     const densityBoost = cloud.weatherOnly ? 1.2 : 1;
     const widthScale = 1 + cloudWeatherBlend * 0.14 * densityBoost;
-    const heightScale = 1 + cloudWeatherBlend * 0.55 * densityBoost;
+    const heightScale = weather.seasonName === 'summer' ? 0.26 : 1 + cloudWeatherBlend * 0.55 * densityBoost;
     const depthScale = 1 + cloudWeatherBlend * 0.18 * densityBoost;
     cloud.group.scale.set(
       cloud.baseScale * widthScale,
@@ -4978,7 +4985,7 @@ function groundColours(palette) {
     path: { h: palette.groundPath.h, s: palette.groundPath.s, l: palette.groundPath.lBase },
     grass: palette.groundGrass,
     patch: palette.groundAlt1,
-    tone: GROUND_TONE,
+    tone: palette.name === 'summer' ? 0.42 : GROUND_TONE,
   };
 }
 
