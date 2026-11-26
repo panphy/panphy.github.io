@@ -1,6 +1,7 @@
 // lowpoly-creatures.js — faceted, flat-shaded monsters. Each is a handful of simple
 // solids on pivots, plus an animate(seconds, enemy) function that moves the pivots.
 import * as THREE from 'three';
+import { roundSides, polyDetail } from './detail.js?v=beta32';
 
 const BONE = 0xf3e6c8;
 
@@ -33,16 +34,16 @@ function builder(kit) {
   // The builders below name coarse shapes; these raise the facet count of everything
   // round by one step. Three- and four-sided shapes are deliberate (spikes, flat limbs,
   // plates) and stay as written, as do the crystal-like octahedra and dodecahedra.
-  const rounder = (sides) => (sides <= 4 ? sides : Math.round(sides * 1.6));
+  const rounder = (sides) => roundSides(sides);
   return {
     place,
-    ico: (radius, detail = 0) => new THREE.IcosahedronGeometry(radius, detail + 1),
+    ico: (radius, detail = 0) => new THREE.IcosahedronGeometry(radius, polyDetail(detail + 1)),
     octa: (radius) => new THREE.OctahedronGeometry(radius, 0),
     cone: (radius, height, sides = 4) => new THREE.ConeGeometry(radius, height, rounder(sides)),
     cylinder: (top, bottom, height, sides = 5) => new THREE.CylinderGeometry(top, bottom, height, rounder(sides)),
     box: (x, y, z) => new THREE.BoxGeometry(x, y, z),
     dodeca: (radius) => new THREE.DodecahedronGeometry(radius, 0),
-    ring: (radius, tube, sides = 8) => new THREE.TorusGeometry(radius, tube, 6, rounder(sides)),
+    ring: (radius, tube, sides = 8) => new THREE.TorusGeometry(radius, tube, roundSides(6, 1, 1.5), rounder(sides)),
   };
 }
 
