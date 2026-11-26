@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=6';
-import { createSeasonalEffects } from './seasonal-effects.js?v=6';
-import { createPowerUpSystem } from './power-ups.js?v=6';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=6';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=6';
-import { createLeaderboard } from './leaderboard.js?v=6';
-import { createEnemyMesh } from './enemy-meshes.js?v=6';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=6';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=6';
-import { createLowPolyCloud } from './lowpoly.js?v=6';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=6';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=6';
-import { createWordDeck } from './word-decks.js?v=6';
-import { createStage } from './stages.js?v=6';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=6';
-import { storyBeatForWave } from './story.js?v=6';
-import { createStoryteller, settleLantern } from './storyteller.js?v=6';
-import { createPlasmaCannon } from './plasma-cannon.js?v=6';
-import { createRideCart } from './ride-cart.js?v=6';
+import { createKeyFireAudio } from './audio.js?v=7';
+import { createSeasonalEffects } from './seasonal-effects.js?v=7';
+import { createPowerUpSystem } from './power-ups.js?v=7';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=7';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=7';
+import { createLeaderboard } from './leaderboard.js?v=7';
+import { createEnemyMesh } from './enemy-meshes.js?v=7';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=7';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=7';
+import { createLowPolyCloud } from './lowpoly.js?v=7';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=7';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=7';
+import { createWordDeck } from './word-decks.js?v=7';
+import { createStage } from './stages.js?v=7';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=7';
+import { storyBeatForWave } from './story.js?v=7';
+import { createStoryteller, settleLantern } from './storyteller.js?v=7';
+import { createPlasmaCannon } from './plasma-cannon.js?v=7';
+import { createRideCart } from './ride-cart.js?v=7';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -108,10 +108,11 @@ const FINAL_WAVE_NUMBER = WAVE_COUNT;
 // The camera rides a route through each wave's stage (stages.js) and stops for each ambush.
 const CAMERA_HEIGHT = 3.5;
 // The moons and clouds hang at fixed places in the world, nearer than the far hills,
-// islands and trees of a stage, which they would otherwise cover. keepInSky draws them at
-// the far edge of the depth range (NDC z), so all scenery covers them; clouds sit a step
-// in front of the moons so they can still drift across them.
-const SKY_DEPTH = { cloud: 0.99998, moon: 0.999998 };
+// islands and trees of a stage, which they would otherwise cover. keepInSky squeezes their
+// depth into a thin band at the back of the depth range, so all scenery nearer than
+// about 107 units covers them. Within the band they keep their order by distance:
+// a flat depth made the overlapping puffs of a cloud flicker as they fought.
+const SKY_BAND = { near: 0.9998, width: 0.00018, reach: 150 };
 const CAMERA_DISTANCE = 10.5;
 const RAIL_WALK_SPEED = 7;
 // Monsters rush to this line, wind up, then strike.
@@ -3018,7 +3019,7 @@ function spawnRailMember(encounter) {
   // Healers and chests run across from cover; monsters may come from anywhere.
   const spots = encounter.spots;
   let spot = spots[encounter.nextSpot % spots.length];
-  if (kind !== 'minion') spot = spots.find(candidate => candidate.kind === 'cover') || spot;
+  if (kind !== 'minion') spot = crosserSpot(spots, spot);
   encounter.nextSpot += 1;
   // In the night sky every monster flies in from above.
   const flier = kind === 'minion' && rail.setPiece === 'flight';
@@ -3041,8 +3042,7 @@ function spawnBonusMember(encounter) {
   let spot = spots[encounter.nextSpot % spots.length];
   encounter.nextSpot += 1;
   if (kind === 'chest') {
-    spot = spots.find(candidate => candidate.kind === 'cover') || spot;
-    return spawnEnemy({ isMimic: true, railSpot: spot });
+    return spawnEnemy({ isMimic: true, railSpot: crosserSpot(spots, spot) });
   }
   const flier = rail.setPiece === 'flight';
   if (flier) spot = { ...spot, kind: 'sky' };
@@ -3060,10 +3060,16 @@ function setupRailEntry(enemy, spot) {
   const baseY = enemy.baseY;
   let from;
   let to;
+  let crossTo = null;
   if (spot.kind === 'cover') {
     from = new THREE.Vector3(spot.hideX, baseY, spot.hideZ);
     const laneX = crosser ? spot.x : THREE.MathUtils.clamp(spot.x * 0.45 + (Math.random() - 0.5) * 1.4, -4.6, 4.6);
     to = new THREE.Vector3(laneX, baseY, Math.min(-5, spot.z + (crosser ? 0 : 1.6)));
+    const crossing = crosser ? findCrossing(spot) : null;
+    if (crossing) {
+      to.z = crossing.z;
+      crossTo = crossing.crossTo;
+    }
   } else if (spot.kind === 'ground') {
     from = new THREE.Vector3(spot.x, baseY - 2.4, spot.z);
     to = new THREE.Vector3(spot.x, baseY, spot.z);
@@ -3092,7 +3098,7 @@ function setupRailEntry(enemy, spot) {
     from,
     to,
     speed: (STRIKE_Z - to.z) / walkTime,
-    crossTo: (to.x >= 0 ? -1 : 1) * 12,
+    crossTo: crossTo ?? (to.x >= 0 ? -1 : 1) * CROSS_X,
     crossT: 0,
     crossTime: (2 + railTypingEstimate(enemy)) * 1.5,
   };
@@ -3116,6 +3122,33 @@ function setupRailEntry(enemy, spot) {
     reusableVector.set(to.x, 0.2, to.z);
     fx.burst(reusableVector, { color: 0x7a5a3a, color2: 0xc9a46a, count: 16, speed: 3.4, life: 0.6, size: 0.3, gravity: 6 });
   }
+}
+
+// A healer or chest steps out in front of its cover and runs across the stop. It runs
+// toward the far side if it can, else back past its own cover, at its own depth or a
+// little nearer or further: whichever run first keeps clear of cottages, trees and
+// rocks. Returns { z, crossTo }, or null when every run is blocked.
+const CROSS_X = 12;
+function findCrossing(spot) {
+  const stop = rail.encounter && rail.encounter.stop;
+  const laneZ = Math.min(-5, spot.z);
+  const inward = spot.x >= 0 ? -1 : 1;
+  if (!stop || !stop.pose || !rail.stage || !rail.stage.pathClear) return { z: laneZ, crossTo: inward * CROSS_X };
+  const own = spot.coverX !== undefined ? { x: spot.coverX, z: spot.coverZ } : null;
+  for (const shift of [0, -1.5, 1.5, -3, 3, -4.5]) {
+    const z = THREE.MathUtils.clamp(laneZ + shift, -14, -4.5);
+    for (const side of [inward, -inward]) {
+      // Back past its own cover, the cover is in the way too.
+      if (rail.stage.pathClear(stop, spot.x, side * CROSS_X, z, 0.8, side === inward ? own : null)) return { z, crossTo: side * CROSS_X };
+    }
+  }
+  return null;
+}
+
+// The cover a healer or chest comes from: one with a clear run across, if any has.
+function crosserSpot(spots, fallback) {
+  const covers = spots.filter(candidate => candidate.kind === 'cover');
+  return covers.find(candidate => findCrossing(candidate)) || covers[0] || fallback;
 }
 
 // Moves a monster that came out of an ambush. Returns true once it has gone.
@@ -4291,23 +4324,24 @@ function createSceneryMaterials() {
   sceneRockMaterial = new THREE.MeshStandardMaterial({ color: 0xd6ccb4, roughness: 1, flatShading: true });
 }
 
-// Drawn at the far edge of the depth range, like a skybox, the moons and clouds stay
-// behind all scenery (see SKY_DEPTH).
-function keepInSky(material, layer) {
-  const depth = SKY_DEPTH[layer];
+// Drawn at the back of the depth range, like a skybox, the moons and clouds stay behind
+// all scenery (see SKY_BAND); the band is in NDC z, ordered by distance from the camera.
+function keepInSky(material) {
+  const { near, width, reach } = SKY_BAND;
   material.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader.replace(
       '#include <project_vertex>',
-      `#include <project_vertex>\n  gl_Position.z = gl_Position.w * ${depth.toFixed(6)};`
+      `#include <project_vertex>
+  gl_Position.z = gl_Position.w * (${near.toFixed(6)} + clamp(-mvPosition.z / ${reach.toFixed(1)}, 0.0, 1.0) * ${width.toFixed(6)});`
     );
   };
-  material.customProgramCacheKey = () => `keyfire-sky-${layer}`;
+  material.customProgramCacheKey = () => 'keyfire-sky';
   return material;
 }
 
 function createSky() {
   const moonGeometry = new THREE.SphereGeometry(3.2, 24, 16);
-  const moonMaterial = keepInSky(new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true, fog: false }), 'moon');
+  const moonMaterial = keepInSky(new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true, fog: false }));
   moon = new THREE.Mesh(moonGeometry, moonMaterial);
   positionMoonOnArc();
   scene.add(moon);
@@ -4422,14 +4456,14 @@ function createClouds() {
     transparent: true,
     opacity: 0.92,
     flatShading: true,
-  }), 'cloud');
+  }));
   weatherCloudMaterial = keepInSky(new THREE.MeshLambertMaterial({
     color: 0xd8e4f2,
     emissive: 0x5a5a66,
     transparent: true,
     opacity: 0,
     flatShading: true,
-  }), 'cloud');
+  }));
   const configs = [
     { x: -38, y: 17.5, z: -50, scale: 1.05, speed: 0.55, t: 0 },
     { x: -18, y: 19.0, z: -58, scale: 0.80, speed: 0.40, t: 1 },
@@ -5361,12 +5395,12 @@ function createFinalWaveScenery() {
     { position: [34, 13, -60], radius: 2.2, color: 0xf2a65a, ring: null },
   ];
   for (const spec of moonSpecs) {
-    const material = keepInSky(new THREE.MeshStandardMaterial({ color: spec.color, emissive: spec.color, emissiveIntensity: 0.22, roughness: 1, flatShading: true, fog: false }), 'moon');
+    const material = keepInSky(new THREE.MeshStandardMaterial({ color: spec.color, emissive: spec.color, emissiveIntensity: 0.22, roughness: 1, flatShading: true, fog: false }));
     const body = new THREE.Mesh(new THREE.IcosahedronGeometry(spec.radius, 1), material);
     body.position.set(...spec.position);
     group.add(body);
     if (spec.ring) {
-      const ringMaterial = keepInSky(new THREE.MeshStandardMaterial({ color: spec.ring, emissive: spec.ring, emissiveIntensity: 0.4, roughness: 1, flatShading: true, fog: false }), 'moon');
+      const ringMaterial = keepInSky(new THREE.MeshStandardMaterial({ color: spec.ring, emissive: spec.ring, emissiveIntensity: 0.4, roughness: 1, flatShading: true, fog: false }));
       const ring = new THREE.Mesh(new THREE.TorusGeometry(spec.radius * 1.7, spec.radius * 0.09, 4, 14), ringMaterial);
       ring.position.set(...spec.position);
       ring.rotation.set(1.25, 0.3, 0);
