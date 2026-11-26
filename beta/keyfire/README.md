@@ -1,6 +1,6 @@
 # KeyFire (beta rework of Spellwave)
 
-A working copy of Spellwave (`fun/spellwave.html`) for reworking it in the spirit of rail-shooter typing games, renamed KeyFire. Its page is `beta/keyfire.html`. Saved data uses KeyFire names (`RENAMED_STORAGE_KEYS` in `src/main.js` copies anything saved under the old Spellwave names across once). The live game is untouched; this copy has a leaderboard of its own and keeps its best score and word history under its own localStorage keys. It needs no build step, and the files share the `?v=` value `beta37`: bump it in `beta/keyfire.html` and in every import when the files change.
+A working copy of Spellwave (`fun/spellwave.html`) for reworking it in the spirit of rail-shooter typing games, renamed KeyFire. Its page is `beta/keyfire.html`. Saved data uses KeyFire names (`RENAMED_STORAGE_KEYS` in `src/main.js` copies anything saved under the old Spellwave names across once). The live game is untouched; this copy has a leaderboard of its own and keeps its best score and word history under its own localStorage keys. It needs no build step, and the files share the `?v=` value `beta38`: bump it in `beta/keyfire.html` and in every import when the files change.
 
 Run the tests with `node --test beta/keyfire/tests/*.test.mjs`.
 
