@@ -384,14 +384,16 @@ body.blizzard .blizzard-veil::after {
   position: fixed;
   top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
   left: 14px;
-  right: 14px;
+  /* A compact plate that hugs the logo and title, not a bar across the whole screen. */
+  width: max-content;
+  max-width: calc(100vw - 28px);
   z-index: 12;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
-  min-height: 64px;
-  padding: 10px 12px;
+  gap: 12px;
+  min-height: 56px;
+  padding: 7px 20px 7px 8px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background:
