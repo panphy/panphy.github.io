@@ -53,7 +53,7 @@ export const STORY_BEATS = [
   },
   {
     name: 'Astra the stargazer', role: 'stargazer',
-    coat: 0x6d4fb3, hat: 0xf2c14e,
+    coat: 0xf0912e, hat: 0xf2c14e,
     held: true,
     voice: 4,
     lines: [
