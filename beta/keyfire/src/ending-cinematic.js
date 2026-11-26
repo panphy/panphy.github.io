@@ -9,12 +9,12 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta35';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta35';
-import { createStoryteller } from './storyteller.js?v=beta35';
-import { STORY_BEATS } from './story.js?v=beta35';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta35';
-import { buildCannon } from './plasma-cannon.js?v=beta35';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=beta36';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=beta36';
+import { createStoryteller } from './storyteller.js?v=beta36';
+import { STORY_BEATS } from './story.js?v=beta36';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta36';
+import { buildCannon } from './plasma-cannon.js?v=beta36';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -22,8 +22,6 @@ const BAR = 4 * BEAT;
 
 // Cue times in seconds. The score (audio.js) uses the same bar grid: 144 bpm, 4/4.
 export const ENDING_TIMELINE = {
-  beat: BEAT,
-  bar: BAR,
   shatter: BAR, // the Dreadnought breaks apart
   charge: 2 * BAR, // the cannon comes up and the words gather
   spinUp: 6 * BAR, // the barrels wind up
@@ -213,10 +211,8 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     return {
       available: false,
       play({ onComplete } = {}) { if (onComplete) onComplete(); },
-      seek() {},
       skipToEnd() {},
       stop() {},
-      dispose() {},
     };
   }
 
@@ -363,7 +359,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     const trunkMaterial = flat(palette.trunkColor);
     const leafMaterials = palette.leafColors.map((hex) => flat(hex));
     spots.forEach(([x, z, size, kind], index) => {
-      const { group } = createLowPolyTree({ kind, trunkMaterial, leafMaterials, seed: index * 7 + x });
+      const group = createLowPolyTree({ kind, trunkMaterial, leafMaterials, seed: index * 7 + x });
       group.position.set(x, heightAt(x, z), z);
       group.scale.setScalar(size);
       group.rotation.y = hash(index, x) * 6;
@@ -1521,6 +1517,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
 
   function play(options = {}) {
     if (!world.built) buildWorld(Boolean(options.batterySaver));
+    world.lite = Boolean(options.batterySaver);
     const terms = options.terms || [];
     const arrivals = options.arrivals && options.arrivals.length === terms.length ? options.arrivals : wordArrivalTimes(terms.length);
     buildTags(terms, arrivals);
@@ -1566,26 +1563,5 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
     if (flashEl) flashEl.classList.remove('is-on');
   }
 
-  // Frees everything the cinematic made. It cannot play again afterwards.
-  function dispose() {
-    stop();
-    clearTags();
-    const seen = new Set();
-    const release = (item) => {
-      if (!item || seen.has(item)) return;
-      seen.add(item);
-      if (item.map) release(item.map);
-      item.dispose();
-    };
-    scene.traverse((child) => {
-      release(child.geometry);
-      (Array.isArray(child.material) ? child.material : [child.material]).forEach(release);
-    });
-    release(glowTexture);
-    release(wallTexture);
-    renderer.dispose();
-    world.built = false;
-  }
-
-  return { available: true, play, seek, skipToEnd, stop, dispose };
+  return { available: true, play, skipToEnd, stop };
 }

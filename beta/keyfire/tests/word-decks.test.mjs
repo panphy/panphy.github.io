@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createWordDeck } from '../src/word-decks.js';
-import { EASY_WORDS, EQUATION_WORDS } from '../src/question-bank.js';
+import { EASY_WORDS, ROCK_UNITS } from '../src/question-bank.js';
 
 test('a deck uses every word in a pool before repeating any', () => {
   const deck = createWordDeck();
@@ -30,7 +30,7 @@ test("last run's words come after fresh ones", () => {
 
 test('a small pool does not repeat within a run', () => {
   const deck = createWordDeck();
-  const run = Array.from({ length: 10 }, () => deck.pick(EQUATION_WORDS).term);
+  const run = Array.from({ length: 10 }, () => deck.pick(ROCK_UNITS).term);
   assert.equal(new Set(run).size, run.length);
 });
 

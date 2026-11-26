@@ -165,7 +165,6 @@ export function createPlasmaCannon({ camera, crystalMaterial, createCrown = null
   let surge = 0;
 
   return {
-    group,
     crowns,
     // What pulses with the plasma: scaled by the game along with its other crystals.
     glows: [parts.core],

@@ -61,10 +61,10 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
     });
   }
 
-  function restHeaders(accessToken = null) {
+  function restHeaders() {
     return {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json',
     };
   }
@@ -104,6 +104,8 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
 
   function registerRecentSubmission(initials, score) {
     recentSubmission = { initials: initials.toUpperCase(), score, expiresAt: Date.now() + HIGHLIGHT_MS };
+    // Draw the board again once the highlight has run out, so it clears.
+    window.setTimeout(renderTopScores, HIGHLIGHT_MS + 50);
   }
 
   function isRecentSubmission(entry) {
@@ -147,10 +149,10 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
     return response.json();
   }
 
-  async function submitScoreRest(initials, score, accessToken = null) {
+  async function submitScoreRest(initials, score) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${SUBMIT_RPC}`, {
       method: 'POST',
-      headers: { ...restHeaders(accessToken), Prefer: 'return=minimal' },
+      headers: { ...restHeaders(), Prefer: 'return=minimal' },
       body: JSON.stringify({ initials: initials.toUpperCase(), score }),
     });
     if (!response.ok) throw new Error(`RPC insert failed: ${response.status}`);
@@ -168,10 +170,9 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
     setStatus('Live');
   }
 
-  async function fetchTopScores({ preferRemote = false, showLoading = true } = {}) {
-    if (showLoading) renderLoading();
+  async function fetchTopScores() {
     let active = initClient();
-    if (!active && preferRemote) active = await waitForClient();
+    if (!active) active = await waitForClient();
     try {
       if (active) {
         const { data, error } = await active
@@ -213,7 +214,7 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
       topScores = mergeRecentSubmission(topScores);
       renderTopScores();
       saveCache(topScores);
-      setTimeout(() => fetchTopScores({ preferRemote: true, showLoading: false }), 800);
+      setTimeout(() => fetchTopScores(), 800);
       return true;
     } catch (err) {
       console.error('Score submit failed:', err);
@@ -342,10 +343,10 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
     } else {
       renderLoading();
     }
-    fetchTopScores({ preferRemote: true, showLoading: false });
+    fetchTopScores();
     if (supabaseScript) {
       supabaseScript.addEventListener('load', () => {
-        fetchTopScores({ preferRemote: true, showLoading: false });
+        fetchTopScores();
       });
     }
     if (initialsInput) {

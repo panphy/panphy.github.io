@@ -1,11 +1,14 @@
-// difficulty.js — how long a keyword may be on each wave, and each wave's boss fight.
-import { buildSearchPrompt } from './prompt-utils.js?v=beta35';
+// difficulty.js — how long a keyword may be, and each boss fight. The tables are indexed
+// by a difficulty step from 1 to 10, not by wave: the game's five waves use steps 1, 3,
+// 5, 7, 9 for their monsters and 2, 4, 6, 8, 10 for their bosses (monsterLevel and
+// bossLevel in main.js), so some rows are steps the game passes over.
+import { buildSearchPrompt } from './prompt-utils.js?v=beta36';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
-// ask on waves 1, 2, 3… Late waves keep the final cap.
+// ask at steps 1, 2, 3… Later steps keep the final cap.
 export const NORMAL_PROMPT_LENGTH_CAPS = [11, 12, 12, 13, 13, 14];
 
-// [fewest, most] hard words slipped into the second half of waves 1–4.
+// [fewest, most] hard words slipped into the second half of a wave at steps 1–4.
 export const HARD_GUEST_COUNTS = [[0, 0], [1, 1], [1, 2], [1, 2]];
 
 const typedLengths = new WeakMap();
@@ -21,7 +24,6 @@ export function normalPromptLengthCap(wave) {
 }
 
 export function withinLength(entries, cap) {
-  if (cap === Infinity) return entries;
   return entries.filter((entry) => typedLength(entry) <= cap);
 }
 
@@ -36,7 +38,6 @@ export function hardGuestCount(wave, random = Math.random) {
 // statements (BOSS_PHRASES). The last boss ends with a short story instead
 // (BOSS_STORIES). Each stage, statement or story line takes a segment off the
 // health bar. Between words the player can shatter the rocks the boss throws.
-// The game's five waves use every second row: bosses fight at steps 2, 4, 6, 8 and 10.
 // stages: words in each word stage. finishers: statements at the end (two at most).
 // story: end with a story instead. maxLetters: longest statement, letters only.
 // attackGap: seconds between throws. rockFlight: seconds a rock takes to arrive.

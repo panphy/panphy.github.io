@@ -2,21 +2,9 @@ import * as THREE from 'three';
 
 export function createSeasonalEffects({
   scene,
-  world,
   lightningFlash,
   getMode,
-  treeMinZ,
-  treeMaxZ,
-  treeSpan,
-  pathMarkerMinZ,
-  pathMarkerMaxZ,
-  pathMarkerSpan,
-  pathMarkerWrapZ,
-  // Off when stages bring their own flowers: the spring flowers and fallen leaves scroll on a straight road.
-  groundDecor = true,
 }) {
-  const springFlowers = [];
-  const autumnFallenLeaves = [];
   const lightningBolts = [];
 
   let currentSeasonName = 'spring';
@@ -30,30 +18,22 @@ export function createSeasonalEffects({
   let lightningLight = null;
   let lightningGlow = null;
   let summerStorm = {
-    active: false,
-    nextRain: 7,
-    rainTime: 0,
     lightningTime: 0,
     flashTime: 0,
   };
 
   function create() {
-    createSpringFlowers();
-    createAutumnFallenLeaves();
     createSnowField();
     createRainField();
     createLightning();
   }
 
-  function update(seconds, delta, scrollDelta) {
-    updateSeasonalScenery(seconds, scrollDelta);
+  function update(seconds, delta) {
     updateWeather(seconds, delta);
   }
 
   function stopWeather() {
     weatherDisabled = true;
-    summerStorm.active = false;
-    summerStorm.rainTime = 0;
     summerStorm.flashTime = 0;
     if (rainField) rainField.visible = false;
     if (snowField) snowField.visible = false;
@@ -67,20 +47,13 @@ export function createSeasonalEffects({
     weatherDisabled = false;
     currentSeasonName = seasonName;
 
-    const isSpring = seasonName === 'spring';
-    const isAutumn = seasonName === 'autumn';
     const isWinter = seasonName === 'winter';
     const isSummer = seasonName === 'summer';
 
-    for (const flower of springFlowers) flower.group.visible = groundDecor && isSpring;
-    for (const leaf of autumnFallenLeaves) leaf.mesh.visible = groundDecor && isAutumn;
     if (snowField) snowField.visible = isWinter;
 
     if (!isSummer) {
-      summerStorm.active = false;
-      summerStorm.rainTime = 0;
       summerStorm.flashTime = 0;
-      summerStorm.nextRain = 7 + Math.random() * 8;
       if (rainField) rainField.visible = false;
       hideLightningBolts();
       if (lightningFlash) lightningFlash.style.opacity = '0';
@@ -89,34 +62,9 @@ export function createSeasonalEffects({
       return;
     }
 
-    summerStorm.active = false;
-    summerStorm.rainTime = Number.POSITIVE_INFINITY;
     summerStorm.flashTime = 0;
     summerStorm.lightningTime = 0.6 + Math.random() * 1.2;
-    summerStorm.nextRain = 0;
     if (rainField) rainField.visible = true;
-  }
-
-  function updateSeasonalScenery(seconds, scrollDelta) {
-    for (const flower of springFlowers) {
-      flower.group.position.z += scrollDelta * flower.speed;
-      if (flower.group.position.z > treeMaxZ) {
-        flower.group.position.z -= treeSpan;
-      }
-      flower.group.position.x = flower.baseX + Math.sin(seconds * 0.7 + flower.phase) * 0.05;
-      flower.group.rotation.z = Math.sin(seconds * 1.2 + flower.phase) * 0.035;
-    }
-
-    for (const leaf of autumnFallenLeaves) {
-      leaf.mesh.position.z += scrollDelta * leaf.speed;
-      if (leaf.mesh.position.z > pathMarkerWrapZ) {
-        leaf.mesh.position.z -= pathMarkerSpan;
-        leaf.mesh.position.x = leaf.side * (4.95 + Math.random() * 2.2);
-        leaf.baseX = leaf.mesh.position.x;
-      }
-      leaf.mesh.position.x = leaf.baseX + Math.sin(seconds * 0.9 + leaf.phase) * 0.08;
-      leaf.mesh.rotation.y += scrollDelta * 0.08;
-    }
   }
 
   function updateWeather(seconds, delta) {
@@ -144,7 +92,6 @@ export function createSeasonalEffects({
 
   function updateSummerStorm(delta) {
     if (weatherDisabled) {
-      summerStorm.active = false;
       summerStorm.flashTime = 0;
       if (rainField) rainField.visible = false;
       hideLightningBolts();
@@ -152,7 +99,6 @@ export function createSeasonalEffects({
       return;
     }
     if (currentSeasonName !== 'summer') {
-      summerStorm.active = false;
       summerStorm.flashTime = 0;
       if (rainField) rainField.visible = false;
       hideLightningBolts();
@@ -161,8 +107,6 @@ export function createSeasonalEffects({
     }
 
     const timerDelta = delta * (getMode() === 'running' ? 1 : 0.38);
-    summerStorm.active = true;
-    summerStorm.rainTime = Number.POSITIVE_INFINITY;
     if (rainField) rainField.visible = true;
     summerStorm.lightningTime -= timerDelta;
     if (summerStorm.lightningTime <= 0) {
@@ -256,92 +200,6 @@ export function createSeasonalEffects({
       raining: Boolean(rainField && rainField.visible),
       snowing: Boolean(snowField && snowField.visible),
     };
-  }
-
-  function createSpringFlowers() {
-    const stemMaterial = new THREE.MeshStandardMaterial({ flatShading: true, color: 0x2e7d48, roughness: 0.82 });
-    const centerMaterial = new THREE.MeshStandardMaterial({ flatShading: true, color: 0xffd86f, roughness: 0.55, emissive: 0x6b3a00, emissiveIntensity: 0.18 });
-    const petalMaterials = [
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xff8fbd, roughness: 0.72 }),
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xf9c7dc, roughness: 0.72 }),
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xd9f99d, roughness: 0.75 }),
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xbde7ff, roughness: 0.7 }),
-    ];
-
-    // Each flower is a thin stem, a flattened faceted bloom and a small centre.
-    const stemGeometry = new THREE.CylinderGeometry(0.02, 0.03, 1, 3);
-    const bloomGeometry = new THREE.IcosahedronGeometry(0.16, 0);
-    const centreGeometry = new THREE.OctahedronGeometry(0.06, 0);
-    for (let patchIndex = 0; patchIndex < 42; patchIndex += 1) {
-      const side = patchIndex % 2 === 0 ? -1 : 1;
-      const group = new THREE.Group();
-      const x = side * (4.65 + Math.random() * 1.9);
-      const z = treeMinZ + 4 + Math.random() * (treeSpan - 8);
-      group.position.set(x, -0.08, z);
-      group.rotation.y = (Math.random() - 0.5) * 0.45;
-
-      const blossoms = 2 + Math.floor(Math.random() * 3);
-      for (let blossomIndex = 0; blossomIndex < blossoms; blossomIndex += 1) {
-        const petalMaterial = petalMaterials[(patchIndex + blossomIndex) % petalMaterials.length];
-        const localX = (Math.random() - 0.5) * 0.86;
-        const localZ = (Math.random() - 0.5) * 0.68;
-        const height = 0.28 + Math.random() * 0.2;
-        const stem = new THREE.Mesh(stemGeometry, stemMaterial);
-        stem.scale.y = height;
-        stem.position.set(localX, height * 0.5, localZ);
-        const bloom = new THREE.Mesh(bloomGeometry, petalMaterial);
-        bloom.scale.set(1, 0.5, 1);
-        bloom.position.set(localX, height + 0.04, localZ);
-        bloom.rotation.y = Math.random() * Math.PI;
-        const centre = new THREE.Mesh(centreGeometry, centerMaterial);
-        centre.position.set(localX, height + 0.1, localZ);
-        for (const part of [stem, bloom, centre]) {
-          part.castShadow = true;
-          group.add(part);
-        }
-      }
-
-      group.visible = false;
-      world.add(group);
-      springFlowers.push({
-        group,
-        baseX: x,
-        speed: 0.8 + Math.random() * 0.38,
-        phase: Math.random() * Math.PI * 2,
-      });
-    }
-  }
-
-  function createAutumnFallenLeaves() {
-    const leafMaterials = [
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xb33b12, roughness: 0.9 }),
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xd76818, roughness: 0.9 }),
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xe1a32c, roughness: 0.86 }),
-      new THREE.MeshStandardMaterial({ flatShading: true, color: 0x7d2d18, roughness: 0.94 }),
-    ];
-
-    const leafGeometry = new THREE.OctahedronGeometry(1, 0);
-    for (let index = 0; index < 92; index += 1) {
-      const side = index % 2 === 0 ? -1 : 1;
-      const material = leafMaterials[index % leafMaterials.length];
-      const mesh = new THREE.Mesh(leafGeometry, material);
-      mesh.scale.set(0.14 + Math.random() * 0.1, 0.02, 0.07 + Math.random() * 0.08);
-      mesh.position.y = 0.01;
-      mesh.receiveShadow = true;
-      mesh.position.x = side * (4.95 + Math.random() * 2.2);
-      mesh.position.z = pathMarkerMinZ + Math.random() * (pathMarkerMaxZ - pathMarkerMinZ);
-      mesh.rotation.y = Math.random() * Math.PI;
-      mesh.rotation.z = (Math.random() - 0.5) * 0.16;
-      mesh.visible = false;
-      world.add(mesh);
-      autumnFallenLeaves.push({
-        mesh,
-        side,
-        baseX: mesh.position.x,
-        speed: 0.9 + Math.random() * 0.45,
-        phase: Math.random() * Math.PI * 2,
-      });
-    }
   }
 
   function createSnowField() {

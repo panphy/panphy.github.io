@@ -9,22 +9,19 @@ export function createPowerUpSystem({
   getMode,
   getEnemies,
   getGameTime,
-  defeatEnemy,
   showBanner,
   powerUpBar,
   powerUpSlots,
-  scene,
   effectsGroup,
   playShockwaveSound,
   playShieldActivateSound,
   playShieldBlockSound,
   playGodModeOnSound,
   playGodModeOffSound,
-  playToggleSound,
   playStartSound,
-  playChainPrimeSound = playToggleSound,
-  playTimeFreezeSound = playGodModeOnSound,
-  playTimeResumeSound = playGodModeOffSound,
+  playChainPrimeSound,
+  playTimeFreezeSound,
+  playTimeResumeSound,
   THREE,
   SPAWN_Z,
   WALL_Z
@@ -87,11 +84,11 @@ export function createPowerUpSystem({
 
     powerUpSlots.forEach((slot, index) => {
       const powerUp = powerUps[index];
-      slot.className = 'power-up-slot';
+      // Only this class is redrawn: the flash of a slot just used must survive.
+      slot.classList.toggle('occupied', Boolean(powerUp));
       const iconContainer = slot.querySelector('.power-up-icon');
       if (powerUp) {
         const powerUpName = powerUp.replace(/_/g, ' ');
-        slot.classList.add('occupied');
         slot.setAttribute('data-power-up', powerUp);
         slot.setAttribute('aria-label', `Power-up slot ${index + 1}: ${powerUpName}`);
         slot.setAttribute('title', `Use power-up: ${powerUpName}`);

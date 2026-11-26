@@ -1,6 +1,6 @@
-// lowpoly.js — faceted, flat-shaded scenery: the rolling ground, trees, rocks and clouds.
+// lowpoly.js — faceted, flat-shaded scenery: trees, rocks and clouds.
 import * as THREE from 'three';
-import { roundSides, polyDetail, roughen } from './detail.js?v=beta35';
+import { roundSides, polyDetail, roughen } from './detail.js?v=beta36';
 
 function hash(a, b, c = 0) {
   const value = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453;
@@ -13,109 +13,8 @@ function shadowed(mesh) {
   return mesh;
 }
 
-// A strip of triangles whose shape repeats every `period` along the road, so it can
-// scroll forever by wrapping its position. The road and its verges are flat; the
-// ground rises into banks further out.
-export function createLowPolyTerrain({ minZ, maxZ, halfWidth = 14, cell = 2, period = 36, roadHalfWidth = 4.2 }) {
-  const columns = Math.round((halfWidth * 2) / cell);
-  const rows = Math.ceil((maxZ - minZ + period) / cell);
-  const repeat = Math.round(period / cell);
-
-  const vertex = (ix, iz, target) => {
-    const k = ((iz % repeat) + repeat) % repeat;
-    const baseX = -halfWidth + ix * cell;
-    const distance = Math.abs(baseX);
-    const onRoad = distance < roadHalfWidth - 0.5;
-    const wobble = onRoad ? 0 : distance < 7 ? 0.45 : 0.75;
-    const x = baseX + (hash(ix, k, 1) - 0.5) * 2 * wobble * (ix === 0 || ix === columns ? 0 : 1);
-    const z = -iz * cell + (hash(ix, k, 2) - 0.5) * 2 * wobble;
-    const bank = Math.max(0, distance - 9) * 0.38;
-    const y = -0.1 + (distance < 7 ? (hash(ix, k, 3) - 0.5) * 0.08 : (hash(ix, k, 3) - 0.3) * 0.5 + bank);
-    return target.set(x, y, z);
-  };
-
-  const triangles = columns * rows * 2;
-  const positions = new Float32Array(triangles * 9);
-  const colors = new Float32Array(triangles * 9);
-  const faces = [];
-  const corners = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-  let offset = 0;
-  for (let iz = 0; iz < rows; iz += 1) {
-    for (let ix = 0; ix < columns; ix += 1) {
-      vertex(ix, iz, corners[0]);
-      vertex(ix + 1, iz, corners[1]);
-      vertex(ix + 1, iz + 1, corners[2]);
-      vertex(ix, iz + 1, corners[3]);
-      // Alternate the diagonal so the facets do not line up in rows.
-      const split = (ix + iz) % 2 === 0 ? [[0, 1, 3], [1, 2, 3]] : [[0, 1, 2], [0, 2, 3]];
-      for (const [a, b, c] of split) {
-        const centreX = (corners[a].x + corners[b].x + corners[c].x) / 3;
-        for (const index of [a, b, c]) {
-          positions[offset] = corners[index].x;
-          positions[offset + 1] = corners[index].y;
-          positions[offset + 2] = corners[index].z;
-          offset += 3;
-        }
-        faces.push({ onRoad: Math.abs(centreX) < roadHalfWidth, seed: hash(ix, iz % repeat, a + b * 3) });
-      }
-    }
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  geometry.computeVertexNormals();
-  const material = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1, metalness: 0 });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.receiveShadow = true;
-  mesh.frustumCulled = false;
-  mesh.position.z = maxZ;
-
-  let scrolled = 0;
-  let blendFrom = null;
-  let blendTo = null;
-  const color = new THREE.Color();
-  const fill = (target, { path, grass, patch, tone = 1 }) => {
-    faces.forEach((face, index) => {
-      if (face.onRoad) color.setHSL(path.h, path.s, path.l + (face.seed - 0.5) * 0.07);
-      else if (face.seed > 0.82) color.setHSL(patch.h, patch.s, patch.l);
-      else color.setHSL(grass.h, grass.s, grass.l + (face.seed - 0.5) * 0.09);
-      color.multiplyScalar(tone);
-      for (let corner = 0; corner < 3; corner += 1) color.toArray(target, index * 9 + corner * 3);
-    });
-  };
-
-  return {
-    mesh,
-    scroll(distance) {
-      scrolled = (scrolled + distance) % period;
-      mesh.position.z = maxZ + scrolled;
-    },
-    // path, grass and patch are { h, s, l } colours; every facet gets its own slight tone.
-    recolor(spec) {
-      fill(colors, spec);
-      geometry.attributes.color.needsUpdate = true;
-    },
-    // For a gradual change: remember the colours now and the colours wanted, then call blend(0..1).
-    startBlend(spec) {
-      blendFrom = colors.slice();
-      blendTo = new Float32Array(colors.length);
-      fill(blendTo, spec);
-    },
-    blend(amount) {
-      if (!blendFrom) return;
-      for (let index = 0; index < colors.length; index += 1) {
-        colors[index] = blendFrom[index] + (blendTo[index] - blendFrom[index]) * amount;
-      }
-      geometry.attributes.color.needsUpdate = true;
-    },
-  };
-}
-
-// Returns { group, crowns }: crowns are the meshes that sway.
 export function createLowPolyTree({ kind, trunkMaterial, leafMaterials, seed }) {
   const group = new THREE.Group();
-  const crowns = [];
   const random = (salt) => hash(seed, salt, 7);
 
   if (kind === 'pine') {
@@ -131,9 +30,8 @@ export function createLowPolyTree({ kind, trunkMaterial, leafMaterials, seed }) 
       cone.position.y = trunkHeight + 0.4 + tier * 0.62;
       cone.rotation.y = random(10 + tier) * Math.PI;
       group.add(cone);
-      crowns.push(cone);
     }
-    return { group, crowns };
+    return group;
   }
 
   const trunkHeight = 1.3 + random(1) * 0.7;
@@ -158,9 +56,8 @@ export function createLowPolyTree({ kind, trunkMaterial, leafMaterials, seed }) 
     crown.position.set(Math.cos(angle) * reach, trunkHeight + 0.55 + random(50 + index) * 0.45 - (index === 0 ? 0 : 0.25), Math.sin(angle) * reach);
     crown.rotation.set(random(60 + index) * 3, random(70 + index) * 3, random(80 + index) * 3);
     group.add(crown);
-    crowns.push(crown);
   }
-  return { group, crowns };
+  return group;
 }
 
 export function createLowPolyRock(material, seed) {
