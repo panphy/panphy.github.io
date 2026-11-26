@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=5';
-import { createSeasonalEffects } from './seasonal-effects.js?v=5';
-import { createPowerUpSystem } from './power-ups.js?v=5';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=5';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=5';
-import { createLeaderboard } from './leaderboard.js?v=5';
-import { createEnemyMesh } from './enemy-meshes.js?v=5';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=5';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=5';
-import { createLowPolyCloud } from './lowpoly.js?v=5';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=5';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=5';
-import { createWordDeck } from './word-decks.js?v=5';
-import { createStage } from './stages.js?v=5';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=5';
-import { storyBeatForWave } from './story.js?v=5';
-import { createStoryteller, settleLantern } from './storyteller.js?v=5';
-import { createPlasmaCannon } from './plasma-cannon.js?v=5';
-import { createRideCart } from './ride-cart.js?v=5';
+import { createKeyFireAudio } from './audio.js?v=6';
+import { createSeasonalEffects } from './seasonal-effects.js?v=6';
+import { createPowerUpSystem } from './power-ups.js?v=6';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=6';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=6';
+import { createLeaderboard } from './leaderboard.js?v=6';
+import { createEnemyMesh } from './enemy-meshes.js?v=6';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=6';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=6';
+import { createLowPolyCloud } from './lowpoly.js?v=6';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=6';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=6';
+import { createWordDeck } from './word-decks.js?v=6';
+import { createStage } from './stages.js?v=6';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=6';
+import { storyBeatForWave } from './story.js?v=6';
+import { createStoryteller, settleLantern } from './storyteller.js?v=6';
+import { createPlasmaCannon } from './plasma-cannon.js?v=6';
+import { createRideCart } from './ride-cart.js?v=6';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -107,6 +107,11 @@ const BOSS_SIZE = 1.35;
 const FINAL_WAVE_NUMBER = WAVE_COUNT;
 // The camera rides a route through each wave's stage (stages.js) and stops for each ambush.
 const CAMERA_HEIGHT = 3.5;
+// The moons and clouds hang at fixed places in the world, nearer than the far hills,
+// islands and trees of a stage, which they would otherwise cover. keepInSky draws them at
+// the far edge of the depth range (NDC z), so all scenery covers them; clouds sit a step
+// in front of the moons so they can still drift across them.
+const SKY_DEPTH = { cloud: 0.99998, moon: 0.999998 };
 const CAMERA_DISTANCE = 10.5;
 const RAIL_WALK_SPEED = 7;
 // Monsters rush to this line, wind up, then strike.
@@ -328,6 +333,7 @@ let rideCart = null;
 let storyCard = null;
 let helpBubble = null;
 let challengeCard = null;
+let challengeIntro = null;
 let sceneGround = null;
 let sceneRockMaterial = null;
 const rail = { stage: null, state: 'idle', stopIndex: -1, from: null, to: null, toIndex: 0, t: 0, duration: 1, bursts: [], encounter: null, walkPhase: 0 };
@@ -666,6 +672,7 @@ function toggleGodMode() {
     playGodModeOffSound();
     document.body.classList.remove('is-god-mode');
     if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
+    weapon?.setGolden(false);
     updateHud(true);
     return;
   }
@@ -678,8 +685,9 @@ function toggleGodMode() {
   godModeBadge = document.createElement('div');
   godModeBadge.className = 'god-mode-badge';
   godModeBadge.setAttribute('aria-live', 'assertive');
-  godModeBadge.textContent = '✦ GOD MODE ✦';
-  document.querySelector('.hud-grid').append(godModeBadge);
+  godModeBadge.innerHTML = '<span class="god-mode-spark" aria-hidden="true">✦</span>GOD MODE<span class="god-mode-spark" aria-hidden="true">✦</span>';
+  document.getElementById('app').append(godModeBadge);
+  weapon?.setGolden(true);
   updateHud(true);
 }
 
@@ -707,6 +715,7 @@ function startGame() {
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
+  weapon?.setGolden(false);
   score = 0;
   health = MAX_LIFE;
   renderedHealth = null;
@@ -876,7 +885,7 @@ function handleKeyDown(event) {
   if (cosmicBuffer.length > 10) cosmicBuffer.shift();
   if (cosmicBuffer.length === 10 && fnv1a(cosmicBuffer.join(',')) === COSMIC_WAVE_THRESHOLD) {
     cosmicBuffer = [];
-    activateFinalWaveCheat();
+    activateSkipCheat();
     return;
   }
 
@@ -2805,13 +2814,14 @@ function endStory() {
 
 // ── The bat swarm ────────────────────────────────────────────────────────
 // A challenge at one stop of the night sky: space bats flit about, each marked with a
-// unit. Ten come, a few at a time, and the player has half a minute to bring all ten
-// down. They do no harm; clearing the swarm earns points and a heart, and running out
-// of time only loses the prize.
+// unit. The swarm is told first what it takes, then bats keep coming, up to five at a
+// time, and the player has half a minute to bring ten down. They do no harm; clearing
+// the swarm earns points and a heart, and running out of time only loses the prize.
 const BAT_TYPE = { name: 'Space Bat', body: 0x2b1d5c, trim: 0x8b5cf6, eye: 0x7ff5e6, scale: 1.25, score: 60 };
 const BAT_GOAL = 10;
 const BAT_TIME = 30;
-const BATS_AT_ONCE = 3;
+const BATS_AT_ONCE = 5;
+const BAT_INTRO_TIME = 2.6;
 const BAT_BONUS = 1500;
 const BAT_HEAL = 2;
 // Where the bats flit, spread across the sky and well apart, so their cards do not
@@ -2822,7 +2832,26 @@ const BAT_SPOTS = [
   { x: 2.8, y: 1.1, z: -3.5 },
   { x: 5.6, y: 3.2, z: -6.5 },
   { x: 8.4, y: 1.4, z: -5 },
+  { x: -3.0, y: 4.4, z: -8.5 },
+  { x: 2.0, y: 5.0, z: -10 },
+  { x: 7.2, y: 4.8, z: -9.5 },
 ];
+
+// Before the first bat, the challenge says what it takes, big in the middle of the view.
+function showChallengeIntro() {
+  if (!challengeIntro) {
+    challengeIntro = document.createElement('div');
+    challengeIntro.className = 'challenge-intro';
+    challengeIntro.setAttribute('role', 'status');
+    challengeIntro.innerHTML = '<strong>BAT SWARM!</strong>'
+      + `<span>Shoot down ${BAT_GOAL} bats in ${BAT_TIME} seconds</span>`;
+    document.getElementById('app').append(challengeIntro);
+  }
+  challengeIntro.hidden = false;
+  challengeIntro.classList.remove('is-in');
+  void challengeIntro.offsetWidth;
+  challengeIntro.classList.add('is-in');
+}
 
 function showChallengeCard(text) {
   if (!challengeCard) {
@@ -2837,8 +2866,8 @@ function showChallengeCard(text) {
 
 function startChallenge() {
   rail.state = 'challenge';
-  rail.challenge = { time: BAT_TIME, spawned: 0, spawnTimer: 0.6, over: 0 };
-  showBanner('BAT SWARM!', 'variant-hint');
+  rail.challenge = { time: BAT_TIME, spawned: 0, spawnTimer: 0, over: 0, intro: BAT_INTRO_TIME };
+  showChallengeIntro();
 }
 
 function liveBats() {
@@ -2879,6 +2908,12 @@ function updateChallenge(delta) {
     railBeginTravel(nextStopIndex());
     return;
   }
+  // The clock waits while the challenge is explained.
+  if (challenge.intro > 0) {
+    challenge.intro -= delta;
+    if (challenge.intro > 0) return;
+    if (challengeIntro) challengeIntro.hidden = true;
+  }
   challenge.time = Math.max(0, challenge.time - delta);
   showChallengeCard(`SPACE BATS ${Math.min(BAT_GOAL, killed)}/${BAT_GOAL} · ${Math.ceil(challenge.time)}s`);
   if (killed >= BAT_GOAL) {
@@ -2909,14 +2944,15 @@ function updateChallenge(delta) {
     return;
   }
   challenge.spawnTimer -= delta;
-  if (challenge.spawnTimer <= 0 && live.length < BATS_AT_ONCE && challenge.spawned < BAT_GOAL) {
+  if (challenge.spawnTimer <= 0 && live.length < BATS_AT_ONCE) {
     if (spawnBat()) challenge.spawned += 1;
-    challenge.spawnTimer = 0.45;
+    challenge.spawnTimer = 0.35;
   }
 }
 
 function endChallenge() {
   if (challengeCard) challengeCard.hidden = true;
+  if (challengeIntro) challengeIntro.hidden = true;
   rail.challenge = null;
 }
 
@@ -4255,9 +4291,23 @@ function createSceneryMaterials() {
   sceneRockMaterial = new THREE.MeshStandardMaterial({ color: 0xd6ccb4, roughness: 1, flatShading: true });
 }
 
+// Drawn at the far edge of the depth range, like a skybox, the moons and clouds stay
+// behind all scenery (see SKY_DEPTH).
+function keepInSky(material, layer) {
+  const depth = SKY_DEPTH[layer];
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <project_vertex>',
+      `#include <project_vertex>\n  gl_Position.z = gl_Position.w * ${depth.toFixed(6)};`
+    );
+  };
+  material.customProgramCacheKey = () => `keyfire-sky-${layer}`;
+  return material;
+}
+
 function createSky() {
   const moonGeometry = new THREE.SphereGeometry(3.2, 24, 16);
-  const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true, fog: false });
+  const moonMaterial = keepInSky(new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true, fog: false }), 'moon');
   moon = new THREE.Mesh(moonGeometry, moonMaterial);
   positionMoonOnArc();
   scene.add(moon);
@@ -4366,20 +4416,20 @@ function updateMeteors(delta) {
 
 function createClouds() {
   // Lit, so the facets show, with enough self-glow that clouds stay bright.
-  baseCloudMaterial = new THREE.MeshLambertMaterial({
+  baseCloudMaterial = keepInSky(new THREE.MeshLambertMaterial({
     color: 0xf0f2f8,
     emissive: 0x6a6670,
     transparent: true,
     opacity: 0.92,
     flatShading: true,
-  });
-  weatherCloudMaterial = new THREE.MeshLambertMaterial({
+  }), 'cloud');
+  weatherCloudMaterial = keepInSky(new THREE.MeshLambertMaterial({
     color: 0xd8e4f2,
     emissive: 0x5a5a66,
     transparent: true,
     opacity: 0,
     flatShading: true,
-  });
+  }), 'cloud');
   const configs = [
     { x: -38, y: 17.5, z: -50, scale: 1.05, speed: 0.55, t: 0 },
     { x: -18, y: 19.0, z: -58, scale: 0.80, speed: 0.40, t: 1 },
@@ -5311,12 +5361,12 @@ function createFinalWaveScenery() {
     { position: [34, 13, -60], radius: 2.2, color: 0xf2a65a, ring: null },
   ];
   for (const spec of moonSpecs) {
-    const material = new THREE.MeshStandardMaterial({ color: spec.color, emissive: spec.color, emissiveIntensity: 0.22, roughness: 1, flatShading: true, fog: false });
+    const material = keepInSky(new THREE.MeshStandardMaterial({ color: spec.color, emissive: spec.color, emissiveIntensity: 0.22, roughness: 1, flatShading: true, fog: false }), 'moon');
     const body = new THREE.Mesh(new THREE.IcosahedronGeometry(spec.radius, 1), material);
     body.position.set(...spec.position);
     group.add(body);
     if (spec.ring) {
-      const ringMaterial = new THREE.MeshStandardMaterial({ color: spec.ring, emissive: spec.ring, emissiveIntensity: 0.4, roughness: 1, flatShading: true, fog: false });
+      const ringMaterial = keepInSky(new THREE.MeshStandardMaterial({ color: spec.ring, emissive: spec.ring, emissiveIntensity: 0.4, roughness: 1, flatShading: true, fog: false }), 'moon');
       const ring = new THREE.Mesh(new THREE.TorusGeometry(spec.radius * 1.7, spec.radius * 0.09, 4, 14), ringMaterial);
       ring.position.set(...spec.position);
       ring.rotation.set(1.25, 0.3, 0);
@@ -5557,49 +5607,68 @@ function dismissEndingSequence() {
   stopVictoryScore(0.2);
 }
 
-function activateFinalWaveCheat() {
-  // Entered again during the final stage it jumps on to the boss (for testing; the run stays unranked).
-  const toBoss = finalWaveCheatUsedThisRun && mode === 'running' && waveSet === FINAL_WAVE_NUMBER && wavePhase === 'normal';
-  const savedHealth = (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') ? health : MAX_LIFE;
-
-  if (mode === 'idle' || mode === 'gameover' || mode === 'ending') {
-    startGame();
-  } else {
-    hideLootGuide();
-    clearEnemies();
-    clearEffects();
-    typedBuffer = '';
-    activeTarget = null;
-    mode = 'running';
-    document.body.classList.add('is-running');
-    document.body.classList.remove('is-paused');
-    messagePanel.hidden = true;
-    messagePanel.classList.remove('is-cleared');
-    setPauseButtonState(true, false);
-    startMusicLoop(false);
-  }
-
+// The Konami code skips ahead, for testing (the run stays unranked). Each entry goes one
+// step on: from a stage to its boss, from a boss to the next stage, and from the last
+// boss to the ending. Entered before a run, it starts one at the first boss.
+function activateSkipCheat() {
+  if (mode === 'ending') return;
+  if (mode === 'idle' || mode === 'gameover') startGame();
   finalWaveCheatUsedThisRun = true;
-  waveSet = FINAL_WAVE_NUMBER;
-  health = savedHealth;
-  // Plan the final wave from scratch: a jump from mid-run must not carry the old wave's
-  // spawn count, or every healer and chest is due at once.
-  wavePhase = 'normal';
-  normalEnemyTarget = getNormalEnemyTarget(monsterLevel());
-  normalEnemiesSpawned = 0;
-  normalTypingCostSpawned = 0;
-  prepareWavePlan();
-  buildStageForWave(FINAL_WAVE_NUMBER);
-  startFinalWave();
-  if (toBoss) {
-    // Start the walk from the last stop before the arena rather than the start of the route.
-    rail.stopIndex = Math.max(-1, rail.stage.stops.length - 2);
-    startBossPhase();
+  if (mode === 'wave_cleared') {
+    advanceWaveSet();
+    jumpToBoss();
+  } else if (wavePhase === 'boss') {
+    if (isFinalWave()) {
+      bossFight = null;
+      bossDeath = null;
+      hideBossHpBar();
+      startEndingSequence();
+      return;
+    }
+    resumeForCheat();
+    advanceWaveSet();
+  } else {
+    resumeForCheat();
+    jumpToBoss();
   }
   showBanner('CHEAT CODE ACTIVATED', 'mimic-hint');
   updateHud(true);
   focusKeyboard();
   scheduleFrame();
+}
+
+function resumeForCheat() {
+  hideLootGuide();
+  clearEnemies();
+  clearEffects();
+  typedBuffer = '';
+  activeTarget = null;
+  mode = 'running';
+  document.body.classList.add('is-running');
+  document.body.classList.remove('is-paused');
+  messagePanel.hidden = true;
+  messagePanel.classList.remove('is-cleared');
+  setPauseButtonState(true, false);
+  startMusicLoop(false);
+}
+
+// Rebuilds this stage and walks from its last stop into the boss arena. The wave's plan
+// starts afresh, so no healer or chest is left due, and its set-piece is skipped.
+function jumpToBoss() {
+  clearEnemies();
+  clearEffects();
+  typedBuffer = '';
+  activeTarget = null;
+  wavePhase = 'normal';
+  normalEnemyTarget = getNormalEnemyTarget(monsterLevel());
+  normalEnemiesSpawned = 0;
+  normalTypingCostSpawned = 0;
+  prepareWavePlan();
+  buildStageForWave(waveSet);
+  applySeasonForWave(waveSet, true);
+  rail.setPieceDone = true;
+  rail.stopIndex = Math.max(-1, rail.stage.stops.length - 2);
+  startBossPhase();
 }
 
 function advanceWaveSet() {

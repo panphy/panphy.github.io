@@ -126,6 +126,16 @@ export function createPlasmaCannon({ camera, crystalMaterial, createCrown = null
     }),
   };
 
+  // God mode gilds the gun: the same parts in gold, with warm light in the vents and coils.
+  const GOLD = {
+    metal: [0xb8862b, 0x4a3008],
+    plate: [0xf2c14e, 0x5a3d08],
+    barrel: [0xffd970, 0x5a4210],
+  };
+  const plain = {};
+  for (const key of Object.keys(GOLD)) plain[key] = [materials[key].color.getHex(), materials[key].emissive.getHex()];
+  const plainGlow = materials.glow.color.getHex();
+
   const group = new THREE.Group();
   const mount = new THREE.Group();
   group.add(mount);
@@ -166,6 +176,14 @@ export function createPlasmaCannon({ camera, crystalMaterial, createCrown = null
 
   return {
     crowns,
+    setGolden(on) {
+      for (const key of Object.keys(GOLD)) {
+        const [color, emissive] = on ? GOLD[key] : plain[key];
+        materials[key].color.setHex(color);
+        materials[key].emissive.setHex(emissive);
+      }
+      materials.glow.color.setHex(on ? 0xfff0a0 : plainGlow);
+    },
     // What pulses with the plasma: scaled by the game along with its other crystals.
     glows: [parts.core],
     // 1 is the muzzle, where bolts leave; 0 is the core, where chain lightning leaps from.
