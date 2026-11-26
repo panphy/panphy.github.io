@@ -1,7 +1,7 @@
 // lowpoly-creatures.js — faceted, flat-shaded monsters. Each is a handful of simple
 // solids on pivots, plus an animate(seconds, enemy) function that moves the pivots.
 import * as THREE from 'three';
-import { roundSides, polyDetail } from './detail.js?v=7';
+import { roundSides, polyDetail } from './detail.js?v=8';
 
 const BONE = 0xf3e6c8;
 
@@ -1269,7 +1269,9 @@ export function buildStellarDreadnought(type, kit) {
     b.place(elbow, b.ico(0.19, 0), gold, [0, -0.58, 0.02], [1, 1, 1.1]);
     arms.push({ arm, elbow });
   }
-  const shield = pivot(arms[0].elbow, -0.08, -0.4, 0.26);
+  // The gauntlet grips the shield from behind: the shield sits out along its own face
+  // (it is tilted 0.96 about x) so the hand and forearm stay clear of the plate.
+  const shield = pivot(arms[0].elbow, -0.08, -0.66, 0.443);
   b.place(shield, b.cylinder(0.6, 0.6, 0.06, 6), gold, [0, 0, 0], [0.84, 1, 1.42], [Math.PI / 2, 0, 0]);
   b.place(shield, b.cylinder(0.53, 0.53, 0.1, 6), plateDark, [0, 0, 0.02], [0.84, 1, 1.42], [Math.PI / 2, 0, 0]);
   b.place(shield, b.octa(0.15), lamp, [0, 0.06, 0.1], [0.5, 2.4, 0.3]);
