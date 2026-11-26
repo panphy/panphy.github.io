@@ -11,10 +11,10 @@
 import * as THREE from 'three';
 import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js';
 import { buildStellarDreadnought } from './lowpoly-creatures.js';
-import { createStoryteller } from './storyteller.js?v=beta25';
-import { STORY_BEATS } from './story.js?v=beta25';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta25';
-import { buildCannon } from './arcane-cannon.js?v=beta25';
+import { createStoryteller } from './storyteller.js?v=beta26';
+import { STORY_BEATS } from './story.js?v=beta26';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=beta26';
+import { buildCannon } from './arcane-cannon.js?v=beta26';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
@@ -38,7 +38,7 @@ export const ENDING_TIMELINE = {
 
 const T = ENDING_TIMELINE;
 const LAND_COUNT = 5;
-const TITLE_TEXT = 'Spellwave';
+const TITLE_TEXT = 'KeyFire';
 // The game's heading face (Fredoka), as in the menu title and banners.
 const GAME_FONT_FAMILY = 'Fredoka, Manrope, system-ui, sans-serif';
 
@@ -207,7 +207,7 @@ export function createEndingCinematic(canvas, { flashEl = null, captionEl = null
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
   } catch (error) {
-    console.warn('Spellwave could not start the ending cinematic.', error);
+    console.warn('KeyFire could not start the ending cinematic.', error);
   }
   if (!renderer) {
     return {

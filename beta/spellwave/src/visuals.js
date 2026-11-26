@@ -563,7 +563,7 @@ export function createVisuals({ renderer, scene, camera, available, onQualityCha
       composer = built;
       applyQuality();
     } catch (error) {
-      console.warn('Spellwave post-processing is unavailable; using the basic renderer.', error);
+      console.warn('KeyFire post-processing is unavailable; using the basic renderer.', error);
       composer = null;
     }
   }

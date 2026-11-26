@@ -58,7 +58,7 @@ test('long phrases stay out of normal pools at every wave', () => {
 
 
 test('startup dependencies share the page release version to avoid mixed cached code', () => {
-  const html = readFileSync(new URL('../../spellwave.html', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../../keyfire.html', import.meta.url), 'utf8');
   const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const difficulty = readFileSync(new URL('../src/difficulty.js', import.meta.url), 'utf8');
   const version = html.match(/spellwave\/src\/main\.js\?v=([^"&]+)/)?.[1];

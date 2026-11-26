@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta25';
+import { createSpellwaveAudio } from './audio.js?v=beta26';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=beta25';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta25';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta25';
-import { createLeaderboard } from './leaderboard.js?v=beta25';
+import { createPotionSystem } from './potions.js?v=beta26';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta26';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta26';
+import { createLeaderboard } from './leaderboard.js?v=beta26';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta25';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta25';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, planVariants } from './difficulty.js?v=beta26';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta26';
 import { createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta25';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta25';
-import { createWordDeck } from './word-decks.js?v=beta25';
-import { createStage } from './stages.js?v=beta25';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta25';
-import { storyBeatForWave } from './story.js?v=beta25';
-import { createStoryteller } from './storyteller.js?v=beta25';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta25';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta26';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta26';
+import { createWordDeck } from './word-decks.js?v=beta26';
+import { createStage } from './stages.js?v=beta26';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta26';
+import { storyBeatForWave } from './story.js?v=beta26';
+import { createStoryteller } from './storyteller.js?v=beta26';
+import { createArcaneCannon } from './arcane-cannon.js?v=beta26';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -649,6 +649,8 @@ updatePhaseDisplay();
 updateHud(true);
 if (!webGLAvailable) showWebGLUnavailable();
 
+setUpDeviceGate();
+
 startButton.addEventListener('click', () => {
   resumeAudio();
   if (mode === 'paused') {
@@ -937,7 +939,7 @@ function showWebGLUnavailable() {
   showMessage(
     'WEBGL REQUIRED',
     'Graphics Unavailable',
-    'Spellwave needs browser WebGL support',
+    'KeyFire needs browser WebGL support',
     'Unavailable',
     'Enable hardware acceleration or try a browser/device with WebGL enabled.'
   );
@@ -3805,7 +3807,7 @@ function updatePhaseDisplay() {
     phaseValue.textContent = mode === 'ending' ? 'Victory' : 'Run ended';
     return;
   }
-  phaseValue.textContent = 'Spellwave';
+  phaseValue.textContent = '';
 }
 
 function getNormalEnemyTarget(wave) {
@@ -4950,6 +4952,37 @@ function formatAccuracySummary() {
   return `${Math.round(accuracy() * 100)}% accuracy`;
 }
 
+// Phones and tablets without a keyboard cannot play a typing game. A touch-only device
+// (no fine pointer) is asked to use a computer; a key press from a physical keyboard,
+// such as an iPad's keyboard case, lets it through. Nothing on the gate takes focus
+// that would raise the on-screen keyboard.
+function isTouchOnlyDevice() {
+  if (!window.matchMedia) return false;
+  return window.matchMedia('(any-pointer: coarse)').matches && !window.matchMedia('(any-pointer: fine)').matches;
+}
+
+function setUpDeviceGate() {
+  // Declared here, not at module level: this runs before the module's later constants exist.
+  const DEVICE_GATE_KEY = 'spellwaveBetaHasKeyboard';
+  const gate = document.getElementById('deviceGate');
+  if (!gate || !isTouchOnlyDevice()) return;
+  try {
+    if (localStorage.getItem(DEVICE_GATE_KEY) === '1') return;
+  } catch {}
+  gate.hidden = false;
+  document.body.classList.add('needs-keyboard');
+  const unlock = (event) => {
+    if (event.isComposing || event.key === 'Unidentified' || event.key === 'Process') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.removeEventListener('keydown', unlock, true);
+    gate.hidden = true;
+    document.body.classList.remove('needs-keyboard');
+    try { localStorage.setItem(DEVICE_GATE_KEY, '1'); } catch {}
+  };
+  window.addEventListener('keydown', unlock, true);
+}
+
 function focusKeyboard() {
   if (keyboardInput.value !== INPUT_SENTINEL) resetKeyboardInput();
   keyboardInput.focus({ preventScroll: true });
@@ -4975,7 +5008,7 @@ function createRenderer() {
       available: true,
     };
   } catch (error) {
-    console.warn('Spellwave could not create a WebGL renderer.', error);
+    console.warn('KeyFire could not create a WebGL renderer.', error);
     return {
       renderer: createFallbackRenderer(),
       available: false,
