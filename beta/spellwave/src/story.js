@@ -13,7 +13,7 @@ export const STORY_BEATS = [
     coat: 0xf2f0e6, hat: 0x8a5a2b,
     voice: 0,
     lines: [
-      "Oh, thank goodness, a real wizard! I was starting to think nobody would come.",
+      "Oh, thank goodness, someone who knows their physics! I was starting to think nobody would come.",
       "These myths crawled out of every bad idea people ever believed. Type the truth at them and they fall apart.",
       "Mind the Colossus up ahead. It keeps telling everyone that heavy things fall faster. Honestly!",
     ],
@@ -32,7 +32,7 @@ export const STORY_BEATS = [
   {
     name: 'Mina the miner',
     coat: 0xd8a23a, hat: 0xe0483a,
-    plea: "Oi, wizard! Down here! This one's been filling my head with rubbish!",
+    plea: "Oi, you with the cannon! Down here! This one's been filling my head with rubbish!",
     voice: 2,
     lines: [
       "Ta very much. It swore blind the cold was creeping into my bones. Cold doesn't creep anywhere!",

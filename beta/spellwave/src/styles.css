@@ -3568,6 +3568,16 @@ body.loot-guide-open .potion-bar {
   white-space: normal;
 }
 
+/* Whole statements and story lines read as sentences: the body face with room between words. */
+.word-tag[data-kind="boss"]:not([data-stage="words"]) .prompt {
+  font-family: var(--font-body);
+  font-size: clamp(1.05rem, 2.7vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  word-spacing: 0.32em;
+  line-height: 1.5;
+}
+
 .word-tag[data-kind="boss"] .current-word {
   border-bottom: 3px solid color-mix(in srgb, var(--boss-accent, var(--danger)) 70%, transparent);
 }
