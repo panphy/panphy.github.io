@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=4';
-import { createSeasonalEffects } from './seasonal-effects.js?v=4';
-import { createPowerUpSystem } from './power-ups.js?v=4';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=4';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=4';
-import { createLeaderboard } from './leaderboard.js?v=4';
-import { createEnemyMesh } from './enemy-meshes.js?v=4';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=4';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=4';
-import { createLowPolyCloud } from './lowpoly.js?v=4';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=4';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=4';
-import { createWordDeck } from './word-decks.js?v=4';
-import { createStage } from './stages.js?v=4';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=4';
-import { storyBeatForWave } from './story.js?v=4';
-import { createStoryteller, settleLantern } from './storyteller.js?v=4';
-import { createPlasmaCannon } from './plasma-cannon.js?v=4';
-import { createRideCart } from './ride-cart.js?v=4';
+import { createKeyFireAudio } from './audio.js?v=5';
+import { createSeasonalEffects } from './seasonal-effects.js?v=5';
+import { createPowerUpSystem } from './power-ups.js?v=5';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=5';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=5';
+import { createLeaderboard } from './leaderboard.js?v=5';
+import { createEnemyMesh } from './enemy-meshes.js?v=5';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=5';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=5';
+import { createLowPolyCloud } from './lowpoly.js?v=5';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=5';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=5';
+import { createWordDeck } from './word-decks.js?v=5';
+import { createStage } from './stages.js?v=5';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=5';
+import { storyBeatForWave } from './story.js?v=5';
+import { createStoryteller, settleLantern } from './storyteller.js?v=5';
+import { createPlasmaCannon } from './plasma-cannon.js?v=5';
+import { createRideCart } from './ride-cart.js?v=5';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -2017,11 +2017,11 @@ function frostBossLine() {
 
 // The Stellar Dreadnought changes weapons with each stage of its fight: comets while
 // its words are typed, comets that split while its statement is, a shield of
-// satellites round its core word, and a charging beam (no throws) during its story.
+// satellites round its core word, and a charging beam during its story, with a
+// plain comet now and then, one at a time.
 function dreadnoughtAttack(boss, inFlight) {
   const line = boss.bossLines[boss.lineIndex] || {};
-  if (line.kind === 'story') return { wait: 1 };
-  if (line.core) {
+  if (line.core || line.kind === 'story') {
     if (inFlight >= 1) return { wait: 1 };
     throwRock(boss, { comet: true });
     return { gapScale: 1.5 };
@@ -2190,10 +2190,10 @@ function updatePhraseBoss(boss, delta, seconds) {
   boss.scaleBoost = 1 + boss.windup * 0.06 + Math.sin(boss.roar * Math.PI) * 0.14;
   if (boss.lineKind === 'words' || boss.shielded) updateBossShield(boss);
   if (stunned || boss.stagger > 0) return;
-  if (boss.lineKind === 'story' && bossPlan(bossLevel()).beamLettersPerSecond) {
-    updateBossBeam(boss, delta);
-    return;
-  }
+  // During its story the Dreadnought charges its beam and throws comets as well.
+  const racing = boss.lineKind === 'story' && !!bossPlan(bossLevel()).beamLettersPerSecond;
+  if (racing) updateBossBeam(boss, delta);
+  const beamWindup = racing ? boss.windup : 0;
 
   // Between throws it roars: more often the angrier it is.
   boss.roarTimer -= delta * (1 + rage);
@@ -2207,9 +2207,9 @@ function updatePhraseBoss(boss, delta, seconds) {
   }
 
   boss.attackTimer -= delta;
-  boss.windup = boss.attackTimer <= BOSS_WINDUP_TIME ? THREE.MathUtils.clamp(1 - boss.attackTimer / BOSS_WINDUP_TIME, 0, 1) : 0;
+  boss.windup = Math.max(beamWindup, boss.attackTimer <= BOSS_WINDUP_TIME ? THREE.MathUtils.clamp(1 - boss.attackTimer / BOSS_WINDUP_TIME, 0, 1) : 0);
   if (boss.attackTimer <= 0) {
-    boss.windup = 0;
+    boss.windup = beamWindup;
     const gapScale = bossAttack(boss);
     boss.attackTimer = bossPlan(bossLevel()).attackGap * gapScale * (0.85 + Math.random() * 0.3);
   }
@@ -2805,14 +2805,24 @@ function endStory() {
 
 // ── The bat swarm ────────────────────────────────────────────────────────
 // A challenge at one stop of the night sky: space bats flit about, each marked with a
-// unit, and the player has half a minute to bring ten down. They do no harm; clearing
-// the swarm earns points and a heart, and running out of time only loses the prize.
+// unit. Ten come, a few at a time, and the player has half a minute to bring all ten
+// down. They do no harm; clearing the swarm earns points and a heart, and running out
+// of time only loses the prize.
 const BAT_TYPE = { name: 'Space Bat', body: 0x2b1d5c, trim: 0x8b5cf6, eye: 0x7ff5e6, scale: 1.25, score: 60 };
 const BAT_GOAL = 10;
 const BAT_TIME = 30;
 const BATS_AT_ONCE = 3;
 const BAT_BONUS = 1500;
 const BAT_HEAL = 2;
+// Where the bats flit, spread across the sky and well apart, so their cards do not
+// crowd one another. Each live bat takes a free spot.
+const BAT_SPOTS = [
+  { x: -4.6, y: 1.0, z: -4 },
+  { x: -0.4, y: 3.4, z: -6 },
+  { x: 2.8, y: 1.1, z: -3.5 },
+  { x: 5.6, y: 3.2, z: -6.5 },
+  { x: 8.4, y: 1.4, z: -5 },
+];
 
 function showChallengeCard(text) {
   if (!challengeCard) {
@@ -2840,10 +2850,11 @@ function spawnBat() {
   const free = ROCK_UNITS.filter(entry => !taken.has(buildSearchPrompt(entry.term).charAt(0)));
   if (free.length === 0) return false;
   const bat = spawnEnemy({ wordData: free[Math.floor(Math.random() * free.length)], type: BAT_TYPE, customGroup: createSpaceBat(BAT_TYPE), flier: true });
-  // Each takes one of three patches of sky, spread across the view and kept right of
-  // the readouts in the top left corner.
-  const patch = [-0.8, 1.8, 4.2][rail.challenge.spawned % BATS_AT_ONCE];
-  const home = new THREE.Vector3(patch + (Math.random() - 0.5) * 0.8, 0.9 + Math.random() * 1.4, -3.5 - Math.random() * 2.5);
+  const takenSpots = new Set(liveBats().map(other => other.batSpot));
+  const freeSpots = BAT_SPOTS.filter(spot => !takenSpots.has(spot));
+  const spot = freeSpots[Math.floor(Math.random() * freeSpots.length)];
+  const home = new THREE.Vector3(spot.x + (Math.random() - 0.5) * 0.6, spot.y + (Math.random() - 0.5) * 0.4, spot.z);
+  bat.batSpot = spot;
   bat.isBat = true;
   bat.damage = 0;
   bat.noGlossary = true;
@@ -2898,7 +2909,7 @@ function updateChallenge(delta) {
     return;
   }
   challenge.spawnTimer -= delta;
-  if (challenge.spawnTimer <= 0 && live.length < BATS_AT_ONCE) {
+  if (challenge.spawnTimer <= 0 && live.length < BATS_AT_ONCE && challenge.spawned < BAT_GOAL) {
     if (spawnBat()) challenge.spawned += 1;
     challenge.spawnTimer = 0.45;
   }
