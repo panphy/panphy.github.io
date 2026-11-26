@@ -851,6 +851,7 @@ function pauseGame() {
   document.body.classList.add('is-paused');
   setPauseButtonState(false, false);
   showMessage('PAUSED', 'Stage Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
+  if (supportLink) supportLink.hidden = false;
   updatePhaseDisplay();
 }
 
@@ -5730,7 +5731,11 @@ function activateFinalWaveCheat() {
   prepareWavePlan();
   buildStageForWave(FINAL_WAVE_NUMBER);
   startFinalWave();
-  if (toBoss) startBossPhase();
+  if (toBoss) {
+    // Start the walk from the last stop before the arena rather than the start of the route.
+    rail.stopIndex = Math.max(-1, rail.stage.stops.length - 2);
+    startBossPhase();
+  }
   showBanner('CHEAT CODE ACTIVATED', 'mimic-hint');
   updateHud(true);
   focusKeyboard();
