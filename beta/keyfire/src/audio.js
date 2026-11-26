@@ -1345,6 +1345,36 @@ export function createKeyFireAudio({
     flutter.stop(start + duration + 0.04);
   }
 
+  // Struck metal: partials that are not whole multiples of each other, each dying
+  // faster than the one below it.
+  function clang(frequency, duration, gain, options = {}) {
+    [1, 2.76, 5.4].forEach((ratio, index) => {
+      playTone(frequency * ratio, duration / (1 + index * 0.7), {
+        ...options, gain: gain / (1 + index), type: index === 0 ? 'triangle' : 'square', attack: 0.001, cutoff: 7000,
+      });
+    });
+  }
+
+  // A scatter of tiny high pips over `span` seconds: breaking ice, sparks, coins.
+  function tinkle(count, low, high, span, gain, options = {}) {
+    for (let index = 0; index < count; index += 1) {
+      const pitch = low + Math.random() * (high - low);
+      playTone(pitch, 0.05 + Math.random() * 0.09, {
+        gain: gain * (0.5 + Math.random() * 0.5),
+        type: options.type || 'sine',
+        attack: 0.001,
+        endFrequency: pitch * (options.bend || 1),
+        delay: (options.delay || 0) + Math.random() * span,
+        pan: Math.max(-1, Math.min(1, (options.pan || 0) + (Math.random() - 0.5) * 0.7)),
+      });
+    }
+  }
+
+  // A round blip that jumps up at its end: a bubble.
+  function glug(frequency, gain, options = {}) {
+    playTone(frequency, 0.1, { ...options, gain, type: 'sine', endFrequency: frequency * 1.7, attack: 0.012 });
+  }
+
   function laneOf(targetX) {
     return Math.max(-1, Math.min(1, targetX / PATH_HALF_WIDTH)) * LANE_PAN_WIDTH;
   }
@@ -1427,12 +1457,47 @@ export function createKeyFireAudio({
   // Monsters
 
   // A boss's cue: landing in the arena, roaring, raising a minion or its satellites.
+  // Each boss roars in its own voice (BOSS_VOICES).
   function playRevealSound(boss) {
     const pan = lanePan(boss);
+    duckMusic(0.5, 0.7);
+    const voice = BOSS_VOICES[boss?.type?.name];
+    if (voice) {
+      voice.roar(pan);
+      return;
+    }
     thud(70, 0.6, 0.09, { pan });
     growl(55, 1.1, 0.09, { pan, cutoff: 1000, endFrequency: 73.42 });
     growl(82.41, 0.9, 0.05, { pan: -pan, cutoff: 700, delay: 0.12 });
     burst(0.9, 0.03, { pan, swell: true, filterType: 'lowpass', filterFrequency: 200, endFilterFrequency: 1400 });
+  }
+
+  // A monster, healer or chest showing itself, each in its own voice.
+  function playAppearSound(enemy, delay = 0) {
+    const pan = lanePan(enemy);
+    if (enemy?.isMedic) {
+      // A heartbeat, and a soft glint over it.
+      playTone(96, 0.13, { gain: 0.075, type: 'sine', endFrequency: 58, attack: 0.004, pan, delay });
+      playTone(82, 0.16, { gain: 0.06, type: 'sine', endFrequency: 50, attack: 0.004, pan, delay: delay + 0.17 });
+      chime(1046.5, 0.4, 0.018, { pan, delay: delay + 0.05 });
+      chime(1318.51, 0.4, 0.014, { pan, delay: delay + 0.22 });
+      return;
+    }
+    if (enemy?.isMimic) {
+      // The lid rattling on its hinges, and the coins inside.
+      [0, 0.07, 0.13, 0.22].forEach((offset, index) => {
+        zap(varyPitch(250 - index * 12, 30), 170, 0.045, 0.04, { pan, cutoff: 1500, delay: delay + offset });
+      });
+      tinkle(6, 2300, 4400, 0.3, 0.014, { pan, delay: delay + 0.06 });
+      return;
+    }
+    const voice = CREATURE_VOICES[enemy?.type?.name];
+    if (voice) voice.appear(pan, voicePitch(enemy), delay);
+  }
+
+  // A small monster (half of a splitter) speaks higher.
+  function voicePitch(enemy) {
+    return enemy?.scaleBoost && enemy.scaleBoost < 1 ? 1.5 : 1;
   }
 
   // The monster bursting: mid-range noise and a falling sweep. It leaves the low end
@@ -1449,6 +1514,15 @@ export function createKeyFireAudio({
     zap(base, base / 6, 0.18, varyGain(0.04), { pan, delay, type: 'sawtooth', cutoff: 2600, endCutoff: 400, q: 2 });
     playTone(220, 0.1, { gain: 0.035, type: 'sine', endFrequency: 90, attack: 0.002, pan, delay });
     zap(base * 2.5, base * 4, 0.07, 0.014, { pan, type: 'sine', delay: delay + 0.03 });
+    const voice = CREATURE_VOICES[enemy?.type?.name];
+    if (voice) voice.die(pan, voicePitch(enemy), delay);
+  }
+
+  // The boss's end: the explosion, and its own voice giving out.
+  function playBossDeathSound(boss) {
+    playBossExplosionSound(boss);
+    const voice = BOSS_VOICES[boss?.type?.name];
+    if (voice) voice.death(lanePan(boss) * 0.6);
   }
 
   // A driven low hit, a long falling sweep and roar of noise, then sparks scattering
@@ -1521,16 +1595,25 @@ export function createKeyFireAudio({
     zap(bossHit ? 98 : 123, 40, bossHit ? 0.4 : 0.28, 0.06, { type: 'sawtooth', cutoff: 900, endCutoff: 200, drive: true });
   }
 
+  // A throw: each boss's own, or the plain one for a caster's or a satellite's bolt.
   function playBossThrowSound(enemy) {
     const pan = lanePan(enemy) * 0.6;
+    const voice = enemy?.isBoss ? BOSS_VOICES[enemy.type?.name] : null;
+    if (voice) {
+      voice.throw(pan);
+      return;
+    }
     burst(0.22, 0.04, { pan, filterFrequency: 320, endFilterFrequency: 1500, q: 1.2 });
     zap(90, 240, 0.2, 0.04, { pan, type: 'sawtooth', cutoff: 1000, hold: 0.4 });
   }
 
-  function playBossImpactSound() {
+  // A blow landing on a boss. Given the boss (a finished line), it cries out as well.
+  function playBossImpactSound(boss) {
     thud(104, 0.26, 0.07);
     playNoise(0.05, { gain: 0.04, filterType: 'highpass', filterFrequency: 2000 });
     zap(300, 80, 0.1, 0.03, { cutoff: 1800 });
+    const voice = BOSS_VOICES[boss?.type?.name];
+    if (voice) voice.hurt(lanePan(boss) * 0.6);
   }
 
   // An alarm: three rising sweeps over a growl.
@@ -1622,6 +1705,247 @@ export function createKeyFireAudio({
     zap(180, 360, 0.14, 0.04, { type: 'sawtooth', cutoff: 1400, hold: 0.4 });
     [1318.51, 1760, 2093].forEach((frequency, index) => chime(frequency, 0.3, 0.016, { delay: 0.14 + index * 0.06 }));
   }
+
+  // The loot: coins spilling over a bright run up the chord of the pick-up stab.
+  function playChestLootSound() {
+    tinkle(9, 2200, 5200, 0.32, 0.016);
+    [1174.66, 1396.91, 1760, 2349.32].forEach((frequency, index) => chime(frequency, 0.3, 0.02, { delay: 0.05 + index * 0.055 }));
+  }
+
+  // ── Voices ─────────────────────────────────────────────────────────────
+  // Every kind of monster has a voice of its own, heard as it shows itself and again
+  // as it dies. `k` raises the pitch for a small one; `delay` is in seconds.
+  const CREATURE_VOICES = {
+    // A blob of mud: three wet glugs, and a splat.
+    'Mudlug': {
+      appear(pan, k, delay) {
+        [0, 0.1, 0.19].forEach((offset, index) => glug(varyPitch(105 + index * 24, 20) * k, 0.06, { pan, delay: delay + offset }));
+        burst(0.3, 0.025, { pan, delay, filterType: 'lowpass', filterFrequency: 520, endFilterFrequency: 180 });
+      },
+      die(pan, k, delay) {
+        burst(0.28, 0.06, { pan, delay, filterType: 'lowpass', filterFrequency: 950, endFilterFrequency: 140, drive: true });
+        playTone(190 * k, 0.22, { gain: 0.055, type: 'sine', endFrequency: 48, attack: 0.002, pan, delay });
+        glug(120 * k, 0.04, { pan, delay: delay + 0.17 });
+      },
+    },
+    // An insect: a chitter of clicks over a buzz of wings, and a falling chirp.
+    'Glowmite': {
+      appear(pan, k, delay) {
+        for (let index = 0; index < 6; index += 1) {
+          zap(varyPitch(2600, 180) * k, 1900 * k, 0.022, 0.026, { pan, delay: delay + index * 0.038, cutoff: 7000 });
+        }
+        zap(170 * k, 330 * k, 0.26, 0.016, { pan, delay, type: 'sawtooth', cutoff: 1800 });
+      },
+      die(pan, k, delay) {
+        zap(3400 * k, 480 * k, 0.16, 0.036, { pan, delay, cutoff: 7000 });
+        for (let index = 0; index < 3; index += 1) {
+          zap(2200 * k, 1500 * k, 0.02, 0.022, { pan, delay: delay + 0.15 + index * 0.05, cutoff: 6000 });
+        }
+      },
+    },
+    // A slow brute: a grunt and a footfall, and a groan as it crumbles.
+    'Ash Oaf': {
+      appear(pan, k, delay) {
+        growl(82 * k, 0.42, 0.05, { pan, delay, cutoff: 650, endFrequency: 62 * k });
+        thud(58, 0.2, 0.05, { pan, delay: delay + 0.32 });
+      },
+      die(pan, k, delay) {
+        growl(104 * k, 0.55, 0.05, { pan, delay, cutoff: 800, endFrequency: 44 * k });
+        burst(0.4, 0.035, { pan, delay: delay + 0.15, filterType: 'lowpass', filterFrequency: 700, endFilterFrequency: 160 });
+      },
+    },
+    // A little devil: a cackle over crackling fire, and a shriek going out.
+    'Cinder Imp': {
+      appear(pan, k, delay) {
+        for (let index = 0; index < 4; index += 1) {
+          const pitch = (900 - index * 70) * k;
+          zap(pitch, pitch * 1.35, 0.055, 0.032, { pan, delay: delay + index * 0.075, type: 'sawtooth', cutoff: 4200 });
+        }
+        burst(0.32, 0.018, { pan, delay, filterType: 'highpass', filterFrequency: 5200 });
+      },
+      die(pan, k, delay) {
+        zap(1500 * k, 260 * k, 0.24, 0.042, { pan, delay, type: 'sawtooth', cutoff: 5000, endCutoff: 900 });
+        tinkle(5, 2400, 5200, 0.25, 0.012, { pan, delay: delay + 0.05, type: 'square', bend: 0.5 });
+      },
+    },
+    // Something from the swamp: a hollow moan, and a moan sinking into bubbles.
+    'Bog Shambler': {
+      appear(pan, k, delay) {
+        playTone(150 * k, 0.6, { gain: 0.05, type: 'sawtooth', endFrequency: 112 * k, attack: 0.15, hold: 0.5, cutoff: 620, q: 4, chorus: 16, pan, delay });
+        glug(140 * k, 0.03, { pan, delay: delay + 0.5 });
+      },
+      die(pan, k, delay) {
+        playTone(196 * k, 0.55, { gain: 0.05, type: 'sawtooth', endFrequency: 58 * k, attack: 0.03, cutoff: 900, endCutoff: 200, q: 4, chorus: 18, pan, delay });
+        [0.3, 0.4, 0.47].forEach((offset, index) => glug((110 + index * 30) * k, 0.035, { pan, delay: delay + offset }));
+      },
+    },
+    // Two squeaks, and one falling away.
+    'Space Bat': {
+      appear(pan, k, delay) {
+        playTone(4200, 0.05, { gain: 0.036, type: 'sine', endFrequency: 5600, attack: 0.004, pan, delay });
+        playTone(4600, 0.06, { gain: 0.032, type: 'sine', endFrequency: 6000, attack: 0.004, pan, delay: delay + 0.08 });
+      },
+      die(pan, k, delay) {
+        playTone(5400, 0.13, { gain: 0.026, type: 'sine', endFrequency: 1700, attack: 0.003, pan, delay });
+      },
+    },
+    // A machine: two radar pips, and a signal lost in static.
+    'Satellite': {
+      appear(pan, k, delay) {
+        playTone(1320, 0.07, { gain: 0.03, type: 'sine', attack: 0.004, pan, delay });
+        playTone(1760, 0.09, { gain: 0.03, type: 'sine', attack: 0.004, pan, delay: delay + 0.1 });
+      },
+      die(pan, k, delay) {
+        zap(1760, 220, 0.2, 0.03, { pan, delay, cutoff: 5000 });
+        burst(0.22, 0.03, { pan, delay, filterType: 'highpass', filterFrequency: 5000 });
+      },
+    },
+  };
+
+  // Each boss sounds like what it is made of: timber, armour, lava, ice, machinery.
+  // roar: landing in the arena, roaring, raising help. throw: letting fly. hurt: a
+  // finished line landing. death: its last moment, under the explosion.
+  const BOSS_VOICES = {
+    // A giant of wood and moss: timber groaning, leaves shaking, wood knocking and splitting.
+    'Verdant Colossus': {
+      roar(pan) {
+        growl(49, 1.3, 0.09, { pan, cutoff: 520, endFrequency: 41 });
+        playTone(92, 0.9, { gain: 0.05, type: 'sawtooth', endFrequency: 70, attack: 0.2, hold: 0.5, cutoff: 420, endCutoff: 1100, q: 14, pan, delay: 0.1 });
+        playTone(138, 0.5, { gain: 0.03, type: 'sawtooth', endFrequency: 150, attack: 0.1, cutoff: 900, endCutoff: 500, q: 14, pan: -pan, delay: 0.7 });
+        burst(1.1, 0.03, { pan, swell: true, filterType: 'highpass', filterFrequency: 3200, endFilterFrequency: 6500 });
+        thud(55, 0.5, 0.08, { delay: 0.05 });
+      },
+      throw(pan) {
+        burst(0.26, 0.04, { pan, swell: true, filterFrequency: 500, endFilterFrequency: 2200, q: 1.4 });
+        playTone(210, 0.06, { gain: 0.06, type: 'triangle', endFrequency: 150, attack: 0.001, pan, delay: 0.24 });
+        playTone(430, 0.04, { gain: 0.03, type: 'triangle', endFrequency: 300, attack: 0.001, pan, delay: 0.24 });
+      },
+      hurt(pan) {
+        [0, 0.05, 0.13].forEach((delay, index) => burst(0.05, 0.06, { pan, delay, filterFrequency: 1600 + index * 500, q: 3 }));
+        playTone(120, 0.5, { gain: 0.05, type: 'sawtooth', endFrequency: 64, attack: 0.02, cutoff: 700, endCutoff: 260, q: 10, pan, delay: 0.08 });
+      },
+      death(pan) {
+        playTone(130, 1.5, { gain: 0.07, type: 'sawtooth', endFrequency: 38, attack: 0.05, cutoff: 900, endCutoff: 220, q: 12, pan });
+        for (let index = 0; index < 7; index += 1) {
+          const delay = 0.5 + Math.random() * 1.1;
+          const pitch = 140 + Math.random() * 160;
+          playTone(pitch, 0.07, { gain: 0.05, type: 'triangle', endFrequency: pitch * 0.6, attack: 0.001, delay, pan: Math.random() - 0.5 });
+          burst(0.04, 0.03, { delay, filterFrequency: 1800, q: 3 });
+        }
+        burst(1.2, 0.04, { delay: 0.6, filterType: 'highpass', filterFrequency: 3000 });
+        thud(46, 1.0, 0.12, { delay: 1.3 });
+      },
+    },
+    // A flying fortress in red armour: a war horn, and plate ringing under every blow.
+    'Crimson Bulwark': {
+      roar(pan) {
+        stab([98, 146.83, 196], 1.1, 0.11, { pan, attack: 0.12, hold: 0.6, cutoff: 420, endCutoff: 2600, q: 3 });
+        playTone(49, 1.1, { gain: 0.06, type: 'sawtooth', attack: 0.1, hold: 0.6, cutoff: 300, pan, drive: true });
+        clang(196, 0.5, 0.045, { pan, delay: 0.02 });
+      },
+      throw(pan) {
+        clang(330, 0.3, 0.1, { pan });
+        zap(160, 420, 0.16, 0.06, { pan, type: 'sawtooth', cutoff: 1600 });
+      },
+      hurt(pan) {
+        clang(262, 0.6, 0.08, { pan });
+        clang(392, 0.4, 0.04, { pan: -pan, delay: 0.07 });
+        thud(80, 0.3, 0.06);
+      },
+      death(pan) {
+        [98, 146.83, 196].forEach((frequency) => {
+          playTone(frequency, 1.6, { gain: 0.05, type: 'sawtooth', endFrequency: frequency * 0.45, attack: 0.01, hold: 0.2, cutoff: 2400, endCutoff: 300, q: 2, pan });
+        });
+        for (let index = 0; index < 6; index += 1) {
+          clang(180 + Math.random() * 340, 0.45, 0.05, { delay: 0.2 + Math.random() * 1.3, pan: Math.random() - 0.5 });
+        }
+        thud(50, 1.0, 0.11, { delay: 1.4 });
+      },
+    },
+    // A lord of lava: a roar of fire over a deep rumble, bubbling, and steam when it is hurt.
+    'Magma Sovereign': {
+      roar(pan) {
+        growl(41, 1.4, 0.1, { pan, cutoff: 900, endFrequency: 55 });
+        playNoise(1.3, { gain: 0.07, filterType: 'lowpass', filterFrequency: 240, endFilterFrequency: 2200, swell: true, drive: true, pan });
+        for (let index = 0; index < 5; index += 1) glug(90 + Math.random() * 90, 0.045, { delay: 0.1 + Math.random() * 1.1, pan: Math.random() - 0.5 });
+      },
+      throw(pan) {
+        playNoise(0.34, { gain: 0.06, filterFrequency: 700, endFilterFrequency: 3200, q: 0.8, swell: true, pan });
+        zap(70, 180, 0.3, 0.04, { pan, type: 'sawtooth', cutoff: 800, drive: true });
+      },
+      hurt(pan) {
+        burst(0.7, 0.06, { pan, filterType: 'highpass', filterFrequency: 4200, q: 0.5 });
+        thud(62, 0.5, 0.08);
+        [0.1, 0.22, 0.31].forEach((delay, index) => glug(100 + index * 35, 0.04, { delay, pan: -pan }));
+      },
+      death(pan) {
+        playNoise(2.0, { gain: 0.1, filterType: 'lowpass', filterFrequency: 2600, endFilterFrequency: 90, drive: true, pan });
+        [0, 0.35, 0.8, 1.3].forEach((delay, index) => thud(80 - index * 11, 0.7, 0.1, { delay, pan: index % 2 ? 0.3 : -0.3 }));
+        burst(1.6, 0.05, { delay: 0.4, filterType: 'highpass', filterFrequency: 4600, q: 0.5 });
+        zap(220, 28, 1.8, 0.06, { type: 'sawtooth', cutoff: 1200, endCutoff: 150, drive: true });
+      },
+    },
+    // A titan of ice: a cold howl on the wind, shards singing, cracks and falling glass.
+    'Glacial Titan': {
+      roar(pan) {
+        playTone(740, 1.3, { gain: 0.06, type: 'triangle', endFrequency: 520, attack: 0.25, hold: 0.5, chorus: 10, pan });
+        playTone(1108.73, 1.3, { gain: 0.036, type: 'triangle', endFrequency: 780, attack: 0.3, hold: 0.5, chorus: 12, pan: -pan });
+        playNoise(1.4, { gain: 0.05, filterFrequency: 500, endFilterFrequency: 1700, q: 2.2, swell: true, pan });
+        thud(50, 0.7, 0.08);
+        tinkle(6, 3000, 6000, 1.0, 0.012, { pan });
+      },
+      throw(pan) {
+        playTone(2400, 0.22, { gain: 0.08, type: 'triangle', endFrequency: 4200, attack: 0.002, pan });
+        playTone(3600, 0.16, { gain: 0.04, type: 'sine', endFrequency: 5600, attack: 0.002, pan, delay: 0.03 });
+        tinkle(4, 3200, 6400, 0.2, 0.024, { pan, delay: 0.05 });
+      },
+      hurt(pan) {
+        playNoise(0.03, { gain: 0.09, filterType: 'highpass', filterFrequency: 2500, pan });
+        zap(900, 200, 0.06, 0.08, { pan, cutoff: 4000 });
+        tinkle(9, 2600, 7000, 0.45, 0.034, { pan, delay: 0.03 });
+        playTone(110, 0.5, { gain: 0.08, type: 'sine', endFrequency: 80, attack: 0.03, delay: 0.05 });
+      },
+      death(pan) {
+        playNoise(0.6, { gain: 0.1, filterType: 'highpass', filterFrequency: 3000, q: 0.5, pan });
+        [0, 0.22, 0.5].forEach((delay) => playNoise(0.03, { gain: 0.08, filterType: 'highpass', filterFrequency: 2200, delay }));
+        tinkle(22, 2000, 8000, 1.6, 0.022, { pan });
+        playTone(1760, 1.2, { gain: 0.03, type: 'sine', endFrequency: 220, attack: 0.01, chorus: 9, delay: 0.1 });
+        thud(48, 1.2, 0.12, { delay: 0.15 });
+      },
+    },
+    // A warship: a klaxon over the hum of its engines, lasers, short circuits and a long power-down.
+    'Stellar Dreadnought': {
+      roar(pan) {
+        zap(196, 392, 0.45, 0.05, { pan, type: 'sawtooth', cutoff: 2200, hold: 0.7, chorus: 12 });
+        zap(196, 392, 0.45, 0.05, { pan, type: 'sawtooth', cutoff: 2200, hold: 0.7, chorus: 12, delay: 0.5 });
+        playTone(55, 1.2, { gain: 0.06, type: 'square', attack: 0.05, hold: 0.7, cutoff: 400, drive: true });
+        tinkle(8, 1200, 3200, 1.0, 0.012, { pan, type: 'square' });
+      },
+      throw(pan) {
+        zap(2200, 180, 0.34, 0.07, { pan, type: 'sawtooth', cutoff: 5200, endCutoff: 700 });
+        thud(70, 0.25, 0.08, { pan });
+      },
+      hurt(pan) {
+        tinkle(7, 1500, 4500, 0.4, 0.045, { pan, type: 'square', bend: 0.4 });
+        zap(440, 110, 0.5, 0.07, { pan, type: 'sawtooth', cutoff: 1800, endCutoff: 300 });
+        burst(0.25, 0.04, { pan, filterType: 'highpass', filterFrequency: 5000 });
+      },
+      death(pan) {
+        zap(660, 22, 2.2, 0.07, { pan, type: 'sawtooth', cutoff: 3000, endCutoff: 120, q: 3 });
+        // Its alarms, falling in pitch and slowing as the power goes.
+        let delay = 0.1;
+        for (let index = 0; index < 8; index += 1) {
+          const pitch = 1760 * Math.pow(0.84, index);
+          zap(pitch, pitch, 0.08 + index * 0.012, 0.025, { delay, cutoff: 4200, pan: index % 2 ? 0.4 : -0.4 });
+          delay += 0.1 * Math.pow(1.25, index);
+        }
+        for (let index = 0; index < 5; index += 1) {
+          burst(0.12, 0.04, { delay: 0.2 + Math.random() * 1.6, filterType: 'highpass', filterFrequency: 4800, pan: Math.random() - 0.5 });
+        }
+        thud(40, 1.4, 0.13, { delay: 1.9 });
+      },
+    },
+  };
 
   // Wave results
 
@@ -2151,7 +2475,9 @@ export function createKeyFireAudio({
     playBackspaceSound,
     playMistakeSound,
     playRevealSound,
+    playAppearSound,
     playDefeatSound,
+    playBossDeathSound,
     playBeamSound,
     playChainPrimeSound,
     playChainZapSound,
@@ -2173,6 +2499,7 @@ export function createKeyFireAudio({
     playGodModeOffSound,
     playChestClackSound,
     playChestOpenSound,
+    playChestLootSound,
     playShockwaveSound,
     playShieldActivateSound,
     playShieldBlockSound,

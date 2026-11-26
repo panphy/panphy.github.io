@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=beta36';
-import { createSeasonalEffects } from './seasonal-effects.js?v=beta36';
-import { createPowerUpSystem } from './power-ups.js?v=beta36';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta36';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta36';
-import { createLeaderboard } from './leaderboard.js?v=beta36';
-import { createEnemyMesh } from './enemy-meshes.js?v=beta36';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta36';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta36';
-import { createLowPolyCloud } from './lowpoly.js?v=beta36';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta36';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta36';
-import { createWordDeck } from './word-decks.js?v=beta36';
-import { createStage } from './stages.js?v=beta36';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta36';
-import { storyBeatForWave } from './story.js?v=beta36';
-import { createStoryteller } from './storyteller.js?v=beta36';
-import { createPlasmaCannon } from './plasma-cannon.js?v=beta36';
+import { createKeyFireAudio } from './audio.js?v=beta37';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta37';
+import { createPowerUpSystem } from './power-ups.js?v=beta37';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta37';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta37';
+import { createLeaderboard } from './leaderboard.js?v=beta37';
+import { createEnemyMesh } from './enemy-meshes.js?v=beta37';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta37';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta37';
+import { createLowPolyCloud } from './lowpoly.js?v=beta37';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta37';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=beta37';
+import { createWordDeck } from './word-decks.js?v=beta37';
+import { createStage } from './stages.js?v=beta37';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta37';
+import { storyBeatForWave } from './story.js?v=beta37';
+import { createStoryteller } from './storyteller.js?v=beta37';
+import { createPlasmaCannon } from './plasma-cannon.js?v=beta37';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -394,7 +394,9 @@ const {
   playBackspaceSound,
   playMistakeSound,
   playRevealSound,
+  playAppearSound,
   playDefeatSound,
+  playBossDeathSound,
   playHealSound,
   playMedicPassSound,
   playDamageSound,
@@ -411,6 +413,7 @@ const {
   playGodModeOffSound,
   playChestClackSound,
   playChestOpenSound,
+  playChestLootSound,
   playShockwaveSound,
   playShieldActivateSound,
   playShieldBlockSound,
@@ -1646,6 +1649,7 @@ function deploySatellites(boss, count = 3) {
     satellite.revealed = true;
     satellite.group.position.copy(at);
     setEnemyKind(satellite, 'satellite');
+    playAppearSound(satellite, 0.5 + index * 0.14);
     satellite.rail = { phase: 'orbit', t: 0, boss, angle: (index / count) * Math.PI * 2, boltTimer: 2.5 + index * (SATELLITE_BOLT_EVERY / count) };
   }
   boss.shielded = true;
@@ -1883,7 +1887,7 @@ function advanceBossLine(boss) {
   reusableVector.copy(boss.group.position);
   reusableVector.y += 1.5 * boss.group.scale.y;
   fx.burst(reusableVector, { color: boss.type.eye, color2: 0xffffff, count: 28, speed: 6, life: 0.7, size: 0.4 });
-  playBossImpactSound();
+  playBossImpactSound(boss);
   kickTimer = Math.max(kickTimer, 0.42);
   hitStopTimer = 0.12;
   // Pieces fly off it, a shockwave rolls out and it reels back.
@@ -2272,7 +2276,7 @@ function updateBossDeath(delta) {
   if (t < 1) return;
 
   // The end: everything that is left goes at once.
-  playDefeatSound(boss);
+  playBossDeathSound(boss);
   spawnBeam(position);
   spawnDebris(position, boss.type, true);
   reusableVector.set(position.x, 0.14, position.z);
@@ -2543,6 +2547,7 @@ function spawnRideMonster() {
   enemy.group.position.copy(enemy.rail.to);
   normalEnemiesSpawned += 1;
   registerNormalTypingCost(enemy);
+  playAppearSound(enemy);
 }
 
 function beginBlizzard() {
@@ -2633,6 +2638,7 @@ function startStory() {
     guard.rail = { phase: 'guard', t: 0, to: at };
     guard.group.position.copy(at);
     setEnemyKind(guard, 'myth');
+    playAppearSound(guard, 0.3);
     rail.story.guard = guard;
     npc.userData.parts.dome.visible = true;
     showStoryLine(beat.name, beat.plea);
@@ -2797,6 +2803,7 @@ function spawnBat() {
   bat.rail = { phase: 'bat', t: 0, to: home, from: new THREE.Vector3(home.x + (Math.random() - 0.5) * 6, home.y + 9, home.z - 4) };
   bat.group.position.copy(bat.rail.from);
   setEnemyKind(bat, 'bat');
+  playAppearSound(bat, 0.3);
   return true;
 }
 
@@ -3063,6 +3070,7 @@ function updateRailEnemy(enemy, delta, seconds) {
       plan.phase = enemy.isMedic || enemy.isMimic ? 'cross' : 'advance';
       enemy.revealed = true;
       enemy.revealFlash = 0.28;
+      playAppearSound(enemy);
       reusableVector.set(position.x, 0.14, position.z);
       fx.ring(reusableVector, enemy.type.eye, { from: 0.3, to: plan.kind === 'sky' ? 3.2 : 2.2, life: 0.5, opacity: 0.7 });
       if (plan.kind !== 'cover') kickTimer = Math.max(kickTimer, 0.1);
@@ -5785,6 +5793,7 @@ function awardMimicLoot(enemy) {
   const type = types[Math.floor(Math.random() * types.length)];
   const slot = powerUps.getPowerUps().indexOf(null);
   const success = powerUps.addPowerUp(type);
+  playChestLootSound();
   mimicsLooted += 1;
   if (success) queueLootGuide(type, slot);
 
