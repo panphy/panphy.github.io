@@ -38,6 +38,15 @@
 </head>
 
 <body>
+  <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite">
+    <img src="./spellwave/keyfire-title.svg?v=beta28" alt="KeyFire" width="425" height="130">
+    <div class="loading-bar" aria-hidden="true"><i></i></div>
+    <p>Loading…</p>
+  </div>
+  <script>
+    // If the game cannot start (a blocked script, an old browser), do not hide the page for ever.
+    window.setTimeout(() => document.getElementById('loadingScreen')?.classList.add('is-done'), 20000);
+  </script>
   <div id="app">
     <div id="starfield" aria-hidden="true"></div>
     <canvas id="gameCanvas" aria-label="KeyFire 3D game scene"></canvas>

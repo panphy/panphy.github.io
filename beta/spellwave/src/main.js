@@ -743,6 +743,31 @@ resizeRenderer();
 batterySaver = loadBatterySaverSetting();
 applyBatterySaver();
 scheduleFrame();
+revealWhenReady();
+
+// The page stays behind the loading screen until the fonts, the title art and the
+// first few frames of the scene are ready, so nothing pops in piece by piece.
+// Slow third-party scripts (the leaderboard's) are not waited for beyond a few seconds.
+function revealWhenReady() {
+  const screen = document.getElementById('loadingScreen');
+  if (!screen) return;
+  const pageLoaded = document.readyState === 'complete'
+    ? Promise.resolve()
+    : new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
+  const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+  const patience = new Promise(resolve => window.setTimeout(resolve, 8000));
+  const frames = () => new Promise((resolve) => {
+    let count = 0;
+    const tick = () => (++count >= 3 ? resolve() : requestAnimationFrame(tick));
+    requestAnimationFrame(tick);
+  });
+  Promise.race([Promise.all([pageLoaded, fontsReady]), patience])
+    .then(frames)
+    .then(() => {
+      screen.classList.add('is-done');
+      window.setTimeout(() => screen.remove(), 700);
+    });
+}
 
 
 function toggleGodMode() {
