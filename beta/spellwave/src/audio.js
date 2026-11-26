@@ -230,6 +230,7 @@ export function createSpellwaveAudio({
   let lastLeadFrequency = 0;
   let sfxBus = null;
   let driveBus = null;
+  let typeShotSide = 1;
   let noiseBuffer = null;
   let musicTimer = null;
   let musicStep = 0;
@@ -1382,10 +1383,18 @@ export function createSpellwaveAudio({
   // every key, so it stays short and the bright parts stay quiet.
   function playTypeSound(progress = Math.min(getTypedLength(), 12) / 12) {
     const amount = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
-    const pitch = varyPitch(1700 + amount * 1100, 20);
-    playTone(varyPitch(140 + amount * 22, 12), 0.12, { gain: 0.085, type: 'sine', endFrequency: 50, attack: 0.002, drive: true });
-    playNoise(0.045, { gain: varyGain(0.03), filterFrequency: 3600 + amount * 3000, q: 1.2 });
-    playTone(pitch, 0.06, { gain: 0.018, type: 'square', endFrequency: pitch * 0.3, attack: 0.001, cutoff: 5200 });
+    // Shots alternate a little left and right, like barrels firing in turn.
+    typeShotSide = -typeShotSide;
+    const pan = typeShotSide * 0.18;
+    const pitch = varyPitch(1900 + amount * 1300, 25);
+    // The body of the shot: a driven thump with a snarling saw falling through it.
+    playTone(varyPitch(165 + amount * 30, 12), 0.14, { gain: 0.13, type: 'sine', endFrequency: 46, attack: 0.001, drive: true });
+    playTone(varyPitch(120 + amount * 20, 8), 0.11, { gain: 0.09, type: 'sine', endFrequency: 52, attack: 0.001 });
+    playTone(varyPitch(820 + amount * 260, 30), 0.09, { gain: 0.075, type: 'sawtooth', endFrequency: 150, attack: 0.001, cutoff: 3200, endCutoff: 500, q: 2, pan });
+    // The crack on top: a bright noise snap, a falling laser chirp and a metallic ring.
+    playNoise(0.05, { gain: varyGain(0.085), filterFrequency: 4200 + amount * 3200, q: 1.4, pan });
+    playTone(pitch, 0.07, { gain: 0.05, type: 'square', endFrequency: pitch * 0.28, attack: 0.001, cutoff: 6400, pan });
+    playTone(varyPitch(2900 + amount * 900, 40), 0.09, { gain: 0.02, type: 'triangle', attack: 0.001, delay: 0.012, pan: -pan });
   }
 
   // A monster bursting out of hiding: a hit, a rush of noise and a falling stinger.
@@ -1478,13 +1487,22 @@ export function createSpellwaveAudio({
   function playBeamSound(targetX = 0) {
     const pan = laneOf(targetX);
     const delay = BEAM_CHARGE_TIME;
-    zap(varyPitch(500, 60), 3200, delay, 0.03, { pan, type: 'sawtooth', attack: delay * 0.4, hold: 0.9, cutoff: 6000 });
-    thud(96, 0.42, 0.13, { pan, delay });
-    zap(330, 45, 0.3, 0.06, { pan, delay, type: 'sawtooth', cutoff: 1800, endCutoff: 250, q: 3, drive: true });
-    burst(0.4, 0.03, { pan, delay, filterType: 'highpass', filterFrequency: 5200, q: 0.6 });
-    for (let index = 0; index < 3; index += 1) {
-      const pitch = 2500 + Math.random() * 2500;
-      zap(pitch, pitch * 0.5, 0.02, 0.02, { pan, delay: delay + 0.06 + Math.random() * 0.3 });
+    // Charge: two whines racing upward.
+    zap(varyPitch(420, 60), 3600, delay, 0.04, { pan, type: 'sawtooth', attack: delay * 0.4, hold: 0.9, cutoff: 6500 });
+    zap(varyPitch(630, 60), 5400, delay, 0.02, { pan: -pan, attack: delay * 0.5, hold: 0.9, cutoff: 7000 });
+    // Blast: a deep double boom, a roaring saw falling through it and a long bright tail.
+    thud(104, 0.5, 0.19, { pan, delay });
+    thud(58, 0.6, 0.12, { delay: delay + 0.03 });
+    playTone(84, 0.4, { gain: 0.11, type: 'sine', endFrequency: 40, attack: 0.002, delay, pan });
+    zap(420, 40, 0.38, 0.085, { pan, delay, type: 'sawtooth', cutoff: 2400, endCutoff: 220, q: 3, drive: true });
+    zap(300, 55, 0.3, 0.07, { pan, delay, type: 'sawtooth', cutoff: 1800, endCutoff: 260 });
+    zap(1800, 240, 0.22, 0.06, { pan, delay, type: 'square', cutoff: 5200 });
+    burst(0.55, 0.075, { pan, delay, filterType: 'highpass', filterFrequency: 4600, q: 0.6 });
+    burst(0.16, 0.05, { pan, delay, filterFrequency: 1400, q: 0.9, drive: true });
+    // Crackle as the beam dies away.
+    for (let index = 0; index < 6; index += 1) {
+      const pitch = 2400 + Math.random() * 3200;
+      zap(pitch, pitch * 0.45, 0.022, 0.022, { pan: pan + (Math.random() - 0.5) * 0.5, delay: delay + 0.05 + Math.random() * 0.42 });
     }
   }
 
