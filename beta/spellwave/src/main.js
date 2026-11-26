@@ -738,6 +738,8 @@ keyboardInput.addEventListener('compositionend', () => { composedText = ''; });
 resizeRenderer();
 batterySaver = loadBatterySaverSetting();
 applyBatterySaver();
+// The opening stage was built before the setting was read; build it again coarse.
+if (batterySaver) rebuildIdleStage();
 scheduleFrame();
 revealWhenReady();
 
@@ -5400,7 +5402,16 @@ function toggleBatterySaver() {
   batterySaver = !batterySaver;
   saveBatterySaverSetting(batterySaver);
   applyBatterySaver();
+  // Battery saver also uses the coarse low-poly shapes (detail.js). On the start screen
+  // the stage is rebuilt at once; during a run the change shows from the next stage.
+  if (mode === 'idle') rebuildIdleStage();
   if (mode === 'running') focusKeyboard();
+}
+
+function rebuildIdleStage() {
+  if (mode !== 'idle') return;
+  buildStageForWave(waveSet);
+  applySeasonForWave(waveSet, true);
 }
 
 function readStoredValue(key, fallback) {

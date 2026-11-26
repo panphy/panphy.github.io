@@ -4581,58 +4581,55 @@ body.battery-saver .corner-controls .battery-saver-toggle.is-active {
   opacity: 1;
 }
 
-/* ── Boss health bar: the enemy's hazard plate, like the word cards ── */
+/* ── Boss health bar: chunky, no plate. The name in the title's lettering over a thick
+   dark bar of glossy red segments; the beam charge is a slimmer bar beneath. ── */
 body .boss-hp-bar {
-  isolation: isolate;
-  padding: 10px 28px 12px 36px;
+  gap: 7px;
+  padding: 0;
   border: 0 !important;
   background: none !important;
   box-shadow: none !important;
-  filter: drop-shadow(0 5px 0 rgba(0, 0, 0, 0.45));
-}
-
-body .boss-hp-bar::before {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border: 3px solid #000;
-  background:
-    repeating-linear-gradient(45deg, var(--boss-accent, #ffb020) 0 6px, #1a1311 6px 12px) left / 12px 100% no-repeat,
-    #1a1311;
-  content: '';
-  transform: skewX(-10deg);
+  filter: none;
 }
 
 body .boss-hp-bar .boss-hp-name {
-  color: var(--boss-accent, #ffb020);
-  -webkit-text-stroke: 0;
-  text-shadow: none;
+  color: #fff6dc;
+  font-size: 1.15rem;
+  text-shadow: 0 3px 0 var(--key-ink);
+  -webkit-text-stroke: 5px var(--key-ink);
+  paint-order: stroke fill;
 }
 
 body .boss-hp-bar .boss-hp-segments {
-  gap: 6px;
-  transform: skewX(-10deg);
+  box-sizing: border-box;
+  gap: 5px;
+  padding: 5px;
+  border: 3px solid var(--key-ink);
+  border-radius: 12px;
+  background: #2a1d14;
+  box-shadow: 0 5px 0 var(--key-ink);
 }
 
 body .boss-hp-bar .boss-hp-segments i {
-  height: 15px;
+  height: 18px;
   border: 0;
-  border-radius: 0;
-  background: linear-gradient(#ff8a6a, #e2302a);
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  background: linear-gradient(#ffb0a0, #ff5a3a 45%, #c8281c);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4);
+  transform: none;
 }
 
 body .boss-hp-bar .boss-hp-segments i.is-gone {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   box-shadow: none;
 }
 
 body .boss-hp-bar .boss-beam {
-  height: 8px;
-  border: 0;
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.12);
-  transform: skewX(-10deg);
+  width: 70%;
+  height: 12px;
+  border: 3px solid var(--key-ink);
+  border-radius: 7px;
+  background: #2a1d14;
 }
 
 body .boss-hp-bar .boss-beam i {
