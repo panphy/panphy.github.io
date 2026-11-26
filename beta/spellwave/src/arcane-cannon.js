@@ -1,4 +1,4 @@
-// arcane-cannon.js — the player's weapon: a magic machine gun, part machine and part
+// arcane-cannon.js — the player's weapon: a plasma machine gun, part machine and part
 // spell, held low and a little right of the middle, angled in toward the centre of
 // the view, so only its top rises into the picture. Six barrels spin up as the player types,
 // a crystal core feeds them, and every letter kicks it back with a muzzle flash.
@@ -167,7 +167,7 @@ export function createArcaneCannon({ camera, crystalMaterial, createCrown = null
   return {
     group,
     crowns,
-    // What pulses with the magic: scaled by the game along with its other crystals.
+    // What pulses with the plasma: scaled by the game along with its other crystals.
     glows: [parts.core],
     // 1 is the muzzle, where bolts leave; 0 is the core, where chain lightning leaps from.
     origin(side, target = new THREE.Vector3()) {

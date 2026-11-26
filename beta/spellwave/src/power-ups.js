@@ -1,18 +1,18 @@
 /**
- * Potion system for KeyFire (the Spellwave beta)
- * Encapsulates potion states, SVG icon templates, active timers,
+ * Power-up system for KeyFire (the Spellwave beta)
+ * Encapsulates power-up states, SVG icon templates, active timers,
  * 3D visual indicators for Shockwave travelling waves,
- * and the 'idkfa' potion cheat mechanism.
+ * and the 'idkfa' power-up cheat mechanism.
  */
 
-export function createPotionSystem({
+export function createPowerUpSystem({
   getMode,
   getEnemies,
   getGameTime,
   defeatEnemy,
   showBanner,
-  potionBar,
-  potionSlots,
+  powerUpBar,
+  powerUpSlots,
   scene,
   effectsGroup,
   playShockwaveSound,
@@ -29,10 +29,10 @@ export function createPotionSystem({
   SPAWN_Z,
   WALL_Z
 }) {
-  let potions = [null, null, null, null];
+  let powerUps = [null, null, null, null];
   let timeFreezeTimer = 0;
   let chainLightningPrimed = false;
-  let potionCheatActive = false;
+  let powerUpCheatActive = false;
 
   // Shield (A.T. Field) state
   let shieldActive = false;
@@ -46,9 +46,9 @@ export function createPotionSystem({
 
   // Chunky icons in the keycap style: filled shapes with a thick ink outline.
   const INK = '#3d2b1c';
-  const POTION_SVGS = {
+  const POWER_UP_SVGS = {
     time_freeze: `
-      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <svg class="power-up-svg power-up-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
         <rect x="18" y="3.5" width="8" height="5" rx="1.5" fill="#8ef0e6" stroke="${INK}" stroke-width="2.6"/>
         <circle cx="22" cy="24" r="15" fill="#fff6dc" stroke="${INK}" stroke-width="3.4"/>
         <path d="M22 24V15.5M22 24l6 3.5" fill="none" stroke="#1a8fb0" stroke-width="3.4" stroke-linecap="round"/>
@@ -57,13 +57,13 @@ export function createPotionSystem({
       </svg>
     `,
     chain_lightning: `
-      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <svg class="power-up-svg power-up-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
         <path d="M26 3 L11 24 H20 L16 41 L33 18 H23.5 Z" fill="#ffd24a" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
         <path d="M24 9 L16.5 20" stroke="#fff6dc" stroke-width="2.2" stroke-linecap="round"/>
       </svg>
     `,
     shockwave: `
-      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <svg class="power-up-svg power-up-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
         <g fill="none" stroke-linecap="round">
           <path d="M8 26 Q22 4 36 26" stroke="${INK}" stroke-width="8"/>
           <path d="M8 26 Q22 4 36 26" stroke="#8ef0e6" stroke-width="3.6"/>
@@ -74,7 +74,7 @@ export function createPotionSystem({
       </svg>
     `,
     shield: `
-      <svg class="svg-magic potion-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <svg class="power-up-svg power-up-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
         <path d="M22 4 L37 9.5 V21 C37 30 30.5 36.5 22 40 C13.5 36.5 7 30 7 21 V9.5 Z" fill="#8ef0e6" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
         <path d="M22 9.5 L32 13 V21 C32 27 28 31.5 22 34 Z" fill="#4fd8d0"/>
         <path d="M12 13 V20" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
@@ -82,26 +82,26 @@ export function createPotionSystem({
     `
   };
 
-  function updatePotionUI() {
-    if (!potionBar || !potionSlots) return;
+  function updatePowerUpUI() {
+    if (!powerUpBar || !powerUpSlots) return;
 
-    potionSlots.forEach((slot, index) => {
-      const potion = potions[index];
-      slot.className = 'potion-slot';
-      const iconContainer = slot.querySelector('.potion-icon');
-      if (potion) {
-        const potionName = potion.replace(/_/g, ' ');
+    powerUpSlots.forEach((slot, index) => {
+      const powerUp = powerUps[index];
+      slot.className = 'power-up-slot';
+      const iconContainer = slot.querySelector('.power-up-icon');
+      if (powerUp) {
+        const powerUpName = powerUp.replace(/_/g, ' ');
         slot.classList.add('occupied');
-        slot.setAttribute('data-potion', potion);
-        slot.setAttribute('aria-label', `Potion Slot ${index + 1}: ${potionName}`);
-        slot.setAttribute('title', `Use Potion: ${potionName}`);
+        slot.setAttribute('data-power-up', powerUp);
+        slot.setAttribute('aria-label', `Power-up slot ${index + 1}: ${powerUpName}`);
+        slot.setAttribute('title', `Use power-up: ${powerUpName}`);
         if (iconContainer) {
-          iconContainer.innerHTML = POTION_SVGS[potion] || '';
+          iconContainer.innerHTML = POWER_UP_SVGS[powerUp] || '';
         }
       } else {
-        slot.removeAttribute('data-potion');
-        slot.setAttribute('aria-label', `Potion Slot ${index + 1} (Empty)`);
-        slot.setAttribute('title', `Potion Slot ${index + 1} (Empty)`);
+        slot.removeAttribute('data-power-up');
+        slot.setAttribute('aria-label', `Power-up slot ${index + 1} (empty)`);
+        slot.setAttribute('title', `Power-up slot ${index + 1} (empty)`);
         if (iconContainer) {
           iconContainer.innerHTML = '';
         }
@@ -109,22 +109,22 @@ export function createPotionSystem({
     });
   }
 
-  function addPotion(type) {
+  function addPowerUp(type) {
     if (!type) {
       const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
       type = types[Math.floor(Math.random() * types.length)];
     }
 
-    const freeSlot = potions.indexOf(null);
+    const freeSlot = powerUps.indexOf(null);
     if (freeSlot !== -1) {
-      potions[freeSlot] = type;
-      updatePotionUI();
+      powerUps[freeSlot] = type;
+      updatePowerUpUI();
       playStartSound(); // Play collection chime
       return true;
     } else {
-      if (potionBar) {
-        potionBar.classList.add('full-shake');
-        window.setTimeout(() => potionBar.classList.remove('full-shake'), 400);
+      if (powerUpBar) {
+        powerUpBar.classList.add('full-shake');
+        window.setTimeout(() => powerUpBar.classList.remove('full-shake'), 400);
       }
       return false;
     }
@@ -145,17 +145,17 @@ export function createPotionSystem({
     }
   }
 
-  function activatePotionSlot(index) {
+  function activatePowerUpSlot(index) {
     if (getMode() !== 'running') return;
-    const potion = potions[index];
-    if (!potion) return;
+    const powerUp = powerUps[index];
+    if (!powerUp) return;
 
-    const isAlreadyActive = (potion === 'time_freeze' && timeFreezeTimer > 0) ||
-                            (potion === 'chain_lightning' && chainLightningPrimed) ||
-                            (potion === 'shield' && shieldActive);
+    const isAlreadyActive = (powerUp === 'time_freeze' && timeFreezeTimer > 0) ||
+                            (powerUp === 'chain_lightning' && chainLightningPrimed) ||
+                            (powerUp === 'shield' && shieldActive);
 
     if (isAlreadyActive) {
-      const slotEl = potionSlots[index];
+      const slotEl = powerUpSlots[index];
       if (slotEl) {
         slotEl.classList.remove('blocked-active');
         void slotEl.offsetWidth; // force reflow
@@ -165,24 +165,24 @@ export function createPotionSystem({
       return;
     }
 
-    const slotEl = potionSlots[index];
+    const slotEl = powerUpSlots[index];
     if (slotEl) {
       slotEl.classList.add('activating');
       slotEl.addEventListener('animationend', () => slotEl.classList.remove('activating'), { once: true });
     }
 
-    potions[index] = null;
+    powerUps[index] = null;
 
-    if (potion === 'time_freeze') {
+    if (powerUp === 'time_freeze') {
       timeFreezeTimer = 3.5;
       playTimeFreezeSound();
       showBanner('TIME FREEZE!', 'time-freeze');
-    } else if (potion === 'chain_lightning') {
+    } else if (powerUp === 'chain_lightning') {
       chainLightningPrimed = true;
       document.body.classList.add('chain-lightning-primed');
       playChainPrimeSound();
       showBanner('CHAIN PRIMED!', 'chain-lightning');
-    } else if (potion === 'shockwave') {
+    } else if (powerUp === 'shockwave') {
       playShockwaveSound();
       showBanner('SHOCKWAVE!', 'shockwave');
 
@@ -199,7 +199,7 @@ export function createPotionSystem({
       pendingWaves.push({ delay: 0.0 });
       pendingWaves.push({ delay: 0.15 });
       pendingWaves.push({ delay: 0.30 });
-    } else if (potion === 'shield') {
+    } else if (powerUp === 'shield') {
       shieldActive = true;
       shieldCharges = 2;
       shieldHitProgress = 0;
@@ -282,14 +282,14 @@ export function createPotionSystem({
       }
     }
 
-    if (potionCheatActive) {
-      // immediately refill the slot with a random potion
+    if (powerUpCheatActive) {
+      // immediately refill the slot with a random power-up
       const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
       const randomType = types[Math.floor(Math.random() * types.length)];
-      potions[index] = randomType;
+      powerUps[index] = randomType;
     }
 
-    updatePotionUI();
+    updatePowerUpUI();
   }
 
   function triggerShieldHitVisual() {
@@ -470,30 +470,30 @@ export function createPotionSystem({
     }
   }
 
-  function togglePotionCheat() {
-    potionCheatActive = !potionCheatActive;
-    if (potionCheatActive) {
+  function togglePowerUpCheat() {
+    powerUpCheatActive = !powerUpCheatActive;
+    if (powerUpCheatActive) {
       // Fill all slots
       for (let i = 0; i < 4; i++) {
-        if (potions[i] === null) {
+        if (powerUps[i] === null) {
           const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
-          potions[i] = types[Math.floor(Math.random() * types.length)];
+          powerUps[i] = types[Math.floor(Math.random() * types.length)];
         }
       }
-      updatePotionUI();
+      updatePowerUpUI();
       playGodModeOnSound();
-      showBanner('POTION CHEAT ON!', 'cheat');
+      showBanner('POWER-UP CHEAT ON!', 'cheat');
     } else {
       playGodModeOffSound();
-      showBanner('POTION CHEAT OFF!', 'cheat');
+      showBanner('POWER-UP CHEAT OFF!', 'cheat');
     }
   }
 
   function clear() {
-    potions = [null, null, null, null];
+    powerUps = [null, null, null, null];
     timeFreezeTimer = 0;
     chainLightningPrimed = false;
-    potionCheatActive = false;
+    powerUpCheatActive = false;
     shieldActive = false;
     shieldCharges = 0;
     shieldHitProgress = 0;
@@ -514,7 +514,7 @@ export function createPotionSystem({
     }
     activeShockwaves.length = 0;
     pendingWaves.length = 0;
-    updatePotionUI();
+    updatePowerUpUI();
   }
 
   function deactivateShield() {
@@ -526,24 +526,24 @@ export function createPotionSystem({
   }
 
   return {
-    addPotion,
-    activatePotionSlot,
+    addPowerUp,
+    activatePowerUpSlot,
     update,
     clear,
-    togglePotionCheat,
+    togglePowerUpCheat,
     isTimeFrozen: () => timeFreezeTimer > 0,
     isChainLightningPrimed: () => chainLightningPrimed,
     clearChainLightningPrimed: () => {
       chainLightningPrimed = false;
       document.body.classList.remove('chain-lightning-primed');
     },
-    isPotionCheatActive: () => potionCheatActive,
+    isPowerUpCheatActive: () => powerUpCheatActive,
     isShieldActive: () => shieldActive,
     deactivateShield,
     blockLeak,
     triggerShieldHitVisual,
-    getPotions: () => [...potions],
-    getPotionIcon: (type) => POTION_SVGS[type] || ''
+    getPowerUps: () => [...powerUps],
+    getPowerUpIcon: (type) => POWER_UP_SVGS[type] || ''
   };
 }
 

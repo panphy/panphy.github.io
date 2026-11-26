@@ -1553,7 +1553,7 @@ export function createSpellwaveAudio({
     growl(55, 1.2, 0.07, { cutoff: 800 });
   }
 
-  // Potions
+  // Power-ups
 
   // Charging up: a quick run of pulses climbing over a rising sweep.
   function playChainPrimeSound() {

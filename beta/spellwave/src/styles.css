@@ -1850,8 +1850,8 @@ body.is-god-mode .damage-flash.show {
   background: radial-gradient(circle, rgba(255, 255, 200, 0.58), rgba(255, 200, 50, 0.3) 44%, transparent 72%);
 }
 
-/* Potion Bar & Slots UI */
-.potion-bar {
+/* Power-up Bar & Slots UI */
+.power-up-bar {
   position: fixed;
   bottom: max(18px, env(safe-area-inset-bottom));
   right: max(18px, env(safe-area-inset-right));
@@ -1870,12 +1870,12 @@ body.is-god-mode .damage-flash.show {
   pointer-events: auto;
 }
 
-body:not(.is-running) .potion-bar {
+body:not(.is-running) .power-up-bar {
   opacity: 0.5;
   pointer-events: none;
 }
 
-.potion-slot {
+.power-up-slot {
   position: relative;
   width: 44px;
   height: 44px;
@@ -1889,31 +1889,31 @@ body:not(.is-running) .potion-bar {
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.potion-slot[data-slot="1"] {
+.power-up-slot[data-slot="1"] {
   grid-column: 2;
   grid-row: 1;
 }
-.potion-slot[data-slot="0"] {
+.power-up-slot[data-slot="0"] {
   grid-column: 1;
   grid-row: 2;
 }
-.potion-slot[data-slot="3"] {
+.power-up-slot[data-slot="3"] {
   grid-column: 2;
   grid-row: 2;
 }
-.potion-slot[data-slot="2"] {
+.power-up-slot[data-slot="2"] {
   grid-column: 3;
   grid-row: 2;
 }
 
-.potion-slot.occupied {
+.power-up-slot.occupied {
   border: 1px solid var(--gold);
   background: rgba(239, 195, 92, 0.08);
   box-shadow: 0 0 12px rgba(239, 195, 92, 0.15);
   cursor: pointer;
 }
 
-.potion-slot.occupied:hover {
+.power-up-slot.occupied:hover {
   transform: scale(1.08);
   border-color: var(--ink);
   box-shadow: 0 0 16px rgba(239, 195, 92, 0.3);
@@ -1932,12 +1932,12 @@ body:not(.is-running) .potion-bar {
   transition: opacity 0.2s ease;
 }
 
-.potion-slot.occupied .slot-key {
+.power-up-slot.occupied .slot-key {
   color: var(--gold);
   opacity: 1;
 }
 
-.potion-icon {
+.power-up-icon {
   width: 32px;
   height: 32px;
   position: relative;
@@ -1948,147 +1948,11 @@ body:not(.is-running) .potion-bar {
   transition: transform 0.2s ease;
 }
 
-/* Magic SVG Icons */
-.svg-magic {
+/* Power-up icons */
+.power-up-svg {
   width: 32px;
   height: 32px;
   display: block;
-}
-
-/* Time Freeze (Stopwatch) Animation */
-.magic-time .clock-rim {
-  fill: rgba(88, 223, 207, 0.12);
-  stroke: #58dfcf;
-  stroke-width: 2.5;
-  filter: drop-shadow(0 0 3px rgba(88, 223, 207, 0.8));
-  animation: pulse-clock 2s ease-in-out infinite alternate;
-}
-.magic-time .clock-top {
-  fill: none;
-  stroke: #e7ffff;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-.magic-time .clock-hand {
-  stroke: #e7ffff;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  transform-origin: 22px 22px;
-}
-.magic-time .hour-hand {
-  animation: rotate-hand 8s linear infinite;
-}
-.magic-time .minute-hand {
-  animation: rotate-hand 1.5s linear infinite;
-}
-.magic-time .clock-center {
-  fill: #58dfcf;
-}
-
-@keyframes rotate-hand {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-@keyframes pulse-clock {
-  0% { opacity: 0.6; filter: drop-shadow(0 0 2px rgba(88, 223, 207, 0.4)); }
-  100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(88, 223, 207, 0.9)); }
-}
-
-/* Chain Lightning Animation */
-.magic-lightning .bolt-path {
-  fill: #efc35c;
-  stroke: #bf55ec;
-  stroke-width: 1.5;
-  filter: drop-shadow(0 0 4px rgba(191, 85, 236, 0.8));
-  animation: lightning-flicker 1.8s ease-in-out infinite;
-}
-.magic-lightning .spark {
-  fill: #fff;
-  filter: drop-shadow(0 0 3px #efc35c);
-  animation: spark-pulse 1s ease-in-out infinite alternate;
-  transform-origin: center;
-}
-.magic-lightning .spark-2 {
-  animation-delay: 0.5s;
-}
-
-@keyframes lightning-flicker {
-  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 2px rgba(191, 85, 236, 0.6)); }
-  5% { opacity: 0.3; }
-  10% { opacity: 1; filter: drop-shadow(0 0 8px rgba(191, 85, 236, 0.9)); }
-  15% { opacity: 0.6; }
-  25% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
-@keyframes spark-pulse {
-  0% { transform: scale(0.6); opacity: 0.4; }
-  100% { transform: scale(1.3); opacity: 1; }
-}
-
-/* Shockwave Animation */
-.magic-shockwave .shockwave-crest {
-  stroke: #0088ff;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  fill: none;
-  opacity: 0.45;
-  filter: drop-shadow(0 0 1.5px rgba(0, 136, 255, 0.4));
-  animation: shockwave-wifi-glow 1.2s infinite;
-}
-.magic-shockwave .shockwave-crest-1 {
-  animation-delay: 0s;
-}
-.magic-shockwave .shockwave-crest-2 {
-  animation-delay: 0.2s;
-}
-.magic-shockwave .shockwave-crest-3 {
-  animation-delay: 0.4s;
-}
-
-@keyframes shockwave-wifi-glow {
-  0%, 10% {
-    opacity: 0.45;
-    filter: drop-shadow(0 0 1.5px rgba(0, 136, 255, 0.4));
-  }
-  20%, 45% {
-    opacity: 1;
-    filter: drop-shadow(0 0 6px rgba(0, 136, 255, 0.9));
-  }
-  55%, 100% {
-    opacity: 0.45;
-    filter: drop-shadow(0 0 1.5px rgba(0, 136, 255, 0.4));
-  }
-}
-
-/* Shield (A.T. Field Octagon) SVG Icon Styles */
-.magic-shield .shield-oct {
-  fill: rgba(255, 34, 0, 0.08);
-  stroke: #ff2200;
-  stroke-width: 2.2;
-  filter: drop-shadow(0 0 3px rgba(255, 34, 0, 0.8));
-  transform-origin: 22px 22px;
-  animation: shield-breath-icon 2.5s ease-in-out infinite;
-}
-.magic-shield .shield-outer {
-}
-.magic-shield .shield-middle {
-  fill: none;
-}
-.magic-shield .shield-inner {
-  fill: rgba(255, 34, 0, 0.18);
-}
-
-@keyframes shield-breath-icon {
-  0%, 100% {
-    opacity: 0.55;
-    filter: drop-shadow(0 0 2px rgba(255, 34, 0, 0.6));
-    transform: scale(0.97);
-  }
-  50% {
-    opacity: 1.0;
-    filter: drop-shadow(0 0 6px rgba(255, 34, 0, 1.0));
-    transform: scale(1.03);
-  }
 }
 
 body.chain-lightning-primed .typing-strip {
@@ -2099,13 +1963,13 @@ body.chain-lightning-primed .typing-strip {
     0 0 24px rgba(191, 85, 236, 0.22);
 }
 
-@keyframes potion-shake {
+@keyframes power-up-shake {
   0%, 100% { transform: translate(0, 0); }
   25% { transform: translate(-4px, 0); }
   75% { transform: translate(4px, 0); }
 }
-.potion-bar.full-shake {
-  animation: potion-shake 0.2s ease-in-out 2;
+.power-up-bar.full-shake {
+  animation: power-up-shake 0.2s ease-in-out 2;
   border-color: var(--danger);
 }
 
@@ -2114,7 +1978,7 @@ body.chain-lightning-primed .typing-strip {
   50% { transform: scale(1.2); filter: brightness(2) drop-shadow(0 0 15px currentColor); }
   100% { transform: scale(1); filter: brightness(1); }
 }
-.potion-slot.activating {
+.power-up-slot.activating {
   animation: flash-active 0.3s ease-out;
 }
 
@@ -2125,7 +1989,7 @@ body.chain-lightning-primed .typing-strip {
   75% { transform: scale(1.1) translateX(-2px); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 60, 60, 0.8)); color: rgba(255, 60, 60, 1); }
   100% { transform: scale(1); filter: brightness(1); }
 }
-.potion-slot.blocked-active {
+.power-up-slot.blocked-active {
   animation: flash-blocked 0.3s ease-in-out;
 }
 
@@ -2238,8 +2102,8 @@ body:not(.time-frozen) #gameCanvas {
   transition: filter 0.4s ease;
 }
 
-/* === Magic Acquired Burst overlay === */
-.magic-acquired-burst {
+/* === Power-up Acquired Burst overlay === */
+.power-up-burst {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -2252,14 +2116,14 @@ body:not(.time-frozen) #gameCanvas {
   z-index: 200;
   animation: mab-enter 1.9s ease-out forwards;
 }
-.mab-line1 {
+.power-up-burst-line1 {
   font-family: var(--font-mono, monospace);
   font-size: 1.1rem;
   letter-spacing: 0.2em;
   color: #f5d5ff;
   text-shadow: 0 0 12px #d946ef, 0 0 26px #a21caf;
 }
-.mab-line2 {
+.power-up-burst-line2 {
   font-family: var(--font-mono, monospace);
   font-size: 2.4rem;
   font-weight: 700;
@@ -2687,7 +2551,7 @@ body.battery-saver .readout,
 body.battery-saver .typing-strip,
 body.battery-saver .message-panel,
 body.battery-saver .god-mode-badge,
-body.battery-saver .potion-bar {
+body.battery-saver .power-up-bar {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -2709,7 +2573,7 @@ body.battery-saver .god-mode-badge {
   background: var(--paper) !important;
 }
 
-body.battery-saver .potion-bar {
+body.battery-saver .power-up-bar {
   background: var(--panel-solid) !important;
 }
 
@@ -2997,7 +2861,7 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .typing-strip,
 .message-panel,
 .readout,
-.potion-bar,
+.power-up-bar,
 .sw-leaderboard,
 .sw-initials-card,
 .god-mode-badge {
@@ -3015,7 +2879,7 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 
 .readout,
 .sw-leaderboard,
-.potion-bar {
+.power-up-bar {
   border-radius: 12px;
 }
 
@@ -3234,8 +3098,8 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .boss-banner.is-shockwave { color: #0d63c9; }
 .boss-banner.is-chain-lightning { color: #a87400; }
 
-.mab-line1,
-.mab-line2 {
+.power-up-burst-line1,
+.power-up-burst-line2 {
   font-family: var(--font-pixel);
   font-weight: 700;
   color: #8a22a0;
@@ -3247,12 +3111,12 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   text-shadow: none;
 }
 
-.potion-slot.occupied {
+.power-up-slot.occupied {
   background: rgba(168, 101, 26, 0.1);
   box-shadow: 0 2px 6px rgba(74, 52, 28, 0.2);
 }
 
-.potion-slot.occupied:hover {
+.power-up-slot.occupied:hover {
   box-shadow: 0 3px 10px rgba(74, 52, 28, 0.32);
 }
 
@@ -3309,8 +3173,8 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   color: var(--ink);
 }
 
-/* The potion tray is empty most of the time, so it stays see-through until a potion lands in it. */
-.potion-bar {
+/* The power-up tray is empty most of the time, so it stays see-through until a power-up lands in it. */
+.power-up-bar {
   background: rgba(251, 245, 228, 0.5);
   box-shadow: 0 4px 12px rgba(74, 52, 28, 0.14);
 }
@@ -3336,80 +3200,32 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   }
 }
 
-/* Potion icons on paper: the original neon strokes were drawn for a dark tray and
-   faded in and out, so they all but vanished on cream. These keep each potion's
+/* Power-up icons on paper: the original neon strokes were drawn for a dark tray and
+   faded in and out, so they all but vanished on cream. These keep each powerUp's
    hue, darkened to read as ink, at full strength; only a gentle pulse remains. */
-.potion-bar:has(.potion-slot.occupied) {
+.power-up-bar:has(.power-up-slot.occupied) {
   background: var(--panel-solid);
   box-shadow: 0 6px 16px rgba(74, 52, 28, 0.26);
 }
 
-.potion-slot.occupied {
+.power-up-slot.occupied {
   border: 1.5px solid rgba(110, 78, 40, 0.55);
   background: #fffaf0;
 }
 
-.potion-slot.occupied .slot-key {
+.power-up-slot.occupied .slot-key {
   bottom: 1px;
   right: 3px;
   color: #6e4e28;
   font-size: 0.68rem;
 }
 
-.potion-slot.occupied .svg-magic * {
+.power-up-slot.occupied .power-up-svg * {
   filter: none;
 }
 
-.magic-time .clock-rim {
-  fill: rgba(21, 122, 112, 0.16);
-  stroke: #0f6b62;
-  stroke-width: 3;
-  animation: potion-ink-pulse 2s ease-in-out infinite alternate;
-}
-.magic-time .clock-top,
-.magic-time .clock-hand { stroke: #0b4f48; stroke-width: 3; }
-.magic-time .clock-center { fill: #0b4f48; }
-
-.magic-lightning .bolt-path {
-  fill: #f2b13c;
-  stroke: #6a2391;
-  stroke-width: 2;
-  animation: potion-ink-pulse 1.6s ease-in-out infinite alternate;
-}
-.magic-lightning .spark { fill: #6a2391; }
-
-.magic-shockwave .shockwave-crest {
-  stroke: #0f4a9c;
-  stroke-width: 3.2;
-  animation: potion-wave-ink 1.2s infinite;
-}
-
-.magic-shield .shield-oct {
-  stroke: #b8240c;
-  stroke-width: 2.6;
-  fill: rgba(184, 36, 12, 0.08);
-  animation: potion-shield-ink 2.5s ease-in-out infinite;
-}
-.magic-shield .shield-middle { fill: none; }
-.magic-shield .shield-inner { fill: rgba(184, 36, 12, 0.22); }
-
-@keyframes potion-ink-pulse {
-  from { opacity: 0.82; }
-  to { opacity: 1; }
-}
-
-@keyframes potion-wave-ink {
-  0%, 10%, 55%, 100% { opacity: 0.78; }
-  20%, 45% { opacity: 1; }
-}
-
-@keyframes potion-shield-ink {
-  0%, 100% { opacity: 0.85; transform: scale(0.97); }
-  50% { opacity: 1; transform: scale(1.03); }
-}
-
 /* First-loot guide: a paper card over a dimmed, paused game, with the new
-   potion's slot lifted above the shade and pulsing so the player can find it. */
+   powerUp's slot lifted above the shade and pulsing so the player can find it. */
 .loot-guide {
   position: fixed;
   top: 50%;
@@ -3446,12 +3262,12 @@ body.loot-guide-open #app::after {
   pointer-events: none;
 }
 
-body.loot-guide-open .potion-bar {
+body.loot-guide-open .power-up-bar {
   z-index: 47;
   opacity: 1;
 }
 
-.potion-slot.is-guided {
+.power-up-slot.is-guided {
   animation: loot-guide-slot 1.1s ease-in-out infinite;
 }
 
@@ -3484,7 +3300,7 @@ body.loot-guide-open .potion-bar {
   background: #fffaf0;
 }
 
-.loot-guide-icon .svg-magic {
+.loot-guide-icon .power-up-svg {
   width: 58px;
   height: 58px;
 }
@@ -3864,7 +3680,7 @@ body.needs-keyboard #messagePanel,
 body.needs-keyboard .sw-leaderboard,
 body.needs-keyboard .corner-controls,
 body.needs-keyboard .hud-grid,
-body.needs-keyboard .potion-bar {
+body.needs-keyboard .power-up-bar {
   visibility: hidden;
 }
 
@@ -4053,9 +3869,9 @@ body.battery-saver .hud-grid .readout {
 .story-card,
 .boss-hp-bar,
 .sw-leaderboard,
-.potion-bar,
+.power-up-bar,
 body.battery-saver .message-panel,
-body.battery-saver .potion-bar {
+body.battery-saver .power-up-bar {
   border: 3px solid var(--key-ink) !important;
   border-radius: 16px;
   background: var(--key-plate) !important;
@@ -4293,15 +4109,15 @@ body.battery-saver .potion-bar {
   display: none;
 }
 
-/* Potion tray: each potion sits on a keycap with its arrow key in the corner. */
-.potion-bar .potion-slot {
+/* Power-up tray: each power-up sits on a keycap with its arrow key in the corner. */
+.power-up-bar .power-up-slot {
   border: 3px solid var(--key-ink);
   border-radius: 12px;
   background: linear-gradient(#fffaf0, #f1dcae);
   box-shadow: 0 4px 0 var(--key-ink);
 }
 
-.potion-bar .potion-slot .slot-key {
+.power-up-bar .power-up-slot .slot-key {
   color: var(--key-ink);
   font-weight: 800;
 }
@@ -4547,22 +4363,22 @@ body.battery-saver .corner-controls .battery-saver-toggle.is-active {
   color: #ff6a5a;
 }
 
-/* Potion icons: chunky filled art, a little larger on their keys. */
-.potion-bar .potion-icon,
-.potion-bar .svg-magic.potion-art {
+/* Power-up icons: chunky filled art, a little larger on their keys. */
+.power-up-bar .power-up-icon,
+.power-up-bar .power-up-svg.power-up-art {
   width: 34px;
   height: 34px;
 }
 
-.svg-magic.potion-art,
-.svg-magic.potion-art * {
+.power-up-svg.power-up-art,
+.power-up-svg.power-up-art * {
   filter: none;
   animation: none;
 }
 
 /* Each slot's arrow key sits on a small key at its top-left corner, clear of the icon. */
-.potion-bar .potion-slot .slot-key,
-.potion-bar .potion-slot.occupied .slot-key {
+.power-up-bar .power-up-slot .slot-key,
+.power-up-bar .power-up-slot.occupied .slot-key {
   top: -9px;
   right: auto;
   bottom: auto;
@@ -4665,4 +4481,9 @@ body .boss-hp-bar .boss-beam i {
   .word-tag.is-critical .threat-meter i {
     animation: none;
   }
+}
+
+/* An empty slot shows no arrow key: the cross of slots already hints at the arrow keys. */
+.power-up-bar .power-up-slot:not(.occupied) .slot-key {
+  display: none;
 }
