@@ -3961,7 +3961,7 @@ body.battery-saver .hud-grid .readout {
 }
 
 .hud-grid .readout[hidden] {
-  display: none;
+  display: none !important;
 }
 
 .hud-grid .readout > span {
@@ -4035,4 +4035,504 @@ body.battery-saver .hud-grid .readout {
     width: 26px;
     height: 26px;
   }
+}
+
+/* ══ Keycap style ══════════════════════════════════════════════════════════
+   Cards are cream key-plates (a thick ink outline and a key-depth shadow), headings
+   use the title's chunky lettering, and buttons are keys. Word cards over monsters
+   are the exception: slanted black hazard plates, striped in the colour of their kind. */
+:root {
+  --key-ink: #3d2b1c;
+  --key-plate: linear-gradient(#fffaf0, #f4e4bd);
+  --key-shadow: 0 6px 0 var(--key-ink);
+}
+
+.message-panel,
+.sw-initials-card,
+.loot-guide,
+.story-card,
+.boss-hp-bar,
+.sw-leaderboard,
+.potion-bar,
+body.battery-saver .message-panel,
+body.battery-saver .potion-bar {
+  border: 3px solid var(--key-ink) !important;
+  border-radius: 16px;
+  background: var(--key-plate) !important;
+  box-shadow: var(--key-shadow) !important;
+  backdrop-filter: none !important;
+}
+
+/* Kickers: small cyan chunky capitals. */
+#messageKicker,
+.device-gate .message-panel > p:first-child,
+.sw-modal-kicker,
+.loot-guide-kicker {
+  color: #4fd8d0;
+  font-family: var(--font-chunky);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  word-spacing: 0.25em;
+  -webkit-text-stroke: 3.5px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+/* Headings: cream chunky lettering with an ink outline, like the title. */
+.message-panel h2,
+.sw-initials-card h2,
+.loot-guide h2 {
+  color: #fff6dc;
+  font-family: var(--font-chunky);
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  word-spacing: 0.22em;
+  line-height: 1.08;
+  text-shadow: 0 4px 0 var(--key-ink);
+  -webkit-text-stroke: 7px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.message-panel h2 {
+  font-size: clamp(1.9rem, 5.6vw, 2.7rem);
+}
+
+.message-score {
+  font-family: var(--font-chunky);
+  font-weight: 400;
+}
+
+/* Buttons are keys: orange for the main action, cream for the other. */
+.message-panel > button,
+.sw-initials-card button:not(.sw-skip-button),
+.loot-guide-actions button,
+.device-gate-home,
+.ending-replay {
+  min-height: 48px;
+  border: 3px solid var(--key-ink) !important;
+  border-radius: 12px;
+  background: linear-gradient(#ffd9a0, #f0a04a) !important;
+  box-shadow: 0 5px 0 var(--key-ink) !important;
+  color: #fff6dc !important;
+  font-family: var(--font-chunky);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  word-spacing: 0.2em;
+  -webkit-text-stroke: 4.5px var(--key-ink);
+  paint-order: stroke fill;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.loot-guide-actions button.is-secondary,
+.device-gate-home {
+  background: linear-gradient(#fffaf0, #f1dcae) !important;
+  color: var(--key-ink) !important;
+  -webkit-text-stroke: 0;
+  font-size: 1.05rem;
+}
+
+.message-panel > button:not(:disabled):active,
+.sw-initials-card button:not(.sw-skip-button):active,
+.loot-guide-actions button:active,
+.device-gate-home:active,
+.ending-replay:active {
+  box-shadow: 0 1px 0 var(--key-ink) !important;
+  transform: translateY(4px);
+}
+
+.sw-initials-card input {
+  border: 3px solid var(--key-ink);
+  border-radius: 10px;
+  background: #fffaf0;
+  box-shadow: inset 0 3px 0 rgba(61, 43, 28, 0.12);
+  color: var(--key-ink);
+  font-family: var(--font-chunky);
+  letter-spacing: 0.3em;
+}
+
+.sw-modal-score {
+  color: #fff6dc;
+  font-size: 2.4rem;
+  font-family: var(--font-chunky);
+  text-shadow: 0 4px 0 var(--key-ink);
+  -webkit-text-stroke: 7px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+/* Storyteller card. */
+.story-name {
+  color: #a8651a;
+  font-family: var(--font-chunky);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+.story-next kbd {
+  border: 2.5px solid var(--key-ink);
+  box-shadow: 0 3px 0 var(--key-ink);
+  color: var(--key-ink);
+  font-family: var(--font-chunky);
+  font-weight: 400;
+}
+
+.story-skip {
+  color: #a8651a;
+  font-family: var(--font-chunky);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+}
+
+/* Boss health bar and beam. */
+.boss-hp-name {
+  color: #fff6dc;
+  font-family: var(--font-chunky);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  word-spacing: 0.25em;
+  -webkit-text-stroke: 4.5px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.boss-hp-segments i {
+  border: 2px solid var(--key-ink);
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+.boss-hp-segments i.is-gone {
+  border-color: rgba(61, 43, 28, 0.35);
+  transform: none;
+}
+
+.boss-beam {
+  border: 2px solid var(--key-ink);
+}
+
+/* High Scores: a key-plate with each rank on a small key. */
+.sw-leaderboard {
+  width: min(232px, calc(100vw - 28px));
+  padding: 11px 13px 13px;
+}
+
+.sw-leaderboard-header p {
+  color: #fff6dc;
+  font-family: var(--font-chunky);
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  word-spacing: 0.2em;
+  text-shadow: 0 3px 0 var(--key-ink);
+  -webkit-text-stroke: 5px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.sw-leaderboard-header span {
+  color: #4fd8d0;
+  font-family: var(--font-chunky);
+  font-size: 0.7rem;
+  font-weight: 400;
+  -webkit-text-stroke: 3px var(--key-ink);
+  paint-order: stroke fill;
+}
+
+.sw-score-list {
+  gap: 5px;
+}
+
+.sw-score-list li {
+  grid-template-columns: 26px minmax(40px, 1fr) auto;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--key-ink);
+  font-family: var(--font-chunky);
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+}
+
+.sw-score-list li::before {
+  content: counter(score-rank);
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 21px;
+  border: 2.5px solid var(--key-ink);
+  border-radius: 6px;
+  background: #fffaf0;
+  box-shadow: 0 2.5px 0 var(--key-ink);
+  color: var(--key-ink);
+  font-size: 0.78rem;
+}
+
+.sw-score-list li:first-child,
+.sw-score-list li:first-child .sw-score-val,
+.sw-score-list .sw-score-val {
+  color: var(--key-ink);
+  font-size: 1.05rem;
+}
+
+.sw-score-list li:first-child::before {
+  background: linear-gradient(#d9fffa, #4fd8d0);
+  color: var(--key-ink);
+}
+
+.sw-score-list li.sw-highlight {
+  border-radius: 6px;
+  background: rgba(79, 216, 208, 0.22);
+  box-shadow: none;
+}
+
+.sw-score-list .sw-loading {
+  font-family: var(--font-chunky);
+  font-size: 0.9rem;
+}
+
+.sw-score-list .sw-loading::before {
+  display: none;
+}
+
+/* Potion tray: each potion sits on a keycap with its arrow key in the corner. */
+.potion-bar .potion-slot {
+  border: 3px solid var(--key-ink);
+  border-radius: 12px;
+  background: linear-gradient(#fffaf0, #f1dcae);
+  box-shadow: 0 4px 0 var(--key-ink);
+}
+
+.potion-bar .potion-slot .slot-key {
+  color: var(--key-ink);
+  font-weight: 800;
+}
+
+/* Corner buttons: keycaps, cyan with an ink icon when the setting is on. */
+.corner-controls {
+  grid-template-columns: repeat(2, 50px);
+  gap: 12px;
+}
+
+.corner-controls .icon-button,
+body.battery-saver .corner-controls .icon-button {
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
+  border: 3px solid var(--key-ink) !important;
+  border-radius: 12px;
+  background: linear-gradient(#fffaf0, #f1dcae) !important;
+  box-shadow: 0 5px 0 var(--key-ink) !important;
+  color: var(--key-ink);
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.corner-controls .icon-button:not(:disabled):active {
+  box-shadow: 0 1px 0 var(--key-ink) !important;
+  transform: translateY(4px);
+}
+
+.corner-controls .battery-saver-toggle.is-active,
+body.battery-saver .corner-controls .battery-saver-toggle.is-active {
+  background: linear-gradient(#d9fffa, #8ef0e6 55%, #4fd8d0) !important;
+}
+
+.corner-controls .icon-button:disabled {
+  opacity: 0.45;
+}
+
+.corner-controls .button-ring {
+  display: none;
+}
+
+.corner-controls .button-svg {
+  width: 38px;
+  height: 38px;
+}
+
+.corner-controls .sound-wave,
+.corner-controls .fullscreen-enter-glyph path,
+.corner-controls .fullscreen-exit-glyph path {
+  stroke-width: 3.4;
+}
+
+.corner-controls .battery-saver-toggle .leaf-path,
+.corner-controls .battery-saver-toggle.is-active .leaf-path {
+  fill: var(--key-ink);
+  stroke: none;
+}
+
+.corner-controls .battery-saver-toggle .saver-slash {
+  display: none;
+}
+
+/* ── Word cards over monsters: slanted black hazard plates ──
+   The card keeps its own transform (the game positions and scales it), so the slanted
+   plate is drawn by ::before behind the text. The stripe and label take the colour
+   of the card's kind. */
+.word-tag:not(.is-boss),
+.word-tag.is-boss {
+  --stripe: #ffb020;
+  isolation: isolate;
+  padding: 6px 16px 8px 22px;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: #fff6dc;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.45));
+}
+
+.word-tag::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 2.5px solid #000;
+  background:
+    repeating-linear-gradient(45deg, var(--stripe) 0 5px, #1a1311 5px 10px) left / 9px 100% no-repeat,
+    #1a1311;
+  content: '';
+  transform: skewX(-10deg);
+  transition: border-color 100ms ease, box-shadow 100ms ease;
+}
+
+.word-tag .prompt-kind,
+.word-tag.is-target .prompt-kind,
+.word-tag.is-medic .prompt-kind,
+.word-tag.is-mimic .prompt-kind,
+.word-tag[data-kind] .prompt-kind {
+  padding: 0;
+  background: none;
+  color: var(--stripe);
+  font-family: var(--font-chunky);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+}
+
+.word-tag .prompt {
+  font-family: var(--font-chunky);
+  font-size: clamp(1rem, 2.3vw, 1.35rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.word-tag .remaining {
+  color: #fff6dc;
+}
+
+.word-tag .typed {
+  color: #5ff2e6;
+}
+
+.word-tag .threat-meter {
+  height: 4px;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.word-tag .threat-meter i {
+  border-radius: 0;
+  background: linear-gradient(90deg, #ffb347, #ff3b2f);
+}
+
+.word-tag::after {
+  background: linear-gradient(rgba(26, 19, 17, 0.8), rgba(26, 19, 17, 0));
+}
+
+.word-tag.is-target::before {
+  border-color: #ff3b2f;
+  box-shadow: 0 0 14px rgba(255, 59, 47, 0.65);
+}
+
+.word-tag.is-target::after {
+  background: linear-gradient(rgba(255, 59, 47, 0.9), rgba(255, 59, 47, 0));
+}
+
+.word-tag.is-danger::before,
+.word-tag.is-critical::before {
+  border-color: #ff3b2f;
+}
+
+.word-tag.is-medic { --stripe: #4ade80; }
+.word-tag.is-mimic { --stripe: #ffd24a; }
+.word-tag[data-kind="rock"] { --stripe: #ff8a3a; }
+.word-tag[data-kind="satellite"] { --stripe: #8ab8ff; }
+.word-tag[data-kind="shield"] { --stripe: #9fe8ff; }
+.word-tag[data-kind="splitter"] { --stripe: #ff7ad1; }
+.word-tag[data-kind="caster"] { --stripe: #c08bff; }
+.word-tag[data-kind="myth"],
+.word-tag[data-kind="bat"] { --stripe: #b48cff; }
+
+.word-tag.is-stunned::before {
+  border-color: #3aa5dc;
+  background:
+    repeating-linear-gradient(45deg, #3aa5dc 0 5px, #10202a 5px 10px) left / 9px 100% no-repeat,
+    #10202a;
+}
+
+.word-tag.is-stunned {
+  background: none !important;
+}
+
+/* The boss's line: the same plate, wider, in the sentence face. */
+.word-tag.is-boss {
+  --stripe: var(--boss-accent, #ffb020);
+  padding: 9px 20px 11px 26px;
+}
+
+.word-tag[data-kind="boss"] .remaining {
+  color: #fff6dc;
+}
+
+.word-tag[data-kind="boss"] .prompt .typed {
+  color: rgba(255, 246, 220, 0.42);
+}
+
+.word-tag[data-kind="boss"] .prompt .current-word .typed {
+  color: #5ff2e6;
+}
+
+.word-tag[data-kind="boss"] .current-word {
+  border-bottom-color: #ff3b2f;
+}
+
+.word-tag[data-kind="boss"]:not([data-stage="words"]) .prompt {
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+.word-tag[data-kind="boss"] .stage-pips i {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.word-tag[data-kind="boss"] .stage-pips i.is-done {
+  background: var(--boss-accent, #ffb020);
+}
+
+.word-tag[data-kind="boss"].is-frosted::before {
+  border-color: #7cc4e8;
+  background: #2a4a5c;
+}
+
+.word-tag[data-kind="boss"].is-shielded::before {
+  border-color: #7cc4e8;
+}
+
+.word-tag[data-kind="boss"].is-shielded .prompt {
+  text-decoration-color: rgba(159, 232, 255, 0.8);
+}
+
+/* On the black plate the monster's typed letters fade to pale, and the player's own
+   letters below are bright cyan. */
+.word-tag:not(.is-boss) .prompt .typed {
+  color: rgba(255, 246, 220, 0.38);
+}
+
+.word-tag .typed-line {
+  border-top-color: rgba(255, 246, 220, 0.25);
+  color: #5ff2e6;
+  font-family: var(--font-chunky);
+  font-weight: 400;
+}
+
+.word-tag.is-miss .typed-line {
+  color: #ff6a5a;
 }
