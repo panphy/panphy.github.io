@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=1';
-import { createSeasonalEffects } from './seasonal-effects.js?v=1';
-import { createPowerUpSystem } from './power-ups.js?v=1';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=1';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=1';
-import { createLeaderboard } from './leaderboard.js?v=1';
-import { createEnemyMesh } from './enemy-meshes.js?v=1';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=1';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=1';
-import { createLowPolyCloud } from './lowpoly.js?v=1';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=1';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=1';
-import { createWordDeck } from './word-decks.js?v=1';
-import { createStage } from './stages.js?v=1';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=1';
-import { storyBeatForWave } from './story.js?v=1';
-import { createStoryteller, settleLantern } from './storyteller.js?v=1';
-import { createPlasmaCannon } from './plasma-cannon.js?v=1';
+import { createKeyFireAudio } from './audio.js?v=2';
+import { createSeasonalEffects } from './seasonal-effects.js?v=2';
+import { createPowerUpSystem } from './power-ups.js?v=2';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=2';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=2';
+import { createLeaderboard } from './leaderboard.js?v=2';
+import { createEnemyMesh } from './enemy-meshes.js?v=2';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=2';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=2';
+import { createLowPolyCloud } from './lowpoly.js?v=2';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=2';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=2';
+import { createWordDeck } from './word-decks.js?v=2';
+import { createStage } from './stages.js?v=2';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=2';
+import { storyBeatForWave } from './story.js?v=2';
+import { createStoryteller, settleLantern } from './storyteller.js?v=2';
+import { createPlasmaCannon } from './plasma-cannon.js?v=2';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1522,23 +1522,42 @@ function chooseBossLines(wave, count) {
 }
 
 // A stage of single words, typed one at a time like monsters' words. No two start
-// with the same letter, and none repeats within the fight.
-function chooseBossWordStage(count, used) {
+// with the same letter, and none repeats within the fight. With a longTerm cap the
+// stage ends on a long term instead: a phrase too long for any monster, typed word by word.
+function chooseBossWordStage(count, used, longTerm = 0) {
   const initials = new Set();
   const entries = [];
+  const fresh = (entry, key) => !used.has(entry.term) && !initials.has(key.charAt(0));
   const fits = (entry) => {
     const key = buildSearchPrompt(entry.term);
-    return /^[a-z]+$/.test(entry.term) && key.length >= 4 && key.length <= 10
-      && !used.has(entry.term) && !initials.has(key.charAt(0));
+    return /^[a-z]+$/.test(entry.term) && key.length >= 4 && key.length <= 10 && fresh(entry, key);
+  };
+  const fitsLong = (entry) => {
+    const key = buildSearchPrompt(entry.term);
+    return key.length > LONGEST_MONSTER_WORD && key.length <= longTerm && fresh(entry, key);
   };
   while (entries.length < count) {
-    const entry = monsterDeck.pick(currentKeywordPool(), fits) || monsterDeck.pick(ALL_WORDS, fits);
+    const last = longTerm > 0 && entries.length === count - 1;
+    const entry = (last && bossDeck.pick(ALL_WORDS, fitsLong))
+      || monsterDeck.pick(currentKeywordPool(), fits) || monsterDeck.pick(ALL_WORDS, fits);
     if (!entry) break;
     entries.push(entry);
     used.add(entry.term);
     initials.add(buildSearchPrompt(entry.term).charAt(0));
   }
   return { kind: 'words', term: entries.map(entry => entry.term).join(' '), topic: '', entries };
+}
+
+// Where each word of a word stage sits: its entry, that entry's place in the stage and
+// its first and last word. A long term is one entry of several words.
+function wordStageSlots(line) {
+  const slots = [];
+  line.entries.forEach((entry, entryIndex) => {
+    const count = lineWords(entry).length;
+    const start = slots.length;
+    for (let index = 0; index < count; index += 1) slots.push({ entry, entryIndex, start, end: start + count });
+  });
+  return slots;
 }
 
 function chooseBossStory() {
@@ -1566,6 +1585,7 @@ function startBossLine(boss) {
   boss.lineKind = line.kind || 'line';
   boss.label.dataset.stage = boss.lineKind;
   boss.lineWordsList = lineWords(line);
+  boss.stageSlots = boss.lineKind === 'words' ? wordStageSlots(line) : null;
   boss.wordIndex = 0;
   boss.beam = null;
   setBossWord(boss);
@@ -1727,7 +1747,7 @@ function spawnPhraseBoss() {
   const statements = chooseBossLines(bossLevel(), plan.finishers);
   const lines = [];
   for (const step of bossFightOrder(plan)) {
-    if (step.kind === 'words') lines.push(chooseBossWordStage(step.count, used));
+    if (step.kind === 'words') lines.push(chooseBossWordStage(step.count, used, plan.longTerm));
     else if (step.kind === 'line') lines.push(statements.shift());
     else if (step.kind === 'core') lines.push({ ...chooseBossWordStage(1, used), core: true, satellites: step.satellites });
     else if (step.kind === 'story') lines.push(...chooseBossStory());
@@ -1803,10 +1823,13 @@ function advanceBossLine(boss) {
   if (streak > peakStreak) peakStreak = streak;
   score += 10 + boss.searchPrompt.length * 8;
   boss.flinch = 1;
-  const stageWord = boss.lineKind === 'words' ? boss.bossLines[boss.lineIndex].entries[boss.wordIndex] : null;
+  // In a word stage, the word or long term that this word completes, if it completes one.
+  const slot = boss.stageSlots?.[boss.wordIndex];
+  const stageWord = slot && boss.wordIndex === slot.end - 1 ? slot.entry : null;
   if (stageWord) {
     // A word in a word stage lands like a kill: a beam, a piece knocked off, a flinch.
-    score += 30 + boss.searchPrompt.length * 6;
+    const letters = buildSearchPrompt(stageWord.term).length;
+    score += 30 + letters * 6;
     if (!encounteredTerms.some(t => t.term === stageWord.term)) {
       encounteredTerms.push({ term: stageWord.term, definition: stageWord.definition || null, defeated: true });
     }
@@ -1818,8 +1841,8 @@ function advanceBossLine(boss) {
     boss.hurt = Math.max(boss.hurt, 0.45);
     hitStopTimer = 0.04;
     kickTimer = Math.max(kickTimer, 0.14);
-    // Each word of a word stage is ranked like a monster's word.
-    spawnRankPopup(boss);
+    // Each word of a word stage is ranked like a monster's word, a long term as one.
+    spawnRankPopup(boss, letters - 1);
   }
   boss.wordIndex += 1;
   if (boss.wordIndex < boss.lineWordsList.length) {
@@ -1827,7 +1850,7 @@ function advanceBossLine(boss) {
     if (stageWord) playDefeatSound(boss);
     else playTypeSound(1);
     hitEnemyWithLetter(boss);
-    // The next word of a word stage is timed from its own first letter.
+    // The next word or long term of a word stage is timed from its own first letter.
     if (stageWord) boss.firstLetterAt = undefined;
     updateHud(true);
     return true;
@@ -3799,19 +3822,21 @@ function bossWordProgress(boss) {
 
 // Typed words, the word in progress (its typed letters marked) and the words to come.
 function buildBossLineHtml(boss) {
-  const words = boss.lineWordsList;
   const { word, done } = bossWordProgress(boss);
-  if (boss.lineKind === 'words') {
-    // A word stage shows one word at a time, with a pip for each word of the stage.
-    const pips = words.map((entry, index) => `<i class="${index < boss.wordIndex ? 'is-done' : ''}"></i>`).join('');
-    return `<span class="current-word"><span class="typed">${escapeHtml(done)}</span><span class="remaining">${escapeHtml(word.slice(done.length))}</span></span><span class="stage-pips">${pips}</span>`;
-  }
-  const parts = words.map((entry, index) => {
+  const slot = boss.stageSlots?.[boss.wordIndex];
+  // A word stage shows one word or long term at a time; a statement shows the whole line.
+  const from = slot ? slot.start : 0;
+  const parts = boss.lineWordsList.slice(from, slot ? slot.end : undefined).map((entry, offset) => {
+    const index = from + offset;
     if (index < boss.wordIndex) return `<span class="typed">${escapeHtml(entry)}</span>`;
     if (index > boss.wordIndex) return `<span class="remaining">${escapeHtml(entry)}</span>`;
     return `<span class="current-word"><span class="typed">${escapeHtml(done)}</span><span class="remaining">${escapeHtml(word.slice(done.length))}</span></span>`;
   });
-  return parts.join(' ');
+  if (!slot) return parts.join(' ');
+  // A pip for each word or term of the stage.
+  const stage = boss.bossLines[boss.lineIndex].entries;
+  const pips = stage.map((entry, index) => `<i class="${index < slot.entryIndex ? 'is-done' : ''}"></i>`).join('');
+  return `${parts.join(' ')}<span class="stage-pips">${pips}</span>`;
 }
 
 function createLifeMeter() {
