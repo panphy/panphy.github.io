@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Spellwave stage preview</title>
+  <title>KeyFire stage preview</title>
   <script type="importmap">
     {
       "imports": {
@@ -34,7 +34,7 @@
 </head>
 <body>
   <header>
-    <h1>Spellwave stages</h1>
+    <h1>KeyFire stages</h1>
     <label>Wave <select id="wave"></select></label>
     <label>Ambushes <input id="bursts" type="number" min="1" max="7" value="4"></label>
     <label>Seed <input id="seed" type="number" min="1" max="999999" value="1"></label>
@@ -54,8 +54,8 @@
 
   <script type="module">
     import * as THREE from 'three';
-    import { createStage } from './src/stages.js?v=beta34';
-    import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './src/chapters.js?v=beta34';
+    import { createStage } from './src/stages.js?v=beta35';
+    import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './src/chapters.js?v=beta35';
 
     const $ = (id) => document.getElementById(id);
     const canvas = $('canvas');

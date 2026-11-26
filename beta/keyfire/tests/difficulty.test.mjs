@@ -61,9 +61,9 @@ test('startup dependencies share the page release version to avoid mixed cached 
   const html = readFileSync(new URL('../../keyfire.html', import.meta.url), 'utf8');
   const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const difficulty = readFileSync(new URL('../src/difficulty.js', import.meta.url), 'utf8');
-  const version = html.match(/spellwave\/src\/main\.js\?v=([^"&]+)/)?.[1];
+  const version = html.match(/keyfire\/src\/main\.js\?v=([^"&]+)/)?.[1];
   assert.ok(version, 'entry module must have a cache version');
-  assert.ok(html.includes(`spellwave/src/styles.css?v=${version}"`));
+  assert.ok(html.includes(`keyfire/src/styles.css?v=${version}"`));
   assert.ok(main.includes(`from './difficulty.js?v=${version}'`));
   assert.ok(main.includes(`from './prompt-utils.js?v=${version}'`));
   assert.ok(difficulty.includes(`from './prompt-utils.js?v=${version}'`));

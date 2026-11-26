@@ -1,28 +1,51 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=beta34';
-import { createSeasonalEffects } from './seasonal-effects.js?v=beta34';
-import { createPowerUpSystem } from './power-ups.js?v=beta34';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta34';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta34';
-import { createLeaderboard } from './leaderboard.js?v=beta34';
-import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js?v=beta34';
-import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta34';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta34';
-import { createLowPolyCloud } from './lowpoly.js?v=beta34';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta34';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta34';
-import { createWordDeck } from './word-decks.js?v=beta34';
-import { createStage } from './stages.js?v=beta34';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta34';
-import { storyBeatForWave } from './story.js?v=beta34';
-import { createStoryteller } from './storyteller.js?v=beta34';
-import { createArcaneCannon } from './arcane-cannon.js?v=beta34';
+import { createKeyFireAudio } from './audio.js?v=beta35';
+import { createSeasonalEffects } from './seasonal-effects.js?v=beta35';
+import { createPowerUpSystem } from './power-ups.js?v=beta35';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=beta35';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=beta35';
+import { createLeaderboard } from './leaderboard.js?v=beta35';
+import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js?v=beta35';
+import { normalPromptLengthCap, withinLength, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=beta35';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=beta35';
+import { createLowPolyCloud } from './lowpoly.js?v=beta35';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=beta35';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=beta35';
+import { createWordDeck } from './word-decks.js?v=beta35';
+import { createStage } from './stages.js?v=beta35';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=beta35';
+import { storyBeatForWave } from './story.js?v=beta35';
+import { createStoryteller } from './storyteller.js?v=beta35';
+import { createPlasmaCannon } from './plasma-cannon.js?v=beta35';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
 const monsterDeck = createWordDeck();
 const bossDeck = createWordDeck();
-const LAST_RUN_TERMS_KEY = 'panphySpellwaveBetaLastRunTermsV1';
+// Saved data moved from the old Spellwave names to KeyFire ones. Anything saved under an
+// old name is copied across once, so best scores and settings carry over. The old
+// entries are left alone: the live Spellwave game still reads the shared ones.
+const RENAMED_STORAGE_KEYS = [
+  ['panphySpellwaveBetaLastRunTermsV1', 'keyfireLastRunTermsV1'],
+  ['panphySpellwaveBetaBestV1', 'keyfireBestV1'],
+  ['panphySpellwaveAudioV1', 'keyfireAudioV1'],
+  ['spellwave_battery_saver_active', 'keyfireBatterySaver'],
+  ['spellwaveBetaHasKeyboard', 'keyfireHasKeyboard'],
+  ['panphySpellwaveBetaLootGuideSeenV1', 'keyfireLootGuideSeenV1'],
+];
+carryOverSavedData();
+
+function carryOverSavedData() {
+  try {
+    for (const [oldKey, newKey] of RENAMED_STORAGE_KEYS) {
+      if (localStorage.getItem(newKey) !== null) continue;
+      const value = localStorage.getItem(oldKey);
+      if (value !== null) localStorage.setItem(newKey, value);
+    }
+  } catch {}
+}
+
+const LAST_RUN_TERMS_KEY = 'keyfireLastRunTermsV1';
 
 function loadLastRunTerms() {
   try {
@@ -86,8 +109,8 @@ const endMimics = document.getElementById('endMimics');
 const endHealth = document.getElementById('endHealth');
 const endTime = document.getElementById('endTime');
 
-const STORAGE_KEY = 'panphySpellwaveBetaBestV1';
-const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
+const STORAGE_KEY = 'keyfireBestV1';
+const AUDIO_STORAGE_KEY = 'keyfireAudioV1';
 const MAX_DELTA = 0.06;
 // Play is drawn at no more than about 60 frames a second, so a 120 Hz screen
 // does half the work. The slack lets a 60 Hz screen's slightly early frames through.
@@ -397,7 +420,7 @@ let lastFrameTime = 0;
 let rafId = null;
 let isTimeoutScheduled = false;
 let batterySaver = false;
-const BATTERY_SAVER_STORAGE_KEY = 'spellwave_battery_saver_active';
+const BATTERY_SAVER_STORAGE_KEY = 'keyfireBatterySaver';
 
 let elapsed = 0;
 let mistakeTimer = 0;
@@ -496,7 +519,7 @@ const {
   playChainZapSound,
   playTimeFreezeSound,
   playTimeResumeSound,
-} = createSpellwaveAudio({
+} = createKeyFireAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
   saveAudioSetting,
@@ -1286,7 +1309,7 @@ function defeatEnemy(enemy) {
 // A shield-bearer needs two short words: one breaks the shield, one finishes it.
 // A splitter breaks into two small monsters with very short words. A caster stands
 // back and lobs a bolt every few seconds until its long word is typed.
-const VARIANT_HINTS = { shield: 'SHIELD: TWO WORDS!', splitter: 'IT SPLITS IN TWO!', caster: 'CASTER: STOP ITS SPELL!' };
+const VARIANT_HINTS = { shield: 'SHIELD: TWO WORDS!', splitter: 'IT SPLITS IN TWO!', caster: 'CASTER: STOP ITS BOLTS!' };
 const CASTER_CHARGE_TIME = 1.2;
 const CASTER_BOLT_FLIGHT = 1.15;
 const CASTER_BOLT_DAMAGE = 1;
@@ -4360,7 +4383,7 @@ function createTorches() {
 
   // The cannon hangs from the camera, which must be in the scene for it to draw.
   scene.add(camera);
-  weapon = createArcaneCannon({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
+  weapon = createPlasmaCannon({ camera, crystalMaterial: sceneCrystalMat, createCrown: createLightningCrown });
   for (const glow of weapon.glows) torchFlames.push({ mesh: glow, phase: Math.random() * Math.PI * 2 });
   lightningCrowns.push(...weapon.crowns);
 
@@ -5257,7 +5280,7 @@ function isTouchOnlyDevice() {
 
 function setUpDeviceGate() {
   // Declared here, not at module level: this runs before the module's later constants exist.
-  const DEVICE_GATE_KEY = 'spellwaveBetaHasKeyboard';
+  const DEVICE_GATE_KEY = 'keyfireHasKeyboard';
   const gate = document.getElementById('deviceGate');
   if (!gate || !isTouchOnlyDevice()) return;
   try {
@@ -5956,7 +5979,7 @@ function spawnPowerUpBurst(addedType) {
 // ── First-loot guide ──
 // The first time a player ever loots a power-up, the game pauses once to show how
 // to use a power-up and invites them to find out what each kind does by trying it.
-const LOOT_GUIDE_KEY = 'panphySpellwaveBetaLootGuideSeenV1';
+const LOOT_GUIDE_KEY = 'keyfireLootGuideSeenV1';
 const LOOT_GUIDE_DELAY = 0.8;
 const SLOT_KEYS = [
   { arrow: 'ArrowLeft', symbol: '\u2190' },

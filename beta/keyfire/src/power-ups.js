@@ -1,5 +1,5 @@
 /**
- * Power-up system for KeyFire (the Spellwave beta)
+ * Power-up system for KeyFire
  * Encapsulates power-up states, SVG icon templates, active timers,
  * 3D visual indicators for Shockwave travelling waves,
  * and the 'idkfa' power-up cheat mechanism.

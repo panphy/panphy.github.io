@@ -196,7 +196,7 @@ const ENDING_MUSIC = {
 const ENDING_PLUCKS = [0, 2, 1, 2, 3, 2, 1, 2];
 const ENDING_BELLS = [[0, 4], [6, 3], [12, 5], [20, 4], [26, 2]];
 
-export function createSpellwaveAudio({
+export function createKeyFireAudio({
   audioButton,
   initialEnabled,
   saveAudioSetting,
@@ -1270,7 +1270,7 @@ export function createSpellwaveAudio({
   }
 
   // ── Sound effects ──────────────────────────────────────────────────────
-  // One electronic family for the arcane cannon and what it hits: pitch-swept
+  // One electronic family for the plasma cannon and what it hits: pitch-swept
   // pulses, filtered noise bursts, driven low hits and clean synth chimes.
   // Options carry delay and pan.
 
