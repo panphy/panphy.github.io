@@ -495,6 +495,10 @@ export function buildStars() {
   }));
 }
 
+// Planets are far-off scenery: solid, but their colors are mixed most of the way into the
+// night sky so they never read as something to dodge.
+const PLANET_SKY = [9, 8, 24]; // #090818, the field's background
+const PLANET_DIM = 0.4; // share of each planet color that survives the mix
 const PLANET_PALETTES = [
   ['#1c1433', '#3a2463', '#6b3d8f', '#a466b8', '#e0a6d6'],
   ['#0f1f2a', '#1d4250', '#2f7473', '#5fae94', '#b6e3b0'],
@@ -505,7 +509,8 @@ export function buildPlanet(seed) {
   const rng = makeRng(seed);
   const radius = 14 + Math.floor(rng() * 16);
   const ringed = rng() < 0.45;
-  const palette = PLANET_PALETTES[Math.floor(rng() * PLANET_PALETTES.length)].map(hexToRgb);
+  const palette = PLANET_PALETTES[Math.floor(rng() * PLANET_PALETTES.length)]
+    .map((hex) => hexToRgb(hex).map((v, i) => Math.round(PLANET_SKY[i] + (v - PLANET_SKY[i]) * PLANET_DIM)));
   const bandFreq = 0.35 + rng() * 0.5;
   const bandPhase = rng() * 10;
   const tilt = (rng() - 0.5) * 0.5;
