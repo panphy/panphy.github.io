@@ -304,7 +304,12 @@ h1 { margin: 0; }
 
 /* Full screen: the page sits in the middle of the screen. Auto margins (not
    justify-content) keep the top reachable when the page is taller than the screen. */
-html.is-fullscreen body { display: flex; flex-direction: column; }
+html.is-fullscreen body {
+  display: flex;
+  flex-direction: column;
+  /* Full screen reaches under a punch-hole camera or notch; keep the top bar clear of it. */
+  padding-top: max(12px, env(safe-area-inset-top));
+}
 html.is-fullscreen .topbar,
 html.is-fullscreen .layout,
 html.is-fullscreen .footer { width: 100%; }
