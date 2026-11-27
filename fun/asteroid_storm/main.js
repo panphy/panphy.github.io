@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261127-rotate';
-import { createAudio } from './audio.js?v=20261127-rotate';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261127-rotate';
-import { createTrophies, trophyArt } from './trophies.js?v=20261127-rotate';
-import { mountTitle } from './title.js?v=20261127-rotate';
-import { createJoystick } from './joystick.js?v=20261127-rotate';
-import { createPilot } from './pilot.js?v=20261127-rotate';
+} from './art.js?v=20261127-front';
+import { createAudio } from './audio.js?v=20261127-front';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261127-front';
+import { createTrophies, trophyArt } from './trophies.js?v=20261127-front';
+import { mountTitle } from './title.js?v=20261127-front';
+import { createJoystick } from './joystick.js?v=20261127-front';
+import { createPilot } from './pilot.js?v=20261127-front';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1386,7 +1386,6 @@ function drawBackground() {
   } else {
     paint(to);
   }
-  if (state.planet) ctx.drawImage(state.planet.sprite, state.planet.x, fine(state.planet.y));
   const streak = Math.round(state.warp * 14);
   starLayers.forEach((layer, li) => {
     for (const star of layer.stars) {
@@ -1405,6 +1404,8 @@ function drawBackground() {
       }
     }
   });
+  // The planet hides the stars behind it, as any planet would.
+  if (state.planet) ctx.drawImage(state.planet.sprite, state.planet.x, fine(state.planet.y));
 }
 
 function drawWells() {
