@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261127-planet';
-import { createAudio } from './audio.js?v=20261127-planet';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261127-planet';
-import { createTrophies, trophyArt } from './trophies.js?v=20261127-planet';
-import { mountTitle } from './title.js?v=20261127-planet';
-import { createJoystick } from './joystick.js?v=20261127-planet';
-import { createPilot } from './pilot.js?v=20261127-planet';
+} from './art.js?v=20261127-rotate';
+import { createAudio } from './audio.js?v=20261127-rotate';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261127-rotate';
+import { createTrophies, trophyArt } from './trophies.js?v=20261127-rotate';
+import { mountTitle } from './title.js?v=20261127-rotate';
+import { createJoystick } from './joystick.js?v=20261127-rotate';
+import { createPilot } from './pilot.js?v=20261127-rotate';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1804,6 +1804,9 @@ function drawTitleWord(word, y, scale, color, shadow, delay) {
   });
 }
 
+// Phones held upright get a smaller field than sideways (see style.css), so the title says so.
+const phoneUpright = window.matchMedia('(pointer: coarse) and (orientation: portrait) and (max-width: 540px)');
+
 function drawTitle() {
   if (state.clock > 0.2) panel(W / 2 - 128, 44, 256, 124);
   drawTitleWord('ASTEROID', 56, 4, PAL.gold, PAL.hullDark, 0.3);
@@ -1814,6 +1817,7 @@ function drawTitle() {
   }
   if (state.best > 0) drawText(ctx, `BEST ${formatTime(state.best)}`, W / 2, 182, { align: 'center', color: PAL.steel });
   if (state.god) drawText(ctx, 'GOD MODE', W / 2, 196, { align: 'center', color: blink(1) ? PAL.gold : PAL.amber });
+  if (phoneUpright.matches && state.clock > 1.5) drawText(ctx, 'ROTATE FOR THE BEST EXPERIENCE', W / 2, 214, { align: 'center', color: PAL.glass });
 }
 
 // The pause screen hides the field (no rocks, comets, wells or capsules), so a pause can't be
