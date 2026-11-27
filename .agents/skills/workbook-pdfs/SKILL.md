@@ -1,11 +1,11 @@
 ---
 name: workbook-pdfs
-description: Rebuilding the printed PDFs (GCSE workbooks, unit reviews, revision exercises, prep sheets, lesson plans) after their source changes. Use when a workbook, its shared figures or a deck example it copies changes, or when asked to rebuild or check PDFs in a pdf/ folder.
+description: Rebuilding the printed PDFs (GCSE workbooks, unit reviews, revision exercises, prep sheets, lesson plans, DP worksheets) after their source changes. Use when a workbook, its shared figures or a deck example it copies changes, or when asked to rebuild or check PDFs in a pdf/ folder.
 ---
 
 # Rebuilding printed PDFs
 
-Printed resources are HTML pages printed to PDF with headless Chrome and kept in each unit's `pdf/` folder, such as `gcsephy/year9phy/unit02/pdf/`. Each unit's README says what is printed and how.
+Printed resources are HTML pages printed to PDF with headless Chrome and kept in each unit's `pdf/` folder, such as `gcsephy/year9phy/unit02/pdf/`. Each unit's README says what is printed and how. DP worksheets (`ibdpphy/worksheets/`) have their own `build.mjs` and rules in that folder's README.
 
 ## When a rebuild is needed
 

@@ -8,6 +8,7 @@ Rules for everything under `ibdpphy/`, on top of the root `AGENTS.md`. `gcsephy/
 - Pages are reached by direct links only, outside the root catalog; keep `ibdpphy/index.html` current. New pages do not start in `beta/`, and stay out of root `index.html`, `ASSETS_TO_CACHE` and `OFFLINE_CARD_REQUIREMENTS` unless requested. Being outside the catalog does not make them private.
 - Pages load `/assets/theme.js` with `data-theme-scope="ibdpphy"`, giving the section its own theme key.
 - `/ibdpphy` is network-only in the root `sw.js`. `ibdpphy/sw.js` is a freshness worker, not an offline cache: `cache: 'no-cache'` fetches, no Cache Storage, no `BUILD_ID`. Every page includes `<script src="/ibdpphy/sw-register.js" defer></script>`, which also compares the open page's HTML, scripts, stylesheets and images with the server by content hash (GitHub Pages ETags change on every deploy) and offers a Reload banner, never reloading by itself. A page that `fetch`es data lists those files in `data-watch` on the script tag. The pair is a copy of `gcsephy/sw.js` and `/gcsephy/sw-register.js`, scoped to `/ibdpphy/`; keep the two pairs in step. Pages marked `noindex` (PDF build sources) need no `sw-register.js`.
+- Printed resources: worksheets (classwork and revision, answers on the last page, with a 2-up copy) are in `worksheets/`; follow its README's rules when making or changing one. Topic tests stay in the local-only `Topic Tests (local only)/`.
 
 ## Teaching decks
 

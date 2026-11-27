@@ -1,0 +1,146 @@
+/* A4 worksheet with its answers. Every .page is one printed sheet; content never flows between sheets. */
+:root {
+  --navy: #22384d;
+  --ink: #1b1b1b;
+  --rule: #b9bec4;
+  --line: #c3c7cc;
+  --muted: #555;
+  --page-w: 210mm;
+  --page-h: 297mm;
+  --side: 16.5mm;
+}
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #e8e8e8; }
+body { font-family: Arial, Helvetica, sans-serif; color: var(--ink); font-size: 11pt; line-height: 1.38; }
+sup, sub { line-height: 0; font-size: 0.72em; }
+.nuc { display: inline-block; text-align: right; font-size: 0.68em; line-height: 1.02; vertical-align: -0.42em; margin: 0 0.06em 0 0.1em; }
+.nuc > span { display: block; }
+.eq { text-align: center; margin: 3mm 0 3mm; }
+.opt-table { border-collapse: collapse; margin: 3mm 0 0; }
+.opt-table th { font-weight: normal; text-align: center; padding: 0 0 2mm; min-width: 26mm; }
+.opt-table td { text-align: center; padding: 1.3mm 0; }
+.opt-table td:first-child, .opt-table th:first-child { text-align: left; min-width: 8.5mm; width: 8.5mm; }
+.opt-table td:first-child b { font-size: 9.5pt; }
+.data-table { border-collapse: collapse; margin: 3mm auto 4mm; }
+.data-table th, .data-table td { border: 0.25mm solid #888; padding: 1.4mm 5mm; text-align: center; }
+.data-table th { font-weight: bold; background: #f1f3f5; }
+@media print { html, body { background: #fff; } }
+
+.page {
+  width: var(--page-w); height: var(--page-h);
+  margin: 8mm auto; background: #fff;
+  padding: 13mm var(--side) 11mm;
+  display: flex; flex-direction: column;
+  page-break-after: always; break-after: page;
+  position: relative;
+}
+.page:last-child { page-break-after: auto; break-after: auto; }
+@media print { .page { margin: 0; } }
+.page.overflow { outline: 3px solid #d00; }
+.page.overflow::after {
+  content: "Content overflows this page"; position: absolute; top: 2mm; left: var(--side);
+  color: #d00; font: bold 9pt Arial, sans-serif;
+}
+
+.run-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  font-size: 8pt; font-weight: bold; letter-spacing: 0.02em; color: var(--navy);
+  text-transform: uppercase; padding-bottom: 2.6mm; border-bottom: 0.4mm solid var(--navy);
+}
+.page-body { flex: 1; min-height: 0; overflow: hidden; padding-top: 5mm; }
+.run-foot {
+  padding-top: 2.4mm;
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+/* As the GCSE workbooks: the sheet, year, kind and copyright on the left, the page number on the right. */
+.run-foot span:first-child { font-size: 9pt; color: #56606e; }
+.run-foot .page-no { font-size: 10pt; font-weight: bold; color: #0a1326; }
+
+/* Cover */
+.cover-title { font-family: Georgia, "Times New Roman", serif; font-weight: normal; font-size: 27pt; line-height: 1.15; margin: 1mm 0 4mm; }
+.cover-facts { display: flex; justify-content: space-between; font-weight: bold; font-size: 10.5pt; }
+.cover-fields { display: flex; gap: 8mm; align-items: flex-end; margin: 13mm 0 13mm; font-weight: bold; }
+.cover-fields .fill { border-bottom: 0.25mm solid #333; height: 5mm; }
+.cover-fields .name { flex: 0 0 auto; }
+.cover-fields .name-fill { flex: 1 1 auto; }
+.cover-fields .class-fill { flex: 0 0 52mm; }
+.instructions p { margin: 0 0 2.2mm; }
+.instructions { border-bottom: 0.2mm solid var(--rule); padding-bottom: 2mm; margin-bottom: 6mm; }
+
+/* Section heading */
+.section-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  color: var(--navy); margin: 0 0 6mm;
+}
+.section-head h2 { margin: 0; font-size: 16pt; font-weight: bold; }
+.section-head .bar { padding: 0 0.5em; }
+.section-head .marks { font-size: 8.5pt; font-weight: bold; color: var(--ink); }
+.section-head { margin-top: 7mm; }
+.page-body > .section-head:first-child { margin-top: 1mm; }
+.instructions + .section-head { margin-top: 0; }
+.cont-label { font-weight: bold; font-size: 10pt; margin: -1mm 0 5mm; }
+
+/* Questions */
+.q { display: grid; grid-template-columns: 9mm 1fr; align-items: baseline; margin: 0 0 4.5mm; }
+.q-num { font-weight: bold; }
+.q-text p { margin: 0 0 2.5mm; }
+.q-text p:last-child { margin-bottom: 0; }
+.q-cont { margin-left: 9mm; }
+.q-cont > p { margin: 0 0 3mm; }
+.options { list-style: none; margin: 3.5mm 0 0; padding: 0 0 0 0.4mm; }
+.options li { display: grid; grid-template-columns: 8.5mm 1fr; align-items: baseline; margin: 0 0 3mm; }
+.options li:last-child { margin-bottom: 0; }
+.options b { font-size: 9.5pt; }
+
+.part { display: grid; grid-template-columns: 9mm 1fr 10mm; align-items: baseline; margin: 4mm 0 0; }
+.part-label { font-weight: bold; font-size: 10pt; }
+.part-marks { text-align: right; font-weight: bold; font-size: 10pt; }
+.part-text p { margin: 0 0 1.5mm; }
+.answer-lines { margin: 2.5mm 0 7mm 9mm; }
+.answer-lines div { height: 8.2mm; border-bottom: 0.2mm solid var(--line); }
+.answer-box { margin: 7mm 0 6mm 9mm;border: 0.25mm solid var(--rule); position: relative; }
+.answer-box .dot { position: absolute; left: 50%; top: 50%; width: 2mm; height: 2mm; margin: -1mm; border-radius: 50%; background: #111; }
+
+.figure { margin: 3mm 0 3mm; }
+.figure svg { display: block; margin: 0 auto; overflow: visible; }
+.end-label { text-align: right; font-weight: bold; margin-top: auto; padding-top: 4mm; }
+.page-body.has-end { display: flex; flex-direction: column; }
+
+/* Markscheme */
+.ms-intro p { margin: 0 0 1mm; }
+.ms-intro { margin: 0 0 7mm; }
+.cover-sub { font-weight: bold; margin: 0 0 9mm; }
+.ms-table { border-top: 0; margin: 0 0 9mm; }
+.ms-row { display: grid; border-bottom: 0.2mm solid var(--rule); padding: 2.6mm 0 2.6mm; }
+.ms-row.mcq { grid-template-columns: 8mm 7mm 1fr; align-items: baseline; padding: 2.2mm 0; }
+.ms-row.mcq .ms-key { color: var(--navy); font-weight: bold; font-size: 9.5pt; }
+.ms-row.part { grid-template-columns: 17mm 1fr 10mm; align-items: baseline; margin: 0; padding: 3.2mm 0 3mm; }
+.ms-label { font-weight: bold; font-size: 10pt; padding-left: 1.5mm; }
+.ms-row.mcq .ms-label { padding-left: 1.5mm; }
+.ms-points p { margin: 0 0 2mm; }
+.ms-points p:last-child { margin-bottom: 0; }
+.ms-row.figure-row { display: block; padding: 2mm 0 1mm; }
+.ms-row.figure-row .figure { margin: 0; }
+.ms-gap { height: 4mm; }
+
+/* Student answer sheet */
+.ms-row.part.ans { padding: 1.9mm 0 1.7mm; }
+.ans-fig .figure { margin: 1mm 0 0; }
+.ans-fig svg { width: 118mm; height: auto; margin: -1mm 0 -1mm; }
+
+/* Answers: tighter rows so they fit on the last page. */
+.compact-scheme .ms-intro { margin-bottom: 4mm; }
+.compact-scheme .ms-table { margin-bottom: 5mm; }
+.compact-scheme .ms-row.mcq { padding: 1.4mm 0; }
+.compact-scheme .ms-row.part { padding: 1.8mm 0 1.6mm; }
+.compact-scheme .ms-points p { margin-bottom: 0.8mm; }
+.compact-scheme .ms-gap { height: 2mm; }
+.compact-scheme .page-body { font-size: 10pt; }
+/* Short multiple-choice options in two columns (columns: 2): A and B on the first row. */
+.options.cols2 { display: grid; grid-template-columns: 1fr 1fr; column-gap: 6mm; row-gap: 3mm; }
+.options.cols2 li { margin: 0; }
+/* \frac{a}{b}: a stacked fraction in running text. */
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.86em; line-height: 1.15; margin: 0 0.12em; }
+.frac > span:first-child { border-bottom: 0.18mm solid currentColor; padding: 0 0.15em; }
+.frac > span:last-child { padding: 0 0.15em; }
