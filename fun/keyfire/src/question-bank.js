@@ -107,7 +107,7 @@ export const EASY_WORDS = [
 
 export const MEDIUM_WORDS = [
   // Energy
-  { term: 'energy store', definition: 'Kinetic, thermal, chemical or gravitational potential, for example' },
+  { term: 'mechanical energy', definition: 'The sum of the kinetic and potential energy of an object' },
   { term: 'work done', definition: 'Energy transferred when a force moves an object' },
   { term: 'efficiency', definition: 'Useful energy output divided by total energy input' },
   { term: 'dissipation', definition: 'The spreading out of energy into the surroundings so it is less useful' },
@@ -281,9 +281,9 @@ export const MEDIUM_WORDS = [
 
 export const HARD_WORDS = [
   // Energy
-  { term: 'gravitational potential energy', definition: 'Stored by an object because of its height above the ground' },
-  { term: 'kinetic energy', definition: 'The energy store of a moving object' },
-  { term: 'thermal energy', definition: 'The energy store that increases when a substance is heated' },
+  { term: 'gravitational potential energy', definition: 'Energy an object has because of its position in a gravitational field' },
+  { term: 'kinetic energy', definition: 'The energy an object has because of its motion' },
+  { term: 'thermal energy', definition: 'Energy transferred from a hotter to a colder body because of a temperature difference' },
   { term: 'elastic potential energy', definition: 'Stored in an object that is stretched, squashed or bent' },
   { term: 'specific heat capacity', definition: 'Energy to raise the temperature of 1 kg of a substance by 1 °C' },
   { term: 'specific latent heat', definition: 'Energy to change the state of 1 kg with no change in temperature' },

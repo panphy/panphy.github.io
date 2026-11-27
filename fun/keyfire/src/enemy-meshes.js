@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GLOW_GAIN } from './visuals.js?v=12';
-import { LOW_POLY_CREATURES, buildPulseHeart, buildMimicChest } from './lowpoly-creatures.js?v=12';
+import { GLOW_GAIN } from './visuals.js?v=13';
+import { LOW_POLY_CREATURES, buildPulseHeart, buildMimicChest } from './lowpoly-creatures.js?v=13';
 
 const materialCache = new Map();
 
