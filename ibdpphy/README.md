@@ -10,6 +10,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 |---|---|
 | `index.html` | Hub page. Its syllabus map lists themes A to E; a theme becomes a link once it has resources |
 | `course-summary/` | One-page summary of the subject guide: hours, the content and equations of every topic at SL and HL, the practical program and assessment. Paraphrased and shortened; the guide is the authority |
+| `worksheets/` | Printed worksheets in the IB style, answers on the last page, each with a 2-up copy: `sheets/` holds the sources, `pdf/` the PDFs and `build.mjs` prints them. Its README holds the rules |
 | `data-booklet/` | Annotated data booklet: `booklet.js` holds the constants, conversions, mathematical equations and diagrams and builds the page; `booklet.css` styles it |
 | `assets/equations.js` | The equations of every topic as LaTeX with a meaning for each symbol, used by both reference pages; it also typesets them and shows the explanations |
 | `assets/page.css` | Styles shared by those two reference pages, light and dark, including the equation lists |
