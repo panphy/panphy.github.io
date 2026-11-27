@@ -3,13 +3,13 @@
 import {
   W, H, PAL, NEBULA_H, ROCK_DIAMETERS, ROCK_FRAMES, ROCK_PALETTES, SHIP_W, SHIP_H, CAPSULES,
   buildShip, buildRockSet, buildNebula, buildStars, buildPlanet, buildPageTile, buildCapsule, drawText, textWidth, makeRng,
-} from './art.js?v=20261124-nogo';
-import { createAudio } from './audio.js?v=20261124-nogo';
-import { createLeaderboard, formatTime } from './leaderboard.js?v=20261124-nogo';
-import { createTrophies, trophyArt } from './trophies.js?v=20261124-nogo';
-import { mountTitle } from './title.js?v=20261124-nogo';
-import { createJoystick } from './joystick.js?v=20261124-nogo';
-import { createPilot } from './pilot.js?v=20261124-nogo';
+} from './art.js?v=20261127-pad';
+import { createAudio } from './audio.js?v=20261127-pad';
+import { createLeaderboard, formatTime } from './leaderboard.js?v=20261127-pad';
+import { createTrophies, trophyArt } from './trophies.js?v=20261127-pad';
+import { mountTitle } from './title.js?v=20261127-pad';
+import { createJoystick } from './joystick.js?v=20261127-pad';
+import { createPilot } from './pilot.js?v=20261127-pad';
 
 /* -----------------------------------------------------------
  * Difficulty. The asteroid curve started as the previous
@@ -1357,6 +1357,7 @@ function moveShipBy(dx, dy) {
   }
 }
 
+const PLANET_ALPHA = 0.4;
 function updatePlanet(dt) {
   if (!state.planet) {
     const seedRng = makeRng(state.planetSeed);
@@ -1386,7 +1387,12 @@ function drawBackground() {
   } else {
     paint(to);
   }
-  if (state.planet) ctx.drawImage(state.planet.sprite, state.planet.x, fine(state.planet.y));
+  // The planet is far-off scenery, dimmed so it never reads as something to dodge.
+  if (state.planet) {
+    ctx.globalAlpha = PLANET_ALPHA;
+    ctx.drawImage(state.planet.sprite, state.planet.x, fine(state.planet.y));
+    ctx.globalAlpha = 1;
+  }
   const streak = Math.round(state.warp * 14);
   starLayers.forEach((layer, li) => {
     for (const star of layer.stars) {
@@ -1996,6 +2002,7 @@ function frame(now) {
     pending -= STEP;
   }
   draw();
+  joystick.tick(elapsed, state.mode === 'title' || state.mode === 'over');
   if (state.mode !== 'paused' && pilotShown()) {
     pilot.frame(elapsed, pilotView());
     pilot.draw();

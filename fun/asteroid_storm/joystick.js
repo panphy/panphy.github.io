@@ -1,13 +1,21 @@
 // A pixel-art touch pad for narrow touch screens (see style.css). It works like dragging the
 // ship: every finger movement on it is passed straight to onDrag in screen pixels, so the ship
 // moves at once, and the finger may slide past the pad's edge. The knob follows the finger
-// for feedback and springs back to the centre on release.
-import { PAL } from './art.js?v=20261124-nogo';
+// for feedback and springs back to the centre on release; between runs it nudges by itself.
+import { PAL } from './art.js?v=20261127-pad';
 
 const SIZE = 48; // drawn at 48 x 48 pixels; the page scales it up
 const C = SIZE / 2;
 const TRAVEL = 13; // px the knob can move from the centre
 const KNOB = 8; // knob radius
+// Between runs the knob nudges up, right, down and left in turn to show that it moves.
+const NUDGE_PERIOD = 3.2; // s between nudges
+const NUDGE_OUT = 0.25; // s to glide out
+const NUDGE_HOLD = 0.3; // s held at the end
+const NUDGE_BACK = 0.25; // s to spring back
+const NUDGE_REACH = 9; // px
+const NUDGE_DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} } = {}) {
   canvas.width = SIZE;
@@ -20,6 +28,8 @@ export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} }
   let startY = 0;
   let lastX = 0;
   let lastY = 0;
+  let nudgeT = 0; // s into the current nudge cycle
+  let nudgeN = 0; // which direction comes next
 
   // Pixel-perfect ring of the given radius; `dash` skips every other run of pixels.
   function ring(radius, color, dash = 0) {
@@ -56,11 +66,17 @@ export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} }
     disc(C - 0.5, C - 0.5, 22, (x, y, d) => (d > 21 ? PAL.ink : d > 19.5 ? PAL.navy : '#121131'));
     ring(20, active ? PAL.glass : PAL.slate);
     ring(14, active ? '#2a6f8a' : PAL.navy, 2);
-    // Ticks at the eight directions.
-    ctx.fillStyle = active ? PAL.mint : '#3e7f63';
-    for (let k = 0; k < 8; k += 1) {
-      const a = (k / 8) * Math.PI * 2;
-      for (const r of [17, 18]) ctx.fillRect(Math.round(C - 0.5 + Math.cos(a) * r), Math.round(C - 0.5 + Math.sin(a) * r), 1, 1);
+    // Chevrons at the four directions say "push this way".
+    ctx.fillStyle = active ? PAL.mint : '#46a079';
+    for (const [ax, sign] of [[0, -1], [1, 1], [0, 1], [1, -1]]) {
+      // Rows from the tip inwards: [distance from the centre, perpendicular offsets].
+      for (const [d, vs] of [[18, [-1, 0]], [17, [-2, 1]], [16, [-3, 2]]]) {
+        const along = sign > 0 ? C + d : C - 1 - d;
+        for (const v of vs) {
+          if (ax) ctx.fillRect(along, C + v, 1, 1);
+          else ctx.fillRect(C + v, along, 1, 1);
+        }
+      }
     }
     // Centre mark, under the knob when it rests.
     ctx.fillStyle = PAL.slate;
@@ -113,6 +129,9 @@ export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} }
     e.preventDefault();
     if (pointer !== null) return; // one thumb steers; a second touch is ignored
     pointer = e.pointerId;
+    kx = 0; // drop any nudge; the knob now follows the finger
+    ky = 0;
+    nudgeT = 0;
     try { canvas.setPointerCapture(e.pointerId); } catch {}
     startX = lastX = e.clientX;
     startY = lastY = e.clientY;
@@ -129,7 +148,31 @@ export function createJoystick(canvas, { onPress = () => {}, onDrag = () => {} }
 
   draw();
 
+  // The knob's offset during a nudge, t seconds into the cycle.
+  function nudgeOffset(t) {
+    const ease = (u) => 1 - (1 - u) * (1 - u);
+    let r = 0;
+    if (t < NUDGE_OUT) r = ease(t / NUDGE_OUT);
+    else if (t < NUDGE_OUT + NUDGE_HOLD) r = 1;
+    else if (t < NUDGE_OUT + NUDGE_HOLD + NUDGE_BACK) r = 1 - ease((t - NUDGE_OUT - NUDGE_HOLD) / NUDGE_BACK);
+    const [dx, dy] = NUDGE_DIRS[nudgeN % NUDGE_DIRS.length];
+    return [Math.round(dx * r * NUDGE_REACH), Math.round(dy * r * NUDGE_REACH)];
+  }
+
   return {
+    // Called every frame; `idle` is true between runs, when the knob may nudge.
+    tick(dt, idle) {
+      if (pointer !== null) return;
+      if (!idle || reduceMotion.matches || !canvas.offsetWidth) {
+        nudgeT = 0;
+        if (kx || ky) { kx = 0; ky = 0; draw(); }
+        return;
+      }
+      nudgeT += dt;
+      if (nudgeT >= NUDGE_PERIOD) { nudgeT -= NUDGE_PERIOD; nudgeN += 1; }
+      const [nx, ny] = nudgeOffset(nudgeT);
+      if (nx !== kx || ny !== ky) { kx = nx; ky = ny; draw(); }
+    },
     reset() {
       if (pointer !== null) { try { canvas.releasePointerCapture(pointer); } catch {} }
       pointer = null; kx = 0; ky = 0; draw();
