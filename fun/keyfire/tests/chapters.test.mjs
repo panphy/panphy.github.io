@@ -70,7 +70,8 @@ test('every boss has its say before its fight: three lines, in a voice deeper th
     const speech = BOSS_SPEECHES[chapter.boss];
     assert.ok(speech, `${chapter.boss} has a speech`);
     assert.equal(speech.lines.length, 3, chapter.boss);
-    for (const line of speech.lines) assert.ok(line.length <= 110, line);
+    assert.equal(speech.defeat.length, 1, `${chapter.boss} has a last word`);
+    for (const line of [...speech.lines, ...speech.defeat]) assert.ok(line.length <= 110, line);
     assert.ok(speech.voice < lowestStoryVoice, chapter.boss);
     // Blips are 360 + 70 × voice hertz: keep them an audible growl, not a rumble.
     assert.ok(360 + 70 * speech.voice >= 120, chapter.boss);

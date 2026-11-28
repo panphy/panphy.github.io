@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=26';
-import { createSeasonalEffects } from './seasonal-effects.js?v=26';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=26';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=26';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=26';
-import { createLeaderboard } from './leaderboard.js?v=26';
-import { createEnemyMesh } from './enemy-meshes.js?v=26';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=26';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=26';
-import { createLowPolyCloud } from './lowpoly.js?v=26';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=26';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=26';
-import { createWordDeck } from './word-decks.js?v=26';
-import { createStage } from './stages.js?v=26';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=26';
-import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=26';
-import { createStoryteller, settleLantern } from './storyteller.js?v=26';
-import { createPlasmaCannon } from './plasma-cannon.js?v=26';
-import { createRideCart } from './ride-cart.js?v=26';
+import { createKeyFireAudio } from './audio.js?v=27';
+import { createSeasonalEffects } from './seasonal-effects.js?v=27';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=27';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=27';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=27';
+import { createLeaderboard } from './leaderboard.js?v=27';
+import { createEnemyMesh } from './enemy-meshes.js?v=27';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=27';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=27';
+import { createLowPolyCloud } from './lowpoly.js?v=27';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=27';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=27';
+import { createWordDeck } from './word-decks.js?v=27';
+import { createStage } from './stages.js?v=27';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=27';
+import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=27';
+import { createStoryteller, settleLantern } from './storyteller.js?v=27';
+import { createPlasmaCannon } from './plasma-cannon.js?v=27';
+import { createRideCart } from './ride-cart.js?v=27';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -2197,11 +2197,12 @@ function updateBossFight(delta) {
     bossFight = { clearTimer: 0 };
     return;
   }
+  updateBossSpeechText(delta);
   if (bossDeath) {
     updateBossDeath(delta);
     return;
   }
-  if (enemies.some(enemy => !enemy.dying)) return;
+  if (bossSpeech || enemies.some(enemy => !enemy.dying)) return;
   bossFight.clearTimer += delta;
   if (bossFight.clearTimer < 1.4) return;
   bossFight = null;
@@ -2232,7 +2233,7 @@ function updatePhraseBoss(boss, delta, seconds) {
     return;
   }
   if (plan.phase === 'boss-speech') {
-    updateBossSpeech(boss, delta, seconds);
+    poseSpeakingBoss(boss, delta, seconds);
     return;
   }
   const stunned = boss.stunTimer > 0;
@@ -2353,6 +2354,7 @@ function startBossDeath(boss) {
   boss.rage = 1;
   boss.windup = 0;
   bossDeath = { boss, t: 0, nextBurst: 0, x: boss.group.position.x, z: boss.group.position.z };
+  startBossDefeatSpeech(boss);
   boss.label.classList.remove('is-frosted');
   for (const minion of enemies.filter(enemy => (enemy.summoned || enemy.bossHealer) && !enemy.dying)) {
     spawnDebris(minion.group.position, minion.type);
@@ -2928,14 +2930,21 @@ function endStory() {
 }
 
 // ── The boss has its say ─────────────────────────────────────────────────
-// A boss lands and speaks before it fights: its myth, a line at a time, in a dark card
+// A boss lands and taunts the player before it fights, a line at a time, in a dark card
 // in the storyteller's place, moved on with Space or skipped. It neither attacks nor
-// can be typed at until it has finished, and then its fight starts afresh.
+// can be typed at until it has finished, and then its fight starts afresh. Beaten, it
+// gets one last jibe in as it falls, and the stage is not cleared until that is read.
 function startBossSpeech(boss) {
   const speech = BOSS_SPEECHES[boss.type.name];
   if (!speech) return;
   boss.rail.phase = 'boss-speech';
-  bossSpeech = { boss, speech, line: -1, text: '', shown: 0, blip: 0, age: 0 };
+  bossSpeech = { boss, lines: speech.lines, voice: speech.voice, fight: true, line: -1, text: '', shown: 0, blip: 0, age: 0 };
+}
+
+function startBossDefeatSpeech(boss) {
+  const speech = BOSS_SPEECHES[boss.type.name];
+  if (!speech?.defeat) return;
+  bossSpeech = { boss, lines: speech.defeat, voice: speech.voice, fight: false, line: -1, text: '', shown: 0, blip: 0, age: 0 };
 }
 
 function showBossSpeechLine() {
@@ -2952,8 +2961,9 @@ function showBossSpeechLine() {
     });
     document.getElementById('app').append(bossSpeechCard);
   }
-  const { boss, speech } = bossSpeech;
-  bossSpeech.text = speech.lines[bossSpeech.line];
+  const { boss, lines, fight } = bossSpeech;
+  bossSpeech.text = lines[bossSpeech.line];
+  bossSpeechCard.querySelector('.story-skip').title = fight ? 'Skip to the fight' : 'Skip';
   bossSpeech.shown = 0;
   bossSpeech.blip = 0;
   bossSpeechCard.style.setProperty('--boss-accent', hexColor(boss.type.trim));
@@ -2967,29 +2977,34 @@ function showBossSpeechLine() {
 
 function advanceBossSpeech() {
   bossSpeech.line += 1;
-  if (bossSpeech.line >= bossSpeech.speech.lines.length) {
+  if (bossSpeech.line >= bossSpeech.lines.length) {
     finishBossSpeech();
     return;
   }
-  // It roars as it starts each line.
-  const { boss } = bossSpeech;
-  boss.roar = 1;
-  kickTimer = Math.max(kickTimer, 0.12);
+  // Before its fight it roars as it starts each line.
+  if (bossSpeech.fight) {
+    bossSpeech.boss.roar = 1;
+    kickTimer = Math.max(kickTimer, 0.12);
+  }
   showBossSpeechLine();
 }
 
 // The boss stands where it landed, facing the player, looming as it speaks.
-function updateBossSpeech(boss, delta, seconds) {
+function poseSpeakingBoss(boss, delta, seconds) {
   const position = boss.group.position;
   boss.roar = Math.max(0, boss.roar - delta / 0.9);
   if (boss.isFlying) position.y = boss.baseY + Math.sin(seconds * 1.4 + boss.phase) * boss.floatAmount;
   boss.group.rotation.y = Math.atan2(-position.x, CAMERA_DISTANCE - position.z);
   boss.group.rotation.x = Math.sin(boss.roar * Math.PI) * 0.22;
   boss.scaleBoost = 1 + Math.sin(boss.roar * Math.PI) * 0.14;
+}
+
+// The speech's letters appear one at a time, in the boss's low voice.
+function updateBossSpeechText(delta) {
   if (!bossSpeech) return;
   bossSpeech.age += delta;
   if (bossSpeech.line < 0) {
-    if (bossSpeech.age > 0.5) advanceBossSpeech();
+    if (bossSpeech.age > (bossSpeech.fight ? 0.5 : 0.3)) advanceBossSpeech();
     return;
   }
   const { text } = bossSpeech;
@@ -3003,7 +3018,7 @@ function updateBossSpeech(boss, delta, seconds) {
   bossSpeech.blip += now - before;
   if (bossSpeech.blip >= 2 && /\S/.test(text.charAt(now - 1))) {
     bossSpeech.blip = 0;
-    playTalkSound(bossSpeech.speech.voice);
+    playTalkSound(bossSpeech.voice);
   }
 }
 
@@ -3019,9 +3034,9 @@ function hurryBossSpeech(key) {
 // The speech is over: the fight begins, with the boss's first throw a moment away.
 function finishBossSpeech() {
   if (!bossSpeech) return;
-  const { boss } = bossSpeech;
+  const { boss, fight } = bossSpeech;
   endBossSpeech();
-  if (boss.dying || !enemies.includes(boss)) return;
+  if (!fight || boss.dying || !enemies.includes(boss)) return;
   boss.rail.phase = 'boss';
   boss.attackTimer = 2.4;
   boss.roar = 1;
