@@ -3769,6 +3769,53 @@ body.battery-saver .power-up-bar {
   letter-spacing: 0.3em;
 }
 
+/* The start card: narrow and centred. Its three beats are set in the title's lettering,
+   each verb in the colour of what it does; then the Start key, with the best score and
+   the small print under it. */
+.message-panel.is-start {
+  width: min(360px, calc(100vw - 36px));
+  justify-items: center;
+  gap: 14px;
+  padding: 24px 24px 16px;
+  text-align: center;
+}
+
+.message-panel.is-start #messageKicker { order: 0; }
+.message-panel.is-start h2 { order: 1; font-size: clamp(2.1rem, 6vw, 2.8rem); }
+.message-panel.is-start .message-copy { order: 2; }
+.message-panel.is-start > button { order: 3; margin-top: 4px; }
+.message-panel.is-start .message-score { order: 4; }
+.message-panel.is-start .support-link { order: 5; }
+.message-panel.is-start .message-copyright { order: 6; }
+
+.message-panel.is-start .message-copy {
+  display: grid;
+  gap: 4px;
+  color: var(--key-ink);
+  font-family: var(--font-chunky);
+  font-size: clamp(1.3rem, 3.6vw, 1.55rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  white-space: normal;
+}
+
+.message-panel.is-start .message-copy span { display: block; }
+.message-panel.is-start .message-copy b { font-weight: 400; }
+.message-panel.is-start .message-copy .is-kill { color: #d9362b; }
+.message-panel.is-start .message-copy .is-heal { color: #d63d78; }
+.message-panel.is-start .message-copy .is-loot { color: #b7650c; }
+
+.message-panel.is-start .message-score {
+  padding: 3px 12px;
+  border: 2px solid var(--key-ink);
+  border-radius: 999px;
+  background: #fffaf0;
+  color: #157a70;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
 .kf-modal-score {
   color: #fff6dc;
   font-size: 2.4rem;
