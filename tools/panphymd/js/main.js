@@ -56,7 +56,7 @@ import {
   updateHighlightTheme
 } from './ui.js';
 
-import { createEmbeddedImageEditor, parseLinkedImageImport } from './embedded-images.js';
+import { createEmbeddedImageEditor, parseLinkedImageImport, parseLinkedDocumentOpen } from './embedded-images.js';
 import { initPagePreview } from './page-preview.js';
 
 // DOM element references
@@ -1806,6 +1806,34 @@ async function loadMarkdownFile() {
   input.click();
 }
 
+/**
+ * Open a whole document sent in the link (#open=), as the Open button does:
+ * confirm before replacing, keep a snapshot, then replace the content.
+ */
+async function openLinkedDocument(hash) {
+  let content;
+  try {
+    content = parseLinkedDocumentOpen(hash);
+  } catch (error) {
+    alert('The document in this link could not be read. Your draft has been kept.');
+    return;
+  }
+  if (sourceEditor.value === content) return;
+  if (sourceEditor.value.trim() !== '') {
+    const confirmed = await showConfirmationModal(
+      'Opening a file will replace your current content. Any unsaved changes will be lost.',
+      { isSuppressed: isOpenWarningSuppressed, saveSuppressed: saveOpenWarningSuppressed }
+    );
+    if (!confirmed) return;
+  }
+  saveSnapshotIfNeeded(sourceEditor.value);
+  sourceEditor.value = content;
+  clearUntouchedSampleContent();
+  renderContent();
+  saveDraft(sourceEditor.value);
+  updateDirtyIndicator(dirtyIndicator, isDirty(sourceEditor.value));
+}
+
 // ---------------------------------------------------------------------- //
 // Sync Scroll                                                              //
 // ---------------------------------------------------------------------- //
@@ -2344,6 +2372,14 @@ if (window.location.hash.startsWith('#import=')) {
   }
 }
 renderContent();
+function openDocumentFromLocation() {
+  if (!window.location.hash.startsWith('#open=')) return;
+  const openHash = window.location.hash;
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  openLinkedDocument(openHash);
+}
+openDocumentFromLocation();
+window.addEventListener('hashchange', openDocumentFromLocation);
 if (importedImage) {
   if (mobileQuery.matches) switchMobilePane('output');
   mathTypesetQueue.then(() => {
