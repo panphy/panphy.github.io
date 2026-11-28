@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=16';
-import { createSeasonalEffects } from './seasonal-effects.js?v=16';
-import { createPowerUpSystem } from './power-ups.js?v=16';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=16';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=16';
-import { createLeaderboard } from './leaderboard.js?v=16';
-import { createEnemyMesh } from './enemy-meshes.js?v=16';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=16';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=16';
-import { createLowPolyCloud } from './lowpoly.js?v=16';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=16';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=16';
-import { createWordDeck } from './word-decks.js?v=16';
-import { createStage } from './stages.js?v=16';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=16';
-import { storyBeatForWave } from './story.js?v=16';
-import { createStoryteller, settleLantern } from './storyteller.js?v=16';
-import { createPlasmaCannon } from './plasma-cannon.js?v=16';
-import { createRideCart } from './ride-cart.js?v=16';
+import { createKeyFireAudio } from './audio.js?v=17';
+import { createSeasonalEffects } from './seasonal-effects.js?v=17';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=17';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=17';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=17';
+import { createLeaderboard } from './leaderboard.js?v=17';
+import { createEnemyMesh } from './enemy-meshes.js?v=17';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=17';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=17';
+import { createLowPolyCloud } from './lowpoly.js?v=17';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=17';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=17';
+import { createWordDeck } from './word-decks.js?v=17';
+import { createStage } from './stages.js?v=17';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=17';
+import { storyBeatForWave } from './story.js?v=17';
+import { createStoryteller, settleLantern } from './storyteller.js?v=17';
+import { createPlasmaCannon } from './plasma-cannon.js?v=17';
+import { createRideCart } from './ride-cart.js?v=17';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -96,6 +96,8 @@ const MAX_LIFE = HEART_COUNT * 2;
 // One heart or less: the music darkens and a heartbeat joins it.
 const LOW_LIFE_MUSIC_THRESHOLD = 2;
 const MINION_DAMAGE = 2;
+// The railgun's colour: its shots, and the cannon's crystal while shots are left.
+const RAILGUN_COLOUR = 0xff5ad2;
 // Seconds a boss is stunned when chain lightning leaps to it.
 const CHAIN_BOSS_STUN = 5.5;
 // Bosses are drawn this much bigger than their listed scale, so they dominate
@@ -424,6 +426,8 @@ const {
   playBeamSound,
   playChainPrimeSound,
   playChainZapSound,
+  playRailgunChargeSound,
+  playRailgunShotSound,
   playTimeFreezeSound,
   playTimeResumeSound,
 } = createKeyFireAudio({
@@ -548,6 +552,7 @@ powerUps = createPowerUpSystem({
   playGodModeOffSound,
   playStartSound,
   playChainPrimeSound,
+  playRailgunChargeSound,
   playTimeFreezeSound,
   playTimeResumeSound,
   THREE,
@@ -1051,6 +1056,8 @@ function enterCharacter(character) {
   if (matches.length > 0) {
     typedBuffer = typed;
     activeTarget = pickTarget(matches, typed);
+    // A railgun shot finishes the word on its first letter.
+    if (typed.length === 1 && !activeTarget._matchComplete && fireRailgun(activeTarget)) return;
     if (activeTarget._matchComplete) {
       defeatEnemy(activeTarget);
     } else {
@@ -1062,6 +1069,24 @@ function enterCharacter(character) {
 
   // A key that fits nothing is only a miss: the letters typed so far, and the target, stay.
   registerMistake();
+}
+
+// Spends a railgun shot on the word just started, if there is a shot and the target takes
+// one: anything with a word, a boss word included, but not what a boss throws, whose
+// units are only a key or three. The word scores in full but is not ranked.
+function fireRailgun(target) {
+  if (target.isProjectile || !powerUps.useRailgunShot()) return false;
+  target.noRank = true;
+  const position = target.group.position;
+  spawnBeam(position);
+  playRailgunShotSound(position.x);
+  kickTimer = Math.max(kickTimer, 0.3);
+  hitStopTimer = Math.max(hitStopTimer, 0.05);
+  reusableVector.copy(position);
+  reusableVector.y += 1.0 * target.group.scale.y;
+  fx.burst(reusableVector, { color: RAILGUN_COLOUR, color2: 0xffffff, count: 22, speed: 6, life: 0.45, size: 0.32 });
+  defeatEnemy(target);
+  return true;
 }
 
 // Letters typed at a monster that has died or got away are dropped, so the next word starts clean.
@@ -1599,6 +1624,7 @@ function startBossLine(boss) {
   boss.prompt = line.term;
   boss.definition = line.topic;
   boss.firstLetterAt = undefined;
+  boss.noRank = false;
   boss.lineKind = line.kind || 'line';
   boss.label.dataset.stage = boss.lineKind;
   boss.lineWordsList = lineWords(line);
@@ -1867,7 +1893,10 @@ function advanceBossLine(boss) {
     else playTypeSound(1);
     hitEnemyWithLetter(boss);
     // The next word or long term of a word stage is timed from its own first letter.
-    if (stageWord) boss.firstLetterAt = undefined;
+    if (stageWord) {
+      boss.firstLetterAt = undefined;
+      boss.noRank = false;
+    }
     updateHud(true);
     return true;
   }
@@ -3727,15 +3756,17 @@ function updateEnvironment(seconds, delta, isTimeFrozen) {
   visuals.motes.update(seconds, emberLight.color);
   fx.update(delta, camera);
 
-  const isChainLightningPrimed = powerUps.isChainLightningPrimed();
-  if (isChainLightningPrimed && !cannonIsPrimed) {
-    cannonIsPrimed = true;
-    sceneCrystalMat.color.setHex(0xfde068);
-    sceneCrystalMat.emissive.setHex(0xfde068);
+  // A primed charge lights the cannon's crystal: gold with a crown of sparks for chain
+  // lightning, magenta for the railgun.
+  const primedColour = powerUps.isChainLightningPrimed() ? 0xfde068 : powerUps.getRailgunShots() > 0 ? RAILGUN_COLOUR : null;
+  if (primedColour !== null && cannonIsPrimed !== primedColour) {
+    cannonIsPrimed = primedColour;
+    sceneCrystalMat.color.setHex(primedColour);
+    sceneCrystalMat.emissive.setHex(primedColour);
     sceneCrystalMat.emissiveIntensity = 3.5;
-    for (const crown of lightningCrowns) crown.visible = true;
-    for (const light of strikeLights) light.color.setHex(0xfde068);
-  } else if (!isChainLightningPrimed && cannonIsPrimed) {
+    for (const crown of lightningCrowns) crown.visible = primedColour === 0xfde068;
+    for (const light of strikeLights) light.color.setHex(primedColour);
+  } else if (primedColour === null && cannonIsPrimed) {
     cannonIsPrimed = false;
     sceneCrystalMat.color.setHex(0x58dfcf);
     sceneCrystalMat.emissive.setHex(0x2dd4bf);
@@ -5874,7 +5905,7 @@ function rankFor(letters, since) {
 // ranked for each word of a word stage and each finished line. Rocks are not ranked,
 // nor is anything of a single letter, which has no typing time to measure.
 function spawnRankPopup(enemy, letters = enemy.searchPrompt.length - 1) {
-  if (enemy.isProjectile || enemy.firstLetterAt === undefined) return;
+  if (enemy.isProjectile || enemy.noRank || enemy.firstLetterAt === undefined) return;
   const rank = rankFor(letters, enemy.firstLetterAt);
   rankCounts[rank] = (rankCounts[rank] || 0) + 1;
   const bonus = RANK_BONUS_PER_LETTER[rank] * (Math.max(1, letters) + 1);
@@ -6038,8 +6069,7 @@ if (lootGuideLater) {
 }
 
 function awardMimicLoot(enemy) {
-  const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
-  const type = types[Math.floor(Math.random() * types.length)];
+  const type = POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
   const slot = powerUps.getPowerUps().indexOf(null);
   const success = powerUps.addPowerUp(type);
   playChestLootSound();

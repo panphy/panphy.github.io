@@ -5,7 +5,9 @@
  * and the power-up cheat.
  */
 
-const POWER_UP_TYPES = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
+export const POWER_UP_TYPES = ['time_freeze', 'chain_lightning', 'shockwave', 'shield', 'railgun'];
+// The railgun's shots: each one finishes a word on its first letter.
+export const RAILGUN_SHOTS = 3;
 
 export function createPowerUpSystem({
   getMode,
@@ -22,6 +24,7 @@ export function createPowerUpSystem({
   playGodModeOffSound,
   playStartSound,
   playChainPrimeSound,
+  playRailgunChargeSound,
   playTimeFreezeSound,
   playTimeResumeSound,
   THREE,
@@ -31,6 +34,16 @@ export function createPowerUpSystem({
   let powerUps = [null, null, null, null];
   let timeFreezeTimer = 0;
   let chainLightningPrimed = false;
+  let railgunShots = 0;
+  // Three pips in the tray's empty top-left corner show the railgun's shots left.
+  const railgunPips = powerUpBar ? document.createElement('div') : null;
+  if (railgunPips) {
+    railgunPips.className = 'railgun-pips';
+    railgunPips.setAttribute('role', 'status');
+    railgunPips.hidden = true;
+    railgunPips.innerHTML = '<span></span>'.repeat(RAILGUN_SHOTS);
+    powerUpBar.append(railgunPips);
+  }
   let powerUpCheatActive = false;
 
   // Shield state
@@ -70,6 +83,14 @@ export function createPowerUpSystem({
           <path d="M12 33 Q22 17 32 33" stroke="#4fd8d0" stroke-width="3.6"/>
         </g>
         <circle cx="22" cy="38" r="4" fill="#ff8a3a" stroke="${INK}" stroke-width="2.8"/>
+      </svg>
+    `,
+    railgun: `
+      <svg class="power-up-svg power-up-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+        <path d="M6 30 L30 8 L36 14 L12 36 Z" fill="#ff7ad9" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M10 30 L30 12 M14 33 L33 15" stroke="#fff6dc" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+        <circle cx="35" cy="9" r="5" fill="#fff6dc" stroke="${INK}" stroke-width="2.6"/>
+        <path d="M6 30 L12 36 L5 39 Z" fill="${INK}"/>
       </svg>
     `,
     shield: `
@@ -152,6 +173,7 @@ export function createPowerUpSystem({
 
     const isAlreadyActive = (powerUp === 'time_freeze' && timeFreezeTimer > 0) ||
                             (powerUp === 'chain_lightning' && chainLightningPrimed) ||
+                            (powerUp === 'railgun' && railgunShots > 0) ||
                             (powerUp === 'shield' && shieldActive);
 
     if (isAlreadyActive) {
@@ -178,10 +200,17 @@ export function createPowerUpSystem({
       playTimeFreezeSound();
       showBanner('TIME FREEZE!', 'time-freeze');
     } else if (powerUp === 'chain_lightning') {
+      // Chain lightning and the railgun replace each other: the new one takes over.
+      setRailgunShots(0);
       chainLightningPrimed = true;
       document.body.classList.add('chain-lightning-primed');
       playChainPrimeSound();
       showBanner('CHAIN PRIMED!', 'chain-lightning');
+    } else if (powerUp === 'railgun') {
+      clearChainLightning();
+      setRailgunShots(RAILGUN_SHOTS);
+      playRailgunChargeSound();
+      showBanner('RAILGUN!', 'railgun');
     } else if (powerUp === 'shockwave') {
       playShockwaveSound();
       showBanner('SHOCKWAVE!', 'shockwave');
@@ -189,7 +218,13 @@ export function createPowerUpSystem({
       // Pushes back all targeted/alive enemies and stuns them
       const aliveEnemies = getEnemies();
       aliveEnemies.forEach((enemy) => {
-        if (enemy.revealed && !enemy.dying) {
+        if (enemy.dying) return;
+        // What a boss throws is knocked back along its flight, so it takes longer to land.
+        if (enemy.isProjectile && enemy.rail) {
+          enemy.rail.t = Math.max(0, enemy.rail.t - 0.45);
+          return;
+        }
+        if (enemy.revealed) {
           enemy.pushbackTargetZ = Math.max(SPAWN_Z, enemy.group.position.z - 15);
           enemy.stunTimer = 1.5;
         }
@@ -486,10 +521,24 @@ export function createPowerUpSystem({
     }
   }
 
+  function clearChainLightning() {
+    chainLightningPrimed = false;
+    document.body.classList.remove('chain-lightning-primed');
+  }
+
+  function setRailgunShots(count) {
+    railgunShots = count;
+    if (!railgunPips) return;
+    railgunPips.hidden = count <= 0;
+    railgunPips.setAttribute('aria-label', `Railgun: ${count} shot${count === 1 ? '' : 's'} left`);
+    railgunPips.querySelectorAll('span').forEach((pip, index) => pip.classList.toggle('is-spent', index >= count));
+  }
+
   function clear() {
     powerUps = [null, null, null, null];
     timeFreezeTimer = 0;
     chainLightningPrimed = false;
+    setRailgunShots(0);
     powerUpCheatActive = false;
     shieldActive = false;
     shieldCharges = 0;
@@ -530,9 +579,13 @@ export function createPowerUpSystem({
     togglePowerUpCheat,
     isTimeFrozen: () => timeFreezeTimer > 0,
     isChainLightningPrimed: () => chainLightningPrimed,
-    clearChainLightningPrimed: () => {
-      chainLightningPrimed = false;
-      document.body.classList.remove('chain-lightning-primed');
+    clearChainLightningPrimed: clearChainLightning,
+    getRailgunShots: () => railgunShots,
+    // Spends one shot; false when there is none.
+    useRailgunShot: () => {
+      if (railgunShots <= 0) return false;
+      setRailgunShots(railgunShots - 1);
+      return true;
     },
     isPowerUpCheatActive: () => powerUpCheatActive,
     isShieldActive: () => shieldActive,

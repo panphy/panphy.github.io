@@ -1630,6 +1630,24 @@ export function createKeyFireAudio({
     burst(0.3, 0.02, { swell: true, filterFrequency: 1800, endFilterFrequency: 6000, q: 1.6 });
   }
 
+  // The railgun charging: a rising whine over a hum, ending in a click as it locks.
+  function playRailgunChargeSound() {
+    zap(110, 1760, 0.55, 0.03, { type: 'sawtooth', cutoff: 600, endCutoff: 5200, q: 4 });
+    zap(55, 220, 0.55, 0.025, { type: 'square', cutoff: 400, endCutoff: 900 });
+    thud(140, 0.12, 0.05, { delay: 0.56 });
+    playNoise(0.03, { gain: 0.06, filterType: 'highpass', filterFrequency: 3500, delay: 0.56 });
+  }
+
+  // One railgun shot: a hard crack, a heavy thump and a ringing tail.
+  function playRailgunShotSound(targetX = 0) {
+    const pan = laneOf(targetX);
+    duckMusic(0.25, 0.35);
+    playNoise(0.05, { gain: 0.11, filterType: 'highpass', filterFrequency: 2200, pan });
+    zap(3200, 180, 0.22, 0.06, { type: 'sawtooth', pan, cutoff: 6000, endCutoff: 500, q: 2 });
+    thud(64, 0.35, 0.12);
+    chime(1975.53, 0.4, 0.016, { delay: 0.03 });
+  }
+
   // One jump of chain lightning: a sharp crack, a falling zap, crackles and a low thump.
   function playChainZapSound(targetX = 0) {
     const pan = laneOf(targetX);
@@ -2473,6 +2491,8 @@ export function createKeyFireAudio({
     playBeamSound,
     playChainPrimeSound,
     playChainZapSound,
+    playRailgunChargeSound,
+    playRailgunShotSound,
     playTimeFreezeSound,
     playTimeResumeSound,
     playHealSound,

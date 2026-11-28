@@ -95,7 +95,7 @@ test('boss lines and rock units are plain letters', () => {
 const mainSource = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
 const mainSlice = (from, to) => mainSource.slice(mainSource.indexOf(from), mainSource.indexOf(to));
 
-function createTypingHarness(prompts = ['force', 'mass']) {
+function createTypingHarness(prompts = ['force', 'mass'], railgunShots = 0) {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const inputCode = source.slice(source.indexOf('function enterCharacter(character)'), source.indexOf('// Simple FNV-1a'));
   const targets = prompts.map(prompt => {
@@ -112,12 +112,32 @@ function createTypingHarness(prompts = ['force', 'mass']) {
     getInputCharacter, pickTarget,
     checkCheatCode() {}, playTypeSound() {}, hitEnemyWithLetter() {},
     reusableVector: { y: 0, copy() {} }, fx: { burst() {} },
+    railgunShots,
+    powerUps: { useRailgunShot: () => (context.railgunShots > 0 ? (context.railgunShots -= 1, true) : false) },
+    spawnBeam() {}, playRailgunShotSound() {}, kickTimer: 0, hitStopTimer: 0, RAILGUN_COLOUR: 0,
   });
   context.registerMistake = () => { context.mistakes += 1; context.streak = 0; };
   context.defeatEnemy = () => { context.kills += 1; context.typedBuffer = ''; context.activeTarget = null; };
   vm.runInContext(mainSlice('function findMatches(', 'function prepareWavePlan(') + inputCode, context);
   return { context, targets };
 }
+
+test('a railgun shot finishes a word on its first letter, one shot per word, never a rock', () => {
+  const { context, targets } = createTypingHarness(['force', 'mass', 'J'], 2);
+  targets[2].isProjectile = true;
+  context.typedBuffer = '';
+  context.activeTarget = null;
+  context.enterCharacter('j');
+  assert.equal(context.railgunShots, 2, 'a rock takes no shot');
+  context.enterCharacter('f');
+  assert.equal(context.kills, 2);
+  assert.equal(context.railgunShots, 1);
+  assert.ok(targets[0].noRank, 'a railgun kill is not ranked');
+  context.enterCharacter('m');
+  context.enterCharacter('f');
+  assert.equal(context.railgunShots, 0);
+  assert.equal(context.kills, 3);
+});
 
 test('a wrong key is only a miss: the prefix and target stay', () => {
   const { context, targets } = createTypingHarness();
