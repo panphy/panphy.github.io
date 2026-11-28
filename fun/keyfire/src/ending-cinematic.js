@@ -9,13 +9,13 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=15';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=15';
-import { createWatermill, createWindmill } from './stage-kits.js?v=15';
-import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=15';
-import { STORY_BEATS } from './story.js?v=15';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=15';
-import { buildCannon } from './plasma-cannon.js?v=15';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=16';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=16';
+import { createWatermill, createWindmill } from './stage-kits.js?v=16';
+import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=16';
+import { STORY_BEATS } from './story.js?v=16';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=16';
+import { buildCannon } from './plasma-cannon.js?v=16';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
