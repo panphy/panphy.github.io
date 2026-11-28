@@ -86,12 +86,21 @@ export function createPowerUpSystem({
         <circle cx="22" cy="38" r="4" fill="#ff8a3a" stroke="${INK}" stroke-width="2.8"/>
       </svg>
     `,
+    // A slug threaded through two coils: each coil's back half is drawn behind it and
+    // its front half in front, so the slug passes through them.
     railgun: `
       <svg class="power-up-svg power-up-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <path d="M6 30 L30 8 L36 14 L12 36 Z" fill="#ff7ad9" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M10 30 L30 12 M14 33 L33 15" stroke="#fff6dc" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
-        <circle cx="35" cy="9" r="5" fill="#fff6dc" stroke="${INK}" stroke-width="2.6"/>
-        <path d="M6 30 L12 36 L5 39 Z" fill="${INK}"/>
+        <path d="M2 22h8" stroke="#ff5ad2" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+        <path d="M14 11A3.5 11 0 0 0 14 33" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+        <path d="M14 11A3.5 11 0 0 0 14 33" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M25 13A3 9 0 0 0 25 31" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+        <path d="M25 13A3 9 0 0 0 25 31" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M8 18h24l9 4-9 4H8z" fill="#ff5ad2" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>
+        <path d="M11 21h18" stroke="#fff6dc" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M14 11A3.5 11 0 0 1 14 33" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+        <path d="M14 11A3.5 11 0 0 1 14 33" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M25 13A3 9 0 0 1 25 31" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+        <path d="M25 13A3 9 0 0 1 25 31" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
       </svg>
     `,
     shield: `
