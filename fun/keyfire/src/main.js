@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=23';
-import { createSeasonalEffects } from './seasonal-effects.js?v=23';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=23';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=23';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=23';
-import { createLeaderboard } from './leaderboard.js?v=23';
-import { createEnemyMesh } from './enemy-meshes.js?v=23';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=23';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=23';
-import { createLowPolyCloud } from './lowpoly.js?v=23';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=23';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=23';
-import { createWordDeck } from './word-decks.js?v=23';
-import { createStage } from './stages.js?v=23';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=23';
-import { storyBeatForWave } from './story.js?v=23';
-import { createStoryteller, settleLantern } from './storyteller.js?v=23';
-import { createPlasmaCannon } from './plasma-cannon.js?v=23';
-import { createRideCart } from './ride-cart.js?v=23';
+import { createKeyFireAudio } from './audio.js?v=24';
+import { createSeasonalEffects } from './seasonal-effects.js?v=24';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=24';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=24';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=24';
+import { createLeaderboard } from './leaderboard.js?v=24';
+import { createEnemyMesh } from './enemy-meshes.js?v=24';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=24';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=24';
+import { createLowPolyCloud } from './lowpoly.js?v=24';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=24';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=24';
+import { createWordDeck } from './word-decks.js?v=24';
+import { createStage } from './stages.js?v=24';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=24';
+import { storyBeatForWave } from './story.js?v=24';
+import { createStoryteller, settleLantern } from './storyteller.js?v=24';
+import { createPlasmaCannon } from './plasma-cannon.js?v=24';
+import { createRideCart } from './ride-cart.js?v=24';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1546,8 +1546,28 @@ function animate(frameTime) {
   updateSeasonFade(delta);
   updateLabels();
   visuals.render(delta, { measure: mode === 'running' });
+  syncStatusBarColor(frameTime);
 
   scheduleFrame();
+}
+
+// Home-screen apps on iOS paint the status bar with theme-color, so match it to
+// the sky the game draws at the top edge instead of leaving a cream strip.
+const statusBarMeta = document.querySelector('meta[name="theme-color"]');
+const statusBarStandalone = window.matchMedia('(display-mode: standalone)');
+const STATUS_BAR_SYNC_MS = 400;
+const statusBarPixel = new Uint8Array(4);
+let statusBarSyncedAt = -Infinity;
+
+function syncStatusBarColor(frameTime) {
+  if (!webGLAvailable || !statusBarMeta || !statusBarStandalone.matches) return;
+  if (frameTime - statusBarSyncedAt < STATUS_BAR_SYNC_MS) return;
+  statusBarSyncedAt = frameTime;
+  const gl = renderer.getContext();
+  // Read straight after the frame's render, while the drawing buffer still holds it.
+  gl.readPixels(Math.floor(gl.drawingBufferWidth / 2), gl.drawingBufferHeight - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, statusBarPixel);
+  const hex = '#' + [0, 1, 2].map(i => statusBarPixel[i].toString(16).padStart(2, '0')).join('');
+  if (statusBarMeta.content !== hex) statusBarMeta.content = hex;
 }
 
 // ── Bosses ───────────────────────────────────────────────────────────────

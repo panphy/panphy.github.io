@@ -1700,6 +1700,11 @@ body.is-god-mode .god-mode-veil {
   animation-delay: 0.8s;
 }
 
+/* Clear the iPadOS keyboard shortcut bar, as the story card does. */
+@supports (-webkit-touch-callout: none) {
+  .god-mode-badge { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 64px); }
+}
+
 /* The storyteller's card sits in the same place, so the lettering steps aside for it. */
 body:has(.story-card:not([hidden])) .god-mode-badge {
   opacity: 0;
