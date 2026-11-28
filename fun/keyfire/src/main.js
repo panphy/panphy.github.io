@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=29';
-import { createSeasonalEffects } from './seasonal-effects.js?v=29';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=29';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=29';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=29';
-import { createLeaderboard } from './leaderboard.js?v=29';
-import { createEnemyMesh } from './enemy-meshes.js?v=29';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=29';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=29';
-import { createLowPolyCloud } from './lowpoly.js?v=29';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=29';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=29';
-import { createWordDeck } from './word-decks.js?v=29';
-import { createStage } from './stages.js?v=29';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=29';
-import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=29';
-import { createStoryteller, settleLantern } from './storyteller.js?v=29';
-import { createPlasmaCannon } from './plasma-cannon.js?v=29';
-import { createRideCart } from './ride-cart.js?v=29';
+import { createKeyFireAudio } from './audio.js?v=30';
+import { createSeasonalEffects } from './seasonal-effects.js?v=30';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=30';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=30';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=30';
+import { createLeaderboard } from './leaderboard.js?v=30';
+import { createEnemyMesh } from './enemy-meshes.js?v=30';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=30';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=30';
+import { createLowPolyCloud } from './lowpoly.js?v=30';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=30';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=30';
+import { createWordDeck } from './word-decks.js?v=30';
+import { createStage } from './stages.js?v=30';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=30';
+import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=30';
+import { createStoryteller, settleLantern } from './storyteller.js?v=30';
+import { createPlasmaCannon } from './plasma-cannon.js?v=30';
+import { createRideCart } from './ride-cart.js?v=30';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -866,6 +866,7 @@ function submitRunToLeaderboard() {
 }
 
 function showMessage(kicker, title, scoreText, buttonText, copyText) {
+  messagePanel.classList.remove('is-start');
   messageKicker.textContent = kicker;
   messageTitle.textContent = title;
   messageScore.textContent = scoreText;
