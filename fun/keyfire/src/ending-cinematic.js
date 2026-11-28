@@ -9,20 +9,20 @@
 // Everything on screen is a pure function of the cinematic's clock, so Skip only
 // moves the clock. The music in audio.js is scored to the same timeline.
 import * as THREE from 'three';
-import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=27';
-import { buildStellarDreadnought } from './lowpoly-creatures.js?v=27';
-import { createWatermill, createWindmill } from './stage-kits.js?v=27';
-import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=27';
-import { STORY_BEATS } from './story.js?v=27';
-import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=27';
-import { buildCannon } from './plasma-cannon.js?v=27';
+import { createLowPolyTree, createLowPolyCloud, createLowPolyRock } from './lowpoly.js?v=28';
+import { buildStellarDreadnought } from './lowpoly-creatures.js?v=28';
+import { createWatermill, createWindmill } from './stage-kits.js?v=28';
+import { createAstrolabe, createStoryteller, settleLantern } from './storyteller.js?v=28';
+import { STORY_BEATS } from './story.js?v=28';
+import { SEASON_PALETTES, FINAL_WAVE_PALETTE, MINE_PALETTE, GROUND_TONE } from './chapters.js?v=28';
+import { buildCannon } from './plasma-cannon.js?v=28';
 import { radialTexture, rgbaTexture } from '../../../assets/three-textures.js';
 
 const BEAT = 60 / 144;
 const BAR = 4 * BEAT;
 
 // Cue times in seconds. The score (audio.js) uses the same bar grid: 144 bpm, 4/4.
-export const ENDING_TIMELINE = {
+const ENDING_TIMELINE = {
   shatter: BAR, // the Dreadnought breaks apart
   charge: 2 * BAR, // the cannon comes up and the words gather
   spinUp: 6 * BAR, // the barrels wind up

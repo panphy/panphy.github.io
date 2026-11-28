@@ -230,7 +230,7 @@ body.blizzard .blizzard-veil::after {
 .challenge-card {
   position: fixed;
   left: 50%;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  top: calc(max(14px, env(safe-area-inset-top)));
   z-index: 12;
   padding: 9px 18px;
   border: 2px solid #6d4fb3;
@@ -657,7 +657,7 @@ body.blizzard .blizzard-veil::after {
 
 .game-bar {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  top: calc(max(14px, env(safe-area-inset-top)));
   left: 14px;
   /* No plate: the logo and the title artwork sit straight on the scene. */
   width: max-content;
@@ -929,7 +929,7 @@ body.is-running:not(.is-paused) .game-bar {
 
 .hud-grid {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + clamp(70px, 8vw + 6px, 90px));
+  top: calc(max(14px, env(safe-area-inset-top)) + clamp(70px, 8vw + 6px, 90px));
   left: 14px;
   z-index: 11;
   display: grid;
@@ -944,7 +944,7 @@ body:is(:not(.is-running), .is-paused) .game-bar:has(#phaseValue:not(:empty)) ~ 
 }
 
 body.is-running:not(.is-paused) .hud-grid {
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  top: calc(max(14px, env(safe-area-inset-top)));
 }
 
 .readout {
@@ -1671,7 +1671,7 @@ body.is-running:not(.is-paused) .hud-grid {
   }
 
   .hud-grid {
-    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 64px);
+    top: calc(max(14px, env(safe-area-inset-top)) + 64px);
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: calc(100vw - 28px);
   }
@@ -1701,7 +1701,7 @@ body.is-running:not(.is-paused) .hud-grid {
 
   /* Start, pause and result cards sit under the HUD instead of over it, and scroll if tall. */
   #messagePanel {
-    --panel-top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 140px);
+    --panel-top: calc(max(14px, env(safe-area-inset-top)) + 140px);
     top: var(--panel-top);
     max-height: calc(100dvh - var(--panel-top) - max(14px, env(safe-area-inset-bottom)));
     overflow-y: auto;
@@ -1711,7 +1711,7 @@ body.is-running:not(.is-paused) .hud-grid {
 
   /* The status line above the title pushes the HUD down 26px (see .hud-grid); follow it. */
   body:is(:not(.is-running), .is-paused) .game-bar:has(#phaseValue:not(:empty)) ~ #messagePanel {
-    --panel-top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 166px);
+    --panel-top: calc(max(14px, env(safe-area-inset-top)) + 166px);
   }
 
   /* The corner buttons sit raised during a run; between runs they can sit low. */
@@ -1745,12 +1745,11 @@ body.is-god-mode .god-mode-veil {
   opacity: 1;
 }
 
-/* GOD MODE: chunky gold lettering with the title's ink outline, low in the middle of
-   the view, under the golden cannon. No box. */
-/* God mode is announced in the top-right corner, clear of the action. */
+/* GOD MODE: chunky gold lettering with the title's ink outline, in the top-right
+   corner, clear of the action. No box. */
 .god-mode-badge {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  top: calc(max(14px, env(safe-area-inset-top)));
   right: max(16px, env(safe-area-inset-right));
   z-index: 13;
   display: flex;
@@ -1789,7 +1788,7 @@ body.is-god-mode .god-mode-veil {
 /* Where the boss's health bar spans the top, the lettering sits just below it. */
 @media (max-width: 960px) {
   .god-mode-badge {
-    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 72px);
+    top: calc(max(14px, env(safe-area-inset-top)) + 72px);
     font-size: clamp(1.1rem, 3.6vw, 1.6rem);
   }
   /* There the paused high scores take the corner. */
@@ -2444,7 +2443,7 @@ body.ending-summary .kf-leaderboard {
 /* Skip sits in the top cinema bar, clear of the captions in the bottom one. */
 .ending-skip {
   position: absolute;
-  top: calc(max(10px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  top: calc(max(10px, env(safe-area-inset-top)));
   right: max(14px, env(safe-area-inset-right));
   z-index: 1005;
   min-height: 44px;
@@ -2542,7 +2541,7 @@ body.battery-saver .power-up-bar {
 
 .kf-leaderboard {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 82px);
+  top: calc(max(14px, env(safe-area-inset-top)) + 82px);
   right: 14px;
   z-index: 11;
   border: 1px solid rgba(88, 223, 207, 0.22);
@@ -3359,7 +3358,7 @@ body.loot-guide-open .power-up-bar {
 
 .boss-hp-bar {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  top: calc(max(14px, env(safe-area-inset-top)));
   left: 50%;
   z-index: 12;
   display: grid;
