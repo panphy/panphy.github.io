@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=18';
-import { createSeasonalEffects } from './seasonal-effects.js?v=18';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=18';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=18';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=18';
-import { createLeaderboard } from './leaderboard.js?v=18';
-import { createEnemyMesh } from './enemy-meshes.js?v=18';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=18';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=18';
-import { createLowPolyCloud } from './lowpoly.js?v=18';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=18';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=18';
-import { createWordDeck } from './word-decks.js?v=18';
-import { createStage } from './stages.js?v=18';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=18';
-import { storyBeatForWave } from './story.js?v=18';
-import { createStoryteller, settleLantern } from './storyteller.js?v=18';
-import { createPlasmaCannon } from './plasma-cannon.js?v=18';
-import { createRideCart } from './ride-cart.js?v=18';
+import { createKeyFireAudio } from './audio.js?v=19';
+import { createSeasonalEffects } from './seasonal-effects.js?v=19';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=19';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=19';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=19';
+import { createLeaderboard } from './leaderboard.js?v=19';
+import { createEnemyMesh } from './enemy-meshes.js?v=19';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=19';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=19';
+import { createLowPolyCloud } from './lowpoly.js?v=19';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=19';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=19';
+import { createWordDeck } from './word-decks.js?v=19';
+import { createStage } from './stages.js?v=19';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=19';
+import { storyBeatForWave } from './story.js?v=19';
+import { createStoryteller, settleLantern } from './storyteller.js?v=19';
+import { createPlasmaCannon } from './plasma-cannon.js?v=19';
+import { createRideCart } from './ride-cart.js?v=19';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -426,6 +426,8 @@ const {
   playBeamSound,
   playChainPrimeSound,
   playChainZapSound,
+  playChainStrikeSound,
+  playChainThunderSound,
   playRailgunChargeSound,
   playRailgunShotSound,
   playTimeFreezeSound,
@@ -1078,14 +1080,17 @@ function fireRailgun(target) {
   if (target.isProjectile || !powerUps.useRailgunShot()) return false;
   target.noRank = true;
   const position = target.group.position;
-  spawnBeam(position);
+  spawnRailgunShot(position);
   playRailgunShotSound(position.x);
-  kickTimer = Math.max(kickTimer, 0.3);
-  hitStopTimer = Math.max(hitStopTimer, 0.05);
-  reusableVector.copy(position);
-  reusableVector.y += 1.0 * target.group.scale.y;
-  fx.burst(reusableVector, { color: RAILGUN_COLOUR, color2: 0xffffff, count: 22, speed: 6, life: 0.45, size: 0.32 });
-  defeatEnemy(target);
+  kickTimer = Math.max(kickTimer, 0.45);
+  hitStopTimer = Math.max(hitStopTimer, 0.07);
+  // The kill's own teal beam is held back, so the shot reads as the railgun's alone.
+  railgunFiring = true;
+  try {
+    defeatEnemy(target);
+  } finally {
+    railgunFiring = false;
+  }
   return true;
 }
 
@@ -3641,7 +3646,10 @@ function updateEffects(delta) {
 
     // Only chain-lightning bolts are held, at full strength, until the burst.
     if (effect.hold) {
-      effect.mesh.material.opacity = 1.0;
+      // A held bolt crackles: it flickers, now and then dropping out for a frame.
+      effect.mesh.material.opacity = effect.flicker
+        ? (Math.random() < 0.12 ? 0.15 : 0.6 + Math.random() * 0.4) * (effect.baseOpacity ?? 1)
+        : 1.0;
       continue;
     }
 
@@ -3649,7 +3657,7 @@ function updateEffects(delta) {
     const amount = Math.max(0, effect.life / effect.maxLife);
 
     if (effect.kind === 'lightning_bolt') {
-      effect.mesh.material.opacity = amount;
+      effect.mesh.material.opacity = amount * (effect.baseOpacity ?? 1);
     } else if (effect.kind === 'beam_flash') {
       const expand = 0.3 + (1 - amount) * 2.2;
       effect.mesh.scale.setScalar(expand);
@@ -3662,6 +3670,26 @@ function updateEffects(delta) {
       const xyScale = 0.35 + amount * 0.65;
       effect.mesh.scale.set(xyScale, xyScale, Math.max(0.05, amount));
       effect.mesh.material.opacity = amount;
+    } else if (effect.kind === 'rail_core') {
+      // The slug trail holds full width, then thins out from the middle.
+      const xyScale = amount > 0.5 ? 1 : 0.2 + amount * 1.6;
+      effect.mesh.scale.set(xyScale, xyScale, 1);
+      effect.mesh.material.opacity = Math.min(1, amount * 1.6) * (effect.baseOpacity ??= effect.mesh.material.opacity);
+    } else if (effect.kind === 'rail_haze') {
+      const xyScale = 0.6 + (1 - amount) * 0.8;
+      effect.mesh.scale.set(xyScale, xyScale, 1);
+      effect.mesh.material.opacity = amount * 0.28;
+    } else if (effect.kind === 'rail_ring') {
+      if (effect.delay > 0) {
+        effect.delay -= delta;
+        effect.life += delta;
+        continue;
+      }
+      effect.mesh.visible = true;
+      const grow = 0.5 + (1 - amount) * 2.6;
+      effect.mesh.scale.setScalar(grow);
+      effect.mesh.rotateZ(effect.spin * delta);
+      effect.mesh.material.opacity = amount * 0.95;
     } else if (effect.kind === 'boss_explosion_wave') {
       const progress = 1 - amount;
       const currentScale = effect.initialScale + progress * effect.expandSpeed;
@@ -4709,7 +4737,69 @@ function glowColor(hex, gain = GLOW_GAIN) {
   return new THREE.Color(hex).multiplyScalar(gain);
 }
 
+// A railgun shot: a straight magenta slug trail, thick and slow to fade, threaded with
+// coil rings that burst outward along it, and a heavy impact. Nothing like the plain
+// teal beam, so a railgun kill is unmistakable.
+const RAILGUN_RINGS = 9;
+let railgunFiring = false;
+function spawnRailgunShot(targetPosition) {
+  weapon.cast(1, 1);
+  weapon.cast(0, 1);
+  const start = weapon.origin(1);
+  const end = targetPosition.clone();
+  end.y += 1.2;
+  const distance = start.distanceTo(end);
+  const mid = start.clone().lerp(end, 0.5);
+  const additive = (color, opacity) => new THREE.MeshBasicMaterial({
+    color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  // Solid magenta, not added light: on a bright sky added light washes out to white.
+  const solid = (color, opacity) => new THREE.MeshBasicMaterial({
+    color, transparent: true, opacity, depthWrite: false, fog: false,
+  });
+  const along = (mesh) => {
+    mesh.position.copy(mid);
+    mesh.lookAt(end);
+    effectsGroup.add(mesh);
+    return mesh;
+  };
+  const taper = (atTarget, atMuzzle) => new THREE.CylinderGeometry(atTarget, atMuzzle, distance, 8, 1, true).rotateX(Math.PI / 2);
+
+  // A hot white core, a solid magenta slug trail round it, and a wide pink haze.
+  beams.push({ mesh: along(new THREE.Mesh(taper(0.36, 0.07), solid(RAILGUN_COLOUR, 0.92))), life: 0.55, maxLife: 0.55, kind: 'rail_core' });
+  beams.push({ mesh: along(new THREE.Mesh(taper(0.12, 0.025), additive(glowColor(0xffffff), 1))), life: 0.45, maxLife: 0.45, kind: 'rail_core' });
+  beams.push({ mesh: along(new THREE.Mesh(taper(0.9, 0.12), solid(0xff9be6, 0.28))), life: 0.65, maxLife: 0.65, kind: 'rail_haze' });
+
+  // Coil rings threaded on the trail, small near the muzzle, each bursting outward a
+  // moment after the one behind it, as if the slug had just passed through.
+  const direction = end.clone().sub(start).normalize();
+  for (let index = 0; index < RAILGUN_RINGS; index += 1) {
+    const fraction = 0.12 + (index / (RAILGUN_RINGS - 1)) * 0.86;
+    const radius = 0.05 + fraction * 0.42;
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, radius * 0.18, 4, 14), solid(index % 2 ? 0xffd2f4 : RAILGUN_COLOUR, 0.95));
+    ring.position.copy(start).addScaledVector(direction, distance * fraction);
+    ring.lookAt(end);
+    ring.visible = false;
+    effectsGroup.add(ring);
+    const life = 0.6;
+    beams.push({ mesh: ring, life, maxLife: life, kind: 'rail_ring', delay: index * 0.018, spin: (index % 2 ? 1 : -1) * 6 });
+  }
+
+  // The impact: a hard flash, a double shock ring standing and lying, and sparks.
+  const flash = new THREE.Mesh(new THREE.IcosahedronGeometry(0.75, 0), additive(0xffd2f4, 0.95));
+  flash.position.copy(end);
+  effectsGroup.add(flash);
+  beams.push({ mesh: flash, life: 0.3, maxLife: 0.3, kind: 'beam_flash' });
+  fx.flash(start, 0xffd2f4, 0.7, 0.2);
+  fx.flash(end, 0xff9be6, 5, 0.32);
+  fx.ring(end, RAILGUN_COLOUR, { from: 0.4, to: 3.6, life: 0.45, flat: false, opacity: 0.95 });
+  fx.ring(end, 0xffffff, { from: 0.2, to: 2.6, life: 0.35, flat: true, opacity: 0.8 });
+  fx.lightPulse(end, RAILGUN_COLOUR, 22, 0.4);
+  fx.burst(end, { color: RAILGUN_COLOUR, color2: 0xffffff, count: 34, speed: 7.5, life: 0.65, size: 0.34 });
+}
+
 function spawnBeam(targetPosition) {
+  if (railgunFiring) return;
   // The finishing blow comes from the muzzle, with the core surging behind it.
   weapon.cast(1, 1);
   weapon.cast(0, 1);
@@ -6210,7 +6300,7 @@ function triggerChainLightning(firstEnemy) {
     .filter(enemy => enemy !== firstEnemy && isEnemyTargetable(enemy))
     .sort((a, b) => a.group.position.distanceToSquared(origin) - b.group.position.distanceToSquared(origin))[0];
 
-  playToggleSound();
+  playChainStrikeSound();
   showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
   // The chain leaps from the cannon's core; each bolt is held until the burst.
@@ -6227,7 +6317,7 @@ function triggerChainLightning(firstEnemy) {
   strike(firstEnemy);
 
   if (!hop) {
-    scheduleChainLightningTimer(() => burstChain(chain), 100);
+    scheduleChainLightningTimer(() => burstChain(chain), 200);
     return;
   }
   scheduleChainLightningTimer(() => {
@@ -6236,8 +6326,8 @@ function triggerChainLightning(firstEnemy) {
       chain.push(hop);
       strike(hop);
     }
-    scheduleChainLightningTimer(() => burstChain(chain), 80);
-  }, 60);
+    scheduleChainLightningTimer(() => burstChain(chain), 170);
+  }, 140);
 }
 
 function armChainLightningTimer(entry, delay) {
@@ -6282,15 +6372,25 @@ function releaseChainBeams() {
   for (const effect of beams) {
     if (effect.kind === 'lightning_bolt' && effect.hold) {
       effect.hold = false;
-      effect.life = 0.10;
-      effect.maxLife = 0.10;
+      effect.life = 0.18;
+      effect.maxLife = 0.18;
     }
   }
 }
 
 function burstChain(chain) {
   releaseChainBeams();
-  for (const enemy of chain) defeatEnemyChainBurst(enemy);
+  playChainThunderSound();
+  kickTimer = Math.max(kickTimer, 0.5);
+  for (const enemy of chain) {
+    // Each one struck goes up in a crown of sparks and a wide ring of light.
+    reusableVector.copy(enemy.group.position);
+    reusableVector.y += 0.8;
+    fx.burst(reusableVector, { color: 0xffc21a, color2: 0xffffff, count: 30, speed: 8, life: 0.7, size: 0.34, up: 1.8 });
+    reusableVector.y = 0.12;
+    fx.ring(reusableVector, 0xffc21a, { from: 0.5, to: 4.5, life: 0.6, opacity: 0.9 });
+    defeatEnemyChainBurst(enemy);
+  }
   flashLightning();
 }
 
@@ -6335,86 +6435,84 @@ function defeatEnemyChainBurst(enemy) {
   updateHud(true);
 }
 
-function spawnLightningVisual(startPos, targetPos, hold = false) {
-  const origin = startPos.clone();
-  const points = [];
-  points.push(origin);
-  const segments = 6;
-  for (let i = 1; i < segments; i++) {
-    const t = i / segments;
-    const p = new THREE.Vector3().lerpVectors(origin, targetPos, t);
-    p.x += (Math.random() - 0.5) * 0.6;
-    p.y += (Math.random() - 0.5) * 0.6;
-    p.z += (Math.random() - 0.5) * 0.6;
-    points.push(p);
+const BOLT_CLEAR_OF_CAMERA = 3.5;
+// A jagged bolt: straight runs between kinks that wander most in the middle.
+function jaggedPoints(from, to, segments, spread) {
+  const points = [from.clone()];
+  for (let index = 1; index < segments; index += 1) {
+    const t = index / segments;
+    const wander = Math.sin(t * Math.PI) * spread;
+    const point = new THREE.Vector3().lerpVectors(from, to, t);
+    point.x += (Math.random() - 0.5) * wander;
+    point.y += (Math.random() - 0.5) * wander;
+    point.z += (Math.random() - 0.5) * wander * 0.6;
+    points.push(point);
   }
-  points.push(targetPos);
+  points.push(to.clone());
+  return points;
+}
 
-  const curve = new THREE.CatmullRomCurve3(points);
-  
-  // 1. Solid white core tube
-  const coreGeom = new THREE.TubeGeometry(curve, 16, 0.10, 4, false);
-  const coreMat = new THREE.MeshBasicMaterial({
-    color: glowColor(0xffffff),
-    transparent: true,
-    opacity: 1.0,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  const coreMesh = new THREE.Mesh(coreGeom, coreMat);
-  effectsGroup.add(coreMesh);
+// A bolt as a white-hot core in a solid gold sleeve (added light alone washes out to
+// white against a bright sky). Held bolts crackle until the chain bursts.
+function addBoltMeshes(points, coreRadius, sleeveRadius, hold, duration) {
+  const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0);
+  const tubular = points.length * 3;
+  const sleeve = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, tubular, sleeveRadius, 5, false),
+    new THREE.MeshBasicMaterial({ color: 0xffc21a, transparent: true, opacity: 0.9, depthWrite: false, fog: false })
+  );
+  const core = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, tubular, coreRadius, 4, false),
+    new THREE.MeshBasicMaterial({ color: glowColor(0xffffff), transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  const halo = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, tubular, sleeveRadius * 2.6, 5, false),
+    new THREE.MeshBasicMaterial({ color: glowColor(0xffd76a, 1.2), transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  for (const mesh of [halo, sleeve, core]) {
+    effectsGroup.add(mesh);
+    beams.push({ kind: 'lightning_bolt', mesh, life: duration, maxLife: duration, hold, flicker: true, baseOpacity: mesh.material.opacity });
+  }
+}
 
-  // 2. Wide glowing golden sleeve
-  const glowGeom = new THREE.TubeGeometry(curve, 16, 0.38, 5, false);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: glowColor(0xefc35c, 1.8),
-    transparent: true,
-    opacity: 0.52,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  const glowMesh = new THREE.Mesh(glowGeom, glowMat);
-  effectsGroup.add(glowMesh);
+function spawnLightningVisual(startPos, targetPos, hold = false) {
+  const duration = 0.16;
+  // A bolt from the cannon starts a little way out, so its tube does not fill the view
+  // right in front of the camera.
+  const start = startPos.clone();
+  const nearCamera = start.distanceTo(camera.position);
+  if (nearCamera < BOLT_CLEAR_OF_CAMERA) {
+    start.lerp(targetPos, Math.min(0.45, (BOLT_CLEAR_OF_CAMERA - nearCamera) / Math.max(0.01, start.distanceTo(targetPos))));
+    // A thin feeder arc joins it to the cannon's core, thin because it is so close.
+    addBoltMeshes(jaggedPoints(startPos, start, 4, 0.12), 0.012, 0.026, hold, duration);
+  }
+  const main = jaggedPoints(start, targetPos, 9, Math.min(2.2, 0.35 + start.distanceTo(targetPos) * 0.12));
+  addBoltMeshes(main, 0.06, 0.12, hold, duration);
 
-  // 3. Impact flash at the target position
-  const flashGeo = new THREE.DodecahedronGeometry(0.5, 0);
-  const flashMat = new THREE.MeshBasicMaterial({
-    color: 0xffdd66,
-    transparent: true,
-    opacity: 0.9,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+  // Forks split off the main bolt and claw at the air around it.
+  const forks = 2 + Math.floor(Math.random() * 2);
+  for (let index = 0; index < forks; index += 1) {
+    const from = main[2 + Math.floor(Math.random() * (main.length - 4))];
+    const reach = 0.8 + Math.random() * 1.4;
+    const to = from.clone().add(new THREE.Vector3((Math.random() - 0.5) * 2, (Math.random() - 0.2) * 1.4, (Math.random() - 0.5) * 2).setLength(reach));
+    addBoltMeshes(jaggedPoints(from, to, 4, 0.5), 0.035, 0.07, hold, duration);
+  }
+
+  // At the target: a hard flash, a standing shock ring, a ring on the ground and sparks.
+  const flashMesh = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.6, 0),
+    new THREE.MeshBasicMaterial({ color: 0xfff1a8, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
   flashMesh.position.copy(targetPos);
   effectsGroup.add(flashMesh);
+  beams.push({ kind: 'beam_flash', mesh: flashMesh, life: 0.22, maxLife: 0.22 });
   playChainZapSound(targetPos.x);
-  fx.flash(targetPos, 0xffe58a, 4.2, 0.24);
-  fx.lightPulse(targetPos, 0xffdd66, 22, 0.3);
-  fx.burst(targetPos, { color: 0xffe58a, color2: 0xffffff, count: 16, speed: 6, life: 0.5, size: 0.3 });
-
-  // Register them in beams array for decay
-  const duration = 0.10;
-  beams.push({
-    kind: 'lightning_bolt',
-    mesh: coreMesh,
-    life: duration,
-    maxLife: duration,
-    hold: hold
-  });
-  beams.push({
-    kind: 'lightning_bolt',
-    mesh: glowMesh,
-    life: duration,
-    maxLife: duration,
-    hold: hold
-  });
-  beams.push({
-    kind: 'beam_flash',
-    mesh: flashMesh,
-    life: duration,
-    maxLife: duration
-  });
+  fx.flash(targetPos, 0xffe58a, 5, 0.3);
+  fx.lightPulse(targetPos, 0xffcc33, 26, 0.35);
+  fx.ring(targetPos, 0xffc21a, { from: 0.3, to: 2.8, life: 0.4, flat: false, opacity: 0.95 });
+  reusableVector.set(targetPos.x, 0.12, targetPos.z);
+  fx.ring(reusableVector, 0xffe58a, { from: 0.4, to: 3.4, life: 0.5, opacity: 0.8 });
+  fx.burst(targetPos, { color: 0xffc21a, color2: 0xffffff, count: 26, speed: 7, life: 0.55, size: 0.3 });
 }
 
 // Hook up event listeners for power-up slots

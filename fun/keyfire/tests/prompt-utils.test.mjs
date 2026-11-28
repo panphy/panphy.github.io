@@ -114,7 +114,7 @@ function createTypingHarness(prompts = ['force', 'mass'], railgunShots = 0) {
     reusableVector: { y: 0, copy() {} }, fx: { burst() {} },
     railgunShots,
     powerUps: { useRailgunShot: () => (context.railgunShots > 0 ? (context.railgunShots -= 1, true) : false) },
-    spawnBeam() {}, playRailgunShotSound() {}, kickTimer: 0, hitStopTimer: 0, RAILGUN_COLOUR: 0,
+    spawnRailgunShot() {}, playRailgunShotSound() {}, kickTimer: 0, hitStopTimer: 0, railgunFiring: false,
   });
   context.registerMistake = () => { context.mistakes += 1; context.streak = 0; };
   context.defeatEnemy = () => { context.kills += 1; context.typedBuffer = ''; context.activeTarget = null; };
