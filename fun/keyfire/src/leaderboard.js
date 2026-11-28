@@ -8,8 +8,8 @@ const SUBMIT_RPC = 'submit_keyfire_score';
 const SCORE_FIELD = 'score';
 // Bumped whenever the board is reset after a gameplay change; lists saved under
 // older keys are from old rules and are removed on load.
-const CACHE_KEY = 'keyfireLeaderboardCacheV10';
-const OLD_CACHE_KEYS = ['keyfireLeaderboardCacheV1', 'keyfireLeaderboardCacheV2', 'keyfireLeaderboardCacheV3', 'keyfireLeaderboardCacheV4', 'keyfireLeaderboardCacheV5', 'keyfireLeaderboardCacheV6', 'keyfireLeaderboardCacheV7', 'keyfireLeaderboardCacheV8', 'keyfireLeaderboardCacheV9'];
+const CACHE_KEY = 'keyfireLeaderboardCacheV11';
+const OLD_CACHE_KEYS = ['keyfireLeaderboardCacheV1', 'keyfireLeaderboardCacheV2', 'keyfireLeaderboardCacheV3', 'keyfireLeaderboardCacheV4', 'keyfireLeaderboardCacheV5', 'keyfireLeaderboardCacheV6', 'keyfireLeaderboardCacheV7', 'keyfireLeaderboardCacheV8', 'keyfireLeaderboardCacheV9', 'keyfireLeaderboardCacheV10'];
 const BOARD_SIZE = 10;
 const MIN_SCORE = 1;
 // Matches the server check (keyfire_score_range).
