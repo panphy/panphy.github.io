@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=17';
-import { createSeasonalEffects } from './seasonal-effects.js?v=17';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=17';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=17';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=17';
-import { createLeaderboard } from './leaderboard.js?v=17';
-import { createEnemyMesh } from './enemy-meshes.js?v=17';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=17';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=17';
-import { createLowPolyCloud } from './lowpoly.js?v=17';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=17';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=17';
-import { createWordDeck } from './word-decks.js?v=17';
-import { createStage } from './stages.js?v=17';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=17';
-import { storyBeatForWave } from './story.js?v=17';
-import { createStoryteller, settleLantern } from './storyteller.js?v=17';
-import { createPlasmaCannon } from './plasma-cannon.js?v=17';
-import { createRideCart } from './ride-cart.js?v=17';
+import { createKeyFireAudio } from './audio.js?v=18';
+import { createSeasonalEffects } from './seasonal-effects.js?v=18';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=18';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=18';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=18';
+import { createLeaderboard } from './leaderboard.js?v=18';
+import { createEnemyMesh } from './enemy-meshes.js?v=18';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=18';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=18';
+import { createLowPolyCloud } from './lowpoly.js?v=18';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=18';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=18';
+import { createWordDeck } from './word-decks.js?v=18';
+import { createStage } from './stages.js?v=18';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=18';
+import { storyBeatForWave } from './story.js?v=18';
+import { createStoryteller, settleLantern } from './storyteller.js?v=18';
+import { createPlasmaCannon } from './plasma-cannon.js?v=18';
+import { createRideCart } from './ride-cart.js?v=18';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -3718,6 +3718,7 @@ function updateEnvironment(seconds, delta, isTimeFrozen) {
     walkPhase: rail.walkPhase,
   });
   if (rail.stage) rail.stage.update(seconds);
+  placeRailgunPips();
 
   if (moon) {
     let targetMoonShadowStrength;
@@ -3860,6 +3861,19 @@ function updateFlyingShadowOpacity() {
 function moveTowards(current, target, maxDelta) {
   if (Math.abs(target - current) <= maxDelta) return target;
   return current + Math.sign(target - current) * maxDelta;
+}
+
+// The railgun's pips ride above the cannon's muzzle, following the gun as it turns.
+const RAILGUN_PIPS_LIFT = 44;
+const railgunPipsAnchor = new THREE.Vector3();
+function placeRailgunPips() {
+  const pips = powerUps.railgunPips;
+  if (!pips || pips.hidden) return;
+  weapon.origin(1, railgunPipsAnchor).project(camera);
+  const x = (railgunPipsAnchor.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-railgunPipsAnchor.y * 0.5 + 0.5) * window.innerHeight - RAILGUN_PIPS_LIFT;
+  pips.style.left = `${Math.round(x)}px`;
+  pips.style.top = `${Math.round(y)}px`;
 }
 
 function updateLabels() {
