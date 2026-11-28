@@ -1748,6 +1748,16 @@ async function saveMarkdown() {
   updateDirtyIndicator(dirtyIndicator, false);
 }
 
+const TEXT_FILE_PATTERN = /\.(md|markdown|mdown|mkd|txt|text|tex)$/i;
+
+function confirmTextFileName(name) {
+  if (TEXT_FILE_PATTERN.test(name)) return Promise.resolve(true);
+  return showConfirmationModal(
+    `"${name}" doesn't look like a Markdown or text file. Open it anyway?`,
+    { allowSuppress: false }
+  );
+}
+
 /**
  * Load a Markdown or plain text file from the user's computer
  */
@@ -1763,13 +1773,11 @@ async function loadMarkdownFile() {
 
   if (CAN_OPEN_WITH_FSA) {
     try {
-      const [fileHandle] = await window.showOpenFilePicker({
-        types: [{
-          description: 'Markdown and plain text',
-          accept: { 'text/markdown': ['.md'], 'text/plain': ['.txt'] }
-        }]
-      });
+      // No type filter: macOS greys out freshly written .md files in the
+      // picker until it has classified them, so check the name afterwards.
+      const [fileHandle] = await window.showOpenFilePicker();
       const file = await fileHandle.getFile();
+      if (!(await confirmTextFileName(file.name))) return;
       saveSnapshotIfNeeded(sourceEditor.value);
       sourceEditor.value = await file.text();
       clearUntouchedSampleContent();
@@ -1786,10 +1794,9 @@ async function loadMarkdownFile() {
 
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.md,.txt,text/markdown,text/plain';
-  input.onchange = e => {
+  input.onchange = async e => {
     const file = e.target.files[0];
-    if (file) {
+    if (file && await confirmTextFileName(file.name)) {
       saveSnapshotIfNeeded(sourceEditor.value);
       const reader = new FileReader();
       reader.onload = event => {
