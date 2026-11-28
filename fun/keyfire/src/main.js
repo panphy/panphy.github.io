@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=28';
-import { createSeasonalEffects } from './seasonal-effects.js?v=28';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=28';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=28';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=28';
-import { createLeaderboard } from './leaderboard.js?v=28';
-import { createEnemyMesh } from './enemy-meshes.js?v=28';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=28';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=28';
-import { createLowPolyCloud } from './lowpoly.js?v=28';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=28';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=28';
-import { createWordDeck } from './word-decks.js?v=28';
-import { createStage } from './stages.js?v=28';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=28';
-import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=28';
-import { createStoryteller, settleLantern } from './storyteller.js?v=28';
-import { createPlasmaCannon } from './plasma-cannon.js?v=28';
-import { createRideCart } from './ride-cart.js?v=28';
+import { createKeyFireAudio } from './audio.js?v=29';
+import { createSeasonalEffects } from './seasonal-effects.js?v=29';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=29';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=29';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=29';
+import { createLeaderboard } from './leaderboard.js?v=29';
+import { createEnemyMesh } from './enemy-meshes.js?v=29';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=29';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=29';
+import { createLowPolyCloud } from './lowpoly.js?v=29';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=29';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=29';
+import { createWordDeck } from './word-decks.js?v=29';
+import { createStage } from './stages.js?v=29';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=29';
+import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=29';
+import { createStoryteller, settleLantern } from './storyteller.js?v=29';
+import { createPlasmaCannon } from './plasma-cannon.js?v=29';
+import { createRideCart } from './ride-cart.js?v=29';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1539,6 +1539,9 @@ function animate(frameTime) {
     } else if (wavePhase === 'boss' && rail.state === 'boss') {
       updateBossFight(currentDelta);
     }
+    // A boss's lines type at the storytellers' pace in real time, untouched by the slow
+    // motion of its death, a hit pause or a time freeze.
+    if (bossSpeech) updateBossSpeechText(delta);
 
     updateEnemies(currentDelta, gameTimeSeconds);
     updateHud(false);
@@ -2197,7 +2200,6 @@ function updateBossFight(delta) {
     bossFight = { clearTimer: 0 };
     return;
   }
-  updateBossSpeechText(delta);
   if (bossDeath) {
     updateBossDeath(delta);
     return;
@@ -5213,7 +5215,8 @@ function enemyTypeableKeys(enemy) {
 // jumping out of hiding.
 function isEnemyTargetable(enemy) {
   if (enemy.dying || enemy.group.position.z >= WALL_Z) return false;
-  if (enemy.isBoss) return enemy.rail?.phase !== 'boss-speech';
+  // A phrase boss's card waits until it has landed and finished taunting.
+  if (enemy.isBoss) return !enemy.phraseBoss || enemy.rail?.phase === 'boss';
   // In a blizzard a monster cannot be seen, or typed at, until it is close.
   if (enemy.veilZ !== undefined && enemy.group.position.z < enemy.veilZ) return false;
   return enemy.revealed;
