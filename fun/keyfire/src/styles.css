@@ -1959,6 +1959,40 @@ body:not(.is-running) .power-up-bar {
     0 0 30px rgba(239, 195, 92, 0.5);
 }
 
+.boss-banner.is-railgun {
+  text-shadow:
+    2px 0 0 #000,
+    -2px 0 0 #000,
+    0 2px 0 #000,
+    0 -2px 0 #000,
+    0 0 18px rgba(255, 90, 210, 0.75),
+    0 0 30px rgba(255, 90, 210, 0.4);
+}
+
+/* The railgun's shots left: three pips in the tray's empty top-left corner. */
+.railgun-pips {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.railgun-pips[hidden] { display: none; }
+.railgun-pips span {
+  width: 8px;
+  height: 18px;
+  border-radius: 3px;
+  background: #ff5ad2;
+  box-shadow: 0 0 8px rgba(255, 90, 210, 0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.railgun-pips span.is-spent {
+  opacity: 0.18;
+  box-shadow: none;
+  transform: scaleY(0.6);
+}
+
 /* Time Freeze visual filter on canvas */
 body.time-frozen #gameCanvas {
   filter: saturate(0.2) contrast(1.1) brightness(0.9) sepia(0.2) hue-rotate(180deg);
@@ -2835,7 +2869,8 @@ body.is-running:not(.is-paused) .kf-leaderboard {
 .boss-banner.is-final-wave,
 .boss-banner.is-time-freeze,
 .boss-banner.is-shockwave,
-.boss-banner.is-chain-lightning {
+.boss-banner.is-chain-lightning,
+.boss-banner.is-railgun {
   font-weight: 700;
   letter-spacing: 0.01em;
   text-shadow: 0 0 6px #fff, 0 0 18px rgba(255, 255, 255, 0.92), 0 3px 0 rgba(255, 255, 255, 0.85);
@@ -2849,6 +2884,7 @@ body.is-running:not(.is-paused) .kf-leaderboard {
 .boss-banner.is-time-freeze { color: #157a70; }
 .boss-banner.is-shockwave { color: #0d63c9; }
 .boss-banner.is-chain-lightning { color: #a87400; }
+.boss-banner.is-railgun { color: #b0188a; }
 
 .power-up-burst-line1,
 .power-up-burst-line2 {
