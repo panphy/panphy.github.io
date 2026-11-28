@@ -1969,14 +1969,23 @@ body:not(.is-running) .power-up-bar {
     0 0 30px rgba(255, 90, 210, 0.4);
 }
 
-/* The railgun's shots left: three pips in the tray's empty top-left corner. */
+/* The railgun's shots left: three pips on a small plate of their own, held above the
+   cannon (placeRailgunPips in main.js sets left and top). */
 .railgun-pips {
-  grid-column: 1;
-  grid-row: 1;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 11;
+  transform: translate(-50%, -100%);
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 3px solid var(--key-ink, #3d2b1c);
+  border-radius: 12px;
+  background: var(--key-plate, #fffaf0);
+  box-shadow: var(--key-shadow, 0 3px 8px rgba(74, 52, 28, 0.2));
+  pointer-events: none;
 }
 .railgun-pips[hidden] { display: none; }
 .railgun-pips span {
@@ -3376,7 +3385,8 @@ body.needs-keyboard #messagePanel,
 body.needs-keyboard .kf-leaderboard,
 body.needs-keyboard .corner-controls,
 body.needs-keyboard .hud-grid,
-body.needs-keyboard .power-up-bar {
+body.needs-keyboard .power-up-bar,
+body.needs-keyboard .railgun-pips {
   visibility: hidden;
 }
 

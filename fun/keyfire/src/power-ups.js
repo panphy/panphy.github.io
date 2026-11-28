@@ -35,14 +35,15 @@ export function createPowerUpSystem({
   let timeFreezeTimer = 0;
   let chainLightningPrimed = false;
   let railgunShots = 0;
-  // Three pips in the tray's empty top-left corner show the railgun's shots left.
+  // Three pips over the cannon show the railgun's shots left; the game keeps them
+  // above the gun as it turns (placeRailgunPips in main.js).
   const railgunPips = powerUpBar ? document.createElement('div') : null;
   if (railgunPips) {
     railgunPips.className = 'railgun-pips';
     railgunPips.setAttribute('role', 'status');
     railgunPips.hidden = true;
     railgunPips.innerHTML = '<span></span>'.repeat(RAILGUN_SHOTS);
-    powerUpBar.append(railgunPips);
+    (powerUpBar.parentElement || document.body).append(railgunPips);
   }
   let powerUpCheatActive = false;
 
@@ -581,6 +582,7 @@ export function createPowerUpSystem({
     isChainLightningPrimed: () => chainLightningPrimed,
     clearChainLightningPrimed: clearChainLightning,
     getRailgunShots: () => railgunShots,
+    railgunPips,
     // Spends one shot; false when there is none.
     useRailgunShot: () => {
       if (railgunShots <= 0) return false;
