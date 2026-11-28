@@ -69,8 +69,9 @@ export function storyBeatForWave(wave) {
 }
 
 // What each boss says to the player as it lands, before its fight: it mocks them,
-// and lets slip its myth as if everyone knew it. voice: the pitch of its speech
-// blips, below every storyteller's.
+// and lets slip its myth as if everyone knew it. defeat: its last jibe as it falls,
+// a sore loser to the end. voice: the pitch of its speech blips, below every
+// storyteller's.
 export const BOSS_SPEECHES = {
   'Verdant Colossus': {
     voice: -2.6,
@@ -78,6 +79,9 @@ export const BOSS_SPEECHES = {
       "Ha! They sent YOU? I've squashed pebbles with more fight in them.",
       "Heavy things fall faster. Everyone knows that. Everyone except you, it seems. Did you nap through school?",
       "Look at those shaking fingers! My boulders will land long before you can spell gravity.",
+    ],
+    defeat: [
+      "Lucky shot! Pure luck! Heavy things still fall faster... don't they? DON'T THEY?",
     ],
   },
   'Crimson Bulwark': {
@@ -87,6 +91,9 @@ export const BOSS_SPEECHES = {
       "My machine runs for ever on nothing at all. You're puffed out after three words. Pathetic!",
       "Go on then, bash those keys. I've got energy for ever, and you've got about a minute.",
     ],
+    defeat: [
+      "Out of energy? Me? Impossible! You cheated, you sneaky little typist!",
+    ],
   },
   'Magma Sovereign': {
     voice: -3,
@@ -94,6 +101,9 @@ export const BOSS_SPEECHES = {
       "You crawled into my furnace? You're sweating already. How embarrassing.",
       "Heat is a liquid, peasant, and I have rivers of it. You have a keyboard and a lot of nerve.",
       "Type faster, little ember. Oh, you can't? Your words drip out slower than cold treacle.",
+    ],
+    defeat: [
+      "You cooled me down? Enjoy it while it lasts. Your fingers will be sore for a week!",
     ],
   },
   'Glacial Titan': {
@@ -103,6 +113,9 @@ export const BOSS_SPEECHES = {
       "Ice sinks, everyone knows that. And so will you, the moment you trip over your first word.",
       "Take your time, slowcoach. You'll be frozen solid before you finish a sentence.",
     ],
+    defeat: [
+      "Fine. Ice floats. But you still type like a frozen snail, and don't you forget it!",
+    ],
   },
   'Stellar Dreadnought': {
     voice: -3.2,
@@ -110,6 +123,9 @@ export const BOSS_SPEECHES = {
       "Ah, the little hero who keeps pressing Backspace. Yes, I saw every single one.",
       "The stars wrote your fate before you were born. They wrote that you lose. They even wrote your typos.",
       "Every hero ends up as a dot in my sky. You'll be a very small, very dim one. Go on, type.",
+    ],
+    defeat: [
+      "This was not written! The stars swore you'd lose... they must have been watching your typing.",
     ],
   },
 };

@@ -5,8 +5,8 @@
 // Nothing here adds a light: glows are emissive materials, so the light count never
 // changes between stages. A kit's own materials are made per stage and disposed with it.
 import * as THREE from 'three';
-import { firCrown } from './lowpoly.js?v=26';
-import { roundSides, polyDetail, roughen } from './detail.js?v=26';
+import { firCrown } from './lowpoly.js?v=27';
+import { roundSides, polyDetail, roughen } from './detail.js?v=27';
 
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true, ...extra });
 const lit = (color, intensity = 1.6, extra = {}) => flat(color, { emissive: color, emissiveIntensity: intensity, roughness: 0.5, ...extra });
