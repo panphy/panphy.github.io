@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=31';
-import { createSeasonalEffects } from './seasonal-effects.js?v=31';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=31';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=31';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=31';
-import { createLeaderboard } from './leaderboard.js?v=31';
-import { createEnemyMesh } from './enemy-meshes.js?v=31';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=31';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=31';
-import { createLowPolyCloud } from './lowpoly.js?v=31';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=31';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=31';
-import { createWordDeck } from './word-decks.js?v=31';
-import { createStage } from './stages.js?v=31';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=31';
-import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=31';
-import { createStoryteller, settleLantern } from './storyteller.js?v=31';
-import { createPlasmaCannon } from './plasma-cannon.js?v=31';
-import { createRideCart } from './ride-cart.js?v=31';
+import { createKeyFireAudio } from './audio.js?v=32';
+import { createSeasonalEffects } from './seasonal-effects.js?v=32';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=32';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=32';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=32';
+import { createLeaderboard } from './leaderboard.js?v=32';
+import { createEnemyMesh } from './enemy-meshes.js?v=32';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=32';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=32';
+import { createLowPolyCloud } from './lowpoly.js?v=32';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=32';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=32';
+import { createWordDeck } from './word-decks.js?v=32';
+import { createStage } from './stages.js?v=32';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=32';
+import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=32';
+import { createStoryteller, settleLantern } from './storyteller.js?v=32';
+import { createPlasmaCannon } from './plasma-cannon.js?v=32';
+import { createRideCart } from './ride-cart.js?v=32';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1922,6 +1922,15 @@ function advanceBossLine(boss) {
     spawnRankPopup(boss, letters - 1);
   }
   boss.wordIndex += 1;
+  // Primed chain lightning strikes with the next word: it finishes the rest of the line,
+  // which scores in full but is not ranked.
+  const chained = powerUps.isChainLightningPrimed();
+  if (chained) {
+    powerUps.clearChainLightningPrimed();
+    boss.wordIndex = boss.lineWordsList.length;
+    boss.noRank = true;
+    strikeBossWithChain(boss);
+  }
   if (boss.wordIndex < boss.lineWordsList.length) {
     setBossWord(boss);
     if (stageWord) playDefeatSound(boss);
@@ -1937,14 +1946,8 @@ function advanceBossLine(boss) {
   }
 
   // A whole line: a heavy hit and a segment off the health bar.
-  let lost = 1;
-  if (powerUps.isChainLightningPrimed()) {
-    // Chain lightning doubles the blow and clears the rocks in the air.
-    powerUps.clearChainLightningPrimed();
-    if (boss.hp > 2) lost = 2;
-    flashLightning();
-    for (const rock of enemies.filter(other => other.isProjectile && !other.dying)) shatterRock(rock, false);
-  }
+  // Chain lightning doubles the blow while the boss has more than two segments left.
+  const lost = chained && boss.hp > 2 ? 2 : 1;
   boss.hp = Math.max(0, boss.hp - lost);
   boss.lineIndex += lost;
   if (!stageWord) {
@@ -6556,6 +6559,22 @@ function releaseChainBeams() {
       effect.maxLife = 0.18;
     }
   }
+}
+
+// Chain lightning at a boss: a bolt from the cannon's core, a stun that holds off its
+// attacks, and every rock in the air shattered.
+function strikeBossWithChain(boss) {
+  playChainStrikeSound();
+  showBanner('CHAIN LIGHTNING!', 'chain-lightning');
+  weapon.cast(0, 1);
+  weapon.cast(1, 1);
+  const to = boss.group.position.clone();
+  to.y += 1.5 * boss.group.scale.y;
+  spawnLightningVisual(weapon.origin(0), to);
+  boss.stunTimer = Math.max(boss.stunTimer || 0, CHAIN_BOSS_STUN);
+  for (const rock of enemies.filter(other => other.isProjectile && !other.dying)) shatterRock(rock, false);
+  playChainBurstSound();
+  flashLightning();
 }
 
 function burstChain(chain) {
