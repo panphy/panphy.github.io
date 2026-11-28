@@ -1621,19 +1621,34 @@ export function createKeyFireAudio({
 
   // Power-ups
 
-  // Chain lightning primed: a storm gathering in the cannon, a rising electric buzz with
-  // crackles scattered over it and far-off thunder underneath.
-  function playChainPrimeSound() {
-    playTone(55, 0.7, { type: 'sawtooth', gain: 0.03, endFrequency: 220, cutoff: 300, endCutoff: 2600, q: 5, attack: 0.03 });
-    playTone(58, 0.7, { type: 'square', gain: 0.016, endFrequency: 232, cutoff: 250, endCutoff: 2000, attack: 0.03 });
-    for (let index = 0; index < 10; index += 1) {
-      const delay = index * 0.06 + Math.random() * 0.04;
-      playNoise(0.014, { gain: 0.03 + index * 0.004, filterType: 'highpass', filterFrequency: 3500 + Math.random() * 3000, delay, pan: (Math.random() - 0.5) * 0.8 });
+  // Chain lightning is an electric arc, not weather: a harsh buzz that stutters on and
+  // off many times a second, with a hot sizzle riding on top. `arc` builds it from
+  // short chops, each a driven sawtooth plus a burst of bright noise, at a random level
+  // (some silent), so it flickers like a real spark gap. Its pitch slides from `from`
+  // to `to` over the arc.
+  function arc(duration, gain, options = {}) {
+    const from = options.from || 110;
+    const to = options.to || from;
+    const delay = options.delay || 0;
+    let at = 0;
+    while (at < duration) {
+      const chop = 0.006 + Math.random() * 0.012;
+      const level = Math.random() < 0.18 ? 0 : (0.4 + Math.random() * 0.6) * (1 - (at / duration) * (options.fade ?? 0.5));
+      if (level > 0) {
+        const pitch = (from + (to - from) * (at / duration)) * (0.9 + Math.random() * 0.2);
+        const pan = (options.pan || 0) + (Math.random() - 0.5) * 0.3;
+        playTone(pitch, chop * 1.4, { type: 'sawtooth', gain: gain * level, attack: 0.001, drive: true, cutoff: 4200, delay: delay + at, pan });
+        playTone(pitch * 2.02, chop * 1.4, { type: 'square', gain: gain * level * 0.35, attack: 0.001, cutoff: 6000, delay: delay + at, pan });
+        playNoise(chop * 1.2, { gain: gain * level * 0.9, filterType: 'highpass', filterFrequency: 2500 + Math.random() * 3500, delay: delay + at, pan });
+      }
+      at += chop;
     }
-    [880, 1108.73, 1318.51, 1760].forEach((frequency, index) => {
-      zap(frequency, frequency * 1.06, 0.08, 0.02, { delay: 0.3 + index * 0.07, pan: index % 2 === 0 ? -0.3 : 0.3, cutoff: 4200 });
-    });
-    playNoise(0.9, { gain: 0.035, filterType: 'lowpass', filterFrequency: 200, endFilterFrequency: 70, delay: 0.1 });
+  }
+
+  // Chain lightning primed: the arc charging up, a buzz climbing and thickening.
+  function playChainPrimeSound() {
+    arc(0.6, 0.03, { from: 60, to: 180, fade: -0.6 });
+    playNoise(0.05, { gain: 0.08, filterType: 'highpass', filterFrequency: 2000, delay: 0.6 });
   }
 
   // The railgun charging: capacitors whining up through stepped pulses, a held hum,
@@ -1665,43 +1680,27 @@ export function createKeyFireAudio({
     thud(96, 0.25, 0.08, { delay: 0.02 });
   }
 
-  // Chain lightning unleashed: a split-second crack like a whip, a sizzling buzz and a
-  // charge dropping through the floor.
+  // Chain lightning unleashed: a hard snap as the arc strikes, then a fierce buzz.
   function playChainStrikeSound() {
-    duckMusic(0.45, 0.6);
-    playNoise(0.025, { gain: 0.16, filterType: 'highpass', filterFrequency: 3600 });
-    zap(4200, 220, 0.18, 0.06, { type: 'sawtooth', cutoff: 8000, endCutoff: 900, q: 2 });
-    playTone(92, 0.35, { type: 'sawtooth', gain: 0.03, cutoff: 1400, endCutoff: 200, q: 5, attack: 0.002 });
-    playTone(97, 0.35, { type: 'square', gain: 0.018, cutoff: 1200, endCutoff: 180, attack: 0.002 });
-    thud(70, 0.35, 0.1);
+    duckMusic(0.5, 0.5);
+    playNoise(0.03, { gain: 0.16, filterType: 'highpass', filterFrequency: 1500 });
+    arc(0.32, 0.05, { from: 150, to: 95 });
   }
 
-  // One jump of chain lightning: a sharp crack, a falling zap, a spray of crackles over
-  // an electric buzz, and a low thump where it lands.
+  // One jump of chain lightning: a snap where it lands and a short stab of buzz.
   function playChainZapSound(targetX = 0) {
     const pan = laneOf(targetX);
-    playNoise(0.035, { gain: 0.1, filterType: 'highpass', filterFrequency: 2800, pan });
-    zap(3200, 300, 0.1, 0.055, { pan, cutoff: 6000 });
-    playTone(120, 0.22, { type: 'sawtooth', gain: 0.022, cutoff: 2200, endCutoff: 300, q: 4, pan });
-    for (let index = 0; index < 7; index += 1) {
-      const delay = 0.02 + Math.random() * 0.22;
-      playNoise(0.012, { gain: 0.05, filterType: 'highpass', filterFrequency: 3000 + Math.random() * 4000, delay, pan: pan + (Math.random() - 0.5) * 0.4 });
-      const pitch = 900 + Math.random() * 1800;
-      zap(pitch, pitch * (0.4 + Math.random() * 0.4), 0.02, 0.024, { pan, delay });
-    }
-    thud(84, 0.26, 0.07);
+    playNoise(0.025, { gain: 0.12, filterType: 'highpass', filterFrequency: 1800, pan });
+    arc(0.16, 0.045, { from: 170, to: 120, pan });
   }
 
-  // The chain bursts: thunder right overhead, a crack and then a long rolling rumble.
-  function playChainThunderSound() {
-    duckMusic(0.55, 1.1);
-    playNoise(0.05, { gain: 0.15, filterType: 'highpass', filterFrequency: 2000 });
-    playNoise(0.3, { gain: 0.09, filterType: 'bandpass', filterFrequency: 3000, endFilterFrequency: 400, q: 0.8 });
-    thud(46, 0.9, 0.16);
-    playNoise(1.4, { gain: 0.07, filterType: 'lowpass', filterFrequency: 380, endFilterFrequency: 90, delay: 0.06, drive: true });
-    playNoise(0.9, { gain: 0.045, filterType: 'lowpass', filterFrequency: 260, endFilterFrequency: 70, delay: 0.45, pan: -0.3 });
-    playNoise(0.8, { gain: 0.035, filterType: 'lowpass', filterFrequency: 240, endFilterFrequency: 60, delay: 0.8, pan: 0.3 });
-    [1318.51, 1760, 2637].forEach((frequency, index) => chime(frequency, 0.5, 0.012, { delay: 0.03 + index * 0.05, pan: index % 2 ? 0.4 : -0.4 }));
+  // The chain bursts: everything struck at once, a loud crackling discharge that
+  // sputters out, with a thump under it.
+  function playChainBurstSound() {
+    duckMusic(0.55, 0.7);
+    playNoise(0.05, { gain: 0.2, filterType: 'highpass', filterFrequency: 1200 });
+    arc(0.45, 0.06, { from: 200, to: 70, fade: 0.9 });
+    thud(70, 0.25, 0.09);
   }
 
   // The world winding down: a long falling sweep with chimes stepping down and slowing.
@@ -2536,7 +2535,7 @@ export function createKeyFireAudio({
     playChainPrimeSound,
     playChainZapSound,
     playChainStrikeSound,
-    playChainThunderSound,
+    playChainBurstSound,
     playRailgunChargeSound,
     playRailgunShotSound,
     playTimeFreezeSound,
