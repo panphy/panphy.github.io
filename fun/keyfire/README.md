@@ -1,6 +1,6 @@
 # KeyFire
 
-A typing game in the spirit of rail shooters: the player rides through five stages and types physics words to shoot down what jumps out. Its page is `fun/keyfire.html`; like everything in `fun/` it is network-only. It needs no build step, and the files share the `?v=` value `22`: bump it in `fun/keyfire.html` and in every import when the files change, so a new page cannot load incompatible browser-cached code. The UI, terms and definitions use British English; typed answers accept British and American spellings (`src/prompt-utils.js` lists the variants).
+A typing game in the spirit of rail shooters: the player rides through five stages and types physics words to shoot down what jumps out. Its page is `fun/keyfire.html`; like everything in `fun/` it is network-only. It needs no build step, and the files share the `?v=` value `23`: bump it in `fun/keyfire.html` and in every import when the files change, so a new page cannot load incompatible browser-cached code. The UI, terms and definitions use British English; typed answers accept British and American spellings (`src/prompt-utils.js` lists the variants). Unlike other published pages it leaves out `/assets/standalone-top.css`: the game fills the screen, and the iPadOS 26 blur falls on the sky.
 
 Run the tests with `node --test fun/keyfire/tests/*.test.mjs`.
 

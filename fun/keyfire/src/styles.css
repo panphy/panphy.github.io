@@ -410,6 +410,12 @@ body.blizzard .blizzard-veil::after {
   line-height: 1.5;
 }
 
+/* iPadOS floats its keyboard shortcut bar over the bottom middle of the screen
+   while the hidden typing input has focus, so lift the card clear of it. */
+@supports (-webkit-touch-callout: none) {
+  .story-card { bottom: calc(max(22px, env(safe-area-inset-bottom)) + 64px); }
+}
+
 /* Leave the two corner control banks accessible on smaller keyboard screens. */
 @media (max-width: 800px) and (min-height: 530px) {
   .story-card { top: max(102px, calc(env(safe-area-inset-top) + 86px)); bottom: auto; }
