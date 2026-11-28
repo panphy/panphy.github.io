@@ -351,6 +351,9 @@ const variantHintsShown = new Set();
 const casterBolts = [];
 let rideCart = null;
 let storyCard = null;
+// A boss's speech before its fight (startBossSpeech), and its card.
+let bossSpeech = null;
+let bossSpeechCard = null;
 let helpBubble = null;
 let helpBubbleAnchor = null;
 let challengeCard = null;
@@ -2928,9 +2931,6 @@ function endStory() {
 // A boss lands and speaks before it fights: its myth, a line at a time, in a dark card
 // in the storyteller's place, moved on with Space or skipped. It neither attacks nor
 // can be typed at until it has finished, and then its fight starts afresh.
-let bossSpeechCard = null;
-let bossSpeech = null;
-
 function startBossSpeech(boss) {
   const speech = BOSS_SPEECHES[boss.type.name];
   if (!speech) return;
