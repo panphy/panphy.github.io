@@ -7,7 +7,7 @@
 
 export const POWER_UP_TYPES = ['time_freeze', 'chain_lightning', 'shockwave', 'shield', 'railgun'];
 // The railgun's shots: each one finishes a word on its first letter.
-export const RAILGUN_SHOTS = 3;
+const RAILGUN_SHOTS = 3;
 
 export function createPowerUpSystem({
   getMode,

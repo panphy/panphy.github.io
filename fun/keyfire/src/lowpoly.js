@@ -1,6 +1,6 @@
 // lowpoly.js — faceted, flat-shaded scenery: trees, rocks and clouds.
 import * as THREE from 'three';
-import { roundSides, polyDetail, roughen } from './detail.js?v=27';
+import { roundSides, polyDetail, roughen } from './detail.js?v=28';
 
 function hash(a, b, c = 0) {
   const value = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453;
