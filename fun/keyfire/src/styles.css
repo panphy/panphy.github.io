@@ -1747,11 +1747,12 @@ body.is-god-mode .god-mode-veil {
 
 /* GOD MODE: chunky gold lettering with the title's ink outline, low in the middle of
    the view, under the golden cannon. No box. */
+/* God mode is announced in the top-right corner, clear of the action. */
 .god-mode-badge {
   position: fixed;
-  left: 50%;
-  bottom: max(10px, env(safe-area-inset-bottom));
-  z-index: 9;
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 13;
   display: flex;
   align-items: center;
   gap: 0.35em;
@@ -1767,7 +1768,7 @@ body.is-god-mode .god-mode-veil {
   text-shadow: 0 4px 0 var(--key-ink, #3d2b1c), 0 0 22px rgba(255, 196, 0, 0.55);
   -webkit-text-stroke: 7px var(--key-ink, #3d2b1c);
   paint-order: stroke fill;
-  transform: translateX(-50%);
+  transform-origin: top right;
   transition: opacity 0.2s ease;
   animation:
     godMode-appear 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both,
@@ -1785,19 +1786,19 @@ body.is-god-mode .god-mode-veil {
   animation-delay: 0.8s;
 }
 
-/* Clear the iPadOS keyboard shortcut bar, as the story card does. */
-@supports (-webkit-touch-callout: none) {
-  .god-mode-badge { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 64px); }
-}
-
-/* The storyteller's card sits in the same place, so the lettering steps aside for it. */
-body:has(.story-card:not([hidden])) .god-mode-badge {
-  opacity: 0;
+/* Where the boss's health bar spans the top, the lettering sits just below it. */
+@media (max-width: 960px) {
+  .god-mode-badge {
+    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 72px);
+    font-size: clamp(1.1rem, 3.6vw, 1.6rem);
+  }
+  /* There the paused high scores take the corner. */
+  body:is(:not(.is-running), .is-paused) .god-mode-badge { opacity: 0; }
 }
 
 @keyframes godMode-appear {
-  from { opacity: 0; transform: translateX(-50%) translateY(18px) scale(0.6); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(-14px) scale(0.6); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes godMode-glow {
