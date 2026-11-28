@@ -86,21 +86,22 @@ export function createPowerUpSystem({
         <circle cx="22" cy="38" r="4" fill="#ff8a3a" stroke="${INK}" stroke-width="2.8"/>
       </svg>
     `,
-    // A slug threaded through two coils: each coil's back half is drawn behind it and
-    // its front half in front, so the slug passes through them.
+    // A slug threaded through two coils: each coil is a whole ring behind the slug, and
+    // only the stretch of its front that crosses the slug is drawn again on top, along the
+    // same curve, so the slug passes through it with no join showing.
     railgun: `
       <svg class="power-up-svg power-up-art" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
         <path d="M2 22h8" stroke="#ff5ad2" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
-        <path d="M14 11A3.5 11 0 0 0 14 33" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-        <path d="M14 11A3.5 11 0 0 0 14 33" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M25 13A3 9 0 0 0 25 31" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-        <path d="M25 13A3 9 0 0 0 25 31" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M14 11A3.5 11 0 1 1 14 33A3.5 11 0 1 1 14 11Z" fill="none" stroke="${INK}" stroke-width="5"/>
+        <path d="M14 11A3.5 11 0 1 1 14 33A3.5 11 0 1 1 14 11Z" fill="none" stroke="#8ef0e6" stroke-width="2.4"/>
+        <path d="M25 13A3 9 0 1 1 25 31A3 9 0 1 1 25 13Z" fill="none" stroke="${INK}" stroke-width="5"/>
+        <path d="M25 13A3 9 0 1 1 25 31A3 9 0 1 1 25 13Z" fill="none" stroke="#8ef0e6" stroke-width="2.4"/>
         <path d="M8 18h24l9 4-9 4H8z" fill="#ff5ad2" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>
         <path d="M11 21h18" stroke="#fff6dc" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M14 11A3.5 11 0 0 1 14 33" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-        <path d="M14 11A3.5 11 0 0 1 14 33" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M25 13A3 9 0 0 1 25 31" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-        <path d="M25 13A3 9 0 0 1 25 31" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M16.70 15A3.5 11 0 0 1 16.70 29" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="butt"/>
+        <path d="M16.33 13.8A3.5 11 0 0 1 16.33 30.2" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="butt"/>
+        <path d="M26.89 15A3 9 0 0 1 26.89 29" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="butt"/>
+        <path d="M26.24 13.8A3 9 0 0 1 26.24 30.2" fill="none" stroke="#8ef0e6" stroke-width="2.4" stroke-linecap="butt"/>
       </svg>
     `,
     shield: `
