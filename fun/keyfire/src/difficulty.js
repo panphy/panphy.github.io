@@ -2,7 +2,7 @@
 // by a difficulty step from 1 to 10, not by wave: the game's five waves use steps 1, 3,
 // 5, 7, 9 for their monsters and 2, 4, 6, 8, 10 for their bosses (monsterLevel and
 // bossLevel in main.js), so some rows are steps the game passes over.
-import { buildSearchPrompt } from './prompt-utils.js?v=13';
+import { buildSearchPrompt } from './prompt-utils.js?v=14';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask at steps 1, 2, 3… Later steps keep the final cap.
@@ -56,7 +56,7 @@ export const BOSS_PLAN_TABLE = [
   { fromWave: 2, stages: [3, 3], longTerm: 18, finishers: 1, maxLetters: 34, attackGap: 5.4, rockFlight: 3.2, rockDamage: 1 },
   { fromWave: 3, stages: [3, 4], longTerm: 19, finishers: 1, maxLetters: 36, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1 },
   { fromWave: 5, stages: [4, 4], longTerm: 22, finishers: 1, maxLetters: 42, attackGap: 4.6, rockFlight: 2.8, rockDamage: 1 },
-  { fromWave: 7, stages: [4, 5], longTerm: 26, finishers: 2, maxLetters: 46, attackGap: 4.2, rockFlight: 2.6, rockDamage: 2 },
+  { fromWave: 7, stages: [4, 5], longTerm: 26, finishers: 2, maxLetters: 46, attackGap: 4.2, rockFlight: 2.6, rockDamage: 1 },
   // The last boss: four words under comets, one statement under splitting comets, a
   // core word behind a shield of satellites, then a story raced against its beam.
   { fromWave: 10, stages: [4], longTerm: 34, finishers: 1, satellites: 3, story: true, maxLetters: 40, attackGap: 5.0, rockFlight: 3.0, rockDamage: 1,

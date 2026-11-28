@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=13';
-import { createSeasonalEffects } from './seasonal-effects.js?v=13';
-import { createPowerUpSystem } from './power-ups.js?v=13';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=13';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=13';
-import { createLeaderboard } from './leaderboard.js?v=13';
-import { createEnemyMesh } from './enemy-meshes.js?v=13';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=13';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=13';
-import { createLowPolyCloud } from './lowpoly.js?v=13';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=13';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=13';
-import { createWordDeck } from './word-decks.js?v=13';
-import { createStage } from './stages.js?v=13';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=13';
-import { storyBeatForWave } from './story.js?v=13';
-import { createStoryteller, settleLantern } from './storyteller.js?v=13';
-import { createPlasmaCannon } from './plasma-cannon.js?v=13';
-import { createRideCart } from './ride-cart.js?v=13';
+import { createKeyFireAudio } from './audio.js?v=14';
+import { createSeasonalEffects } from './seasonal-effects.js?v=14';
+import { createPowerUpSystem } from './power-ups.js?v=14';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=14';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=14';
+import { createLeaderboard } from './leaderboard.js?v=14';
+import { createEnemyMesh } from './enemy-meshes.js?v=14';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=14';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=14';
+import { createLowPolyCloud } from './lowpoly.js?v=14';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=14';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=14';
+import { createWordDeck } from './word-decks.js?v=14';
+import { createStage } from './stages.js?v=14';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=14';
+import { storyBeatForWave } from './story.js?v=14';
+import { createStoryteller, settleLantern } from './storyteller.js?v=14';
+import { createPlasmaCannon } from './plasma-cannon.js?v=14';
+import { createRideCart } from './ride-cart.js?v=14';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -91,10 +91,10 @@ const MIN_FRAME_MS = 1000 / 60 - 3;
 const IDLE_FRAME_INTERVAL = 100; // ~10 fps when not actively playing
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
-const HEART_COUNT = 5;
+const HEART_COUNT = 3;
 const MAX_LIFE = HEART_COUNT * 2;
-// Two hearts or fewer: the music darkens and a heartbeat joins it.
-const LOW_LIFE_MUSIC_THRESHOLD = 4;
+// One heart or less: the music darkens and a heartbeat joins it.
+const LOW_LIFE_MUSIC_THRESHOLD = 2;
 const MINION_DAMAGE = 2;
 // Seconds a boss is stunned when chain lightning leaps to it.
 const CHAIN_BOSS_STUN = 5.5;
@@ -118,7 +118,14 @@ const STRIKE_Z = 2.4;
 const WINDUP_TIME = 1.1;
 const RAIL_ENEMY_CAP = 6;
 const COSMIC_WAVE_THRESHOLD = 99149236;
-const MEDIC_HEAL_AMOUNT = 2;
+// A small healer gives back half a heart, a big one a whole heart. From the second
+// stage each healer has this chance of being big.
+const SMALL_HEAL = 1;
+const BIG_HEAL = 2;
+const BIG_HEALER_CHANCE = 1 / 3;
+// From the second stage each chest has this chance of being a mimic that bites.
+const MIMIC_BITE_CHANCE = 1 / 3;
+const MIMIC_BITE_DAMAGE = 1;
 const EMBER_HEIGHT_DELTAS = 1819600217;
 const PARTICLE_GRAVITY_COEFFS = 2242416284;
 const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
@@ -189,6 +196,14 @@ const MEDIC_TYPE = {
   eye: 0xf2f0df,
   scale: 0.92,
   score: 45,
+};
+// The big healer: two hearts side by side, half as big again.
+const BIG_MEDIC_TYPE = {
+  ...MEDIC_TYPE,
+  name: 'Twin Heart',
+  isBigMedic: true,
+  scale: MEDIC_TYPE.scale * 1.5,
+  score: 70,
 };
 const MIMIC_TYPE = {
   name: 'Mimic Chest',
@@ -289,6 +304,7 @@ let medicSpawnSlots = [];
 let mimicsSpawnedThisSet = 0;
 let mimicSpawnSlots = [];
 let firstMimicHintShown = false;
+let firstBiterHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
 let powerUpCheatUsedThisRun = false;
@@ -332,6 +348,7 @@ const casterBolts = [];
 let rideCart = null;
 let storyCard = null;
 let helpBubble = null;
+let helpBubbleAnchor = null;
 let challengeCard = null;
 let challengeIntro = null;
 let sceneGround = null;
@@ -1340,7 +1357,7 @@ function awardKill(enemy) {
   streak += 1;
   defeatedCount += 1;
   const points = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
-  const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
+  const healed = enemy.isMedic ? Math.min(enemy.healAmount || SMALL_HEAL, MAX_LIFE - health) : 0;
   score += points;
   if (healed > 0) health += healed;
   if (!enemy.noGlossary && !enemy.isProjectile && !encounteredTerms.some(t => t.term === enemy.prompt)) {
@@ -1364,8 +1381,13 @@ function leakEnemy(enemy) {
     return;
   }
 
-  if (enemy.isMimic) {
-    // A Mimic Chest is bonus loot, not a threat — letting it escape costs you the
+  if (enemy.isMimic && enemy.bites) {
+    // A mimic that bites: letting it go costs half a heart and the streak, as a
+    // monster that gets through does, unless the shield takes the bite.
+    enemy.damage = MIMIC_BITE_DAMAGE;
+    playChestClackSound();
+  } else if (enemy.isMimic) {
+    // A loot chest is bonus loot, not a threat — letting it escape costs you the
     // reward but never deals damage, breaks your shield, or resets your streak.
     const wasActiveTarget = activeTarget === enemy;
     playChestClackSound();
@@ -1910,12 +1932,8 @@ function advanceBossLine(boss) {
     const next = boss.bossLines[boss.lineIndex];
     const newStage = finished.kind !== next.kind || !!finished.core !== !!next.core;
     if (boss.isClimaxBoss && newStage) {
-      // The last boss gives back a heart at each change of weapon, and names the next one.
-      const healed = Math.min(2, MAX_LIFE - health);
-      if (healed > 0) {
-        health += healed;
-        playHealSound(healed);
-      }
+      // At each change of weapon the last boss names the next one, and a big healer
+      // crosses the arena (below): typing it gives back a heart.
       if (next.kind === 'story') {
         showBanner(`THE TALE OF ${next.story.toUpperCase()}`);
         showBannerLater('BEAT THE BEAM!', 'variant-hint', 1600);
@@ -1925,6 +1943,7 @@ function advanceBossLine(boss) {
     // Only the turn to the finishing blow is announced.
     else if (stageWord && next.kind !== 'words') showBanner('FINISH IT!');
     startBossLine(boss);
+    if (boss.isClimaxBoss && newStage && spawnBossHealer(boss, true)) boss.healerStage = bossStageOf(boss);
     updateHud(true);
     return true;
   }
@@ -1939,7 +1958,7 @@ function advanceBossLine(boss) {
 // Rocks carry a short unit; none may start with the same letter as another rock or as
 // any word the boss has still to show, so the first key always picks one target.
 function chooseRockWord(boss, { minLength = 1, maxLength = Infinity } = {}) {
-  const taken = new Set(enemies.filter(other => !other.dying && (other.isProjectile || other.satellite))
+  const taken = new Set(enemies.filter(other => !other.dying && (other.isProjectile || other.satellite || other.isMedic))
     .map(other => other.searchPrompt.charAt(0)));
   for (const word of boss.lineWordsList.slice(boss.wordIndex)) taken.add(buildSearchPrompt(word).charAt(0));
   const free = ROCK_UNITS.filter((entry) => {
@@ -1994,6 +2013,7 @@ function bossAttack(boss) {
 function summonMinion(boss) {
   const initials = new Set(boss.lineWordsList.map(word => buildSearchPrompt(word).charAt(0)));
   const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt);
+  for (const healer of enemies.filter(enemy => enemy.isMedic && !enemy.dying)) initials.add(healer.searchPrompt.charAt(0));
   const fits = (entry) => {
     const key = buildSearchPrompt(entry.term);
     if (key.length < 3 || key.length > 6 || !/^[a-z]+$/.test(key) || initials.has(key.charAt(0))) return false;
@@ -2193,6 +2213,7 @@ function updatePhraseBoss(boss, delta, seconds) {
   boss.group.rotation.x = -boss.windup * 0.34 + boss.lunge * 0.42 - recoil * 0.5 + Math.sin(boss.roar * Math.PI) * 0.22;
   boss.scaleBoost = 1 + boss.windup * 0.06 + Math.sin(boss.roar * Math.PI) * 0.14;
   if (boss.lineKind === 'words' || boss.shielded) updateBossShield(boss);
+  updateBossHealer(boss, delta);
   if (stunned || boss.stagger > 0) return;
   // During its story the Dreadnought charges its beam and throws comets as well.
   const racing = boss.lineKind === 'story' && !!bossPlan(bossLevel()).beamLettersPerSecond;
@@ -2219,6 +2240,55 @@ function updatePhraseBoss(boss, delta, seconds) {
   }
 }
 
+// Once in each stage of a boss fight, a little while after the player has lost life,
+// a small healer crosses the arena in front of the boss.
+const BOSS_HEALER_DELAY = 2.5;
+function updateBossHealer(boss, delta) {
+  if (boss.dying || boss.healerStage === bossStageOf(boss)) return;
+  if (health >= MAX_LIFE || enemies.some(enemy => enemy.isMedic && !enemy.dying)) {
+    boss.healerWait = BOSS_HEALER_DELAY;
+    return;
+  }
+  boss.healerWait = (boss.healerWait ?? BOSS_HEALER_DELAY) - delta;
+  if (boss.healerWait > 0) return;
+  if (spawnBossHealer(boss, false)) boss.healerStage = bossStageOf(boss);
+}
+
+// The stage of the fight the boss's current line belongs to: each word stage is a stage
+// of its own; a run of statements or of story lines is one stage.
+function bossStageOf(boss) {
+  let stage = 0;
+  for (let index = 1; index <= boss.lineIndex && index < boss.bossLines.length; index += 1) {
+    const before = boss.bossLines[index - 1];
+    const line = boss.bossLines[index];
+    if (line.kind === 'words' || before.kind !== line.kind || !!before.core !== !!line.core) stage += 1;
+  }
+  return stage;
+}
+
+// A healer runs in from the side away from the boss and across the arena, a little in
+// front of it. Its word starts with none of the letters that start the words of the
+// boss's line and the next, or the other targets, so the first key picks one target.
+function spawnBossHealer(boss, big) {
+  const initials = new Set(boss.lineWordsList.map(word => buildSearchPrompt(word).charAt(0)));
+  const nextLine = boss.bossLines[boss.lineIndex + 1];
+  if (nextLine) for (const word of lineWords(nextLine)) initials.add(buildSearchPrompt(word).charAt(0));
+  const liveKeys = enemies.filter(enemy => !enemy.dying).map(enemy => enemy.searchPrompt);
+  for (const key of liveKeys) initials.add(key.charAt(0));
+  const avoid = (entry) => {
+    const key = buildSearchPrompt(entry.term);
+    return !/^[a-z ]+$/.test(key) || initials.has(key.charAt(0));
+  };
+  const wordData = chooseMedicPrompt({ big, avoid });
+  if (!wordData || avoid(wordData)) return null;
+  const side = boss.group.position.x > 0 ? -1 : 1;
+  const z = THREE.MathUtils.clamp(boss.standZ + 5, -14, -5);
+  const spot = { kind: 'cover', x: side * 6, z, hideX: side * 10, hideZ: z };
+  const healer = spawnEnemy({ isMedic: true, bigMedic: big, wordData, railSpot: spot });
+  healer.bossHealer = true;
+  return healer;
+}
+
 // A beaten boss does not just vanish: it shudders, bursts in several places and then goes up.
 const BOSS_DEATH_TIME = 1.9;
 const BOSS_WINDUP_TIME = 0.9;
@@ -2232,7 +2302,7 @@ function startBossDeath(boss) {
   boss.windup = 0;
   bossDeath = { boss, t: 0, nextBurst: 0, x: boss.group.position.x, z: boss.group.position.z };
   boss.label.classList.remove('is-frosted');
-  for (const minion of enemies.filter(enemy => enemy.summoned && !enemy.dying)) {
+  for (const minion of enemies.filter(enemy => (enemy.summoned || enemy.bossHealer) && !enemy.dying)) {
     spawnDebris(minion.group.position, minion.type);
     removeEnemy(minion);
   }
@@ -2588,9 +2658,8 @@ function arriveAtStop() {
 // ── The story ────────────────────────────────────────────────────────────
 // At one stop in each wave someone is waiting (story.js). In the meadow they simply
 // talk. Later a myth holds them, and its word must be typed to set them free; then
-// they talk, and thank the player with a heart.
+// they talk.
 const STORY_SPOT = new THREE.Vector3(2.3, 0, -4.2);
-const STORY_RESCUE_HEAL = 2;
 const STORY_LETTERS_PER_SECOND = 20;
 // Done with talking, the storyteller turns and runs off to the right, a little toward
 // the camera so the scenery beside the route does not hide them, until out of view.
@@ -2609,8 +2678,11 @@ function placeHelpBubble(npc) {
   reusableVector.copy(npc.position);
   reusableVector.y += 3.1;
   reusableVector.project(camera);
-  helpBubble.style.left = `${((reusableVector.x * 0.5 + 0.5) * window.innerWidth).toFixed(1)}px`;
-  helpBubble.style.top = `${((-reusableVector.y * 0.5 + 0.5) * window.innerHeight).toFixed(1)}px`;
+  // updateLabels places the bubble, among the word cards so none covers another.
+  helpBubbleAnchor = {
+    x: (reusableVector.x * 0.5 + 0.5) * window.innerWidth,
+    y: (-reusableVector.y * 0.5 + 0.5) * window.innerHeight,
+  };
   helpBubble.hidden = false;
 }
 
@@ -2745,12 +2817,6 @@ function updateStory(delta) {
     reusableVector.y += 1;
     fx.burst(reusableVector, { color: 0x9a5cff, color2: 0xffffff, count: 26, speed: 5, life: 0.6, size: 0.3 });
     fx.ring(reusableVector, 0x9a5cff, { from: 0.4, to: 3, life: 0.45, opacity: 0.8, flat: false });
-    const healed = Math.min(STORY_RESCUE_HEAL, MAX_LIFE - health);
-    if (healed > 0) {
-      health += healed;
-      playHealSound(healed);
-      updateHud(true);
-    }
     advanceStoryLine();
     return;
   }
@@ -2818,7 +2884,6 @@ const BAT_TIME = 30;
 const BATS_AT_ONCE = 5;
 const BAT_INTRO_TIME = 2.6;
 const BAT_BONUS = 1500;
-const BAT_HEAL = 2;
 // Where the bats flit, spread across the sky and well apart, so their cards do not
 // crowd one another. Each live bat takes a free spot.
 const BAT_SPOTS = [
@@ -2912,14 +2977,9 @@ function updateChallenge(delta) {
   challenge.time = Math.max(0, challenge.time - delta);
   showChallengeCard(`SPACE BATS ${Math.min(BAT_GOAL, killed)}/${BAT_GOAL} · ${Math.ceil(challenge.time)}s`);
   if (killed >= BAT_GOAL) {
-    // Cleared: the stragglers scatter, and the prize is points and a heart.
+    // Cleared: the stragglers scatter, and the prize is points.
     for (const bat of live) removeEnemy(bat);
     score += BAT_BONUS;
-    const healed = Math.min(BAT_HEAL, MAX_LIFE - health);
-    if (healed > 0) {
-      health += healed;
-      playHealSound(healed);
-    }
     showBanner('SWARM CLEARED!', 'variant-hint');
     showChallengeCard(`SWARM CLEARED · +${formatScore(BAT_BONUS)}`);
     challenge.over = 0.01;
@@ -3019,7 +3079,17 @@ function spawnRailMember(encounter) {
   const flier = kind === 'minion' && rail.setPiece === 'flight';
   if (flier) spot = { ...spot, kind: 'sky' };
   const variant = kind === 'minion' && !encounter.stop.plain ? variantSchedule.get(normalEnemiesSpawned) : null;
-  const enemy = spawnEnemy({ isMedic: kind === 'medic', isMimic: kind === 'mimic', railSpot: spot, variant, flier });
+  // From the second stage a healer may be big and a chest may be a mimic that bites.
+  const later = waveSet >= 2;
+  const enemy = spawnEnemy({
+    isMedic: kind === 'medic',
+    bigMedic: kind === 'medic' && later && Math.random() < BIG_HEALER_CHANCE,
+    isMimic: kind === 'mimic',
+    bites: kind === 'mimic' && later && Math.random() < MIMIC_BITE_CHANCE,
+    railSpot: spot,
+    variant,
+    flier,
+  });
   registerNormalTypingCost(enemy);
   if (kind === 'medic') medicsSpawnedThisSet += 1;
   else if (kind === 'mimic') mimicsSpawnedThisSet += 1;
@@ -3325,7 +3395,8 @@ function updateEnemies(delta, seconds) {
 
     if (enemy.isMimic) {
       const isTargeted = (activeTarget === enemy && isEnemyTargetable(enemy));
-      const idleTarget = 0.22 + Math.sin(seconds * 2.2 + enemy.phase) * 0.12;
+      // A loot chest keeps its lid shut; a mimic that bites snaps its lid, baring its teeth.
+      const idleTarget = enemy.bites ? 0.18 + Math.abs(Math.sin(seconds * 7 + enemy.phase)) * 0.4 : 0;
       const targetLidProgress = isTargeted ? 1.0 : idleTarget;
       const oldProgress = enemy.lidOpenProgress;
       enemy.lidOpenProgress += (targetLidProgress - enemy.lidOpenProgress) * Math.min(1.0, 12 * delta);
@@ -3837,7 +3908,18 @@ function updateLabels() {
     };
   });
 
-  resolveLabelStacks(layoutItems.filter(item => !item.pinned));
+  // A held storyteller's cry for help stacks with the cards like one more card. Its
+  // tail hangs below its box, so the tail counts as part of its height.
+  const stacked = layoutItems.filter(item => !item.pinned);
+  const bubbleItem = helpBubble && !helpBubble.hidden && helpBubbleAnchor
+    ? layoutHelpBubble(helpBubbleAnchor, safeBounds, width)
+    : null;
+  if (bubbleItem) stacked.push(bubbleItem);
+  resolveLabelStacks(stacked);
+  if (bubbleItem) {
+    helpBubble.style.left = `${bubbleItem.x.toFixed(1)}px`;
+    helpBubble.style.top = `${(bubbleItem.y - HELP_BUBBLE_TAIL).toFixed(1)}px`;
+  }
 
   for (const item of layoutItems) {
     const { enemy, scale } = item;
@@ -3854,6 +3936,26 @@ function updateLabels() {
     enemy.label.classList.toggle('is-critical', aboutToHit);
     enemy.label.classList.toggle('is-stunned', !!(enemy.stunTimer && enemy.stunTimer > 0));
   }
+}
+
+const HELP_BUBBLE_TAIL = 12;
+function layoutHelpBubble(anchor, safeBounds, width) {
+  const bubbleWidth = helpBubble.offsetWidth;
+  const bubbleHeight = helpBubble.offsetHeight + HELP_BUBBLE_TAIL;
+  const x = THREE.MathUtils.clamp(anchor.x, LABEL_SAFE_MARGIN + bubbleWidth / 2, width - LABEL_SAFE_MARGIN - bubbleWidth / 2);
+  const minY = safeBounds.top + bubbleHeight;
+  const maxY = safeBounds.bottom;
+  return {
+    enemy: { id: -1 },
+    x,
+    y: THREE.MathUtils.clamp(anchor.y + HELP_BUBBLE_TAIL, minY, maxY),
+    minY,
+    maxY,
+    width: bubbleWidth,
+    height: bubbleHeight,
+    left: x - bubbleWidth / 2,
+    right: x + bubbleWidth / 2,
+  };
 }
 
 function resolveLabelStacks(items) {
@@ -4097,18 +4199,19 @@ function spawnEnemy(options = {}) {
   const isBoss = options.isBoss || false;
   const isMedic = options.isMedic || false;
   const isMimic = options.isMimic || false;
+  const bigMedic = isMedic && !!options.bigMedic;
   const isClimaxBoss = options.isClimaxBoss || false;
   const wordData = options.wordData
     ? options.wordData
     : isMedic
-    ? chooseMedicPrompt()
+    ? chooseMedicPrompt({ big: bigMedic, avoid: options.avoid })
     : isMimic
     ? chooseMimicPrompt()
     : options.variant
     ? chooseVariantPrompt(options.variant)
     : choosePrompt();
 
-  const type = options.type || (isBoss ? options.bossType : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES));
+  const type = options.type || (isBoss ? options.bossType : isMedic ? (bigMedic ? BIG_MEDIC_TYPE : MEDIC_TYPE) : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES));
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     showBannerLater('TYPE TO HEAL!', 'medic-hint', 1100);
@@ -4116,6 +4219,10 @@ function spawnEnemy(options = {}) {
   if (isMimic && !firstMimicHintShown) {
     firstMimicHintShown = true;
     showBannerLater('MIMIC CHEST DETECTED!', 'mimic-hint', 1100);
+  }
+  if (options.bites && !firstBiterHintShown) {
+    firstBiterHintShown = true;
+    showBannerLater('SNAPPING LID: IT BITES!', 'mimic-hint', 1100);
   }
   const group = options.customGroup || createEnemyMesh(type);
   // A monster from an ambush is placed by setupRailEntry; bosses and rocks say where they start.
@@ -4213,6 +4320,8 @@ function spawnEnemy(options = {}) {
     enemy.wings = createWings(type);
     group.add(enemy.wings);
   }
+  if (isMedic) enemy.healAmount = bigMedic ? BIG_HEAL : SMALL_HEAL;
+  if (options.bites) enemy.bites = true;
   if (options.variant) dressVariant(enemy, options.variant);
   if (options.railSpot) setupRailEntry(enemy, options.railSpot);
   enemyId += 1;
@@ -4933,14 +5042,19 @@ function choosePrompt() {
     || monsterDeck.pick(pool);
 }
 
-function chooseMedicPrompt() {
+// A small healer carries a short word, a big one a long word. avoid, if given, rules
+// out more words (in a boss fight, those that start like the boss's).
+function chooseMedicPrompt({ big = false, avoid = null } = {}) {
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
-  const pool = currentKeywordPool();
-  const compactPool = pool.filter((entry) => {
+  const [min, max] = big ? [8, LONGEST_MONSTER_WORD] : [4, 7];
+  const sized = pool => pool.filter((entry) => {
     const length = buildSearchPrompt(entry.term).length;
-    return length >= 4 && length <= 12;
+    return length >= min && length <= max && (!avoid || !avoid(entry));
   });
-  const usablePool = compactPool.length > 0 ? compactPool : pool.length > 0 ? pool : EASY_WORDS;
+  const pool = currentKeywordPool();
+  const compactPool = sized(pool);
+  const widePool = compactPool.length > 0 ? compactPool : sized(ALL_WORDS);
+  const usablePool = widePool.length > 0 ? widePool : pool.length > 0 ? pool : EASY_WORDS;
   const bossAnswers = liveAnswers(enemy => enemy.isBoss);
   const clear = entry => !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers);
   return monsterDeck.pick(usablePool, entry => !nearExisting.has(entry.term) && clear(entry))
@@ -5792,7 +5906,7 @@ function spawnScorePopup(points, enemy, healed = 0) {
   const popup = document.createElement('div');
   popup.className = enemy.isMedic ? 'score-popup is-heal' : 'score-popup';
   const scoreText = streak >= 2 ? `+${points} ×${streak}` : `+${points}`;
-  const healText = healed >= MEDIC_HEAL_AMOUNT ? '+1 HEART' : '+0.5 HEART';
+  const healText = healed >= 2 ? '+1 HEART' : '+0.5 HEART';
   popup.textContent = healed > 0 ? `${scoreText} · ${healText}` : scoreText;
   popup.style.left = `${left}px`;
   popup.style.top = `${top}px`;
