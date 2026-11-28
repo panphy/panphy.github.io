@@ -427,7 +427,7 @@ const {
   playChainPrimeSound,
   playChainZapSound,
   playChainStrikeSound,
-  playChainThunderSound,
+  playChainBurstSound,
   playRailgunChargeSound,
   playRailgunShotSound,
   playTimeFreezeSound,
@@ -6380,7 +6380,7 @@ function releaseChainBeams() {
 
 function burstChain(chain) {
   releaseChainBeams();
-  playChainThunderSound();
+  playChainBurstSound();
   kickTimer = Math.max(kickTimer, 0.5);
   for (const enemy of chain) {
     // Each one struck goes up in a crown of sparks and a wide ring of light.
