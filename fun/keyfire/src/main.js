@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=30';
-import { createSeasonalEffects } from './seasonal-effects.js?v=30';
-import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=30';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=30';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=30';
-import { createLeaderboard } from './leaderboard.js?v=30';
-import { createEnemyMesh } from './enemy-meshes.js?v=30';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=30';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=30';
-import { createLowPolyCloud } from './lowpoly.js?v=30';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=30';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=30';
-import { createWordDeck } from './word-decks.js?v=30';
-import { createStage } from './stages.js?v=30';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=30';
-import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=30';
-import { createStoryteller, settleLantern } from './storyteller.js?v=30';
-import { createPlasmaCannon } from './plasma-cannon.js?v=30';
-import { createRideCart } from './ride-cart.js?v=30';
+import { createKeyFireAudio } from './audio.js?v=31';
+import { createSeasonalEffects } from './seasonal-effects.js?v=31';
+import { createPowerUpSystem, POWER_UP_TYPES } from './power-ups.js?v=31';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=31';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=31';
+import { createLeaderboard } from './leaderboard.js?v=31';
+import { createEnemyMesh } from './enemy-meshes.js?v=31';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=31';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=31';
+import { createLowPolyCloud } from './lowpoly.js?v=31';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=31';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=31';
+import { createWordDeck } from './word-decks.js?v=31';
+import { createStage } from './stages.js?v=31';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=31';
+import { storyBeatForWave, BOSS_SPEECHES } from './story.js?v=31';
+import { createStoryteller, settleLantern } from './storyteller.js?v=31';
+import { createPlasmaCannon } from './plasma-cannon.js?v=31';
+import { createRideCart } from './ride-cart.js?v=31';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -442,7 +442,7 @@ const {
   initialEnabled: loadAudioSetting(),
   saveAudioSetting,
   getMode: () => mode,
-  getWavePhase: () => wavePhase,
+  getWavePhase: () => musicPhase(),
   getWaveSet: () => waveSet,
   getIsFinalWave: () => isFinalWave(),
   getHealth: () => health,
@@ -5851,6 +5851,17 @@ function updateFinalWaveScenery(seconds, delta) {
     drifter.rock.rotation.x += drifter.spin * delta;
     drifter.rock.rotation.y += drifter.spin * 0.7 * delta;
   }
+}
+
+// The music follows a boss's wave through its phases: the approach and the taunt
+// ('boss-intro'), the fight ('boss'), the boss shuddering as it falls ('boss-falling')
+// and the time after it has burst ('boss-down').
+function musicPhase() {
+  if (wavePhase !== 'boss') return wavePhase;
+  if (bossDeath) return 'boss-falling';
+  const boss = enemies.find(enemy => enemy.phraseBoss);
+  if (bossFight && !boss) return 'boss-down';
+  return boss?.rail?.phase === 'boss' ? 'boss' : 'boss-intro';
 }
 
 function startBossPhase() {
