@@ -67,3 +67,48 @@ export const STORY_BEATS = [
 export function storyBeatForWave(wave) {
   return STORY_BEATS[Math.min(STORY_BEATS.length, Math.max(1, Math.floor(wave))) - 1];
 }
+
+// What each boss says as it lands, before its fight: its myth, said with total
+// confidence. voice: the pitch of its speech blips, below every storyteller's.
+export const BOSS_SPEECHES = {
+  'Verdant Colossus': {
+    voice: -2.6,
+    lines: [
+      "Another little typist, come to argue with me? How adorable.",
+      "Heavy things fall faster. Drop a boulder and a pebble together, and the boulder wins every time!",
+      "Shall we test it? I'll drop the heaviest rocks I have, right on your head.",
+    ],
+  },
+  'Crimson Bulwark': {
+    voice: -1.6,
+    lines: [
+      "Roll up, roll up! Energy for nothing, and plenty of it!",
+      "My marvellous machine turns for ever and never needs a push. Free power, for ever and ever!",
+      "And you'd spoil it all with your dreary sums? Then I'll spend a little of my endless energy on you.",
+    ],
+  },
+  'Magma Sovereign': {
+    voice: -3,
+    lines: [
+      "Kneel. You stand in the furnace of the Magma Sovereign.",
+      "Heat is a liquid, fool. I keep it in my veins and pour it wherever I please.",
+      "Come closer, and I shall pour every last drop of it over you!",
+    ],
+  },
+  'Glacial Titan': {
+    voice: -2.2,
+    lines: [
+      "So. A warm little creature has wandered onto my lake.",
+      "Ice is hard and heavy, so ice must sink. Nobody looks beneath the water to check. Nobody ever will.",
+      "Stay a while. I'll freeze you solid, and then we shall see which of us sinks.",
+    ],
+  },
+  'Stellar Dreadnought': {
+    voice: -3.2,
+    lines: [
+      "I have watched you since the night you were born, little one.",
+      "The stars wrote your whole life before it began. Every step that brought you here was already written.",
+      "And it is written that you fall tonight. Go on, type. It changes nothing.",
+    ],
+  },
+};
