@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { STORY_BEATS, storyBeatForWave } from '../src/story.js';
+import { STORY_BEATS, storyBeatForWave, BOSS_SPEECHES } from '../src/story.js';
 import { CHAPTERS, MINE_PALETTE, FINAL_WAVE_PALETTE, SEASON_PALETTES, WAVE_COUNT, chapterForWave } from '../src/chapters.js';
 
 test('five waves, one chapter each', () => {
@@ -62,4 +62,18 @@ test('every wave has a storyteller; only the first is not held by a myth', async
     for (const line of beat.lines) assert.ok(line.length <= 125, line);
     assert.equal(!!beat.held, wave > 1);
   }
+});
+
+test('every boss has its say before its fight: three lines, in a voice deeper than any storyteller', () => {
+  const lowestStoryVoice = Math.min(...STORY_BEATS.map(beat => beat.voice));
+  for (const chapter of CHAPTERS) {
+    const speech = BOSS_SPEECHES[chapter.boss];
+    assert.ok(speech, `${chapter.boss} has a speech`);
+    assert.equal(speech.lines.length, 3, chapter.boss);
+    for (const line of speech.lines) assert.ok(line.length <= 110, line);
+    assert.ok(speech.voice < lowestStoryVoice, chapter.boss);
+    // Blips are 360 + 70 × voice hertz: keep them an audible growl, not a rumble.
+    assert.ok(360 + 70 * speech.voice >= 120, chapter.boss);
+  }
+  assert.deepEqual(Object.keys(BOSS_SPEECHES).sort(), CHAPTERS.map(chapter => chapter.boss).sort());
 });

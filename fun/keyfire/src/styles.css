@@ -496,6 +496,91 @@ body.blizzard .blizzard-veil::after {
   .story-card.is-done .story-next { animation: none; }
 }
 
+/* A boss's speech before its fight: the storyteller's card turned dark, lit from below
+   in the boss's own colour (--boss-accent), with a smouldering glow. */
+.story-card.boss-speech {
+  --boss-accent: #ff351f;
+  gap: 6px;
+  padding: 14px 56px 32px;
+  border: 3px solid #0b0507 !important;
+  border-radius: 14px;
+  background:
+    radial-gradient(120% 90% at 50% 125%, color-mix(in srgb, var(--boss-accent) 42%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--boss-accent) 10%, #22090f), #0c0407) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--boss-accent) 75%, transparent),
+    0 0 26px color-mix(in srgb, var(--boss-accent) 45%, transparent),
+    0 7px 0 #0b0507 !important;
+  color: #f3e3cf;
+  animation: boss-speech-glow 2.6s ease-in-out infinite;
+}
+
+/* A thin inner frame, like an old engraved plate. */
+.story-card.boss-speech::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid color-mix(in srgb, var(--boss-accent) 35%, transparent);
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+.story-card.boss-speech.is-in {
+  animation: boss-speech-in 420ms ease-out, boss-speech-glow 2.6s ease-in-out infinite;
+}
+
+.story-card.boss-speech .story-name {
+  color: var(--boss-accent);
+  font-family: var(--font-chunky);
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--boss-accent) 70%, transparent), 0 2px 0 #000;
+}
+
+.story-card.boss-speech .story-line {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.6vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  word-spacing: 0.12em;
+  line-height: 1.4;
+  text-shadow: 0 0 14px rgba(255, 60, 40, 0.35), 0 2px 0 #000;
+}
+
+.story-card.boss-speech .story-next kbd {
+  border-color: var(--boss-accent);
+  background: #14070b;
+  box-shadow: 0 3px 0 #000;
+  color: var(--boss-accent);
+}
+
+.story-card.boss-speech .story-skip {
+  color: color-mix(in srgb, var(--boss-accent) 80%, #f3e3cf);
+}
+
+.story-card.boss-speech .story-skip:hover,
+.story-card.boss-speech .story-skip:focus-visible {
+  background: color-mix(in srgb, var(--boss-accent) 18%, transparent);
+}
+
+@keyframes boss-speech-in {
+  0% { opacity: 0; translate: 0 14px; scale: 0.94; filter: brightness(2.2); }
+  45% { opacity: 1; translate: -4px 0; scale: 1.02; }
+  65% { translate: 4px 0; }
+  85% { translate: -2px 0; }
+  100% { translate: 0 0; scale: 1; filter: none; }
+}
+
+@keyframes boss-speech-glow {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--boss-accent) 45%, transparent)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-card.boss-speech,
+  .story-card.boss-speech.is-in { animation: none; }
+}
+
 .damage-flash {
   z-index: 9;
   opacity: 0;
