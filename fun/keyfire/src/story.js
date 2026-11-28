@@ -68,47 +68,48 @@ export function storyBeatForWave(wave) {
   return STORY_BEATS[Math.min(STORY_BEATS.length, Math.max(1, Math.floor(wave))) - 1];
 }
 
-// What each boss says as it lands, before its fight: its myth, said with total
-// confidence. voice: the pitch of its speech blips, below every storyteller's.
+// What each boss says to the player as it lands, before its fight: it mocks them,
+// and lets slip its myth as if everyone knew it. voice: the pitch of its speech
+// blips, below every storyteller's.
 export const BOSS_SPEECHES = {
   'Verdant Colossus': {
     voice: -2.6,
     lines: [
-      "Another little typist, come to argue with me? How adorable.",
-      "Heavy things fall faster. Drop a boulder and a pebble together, and the boulder wins every time!",
-      "Shall we test it? I'll drop the heaviest rocks I have, right on your head.",
+      "Ha! They sent YOU? I've squashed pebbles with more fight in them.",
+      "Heavy things fall faster. Everyone knows that. Everyone except you, it seems. Did you nap through school?",
+      "Look at those shaking fingers! My boulders will land long before you can spell gravity.",
     ],
   },
   'Crimson Bulwark': {
     voice: -1.6,
     lines: [
-      "Roll up, roll up! Energy for nothing, and plenty of it!",
-      "My marvellous machine turns for ever and never needs a push. Free power, for ever and ever!",
-      "And you'd spoil it all with your dreary sums? Then I'll spend a little of my endless energy on you.",
+      "Oh look, a customer! Sorry, little one, no refunds for clumsy typists.",
+      "My machine runs for ever on nothing at all. You're puffed out after three words. Pathetic!",
+      "Go on then, bash those keys. I've got energy for ever, and you've got about a minute.",
     ],
   },
   'Magma Sovereign': {
     voice: -3,
     lines: [
-      "Kneel. You stand in the furnace of the Magma Sovereign.",
-      "Heat is a liquid, fool. I keep it in my veins and pour it wherever I please.",
-      "Come closer, and I shall pour every last drop of it over you!",
+      "You crawled into my furnace? You're sweating already. How embarrassing.",
+      "Heat is a liquid, peasant, and I have rivers of it. You have a keyboard and a lot of nerve.",
+      "Type faster, little ember. Oh, you can't? Your words drip out slower than cold treacle.",
     ],
   },
   'Glacial Titan': {
     voice: -2.2,
     lines: [
-      "So. A warm little creature has wandered onto my lake.",
-      "Ice is hard and heavy, so ice must sink. Nobody looks beneath the water to check. Nobody ever will.",
-      "Stay a while. I'll freeze you solid, and then we shall see which of us sinks.",
+      "Shivering already, little hero? Your teeth are chattering louder than your keys.",
+      "Ice sinks, everyone knows that. And so will you, the moment you trip over your first word.",
+      "Take your time, slowcoach. You'll be frozen solid before you finish a sentence.",
     ],
   },
   'Stellar Dreadnought': {
     voice: -3.2,
     lines: [
-      "I have watched you since the night you were born, little one.",
-      "The stars wrote your whole life before it began. Every step that brought you here was already written.",
-      "And it is written that you fall tonight. Go on, type. It changes nothing.",
+      "Ah, the little hero who keeps pressing Backspace. Yes, I saw every single one.",
+      "The stars wrote your fate before you were born. They wrote that you lose. They even wrote your typos.",
+      "Every hero ends up as a dot in my sky. You'll be a very small, very dim one. Go on, type.",
     ],
   },
 };
