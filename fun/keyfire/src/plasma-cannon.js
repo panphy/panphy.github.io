@@ -13,9 +13,10 @@ const GUN_SCALE = 1.5;
 // How far right of centre it sits, as a share of half the view's width.
 const GUN_OFFSET = 0.3;
 // At rest it points at the middle of the view, a short way ahead, which turns it in
-// at an angle; it leans further toward whatever is being typed at.
+// at an angle. While typing it points right at the target, so every shot leaves the
+// barrel along the line it flies; it turns fast enough to be on target by the shot.
 const REST_AIM = new THREE.Vector3(0, 0.1, -5.5);
-const AIM_LEAN = 0.45;
+const AIM_TURN_RATE = 28;
 const BARREL_LENGTH = 0.5;
 const BARREL_RADIUS = 0.062;
 const MUZZLE_Z = 0.3 + BARREL_LENGTH;
@@ -190,6 +191,14 @@ export function createPlasmaCannon({ camera, crystalMaterial, createCrown = null
     origin(side, target = new THREE.Vector3()) {
       return (side === 0 ? parts.core : parts.muzzle).getWorldPosition(target);
     },
+    // Turns the gun onto a world point at once, so a shot fired this frame leaves the
+    // muzzle along the line to it.
+    pointAt(point) {
+      aim.copy(point);
+      aimReady = true;
+      parts.gun.lookAt(aim);
+      parts.gun.updateMatrixWorld(true);
+    },
     // A shot: the barrels spin up, the gun kicks back and the muzzle flashes.
     cast(side, strength = 1) {
       if (side === 0) {
@@ -210,16 +219,18 @@ export function createPlasmaCannon({ camera, crystalMaterial, createCrown = null
       const halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * -DEPTH * camera.aspect;
       mount.position.set(halfWidth * GUN_OFFSET + Math.sin(walkPhase * 0.5) * 0.02 * walk, GUN_Y + bob + Math.sin(seconds * 0.9) * 0.008, DEPTH);
 
-      // The gun swings toward the target without sweeping right across the view.
       camera.updateMatrixWorld();
-      wanted.copy(REST_AIM);
-      camera.localToWorld(wanted);
-      if (target) wanted.lerp(target, AIM_LEAN);
+      if (target) {
+        wanted.copy(target);
+      } else {
+        wanted.copy(REST_AIM);
+        camera.localToWorld(wanted);
+      }
       if (!aimReady) {
         aim.copy(wanted);
         aimReady = true;
       } else {
-        aim.lerp(wanted, Math.min(1, delta * 10));
+        aim.lerp(wanted, Math.min(1, delta * AIM_TURN_RATE));
       }
       // The kick below moves the gun, so it starts each frame from home.
       parts.gun.position.set(0, 0, 0);

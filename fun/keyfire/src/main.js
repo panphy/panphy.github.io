@@ -294,6 +294,7 @@ let score = 0;
 let bestScore = loadBestScore();
 let health = MAX_LIFE;
 let cannonIsPrimed = false;
+const cannonAimPoint = new THREE.Vector3();
 let gameTimeSeconds = 0;
 let waveSet = 1;
 let wavePhase = 'normal';
@@ -420,6 +421,7 @@ const {
   playChestClackSound,
   playChestOpenSound,
   playChestLootSound,
+  playMimicChargeSound,
   playShockwaveSound,
   playShieldActivateSound,
   playShieldBlockSound,
@@ -3155,7 +3157,7 @@ function startMimicCharge(enemy) {
   plan.phase = 'advance';
   plan.speed = (STRIKE_Z - position.z) / (railTypingEstimate(enemy) * 0.6 + MIMIC_CHARGE_SPARE);
   enemy.lidOpenProgress = 1;
-  playChestClackSound();
+  playMimicChargeSound(position.x);
   reusableVector.set(position.x, 0.14, position.z);
   fx.ring(reusableVector, enemy.type.eye, { from: 0.3, to: 2.4, life: 0.45, opacity: 0.8 });
 }
@@ -3422,6 +3424,7 @@ function hitEnemyWithLetter(enemy) {
   reusableVector.copy(enemy.group.position);
   reusableVector.y += 0.9 * enemy.group.scale.y;
   fx.burst(reusableVector, { color: enemy.type.eye, color2: 0xffffff, count: 7, speed: 3.2, life: 0.3, size: 0.24 });
+  weapon.pointAt(reusableVector);
   weapon.cast(1, 0.45);
   const start = weapon.origin(1);
   const end = reusableVector.clone();
@@ -3740,8 +3743,14 @@ function updateEnvironment(seconds, delta, isTimeFrozen) {
   camera.position.y = CAMERA_HEIGHT + Math.sin(seconds * 0.52) * 0.06 + bob + Math.cos(seconds * 37) * shake;
   camera.position.z = CAMERA_DISTANCE + Math.sin(seconds * 0.28) * 0.08 + Math.sin(seconds * 43) * shake;
   camera.lookAt(cameraTarget);
+  // The gun points straight at the spot its bolts strike, the middle of the target.
+  let aimPoint = null;
+  if (activeTarget && !activeTarget.dying) {
+    aimPoint = cannonAimPoint.copy(activeTarget.group.position);
+    aimPoint.y += (activeTarget.isBoss ? 1.2 : 0.9) * activeTarget.group.scale.y;
+  }
   weapon.update(seconds, envDelta, {
-    target: activeTarget && !activeTarget.dying ? activeTarget.group.position : null,
+    target: aimPoint,
     walk: walking,
     walkPhase: rail.walkPhase,
   });
@@ -4745,9 +4754,10 @@ let railgunFiring = false;
 function spawnRailgunShot(targetPosition) {
   weapon.cast(1, 1);
   weapon.cast(0, 1);
-  const start = weapon.origin(1);
   const end = targetPosition.clone();
   end.y += 1.2;
+  weapon.pointAt(end);
+  const start = weapon.origin(1);
   const distance = start.distanceTo(end);
   const mid = start.clone().lerp(end, 0.5);
   const additive = (color, opacity) => new THREE.MeshBasicMaterial({
@@ -4803,9 +4813,10 @@ function spawnBeam(targetPosition) {
   // The finishing blow comes from the muzzle, with the core surging behind it.
   weapon.cast(1, 1);
   weapon.cast(0, 1);
-  const start = weapon.origin(1);
   const end = targetPosition.clone();
   end.y += 1.2;
+  weapon.pointAt(end);
+  const start = weapon.origin(1);
   playBeamSound(end.x);
   const distance = start.distanceTo(end);
   const mid = start.clone().lerp(end, 0.5);

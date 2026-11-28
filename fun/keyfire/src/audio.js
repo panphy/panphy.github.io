@@ -1645,31 +1645,20 @@ export function createKeyFireAudio({
     }
   }
 
-  // Chain lightning primed: the arc charging up, a buzz climbing and thickening.
+  // Chain lightning primed: the arc building with a rush, snapping into a charged hum.
   function playChainPrimeSound() {
-    arc(0.6, 0.03, { from: 60, to: 180, fade: -0.6 });
-    playNoise(0.05, { gain: 0.08, filterType: 'highpass', filterFrequency: 2000, delay: 0.6 });
-  }
-
-  // A struck metal bar or bell: inharmonic partials, the high ones dying first.
-  function bell(frequency, duration, gain, options = {}) {
-    [[1, 1, 1], [2.76, 0.5, 0.6], [5.4, 0.3, 0.4], [8.93, 0.18, 0.25]].forEach(([ratio, level, life]) => {
-      playTone(frequency * ratio, duration * life, { ...options, type: 'sine', gain: gain * level, attack: 0.001 });
-    });
+    swellInto(0.5, 0.05, { length: 0.5, from: 500, to: 7000 });
+    arc(0.55, 0.026, { from: 55, to: 160, fade: -0.6 });
+    playNoise(0.02, { gain: 0.16, filterType: 'highpass', filterFrequency: 1800, delay: 0.5 });
+    subDrop(80, 40, 0.45, 0.09, { delay: 0.5 });
   }
 
   // Mecha-anime sound design in a few pieces. `swellInto` is a reversed whoosh that
-  // rushes up into a hit at `at` seconds. `ring` is a high, glassy tone held by two
-  // sines a few hertz apart, so it shimmers as it dies away (the "kiiin" after a hit).
-  // `subDrop` is the deep falling boom under a heavy impact.
+  // rushes up into a hit at `at` seconds; `subDrop` is the deep falling boom under a
+  // heavy impact. No high pings: hits are noise, sweeps and low weight.
   function swellInto(at, gain, options = {}) {
     const length = options.length || 0.4;
     playNoise(length, { gain, filterType: 'highpass', filterFrequency: options.from || 400, endFilterFrequency: options.to || 4000, swell: true, delay: Math.max(0, at - length), pan: options.pan });
-  }
-
-  function ring(frequency, duration, gain, options = {}) {
-    playTone(frequency, duration, { ...options, type: 'sine', gain, attack: 0.002 });
-    playTone(frequency + (options.beat || 5), duration, { ...options, type: 'sine', gain: gain * 0.8, attack: 0.002 });
   }
 
   function subDrop(from, to, duration, gain, options = {}) {
@@ -1677,26 +1666,27 @@ export function createKeyFireAudio({
     playTone(from * 2, duration * 0.5, { ...options, type: 'sawtooth', gain: gain * 0.3, endFrequency: to * 2, cutoff: 700, endCutoff: 90, attack: 0.003 });
   }
 
-  // A struck metal bar or bell: inharmonic partials, the high ones dying first.
+  // A struck metal mass: inharmonic partials, the high ones dying first. Kept low (a
+  // groan or clang, never a ding).
   function bell(frequency, duration, gain, options = {}) {
     [[1, 1, 1], [2.76, 0.5, 0.6], [5.4, 0.3, 0.4], [8.93, 0.18, 0.25]].forEach(([ratio, level, life]) => {
       playTone(frequency * ratio, duration * life, { ...options, type: 'sine', gain: gain * level, attack: 0.001 });
     });
   }
 
-  // The railgun charging: static crackling over a whine that screams up out of hearing
-  // ("kyuiiin"), then a hard metallic lock.
+  // The railgun charging: static crackling under a whine that screams up out of hearing
+  // ("kyuiiin"), then a hard mechanical lock.
   function playRailgunChargeSound() {
     arc(0.7, 0.012, { from: 90, to: 140, fade: -0.4 });
-    playTone(1800, 0.75, { type: 'sine', gain: 0.02, endFrequency: 11000, attack: 0.45, hold: 0.9 });
+    playTone(1800, 0.75, { type: 'sine', gain: 0.018, endFrequency: 11000, attack: 0.45, hold: 0.9 });
     playTone(220, 0.75, { type: 'sawtooth', gain: 0.02, endFrequency: 880, cutoff: 300, endCutoff: 6000, q: 9, attack: 0.3, hold: 0.8 });
-    playNoise(0.015, { gain: 0.14, filterType: 'highpass', filterFrequency: 2500, delay: 0.76 });
-    bell(1480, 0.5, 0.02, { delay: 0.76 });
-    ring(3520, 0.7, 0.006, { delay: 0.78, beat: 4 });
+    playNoise(0.015, { gain: 0.16, filterType: 'highpass', filterFrequency: 2500, delay: 0.76 });
+    playNoise(0.05, { gain: 0.1, filterType: 'bandpass', filterFrequency: 700, q: 2, delay: 0.78 });
+    subDrop(120, 60, 0.25, 0.1, { delay: 0.76 });
   }
 
   // One railgun shot ("bakyuun"): a split-second rush into a sharp crack, the slug's
-  // beam tearing off with a resonant sweep, a deep boom, and a high ring left hanging.
+  // beam tearing off with a resonant sweep, a deep boom, and the charge sizzling away.
   function playRailgunShotSound(targetX = 0) {
     const pan = laneOf(targetX);
     duckMusic(0.4, 0.7);
@@ -1705,36 +1695,38 @@ export function createKeyFireAudio({
     playTone(3200, 0.6, { type: 'sawtooth', gain: 0.04, endFrequency: 90, cutoff: 8000, endCutoff: 250, q: 8, delay: 0.06, pan });
     playTone(3260, 0.6, { type: 'sawtooth', gain: 0.025, endFrequency: 93, cutoff: 8000, endCutoff: 250, q: 8, delay: 0.06, pan: -pan });
     subDrop(90, 32, 1.1, 0.18, { delay: 0.06 });
-    ring(2637, 1.2, 0.01, { delay: 0.08, pan, beat: 6 });
     arc(0.2, 0.01, { from: 260, to: 160, delay: 0.1, fade: 1, pan });
   }
 
-  // Chain lightning unleashed: a hard snap as the arc strikes, then a fierce buzz.
+  // Chain lightning unleashed: a rush into a hard crack, a fierce arc and a deep hit.
   function playChainStrikeSound() {
-    duckMusic(0.5, 0.5);
-    playNoise(0.03, { gain: 0.16, filterType: 'highpass', filterFrequency: 1500 });
-    arc(0.32, 0.05, { from: 150, to: 95 });
+    duckMusic(0.4, 0.6);
+    swellInto(0.05, 0.05, { length: 0.05, from: 2000, to: 9000 });
+    playNoise(0.03, { gain: 0.2, filterType: 'highpass', filterFrequency: 1500, delay: 0.05 });
+    arc(0.32, 0.05, { from: 150, to: 95, delay: 0.05 });
+    subDrop(85, 30, 0.6, 0.14, { delay: 0.05 });
   }
 
-  // One jump of chain lightning: a snap where it lands and a short stab of buzz.
+  // One jump of chain lightning: a crack where it lands and a stab of arc.
   function playChainZapSound(targetX = 0) {
     const pan = laneOf(targetX);
-    playNoise(0.025, { gain: 0.12, filterType: 'highpass', filterFrequency: 1800, pan });
+    playNoise(0.025, { gain: 0.14, filterType: 'highpass', filterFrequency: 1800, pan });
     arc(0.16, 0.045, { from: 170, to: 120, pan });
+    subDrop(100, 50, 0.25, 0.06);
   }
 
-  // The chain bursts: everything struck at once, a loud crackling discharge that
-  // sputters out, with a thump under it.
+  // The chain bursts ("zudon"): a rush into a huge discharge, the arc sputtering out
+  // over a sub boom.
   function playChainBurstSound() {
-    duckMusic(0.55, 0.7);
-    playNoise(0.05, { gain: 0.2, filterType: 'highpass', filterFrequency: 1200 });
-    arc(0.45, 0.06, { from: 200, to: 70, fade: 0.9 });
-    thud(70, 0.25, 0.09);
+    duckMusic(0.3, 0.9);
+    swellInto(0.08, 0.07, { length: 0.08, from: 1500, to: 9000 });
+    playNoise(0.05, { gain: 0.22, filterType: 'highpass', filterFrequency: 1000, delay: 0.08 });
+    arc(0.45, 0.06, { from: 200, to: 70, fade: 0.9, delay: 0.08 });
+    subDrop(70, 24, 1.2, 0.2, { delay: 0.08 });
   }
 
   // Time stopping ("dooon"): a rush up into a deep, heavy hit that the whole world drops
-  // through, everything tuning down to nothing, and one high tone left ringing in the
-  // silence.
+  // through, everything tuning down to nothing, and a hollow wind left in the silence.
   function playTimeFreezeSound() {
     duckMusic(0.15, 1.4);
     swellInto(0.45, 0.07, { length: 0.45, from: 300, to: 6000 });
@@ -1743,13 +1735,13 @@ export function createKeyFireAudio({
     [220, 277.18, 329.63].forEach((frequency, index) => {
       playTone(frequency, 1.2, { type: 'sawtooth', gain: 0.014, endFrequency: frequency / 12, cutoff: 2400, endCutoff: 120, q: 3, hold: 0.5, delay: 0.45, detune: index * 7 - 7 });
     });
-    ring(2793.83, 1.8, 0.012, { delay: 0.5, beat: 3 });
+    playNoise(1.2, { gain: 0.02, filterType: 'bandpass', filterFrequency: 900, endFilterFrequency: 200, q: 3, delay: 0.5 });
   }
 
   // Time running again: a sharp crack like glass splitting, then everything rushes back.
   function playTimeResumeSound() {
-    playNoise(0.02, { gain: 0.14, filterType: 'bandpass', filterFrequency: 4200, q: 1.5 });
-    bell(1975.53, 0.45, 0.02);
+    playNoise(0.02, { gain: 0.16, filterType: 'bandpass', filterFrequency: 4200, q: 1.5 });
+    playNoise(0.12, { gain: 0.06, filterType: 'highpass', filterFrequency: 5000, delay: 0.01 });
     playNoise(0.5, { gain: 0.06, filterType: 'bandpass', filterFrequency: 300, endFilterFrequency: 5000, q: 0.8, delay: 0.05 });
     [220, 277.18, 329.63].forEach((frequency) => {
       playTone(frequency / 12, 0.4, { type: 'sawtooth', gain: 0.012, endFrequency: frequency, cutoff: 150, endCutoff: 2800, q: 3, hold: 0.8, delay: 0.05 });
@@ -1769,44 +1761,63 @@ export function createKeyFireAudio({
     bell(98, 1.6, 0.03, { delay: 0.32 });
   }
 
-  // The A.T. Field going up: a resonant sweep surging up, a hard metallic "kin!" as the
-  // field forms, and a high shimmer that hangs while it holds.
+  // The A.T. Field going up: a resonant sweep surging up into a hard crack as the field
+  // forms, and a low hum while it holds.
   function playShieldActivateSound() {
     playTone(110, 0.5, { type: 'sawtooth', gain: 0.03, cutoff: 200, endCutoff: 5000, q: 12, attack: 0.05 });
     playTone(111.5, 0.5, { type: 'sawtooth', gain: 0.02, cutoff: 260, endCutoff: 5200, q: 12, attack: 0.05 });
-    playNoise(0.012, { gain: 0.16, filterType: 'highpass', filterFrequency: 3000, delay: 0.45 });
-    bell(1318.51, 0.7, 0.03, { delay: 0.45 });
-    ring(2637, 1.4, 0.011, { delay: 0.46, beat: 5 });
-    subDrop(65, 40, 0.6, 0.08, { delay: 0.45 });
+    playNoise(0.015, { gain: 0.18, filterType: 'highpass', filterFrequency: 2500, delay: 0.45 });
+    playNoise(0.25, { gain: 0.05, filterType: 'bandpass', filterFrequency: 3000, endFilterFrequency: 600, q: 1.2, delay: 0.46 });
+    subDrop(65, 40, 0.6, 0.1, { delay: 0.45 });
+    [55, 82.5].forEach((frequency) => playTone(frequency, 0.9, { type: 'sawtooth', gain: 0.012, cutoff: 400, attack: 0.05, hold: 0.5, delay: 0.45 }));
   }
 
-  // The field taking a hit ("gakiiin"): a hard metal clang with a long shimmering tail.
+  // The field taking a hit ("gashan"): a crack, a low metal clang and the hum flaring.
   function playShieldBlockSound() {
-    playNoise(0.02, { gain: 0.18, filterType: 'highpass', filterFrequency: 2200 });
-    bell(587.33, 1.4, 0.07);
-    playTone(1244, 0.12, { type: 'square', gain: 0.02, cutoff: 6000, endCutoff: 1500, attack: 0.001 });
-    ring(1975.53, 1.6, 0.012, { beat: 7 });
-    subDrop(90, 45, 0.5, 0.1);
+    playNoise(0.02, { gain: 0.2, filterType: 'highpass', filterFrequency: 2200 });
+    playNoise(0.18, { gain: 0.07, filterType: 'bandpass', filterFrequency: 1600, endFilterFrequency: 500, q: 4 });
+    bell(147, 0.9, 0.06);
+    subDrop(90, 45, 0.5, 0.12);
+    playTone(110, 0.6, { type: 'sawtooth', gain: 0.022, cutoff: 900, endCutoff: 150, attack: 0.01 });
   }
 
   // Chests
 
+  // A lid slamming or jaws biting shut ("gachan"): two hard clacks over a thump.
   function playChestClackSound() {
-    zap(300, 200, 0.05, 0.045, { cutoff: 1400 });
-    zap(220, 150, 0.07, 0.04, { cutoff: 1200, delay: 0.035 });
-    playTone(140, 0.12, { gain: 0.045, type: 'sine', endFrequency: 60, attack: 0.002 });
+    playNoise(0.02, { gain: 0.14, filterType: 'bandpass', filterFrequency: 2600, q: 2 });
+    playNoise(0.035, { gain: 0.11, filterType: 'bandpass', filterFrequency: 900, q: 2.5, delay: 0.03 });
+    subDrop(130, 55, 0.18, 0.1);
   }
 
-  // The lock releasing, then a glint.
+  // The lid lifting: a hydraulic hiss and a servo whirring up.
   function playChestOpenSound() {
-    zap(180, 360, 0.14, 0.04, { type: 'sawtooth', cutoff: 1400, hold: 0.4 });
-    [1318.51, 1760, 2093].forEach((frequency, index) => chime(frequency, 0.3, 0.016, { delay: 0.14 + index * 0.06 }));
+    playNoise(0.22, { gain: 0.05, filterType: 'highpass', filterFrequency: 3500, endFilterFrequency: 1500 });
+    playTone(260, 0.16, { type: 'sawtooth', gain: 0.02, endFrequency: 520, cutoff: 1400, q: 5 });
+    playNoise(0.015, { gain: 0.07, filterType: 'bandpass', filterFrequency: 1800, q: 3, delay: 0.15 });
   }
 
-  // The loot: coins spilling over a bright run up the chord of the pick-up stab.
+  // A mimic turning to charge: a mechanical snarl revving up, jaws snapping.
+  function playMimicChargeSound(targetX = 0) {
+    const pan = laneOf(targetX);
+    playTone(70, 0.4, { type: 'sawtooth', gain: 0.04, endFrequency: 140, cutoff: 300, endCutoff: 2200, q: 6, drive: true, pan });
+    playTone(72, 0.4, { type: 'square', gain: 0.02, endFrequency: 145, cutoff: 300, endCutoff: 1800, pan });
+    [0, 0.12, 0.22].forEach((delay) => {
+      playNoise(0.02, { gain: 0.12, filterType: 'bandpass', filterFrequency: 2400, q: 2, delay, pan });
+      playNoise(0.03, { gain: 0.08, filterType: 'bandpass', filterFrequency: 800, q: 2, delay: delay + 0.025, pan });
+    });
+  }
+
+  // The loot: the chest bursts open ("baan"), a rush of energy sweeps up and sparks spray.
   function playChestLootSound() {
-    tinkle(9, 2200, 5200, 0.32, 0.016);
-    [1174.66, 1396.91, 1760, 2349.32].forEach((frequency, index) => chime(frequency, 0.3, 0.02, { delay: 0.05 + index * 0.055 }));
+    swellInto(0.06, 0.05, { length: 0.06, from: 1500, to: 8000 });
+    playNoise(0.04, { gain: 0.16, filterType: 'highpass', filterFrequency: 1200, delay: 0.06 });
+    playTone(120, 0.5, { type: 'sawtooth', gain: 0.03, endFrequency: 480, cutoff: 300, endCutoff: 5000, q: 10, delay: 0.06 });
+    playNoise(0.5, { gain: 0.05, filterType: 'bandpass', filterFrequency: 600, endFilterFrequency: 6000, q: 1, delay: 0.06 });
+    for (let index = 0; index < 14; index += 1) {
+      playNoise(0.004 + Math.random() * 0.008, { gain: 0.04 * (0.4 + Math.random() * 0.6), filterType: 'highpass', filterFrequency: 4000 + Math.random() * 4000, delay: 0.1 + Math.random() * 0.4, pan: (Math.random() - 0.5) * 0.9 });
+    }
+    subDrop(100, 45, 0.4, 0.1, { delay: 0.06 });
   }
 
   // ── Voices ─────────────────────────────────────────────────────────────
@@ -2601,6 +2612,7 @@ export function createKeyFireAudio({
     playChestClackSound,
     playChestOpenSound,
     playChestLootSound,
+    playMimicChargeSound,
     playShockwaveSound,
     playShieldActivateSound,
     playShieldBlockSound,
