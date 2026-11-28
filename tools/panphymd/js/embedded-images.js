@@ -106,3 +106,16 @@ export function parseLinkedImageImport(hash) {
   }
   return markdown;
 }
+
+// Whole documents also arrive in the fragment (#open=) and open like the Open button.
+export const MAX_LINKED_DOCUMENT_LENGTH = 500000;
+
+export function parseLinkedDocumentOpen(hash) {
+  if (!hash.startsWith('#open=')) return null;
+  const payload = JSON.parse(decodeURIComponent(hash.slice(6)));
+  const markdown = payload && payload.markdown;
+  if (typeof markdown !== 'string' || !markdown.trim() || markdown.length > MAX_LINKED_DOCUMENT_LENGTH) {
+    throw new Error('The document in this link could not be read.');
+  }
+  return markdown.replace(/\r\n?/g, '\n');
+}

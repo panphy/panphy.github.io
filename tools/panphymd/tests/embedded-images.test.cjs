@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../js/embedded-images.js'), 'utf8').replace(/export /g, '');
-const { createEmbeddedImageModel, createEmbeddedImageEditor, parseLinkedImageImport } = vm.runInNewContext(`${source}\n({createEmbeddedImageModel, createEmbeddedImageEditor, parseLinkedImageImport})`, {
+const { createEmbeddedImageModel, createEmbeddedImageEditor, parseLinkedImageImport, parseLinkedDocumentOpen, MAX_LINKED_DOCUMENT_LENGTH } = vm.runInNewContext(`${source}\n({createEmbeddedImageModel, createEmbeddedImageEditor, parseLinkedImageImport, parseLinkedDocumentOpen, MAX_LINKED_DOCUMENT_LENGTH})`, {
   crypto: { randomUUID: () => 'test-session' }, Event
 });
 const png = 'data:image/png;base64,' + 'Ab12+/'.repeat(1000) + '==';
@@ -120,4 +120,21 @@ test('linked image import rejects malformed payloads and non-image content', () 
       `![x](${svg})\n<script>bad()</script>`].map(markdown => '#import=' + encodeURIComponent(JSON.stringify({ markdown })))]) {
     assert.throws(() => parseLinkedImageImport(hash));
   }
+});
+
+test('#open= links carry a whole Markdown document', () => {
+  const doc = '# Feedback\r\n\n1. **Point.** Uncertainty $\\pm 0.5$ m/s.\n';
+  const hash = '#open=' + encodeURIComponent(JSON.stringify({ markdown: doc }));
+  assert.equal(parseLinkedDocumentOpen(hash), '# Feedback\n\n1. **Point.** Uncertainty $\\pm 0.5$ m/s.\n');
+  assert.equal(parseLinkedDocumentOpen('#import=x'), null);
+  assert.equal(parseLinkedDocumentOpen(''), null);
+});
+
+test('#open= links reject empty, oversized and malformed documents', () => {
+  const link = value => '#open=' + encodeURIComponent(JSON.stringify(value));
+  assert.throws(() => parseLinkedDocumentOpen(link({ markdown: '  ' })));
+  assert.throws(() => parseLinkedDocumentOpen(link({ markdown: 42 })));
+  assert.throws(() => parseLinkedDocumentOpen(link({ text: 'x' })));
+  assert.throws(() => parseLinkedDocumentOpen(link({ markdown: 'x'.repeat(MAX_LINKED_DOCUMENT_LENGTH + 1) })));
+  assert.throws(() => parseLinkedDocumentOpen('#open=%7Bnot-json'));
 });

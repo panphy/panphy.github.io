@@ -14,7 +14,7 @@ The editor and preview sit side by side with a draggable divider. At 900px and b
 | `js/state.js` | Browser storage: draft, snapshots, preferences and unsaved-change tracking |
 | `js/ui.js` | Theme, text size and dialogs; image link normalization and local image reading |
 | `js/copy.js` | Copying equations and tables from the preview |
-| `js/embedded-images.js` | Folding embedded image data in the editor; `#import=` links |
+| `js/embedded-images.js` | Folding embedded image data in the editor; `#import=` and `#open=` links |
 | `js/page-preview.js` | Page Preview and print layout with Paged.js |
 | `css/panphymd.css` | App, preview, print and Present styles |
 | `sample_doc.md` | The document opened by Guide |
@@ -36,6 +36,8 @@ An image can come from a URL or a local file. Dropbox and Google Drive share lin
 
 PanPhyMech and PanPhyCircuits send images through `panphymd.html#import=<JSON>`. The data travels in the link, so it also reaches a tab with separate storage. `parseLinkedImageImport` accepts only one Markdown image of SVG, PNG or JPEG data, which is appended to the current draft after a snapshot.
 
+A whole document can be sent through `panphymd.html#open=<JSON>` with `{"markdown": "..."}`, as the IA Feedback Desk does. `parseLinkedDocumentOpen` accepts non-empty text up to 500,000 characters, and the page then opens it like the Open button: it asks before replacing a non-empty draft (the same suppressible warning) and takes a snapshot first. Unlike Open, the result counts as unsaved.
+
 ## Storage
 
 The draft, preferences and snapshots live in `localStorage` under the `markdown*` keys in `js/state.js`. Keep those names, or existing drafts are lost. The draft is also written when the page is hidden or closed. History snapshots are taken every 5 minutes and on leaving the page, skipping unchanged content and keeping at most 20 snapshots within about 2 MB.
@@ -46,4 +48,4 @@ The draft, preferences and snapshots live in `localStorage` under the `markdown*
 node --test tools/panphymd/tests/*.test.cjs
 ```
 
-`images.test.cjs` covers share-link rewriting, image checks and local image reading. `embedded-images.test.cjs` covers folding, caret positions, copy and cut, and `#import=` validation.
+`images.test.cjs` covers share-link rewriting, image checks and local image reading. `embedded-images.test.cjs` covers folding, caret positions, copy and cut, and `#import=` and `#open=` validation.
