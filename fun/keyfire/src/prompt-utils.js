@@ -38,6 +38,7 @@ const SPELLING_ALTS = [
   ['neutralised', 'neutralized'],
   ['neutralising', 'neutralizing'],
   ['neutralisation', 'neutralization'],
+  ['vapour', 'vapor'],
   ['vapourise', 'vaporise', 'vaporize'],
   ['vaporisation', 'vaporization'],
   ['travelled', 'traveled'],

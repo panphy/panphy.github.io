@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GLOW_GAIN } from './visuals.js?v=15';
-import { LOW_POLY_CREATURES, buildPulseHeart, buildMimicChest } from './lowpoly-creatures.js?v=15';
+import { GLOW_GAIN } from './visuals.js?v=16';
+import { LOW_POLY_CREATURES, buildPulseHeart, buildMimicChest } from './lowpoly-creatures.js?v=16';
 
 const materialCache = new Map();
 
@@ -82,7 +82,7 @@ function createNormalEnemyMesh(type) {
 }
 
 function createMedicHeartMesh(type) {
-  const group = type.isBigMedic ? buildTwinHeart(type) : buildPulseHeart(type, lowPolyKit);
+  const group = buildPulseHeart(type, lowPolyKit);
 
   const medicGlow = createGlowAnchor(type.body, 1.35, 5.2, 2.0);
   medicGlow.position.set(0, 1.5, 0.45);
@@ -94,24 +94,6 @@ function createMedicHeartMesh(type) {
   group.userData.incomingBeacon = incomingBeacon;
   group.userData.targetMarker = targetMarker;
 
-  return group;
-}
-
-// The big healer: two pulse hearts side by side, leaning apart, beating in turn.
-function buildTwinHeart(type) {
-  const group = new THREE.Group();
-  const hearts = [-1, 1].map((side) => {
-    const heart = buildPulseHeart(type, lowPolyKit);
-    heart.position.set(side * 0.62, side * 0.06, -0.05 * side);
-    heart.scale.setScalar(0.78);
-    heart.rotation.z = -side * 0.16;
-    group.add(heart);
-    return heart;
-  });
-  group.userData.animate = (seconds, enemy) => {
-    hearts[0].userData.animate(seconds, enemy);
-    hearts[1].userData.animate(seconds + 0.31, enemy);
-  };
   return group;
 }
 

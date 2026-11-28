@@ -1380,10 +1380,6 @@ body.is-running:not(.is-paused) .hud-grid {
   text-shadow: 0 0 14px rgba(239, 68, 68, 0.8);
 }
 
-.score-popup.is-loot-escaped {
-  text-shadow: 0 0 14px rgba(148, 163, 184, 0.5);
-}
-
 .boss-banner {
   position: fixed;
   top: 50%;
@@ -2820,8 +2816,7 @@ body.is-running:not(.is-paused) .kf-leaderboard {
 .score-popup.is-heal,
 .score-popup.is-missed-heal,
 .score-popup.is-loot-reward,
-.score-popup.is-inventory-full,
-.score-popup.is-loot-escaped {
+.score-popup.is-inventory-full {
   font-family: var(--font-pixel);
   font-size: 1.05rem;
   font-weight: 700;
@@ -2833,7 +2828,6 @@ body.is-running:not(.is-paused) .kf-leaderboard {
 .score-popup.is-missed-heal { color: #c2305c; }
 .score-popup.is-loot-reward { color: #8a22a0; }
 .score-popup.is-inventory-full { color: #c62f2f; }
-.score-popup.is-loot-escaped { color: #5b6676; }
 
 .boss-banner,
 .boss-banner.is-medic-hint,

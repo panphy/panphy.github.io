@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { createKeyFireAudio } from './audio.js?v=15';
-import { createSeasonalEffects } from './seasonal-effects.js?v=15';
-import { createPowerUpSystem } from './power-ups.js?v=15';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=15';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=15';
-import { createLeaderboard } from './leaderboard.js?v=15';
-import { createEnemyMesh } from './enemy-meshes.js?v=15';
-import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=15';
-import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=15';
-import { createLowPolyCloud } from './lowpoly.js?v=15';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=15';
-import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=15';
-import { createWordDeck } from './word-decks.js?v=15';
-import { createStage } from './stages.js?v=15';
-import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=15';
-import { storyBeatForWave } from './story.js?v=15';
-import { createStoryteller, settleLantern } from './storyteller.js?v=15';
-import { createPlasmaCannon } from './plasma-cannon.js?v=15';
-import { createRideCart } from './ride-cart.js?v=15';
+import { createKeyFireAudio } from './audio.js?v=16';
+import { createSeasonalEffects } from './seasonal-effects.js?v=16';
+import { createPowerUpSystem } from './power-ups.js?v=16';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, ROCK_UNITS, BOSS_PHRASES, BOSS_STORIES } from './question-bank.js?v=16';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=16';
+import { createLeaderboard } from './leaderboard.js?v=16';
+import { createEnemyMesh } from './enemy-meshes.js?v=16';
+import { normalPromptLengthCap, withinLength, LONGEST_MONSTER_WORD, hardGuestCount, bossPlan, bossFightOrder, beamChargeTime, planVariants } from './difficulty.js?v=16';
+import { createShieldPlate, createSplitterCores, createCasterOrb, createCasterBolt, createWings, createSpaceBat } from './monster-variants.js?v=16';
+import { createLowPolyCloud } from './lowpoly.js?v=16';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=16';
+import { pickTarget, getInputCharacter, buildSearchPrompt, buildAltSearchPrompts, altTermFor, escapeHtml, promptIndexForProgress } from './prompt-utils.js?v=16';
+import { createWordDeck } from './word-decks.js?v=16';
+import { createStage } from './stages.js?v=16';
+import { chapterForWave, GROUND_TONE, WAVE_COUNT } from './chapters.js?v=16';
+import { storyBeatForWave } from './story.js?v=16';
+import { createStoryteller, settleLantern } from './storyteller.js?v=16';
+import { createPlasmaCannon } from './plasma-cannon.js?v=16';
+import { createRideCart } from './ride-cart.js?v=16';
 
 // Monster, healer and chest words, and boss lines, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -123,9 +123,12 @@ const COSMIC_WAVE_THRESHOLD = 99149236;
 const SMALL_HEAL = 1;
 const BIG_HEAL = 2;
 const BIG_HEALER_CHANCE = 1 / 3;
-// From the second stage each chest has this chance of being a mimic that bites.
-const MIMIC_BITE_CHANCE = 1 / 3;
+// Every chest is a mimic: part way across its run it turns and charges, and if it
+// reaches the player it bites for half a heart. MIMIC_TURN_AT is how far across it
+// turns; its charge takes about as long as the word, plus MIMIC_CHARGE_SPARE seconds.
 const MIMIC_BITE_DAMAGE = 1;
+const MIMIC_TURN_AT = [0.3, 0.55];
+const MIMIC_CHARGE_SPARE = 0.8;
 const EMBER_HEIGHT_DELTAS = 1819600217;
 const PARTICLE_GRAVITY_COEFFS = 2242416284;
 const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
@@ -195,15 +198,14 @@ const MEDIC_TYPE = {
   trim: 0xff8fb3,
   eye: 0xf2f0df,
   scale: 0.92,
-  score: 45,
-};
-// The big healer: two hearts side by side, half as big again.
-const BIG_MEDIC_TYPE = {
-  ...MEDIC_TYPE,
-  name: 'Twin Heart',
-  isBigMedic: true,
-  scale: MEDIC_TYPE.scale * 1.5,
   score: 70,
+};
+// The small healer (half a heart) is the same heart at about a third of the size.
+const SMALL_MEDIC_TYPE = {
+  ...MEDIC_TYPE,
+  name: 'Little Heart',
+  scale: MEDIC_TYPE.scale * 0.35,
+  score: 45,
 };
 const MIMIC_TYPE = {
   name: 'Mimic Chest',
@@ -304,7 +306,6 @@ let medicSpawnSlots = [];
 let mimicsSpawnedThisSet = 0;
 let mimicSpawnSlots = [];
 let firstMimicHintShown = false;
-let firstBiterHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
 let powerUpCheatUsedThisRun = false;
@@ -1189,7 +1190,10 @@ function choosePromptOfLength(min, max) {
     if (key.length < min || key.length > max || !/^[a-z]+$/.test(key)) return false;
     return !liveKeys.some(other => other.startsWith(key) || key.startsWith(other));
   };
-  return monsterDeck.pick(currentKeywordPool(), fits) || monsterDeck.pick(ALL_WORDS, fits) || choosePrompt();
+  // Short words are quick whatever their tier, so short picks (the cart's fliers, shields)
+  // draw on the whole bank and seldom repeat; longer ones keep to the stage's pool.
+  const pool = max <= 6 ? ALL_WORDS : currentKeywordPool();
+  return monsterDeck.pick(pool, fits) || monsterDeck.pick(ALL_WORDS, fits) || choosePrompt();
 }
 
 function chooseVariantPrompt(variant) {
@@ -1381,28 +1385,11 @@ function leakEnemy(enemy) {
     return;
   }
 
-  if (enemy.isMimic && enemy.bites) {
-    // A mimic that bites: letting it go costs half a heart and the streak, as a
-    // monster that gets through does, unless the shield takes the bite.
+  if (enemy.isMimic) {
+    // A mimic that reaches the player bites: half a heart and the streak, as a
+    // monster that gets through costs, unless the shield takes the bite.
     enemy.damage = MIMIC_BITE_DAMAGE;
     playChestClackSound();
-  } else if (enemy.isMimic) {
-    // A loot chest is bonus loot, not a threat — letting it escape costs you the
-    // reward but never deals damage, breaks your shield, or resets your streak.
-    const wasActiveTarget = activeTarget === enemy;
-    playChestClackSound();
-    if (!enemy.label.classList.contains('is-hidden')) {
-      const left = parseFloat(enemy.label.style.left);
-      const top = parseFloat(enemy.label.style.top);
-      if (Number.isFinite(left) && Number.isFinite(top)) spawnLootEscapedPopup(left, top);
-    }
-    if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-      encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: false });
-    }
-    spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type);
-    removeEnemy(enemy);
-    if (wasActiveTarget) typedBuffer = '';
-    return;
   }
 
 
@@ -2876,10 +2863,11 @@ function endStory() {
 // ── The bat swarm ────────────────────────────────────────────────────────
 // A challenge at one stop of the night sky: space bats flit about, each marked with a
 // unit. The swarm is told first what it takes, then bats keep coming, up to five at a
-// time, and the player has half a minute to bring ten down. They do no harm; clearing
-// the swarm earns points and a heart, and running out of time only loses the prize.
+// time, and the player has half a minute to bring the swarm down: fifteen bats in the
+// first, twenty in the second. They do no harm; clearing the swarm earns points, and
+// running out of time only loses the prize.
 const BAT_TYPE = { name: 'Space Bat', body: 0x2b1d5c, trim: 0x8b5cf6, eye: 0x7ff5e6, scale: 1.25, score: 60 };
-const BAT_GOAL = 10;
+const BAT_GOALS = [15, 20];
 const BAT_TIME = 30;
 const BATS_AT_ONCE = 5;
 const BAT_INTRO_TIME = 2.6;
@@ -2898,15 +2886,15 @@ const BAT_SPOTS = [
 ];
 
 // Before the first bat, the challenge says what it takes, big in the middle of the view.
-function showChallengeIntro() {
+function showChallengeIntro(goal) {
   if (!challengeIntro) {
     challengeIntro = document.createElement('div');
     challengeIntro.className = 'challenge-intro';
     challengeIntro.setAttribute('role', 'status');
-    challengeIntro.innerHTML = '<strong>BAT SWARM!</strong>'
-      + `<span>Shoot down ${BAT_GOAL} bats in ${BAT_TIME} seconds</span>`;
     document.getElementById('app').append(challengeIntro);
   }
+  challengeIntro.innerHTML = '<strong>BAT SWARM!</strong>'
+    + `<span>Shoot down ${goal} bats in ${BAT_TIME} seconds</span>`;
   challengeIntro.hidden = false;
   challengeIntro.classList.remove('is-in');
   void challengeIntro.offsetWidth;
@@ -2926,8 +2914,10 @@ function showChallengeCard(text) {
 
 function startChallenge() {
   rail.state = 'challenge';
-  rail.challenge = { time: BAT_TIME, spawned: 0, spawnTimer: 0, over: 0, intro: BAT_INTRO_TIME };
-  showChallengeIntro();
+  const which = Math.max(0, rail.challengeStops.indexOf(rail.stopIndex));
+  const goal = BAT_GOALS[Math.min(which, BAT_GOALS.length - 1)];
+  rail.challenge = { goal, time: BAT_TIME, spawned: 0, spawnTimer: 0, over: 0, intro: BAT_INTRO_TIME };
+  showChallengeIntro(goal);
 }
 
 function liveBats() {
@@ -2975,8 +2965,9 @@ function updateChallenge(delta) {
     if (challengeIntro) challengeIntro.hidden = true;
   }
   challenge.time = Math.max(0, challenge.time - delta);
-  showChallengeCard(`SPACE BATS ${Math.min(BAT_GOAL, killed)}/${BAT_GOAL} · ${Math.ceil(challenge.time)}s`);
-  if (killed >= BAT_GOAL) {
+  const goal = challenge.goal;
+  showChallengeCard(`SPACE BATS ${Math.min(goal, killed)}/${goal} · ${Math.ceil(challenge.time)}s`);
+  if (killed >= goal) {
     // Cleared: the stragglers scatter, and the prize is points.
     for (const bat of live) removeEnemy(bat);
     score += BAT_BONUS;
@@ -2994,7 +2985,7 @@ function updateChallenge(delta) {
     typedBuffer = '';
     activeTarget = null;
     showBanner('THE SWARM ESCAPES', 'variant-hint');
-    showChallengeCard(`TIME UP · ${killed}/${BAT_GOAL}`);
+    showChallengeCard(`TIME UP · ${killed}/${goal}`);
     challenge.over = 0.01;
     return;
   }
@@ -3079,13 +3070,12 @@ function spawnRailMember(encounter) {
   const flier = kind === 'minion' && rail.setPiece === 'flight';
   if (flier) spot = { ...spot, kind: 'sky' };
   const variant = kind === 'minion' && !encounter.stop.plain ? variantSchedule.get(normalEnemiesSpawned) : null;
-  // From the second stage a healer may be big and a chest may be a mimic that bites.
+  // From the second stage a healer may be big.
   const later = waveSet >= 2;
   const enemy = spawnEnemy({
     isMedic: kind === 'medic',
     bigMedic: kind === 'medic' && later && Math.random() < BIG_HEALER_CHANCE,
     isMimic: kind === 'mimic',
-    bites: kind === 'mimic' && later && Math.random() < MIMIC_BITE_CHANCE,
     railSpot: spot,
     variant,
     flier,
@@ -3117,6 +3107,23 @@ function spawnBonusMember(encounter) {
 function railTypingEstimate(enemy) {
   const lettersPerSecond = 2.0 + (monsterLevel() - 1) * 0.17;
   return 0.7 + enemy.searchPrompt.length / lettersPerSecond;
+}
+
+// The mimic stops short, snaps at the player and rushes in from where it stands,
+// joining the monsters' advance, wind-up and strike.
+function startMimicCharge(enemy) {
+  const plan = enemy.rail;
+  const position = enemy.group.position;
+  enemy.lane = position.x;
+  // It veers in toward the middle as it comes, so it strikes in view.
+  plan.chargeLane = THREE.MathUtils.clamp(position.x * 0.35, -3.5, 3.5);
+  enemy.wobbleAmount = 0.15;
+  plan.phase = 'advance';
+  plan.speed = (STRIKE_Z - position.z) / (railTypingEstimate(enemy) * 0.6 + MIMIC_CHARGE_SPARE);
+  enemy.lidOpenProgress = 1;
+  playChestClackSound();
+  reusableVector.set(position.x, 0.14, position.z);
+  fx.ring(reusableVector, enemy.type.eye, { from: 0.3, to: 2.4, life: 0.45, opacity: 0.8 });
 }
 
 function setupRailEntry(enemy, spot) {
@@ -3165,6 +3172,7 @@ function setupRailEntry(enemy, spot) {
     crossTo: crossTo ?? (to.x >= 0 ? -1 : 1) * CROSS_X,
     crossT: 0,
     crossTime: (2 + railTypingEstimate(enemy)) * 1.5,
+    turnAt: MIMIC_TURN_AT[0] + Math.random() * (MIMIC_TURN_AT[1] - MIMIC_TURN_AT[0]),
   };
   if (rail.encounter && rail.encounter.blizzard && !crosser && enemy.variant !== 'caster') {
     // In the blizzard a monster's card stays hidden until it is close. It hurries
@@ -3295,6 +3303,11 @@ function updateRailEnemy(enemy, delta, seconds) {
     position.y = enemy.baseY + Math.abs(Math.sin(seconds * 6 + enemy.phase)) * 0.12;
     // Healers and chests keep facing the player as they cross, leaning a little the way they go.
     enemy.group.rotation.y = facing + (plan.crossTo > plan.to.x ? 0.3 : -0.3);
+    // A mimic turns part way across and charges at the player.
+    if (enemy.isMimic && plan.crossT >= plan.turnAt) {
+      startMimicCharge(enemy);
+      return false;
+    }
     if (plan.crossT >= 1) {
       leakEnemy(enemy);
       return true;
@@ -3309,6 +3322,7 @@ function updateRailEnemy(enemy, delta, seconds) {
     } else if (!stunned) {
       const veiled = enemy.veilZ !== undefined && position.z < enemy.veilZ;
       position.z += (veiled ? plan.speed * 1.6 : plan.veilSpeed || plan.speed) * delta;
+      if (plan.chargeLane !== undefined) enemy.lane += (plan.chargeLane - enemy.lane) * Math.min(1, 2.2 * delta);
     }
     position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
     position.y = enemy.flier
@@ -3395,8 +3409,8 @@ function updateEnemies(delta, seconds) {
 
     if (enemy.isMimic) {
       const isTargeted = (activeTarget === enemy && isEnemyTargetable(enemy));
-      // A loot chest keeps its lid shut; a mimic that bites snaps its lid, baring its teeth.
-      const idleTarget = enemy.bites ? 0.18 + Math.abs(Math.sin(seconds * 7 + enemy.phase)) * 0.4 : 0;
+      // A mimic snaps its lid as it runs, baring its teeth.
+      const idleTarget = 0.18 + Math.abs(Math.sin(seconds * 7 + enemy.phase)) * 0.4;
       const targetLidProgress = isTargeted ? 1.0 : idleTarget;
       const oldProgress = enemy.lidOpenProgress;
       enemy.lidOpenProgress += (targetLidProgress - enemy.lidOpenProgress) * Math.min(1.0, 12 * delta);
@@ -4211,7 +4225,7 @@ function spawnEnemy(options = {}) {
     ? chooseVariantPrompt(options.variant)
     : choosePrompt();
 
-  const type = options.type || (isBoss ? options.bossType : isMedic ? (bigMedic ? BIG_MEDIC_TYPE : MEDIC_TYPE) : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES));
+  const type = options.type || (isBoss ? options.bossType : isMedic ? (bigMedic ? MEDIC_TYPE : SMALL_MEDIC_TYPE) : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES));
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     showBannerLater('TYPE TO HEAL!', 'medic-hint', 1100);
@@ -4219,10 +4233,6 @@ function spawnEnemy(options = {}) {
   if (isMimic && !firstMimicHintShown) {
     firstMimicHintShown = true;
     showBannerLater('LOOT CHEST!', 'mimic-hint', 1100);
-  }
-  if (options.bites && !firstBiterHintShown) {
-    firstBiterHintShown = true;
-    showBannerLater('SNAPPING LID: IT BITES!', 'mimic-hint', 1100);
   }
   const group = options.customGroup || createEnemyMesh(type);
   // A monster from an ambush is placed by setupRailEntry; bosses and rocks say where they start.
@@ -4321,7 +4331,6 @@ function spawnEnemy(options = {}) {
     group.add(enemy.wings);
   }
   if (isMedic) enemy.healAmount = bigMedic ? BIG_HEAL : SMALL_HEAL;
-  if (options.bites) enemy.bites = true;
   if (options.variant) dressVariant(enemy, options.variant);
   if (options.railSpot) setupRailEntry(enemy, options.railSpot);
   enemyId += 1;
@@ -5929,16 +5938,6 @@ function spawnInventoryFullPopup(left, top) {
   const popup = document.createElement('div');
   popup.className = 'score-popup is-inventory-full';
   popup.textContent = 'INVENTORY FULL';
-  popup.style.left = `${left}px`;
-  popup.style.top = `${top}px`;
-  document.body.appendChild(popup);
-  popup.addEventListener('animationend', () => popup.remove(), { once: true });
-}
-
-function spawnLootEscapedPopup(left, top) {
-  const popup = document.createElement('div');
-  popup.className = 'score-popup is-loot-escaped';
-  popup.textContent = 'LOOT ESCAPED';
   popup.style.left = `${left}px`;
   popup.style.top = `${top}px`;
   document.body.appendChild(popup);
