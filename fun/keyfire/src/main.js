@@ -442,7 +442,7 @@ const {
   initialEnabled: loadAudioSetting(),
   saveAudioSetting,
   getMode: () => mode,
-  getWavePhase: () => wavePhase,
+  getWavePhase: () => musicPhase(),
   getWaveSet: () => waveSet,
   getIsFinalWave: () => isFinalWave(),
   getHealth: () => health,
@@ -5851,6 +5851,17 @@ function updateFinalWaveScenery(seconds, delta) {
     drifter.rock.rotation.x += drifter.spin * delta;
     drifter.rock.rotation.y += drifter.spin * 0.7 * delta;
   }
+}
+
+// The music follows a boss's wave through its phases: the approach and the taunt
+// ('boss-intro'), the fight ('boss'), the boss shuddering as it falls ('boss-falling')
+// and the time after it has burst ('boss-down').
+function musicPhase() {
+  if (wavePhase !== 'boss') return wavePhase;
+  if (bossDeath) return 'boss-falling';
+  const boss = enemies.find(enemy => enemy.phraseBoss);
+  if (bossFight && !boss) return 'boss-down';
+  return boss?.rail?.phase === 'boss' ? 'boss' : 'boss-intro';
 }
 
 function startBossPhase() {
